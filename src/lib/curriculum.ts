@@ -19,12 +19,12 @@ export const chapters: Chapter[] = [
   },
   {
     id: 2,
-    slug: "02-neurons",
-    title: "Neurons and Perceptrons",
-    subtitle: "Fuzzy logic gates that learn their own rules",
+    slug: "02-optimization",
+    title: "The Power of Incremental Improvement",
+    subtitle: "Why reliable tiny improvements beat brilliant design",
     prerequisites: [1],
     description:
-      "A neuron is a fuzzy logic gate that learned its own truth table. The XOR problem and why a single line can't solve everything.",
+      "Evolution, A/B testing, and gradient descent are all the same algorithm. The secret to building complex things: small changes, tested against reality, kept or discarded.",
   },
   {
     id: 3,
