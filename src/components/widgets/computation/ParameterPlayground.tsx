@@ -23,29 +23,29 @@ const SVG_WIDTH = 500;
 const SVG_HEIGHT = 300;
 const PADDING = 30;
 
+// Fixed Y range based on target function + generous margin for the model
+const Y_MIN = -2;
+const Y_MAX = 2;
+
 function xToSvg(x: number): number {
   return PADDING + ((x - X_MIN) / (X_MAX - X_MIN)) * (SVG_WIDTH - 2 * PADDING);
 }
 
-function yToSvg(y: number, yMin: number, yMax: number): number {
+function yToSvg(y: number): number {
   return (
     SVG_HEIGHT -
     PADDING -
-    ((y - yMin) / (yMax - yMin)) * (SVG_HEIGHT - 2 * PADDING)
+    ((y - Y_MIN) / (Y_MAX - Y_MIN)) * (SVG_HEIGHT - 2 * PADDING)
   );
 }
 
-function generatePath(
-  fn: (x: number) => number,
-  yMin: number,
-  yMax: number
-): string {
+function generatePath(fn: (x: number) => number): string {
   const points: string[] = [];
   for (let i = 0; i <= SAMPLE_COUNT; i++) {
     const x = X_MIN + (i / SAMPLE_COUNT) * (X_MAX - X_MIN);
     const y = fn(x);
     const sx = xToSvg(x);
-    const sy = yToSvg(y, yMin, yMax);
+    const sy = yToSvg(y);
     points.push(`${i === 0 ? "M" : "L"}${sx.toFixed(1)},${sy.toFixed(1)}`);
   }
   return points.join(" ");
@@ -64,46 +64,20 @@ export function ParameterPlayground() {
     setD(0);
   }, []);
 
-  const { targetPath, modelPath, error, yMin, yMax } = useMemo(() => {
-    // Compute y range across both curves
-    let minY = Infinity;
-    let maxY = -Infinity;
-    const targetYs: number[] = [];
-    const modelYs: number[] = [];
-
-    for (let i = 0; i <= SAMPLE_COUNT; i++) {
-      const x = X_MIN + (i / SAMPLE_COUNT) * (X_MAX - X_MIN);
-      const ty = targetFn(x);
-      const my = modelFn(x, a, b, c, d);
-      targetYs.push(ty);
-      modelYs.push(my);
-      minY = Math.min(minY, ty, my);
-      maxY = Math.max(maxY, ty, my);
-    }
-
-    // Add padding to y range
-    const yPad = (maxY - minY) * 0.1 || 1;
-    const yMinVal = minY - yPad;
-    const yMaxVal = maxY + yPad;
-
-    const tPath = generatePath(targetFn, yMinVal, yMaxVal);
-    const mPath = generatePath((x) => modelFn(x, a, b, c, d), yMinVal, yMaxVal);
+  const { targetPath, modelPath, error } = useMemo(() => {
+    const tPath = generatePath(targetFn);
+    const mPath = generatePath((x) => modelFn(x, a, b, c, d));
 
     // Mean squared error
     let mse = 0;
     for (let i = 0; i <= SAMPLE_COUNT; i++) {
-      const diff = targetYs[i] - modelYs[i];
+      const x = X_MIN + (i / SAMPLE_COUNT) * (X_MAX - X_MIN);
+      const diff = targetFn(x) - modelFn(x, a, b, c, d);
       mse += diff * diff;
     }
     mse /= SAMPLE_COUNT + 1;
 
-    return {
-      targetPath: tPath,
-      modelPath: mPath,
-      error: mse,
-      yMin: yMinVal,
-      yMax: yMaxVal,
-    };
+    return { targetPath: tPath, modelPath: mPath, error: mse };
   }, [a, b, c, d]);
 
   const revealBestFit = () => {
@@ -167,18 +141,22 @@ export function ParameterPlayground() {
             strokeOpacity={0.07}
           />
         ))}
-        {/* Zero line if visible */}
-        {yMin < 0 && yMax > 0 && (
-          <line
-            x1={PADDING}
-            y1={yToSvg(0, yMin, yMax)}
-            x2={SVG_WIDTH - PADDING}
-            y2={yToSvg(0, yMin, yMax)}
-            stroke="currentColor"
-            strokeOpacity={0.15}
-            strokeDasharray="4,4"
-          />
-        )}
+        {/* Clip path to keep model curve inside the chart area */}
+        <defs>
+          <clipPath id="chart-area">
+            <rect x={PADDING} y={PADDING} width={SVG_WIDTH - 2 * PADDING} height={SVG_HEIGHT - 2 * PADDING} />
+          </clipPath>
+        </defs>
+        {/* Zero line */}
+        <line
+          x1={PADDING}
+          y1={yToSvg(0)}
+          x2={SVG_WIDTH - PADDING}
+          y2={yToSvg(0)}
+          stroke="currentColor"
+          strokeOpacity={0.15}
+          strokeDasharray="4,4"
+        />
         {/* Target curve */}
         <path
           d={targetPath}
@@ -187,6 +165,7 @@ export function ParameterPlayground() {
           strokeWidth="2.5"
           strokeLinecap="round"
           opacity={0.5}
+          clipPath="url(#chart-area)"
         />
         {/* Model curve */}
         <path
@@ -195,6 +174,7 @@ export function ParameterPlayground() {
           stroke="var(--color-error)"
           strokeWidth="2"
           strokeLinecap="round"
+          clipPath="url(#chart-area)"
         />
         {/* Legend */}
         <line

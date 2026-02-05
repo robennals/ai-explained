@@ -4,15 +4,19 @@
 AI can write poetry, recognize faces, generate art, and hold conversations. It's not magic — it's math. But what kind of math? This chapter will show you the shape of the problem.
 </p>
 
-## A Machine That Can Think
+## What Can AI Do?
 
-A machine that writes poetry. A machine that looks at a photo and says "that's a golden retriever." A machine that translates between languages it was never explicitly taught. A machine that draws pictures from a sentence.
+AI can do things that would have seemed like science fiction a few years ago. It can look at a photo and describe what's in it. It can translate between hundreds of languages. It can write essays, debug code, explain quantum physics to a five-year-old. It can generate photorealistic images from a sentence like "a cat wearing a tiny hat on the moon." It can hold a conversation that feels genuinely intelligent.
 
-These things exist right now. They work. And they're all doing fundamentally the same thing.
+And all of these — every single one — work the same way under the hood.
 
-They're not following hand-written rules. They're not looking things up in a giant database. They're computing — turning numbers in, getting numbers out — using a mathematical function that they *learned*.
+This tutorial is going to teach you how. Not at a hand-wavy, "it's like a brain" level — actually how, with enough detail that you could build one yourself. By the end, you won't just vaguely "get" AI. You'll deeply understand how these systems work, why they work, and what it would take to make one from scratch.
 
-But before we can understand how they learn, we need to understand the raw materials. And the first surprise is: **everything a computer works with is just numbers.**
+But we have to start at the beginning. And the beginning is a deceptively simple idea that, once you really absorb it, makes everything else click:
+
+**Everything an AI works with — every word, image, and sound — is just numbers. Everything an AI *does* is a function that turns numbers into numbers. And that function itself is made of numbers — billions of adjustable values called *parameters*. Building an AI is the art of finding the right values for those numbers.**
+
+That's the whole game. The rest is details. Let's unpack it.
 
 ## Everything Is Numbers
 
@@ -102,10 +106,10 @@ Let's see how big that table would need to be:
 <LookupTableExplosionWidget />
 
 <TryIt>
-Start with a tiny image: just 4 pixels, black or white. That's only 16 entries — totally manageable. Now bump it up to 9 pixels. Then try 16 pixels with 256 shades of gray. Watch the number of entries explode past the number of atoms in the universe. And a real photo has *millions* of pixels.
+Start with a tiny 2&times;2 black-and-white image — only 16 entries, totally manageable. Now step up to a 4&times;4 image. Then switch to grayscale. Then try a 28&times;28 image (the size used in a classic AI benchmark). Watch the number of entries blow past the atoms in the universe. Try the Text and Sound tabs too — a single tweet in Unicode already requires an incomprehensibly large table.
 </TryIt>
 
-The lookup table approach fails spectacularly. Even for a tiny 10×10 grayscale image, the number of possible inputs is 256¹⁰⁰ — a number so large it makes the observable universe look small. You could never build a table that big. You could never even *count* that high.
+The lookup table approach fails spectacularly. Even for a tiny 8×8 grayscale image — smaller than the smallest image used in real AI — the number of possible inputs is 256⁶⁴, a number with over 150 digits. That already dwarfs the number of atoms in the observable universe. And a real photo has *millions* of pixels. You could never build a table that big. You could never even *count* that high.
 
 ## The Real Challenge
 
