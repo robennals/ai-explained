@@ -1,12 +1,17 @@
 import { ChapterNav } from "@/components/layout/ChapterNav";
 import { getAdjacentChapters } from "@/lib/curriculum";
 import Content from "./content.mdx";
-import { ArithmeticWidget, FuzzyWidget, GatesWidget } from "./widgets";
+import {
+  NumbersEverywhereWidget,
+  FunctionMachineWidget,
+  ParameterPlaygroundWidget,
+  LookupTableExplosionWidget,
+} from "./widgets";
 
 export const metadata = {
-  title: "What Is Computation? — AI Explained",
+  title: "Everything Is Numbers — AI Explained",
   description:
-    "Boolean logic, gates, and fuzzy logic as a bridge to neural networks.",
+    "Text, images, and sound are all numbers. Thinking is a function. The challenge: find the right one.",
 };
 
 export default function Chapter01() {
@@ -17,9 +22,10 @@ export default function Chapter01() {
       <div className="prose prose-lg max-w-none">
         <Content
           components={{
-            ArithmeticWidget,
-            FuzzyWidget,
-            GatesWidget,
+            NumbersEverywhereWidget,
+            FunctionMachineWidget,
+            ParameterPlaygroundWidget,
+            LookupTableExplosionWidget,
           }}
         />
       </div>

@@ -3,26 +3,34 @@
 import dynamic from "next/dynamic";
 import { Suspense } from "react";
 
-const ArithmeticVsBooleanDemo = dynamic(
+const NumbersEverywhere = dynamic(
   () =>
-    import("@/components/widgets/computation/ArithmeticVsBooleanDemo").then(
-      (m) => m.ArithmeticVsBooleanDemo
+    import("@/components/widgets/computation/NumbersEverywhere").then(
+      (m) => m.NumbersEverywhere
     ),
   { ssr: false }
 );
 
-const FuzzyLogicPlayground = dynamic(
+const FunctionMachine = dynamic(
   () =>
-    import("@/components/widgets/computation/FuzzyLogicPlayground").then(
-      (m) => m.FuzzyLogicPlayground
+    import("@/components/widgets/computation/FunctionMachine").then(
+      (m) => m.FunctionMachine
     ),
   { ssr: false }
 );
 
-const LogicGateBuilder = dynamic(
+const ParameterPlayground = dynamic(
   () =>
-    import("@/components/widgets/computation/LogicGateBuilder").then(
-      (m) => m.LogicGateBuilder
+    import("@/components/widgets/computation/ParameterPlayground").then(
+      (m) => m.ParameterPlayground
+    ),
+  { ssr: false }
+);
+
+const LookupTableExplosion = dynamic(
+  () =>
+    import("@/components/widgets/computation/LookupTableExplosion").then(
+      (m) => m.LookupTableExplosion
     ),
   { ssr: false }
 );
@@ -41,26 +49,34 @@ function WidgetSlot({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function ArithmeticWidget() {
+export function NumbersEverywhereWidget() {
   return (
     <WidgetSlot>
-      <ArithmeticVsBooleanDemo />
+      <NumbersEverywhere />
     </WidgetSlot>
   );
 }
 
-export function FuzzyWidget() {
+export function FunctionMachineWidget() {
   return (
     <WidgetSlot>
-      <FuzzyLogicPlayground />
+      <FunctionMachine />
     </WidgetSlot>
   );
 }
 
-export function GatesWidget() {
+export function ParameterPlaygroundWidget() {
   return (
     <WidgetSlot>
-      <LogicGateBuilder />
+      <ParameterPlayground />
+    </WidgetSlot>
+  );
+}
+
+export function LookupTableExplosionWidget() {
+  return (
+    <WidgetSlot>
+      <LookupTableExplosion />
     </WidgetSlot>
   );
 }

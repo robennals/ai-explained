@@ -1,75 +1,124 @@
-# What Is Computation?
+# Everything Is Numbers
 
 <p className="lead text-xl text-muted mt-2 mb-8">
-Before we talk about artificial intelligence, we need to understand a deeper question: what does it actually mean to *compute*?
+AI can write poetry, recognize faces, generate art, and hold conversations. It's not magic — it's math. But what kind of math? This chapter will show you the shape of the problem.
 </p>
 
-You might think computation is just "doing math" — addition, multiplication, that sort of thing. And you'd be half right. But here's something most people never think about:
+## A Machine That Can Think
 
-**Addition and multiplication alone can't compute.**
+A machine that writes poetry. A machine that looks at a photo and says "that's a golden retriever." A machine that translates between languages it was never explicitly taught. A machine that draws pictures from a sentence.
 
-That sounds absurd. Surely if you can add and multiply, you can calculate anything? Let's find out.
+These things exist right now. They work. And they're all doing fundamentally the same thing.
 
-## The Challenge: Build a Decision
+They're not following hand-written rules. They're not looking things up in a giant database. They're computing — turning numbers in, getting numbers out — using a mathematical function that they *learned*.
 
-Imagine you have two binary inputs — A and B — each either 0 or 1. You want to build a simple rule: **output 1 only when both A and B are 1**. This is AND — the most basic logical decision.
+But before we can understand how they learn, we need to understand the raw materials. And the first surprise is: **everything a computer works with is just numbers.**
 
-You can use addition, multiplication, or any combination of them. Can you do it?
+## Everything Is Numbers
 
-<ArithmeticWidget />
+You might think of a text message as letters, a photo as colors, a song as sound. But inside a computer, all of them are the same thing: **arrays of numbers**.
 
-If you tried A × B, you might have thought you solved it — and for binary inputs, you're right! But here's the catch: multiplication only accidentally works for 0s and 1s. Feed it 0.5 and 0.7, and you get 0.35 — not a clean decision. Addition is worse: A + B gives you 2 when both are 1, not 1.
+**Text** is numbers. Every character has a number assigned to it (that's what Unicode is). The letter "H" is 72. The letter "e" is 101. Your text message is a sequence of numbers.
 
-The fundamental issue is that addition and multiplication are **smooth, continuous operations**. They gently transform numbers into other numbers. But computation — real computation — requires **sharp decisions**. Something that says "yes or no," "go or stop," "this or that."
+**Images** are numbers. Every pixel is described by three numbers — how much Red, Green, and Blue light to mix. A photo is just a giant grid of these number-triplets.
 
-What you need is a **threshold**: a point where the output snaps from 0 to 1. Without that snap, you can't make decisions. With it, you can do anything.
+**Colors** are numbers. Every color you've ever seen can be described by just three numbers. Adjust those three numbers, and you get a completely different color.
+
+**Sound** is numbers. A microphone samples the air pressure thousands of times per second. Each sample is a number. A three-minute song is about 8 million numbers.
+
+Try it yourself:
+
+<NumbersEverywhereWidget />
+
+<TryIt>
+In the Text tab, type your name and watch each letter turn into a number. In the Color tab, try to make your favorite color using just three sliders. In the Image tab, paint something and notice: the computer only sees numbers.
+</TryIt>
 
 <KeyInsight>
-  The minimum ingredient needed to turn arithmetic into computation is a step function — a threshold that converts continuous values into binary decisions. This threshold is the seed of everything that follows: neurons, neural networks, and AI itself.
+**Everything a computer works with — text, images, colors, sound, video — is just arrays of numbers.** This means every kind of "thinking" a computer does is really just *turning one array of numbers into another*.
 </KeyInsight>
 
-## Going Fuzzy: What If Your Switches Were Soft?
+## Thinking Is a Function
 
-Classical logic is crisp: everything is true or false, 0 or 1. But the real world is fuzzy. Is a tomato a fruit or a vegetable? Is 15°C "warm"? How confident are you that it'll rain tomorrow?
+Once you see that everything is numbers, something clicks: every kind of "intelligent" behavior is really just a **function** — something that takes numbers in and puts numbers out.
 
-**Fuzzy logic** extends boolean logic to continuous values between 0 and 1. The rules are surprisingly elegant:
-- **Fuzzy AND** = min(A, B) — the conjunction is only as strong as its weakest part
-- **Fuzzy OR** = max(A, B) — the disjunction is as strong as its strongest part
-- **Fuzzy NOT** = 1 - A — certainty becomes uncertainty
+- **"Is this a cat?"** = a function that takes pixel values and outputs a confidence score
+- **"Translate to French"** = a function that takes English character codes and outputs French character codes
+- **"Write a poem about rain"** = a function that takes prompt characters and outputs poem characters
+- **"Generate an image of a sunset"** = a function that takes text and outputs pixel values
 
-These aren't arbitrary choices. They're the continuous generalizations of boolean AND, OR, and NOT that preserve all the algebraic laws you'd expect (commutativity, associativity, De Morgan's laws).
+Every single one of these is the same shape: **numbers in, numbers out**.
 
-<FuzzyWidget />
-
-<TryIt>
-  Set both inputs to around 0.5 — the "maximum uncertainty" zone. Notice how AND and OR give different answers even when inputs are identical. Now try extreme values (close to 0 or 1) and watch fuzzy logic collapse back into crisp boolean logic. The continuous version is strictly more general.
-</TryIt>
-
-Here's the connection that matters: **a neuron is a fuzzy logic gate that learned its own rules.** Instead of hard-coded min/max operations, a neuron uses a weighted sum plus an activation function. The weights determine *what kind of logic* it computes. A neuron with the right weights computes AND. Different weights make it compute OR. Or something entirely new that has no name in classical logic.
-
-## Building From One Brick: NAND Universality
-
-In 1913, Henry Sheffer proved something remarkable: **every possible boolean function can be built using only NAND gates.** AND, OR, NOT, XOR — any logical operation you can imagine — can be constructed by wiring together nothing but NAND gates.
-
-This is called **functional completeness**, and it's profound. It means a computer doesn't need a huge catalog of specialized components. It needs **one simple building block, repeated many times, wired together in different patterns.**
-
-Sound familiar? That's exactly the architecture of a neural network: many identical simple units (neurons), connected in different arrangements, producing complex behavior from simple parts.
-
-<GatesWidget />
+<FunctionMachineWidget />
 
 <TryIt>
-  Start with the AND challenge: you need 2 NAND gates. Then try OR: you need 3. Now attempt XOR — you'll need 4 NAND gates, and the wiring gets surprisingly intricate. Feel the explosion of complexity as the function gets more interesting. Now imagine trying to hand-wire a circuit for image recognition, with millions of inputs instead of two. That's why we want a system that *learns* its own wiring.
+Click through the different tasks. Notice that despite doing wildly different things — recognizing images, translating text, answering questions, generating art — they all have the same shape: an array of numbers goes in, an array of numbers comes out. The only difference is what the function *does*.
 </TryIt>
 
-## The Bridge to Neural Networks
+So all of AI reduces to one problem: **find the right function**.
 
-Let's recap what we've discovered:
+If we could find the function that maps photo-pixels to the word "cat," we'd have image recognition. If we could find the function that maps English to French, we'd have translation. If we could find the function that maps prompts to good answers, we'd have a chatbot.
 
-1. **Arithmetic alone can't compute** — you need thresholds for decisions.
-2. **Fuzzy logic generalizes boolean logic** to continuous values (0 to 1).
-3. **A single gate type (NAND) can compute anything** — universality from simplicity.
-4. **Complex functions require many gates, carefully wired** — and the wiring gets intractable fast.
+But how do you "find" a function?
 
-A neuron combines insights 1 and 2: it's a differentiable unit that makes soft decisions via weighted sums and smooth thresholds. A neural network leverages insight 3: many identical simple units, composed together. And the breakthrough of deep learning addresses insight 4: instead of hand-designing the wiring, **the network learns it from data.**
+## Machines with Knobs
 
-In the next chapter, we'll see exactly how a neuron works — and discover what one neuron can and can't do. (Spoiler: the limitations are revealing, and they motivate everything that comes after.)
+Here's the idea: you build a **model** — a machine with adjustable knobs (called **parameters**). Different knob settings make the machine compute different functions. The challenge is finding the right settings.
+
+Let's make this concrete. Below is a model with just 4 parameters (a, b, c, d) that computes:
+
+**y = a + b·x + c·x² + d·x³**
+
+There's a target curve (the blue one) — that's the function we *want*. Your job: adjust the four knobs to make the red curve match the blue one.
+
+<ParameterPlaygroundWidget />
+
+<TryIt>
+Try to match the target curve by adjusting the sliders. Pay attention to how each parameter affects the shape. Then hit "Reveal best fit" to see the answer. Notice: even with just 4 parameters, it's surprisingly hard to find the right values by hand.
+</TryIt>
+
+<KeyInsight>
+**A model is a machine with adjustable knobs.** Different knob settings compute different functions. Finding the right function means finding the right knob settings. With just 4 knobs, hand-tuning is already frustrating. Real AI models have *billions* of knobs. We're going to need a way to tune them automatically.
+</KeyInsight>
+
+## Can a Machine Compute Anything?
+
+Before we go further, here's a question worth asking: are there limits to what functions a machine can compute?
+
+In 1936, mathematicians Alan Turing and Alonzo Church independently proved something astonishing: there exist machines that can compute **any function that can be computed at all**. Not just arithmetic — *anything*. This is called the **Church-Turing thesis**.
+
+This means that, in principle, if "thinking" is computation (turning numbers into numbers), then a computer can do anything a human mind can do. The question isn't *whether* the right function exists — it's whether we can *find* it.
+
+## The Lazy Solution: A Giant Lookup Table
+
+Here's a thought experiment. Forget about clever math. What if we just made a giant table? For every possible input, store the correct output.
+
+Want image recognition? Make a table with one row for every possible image, and in each row, write what's in the image. Want translation? A row for every possible English sentence, paired with its French translation.
+
+In theory, this works! Every function over finite inputs can be represented as a lookup table. Problem solved... right?
+
+Let's see how big that table would need to be:
+
+<LookupTableExplosionWidget />
+
+<TryIt>
+Start with a tiny image: just 4 pixels, black or white. That's only 16 entries — totally manageable. Now bump it up to 9 pixels. Then try 16 pixels with 256 shades of gray. Watch the number of entries explode past the number of atoms in the universe. And a real photo has *millions* of pixels.
+</TryIt>
+
+The lookup table approach fails spectacularly. Even for a tiny 10×10 grayscale image, the number of possible inputs is 256¹⁰⁰ — a number so large it makes the observable universe look small. You could never build a table that big. You could never even *count* that high.
+
+## The Real Challenge
+
+So here's where we are:
+
+1. **Everything is numbers** — text, images, sound, all of it
+2. **Thinking is a function** — every intelligent task is numbers-in, numbers-out
+3. **Models are machines with knobs** — different settings compute different functions
+4. **The right function exists** — the Church-Turing thesis guarantees it
+5. **Brute force is impossible** — a lookup table would be bigger than the universe
+
+We need models that **compress** — that capture the right pattern with far fewer parameters than a lookup table would need entries. And we need a way to **find** the right parameter values automatically, not by hand.
+
+That process — automatically finding the right knob settings — is called **learning**. And that's what the rest of this tutorial is about.
+
+In the next chapter, we'll meet the simplest possible computing unit: the **artificial neuron**. It combines a weighted sum with a threshold — one tiny decision-maker. We'll see what a single neuron can and can't do, and its limitations will motivate everything that comes after.

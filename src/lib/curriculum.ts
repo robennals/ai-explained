@@ -11,11 +11,11 @@ export const chapters: Chapter[] = [
   {
     id: 1,
     slug: "01-computation",
-    title: "What Is Computation?",
-    subtitle: "Gates, thresholds, and the seed of intelligence",
+    title: "Everything Is Numbers",
+    subtitle: "The shape of the AI problem",
     prerequisites: [],
     description:
-      "Boolean logic, gates, why addition and multiplication alone can't compute, universality of NAND, fuzzy logic as a bridge to continuous computation.",
+      "Text, images, and sound are all numbers. Thinking is a function. Models are machines with knobs. The challenge: find the right settings.",
   },
   {
     id: 2,
