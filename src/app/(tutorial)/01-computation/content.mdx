@@ -1,0 +1,75 @@
+# What Is Computation?
+
+<p className="lead text-xl text-muted mt-2 mb-8">
+Before we talk about artificial intelligence, we need to understand a deeper question: what does it actually mean to *compute*?
+</p>
+
+You might think computation is just "doing math" — addition, multiplication, that sort of thing. And you'd be half right. But here's something most people never think about:
+
+**Addition and multiplication alone can't compute.**
+
+That sounds absurd. Surely if you can add and multiply, you can calculate anything? Let's find out.
+
+## The Challenge: Build a Decision
+
+Imagine you have two binary inputs — A and B — each either 0 or 1. You want to build a simple rule: **output 1 only when both A and B are 1**. This is AND — the most basic logical decision.
+
+You can use addition, multiplication, or any combination of them. Can you do it?
+
+<ArithmeticWidget />
+
+If you tried A × B, you might have thought you solved it — and for binary inputs, you're right! But here's the catch: multiplication only accidentally works for 0s and 1s. Feed it 0.5 and 0.7, and you get 0.35 — not a clean decision. Addition is worse: A + B gives you 2 when both are 1, not 1.
+
+The fundamental issue is that addition and multiplication are **smooth, continuous operations**. They gently transform numbers into other numbers. But computation — real computation — requires **sharp decisions**. Something that says "yes or no," "go or stop," "this or that."
+
+What you need is a **threshold**: a point where the output snaps from 0 to 1. Without that snap, you can't make decisions. With it, you can do anything.
+
+<KeyInsight>
+  The minimum ingredient needed to turn arithmetic into computation is a step function — a threshold that converts continuous values into binary decisions. This threshold is the seed of everything that follows: neurons, neural networks, and AI itself.
+</KeyInsight>
+
+## Going Fuzzy: What If Your Switches Were Soft?
+
+Classical logic is crisp: everything is true or false, 0 or 1. But the real world is fuzzy. Is a tomato a fruit or a vegetable? Is 15°C "warm"? How confident are you that it'll rain tomorrow?
+
+**Fuzzy logic** extends boolean logic to continuous values between 0 and 1. The rules are surprisingly elegant:
+- **Fuzzy AND** = min(A, B) — the conjunction is only as strong as its weakest part
+- **Fuzzy OR** = max(A, B) — the disjunction is as strong as its strongest part
+- **Fuzzy NOT** = 1 - A — certainty becomes uncertainty
+
+These aren't arbitrary choices. They're the continuous generalizations of boolean AND, OR, and NOT that preserve all the algebraic laws you'd expect (commutativity, associativity, De Morgan's laws).
+
+<FuzzyWidget />
+
+<TryIt>
+  Set both inputs to around 0.5 — the "maximum uncertainty" zone. Notice how AND and OR give different answers even when inputs are identical. Now try extreme values (close to 0 or 1) and watch fuzzy logic collapse back into crisp boolean logic. The continuous version is strictly more general.
+</TryIt>
+
+Here's the connection that matters: **a neuron is a fuzzy logic gate that learned its own rules.** Instead of hard-coded min/max operations, a neuron uses a weighted sum plus an activation function. The weights determine *what kind of logic* it computes. A neuron with the right weights computes AND. Different weights make it compute OR. Or something entirely new that has no name in classical logic.
+
+## Building From One Brick: NAND Universality
+
+In 1913, Henry Sheffer proved something remarkable: **every possible boolean function can be built using only NAND gates.** AND, OR, NOT, XOR — any logical operation you can imagine — can be constructed by wiring together nothing but NAND gates.
+
+This is called **functional completeness**, and it's profound. It means a computer doesn't need a huge catalog of specialized components. It needs **one simple building block, repeated many times, wired together in different patterns.**
+
+Sound familiar? That's exactly the architecture of a neural network: many identical simple units (neurons), connected in different arrangements, producing complex behavior from simple parts.
+
+<GatesWidget />
+
+<TryIt>
+  Start with the AND challenge: you need 2 NAND gates. Then try OR: you need 3. Now attempt XOR — you'll need 4 NAND gates, and the wiring gets surprisingly intricate. Feel the explosion of complexity as the function gets more interesting. Now imagine trying to hand-wire a circuit for image recognition, with millions of inputs instead of two. That's why we want a system that *learns* its own wiring.
+</TryIt>
+
+## The Bridge to Neural Networks
+
+Let's recap what we've discovered:
+
+1. **Arithmetic alone can't compute** — you need thresholds for decisions.
+2. **Fuzzy logic generalizes boolean logic** to continuous values (0 to 1).
+3. **A single gate type (NAND) can compute anything** — universality from simplicity.
+4. **Complex functions require many gates, carefully wired** — and the wiring gets intractable fast.
+
+A neuron combines insights 1 and 2: it's a differentiable unit that makes soft decisions via weighted sums and smooth thresholds. A neural network leverages insight 3: many identical simple units, composed together. And the breakthrough of deep learning addresses insight 4: instead of hand-designing the wiring, **the network learns it from data.**
+
+In the next chapter, we'll see exactly how a neuron works — and discover what one neuron can and can't do. (Spoiler: the limitations are revealing, and they motivate everything that comes after.)
