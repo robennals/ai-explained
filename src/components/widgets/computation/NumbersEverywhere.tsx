@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
 import { SliderControl } from "../shared/SliderControl";
 
-type Tab = "text" | "image" | "color";
+type Tab = "text" | "image" | "color" | "sound";
 
 const INITIAL_TEXT = "Hello";
 const GRID_SIZE = 8;
@@ -253,6 +253,414 @@ function ColorTab() {
   );
 }
 
+const SOUND_PRESETS = [
+  { label: '"eeee"', f1: 270, f2: 2300 },
+  { label: '"aaah"', f1: 730, f2: 1090 },
+  { label: '"oooh"', f1: 300, f2: 870 },
+  { label: '"mmmm"', f1: 250, f2: 800 },
+];
+
+function buildFormantGraph(
+  actx: BaseAudioContext,
+  pitch: number,
+  f1: number,
+  f2: number
+) {
+  const osc = actx.createOscillator();
+  osc.type = "sawtooth";
+  osc.frequency.value = pitch;
+
+  const makeFormant = (freq: number, q: number, gain: number) => {
+    const filter = actx.createBiquadFilter();
+    filter.type = "bandpass";
+    filter.frequency.value = freq;
+    filter.Q.value = q;
+    const g = actx.createGain();
+    g.gain.value = gain;
+    osc.connect(filter);
+    filter.connect(g);
+    return { filter, gain: g };
+  };
+
+  const formant1 = makeFormant(f1, 8, 1.0);
+  const formant2 = makeFormant(f2, 12, 0.5);
+  const formant3 = makeFormant(2800, 12, 0.3);
+
+  const masterGain = actx.createGain();
+  masterGain.gain.value = 0.25;
+
+  formant1.gain.connect(masterGain);
+  formant2.gain.connect(masterGain);
+  formant3.gain.connect(masterGain);
+
+  return { osc, filter1: formant1.filter, filter2: formant2.filter, masterGain };
+}
+
+function drawWaveform(
+  canvas: HTMLCanvasElement,
+  data: Float32Array,
+  selectedIdx: number | null = null
+) {
+  const ctx = canvas.getContext("2d")!;
+  const w = canvas.width;
+  const h = canvas.height;
+
+  const style = getComputedStyle(canvas);
+  const accentColor =
+    style.getPropertyValue("--color-accent").trim() || "#3b82f6";
+  const mutedColor =
+    style.getPropertyValue("--color-muted").trim() || "#888";
+  const fgColor =
+    style.getPropertyValue("--color-foreground").trim() || "#333";
+
+  // Find min/max for full dynamic range normalization
+  let min = Infinity,
+    max = -Infinity;
+  for (let i = 0; i < data.length; i++) {
+    if (data[i] < min) min = data[i];
+    if (data[i] > max) max = data[i];
+  }
+  const range = max - min || 0.001;
+  const pad = range * 0.08;
+  const yMin = min - pad;
+  const yMax = max + pad;
+  const yRange = yMax - yMin;
+
+  ctx.clearRect(0, 0, w, h);
+
+  // Zero line
+  const zeroY = ((yMax - 0) / yRange) * h;
+  ctx.beginPath();
+  ctx.strokeStyle = mutedColor;
+  ctx.lineWidth = 0.5;
+  ctx.setLineDash([4, 4]);
+  ctx.moveTo(0, zeroY);
+  ctx.lineTo(w, zeroY);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Waveform
+  ctx.beginPath();
+  ctx.strokeStyle = accentColor;
+  ctx.lineWidth = 2;
+  const step = data.length / w;
+  for (let x = 0; x < w; x++) {
+    const i = Math.floor(x * step);
+    const v = data[i];
+    const y = ((yMax - v) / yRange) * h;
+    if (x === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  // Selected sample marker
+  if (selectedIdx !== null && selectedIdx >= 0 && selectedIdx < data.length) {
+    const markerX = (selectedIdx / data.length) * w;
+    const v = data[selectedIdx];
+    const markerY = ((yMax - v) / yRange) * h;
+
+    // Vertical hairline
+    ctx.beginPath();
+    ctx.strokeStyle = fgColor;
+    ctx.lineWidth = 1;
+    ctx.globalAlpha = 0.3;
+    ctx.moveTo(markerX, 0);
+    ctx.lineTo(markerX, h);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+
+    // Dot
+    ctx.beginPath();
+    ctx.fillStyle = accentColor;
+    ctx.strokeStyle = "white";
+    ctx.lineWidth = 2;
+    ctx.arc(markerX, markerY, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+  }
+}
+
+const SAMPLES_WINDOW = 20;
+
+function SoundTab() {
+  const [pitch, setPitch] = useState(150);
+  const [f1, setF1] = useState(730);
+  const [f2, setF2] = useState(1090);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [waveformData, setWaveformData] = useState<Float32Array | null>(null);
+  const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
+
+  const audioRef = useRef<{
+    ctx: AudioContext;
+    osc: OscillatorNode;
+    filter1: BiquadFilterNode;
+    filter2: BiquadFilterNode;
+    masterGain: GainNode;
+    analyser: AnalyserNode;
+  } | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  const togglePlay = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.osc.stop();
+      audioRef.current.ctx.close();
+      audioRef.current = null;
+      setIsPlaying(false);
+      return;
+    }
+
+    const ctx = new AudioContext();
+    const { osc, filter1, filter2, masterGain } = buildFormantGraph(
+      ctx,
+      pitch,
+      f1,
+      f2
+    );
+
+    const analyser = ctx.createAnalyser();
+    analyser.fftSize = 2048;
+
+    masterGain.connect(analyser);
+    analyser.connect(ctx.destination);
+
+    osc.start();
+
+    audioRef.current = { ctx, osc, filter1, filter2, masterGain, analyser };
+    setIsPlaying(true);
+  }, [pitch, f1, f2]);
+
+  // Update audio params smoothly when sliders change while playing
+  useEffect(() => {
+    if (!audioRef.current) return;
+    const t = audioRef.current.ctx.currentTime;
+    audioRef.current.osc.frequency.setTargetAtTime(pitch, t, 0.02);
+    audioRef.current.filter1.frequency.setTargetAtTime(f1, t, 0.02);
+    audioRef.current.filter2.frequency.setTargetAtTime(f2, t, 0.02);
+  }, [pitch, f1, f2]);
+
+  // Render preview waveform whenever params change (always visible, even when not playing)
+  useEffect(() => {
+    let cancelled = false;
+
+    const sampleRate = 44100;
+    const settleTime = 0.1;
+    const displayDuration = 0.04;
+    const renderDuration = settleTime + displayDuration + 0.02;
+    const totalSamples = Math.ceil(renderDuration * sampleRate);
+    const settleEnd = Math.ceil(settleTime * sampleRate);
+    const displaySampleCount = Math.ceil(displayDuration * sampleRate);
+
+    const offlineCtx = new OfflineAudioContext(1, totalSamples, sampleRate);
+    const { osc, masterGain } = buildFormantGraph(offlineCtx, pitch, f1, f2);
+    masterGain.connect(offlineCtx.destination);
+    osc.start();
+
+    offlineCtx.startRendering().then((buffer) => {
+      if (cancelled) return;
+      const fullData = buffer.getChannelData(0);
+
+      // Find the first maximum peak after settling, then back up to the
+      // preceding upward zero-crossing so the peak sits at a consistent
+      // x-position on the left side of the canvas.
+      let peakIdx = settleEnd;
+      let peakVal = -Infinity;
+      // Scan one fundamental period worth of samples to find the first peak
+      const periodSamples = Math.ceil(sampleRate / pitch);
+      const searchEnd = Math.min(settleEnd + periodSamples * 2, fullData.length - displaySampleCount);
+      for (let i = settleEnd; i < searchEnd; i++) {
+        if (fullData[i] > peakVal) {
+          peakVal = fullData[i];
+          peakIdx = i;
+        }
+      }
+      // Back up from peak to the nearest preceding upward zero-crossing
+      let startIdx = peakIdx;
+      for (let i = peakIdx; i >= settleEnd; i--) {
+        if (fullData[i] <= 0 && fullData[i + 1] > 0) {
+          startIdx = i;
+          break;
+        }
+      }
+
+      const data = fullData.slice(startIdx, startIdx + displaySampleCount);
+      setWaveformData(data);
+      setSelectedIdx(null);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [pitch, f1, f2]);
+
+  // Draw waveform whenever data or selection changes
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || !waveformData) return;
+    drawWaveform(canvas, waveformData, selectedIdx);
+  }, [waveformData, selectedIdx]);
+
+  // Handle click on waveform to select a sample
+  const handleCanvasClick = useCallback(
+    (e: React.MouseEvent<HTMLCanvasElement>) => {
+      const canvas = canvasRef.current;
+      if (!canvas || !waveformData) return;
+      const rect = canvas.getBoundingClientRect();
+      const cssX = e.clientX - rect.left;
+      const idx = Math.round((cssX / rect.width) * (waveformData.length - 1));
+      setSelectedIdx(Math.max(0, Math.min(idx, waveformData.length - 1)));
+    },
+    [waveformData]
+  );
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        try {
+          audioRef.current.osc.stop();
+          audioRef.current.ctx.close();
+        } catch {
+          /* ignore */
+        }
+        audioRef.current = null;
+      }
+    };
+  }, []);
+
+  return (
+    <div>
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        {SOUND_PRESETS.map((p) => (
+          <button
+            key={p.label}
+            onClick={() => {
+              setF1(p.f1);
+              setF2(p.f2);
+            }}
+            className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors ${
+              f1 === p.f1 && f2 === p.f2
+                ? "border-accent bg-accent/10 text-accent"
+                : "border-border text-muted hover:border-foreground/30 hover:text-foreground"
+            }`}
+          >
+            {p.label}
+          </button>
+        ))}
+        <button
+          onClick={togglePlay}
+          className={`ml-auto rounded-lg px-4 py-1.5 text-sm font-semibold text-white transition-colors ${
+            isPlaying
+              ? "bg-red-500 hover:bg-red-600"
+              : "bg-accent hover:opacity-90"
+          }`}
+          aria-label={isPlaying ? "Stop sound" : "Play sound"}
+        >
+          {isPlaying ? "\u25A0 Stop" : "\u25B6 Play"}
+        </button>
+      </div>
+
+      <div className="mb-4 overflow-hidden rounded-lg border border-border bg-surface">
+        <canvas
+          ref={canvasRef}
+          width={500}
+          height={120}
+          className="w-full cursor-crosshair"
+          style={{ height: "100px" }}
+          onClick={handleCanvasClick}
+        />
+      </div>
+
+      <div className="mb-4 space-y-3">
+        <SliderControl
+          label="Pitch"
+          value={pitch}
+          min={80}
+          max={300}
+          step={1}
+          onChange={setPitch}
+          formatValue={(v) => `${Math.round(v)} Hz`}
+        />
+        <SliderControl
+          label="F1"
+          value={f1}
+          min={200}
+          max={1000}
+          step={1}
+          onChange={setF1}
+          formatValue={(v) => `${Math.round(v)} Hz`}
+        />
+        <SliderControl
+          label="F2"
+          value={f2}
+          min={500}
+          max={3000}
+          step={1}
+          onChange={setF2}
+          formatValue={(v) => `${Math.round(v)} Hz`}
+        />
+      </div>
+
+      {waveformData && (() => {
+        const winStart =
+          selectedIdx !== null
+            ? Math.max(
+                0,
+                Math.min(
+                  selectedIdx - Math.floor(SAMPLES_WINDOW / 2),
+                  waveformData.length - SAMPLES_WINDOW
+                )
+              )
+            : 0;
+        const highlightPos =
+          selectedIdx !== null ? selectedIdx - winStart : null;
+
+        return (
+          <div className="rounded border border-border bg-surface p-2">
+            <p className="mb-1 text-xs font-medium text-muted">
+              Air pressure samples (44,100 per second)
+              {selectedIdx !== null && (
+                <span>
+                  {" "}&mdash; sample #{selectedIdx} ={" "}
+                  <span className="font-semibold text-accent">
+                    {waveformData[selectedIdx].toFixed(4)}
+                  </span>
+                </span>
+              )}
+              :
+            </p>
+            <p className="font-mono text-[10px] leading-tight text-muted">
+              {winStart > 0 && "... "}
+              [
+              {Array.from(waveformData.slice(winStart, winStart + SAMPLES_WINDOW)).map(
+                (s, i) => (
+                  <span key={i}>
+                    {i > 0 && ", "}
+                    <span
+                      className={
+                        i === highlightPos
+                          ? "rounded bg-accent/20 px-0.5 font-bold text-accent"
+                          : ""
+                      }
+                    >
+                      {s.toFixed(3)}
+                    </span>
+                  </span>
+                )
+              )}
+              , ...]
+            </p>
+            {selectedIdx === null && (
+              <p className="mt-1 text-[10px] text-muted/60">
+                Click the waveform to inspect a sample
+              </p>
+            )}
+          </div>
+        );
+      })()}
+    </div>
+  );
+}
+
 export function NumbersEverywhere() {
   const [activeTab, setActiveTab] = useState<Tab>("text");
 
@@ -260,6 +668,7 @@ export function NumbersEverywhere() {
     { id: "text", label: "Text" },
     { id: "image", label: "Image" },
     { id: "color", label: "Color" },
+    { id: "sound", label: "Sound" },
   ];
 
   return (
@@ -285,6 +694,7 @@ export function NumbersEverywhere() {
       {activeTab === "text" && <TextTab />}
       {activeTab === "image" && <ImageTab />}
       {activeTab === "color" && <ColorTab />}
+      {activeTab === "sound" && <SoundTab />}
     </WidgetContainer>
   );
 }
