@@ -1,334 +1,267 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
 
-const PANEL_WIDTH = 240;
-const PANEL_HEIGHT = 160;
-const PADDING = 20;
-const N_POINTS = 50;
-const N_BINS = 8; // shared resolution for binary + step models
+const SVG_WIDTH = 260;
+const SVG_HEIGHT = 180;
+const PADDING = 28;
 
-// Target function
-function targetFn(x: number): number {
-  return Math.sin(2 * Math.PI * x) * 0.4 + 0.5;
-}
+// Plot range
+const X_MIN = -2;
+const X_MAX = 4;
+const Y_MIN = -8;
+const Y_MAX = 10;
 
-// Sample points for error calculation
-const SAMPLE_XS = Array.from({ length: N_POINTS }, (_, i) => i / (N_POINTS - 1));
-const TARGET_YS = SAMPLE_XS.map(targetFn);
+// Target function: y = 2x − 3
+const TARGET_A = 2;
+const TARGET_B = -3;
 
-// --- Model 1: Binary bits (0 or 1 per bin) ---
-function binaryModel(bits: number[], x: number): number {
-  const idx = Math.min(Math.floor(x * bits.length), bits.length - 1);
-  return bits[idx];
-}
+// Word numbers for parsing
+const WORD_TO_NUM: Record<string, number> = {
+  zero: 0, one: 1, two: 2, three: 3, four: 4,
+  five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10,
+};
 
-function mutateBinary(bits: number[]): number[] {
-  const next = [...bits];
-  const idx = Math.floor(Math.random() * next.length);
-  next[idx] = next[idx] === 0 ? 1 : 0;
-  return next;
-}
+// Parse "times <number> plus/minus <number>" → { a, b } or null
+function parseExpression(text: string): { a: number; b: number } | null {
+  let s = text.trim().toLowerCase();
 
-// --- Model 2: Step function (continuous heights per bin) ---
-function stepModel(heights: number[], x: number): number {
-  const idx = Math.min(Math.floor(x * heights.length), heights.length - 1);
-  return heights[idx];
-}
-
-function mutateSteps(heights: number[]): number[] {
-  const next = [...heights];
-  const idx = Math.floor(Math.random() * next.length);
-  next[idx] = Math.max(0, Math.min(1, next[idx] + (Math.random() - 0.5) * 0.1));
-  return next;
-}
-
-// --- Model 3: Polynomial with continuous coefficients ---
-// Use Chebyshev-like basis scaled to [0,1] for better conditioning
-const N_POLY = 8;
-
-function polyModel(coeffs: number[], x: number): number {
-  // Simple polynomial: sum of c_i * x^i
-  // but we scale x to [-1,1] for better numerical behavior
-  const t = 2 * x - 1;
-  let y = 0;
-  let ti = 1;
-  for (let i = 0; i < coeffs.length; i++) {
-    y += coeffs[i] * ti;
-    ti *= t;
+  for (const [word, num] of Object.entries(WORD_TO_NUM)) {
+    s = s.replace(new RegExp(`\\b${word}\\b`, "g"), String(num));
   }
-  return y;
+
+  const m = s.match(/times\s+(-?[\d.]+)\s+(plus|minus)\s+(-?[\d.]+)/);
+  if (!m) return null;
+
+  const a = parseFloat(m[1]);
+  const sign = m[2] === "plus" ? 1 : -1;
+  const b = sign * parseFloat(m[3]);
+  if (isNaN(a) || isNaN(b)) return null;
+  return { a, b };
 }
 
-function mutatePoly(coeffs: number[]): number[] {
-  const next = [...coeffs];
-  const idx = Math.floor(Math.random() * next.length);
-  // Small perturbations — the smooth landscape means even tiny changes are useful
-  next[idx] += (Math.random() - 0.5) * 0.04;
-  return next;
-}
-
-// --- Error ---
-function mse(modelFn: (x: number) => number): number {
+// Mean squared error over the plotted range
+function computeError(a: number, b: number): number {
   let sum = 0;
-  for (let i = 0; i < SAMPLE_XS.length; i++) {
-    const diff = modelFn(SAMPLE_XS[i]) - TARGET_YS[i];
+  const n = 50;
+  for (let i = 0; i <= n; i++) {
+    const x = X_MIN + (X_MAX - X_MIN) * (i / n);
+    const diff = (a * x + b) - (TARGET_A * x + TARGET_B);
     sum += diff * diff;
   }
-  return sum / SAMPLE_XS.length;
+  return sum / (n + 1);
 }
 
-// --- SVG helpers ---
+// SVG coordinate helpers
 function xToSvg(x: number): number {
-  return PADDING + x * (PANEL_WIDTH - 2 * PADDING);
+  return PADDING + ((x - X_MIN) / (X_MAX - X_MIN)) * (SVG_WIDTH - 2 * PADDING);
 }
-
 function yToSvg(y: number): number {
-  return PANEL_HEIGHT - PADDING - y * (PANEL_HEIGHT - 2 * PADDING);
+  return SVG_HEIGHT - PADDING - ((y - Y_MIN) / (Y_MAX - Y_MIN)) * (SVG_HEIGHT - 2 * PADDING);
 }
 
-function generatePath(fn: (x: number) => number): string {
+function linePath(a: number, b: number): string {
   const pts: string[] = [];
-  for (let i = 0; i < N_POINTS; i++) {
-    const x = i / (N_POINTS - 1);
-    const y = fn(x);
-    const clampedY = Math.max(-0.2, Math.min(1.2, y));
-    pts.push(`${i === 0 ? "M" : "L"}${xToSvg(x).toFixed(1)},${yToSvg(clampedY).toFixed(1)}`);
+  const steps = 100;
+  for (let i = 0; i <= steps; i++) {
+    const x = X_MIN + (X_MAX - X_MIN) * (i / steps);
+    const y = Math.max(Y_MIN - 1, Math.min(Y_MAX + 1, a * x + b));
+    pts.push(`${i === 0 ? "M" : "L"}${xToSvg(x).toFixed(1)},${yToSvg(y).toFixed(1)}`);
   }
   return pts.join(" ");
 }
 
-interface ModelState {
-  params: number[];
-  error: number;
-  steps: number;
-}
-
-function ModelPanel({
-  title,
-  modelFn: mFn,
-  state,
+function Graph({
+  currentA,
+  currentB,
+  valid,
 }: {
-  title: string;
-  modelFn: (params: number[], x: number) => number;
-  state: ModelState;
+  currentA: number | null;
+  currentB: number | null;
+  valid: boolean;
 }) {
-  const targetPath = generatePath(targetFn);
-  const modelPath = generatePath((x) => mFn(state.params, x));
-  const errorColor =
-    state.error < 0.01
-      ? "text-success"
-      : state.error < 0.05
-        ? "text-warning"
-        : "text-error";
-
   return (
-    <div className="flex flex-col items-center gap-1">
-      <span className="text-xs font-semibold text-foreground">{title}</span>
-      <svg
-        viewBox={`0 0 ${PANEL_WIDTH} ${PANEL_HEIGHT}`}
-        className="w-full rounded-lg border border-border bg-surface"
-        preserveAspectRatio="xMidYMid meet"
-      >
-        <defs>
-          <clipPath id={`clip-${title.replace(/\s/g, "")}`}>
-            <rect x={PADDING} y={0} width={PANEL_WIDTH - 2 * PADDING} height={PANEL_HEIGHT} />
-          </clipPath>
-        </defs>
+    <svg
+      viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}
+      className="w-full rounded-lg border border-border bg-surface"
+      preserveAspectRatio="xMidYMid meet"
+    >
+      {/* Axes */}
+      <line
+        x1={xToSvg(X_MIN)} y1={yToSvg(0)}
+        x2={xToSvg(X_MAX)} y2={yToSvg(0)}
+        stroke="currentColor" strokeWidth="1" opacity={0.15}
+      />
+      <line
+        x1={xToSvg(0)} y1={yToSvg(Y_MIN)}
+        x2={xToSvg(0)} y2={yToSvg(Y_MAX)}
+        stroke="currentColor" strokeWidth="1" opacity={0.15}
+      />
+
+      {/* Target line (dashed) */}
+      <path
+        d={linePath(TARGET_A, TARGET_B)}
+        fill="none"
+        stroke="var(--color-success)"
+        strokeWidth="2"
+        strokeDasharray="6,3"
+      />
+
+      {/* Current line */}
+      {valid && currentA !== null && currentB !== null && (
         <path
-          d={targetPath}
+          d={linePath(currentA, currentB)}
           fill="none"
           stroke="var(--color-accent)"
-          strokeWidth="2"
-          opacity={0.5}
-          clipPath={`url(#clip-${title.replace(/\s/g, "")})`}
+          strokeWidth="2.5"
         />
-        <path
-          d={modelPath}
-          fill="none"
-          stroke="var(--color-error)"
-          strokeWidth="1.5"
-          clipPath={`url(#clip-${title.replace(/\s/g, "")})`}
-        />
-      </svg>
-      <div className="flex items-center gap-2 text-xs text-muted">
-        <span>
-          Error: <span className={`font-mono font-bold ${errorColor}`}>{state.error.toFixed(4)}</span>
-        </span>
-      </div>
-    </div>
+      )}
+
+      {/* Legend */}
+      <line x1={SVG_WIDTH - 85} y1={14} x2={SVG_WIDTH - 65} y2={14}
+        stroke="var(--color-success)" strokeWidth="2" strokeDasharray="4,2" />
+      <text x={SVG_WIDTH - 62} y={17} fontSize="9" fill="currentColor" opacity={0.5}>
+        Target
+      </text>
+      <line x1={SVG_WIDTH - 85} y1={26} x2={SVG_WIDTH - 65} y2={26}
+        stroke="var(--color-accent)" strokeWidth="2" />
+      <text x={SVG_WIDTH - 62} y={29} fontSize="9" fill="currentColor" opacity={0.5}>
+        Yours
+      </text>
+    </svg>
   );
 }
 
-function initBinary(): number[] {
-  return Array.from({ length: N_BINS }, () => (Math.random() > 0.5 ? 1 : 0));
-}
-function initSteps(): number[] {
-  return Array.from({ length: N_BINS }, () => 0.5);
-}
-function initPoly(): number[] {
-  return Array.from({ length: N_POLY }, () => 0);
+function formatFn(a: number, b: number, decimals = 0): string {
+  const aStr = decimals > 0 ? a.toFixed(decimals) : String(a);
+  const sign = b >= 0 ? "+" : "\u2212";
+  const bStr = decimals > 0 ? Math.abs(b).toFixed(decimals) : String(Math.abs(b));
+  return `y = ${aStr}x ${sign} ${bStr}`;
 }
 
 export function ModelComparison() {
-  const [binary, setBinary] = useState<ModelState>(() => {
-    const params = initBinary();
-    return { params, error: mse((x) => binaryModel(params, x)), steps: 0 };
-  });
-  const [steps, setSteps] = useState<ModelState>(() => {
-    const params = initSteps();
-    return { params, error: mse((x) => stepModel(params, x)), steps: 0 };
-  });
-  const [poly, setPoly] = useState<ModelState>(() => {
-    const params = initPoly();
-    return { params, error: mse((x) => polyModel(params, x)), steps: 0 };
-  });
-  const [autoRun, setAutoRun] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // Text mode
+  const [text, setText] = useState("times four plus two");
+  const parsed = parseExpression(text);
+  const textError = parsed ? computeError(parsed.a, parsed.b) : null;
+
+  // Slider mode
+  const [sliderA, setSliderA] = useState(4);
+  const [sliderB, setSliderB] = useState(2);
+  const sliderError = computeError(sliderA, sliderB);
 
   const reset = useCallback(() => {
-    if (timerRef.current) clearInterval(timerRef.current);
-    setAutoRun(false);
-    const bp = initBinary();
-    setBinary({ params: bp, error: mse((x) => binaryModel(bp, x)), steps: 0 });
-    const sp = initSteps();
-    setSteps({ params: sp, error: mse((x) => stepModel(sp, x)), steps: 0 });
-    const pp = initPoly();
-    setPoly({ params: pp, error: mse((x) => polyModel(pp, x)), steps: 0 });
+    setText("times four plus two");
+    setSliderA(4);
+    setSliderB(2);
   }, []);
-
-  useEffect(() => {
-    const timer = timerRef;
-    return () => {
-      if (timer.current) clearInterval(timer.current);
-    };
-  }, []);
-
-  const takeStep = useCallback(() => {
-    // Binary: try one mutation
-    setBinary((prev) => {
-      const candidate = mutateBinary(prev.params);
-      const newError = mse((x) => binaryModel(candidate, x));
-      if (newError < prev.error) {
-        return { params: candidate, error: newError, steps: prev.steps + 1 };
-      }
-      return { ...prev, steps: prev.steps + 1 };
-    });
-
-    // Steps: try one mutation
-    setSteps((prev) => {
-      const candidate = mutateSteps(prev.params);
-      const newError = mse((x) => stepModel(candidate, x));
-      if (newError < prev.error) {
-        return { params: candidate, error: newError, steps: prev.steps + 1 };
-      }
-      return { ...prev, steps: prev.steps + 1 };
-    });
-
-    // Polynomial: try several mutations, keep best (smooth landscape means more are useful)
-    setPoly((prev) => {
-      let bestParams = prev.params;
-      let bestError = prev.error;
-      for (let t = 0; t < 5; t++) {
-        const candidate = mutatePoly(prev.params);
-        const newError = mse((x) => polyModel(candidate, x));
-        if (newError < bestError) {
-          bestParams = candidate;
-          bestError = newError;
-        }
-      }
-      return { params: bestParams, error: bestError, steps: prev.steps + 1 };
-    });
-  }, []);
-
-  const takeNSteps = useCallback(
-    (n: number) => {
-      for (let i = 0; i < n; i++) takeStep();
-    },
-    [takeStep]
-  );
-
-  const toggleAutoRun = useCallback(() => {
-    setAutoRun((prev) => {
-      if (prev) {
-        if (timerRef.current) clearInterval(timerRef.current);
-        return false;
-      } else {
-        timerRef.current = setInterval(() => {
-          takeStep();
-        }, 50);
-        return true;
-      }
-    });
-  }, [takeStep]);
 
   return (
     <WidgetContainer
-      title="Model Comparison"
-      description="Three model types try to match the same target curve — watch how model choice affects learning"
+      title="Text vs. Sliders: Why Representation Matters"
+      description={`Match the dashed target line: ${formatFn(TARGET_A, TARGET_B)}`}
       onReset={reset}
     >
-      <div className="mb-3 flex items-center gap-3 rounded-lg bg-surface px-3 py-1.5">
-        <span className="text-xs font-medium text-muted">
-          Steps: <span className="font-mono font-bold text-foreground">{binary.steps}</span>
-        </span>
-      </div>
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        {/* ── Text mode ── */}
+        <div className="flex flex-col gap-2">
+          <span className="text-xs font-semibold text-foreground">
+            Edit text (non-smooth)
+          </span>
 
-      <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <ModelPanel
-          title="Binary (8 bits)"
-          modelFn={binaryModel}
-          state={binary}
-        />
-        <ModelPanel
-          title="Step function (8 steps)"
-          modelFn={stepModel}
-          state={steps}
-        />
-        <ModelPanel
-          title="Polynomial (8 coeffs)"
-          modelFn={polyModel}
-          state={poly}
-        />
-      </div>
+          <input
+            type="text"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            className="rounded-md border border-border bg-white px-3 py-2 font-mono text-sm text-foreground dark:bg-gray-900"
+            spellCheck={false}
+          />
 
-      {/* Legend */}
-      <div className="mb-3 flex items-center gap-4 text-xs text-muted">
-        <span className="flex items-center gap-1">
-          <span className="inline-block h-0.5 w-4 bg-accent opacity-50"></span> Target
-        </span>
-        <span className="flex items-center gap-1">
-          <span className="inline-block h-0.5 w-4 bg-error"></span> Model
-        </span>
-      </div>
+          <div className="flex items-center gap-2 text-xs text-muted min-h-[20px]">
+            {parsed ? (
+              <>
+                <span>{formatFn(parsed.a, parsed.b)}</span>
+                <span className="ml-auto">
+                  Error:{" "}
+                  <span className="font-mono font-bold text-foreground">
+                    {textError!.toFixed(2)}
+                  </span>
+                </span>
+              </>
+            ) : (
+              <span className="text-[var(--color-error)]">
+                Can&apos;t parse &mdash; try &ldquo;times 3 minus 1&rdquo;
+              </span>
+            )}
+          </div>
 
-      {/* Controls */}
-      <div className="flex flex-wrap gap-2">
-        <button
-          onClick={() => takeStep()}
-          disabled={autoRun}
-          className="rounded-md bg-accent/10 px-3 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-accent/20 disabled:opacity-40"
-        >
-          Take 1 step
-        </button>
-        <button
-          onClick={() => takeNSteps(10)}
-          disabled={autoRun}
-          className="rounded-md bg-accent/10 px-3 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-accent/20 disabled:opacity-40"
-        >
-          Take 10 steps
-        </button>
-        <button
-          onClick={toggleAutoRun}
-          className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-            autoRun
-              ? "bg-error/10 text-error hover:bg-error/20"
-              : "bg-accent/10 text-accent hover:bg-accent/20"
-          }`}
-        >
-          {autoRun ? "Stop" : "Auto-run"}
-        </button>
+          {textError !== null && textError < 0.05 && (
+            <span className="text-xs font-bold text-success">Matched!</span>
+          )}
+
+          <Graph
+            currentA={parsed?.a ?? null}
+            currentB={parsed?.b ?? null}
+            valid={parsed !== null}
+          />
+        </div>
+
+        {/* ── Slider mode ── */}
+        <div className="flex flex-col gap-2">
+          <span className="text-xs font-semibold text-foreground">
+            Drag sliders (smooth)
+          </span>
+
+          <div className="flex flex-col gap-2 rounded-md border border-border bg-white px-3 py-2.5 dark:bg-gray-900">
+            <label className="flex items-center gap-2 text-xs text-muted">
+              <span className="w-14 shrink-0 font-medium">Multiply</span>
+              <input
+                type="range"
+                min={-5}
+                max={5}
+                step={0.1}
+                value={sliderA}
+                onChange={(e) => setSliderA(parseFloat(e.target.value))}
+                className="flex-1"
+              />
+              <span className="w-10 text-right font-mono text-sm font-bold text-foreground">
+                {sliderA.toFixed(1)}
+              </span>
+            </label>
+            <label className="flex items-center gap-2 text-xs text-muted">
+              <span className="w-14 shrink-0 font-medium">Add</span>
+              <input
+                type="range"
+                min={-5}
+                max={5}
+                step={0.1}
+                value={sliderB}
+                onChange={(e) => setSliderB(parseFloat(e.target.value))}
+                className="flex-1"
+              />
+              <span className="w-10 text-right font-mono text-sm font-bold text-foreground">
+                {sliderB.toFixed(1)}
+              </span>
+            </label>
+          </div>
+
+          <div className="flex items-center gap-2 text-xs text-muted min-h-[20px]">
+            <span>{formatFn(sliderA, sliderB, 1)}</span>
+            <span className="ml-auto">
+              Error:{" "}
+              <span className="font-mono font-bold text-foreground">
+                {sliderError.toFixed(2)}
+              </span>
+            </span>
+          </div>
+
+          {sliderError < 0.05 && (
+            <span className="text-xs font-bold text-success">Matched!</span>
+          )}
+
+          <Graph currentA={sliderA} currentB={sliderB} valid={true} />
+        </div>
       </div>
     </WidgetContainer>
   );
