@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint && bash scripts/lint-mdx-no-raw-p.sh"
   },
   "dependencies": {
     "@mdx-js/loader": "^3.1.1",
