@@ -11,7 +11,7 @@ Interactive visual tutorial website for understanding AI from first principles. 
 ```bash
 pnpm dev              # Start dev server at localhost:3000
 pnpm build            # Production build
-pnpm lint             # ESLint
+pnpm lint             # ESLint + MDX validation
 npx playwright test   # E2E tests (expects dev server running)
 ```
 
@@ -33,7 +33,7 @@ Chapter metadata (title, slug, prerequisites, descriptions) lives in `src/lib/cu
 ### MDX Pipeline
 
 - `@next/mdx` with `remark-math` + `rehype-katex` (LaTeX) + `rehype-pretty-code` (Shiki syntax highlighting)
-- Custom MDX components registered in `mdx-components.tsx`: `<Callout>`, `<KeyInsight>`, `<TryIt>`
+- Custom MDX components registered in `mdx-components.tsx`: `<Callout>`, `<KeyInsight>`, `<Lead>`, `<TryIt>`
 - MDX component source in `src/components/mdx/`
 
 ### Widget System
@@ -65,6 +65,10 @@ src/components/widgets/
 2. Create `src/app/(tutorial)/{slug}/` with `page.tsx`, `content.mdx`, `widgets.tsx`
 3. Create widgets in `src/components/widgets/{topic}/`
 4. Follow the `01-computation` chapter as a template
+
+## MDX Gotchas
+
+- **Never use raw `<p>` tags in MDX files.** MDX wraps paragraph text in its own `<p>`, so a raw `<p>text</p>` becomes `<p><p>text</p></p>` — invalid HTML that causes React hydration errors. Use `<Lead>` for intro paragraphs or `<div>` if you need a block wrapper. The `pnpm lint` command includes a check for this (`scripts/lint-mdx-no-raw-p.sh`).
 
 ## Key Conventions
 
