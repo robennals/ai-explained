@@ -56,24 +56,20 @@ Let's feel this in action:
 Start in "Blind" mode and try to find the hidden target. All you learn from each guess is "not here" — a little ✗ appears and you have zero idea whether you're getting closer. After a dozen guesses, hit "Reveal target" and see how hopeless it was. Then switch to "With signal." Now each dot's size and color tells you how close you are, and you're constrained to small steps near your last guess. Watch how quickly you zero in. Same problem, but the incremental signal makes all the difference.
 </TryIt>
 
-## What Makes Optimization Easy or Hard?
+## Smooth Functions Can Be Optimized
 
-Incremental optimization is powerful, but it doesn't always work. The key property that makes it work is **smoothness**.
+Incremental optimization is powerful, but it only works when the function you're optimizing is **smooth** — meaning small changes produce small, predictable effects.
 
-When the landscape is **smooth**, small changes produce small, predictable effects. If you take a step and things get a little better, another step in the same direction will probably help too. You can follow the signal.
-
-When the landscape is **rugged**, small changes produce unpredictable effects. A tiny step might help a lot, hurt a lot, or do nothing — seemingly at random. The signal is noise.
-
-Think of it as the difference between **walking downhill in fog** (smooth — you can feel the slope and follow it) versus **navigating a room full of invisible potholes** (rugged — you can't trust the local terrain to guide you anywhere useful).
+Think about dropping a ball on a smooth curve versus a staircase. On the curve, the ball can always feel which way is downhill and roll toward the bottom. On the staircase, each step is flat — there's no slope to follow, so the ball just sits wherever it lands. The function has a lowest point, but there's no local signal pointing toward it.
 
 <SmoothVsRuggedWidget />
 
 <TryIt>
-Hit "Drop ball" on each landscape. The ball starts at a random position — just like real neural networks start with random parameter values — and gradient descent takes over, stepping downhill. On the smooth landscape, it slides cleanly to the bottom every time. On the rugged landscape, it gets stuck in a local dip — a **local minimum** — trapped by tiny bumps even though the real bottom is somewhere else. Try dropping several balls on the rugged side and watch them converge to different dead ends depending on where they started.
+Click anywhere above the landscape to drop a ball. On the smooth curve, it rolls downhill to the bottom every time — gradient descent works because there's always a slope to follow. On the step function, the ball just sits wherever it lands. Each step is flat, so there's no gradient — no local information about which direction leads to the lowest point.
 </TryIt>
 
 <KeyInsight>
-**Smoothness is what makes optimization possible.** A smooth landscape lets you follow the gradient downhill. A rugged landscape traps you in local minima. The success of incremental optimization depends almost entirely on whether the landscape is smooth.
+**Smoothness is what makes optimization possible.** A smooth function gives you a signal at every point — which way is downhill. A non-smooth function (like a step function or a text string) gives you no local signal to follow.
 </KeyInsight>
 
 ## Not All Representations Are Equal
