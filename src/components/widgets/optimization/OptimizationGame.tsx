@@ -33,20 +33,19 @@ function closeness(distance: number): number {
   return Math.max(0, 1 - distance / (MAX_DIST * 0.5));
 }
 
-// Color for signal mode: gray (far) → orange → red (close)
+// Color for signal mode: blue (far) → full spectrum → red (close)
 function signalColor(t: number): string {
-  if (t < 0.5) {
-    const s = t / 0.5;
-    const r = Math.round(160 + s * 95);
-    const g = Math.round(170 - s * 50);
-    const b = Math.round(180 - s * 140);
-    return `rgb(${r},${g},${b})`;
-  }
-  const s = (t - 0.5) / 0.5;
-  const r = 255;
-  const g = Math.round(120 - s * 80);
-  const b = Math.round(40 - s * 30);
-  return `rgb(${r},${g},${b})`;
+  // HSL hue: 240 (blue) → 0 (red) as t goes 0 → 1
+  const hue = 240 * (1 - t);
+  const saturation = 80 + t * 20; // 80% → 100%
+  const lightness = 55 - t * 10;  // 55% → 45% (brighter blues, deeper reds)
+  return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+}
+
+// Pulse duration: slow when far, fast when close
+function pulseDuration(t: number): string {
+  const dur = 2.5 - t * 2.2; // 2.5s (far) → 0.3s (close)
+  return `${dur.toFixed(2)}s`;
 }
 
 // Dot radius for signal mode: small when far, larger when close
@@ -179,6 +178,22 @@ export function OptimizationGame() {
         )}
       </div>
 
+      {/* Color spectrum legend — signal mode only */}
+      {!isBlind && (
+        <div className="mb-3 flex items-center gap-2">
+          <span className="text-[10px] font-medium text-muted whitespace-nowrap">Far</span>
+          <div
+            className="h-3 flex-1 rounded-full"
+            style={{
+              background: `linear-gradient(to right, ${
+                Array.from({ length: 11 }, (_, i) => signalColor(i / 10)).join(", ")
+              })`,
+            }}
+          />
+          <span className="text-[10px] font-medium text-muted whitespace-nowrap">Close</span>
+        </div>
+      )}
+
       {/* SVG canvas */}
       <svg
         ref={svgRef}
@@ -188,10 +203,17 @@ export function OptimizationGame() {
         onClick={handleClick}
       >
         <defs>
-          <radialGradient id="pulse-glow">
-            <stop offset="0%" stopColor="rgb(239,68,68)" stopOpacity="0.4" />
-            <stop offset="100%" stopColor="rgb(239,68,68)" stopOpacity="0" />
-          </radialGradient>
+          {/* Dynamic glow gradients for each guess */}
+          {!isBlind && guesses.map((g, i) => {
+            const t = closeness(g.distance);
+            const color = signalColor(t);
+            return (
+              <radialGradient key={`glow-${i}`} id={`pulse-glow-${i}`}>
+                <stop offset="0%" stopColor={color} stopOpacity="0.5" />
+                <stop offset="100%" stopColor={color} stopOpacity="0" />
+              </radialGradient>
+            );
+          })}
         </defs>
 
         {/* Constraint radius circle in signal mode */}
@@ -262,35 +284,38 @@ export function OptimizationGame() {
             );
           }
 
-          // Signal mode: sized and colored dots
+          // Signal mode: sized and colored dots with pulsing
           const r = signalRadius(t, isLatest);
           const color = signalColor(t);
+          const dur = pulseDuration(t);
+          const pulseScale = 1 + t * 0.4; // pulse amplitude grows with closeness
 
           return (
             <g key={i}>
-              {/* Pulsing glow when close */}
-              {isLatest && t > 0.7 && !found && (
+              {/* Pulsing glow — all dots pulse, faster when closer */}
+              {!found && (
                 <circle
                   cx={g.x}
                   cy={g.y}
-                  r={r + 8}
-                  fill="url(#pulse-glow)"
-                  opacity={0.6}
+                  r={r + 6}
+                  fill={`url(#pulse-glow-${i})`}
+                  opacity={0.5}
                 >
                   <animate
                     attributeName="r"
-                    values={`${r + 4};${r + 14};${r + 4}`}
-                    dur="1s"
+                    values={`${r + 2};${r + 6 + t * 12};${r + 2}`}
+                    dur={dur}
                     repeatCount="indefinite"
                   />
                   <animate
                     attributeName="opacity"
-                    values="0.6;0.2;0.6"
-                    dur="1s"
+                    values={`${0.3 + t * 0.3};${0.1};${0.3 + t * 0.3}`}
+                    dur={dur}
                     repeatCount="indefinite"
                   />
                 </circle>
               )}
+              {/* Main dot — also pulses */}
               <circle
                 cx={g.x}
                 cy={g.y}
@@ -299,7 +324,16 @@ export function OptimizationGame() {
                 stroke="white"
                 strokeWidth={isLatest ? 2 : 1}
                 opacity={isLatest ? 1 : 0.7}
-              />
+              >
+                {!found && (
+                  <animate
+                    attributeName="r"
+                    values={`${r};${r * pulseScale};${r}`}
+                    dur={dur}
+                    repeatCount="indefinite"
+                  />
+                )}
+              </circle>
             </g>
           );
         })}
@@ -357,7 +391,7 @@ export function OptimizationGame() {
       )}
       {!isBlind && guesses.length === 0 && (
         <p className="mb-3 text-xs text-muted">
-          Each guess shows how close you are — bigger, redder dots mean you&apos;re getting warm. Steps are constrained near your last guess.
+          Each guess shows how close you are — dots shift from blue to red and pulse faster as you get warmer. Steps are constrained near your last guess.
         </p>
       )}
 
