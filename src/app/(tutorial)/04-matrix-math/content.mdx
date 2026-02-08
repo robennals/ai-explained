@@ -1,0 +1,152 @@
+# Matrix Math and Linear Transformations
+
+<Lead>
+Every layer in a neural network takes numbers in, multiplies and adds, and puts numbers out. That operation has a name — matrix multiplication — and a beautiful geometric meaning. Each layer is a transformation of space itself.
+</Lead>
+
+## Starting Simple: One Dimension
+
+Before we tackle the full complexity of matrices, let's start with the simplest possible case: one dimension.
+
+In one dimension, a "matrix" is just a single number. You multiply every input by that number. Multiply by 2, and everything stretches away from zero. Multiply by 0.5, and everything contracts toward zero. Multiply by &minus;1, and everything flips to the other side.
+
+<Transform1DWidget />
+
+<TryIt>
+Drag the slider to different values. What happens when you multiply by 0? By &minus;1? By a number between 0 and 1? Notice that zero itself never moves, no matter what you multiply by — it's a **fixed point** of every linear transformation.
+</TryIt>
+
+Here's a simple but important idea: in 1D, the number "1" is a **basis vector** — a building block. Every other number is just some multiple of 1. When you multiply by 2, you're saying "take the basis vector 1, and stretch it to 2." That single number tells you where the basis vector lands after the transformation, and *everything else follows automatically*.
+
+In 1D, there's not much a "matrix" can do: stretch, shrink, flip, or collapse to a point. One number, one effect. Let's add a dimension.
+
+## Two Dimensions: Where It Gets Interesting
+
+In 1D we had one basis vector. In 2D we have **two**: one pointing right along the x-axis, and one pointing up along the y-axis. Every point in 2D is some combination of "go right" and "go up" — it's built from those two building blocks.
+
+A 2&times;2 matrix tells you where each basis vector lands. That takes **four numbers**, arranged in a grid:
+
+<div className="my-6 flex justify-center">
+<div className="inline-block rounded-lg border border-border bg-surface px-6 py-3 font-mono text-lg">
+<div className="flex items-center gap-1"><span className="text-xl text-muted">[</span> <span className="w-8 text-center">a</span> <span className="w-8 text-center">b</span> <span className="text-xl text-muted">]</span></div>
+<div className="flex items-center gap-1"><span className="text-xl text-muted">[</span> <span className="w-8 text-center">c</span> <span className="w-8 text-center">d</span> <span className="text-xl text-muted">]</span></div>
+</div>
+</div>
+
+The first column is &ecirc;&sub1; — it tells you where the x-axis basis vector ends up. The second column is &ecirc;&sub2; — it tells you where the y-axis basis vector ends up. Everything else — every single point in the entire plane — just follows along.
+
+Four numbers. That's it. But watch what they can do:
+
+<Transform2DWidget />
+
+<TryIt>
+Switch to the **Cat** and try the presets. Hit **Rotate 90&deg;** — the cat spins a quarter turn. **Shear** — the cat leans over like it's dodging something. **Reflect** — mirror-image cat! **Collapse** — the cat gets squished into a line (poor cat). Now switch to the **Mona Lisa** and try **Rotate 45&deg;** — can you tell she's tilted? Try making your own transformation: can you make the Mona Lisa twice as wide but the same height? (Hint: in the red box, drag the x slider to 2 — you're telling the x-axis basis vector to stretch to twice its length.)
+</TryIt>
+
+Watch the red and green arrows in the widget — those are the basis vectors. The red arrow (&ecirc;&sub1;) shows where (1, 0) ends up after the transformation. The green arrow (&ecirc;&sub2;) shows where (0, 1) ends up. This is exactly what we saw in 1D: the transformation is completely determined by where the basis vectors land. In 1D we had one basis vector and one number. In 2D we have two basis vectors and four numbers.
+
+<KeyInsight>
+A 2&times;2 matrix is completely defined by four numbers. Those four numbers control every possible 2D linear transformation: rotation, scaling, shearing, reflection, and collapse. The first column tells you where the x-axis basis vector goes. The second tells you where the y-axis basis vector goes. Everything else follows.
+</KeyInsight>
+
+### The Determinant: Area In, Area Out
+
+Notice the **det** value in the widget. The **determinant** tells you how the matrix changes areas:
+
+- **det = 1**: areas preserved (pure rotation)
+- **det = 2**: areas doubled (scaling up)
+- **det = 0**: everything collapses to a line or point — a dimension is destroyed
+- **det &lt; 0**: areas preserved but orientation flipped (reflection)
+
+When the determinant is zero, the matrix is **singular**. It crushes 2D space down to 1D or 0D. Information is destroyed — you can't undo it. Try the "Collapse" preset and watch a whole axis disappear.
+
+## Why Matrices? Why Not Just Say "Rotate and Scale"?
+
+If every 2D matrix is "just" some combination of rotation, scaling, and shearing... why bother with matrices at all? Why not just say "rotate 30&deg;, scale 2&times;, shear by 0.3"? That seems more intuitive.
+
+Three reasons make matrices the right choice:
+
+**1. Matrices compose by multiplication.** Want to apply transformation A, then transformation B? Just multiply: **C = BA**. The result is another matrix of the same shape — one operation, clean and simple. With rotation-scale-shear, composing two transforms requires messy trigonometric formulas that don't simplify.
+
+**2. Learning is simpler.** Neural networks need to *learn* what transformation to apply. With a matrix, the network adjusts four independent numbers. With rotation-scale-shear, the parameters interact nonlinearly — a tiny change in rotation angle can cause a big swing in the result. Independent parameters are much easier to optimize with gradient descent.
+
+**3. Matrices are more general.** A matrix can collapse entire dimensions (det = 0), project space onto a line, or do things that don't decompose neatly into rotation-scale-shear at all. Neural networks need that full generality.
+
+<Callout type="tip" title="Same math, different field">
+This exact same matrix math powers 3D graphics in video games. GPUs — the chips designed to rotate, scale, and shade triangles in games — turned out to be exactly what neural networks needed. This isn't a coincidence. Both fields need to do massive numbers of matrix multiplications very fast.
+</Callout>
+
+## Three Dimensions
+
+The pattern continues. In 3D we have **three basis vectors** — one for each axis (X, Y, Z). A 3&times;3 matrix tells you where each of those three basis vectors lands. That takes **nine numbers** — three columns of three.
+
+The same principle applies: once you know where the three basis vectors go, every other point in 3D space follows automatically. Nine numbers, and you can rotate objects around any axis, scale along any direction, shear, reflect, or project.
+
+<Transform3DWidget />
+
+<TryIt>
+Try different models — the **Sphere** makes stretching and squishing super obvious, and the **House** makes rotation easy to see. Each colored box below the matrix controls one basis vector: the red box sets where the X-axis lands, the green box sets where the Y-axis lands, and the blue box sets where the Z-axis lands. Try the presets: **Rot X 45&deg;** tilts the object forward, **Flatten Y** crushes it flat like a pancake, and **Shear XY** makes it lean sideways. Can you combine changes to make the house spin AND stretch? (Hint: start from a rotation preset, then drag the sliders to make each basis vector longer.)
+</TryIt>
+
+The jump from 2D to 3D adds five more parameters (4 &rarr; 9). But the conceptual jump is small — it's still "each column tells you where one basis vector goes."
+
+## What Happens in Higher Dimensions?
+
+Here's where things get mind-bending. The pattern continues:
+
+| Dimension | Matrix size | Entries | Rotation planes |
+|-----------|-------------|---------|-----------------|
+| 2D | 2&times;2 | 4 | 1 angle |
+| 3D | 3&times;3 | 9 | 3 angles |
+| 4D | 4&times;4 | 16 | 6 angles |
+| 100D | 100&times;100 | 10,000 | 4,950 angles |
+| 768D | 768&times;768 | 589,824 | 294,528 angles |
+
+The number of rotation parameters grows as **n(n&minus;1)/2**. In 2D, there's one rotation plane. In 3D, there are three (XY, XZ, YZ — which is equivalent to rotating "around" the Z, Y, and X axes). In 4D, there are **six** independent rotation planes.
+
+What does rotation in 4D look like? We can't see four dimensions directly, but we can project. Below is a **tesseract** — the 4D equivalent of a cube — projected down to your screen. It looks like a cube inside a cube, connected at the corners.
+
+<HigherDimensionsWidget />
+
+<TryIt>
+Click the rotation plane buttons and watch. **XY**, **XZ**, and **YZ** look like ordinary 3D rotations — familiar. Now try **XW**, **YW**, or **ZW**. Something *weird* happens: the inner and outer cubes appear to swap places, like one is turning inside-out! That's what "rotating into the fourth dimension" looks like — the part of the shape that was "close" in the W direction moves "far," and vice versa. It's like a cube breathing.
+</TryIt>
+
+<KeyInsight>
+Neural networks typically work in hundreds or thousands of dimensions. A single layer in a typical language model transforms a 768-dimensional space — that's a matrix with over half a million entries. The math is the same as our 2D examples. Just... bigger.
+</KeyInsight>
+
+## The Neural Network Connection
+
+Here's the punchline of this chapter. Look at a single layer in a neural network: a set of input neurons connected to a set of output neurons by weighted connections.
+
+Each output neuron computes a **weighted sum** of all the inputs. Input &times; weight, added up. That's exactly what matrix multiplication does. The weights connecting one layer to the next **are** a matrix.
+
+<NeuronVsMatrixWidget />
+
+<TryIt>
+Adjust the weight sliders and watch both views update at the same time. The neuron diagram on the left and the geometric view on the right are showing the **exact same math** — just drawn differently! Try **Rotate 90&deg;** — the neuron weights become [0, &minus;1, 1, 0] and the colored dots spin a quarter turn. Try **Collapse to line** — one output neuron goes dead and the dots all squish onto a single line. Can you find weights that flip the L-shape of dots upside down? (Hint: try making w&#x2082;&#x2082; negative.)
+</TryIt>
+
+This dual interpretation is profound:
+
+- In the **neuron view**, we think: *"Each output computes a weighted sum of inputs."*
+- In the **matrix view**, we think: *"The layer rotates and stretches the input space."*
+
+Both are true simultaneously. They're just two ways of seeing the same math.
+
+<KeyInsight>
+A neural network layer and a matrix transformation are the same thing, drawn differently. When we train a neural network, we're learning the right matrix at each layer — the right geometric transformation to apply to the data.
+</KeyInsight>
+
+## Training Is Geometry
+
+When you train a neural network, you're searching for the right sequence of geometric transformations. Each layer rotates, stretches, and (with activation functions) bends the input space, gradually reshaping it until the data is arranged in a way that makes the answer obvious.
+
+Imagine data points from two classes tangled together in a spiral. No single straight line can separate them. But a matrix transformation can stretch and rotate the spiral, and an activation function can fold it. Stack enough of these transform-and-fold operations, and you can untangle any pattern into neatly separated clusters.
+
+That's what training discovers: the right sequence of rotations, stretches, and folds to make the problem simple.
+
+## What's Next
+
+We've seen that every neural network layer is a matrix transformation — a geometric reshaping of space. But how does the network actually *find* the right matrices? In the next chapter, we'll see how gradient descent rolls downhill through a landscape with millions of dimensions, automatically discovering the transformations that untangle data.
