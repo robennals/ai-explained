@@ -4,271 +4,254 @@
 
 Every chapter should have at least one "wait, what?" moment — something counterintuitive, a surprising connection to an unrelated domain, or an approach that *seems* like it should work but spectacularly doesn't. The goal is not to march through concepts linearly, but to make readers feel the *shape* of the problem space.
 
+The target audience is smart middle schoolers. Every chapter must connect to their lived experience — their phone, their games, ChatGPT, DALL-E, YouTube recommendations. Technical concepts (activation functions, loss functions, regularization, matrix math) are covered *within* exciting narrative chapters, not as standalone topics. No chapter should feel like a textbook section they have to get through before the fun stuff.
+
 ## Widget Philosophy
 
 Widgets are not demonstrations — they are playgrounds. The reader should be tinkering, experimenting, trying to break things. Every widget should have a "try this" prompt that leads to a surprise. Many widgets should be challenge-style. The fun is in the attempt and the discovery.
 
 ---
 
-## Chapter 1: What Is Computation?
+## Chapter 1: Everything Is Numbers
 
 - **Prerequisites**: None
 - **Status**: ✅ Implemented
 
-**Core idea**: Can you compute with just addition and multiplication? Discover you can't — you need gating/thresholds. Fuzzy logic (AND=min, OR=max, NOT=1-x) bridges boolean and continuous computation. NAND universality shows one brick builds everything.
+**Core idea**: Text, images, and sound are all just numbers. Thinking is a function. AI models are machines with knobs. The challenge: find the right settings among billions of possibilities.
 
 **Widgets**:
-1. **ArithmeticVsBooleanDemo** — Challenge: build AND using only + and ×. Fail. Add threshold → succeed.
-2. **FuzzyLogicPlayground** — Continuous inputs (0.0–1.0), fuzzy AND/OR/NOT/NAND. Challenges for discovering behavior.
-3. **LogicGateBuilder** — Wire NAND gates to build AND, OR, XOR. Feel complexity explosion.
+1. **TextAsNumbers** — See how text, images, and audio become arrays of numbers.
+2. **FunctionMachine** — A function with sliders for parameters. Try to match a target by hand.
+3. **KnobExplosion** — How the search space explodes as you add parameters. Feel the impossibility.
 
 ---
 
-## Chapter 2: Neurons and Perceptrons
+## Chapter 2: The Power of Incremental Improvement
 
 - **Prerequisites**: Ch 1
-- **Status**: 🔲 Planned
+- **Status**: ✅ Implemented
 
-**Core idea**: A neuron is a fuzzy logic gate that learned its own truth table. Change weights → same neuron becomes AND, OR, NOT. The XOR challenge: try every weight/bias combination on a single neuron. You can't solve XOR — the decision boundary is a single line.
-
-**Surprise**: The perceptron is the same thing as a linear classifier in statistics and a support vector with no kernel. Three fields independently discovered the same math.
+**Core idea**: Evolution, A/B testing, and gradient descent are all the same algorithm. The secret to building complex things: small changes, tested against reality, kept or discarded. You don't need to be brilliant — just relentlessly slightly better.
 
 **Widgets**:
-1. **FuzzyToNeuron** — Morph fuzzy AND into a neuron by replacing min() with weighted sum + threshold.
-2. **NeuronChallengePlayground** — Single neuron with draggable weights/bias/activation. Challenge board: AND ✓, OR ✓, NOT ✓, XOR ✗.
-3. **PerceptronPlayground** — Draw 2D points, watch perceptron learn. Draw XOR-like data → fails.
+1. **EvolutionPlayground** — Evolve creatures toward a target. Watch random mutations + selection produce design.
+2. **GradientDescentHills** — Roll a ball downhill on a loss landscape. Adjust learning rate.
+3. **SmoothVsJagged** — Why smooth functions are learnable and jagged ones aren't.
 
 ---
 
-## Chapter 3: Activation Functions
+## Chapter 3: Building a Brain
 
 - **Prerequisites**: Ch 2
 - **Status**: 🔲 Planned
 
-**Core idea**: Stack neurons without activation functions → no better than single layer (proof: multiplying matrices gives a matrix). Sigmoid vanishing gradient. ReLU dead neurons. Swish's non-monotonic dip rescues dead neurons.
+**Core idea**: A single neuron is just a weighted vote. Change the weights → same neuron becomes AND, OR, NOT. But one neuron can't solve XOR (try it!). Stack neurons into layers → suddenly you can learn anything. Deeper networks need fewer neurons (exponential efficiency of depth). But without activation functions, stacking is useless — three layers collapse to one.
 
-**Surprise**: Sigmoid = logistic curve in population biology = Fermi-Dirac distribution in physics.
+**Surprise**: Early layers automatically learn edges, middle layers learn shapes, deep layers learn objects. Nobody told the network to do this — hierarchy emerges from the math.
+
+**Technical concepts woven in**: Perceptrons, activation functions (sigmoid → ReLU → Swish), universal approximation, depth vs width tradeoff.
 
 **Widgets**:
-1. **LinearStackingDemo** — Deep network with no activations collapses to single layer.
-2. **ActivationFunctionExplorer** — Plot activation + derivative, stack N layers, watch gradient magnitude.
-3. **DeadNeuronGraveyard** — Train ReLU network, watch neurons die. Switch to Swish, watch them resurrect.
+1. **NeuronChallengePlayground** — Single neuron with draggable weights/bias. Challenge board: AND ✓, OR ✓, NOT ✓, XOR ✗. Feel the limitation.
+2. **ActivationMatters** — Toggle activation functions on/off in a deep network. Off: collapses to single line. On: can learn curves and spirals. Try different activations and see dead neurons, vanishing gradients.
+3. **DepthVsWidth** — Approximate a target function: 1 wide layer (500 neurons) vs 3 narrow layers (20 neurons). See depth win dramatically.
+4. **WhatLayersLearn** — Train image classifier, visualize what each layer detects. Watch edges → shapes → objects emerge.
 
 ---
 
-## Chapter 4: Layers and Networks
+## Chapter 4: Learning from Mistakes
 
-- **Prerequisites**: Ch 2, 3
+- **Prerequisites**: Ch 3
 - **Status**: 🔲 Planned
 
-**Core idea**: One hidden layer approximates any function (universal approximation), but needs 500 neurons. Three layers need only 20. Depth is exponentially more efficient.
+**Core idea**: Training is the network watching itself fail and adjusting. The loss function defines what "wrong" means — change the loss and you change what the model learns. Gradient descent finds the direction of steepest improvement. But if you train *too* well on your examples, the model memorizes instead of learning (like memorizing answers vs understanding math).
 
-**Surprise**: Early layers learn edges, then shapes, then objects — hierarchy emerges automatically.
+**Surprise**: "Local minima" fear is mostly wrong — in high dimensions, what looks like a valley is usually a saddle point. Rotate the view and there's always a way down.
+
+**Technical concepts woven in**: Loss functions (MSE, cross-entropy), gradient descent, backpropagation, learning rate, overfitting, regularization (L2, dropout), train vs test split.
 
 **Widgets**:
-1. **UniversalApproximationDemo** — Approximate target functions: 1 wide layer vs 3 narrow layers.
-2. **ForwardPassAnimation** — Step-by-step data flow through network, try adversarial inputs.
-3. **WhatLayersLearn** — Train image classifier, visualize what maximally activates each neuron.
+1. **LossFunctionComparison** — Drag a prediction slider, see different loss functions react. MSE is gentle, cross-entropy is harsh near wrong answers.
+2. **GradientDescentVisualizer** — 2D loss contour, place ball, adjust learning rate/momentum. Too high → bouncing. Too low → glacial.
+3. **OverfittingDemo** — Fit a curve to noisy data. Drag complexity slider. Watch: perfect training fit = terrible test performance. Add dropout → model gets *better* by being handicapped.
+4. **SaddlePointIllusion** — A surface that looks like a trapped minimum from one angle. Rotate to reveal it's a saddle point with an escape route.
 
 ---
 
-## Chapter 5: Matrix Math and Linear Transformations
+## Chapter 5: The Geometry of Meaning
 
 - **Prerequisites**: Ch 4
 - **Status**: 🔲 Planned
 
-**Core idea**: Every layer is literally a geometric transformation (rotation, scaling, shearing). Training = learning which transformation to apply. Visualize tangled data becoming linearly separable through matrix transforms.
+**Core idea**: How do you turn words into numbers that capture meaning? One-hot encoding is terrible (cat is equidistant from dog and democracy). Embeddings learn to place similar things close together. "king − man + woman = queen" actually works. This is how AI "understands" language — not through definitions, but through the geometry of relationships.
 
-**Surprise**: Same matrix math runs 3D graphics. GPU hardware for games turned out to be exactly what neural networks needed.
+**Surprise**: The dimensions of an embedding space are rotatable. There's no single "correct" set of features — you can rotate the axes to reveal gender, formality, concreteness, or axes no human has names for.
 
 **Widgets**:
-1. **MatrixTransform2D** — Drag handles to rotate/scale/shear 2D grid. Discover singular matrices, identity.
-2. **MatrixTransform3D** — Three.js scene, rotate/scale/shear 3D objects. Eigenvectors as colored axes.
-3. **UntanglingDemo** — Apply matrix + activation to untangle XOR/spiral data by hand.
+1. **OneHotVsEmbedding** — Compare one-hot distances (everything equidistant) to learned embedding distances (meaningful clusters).
+2. **WordEmbeddingExplorer** — ~1000 words projected to 2D. Search, zoom, discover clusters. Try analogies: king − man + woman = ?
+3. **DimensionRotator** — View embeddings along different interpretable axes. Define custom axes via word pairs (e.g., man→woman, small→large).
 
 ---
 
-## Chapter 6: Training, Gradient Descent, Backpropagation
+## Chapter 6: Attention and Transformers
 
-- **Prerequisites**: Ch 3, 4, 5
+- **Prerequisites**: Ch 5
 - **Status**: 🔲 Planned
 
-**Core idea**: Gradient descent = rolling downhill. High dimensions have saddle points, not local minima. Learning rate too high → bouncing, too low → glacial. Flat minima generalize better than sharp ones.
+**Core idea**: Before transformers, models read sentences like a telephone game — by the end, early words were forgotten. Attention lets every word look directly at every other word. But without position encoding, "dog bites man" and "man bites dog" look identical. Q/K/V decoupling lets words ask different questions than they answer.
 
-**Surprise**: "Local minima" fear is mostly wrong — saddle points are everywhere in high dimensions.
+**Surprise**: Attention is permutation invariant — word order is a bolt-on, not built-in. The model has to *learn* that order matters.
+
+**Technical concepts woven in**: Brief RNN/vanishing gradient motivation, self-attention, Q/K/V, position encoding, multi-head attention.
 
 **Widgets**:
-1. **GradientDescentVisualizer** — 2D loss contour, place ball, adjust learning rate/momentum/Adam.
-2. **SaddlePointIllusion** — Surface that looks like local minimum from one angle, rotate to reveal saddle point.
-3. **SpikyVsSmoothMinima** — Two minima, same loss. Add noise → sharp one explodes, flat one survives.
+1. **TelephoneGame** — Type a long sentence. Color each word by how much influence it has on the final output. Watch early words fade to nothing (RNN) vs stay vivid (Transformer).
+2. **PositionEncodingDemo** — Scramble word order. Without positions: identical attention. With positions: completely different.
+3. **SelfAttentionPlayground** — Live attention maps. See how "it" attends to different words depending on context. Q/K toggle: force Q=K → attention becomes symmetric (wrong!). Separate Q/K → directional (right!).
 
 ---
 
-## Chapter 7: Loss Functions
+## Chapter 7: How LLMs Learn to Talk
 
 - **Prerequisites**: Ch 6
 - **Status**: 🔲 Planned
 
-**Core idea**: Loss function is the most important design choice. MSE on classification → mushy boundaries. Cross-entropy → sharp boundaries. The loss tells the model what "wrong" means.
+**Core idea**: An LLM learns about the world by playing a game: predict the next word. This seems too simple to produce intelligence, but to predict well, you need to understand grammar, facts, reasoning, humor, even emotions. Tokenization shapes what the model can see — "indescribable" → ["in", "des", "crib", "able"]. Numbers tokenize inconsistently, which is why LLMs are bad at arithmetic.
 
-**Surprise**: Cross-entropy = KL divergence = maximizing likelihood = minimizing surprise. Lower loss = fewer bits to encode data.
+**Surprise**: The model has never been told what a verb is, what gravity does, or how to tell a joke. It figured all of this out from patterns in text.
+
+**Technical concepts woven in**: Tokenization (BPE), next-token prediction, temperature/sampling, probability distributions over vocabulary.
 
 **Widgets**:
-1. **LossFunctionComparison** — Drag prediction slider, see MSE/cross-entropy/Huber values AND gradients.
-2. **LossShapesModel** — Train identical networks with MSE vs cross-entropy, visualize decision boundaries.
-3. **CompressionConnection** — Model's cross-entropy loss = compression ratio.
+1. **TokenizerPlayground** — Type anything, see tokens colored in real time. Try math ("123456" vs "one hundred"), compare languages, find weird splits.
+2. **NextTokenPrediction** — Type a sentence, see probability distribution over next words. Adjust temperature: low = boring and predictable, high = creative chaos.
+3. **PredictionRequiresUnderstanding** — Curated examples where predicting the next word requires world knowledge, grammar, reasoning, or social awareness.
 
 ---
 
-## Chapter 8: Regularization and Generalization
+## Chapter 8: Transfer Learning
 
-- **Prerequisites**: Ch 6, 7
+- **Prerequisites**: Ch 7
 - **Status**: 🔲 Planned
 
-**Core idea**: Perfect training fit is terrible for generalization. Deliberately handicapping the model (L2, dropout) makes it better. This is Occam's Razor, mathematically.
+**Core idea**: A model trained on millions of books has learned a staggering amount about language, facts, and reasoning — even though it was "just" predicting next words. This knowledge *transfers*: show it 5 examples of a new task and it can do it. Fine-tuning adjusts this general knowledge for specific jobs with minimal data. This is why one model can write poetry, debug code, and diagnose diseases.
+
+**Analogy**: Pre-training is like getting a general education. Fine-tuning is like specializing in medical school. You don't start from scratch — you build on everything you already know.
+
+**Surprise**: A model fine-tuned on just 1,000 medical Q&As outperforms a model trained from scratch on 100,000. The general knowledge does most of the heavy lifting.
 
 **Widgets**:
-1. **OverfittingDemo** — Fit polynomial to noisy data, drag complexity slider. Watch the U-turn in test loss.
-2. **RegularizationVisualizer** — Toggle L1/L2/dropout, see weights shrink, fit smooth out.
-3. **DropoutAnimation** — Watch neurons randomly vanish during training. Knowledge distributes.
+1. **FewShotMagic** — Pre-trained model learns new task from 3 examples. Random model with same examples: nothing. Feel the power of prior knowledge.
+2. **PretrainedVsRandom** — Side-by-side: embedding structure from pre-trained vs random model. Fine-tuning barely changes the structure — it's already organized.
+3. **FineTuningPlayground** — Take a pre-trained model, fine-tune on tiny dataset for sentiment/topic/style. Watch how fast it adapts vs training from scratch.
 
 ---
 
-## Chapter 9: Embeddings and Vector Spaces
+## Chapter 9: Distillation — Big Teaches Small
 
-- **Prerequisites**: Ch 5, 6
+- **Prerequisites**: Ch 8
 - **Status**: 🔲 Planned
 
-**Core idea**: Embedding = 20 Questions with continuous answers. Network learns its own questions. "king - man + woman = queen" is real. One-hot encoding is terrible (cat equidistant from dog and democracy).
+**Core idea**: A huge model knows a lot — but it's too big and slow for your phone. Solution: train a tiny model to mimic the big one's behavior. The small model learns from the big model's *soft predictions* (not just right/wrong, but the full probability distribution). A cat picture that's "90% cat, 8% tiger, 2% dog" teaches more than just "cat."
 
-**Surprise**: Embedding dimensions are rotatable axes of meaning. No single "right" set of features.
+**Analogy**: Learning from a great teacher vs learning from a textbook. The teacher gives you intuition, not just answers. That intuition is "dark knowledge."
+
+**Surprise**: A distilled model can sometimes outperform a model of the same size trained normally — because the teacher's soft labels carry more information than the raw data.
 
 **Widgets**:
-1. **TwentyQuestionsAnalogy** — Play literal 20 Questions → make answers continuous → network learns its own questions.
-2. **WordEmbeddingExplorer** — ~1000 words projected to 2D. Search, zoom, try analogies.
-3. **DimensionRotator** — View embeddings along different interpretable axes. Define custom axes via word pairs.
+1. **HardVsSoftLabels** — Compare learning from "cat" vs learning from "90% cat, 8% tiger, 2% dog." See how soft labels reveal structure between categories.
+2. **DistillationDemo** — Big teacher model classifies images. Small student tries to match. Compare student trained on hard labels vs soft labels from teacher.
+3. **PhoneVsCloud** — Size/speed/accuracy tradeoff visualizer. Drag the "acceptable accuracy" bar and see how small you can go with distillation vs without.
 
 ---
 
-## Chapter 10: Recurrent Architectures (Historical)
+## Chapter 10: Mixture of Experts
 
-- **Prerequisites**: Ch 4, 9
+- **Prerequisites**: Ch 6
 - **Status**: 🔲 Planned
 
-**Core idea**: RNNs have beautiful idea (persistent memory) but fatal flaw: can't remember beyond ~20 steps. Early words' influence fades to literally zero. This is the telephone game problem.
+**Core idea**: Your brain doesn't activate every neuron for every thought. Mixture of Experts works the same way: a router sends each input to the best-suited specialists. A model with 1 trillion parameters might only use 100 billion per question. This is how models keep getting smarter without getting proportionally slower.
+
+**Analogy**: A hospital with specialist doctors. You don't see every doctor for every problem — a triage nurse routes you to the right expert. The hospital has vast total knowledge, but each patient only consumes a fraction.
+
+**Surprise**: The router learns to specialize the experts *without being told what specialties to create*. Math questions automatically go to "math neurons," language questions to "language neurons."
 
 **Widgets**:
-1. **RNNMemoryDecay** — Type sentence, color words by influence on final hidden state. Watch early words fade.
-2. **VanishingGradientRNN** — Gradient magnitude flowing backward through 50 time steps. Hits zero after ~15.
-3. **WhyNotJustLookBack** — Show RNN bottleneck vs attention idea (direct connections to any previous token).
+1. **RouterVisualizer** — Type different inputs and watch which experts light up. Math activates different experts than poetry. Try to find inputs that activate the same experts.
+2. **DenseVsSparse** — Compare: dense model (all parameters active) vs MoE (same total parameters, 10% active). Same quality, fraction of the compute.
+3. **ExpertSpecialization** — What did each expert learn? Feed different types of inputs and see which expert "claims" each type. The specialization emerges without supervision.
 
 ---
 
-## Chapter 11: Attention and Transformers
+## Chapter 11: Thinking Step by Step
 
-- **Prerequisites**: Ch 5, 9, 10
+- **Prerequisites**: Ch 7
 - **Status**: 🔲 Planned
 
-**Core idea**: Without position encoding, model sees no difference between "dog bites man" and "man bites dog." Q/K/V decoupling enables asymmetric relationships. Attention is a soft database lookup.
+**Core idea**: Standard LLMs blurt out answers in one shot — one forward pass per token, with no "scratch paper." For hard problems, this fails. Chain-of-thought lets models show their work, using their own output as working memory. Thinking models (like o1 and Claude) take this further: they're trained to *reason* through problems before answering, sometimes spending minutes thinking.
 
-**Surprise**: Attention is permutation invariant — positions are bolt-on, not built-in.
+**Analogy**: Answering "what's 347 × 28?" in your head instantly vs writing it out step by step. Some problems *require* intermediate steps.
+
+**Surprise**: Simply adding "let's think step by step" to a prompt can make a model go from failing a problem to solving it — the same model, the same knowledge, just more "time to think."
 
 **Widgets**:
-1. **PositionEncodingDemo** — Scramble word order. Without positions: identical attention. With positions: different.
-2. **SelfAttentionPlayground** — Live attention maps from real BERT model (Transformers.js, ~30MB).
-3. **QKVDecoupling** — Toggle Q=K → attention becomes symmetric. With separate Q/K → directional.
+1. **OneShotVsChainOfThought** — Same hard problem, same model. One-shot: wrong. With chain of thought: right. What changed? Just scratch paper.
+2. **ThinkingBudget** — Adjust how many "thinking tokens" a model gets. Too few: sloppy answers. More: better answers. Too many: diminishing returns. Find the sweet spot.
+3. **WhenThinkingHelps** — Collection of problems. Some benefit hugely from step-by-step reasoning (logic, math). Others don't (simple recall, pattern matching). Discover which problems need "slow thinking."
 
 ---
 
-## Chapter 12: Tokenization
+## Chapter 12: Scaling and Emergence
 
-- **Prerequisites**: Ch 9
+- **Prerequisites**: Ch 8
 - **Status**: 🔲 Planned
 
-**Core idea**: Tokenization shapes what the model can see. "indescribable" → ["in", "des", "crib", "able"]. Numbers tokenize inconsistently → explains why LLMs can't do arithmetic. BPE is a compression algorithm.
+**Core idea**: Make a model 10× bigger and it gets smoothly better at predicting the next word. Nothing dramatic — just a straight line on a log-log plot. But zoom into specific capabilities and something weird happens: arithmetic goes from 0% to 90% accuracy at a specific size. Theory of mind appears. Translation quality jumps. Smooth trends at the macro level, sudden jumps at the micro level.
+
+**Surprise**: Nobody programmed arithmetic into these models. They weren't trained on math drills. They were just predicting text — and at some point, arithmetic emerged as a *side effect*.
 
 **Widgets**:
-1. **TokenizerPlayground** — Type anything, see tokens colored in real time. Compare languages.
-2. **BPEStepThrough** — Start from characters, step through merge algorithm. Watch tokens emerge.
-3. **TokenizationArtifacts** — Curated weird tokenization behaviors explaining real LLM quirks.
+1. **ScalingLawsChart** — Interactive log-log plot of model size vs loss. Straight line. Boring? No — zoom into individual capabilities on the same axes.
+2. **EmergencePlot** — Multiple capability curves vs model size. Some smooth, others show sharp "phase transitions." Find the model size where each capability appears.
+3. **PredictTheJump** — Given scaling curves for several tasks, predict: at what size will the model gain a new capability? Feel how hard this is to predict.
 
 ---
 
-## Chapter 13: Pre-training and Fine-tuning
+## Chapter 13: Teaching AI Right from Wrong
 
-- **Prerequisites**: Ch 6, 11, 12
+- **Prerequisites**: Ch 7
 - **Status**: 🔲 Planned
 
-**Core idea**: Model learns about the world by predicting the next word. Seems too simple → but requires understanding syntax, semantics, world knowledge. Pre-training = education, fine-tuning = specialization.
+**Core idea**: A raw pre-trained model completes text but doesn't try to be helpful. RLHF transforms "text completer" into "helpful assistant" by training on human preferences. But Goodhart's Law strikes: optimize too hard on a reward signal and you get sycophantic nonsense. The model learns to tell you what you want to hear, not what's true.
+
+**Analogy**: Like a student who learns that the teacher gives As for long essays. They start writing longer and longer essays about nothing. The metric (essay length) got optimized, but the goal (good essays) got lost.
+
+**Surprise**: After RLHF, models get slightly worse at raw capability benchmarks — but dramatically more useful in practice. Being helpful is different from being smart.
 
 **Widgets**:
-1. **NextTokenPrediction** — Type sentence, see probability distribution over next words.
-2. **PretrainedVsRandom** — Side-by-side embedding visualizations. Fine-tuning only slightly adjusts structure.
-3. **FewShotMagic** — Pre-trained model learns from few examples. Random model with same examples learns nothing.
+1. **RewardModelDemo** — Rank response pairs like a real RLHF labeler. See the reward model learn your preferences — and then mis-generalize in amusing ways.
+2. **RewardHackingDemo** — Crank optimization pressure. Watch: helpful → verbose → sycophantic → meaningless. Goodhart's Law in action.
+3. **AlignmentTaxDemo** — Side-by-side: base model vs aligned model on capability tests vs usefulness tests. Small capability cost, huge usefulness gain.
 
 ---
 
-## Chapter 14: Scaling Laws
+## Chapter 14: Creating Images from Noise
 
-- **Prerequisites**: Ch 13
+- **Prerequisites**: Ch 4, Ch 5
 - **Status**: 🔲 Planned
 
-**Core idea**: Performance scales as power law with compute — smooth, predictable. But individual capabilities suddenly appear at certain scales (emergence). Smooth macro trend, discontinuous micro behavior.
+**Core idea**: Generating an image pixel-by-pixel fails (errors cascade). Diffusion models take a different approach: start with pure noise and gradually denoise. The model learns what "a little less noisy" looks like at every noise level. Latent space is a map of all possible images — nearby points are similar images, and you can walk between them.
 
-**Surprise**: Power laws appear everywhere in nature. Neural network scaling may relate to fractal structure of natural data.
+**Toy models (browser via TF.js)**: Tiny VAE on MNIST (~500KB), tiny diffusion model on colored shapes (~200KB).
 
-**Widgets**:
-1. **ScalingLawsChart** — Interactive log-log plot. Drag compute/data/parameter axes. Chinchilla-optimal frontier.
-2. **EmergencePlot** — Multiple task accuracy curves vs model size. Some smooth, others show sharp jumps.
-
----
-
-## Chapter 15: RLHF and Alignment
-
-- **Prerequisites**: Ch 6, 13
-- **Status**: 🔲 Planned
-
-**Core idea**: Base model knows everything but does nothing useful. RLHF transforms "completes text" → "answers questions helpfully." Over-optimize reward model → sycophantic nonsense (Goodhart's Law).
+**Surprise**: The model never sees a clean image during training — only noisy ones. Yet it learns to create perfect images from pure static.
 
 **Widgets**:
-1. **RewardModelDemo** — Rank response pairs like a real RLHF labeler. See reward model learn + mis-generalize.
-2. **RewardHackingDemo** — Crank optimization pressure. Watch helpful → verbose → sycophantic → meaningless.
-3. **AlignmentTaxDemo** — Alignment slightly reduces capability but massively increases usefulness.
-
----
-
-## Chapter 16: Modern Architectures (Text)
-
-- **Prerequisites**: Ch 11, 13, 14
-- **Status**: 🔲 Planned
-
-**Core idea**: Differences between GPT/BERT/T5 are tiny — mainly which tokens can see which others. One attention mask change → entirely different model. Mixture of experts: 1T parameters, only 100B active per thought.
-
-**Widgets**:
-1. **AttentionMaskComparison** — Side-by-side GPT/BERT/T5 attention masks. Same input, different information flow.
-2. **MixtureOfExpertsVisualizer** — Router sends tokens to different experts. Each token activates ~10% of parameters.
-3. **DecoderSamplingPlayground** — Adjust temperature, top-k, top-p. Low temp: boring. High temp: chaotic.
-
----
-
-## Chapter 17: Image Generation
-
-- **Prerequisites**: Ch 6, 9, 16
-- **Status**: 🔲 Planned
-
-**Core idea**: Autoregressive pixel-by-pixel generation fails (cascading errors). Diffusion models learn to undo randomness. Latent space is a map of all possible images. All demos run real toy models in browser via TF.js.
-
-**Toy models (browser via TF.js)**:
-- Tiny VAE on MNIST (~500KB)
-- Tiny diffusion model on colored shapes (~200KB)
-- Tiny autoregressive pixel model for 8×8 art
-
-**Widgets**:
-1. **PixelByPixelFailure** — Watch autoregressive model generate image pixel-by-pixel. See cascading errors.
-2. **DiffusionPlayground** — Add/remove noise with slider. Generate from pure noise. Adjust denoising steps.
-3. **LatentSpaceExplorer** — 2D map of VAE's latent space. Click to generate. Drag to interpolate (3→7).
-4. **TrainYourOwnVAE** — Train tiny VAE on colored shapes in browser. Watch noise → blobs → shapes.
-5. **ConditionalGeneration** — Generate [color] [shape] with label conditioning. Try contradictory instructions.
+1. **PixelByPixelFailure** — Watch autoregressive generation go wrong. One bad pixel cascades into chaos.
+2. **DiffusionPlayground** — Add/remove noise with slider. Generate from pure noise. Adjust denoising steps: too few → blobby, just right → crisp.
+3. **LatentSpaceExplorer** — 2D map of latent space. Click to generate. Drag between points to interpolate (watch a 3 morph into a 7).
+4. **ConditionalGeneration** — Generate [color] [shape] with label conditioning. Try contradictory instructions and see what happens.
 
 ---
 
@@ -277,7 +260,7 @@ Widgets are not demonstrations — they are playgrounds. The reader should be ti
 | Phase | Chapters | Key Infrastructure |
 |-------|----------|--------------------|
 | 1 | 1–2 | Next.js, MDX, Tailwind, widget system, layout |
-| 2 | 3–8 | TF.js lazy loading, Web Workers, NetworkDiagram |
-| 3 | 9–12 | Word embeddings data, Transformers.js integration |
-| 4 | 13–16 | Advanced visualizations |
-| 5 | 17 | Pre-trained toy models, browser ML training |
+| 2 | 3–4 | Neuron/network diagrams, training animations |
+| 3 | 5–7 | Word embeddings data, attention visualizations, Transformers.js |
+| 4 | 8–11 | Transfer learning demos, MoE routing, chain-of-thought |
+| 5 | 12–14 | Scaling charts, RLHF simulation, browser ML training |
