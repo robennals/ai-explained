@@ -5,6 +5,7 @@ export interface Chapter {
   subtitle: string;
   prerequisites: number[];
   description: string;
+  ready?: boolean;
 }
 
 export const chapters: Chapter[] = [
@@ -16,6 +17,7 @@ export const chapters: Chapter[] = [
     prerequisites: [],
     description:
       "Text, images, and sound are all numbers. Thinking is a function. Models are machines with knobs. The challenge: find the right settings.",
+    ready: true,
   },
   {
     id: 2,
@@ -25,6 +27,7 @@ export const chapters: Chapter[] = [
     prerequisites: [1],
     description:
       "Evolution, A/B testing, and gradient descent are all the same algorithm. The secret to building complex things: small changes, tested against reality, kept or discarded.",
+    ready: true,
   },
   {
     id: 3,
