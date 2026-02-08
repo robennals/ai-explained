@@ -56,44 +56,38 @@ Let's feel this in action:
 Start in "Blind" mode and try to find the hidden target. All you learn from each guess is "not here" — a little ✗ appears and you have zero idea whether you're getting closer. After a dozen guesses, hit "Reveal target" and see how hopeless it was. Then switch to "With signal." Now each dot's size and color tells you how close you are, and you're constrained to small steps near your last guess. Watch how quickly you zero in. Same problem, but the incremental signal makes all the difference.
 </TryIt>
 
-## What Makes Optimization Easy or Hard?
+## Smooth Functions Can Be Optimized
 
-Incremental optimization is powerful, but it doesn't always work. The key property that makes it work is **smoothness**.
+Incremental optimization is powerful, but it only works when the function you're optimizing is **smooth** — meaning small changes produce small, predictable effects.
 
-When the landscape is **smooth**, small changes produce small, predictable effects. If you take a step and things get a little better, another step in the same direction will probably help too. You can follow the signal.
-
-When the landscape is **rugged**, small changes produce unpredictable effects. A tiny step might help a lot, hurt a lot, or do nothing — seemingly at random. The signal is noise.
-
-Think of it as the difference between **walking downhill in fog** (smooth — you can feel the slope and follow it) versus **navigating a room full of invisible potholes** (rugged — you can't trust the local terrain to guide you anywhere useful).
+Think about dropping a ball on a smooth curve versus a staircase. On the curve, the ball can always feel which way is downhill and roll toward the bottom. On the staircase, each step is flat — there's no slope to follow, so the ball just sits wherever it lands. The function has a lowest point, but there's no local signal pointing toward it.
 
 <SmoothVsRuggedWidget />
 
 <TryIt>
-Hit "Drop ball" on each landscape. The ball starts at a random position — just like real neural networks start with random parameter values — and gradient descent takes over, stepping downhill. On the smooth landscape, it slides cleanly to the bottom every time. On the rugged landscape, it gets stuck in a local dip — a **local minimum** — trapped by tiny bumps even though the real bottom is somewhere else. Try dropping several balls on the rugged side and watch them converge to different dead ends depending on where they started.
+Click anywhere above the landscape to drop a ball. On the smooth curve, it rolls downhill to the bottom every time — gradient descent works because there's always a slope to follow. On the step function, the ball just sits wherever it lands. Each step is flat, so there's no gradient — no local information about which direction leads to the lowest point.
 </TryIt>
 
 <KeyInsight>
-**Smoothness is what makes optimization possible.** A smooth landscape lets you follow the gradient downhill. A rugged landscape traps you in local minima. The success of incremental optimization depends almost entirely on whether the landscape is smooth.
+**Smoothness is what makes optimization possible.** A smooth function gives you a signal at every point — which way is downhill. A non-smooth function (like a step function or a text string) gives you no local signal to follow.
 </KeyInsight>
 
-## Not All Models Are Equal
+## Not All Representations Are Equal
 
-Here's the crucial connection: **the choice of model determines the landscape shape**.
+Here's the crucial connection: **the way you represent something determines whether you can optimize it**.
 
-Different models create different optimization landscapes. Some are smooth — easy to optimize. Others are rugged — nearly impossible.
+Consider a simple function: "multiply by some number, then add another number." You could write this as text — say, `times four plus two` — or you could represent the same function with two sliders, one for the multiplier and one for the offset.
 
-Consider three different ways to represent a function:
+Both representations describe the exact same function. But try to *change* it to match a target, and the difference is night and day.
 
-**A binary string** (like a computer program): change one bit and the output changes unpredictably. A one-character typo in code usually makes it crash entirely. The landscape is maximally rugged.
+**Text**: To change "four" to "two," you have to delete characters and retype. There's no "halfway" between the words "four" and "two." Most mid-edit states (`times fo plus two`, `times tw plus two`) don't even parse. Every edit is a big, unpredictable jump.
 
-**A step function** (a series of adjustable platforms): change one step height and you affect just that region. Better — somewhat smooth — but each adjustment only helps locally.
-
-**A polynomial with continuous coefficients** (like `a + bx + cx² + dx³`): change one coefficient slightly and the output changes smoothly *everywhere*. The landscape is smooth.
+**Sliders**: Drag the multiplier from 4.0 smoothly down to 2.0. At every intermediate value — 3.7, 3.2, 2.5 — the function is valid and you can see whether you're getting closer. Small changes produce small, predictable effects.
 
 <ModelComparisonWidget />
 
 <TryIt>
-Hit "Auto-run" and watch all three models try to match the same target curve. The polynomial (continuous parameters) improves steadily. The step function improves slowly. The binary string barely moves — most random bit flips make things worse. This is the same optimization algorithm applied to three different model types. The model determines the landscape, and the landscape determines whether optimization works.
+Try matching the dashed target line on both sides. On the slider side, just drag — watch the line glide smoothly into place. On the text side, try editing "times four plus two" into "times 2 minus 3." Notice how most intermediate edits break the parser entirely. You can get there eventually, but there's no smooth path — just discrete jumps between valid states.
 </TryIt>
 
 ## The Gradient Trick

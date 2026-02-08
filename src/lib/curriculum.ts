@@ -5,6 +5,7 @@ export interface Chapter {
   subtitle: string;
   prerequisites: number[];
   description: string;
+  ready?: boolean;
 }
 
 export const chapters: Chapter[] = [
@@ -16,6 +17,7 @@ export const chapters: Chapter[] = [
     prerequisites: [],
     description:
       "Text, images, and sound are all numbers. Thinking is a function. Models are machines with knobs. The challenge: find the right settings.",
+    ready: true,
   },
   {
     id: 2,
@@ -25,6 +27,7 @@ export const chapters: Chapter[] = [
     prerequisites: [1],
     description:
       "Evolution, A/B testing, and gradient descent are all the same algorithm. The secret to building complex things: small changes, tested against reality, kept or discarded.",
+    ready: true,
   },
   {
     id: 3,
@@ -37,120 +40,102 @@ export const chapters: Chapter[] = [
   },
   {
     id: 4,
-    slug: "04-matrix-math",
-    title: "Matrix Math and Linear Transformations",
-    subtitle: "Neural networks as geometry",
+    slug: "04-learning-from-mistakes",
+    title: "Learning from Mistakes",
+    subtitle: "How networks learn by failing",
     prerequisites: [3],
     description:
-      "Every layer is a geometric transformation. Training is learning which rotation, scaling, and shearing to apply.",
+      "The loss function defines what 'wrong' means. Gradient descent finds the way downhill. Train too well and the model memorizes instead of learning.",
   },
   {
     id: 5,
-    slug: "05-training",
-    title: "Training, Gradient Descent, Backpropagation",
-    subtitle: "Rolling downhill in a million dimensions",
-    prerequisites: [3, 4],
+    slug: "05-geometry-of-meaning",
+    title: "The Geometry of Meaning",
+    subtitle: "How AI turns words into math",
+    prerequisites: [4],
     description:
-      "Gradient descent, saddle points vs local minima, learning rate, momentum, Adam, and flat vs sharp minima.",
+      "Embeddings place words in space where meaning has geometry. King minus man plus woman equals queen. This is how AI 'understands' language.",
   },
   {
     id: 6,
-    slug: "06-loss-functions",
-    title: "Loss Functions",
-    subtitle: "Defining what 'wrong' means",
+    slug: "06-attention-transformers",
+    title: "Attention and Transformers",
+    subtitle: "The architecture that changed everything",
     prerequisites: [5],
     description:
-      "MSE, cross-entropy, Huber loss. The loss function shapes what the model learns. Cross-entropy as compression.",
+      "Before transformers, models forgot early words like a telephone game. Attention lets every word look at every other word directly.",
   },
   {
     id: 7,
-    slug: "07-regularization",
-    title: "Regularization and Generalization",
-    subtitle: "Why perfect training is perfectly terrible",
-    prerequisites: [5, 6],
+    slug: "07-how-llms-learn",
+    title: "How LLMs Learn to Talk",
+    subtitle: "From raw text to conversation",
+    prerequisites: [6],
     description:
-      "Overfitting, L1/L2 regularization, dropout. Why deliberately handicapping the model makes it better.",
+      "An LLM learns by predicting the next word. Seems too simple — but requires understanding grammar, facts, humor, and reasoning. Tokenization shapes what it can see.",
   },
   {
     id: 8,
-    slug: "08-embeddings",
-    title: "Embeddings and Vector Spaces",
-    subtitle: "The geometry of meaning",
-    prerequisites: [4, 5],
+    slug: "08-transfer-learning",
+    title: "Transfer Learning",
+    subtitle: "Train once, use everywhere",
+    prerequisites: [7],
     description:
-      "From one-hot to learned representations. Word analogies, semantic structure, and rotatable dimensions of meaning.",
+      "Pre-trained models transfer knowledge to new tasks with minimal data. Fine-tune on 1,000 examples and beat training from scratch on 100,000.",
   },
   {
     id: 9,
-    slug: "09-recurrent",
-    title: "Recurrent Architectures",
-    subtitle: "Memory, forgetting, and the telephone game",
-    prerequisites: [3, 8],
+    slug: "09-distillation",
+    title: "Distillation",
+    subtitle: "Big model teaches small model",
+    prerequisites: [8],
     description:
-      "RNNs, LSTMs, vanishing gradients through time, and why memory decays. Historical context for attention.",
+      "A giant model is too slow for your phone. Train a tiny model to mimic it using soft predictions. The teacher's intuition — 'dark knowledge' — transfers.",
   },
   {
     id: 10,
-    slug: "10-attention-transformers",
-    title: "Attention and Transformers",
-    subtitle: "The architecture that changed everything",
-    prerequisites: [4, 8, 9],
+    slug: "10-mixture-of-experts",
+    title: "Mixture of Experts",
+    subtitle: "Not every neuron fires for every thought",
+    prerequisites: [6],
     description:
-      "Self-attention, Q/K/V, position encoding, multi-head attention. Why transformers replaced RNNs.",
+      "A router sends each question to specialist sub-networks. A trillion parameters, but only a fraction active per question. Smarter without getting slower.",
   },
   {
     id: 11,
-    slug: "11-tokenization",
-    title: "Tokenization",
-    subtitle: "The ugly plumbing that shapes what models see",
-    prerequisites: [8],
+    slug: "11-thinking-step-by-step",
+    title: "Thinking Step by Step",
+    subtitle: "How AI learned to reason",
+    prerequisites: [7],
     description:
-      "BPE, token artifacts, why LLMs can't do arithmetic, cross-language efficiency. Tokenization as compression.",
+      "Standard LLMs answer in one shot with no scratch paper. Chain-of-thought and thinking models use their own output as working memory to solve harder problems.",
   },
   {
     id: 12,
-    slug: "12-pretraining-finetuning",
-    title: "Pre-training and Fine-tuning",
-    subtitle: "Learning everything by predicting the next word",
-    prerequisites: [5, 10, 11],
+    slug: "12-scaling-emergence",
+    title: "Scaling and Emergence",
+    subtitle: "Bigger models, surprising abilities",
+    prerequisites: [8],
     description:
-      "Next-token prediction, transfer learning, few-shot magic. Pre-training as education, fine-tuning as specialization.",
+      "10x bigger = smoothly better predictions. But individual capabilities appear suddenly — arithmetic, reasoning, translation quality jump at specific sizes.",
   },
   {
     id: 13,
-    slug: "13-scaling-laws",
-    title: "Scaling Laws",
-    subtitle: "Smooth trends, sudden capabilities",
-    prerequisites: [12],
+    slug: "13-alignment",
+    title: "Teaching AI Right from Wrong",
+    subtitle: "RLHF, Goodhart's Law, and the alignment problem",
+    prerequisites: [7],
     description:
-      "Power laws, Chinchilla scaling, emergence. Predictable loss curves, unpredictable capability jumps.",
+      "RLHF transforms a text completer into a helpful assistant. But optimize too hard and the model learns to tell you what you want to hear, not what's true.",
   },
   {
     id: 14,
-    slug: "14-rlhf-alignment",
-    title: "RLHF and Alignment",
-    subtitle: "Teaching AI what humans actually want",
-    prerequisites: [5, 12],
+    slug: "14-image-generation",
+    title: "Creating Images from Noise",
+    subtitle: "Diffusion models and latent space",
+    prerequisites: [4, 5],
     description:
-      "Reward models, Goodhart's Law, reward hacking, KL penalties, the alignment tax.",
-  },
-  {
-    id: 15,
-    slug: "15-modern-architectures",
-    title: "Modern Architectures",
-    subtitle: "GPT, BERT, T5, and Mixture of Experts",
-    prerequisites: [10, 12, 13],
-    description:
-      "Attention masks, causal vs bidirectional, encoder-decoder, sparse routing, temperature and sampling.",
-  },
-  {
-    id: 16,
-    slug: "16-image-generation",
-    title: "Image Generation",
-    subtitle: "Creating images from noise and numbers",
-    prerequisites: [5, 8, 15],
-    description:
-      "Autoencoders, VAEs, diffusion models. Train real toy models in the browser.",
+      "Pixel-by-pixel generation fails. Diffusion models start with pure noise and denoise. Latent space is a map of all possible images.",
   },
 ];
 
