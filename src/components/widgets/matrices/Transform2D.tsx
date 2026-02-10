@@ -47,14 +47,16 @@ const ARROW_VERTS: [number, number][] = [
   [0.15, 0.65],
 ];
 
-// Image shapes — bounding boxes matched to actual aspect ratios
-// Cat: CC BY-SA 3.0, Alvesgaspar, Wikimedia Commons
+// Image shapes — all square, centered on origin, filling 2/3 of the grid
+// Cat: CC BY-SA 3.0, Hisashi, Wikimedia Commons
 // Rocket: Apache 2.0, Google Noto Emoji, Wikimedia Commons
 // Mona Lisa: Public domain, Leonardo da Vinci
+const IMG_SIZE = 4; // 2/3 of 6-unit grid range
+const IMG_HALF = IMG_SIZE / 2;
 const IMAGE_SHAPES: Record<string, ImageShapeConfig> = {
-  cat: { src: "/images/cat.jpg", mathX: 0.05, mathY: 0.1, mathW: 1.5, mathH: 0.92 },
-  rocket: { src: "/images/rocket.png", mathX: 0.1, mathY: 0.05, mathW: 1.2, mathH: 1.2 },
-  "mona-lisa": { src: "/images/mona-lisa.jpg", mathX: 0.2, mathY: 0.05, mathW: 0.9, mathH: 1.34 },
+  cat: { src: "/images/cat.jpg", mathX: -IMG_HALF, mathY: -IMG_HALF, mathW: IMG_SIZE, mathH: IMG_SIZE },
+  rocket: { src: "/images/rocket.png", mathX: -IMG_HALF, mathY: -IMG_HALF, mathW: IMG_SIZE, mathH: IMG_SIZE },
+  "mona-lisa": { src: "/images/mona-lisa.jpg", mathX: -IMG_HALF, mathY: -IMG_HALF, mathW: IMG_SIZE, mathH: IMG_SIZE },
 };
 
 const SHAPE_OPTIONS: { id: ShapeId; label: string }[] = [
@@ -368,7 +370,7 @@ export function Transform2D() {
           fontWeight="bold"
           style={{ fontFamily: "serif" }}
         >
-          &#x00ea;&#x0302;&#x2081;
+          ê&#x2081;
         </text>
 
         {/* Unit vector ê₂ (green) */}
@@ -389,7 +391,7 @@ export function Transform2D() {
           fontWeight="bold"
           style={{ fontFamily: "serif" }}
         >
-          &#x00ea;&#x0302;&#x2082;
+          ê&#x2082;
         </text>
 
         {/* Origin */}
@@ -446,7 +448,7 @@ export function Transform2D() {
         {/* ê₁ (red) — where x-axis lands */}
         <div className="rounded-lg border-2 border-red-400 bg-red-500/5 p-2.5">
           <div className="mb-1.5 text-xs font-semibold text-red-500">
-            &#x00ea;&#x0302;&#x2081; &mdash; where x-axis lands
+            ê&#x2081; &mdash; where x-axis lands
           </div>
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
@@ -487,7 +489,7 @@ export function Transform2D() {
         {/* ê₂ (green) — where y-axis lands */}
         <div className="rounded-lg border-2 border-green-500 bg-green-500/5 p-2.5">
           <div className="mb-1.5 text-xs font-semibold text-green-600">
-            &#x00ea;&#x0302;&#x2082; &mdash; where y-axis lands
+            ê&#x2082; &mdash; where y-axis lands
           </div>
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
