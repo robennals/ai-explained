@@ -35,42 +35,26 @@ const NeuronPlayground = dynamic(
   { ssr: false }
 );
 
-const DecisionBoundaryExplorer = dynamic(
+const NeuronGeometry = dynamic(
   () =>
-    import("@/components/widgets/neurons/DecisionBoundaryExplorer").then(
-      (m) => m.DecisionBoundaryExplorer
+    import("@/components/widgets/neurons/NeuronGeometry").then(
+      (m) => m.NeuronGeometry
     ),
   { ssr: false }
 );
 
-const XORBreakthrough = dynamic(
+const TwoLayerPlayground = dynamic(
   () =>
-    import("@/components/widgets/neurons/XORBreakthrough").then(
-      (m) => m.XORBreakthrough
+    import("@/components/widgets/neurons/TwoLayerPlayground").then(
+      (m) => m.TwoLayerPlayground
     ),
   { ssr: false }
 );
 
-const LinearCollapseDemo = dynamic(
+const NetworkTrainer = dynamic(
   () =>
-    import("@/components/widgets/neurons/LinearCollapseDemo").then(
-      (m) => m.LinearCollapseDemo
-    ),
-  { ssr: false }
-);
-
-const NeuralNetworkTrainer = dynamic(
-  () =>
-    import("@/components/widgets/neurons/NeuralNetworkTrainer").then(
-      (m) => m.NeuralNetworkTrainer
-    ),
-  { ssr: false }
-);
-
-const ActivationFunctionExplorer = dynamic(
-  () =>
-    import("@/components/widgets/neurons/ActivationFunctionExplorer").then(
-      (m) => m.ActivationFunctionExplorer
+    import("@/components/widgets/neurons/NetworkTrainer").then(
+      (m) => m.NetworkTrainer
     ),
   { ssr: false }
 );
@@ -121,42 +105,26 @@ export function NeuronPlaygroundWidget() {
   );
 }
 
-export function DecisionBoundaryExplorerWidget() {
+export function NeuronGeometryWidget() {
   return (
     <WidgetSlot>
-      <DecisionBoundaryExplorer />
+      <NeuronGeometry />
     </WidgetSlot>
   );
 }
 
-export function XORBreakthroughWidget() {
+export function TwoLayerPlaygroundWidget() {
   return (
     <WidgetSlot>
-      <XORBreakthrough />
+      <TwoLayerPlayground />
     </WidgetSlot>
   );
 }
 
-export function LinearCollapseDemoWidget() {
+export function NetworkTrainerWidget() {
   return (
     <WidgetSlot>
-      <LinearCollapseDemo />
-    </WidgetSlot>
-  );
-}
-
-export function NeuralNetworkTrainerWidget() {
-  return (
-    <WidgetSlot>
-      <NeuralNetworkTrainer />
-    </WidgetSlot>
-  );
-}
-
-export function ActivationFunctionExplorerWidget() {
-  return (
-    <WidgetSlot>
-      <ActivationFunctionExplorer />
+      <NetworkTrainer />
     </WidgetSlot>
   );
 }

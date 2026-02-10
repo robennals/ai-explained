@@ -6,11 +6,9 @@ import {
   NeuronDiagramWidget,
   NeuronScaleComparisonWidget,
   NeuronPlaygroundWidget,
-  DecisionBoundaryExplorerWidget,
-  XORBreakthroughWidget,
-  LinearCollapseDemoWidget,
-  NeuralNetworkTrainerWidget,
-  ActivationFunctionExplorerWidget,
+  NeuronGeometryWidget,
+  TwoLayerPlaygroundWidget,
+  NetworkTrainerWidget,
 } from "./widgets";
 
 export const metadata = {
@@ -31,11 +29,9 @@ export default function Chapter03() {
             NeuronDiagramWidget,
             NeuronScaleComparisonWidget,
             NeuronPlaygroundWidget,
-            DecisionBoundaryExplorerWidget,
-            XORBreakthroughWidget,
-            LinearCollapseDemoWidget,
-            NeuralNetworkTrainerWidget,
-            ActivationFunctionExplorerWidget,
+            NeuronGeometryWidget,
+            TwoLayerPlaygroundWidget,
+            NetworkTrainerWidget,
           }}
         />
       </div>
