@@ -14,15 +14,17 @@ function toSVG(x: number, y: number): [number, number] {
   return [CX + x * SCALE, CY - y * SCALE];
 }
 
-function applyTx(
+// Transform using row-based matrix: new = M * old
+// Row 1 = (r1x, r1y), Row 2 = (r2x, r2y)
+function applyRows(
   x: number,
   y: number,
-  e1x: number,
-  e1y: number,
-  e2x: number,
-  e2y: number,
+  r1x: number,
+  r1y: number,
+  r2x: number,
+  r2y: number,
 ): [number, number] {
-  return [e1x * x + e2x * y, e1y * x + e2y * y];
+  return [r1x * x + r1y * y, r2x * x + r2y * y];
 }
 
 // Image configs
@@ -55,55 +57,62 @@ const SHAPE_OPTIONS: { id: ShapeId; label: string }[] = [
   { id: "mona-lisa", label: "Mona Lisa" },
 ];
 
+// Presets expressed as rows: r1 = new x-axis, r2 = new y-axis
 interface Preset {
   label: string;
-  e1: [number, number];
-  e2: [number, number];
+  r1: [number, number];
+  r2: [number, number];
 }
 
 const PRESETS: Preset[] = [
-  { label: "Identity", e1: [1, 0], e2: [0, 1] },
-  { label: "Rotate 90\u00b0", e1: [0, 1], e2: [-1, 0] },
-  { label: "Scale 2\u00d7", e1: [2, 0], e2: [0, 2] },
-  { label: "Stretch X", e1: [2, 0], e2: [0, 1] },
-  { label: "Shear", e1: [1, 0], e2: [0.5, 1] },
-  { label: "Reflect", e1: [-1, 0], e2: [0, 1] },
-  { label: "Collapse", e1: [1, 0], e2: [0, 0] },
+  { label: "Identity", r1: [1, 0], r2: [0, 1] },
+  { label: "Rotate 90\u00b0", r1: [0, -1], r2: [1, 0] },
+  { label: "Scale 2\u00d7", r1: [2, 0], r2: [0, 2] },
+  { label: "Stretch X", r1: [2, 0], r2: [0, 1] },
+  { label: "Shear", r1: [1, 0.5], r2: [0, 1] },
+  { label: "Reflect", r1: [-1, 0], r2: [0, 1] },
+  { label: "Collapse", r1: [1, 0], r2: [0, 0] },
 ];
 
 export function BasisVectorView() {
-  const [e1x, setE1x] = useState(1);
-  const [e1y, setE1y] = useState(0);
-  const [e2x, setE2x] = useState(0);
-  const [e2y, setE2y] = useState(1);
+  // Row-based state: each row defines a new basis vector direction
+  // Row 1 (r1x, r1y) = new x-axis direction in old space
+  // Row 2 (r2x, r2y) = new y-axis direction in old space
+  const [r1x, setR1x] = useState(1);
+  const [r1y, setR1y] = useState(0);
+  const [r2x, setR2x] = useState(0);
+  const [r2y, setR2y] = useState(1);
   const [shape, setShape] = useState<ShapeId>("cat");
 
   const handleReset = useCallback(() => {
-    setE1x(1);
-    setE1y(0);
-    setE2x(0);
-    setE2y(1);
+    setR1x(1);
+    setR1y(0);
+    setR2x(0);
+    setR2y(1);
   }, []);
 
   const applyPreset = useCallback((preset: Preset) => {
-    setE1x(preset.e1[0]);
-    setE1y(preset.e1[1]);
-    setE2x(preset.e2[0]);
-    setE2y(preset.e2[1]);
+    setR1x(preset.r1[0]);
+    setR1y(preset.r1[1]);
+    setR2x(preset.r2[0]);
+    setR2y(preset.r2[1]);
   }, []);
 
   const imageConfig = IMAGE_SHAPES[shape];
 
-  // SVG transform: math matrix [e1x,e2x;e1y,e2y] centered at (CX,CY)
+  // SVG transform for right panel
+  // Matrix [[r1x, r1y], [r2x, r2y]] has columns (r1x,r2x) and (r1y,r2y)
+  // SVG formula: matrix(e1x, -e1y, -e2x, e2y, ...)
+  // where e1x=r1x, e1y=r2x, e2x=r1y, e2y=r2y
   const svgTransform = useMemo(() => {
-    const A = e1x;
-    const B = -e1y;
-    const C = -e2x;
-    const D = e2y;
-    const E = CX * (1 - e1x) + e2x * CY;
-    const F = e1y * CX + CY * (1 - e2y);
+    const A = r1x;
+    const B = -r2x;
+    const C = -r1y;
+    const D = r2y;
+    const E = CX * (1 - r1x) + r1y * CY;
+    const F = r2x * CX + CY * (1 - r2y);
     return `matrix(${A}, ${B}, ${C}, ${D}, ${E}, ${F})`;
-  }, [e1x, e1y, e2x, e2y]);
+  }, [r1x, r1y, r2x, r2y]);
 
   // Image SVG position
   const imgSvg = useMemo(() => {
@@ -116,8 +125,48 @@ export function BasisVectorView() {
     };
   }, [imageConfig]);
 
-  // Transformed grid lines
-  const gridLines = useMemo(() => {
+  // Iso-line grid for the left panel
+  // For row vector (rx, ry), iso-line at value k: rx*x + ry*y = k
+  // This is a line perpendicular to (rx, ry), passing through (rx*k/len², ry*k/len²)
+  const isoLines = useMemo(() => {
+    const lines: {
+      x1: number;
+      y1: number;
+      x2: number;
+      y2: number;
+      row: number;
+      isAxis: boolean;
+    }[] = [];
+    const extent = 6;
+
+    for (const { rx, ry, rowIdx } of [
+      { rx: r1x, ry: r1y, rowIdx: 0 },
+      { rx: r2x, ry: r2y, rowIdx: 1 },
+    ]) {
+      const len2 = rx * rx + ry * ry;
+      if (len2 < 0.0001) continue;
+
+      // Direction along the iso-line (perpendicular to the row vector)
+      const invLen = 1 / Math.sqrt(len2);
+      const dx = -ry * invLen;
+      const dy = rx * invLen;
+
+      for (let k = -GRID_RANGE; k <= GRID_RANGE; k++) {
+        // Point on line closest to origin
+        const px = (rx * k) / len2;
+        const py = (ry * k) / len2;
+
+        const [x1, y1] = toSVG(px - dx * extent, py - dy * extent);
+        const [x2, y2] = toSVG(px + dx * extent, py + dy * extent);
+        lines.push({ x1, y1, x2, y2, row: rowIdx, isAxis: k === 0 });
+      }
+    }
+
+    return lines;
+  }, [r1x, r1y, r2x, r2y]);
+
+  // Transformed grid for the right panel
+  const rightGridLines = useMemo(() => {
     const lines: {
       x1: number;
       y1: number;
@@ -126,14 +175,16 @@ export function BasisVectorView() {
       type: string;
     }[] = [];
     for (let i = -GRID_RANGE; i <= GRID_RANGE; i++) {
-      const [vx1, vy1] = applyTx(i, -GRID_RANGE, e1x, e1y, e2x, e2y);
-      const [vx2, vy2] = applyTx(i, GRID_RANGE, e1x, e1y, e2x, e2y);
+      // Vertical line x=i: transform endpoints
+      const [vx1, vy1] = applyRows(i, -GRID_RANGE, r1x, r1y, r2x, r2y);
+      const [vx2, vy2] = applyRows(i, GRID_RANGE, r1x, r1y, r2x, r2y);
       const [sx1, sy1] = toSVG(vx1, vy1);
       const [sx2, sy2] = toSVG(vx2, vy2);
       lines.push({ x1: sx1, y1: sy1, x2: sx2, y2: sy2, type: `v${i}` });
 
-      const [hx1, hy1] = applyTx(-GRID_RANGE, i, e1x, e1y, e2x, e2y);
-      const [hx2, hy2] = applyTx(GRID_RANGE, i, e1x, e1y, e2x, e2y);
+      // Horizontal line y=i: transform endpoints
+      const [hx1, hy1] = applyRows(-GRID_RANGE, i, r1x, r1y, r2x, r2y);
+      const [hx2, hy2] = applyRows(GRID_RANGE, i, r1x, r1y, r2x, r2y);
       const [shx1, shy1] = toSVG(hx1, hy1);
       const [shx2, shy2] = toSVG(hx2, hy2);
       lines.push({
@@ -145,46 +196,14 @@ export function BasisVectorView() {
       });
     }
     return lines;
-  }, [e1x, e1y, e2x, e2y]);
+  }, [r1x, r1y, r2x, r2y]);
 
-  // Draw the new basis vectors as a transformed grid on the left panel
-  const leftGridLines = useMemo(() => {
-    const lines: {
-      x1: number;
-      y1: number;
-      x2: number;
-      y2: number;
-      type: string;
-    }[] = [];
-    for (let i = -GRID_RANGE; i <= GRID_RANGE; i++) {
-      // Lines along the e1 direction (parametrized by e2)
-      const [vx1, vy1] = applyTx(i, -GRID_RANGE, e1x, e1y, e2x, e2y);
-      const [vx2, vy2] = applyTx(i, GRID_RANGE, e1x, e1y, e2x, e2y);
-      const [sx1, sy1] = toSVG(vx1, vy1);
-      const [sx2, sy2] = toSVG(vx2, vy2);
-      lines.push({ x1: sx1, y1: sy1, x2: sx2, y2: sy2, type: `v${i}` });
-
-      const [hx1, hy1] = applyTx(-GRID_RANGE, i, e1x, e1y, e2x, e2y);
-      const [hx2, hy2] = applyTx(GRID_RANGE, i, e1x, e1y, e2x, e2y);
-      const [shx1, shy1] = toSVG(hx1, hy1);
-      const [shx2, shy2] = toSVG(hx2, hy2);
-      lines.push({
-        x1: shx1,
-        y1: shy1,
-        x2: shx2,
-        y2: shy2,
-        type: `h${i}`,
-      });
-    }
-    return lines;
-  }, [e1x, e1y, e2x, e2y]);
-
-  // Basis vector endpoints
+  // Row vector arrow endpoints in SVG (left panel)
   const [ox, oy] = toSVG(0, 0);
-  const [se1x, se1y] = toSVG(e1x, e1y);
-  const [se2x, se2y] = toSVG(e2x, e2y);
+  const [row1EndX, row1EndY] = toSVG(r1x, r1y);
+  const [row2EndX, row2EndY] = toSVG(r2x, r2y);
 
-  // Original basis vector endpoints
+  // Original basis vector endpoints (faint reference)
   const [origE1x, origE1y] = toSVG(1, 0);
   const [origE2x, origE2y] = toSVG(0, 1);
 
@@ -224,8 +243,8 @@ export function BasisVectorView() {
 
   return (
     <WidgetContainer
-      title="Two Interpretations"
-      description="The matrix columns are the new basis vectors — defining a new coordinate grid"
+      title="The Row View: New Measurement Axes"
+      description="Each row of the matrix defines a new axis — a direction to measure along"
       onReset={handleReset}
     >
       {/* Shape selector */}
@@ -248,10 +267,10 @@ export function BasisVectorView() {
 
       {/* Side-by-side panels */}
       <div className="flex gap-3">
-        {/* Left: Original space with new coordinate grid overlaid */}
+        {/* Left: Original space with new measurement axes overlaid */}
         <div className="flex-1">
           <div className="mb-1 text-center text-xs font-medium text-muted">
-            New basis vectors in original space
+            New axes in original space
           </div>
           <svg
             viewBox={`0 0 ${SVG_W} ${SVG_H}`}
@@ -311,24 +330,20 @@ export function BasisVectorView() {
               )}
             </g>
 
-            {/* New coordinate grid (colored, faint) */}
-            <g clipPath="url(#bv-left-clip)" opacity={0.3}>
-              {leftGridLines.map((line) => {
-                const isAxis = line.type === "v0" || line.type === "h0";
-                const isVertical = line.type.startsWith("v");
-                return (
-                  <line
-                    key={line.type}
-                    x1={line.x1}
-                    y1={line.y1}
-                    x2={line.x2}
-                    y2={line.y2}
-                    stroke={isVertical ? "#ef4444" : "#22c55e"}
-                    strokeWidth={isAxis ? 1.5 : 0.6}
-                    opacity={isAxis ? 0.8 : 0.4}
-                  />
-                );
-              })}
+            {/* Iso-line grid: lines where new_x=k and new_y=k */}
+            <g clipPath="url(#bv-left-clip)" opacity={0.25}>
+              {isoLines.map((line, i) => (
+                <line
+                  key={i}
+                  x1={line.x1}
+                  y1={line.y1}
+                  x2={line.x2}
+                  y2={line.y2}
+                  stroke={line.row === 0 ? "#ef4444" : "#22c55e"}
+                  strokeWidth={line.isAxis ? 1.5 : 0.6}
+                  opacity={line.isAxis ? 0.8 : 0.5}
+                />
+              ))}
             </g>
 
             {/* Original basis vectors (faint gray dashed) */}
@@ -355,45 +370,45 @@ export function BasisVectorView() {
               strokeDasharray="4 3"
             />
 
-            {/* New basis vectors (bold colored) */}
+            {/* New basis vectors: rows as directions in old space */}
             <line
               x1={ox}
               y1={oy}
-              x2={se1x}
-              y2={se1y}
+              x2={row1EndX}
+              y2={row1EndY}
               stroke="#ef4444"
               strokeWidth={3}
               markerEnd="url(#bv-arr-red)"
             />
             <text
-              x={se1x + (se1x > ox ? 8 : -22)}
-              y={se1y + (se1y < oy ? -6 : 14)}
+              x={row1EndX + (row1EndX > ox ? 8 : -22)}
+              y={row1EndY + (row1EndY < oy ? -6 : 14)}
               fill="#ef4444"
               fontSize={12}
               fontWeight="bold"
               style={{ fontFamily: "serif" }}
             >
-              {"\u00ea\u2081"}
+              {"\u00ea\u2081\u2032"}
             </text>
 
             <line
               x1={ox}
               y1={oy}
-              x2={se2x}
-              y2={se2y}
+              x2={row2EndX}
+              y2={row2EndY}
               stroke="#22c55e"
               strokeWidth={3}
               markerEnd="url(#bv-arr-green)"
             />
             <text
-              x={se2x + (se2x > ox ? 8 : -22)}
-              y={se2y + (se2y < oy ? -6 : 14)}
+              x={row2EndX + (row2EndX > ox ? 8 : -22)}
+              y={row2EndY + (row2EndY < oy ? -6 : 14)}
               fill="#22c55e"
               fontSize={12}
               fontWeight="bold"
               style={{ fontFamily: "serif" }}
             >
-              {"\u00ea\u2082"}
+              {"\u00ea\u2082\u2032"}
             </text>
 
             {/* Origin dot */}
@@ -421,7 +436,7 @@ export function BasisVectorView() {
 
             {/* Transformed grid */}
             <g clipPath="url(#bv-right-clip)">
-              {gridLines.map((line) => {
+              {rightGridLines.map((line) => {
                 const isAxis = line.type === "v0" || line.type === "h0";
                 const isVertical = line.type.startsWith("v");
                 return (
@@ -470,119 +485,125 @@ export function BasisVectorView() {
         </div>
       </div>
 
-      {/* Matrix display */}
+      {/* Matrix display — rows colored */}
       <div className="my-4 flex items-center justify-center gap-6">
         <div className="rounded-lg border border-border bg-surface px-4 py-2.5 font-mono text-sm">
           <div className="flex items-center gap-2">
             <span className="text-lg leading-none text-muted">[</span>
             <span className="w-14 text-center font-semibold text-red-500">
-              {e1x.toFixed(2)}
+              {r1x.toFixed(2)}
             </span>
-            <span className="w-14 text-center font-semibold text-green-600">
-              {e2x.toFixed(2)}
+            <span className="w-14 text-center font-semibold text-red-500">
+              {r1y.toFixed(2)}
             </span>
             <span className="text-lg leading-none text-muted">]</span>
+            <span className="ml-1 text-[10px] text-red-400">
+              {"\u2190 \u00ea\u2081\u2032"}
+            </span>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-lg leading-none text-muted">[</span>
-            <span className="w-14 text-center font-semibold text-red-500">
-              {e1y.toFixed(2)}
+            <span className="w-14 text-center font-semibold text-green-600">
+              {r2x.toFixed(2)}
             </span>
             <span className="w-14 text-center font-semibold text-green-600">
-              {e2y.toFixed(2)}
+              {r2y.toFixed(2)}
             </span>
             <span className="text-lg leading-none text-muted">]</span>
+            <span className="ml-1 text-[10px] text-green-500">
+              {"\u2190 \u00ea\u2082\u2032"}
+            </span>
           </div>
         </div>
       </div>
 
-      {/* Basis vector slider boxes */}
+      {/* Basis vector slider boxes — organized by rows */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        {/* ê₁ (red) */}
+        {/* Row 1 (red) — new x-axis */}
         <div className="rounded-lg border-2 border-red-400 bg-red-500/5 p-2.5">
           <div className="mb-1.5 text-xs font-semibold text-red-500">
-            {"\u00ea\u2081"} &mdash; new x-axis
+            {"\u00ea\u2081\u2032"} &mdash; new x-axis
           </div>
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
-              <span className="w-4 shrink-0 text-xs font-medium text-red-400">
-                x
+              <span className="w-12 shrink-0 text-xs font-medium text-red-400">
+                old x
               </span>
               <input
                 type="range"
                 min={-2}
                 max={2}
                 step={0.01}
-                value={e1x}
-                onChange={(e) => setE1x(parseFloat(e.target.value))}
+                value={r1x}
+                onChange={(e) => setR1x(parseFloat(e.target.value))}
                 className="h-1.5 flex-1"
                 style={{ accentColor: "#ef4444" }}
               />
               <span className="w-10 shrink-0 text-right font-mono text-xs font-bold text-red-500">
-                {e1x.toFixed(2)}
+                {r1x.toFixed(2)}
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="w-4 shrink-0 text-xs font-medium text-red-400">
-                y
+              <span className="w-12 shrink-0 text-xs font-medium text-red-400">
+                old y
               </span>
               <input
                 type="range"
                 min={-2}
                 max={2}
                 step={0.01}
-                value={e1y}
-                onChange={(e) => setE1y(parseFloat(e.target.value))}
+                value={r1y}
+                onChange={(e) => setR1y(parseFloat(e.target.value))}
                 className="h-1.5 flex-1"
                 style={{ accentColor: "#ef4444" }}
               />
               <span className="w-10 shrink-0 text-right font-mono text-xs font-bold text-red-500">
-                {e1y.toFixed(2)}
+                {r1y.toFixed(2)}
               </span>
             </div>
           </div>
         </div>
 
-        {/* ê₂ (green) */}
+        {/* Row 2 (green) — new y-axis */}
         <div className="rounded-lg border-2 border-green-500 bg-green-500/5 p-2.5">
           <div className="mb-1.5 text-xs font-semibold text-green-600">
-            {"\u00ea\u2082"} &mdash; new y-axis
+            {"\u00ea\u2082\u2032"} &mdash; new y-axis
           </div>
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
-              <span className="w-4 shrink-0 text-xs font-medium text-green-500">
-                x
+              <span className="w-12 shrink-0 text-xs font-medium text-green-500">
+                old x
               </span>
               <input
                 type="range"
                 min={-2}
                 max={2}
                 step={0.01}
-                value={e2x}
-                onChange={(e) => setE2x(parseFloat(e.target.value))}
+                value={r2x}
+                onChange={(e) => setR2x(parseFloat(e.target.value))}
                 className="h-1.5 flex-1"
                 style={{ accentColor: "#22c55e" }}
               />
               <span className="w-10 shrink-0 text-right font-mono text-xs font-bold text-green-600">
-                {e2x.toFixed(2)}
+                {r2x.toFixed(2)}
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="w-4 shrink-0 text-xs font-medium text-green-500">
-                y
+              <span className="w-12 shrink-0 text-xs font-medium text-green-500">
+                old y
               </span>
               <input
                 type="range"
                 min={-2}
                 max={2}
                 step={0.01}
-                value={e2y}
-                onChange={(e) => setE2y(parseFloat(e.target.value))}
+                value={r2y}
+                onChange={(e) => setR2y(parseFloat(e.target.value))}
                 className="h-1.5 flex-1"
                 style={{ accentColor: "#22c55e" }}
               />
               <span className="w-10 shrink-0 text-right font-mono text-xs font-bold text-green-600">
-                {e2y.toFixed(2)}
+                {r2y.toFixed(2)}
               </span>
             </div>
           </div>

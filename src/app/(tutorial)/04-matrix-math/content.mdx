@@ -49,19 +49,21 @@ A 2&times;2 matrix is completely defined by four numbers. Those four numbers con
 
 ## Another Way to See It: New Axes
 
-There's a powerful second way to read a matrix. Instead of thinking "where do the old axes end up?", think: **the columns of the matrix define a new set of axes**.
+There's a powerful second way to read a matrix. Instead of thinking "where do the old basis vectors end up?" (the columns), think about the **rows**: each row defines a new basis vector in terms of the old ones.
 
-The left panel below shows the original image with the new basis vectors drawn on top — the red and green arrows show your new "rulers." The right panel shows what happens when you measure the image using those rulers. It's two views of the same math.
+The <span style={{color: "#ef4444"}}>first row</span> says: "my new x-axis is made of this much old-x and this much old-y." The <span style={{color: "#22c55e"}}>second row</span> does the same for the new y-axis. You're defining a new coordinate system by pointing arrows in the old space and saying "measure along *these* directions instead."
+
+The left panel below shows the original image with the new axes drawn on top. The faint colored grid lines show where integer values of each new coordinate fall. The right panel shows the result of re-measuring the image using those new axes.
 
 <BasisVectorViewWidget />
 
 <TryIt>
-Start with **Identity** — the new axes match the old ones, so nothing changes. Now hit **Stretch X** — the red arrow gets longer, and the cat on the right stretches. Hit **Shear** — the green arrow tilts sideways, and the right panel shows the cat leaning. Try **Rotate 90&deg;** — both arrows rotate a quarter turn, and the cat spins.
+Start with **Identity** — the new axes match the old ones, so nothing changes. Now hit **Rotate 90&deg;** — the red arrow (new x-axis) now points down and the green arrow (new y-axis) points right. The cat rotates because we're measuring along different directions. Try **Shear** — the red arrow tilts, mixing in some old-y into the new x-measurement, and the cat leans. Try **Collapse** — the green arrow shrinks to nothing, destroying the y-measurement entirely.
 
-The key: every transformation is just choosing new axes. The red arrow is your new "right," the green arrow is your new "up," and the image reshapes to match.
+Notice how the faint grid lines on the left are perpendicular to the arrows — they mark where each new coordinate equals 0, 1, 2, etc. The arrow tells you *which direction* you're measuring along.
 </TryIt>
 
-This dual interpretation — "where do axes land?" vs. "what are my new axes?" — is the same math read two ways. Both are useful. When you see a matrix in a neural network, sometimes it helps to think of it as rotating and stretching space. Other times it helps to think of it as defining a new coordinate system for the data.
+This dual interpretation — "where do old axes land?" (columns) vs. "what are my new measurement directions?" (rows) — is the same math read two ways. Both are useful. In neural networks, the row view is especially natural: each output neuron computes a dot product with one row of the weight matrix, measuring how much the input aligns with that row's direction.
 
 ## Changing Dimensions
 
