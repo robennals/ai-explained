@@ -19,18 +19,18 @@ const Transform2D = dynamic(
   { ssr: false }
 );
 
-const Transform3D = dynamic(
+const BasisVectorView = dynamic(
   () =>
-    import("@/components/widgets/matrices/Transform3D").then(
-      (m) => m.Transform3D
+    import("@/components/widgets/matrices/BasisVectorView").then(
+      (m) => m.BasisVectorView
     ),
   { ssr: false }
 );
 
-const HigherDimensions = dynamic(
+const DimensionProjection = dynamic(
   () =>
-    import("@/components/widgets/matrices/HigherDimensions").then(
-      (m) => m.HigherDimensions
+    import("@/components/widgets/matrices/DimensionProjection").then(
+      (m) => m.DimensionProjection
     ),
   { ssr: false }
 );
@@ -73,18 +73,18 @@ export function Transform2DWidget() {
   );
 }
 
-export function Transform3DWidget() {
+export function BasisVectorViewWidget() {
   return (
     <WidgetSlot>
-      <Transform3D />
+      <BasisVectorView />
     </WidgetSlot>
   );
 }
 
-export function HigherDimensionsWidget() {
+export function DimensionProjectionWidget() {
   return (
     <WidgetSlot>
-      <HigherDimensions />
+      <DimensionProjection />
     </WidgetSlot>
   );
 }

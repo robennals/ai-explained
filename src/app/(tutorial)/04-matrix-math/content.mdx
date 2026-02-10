@@ -43,73 +43,60 @@ Four numbers. That's it. But watch what they can do:
 Switch to the **Cat** and try the presets. Hit **Rotate 90&deg;** — the cat spins a quarter turn. **Shear** — the cat leans over like it's dodging something. **Reflect** — mirror-image cat! **Collapse** — the cat gets squished into a line (poor cat). Now switch to the **Mona Lisa** and try **Rotate 45&deg;** — can you tell she's tilted? Try making your own transformation: can you make the Mona Lisa twice as wide but the same height? (Hint: drag *a* to 2 — you're stretching the x-axis basis vector to twice its length.)
 </TryIt>
 
-Watch the red and green arrows in the widget — those are the basis vectors. The red arrow shows where (1, 0) ends up after the transformation. The green arrow shows where (0, 1) ends up. The transformation is completely determined by where those two arrows land. In 1D we had one basis vector and one number. In 2D we have two basis vectors and four numbers.
-
 <KeyInsight>
 A 2&times;2 matrix is completely defined by four numbers. Those four numbers control every possible 2D linear transformation: rotation, scaling, shearing, reflection, and collapse. The first column tells you where the x-axis basis vector goes. The second tells you where the y-axis basis vector goes. Everything else follows.
 </KeyInsight>
 
-### The Determinant: Area In, Area Out
+## Another Way to See It: New Axes
 
-Notice the **det** value in the widget. The **determinant** tells you how the matrix changes areas:
+There's a powerful second way to read a matrix. Instead of thinking "where do the old axes end up?", think: **the columns of the matrix define a new set of axes**.
 
-- **det = 1**: areas preserved (pure rotation)
-- **det = 2**: areas doubled (scaling up)
-- **det = 0**: everything collapses to a line or point — a dimension is destroyed
-- **det &lt; 0**: areas preserved but orientation flipped (reflection)
+The left panel below shows the original image with the new basis vectors drawn on top — the red and green arrows show your new "rulers." The right panel shows what happens when you measure the image using those rulers. It's two views of the same math.
 
-When the determinant is zero, the matrix is **singular**. It crushes 2D space down to 1D or 0D. Information is destroyed — you can't undo it. Try the "Collapse" preset and watch a whole axis disappear.
-
-## Three Dimensions
-
-The pattern continues. In 3D we have **three basis vectors** — one for each axis (X, Y, Z). A 3&times;3 matrix tells you where each of those three basis vectors lands. That takes **nine numbers** — three columns of three.
-
-The same principle applies: once you know where the three basis vectors go, every other point in 3D space follows automatically. Nine numbers, and you can rotate objects around any axis, scale along any direction, shear, reflect, or project.
-
-<Transform3DWidget />
+<BasisVectorViewWidget />
 
 <TryIt>
-Start with the **Chicken** and drag the rotation sliders — watch how the nine matrix numbers change as you rotate! The rotation and scale sliders let you build a matrix intuitively, and the colored boxes below show you where each basis vector ends up. Try **Flatten Y** and watch the chicken get pancaked. Try **Stretch X** to make a wide chicken. Now try **Spin + Squash** to see rotation and scaling combined. Switch to the **Sphere** — it makes stretching super obvious since every direction is visible. The key insight: every rotation and scale you can imagine is just nine numbers in a matrix.
+Start with **Identity** — the new axes match the old ones, so nothing changes. Now hit **Stretch X** — the red arrow gets longer, and the cat on the right stretches. Hit **Shear** — the green arrow tilts sideways, and the right panel shows the cat leaning. Try **Rotate 90&deg;** — both arrows rotate a quarter turn, and the cat spins.
+
+The key: every transformation is just choosing new axes. The red arrow is your new "right," the green arrow is your new "up," and the image reshapes to match.
 </TryIt>
 
-The jump from 2D to 3D adds five more parameters (4 &rarr; 9). But the conceptual jump is small — it's still "each column tells you where one basis vector goes."
+This dual interpretation — "where do axes land?" vs. "what are my new axes?" — is the same math read two ways. Both are useful. When you see a matrix in a neural network, sometimes it helps to think of it as rotating and stretching space. Other times it helps to think of it as defining a new coordinate system for the data.
 
-## What Happens in Higher Dimensions?
+## Changing Dimensions
 
-Here's where things get mind-bending. The pattern continues:
+So far our matrices have been square — 2&times;2 matrices mapping 2D to 2D. But matrices don't have to be square. A **1&times;2 matrix** takes a 2D point and produces a single number. It *projects* two dimensions down to one.
 
-| Dimension | Matrix size | Entries | Rotation planes |
-|-----------|-------------|---------|-----------------|
-| 2D | 2&times;2 | 4 | 1 angle |
-| 3D | 3&times;3 | 9 | 3 angles |
-| 4D | 4&times;4 | 16 | 6 angles |
-| 100D | 100&times;100 | 10,000 | 4,950 angles |
-| 768D | 768&times;768 | 589,824 | 294,528 angles |
+This is dimension reduction — and it's everywhere in neural networks. A layer with 768 inputs and 64 outputs is a 64&times;768 matrix. It takes a high-dimensional representation and squishes it down to a smaller one, keeping (hopefully) the important information and discarding the rest.
 
-The number of rotation parameters grows as **n(n&minus;1)/2**. In 2D, there's one rotation plane. In 3D, there are three (XY, XZ, YZ — which is equivalent to rotating "around" the Z, Y, and X axes). In 4D, there are **six** independent rotation planes.
+Below, you can see 2D points being projected onto a line. Each colored point has a letter so you can track where it lands. Rotate the line and watch the points slide along it.
 
-What does rotation in 4D look like? We can't see four dimensions directly, but we can project. Below is a **tesseract** — the 4D equivalent of a cube — projected down to your screen. It looks like a cube inside a cube, connected at the corners.
-
-<HigherDimensionsWidget />
+<DimensionProjectionWidget />
 
 <TryIt>
-Click the rotation plane buttons and watch. **XY**, **XZ**, and **YZ** look like ordinary 3D rotations — familiar. Now try **XW**, **YW**, or **ZW**. Something *weird* happens: the inner and outer cubes appear to swap places, like one is turning inside-out! That's what "rotating into the fourth dimension" looks like — the part of the shape that was "close" in the W direction moves "far," and vice versa. It's like a cube breathing.
+Start with the **Arrow** shape. At **0&deg;** (horizontal line), you're only keeping each point's x-coordinate — the arrow gets squished onto the x-axis. Switch to **90&deg;** (vertical) and you keep only the y-coordinate. Now try **45&deg;** — you get a mix of both.
+
+Notice how some directions preserve the shape's structure better than others. At 0&deg;, points B and C land in almost the same spot — they're "confused." At 45&deg;, all the points spread out more evenly. Finding the direction that preserves the most information is exactly what algorithms like PCA (principal component analysis) do.
 </TryIt>
 
-<KeyInsight>
-Neural networks typically work in hundreds or thousands of dimensions. A single layer in a typical language model transforms a 768-dimensional space — that's a matrix with over half a million entries. The math is the same as our 2D examples. Just... bigger.
-</KeyInsight>
+When the matrix has **more rows than columns**, it does the opposite — it *embeds* a lower dimension into a higher one. A 768&times;1 matrix takes a single number and places it into a 768-dimensional space. Neural networks do both: expanding dimensions to create richer representations, then compressing them back down.
 
 ## The Neural Network Connection
 
-Here's the punchline of this chapter. Look at a single layer in a neural network: a set of input neurons connected to a set of output neurons by weighted connections.
+Here's the punchline of this chapter. A single layer in a neural network does three things in sequence:
 
-Each output neuron computes a **weighted sum** of all the inputs. Input &times; weight, added up. That's exactly what matrix multiplication does. The weights connecting one layer to the next **are** a matrix.
+1. **Matrix multiply**: multiply the inputs by a weight matrix (rotate and stretch the space)
+2. **Add bias**: shift everything by a fixed offset (translate the space)
+3. **Apply activation function**: bend the space non-linearly (e.g., clip negative values to zero with ReLU)
+
+The matrix part is everything we've been exploring. The bias is a simple shift — it moves the origin. And the activation function is the crucial non-linear ingredient that lets neural networks learn things that pure matrices can't.
+
+Without activation functions, stacking layers would be pointless: a matrix times a matrix is just another matrix. Two rotations compose into one rotation. But add a non-linear bend between each layer, and suddenly you can build arbitrarily complex transformations.
 
 <NeuronVsMatrixWidget />
 
 <TryIt>
-Adjust the weight sliders and watch both views update at the same time. The neuron diagram on the left and the geometric view on the right are showing the **exact same math** — just drawn differently! Try **Rotate 90&deg;** — the neuron weights become [0, &minus;1, 1, 0] and the colored dots spin a quarter turn. Try **Collapse to line** — one output neuron goes dead and the dots all squish onto a single line. Can you find weights that flip the L-shape of dots upside down? (Hint: try making w&#x2082;&#x2082; negative.)
+Adjust the weight sliders and watch both views update at the same time. The neuron diagram on the left and the geometric view on the right are showing the **exact same math** — just drawn differently! Try **Rotate 90&deg;** — the neuron weights become [0, &minus;1, 1, 0] and the colored dots spin a quarter turn. Try **Collapse to line** — one output neuron goes dead and the dots all squish onto a single line.
 </TryIt>
 
 This dual interpretation is profound:
@@ -120,7 +107,7 @@ This dual interpretation is profound:
 Both are true simultaneously. They're just two ways of seeing the same math.
 
 <KeyInsight>
-A neural network layer and a matrix transformation are the same thing, drawn differently. When we train a neural network, we're learning the right matrix at each layer — the right geometric transformation to apply to the data.
+A neural network layer and a matrix transformation are the same thing, drawn differently. When we train a neural network, we're learning the right matrix at each layer — the right geometric transformation to apply to the data. Real neural networks work in hundreds or thousands of dimensions — a single layer in a typical language model transforms a 768-dimensional space, with over half a million matrix entries — but the math is identical to our 2D examples. Just... bigger.
 </KeyInsight>
 
 ## Training Is Geometry

@@ -4,8 +4,8 @@ import Content from "./content.mdx";
 import {
   Transform1DWidget,
   Transform2DWidget,
-  Transform3DWidget,
-  HigherDimensionsWidget,
+  BasisVectorViewWidget,
+  DimensionProjectionWidget,
   NeuronVsMatrixWidget,
 } from "./widgets";
 
@@ -25,8 +25,8 @@ export default function Chapter04() {
           components={{
             Transform1DWidget,
             Transform2DWidget,
-            Transform3DWidget,
-            HigherDimensionsWidget,
+            BasisVectorViewWidget,
+            DimensionProjectionWidget,
             NeuronVsMatrixWidget,
           }}
         />
