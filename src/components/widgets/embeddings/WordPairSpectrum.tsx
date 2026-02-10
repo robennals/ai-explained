@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback, useRef, useEffect } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
 import { useEmbeddingData } from "./useEmbeddingData";
 import {
@@ -92,35 +92,28 @@ function Autocomplete({
   );
 }
 
+interface SpectrumEntry {
+  word: string;
+  t: number; // 0..1 normalized position on the spectrum
+  isAnchor: boolean;
+}
+
 export function WordPairSpectrum() {
   const { data, loading, error } = useEmbeddingData();
   const [wordA, setWordA] = useState("ant");
   const [wordB, setWordB] = useState("whale");
   const [presetDescription, setPresetDescription] = useState(PRESETS[0].description);
-  const [hoveredWord, setHoveredWord] = useState<string | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [containerWidth, setContainerWidth] = useState(600);
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-    const obs = new ResizeObserver((entries) => {
-      for (const entry of entries) setContainerWidth(entry.contentRect.width);
-    });
-    obs.observe(containerRef.current);
-    return () => obs.disconnect();
-  }, []);
 
   const resetState = useCallback(() => {
     setWordA("ant");
     setWordB("whale");
     setPresetDescription(PRESETS[0].description);
-    setHoveredWord(null);
   }, []);
 
   const wordSet = useMemo(() => new Set(data?.words ?? []), [data]);
 
-  // Compute spectrum results
-  const spectrum = useMemo(() => {
+  // Compute spectrum results as a sorted list
+  const entries = useMemo((): SpectrumEntry[] | null => {
     if (!data) return null;
     const idxA = data.words.indexOf(wordA);
     const idxB = data.words.indexOf(wordB);
@@ -149,31 +142,37 @@ export function WordPairSpectrum() {
     scored.sort((a, b) => b.relevance - a.relevance);
     const top = scored.slice(0, NUM_RESULTS);
 
-    // Sort by projection for display
-    top.sort((a, b) => a.projection - b.projection);
-
-    // Compute projection range including the anchor words
+    // Include anchor projections
     const projA = dotProduct(vecA, direction);
     const projB = dotProduct(vecB, direction);
+
+    // Compute min/max for normalization
     const allProjs = [projA, projB, ...top.map((t) => t.projection)];
     const minProj = Math.min(...allProjs);
     const maxProj = Math.max(...allProjs);
-    const pad = (maxProj - minProj) * 0.08;
+    const range = maxProj - minProj || 1;
 
-    return {
-      results: top,
-      projA,
-      projB,
-      minProj: minProj - pad,
-      maxProj: maxProj + pad,
-    };
+    // Build entries: anchors + results
+    const all: SpectrumEntry[] = [
+      { word: wordA, t: (projA - minProj) / range, isAnchor: true },
+      { word: wordB, t: (projB - minProj) / range, isAnchor: true },
+      ...top.map((r) => ({
+        word: data.words[r.index],
+        t: (r.projection - minProj) / range,
+        isAnchor: false,
+      })),
+    ];
+
+    // Sort by projection (low to high = wordA direction to wordB direction)
+    all.sort((a, b) => a.t - b.t);
+
+    return all;
   }, [data, wordA, wordB]);
 
   const handlePreset = (preset: Preset) => {
     setWordA(preset.wordA);
     setWordB(preset.wordB);
     setPresetDescription(preset.description);
-    setHoveredWord(null);
   };
 
   if (loading) {
@@ -193,17 +192,6 @@ export function WordPairSpectrum() {
       </WidgetContainer>
     );
   }
-
-  const PADDING = 50;
-  const LINE_Y = 40;
-  const svgHeight = 100;
-  const lineWidth = containerWidth - PADDING * 2;
-
-  const projToX = (proj: number) => {
-    if (!spectrum) return PADDING;
-    const t = (proj - spectrum.minProj) / (spectrum.maxProj - spectrum.minProj);
-    return PADDING + Math.max(0, Math.min(1, t)) * lineWidth;
-  };
 
   return (
     <WidgetContainer
@@ -233,7 +221,7 @@ export function WordPairSpectrum() {
       <div className="mb-4 grid grid-cols-2 gap-3">
         <div>
           <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-muted">
-            Left word
+            Word A
           </label>
           <Autocomplete
             words={data.words}
@@ -249,7 +237,7 @@ export function WordPairSpectrum() {
         </div>
         <div>
           <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-muted">
-            Right word
+            Word B
           </label>
           <Autocomplete
             words={data.words}
@@ -265,89 +253,61 @@ export function WordPairSpectrum() {
         </div>
       </div>
 
-      {/* Spectrum visualization */}
-      <div ref={containerRef} className="w-full">
-        {spectrum ? (
-          <svg width={containerWidth} height={svgHeight} className="overflow-visible">
-            {/* Main line */}
-            <line
-              x1={PADDING} y1={LINE_Y}
-              x2={containerWidth - PADDING} y2={LINE_Y}
-              stroke="var(--color-border)" strokeWidth={2}
-            />
-            {/* Arrows */}
-            <polygon
-              points={`${PADDING - 6},${LINE_Y} ${PADDING + 2},${LINE_Y - 4} ${PADDING + 2},${LINE_Y + 4}`}
-              fill="var(--color-border)"
-            />
-            <polygon
-              points={`${containerWidth - PADDING + 6},${LINE_Y} ${containerWidth - PADDING - 2},${LINE_Y - 4} ${containerWidth - PADDING - 2},${LINE_Y + 4}`}
-              fill="var(--color-border)"
-            />
-
-            {/* Anchor words */}
-            {[
-              { word: wordA, proj: spectrum.projA },
-              { word: wordB, proj: spectrum.projB },
-            ].map(({ word, proj }) => {
-              const cx = projToX(proj);
-              return (
-                <g key={`anchor-${word}`}>
-                  <circle cx={cx} cy={LINE_Y} r={5} fill="var(--color-accent)" />
-                  <text
-                    x={cx} y={LINE_Y - 12}
-                    textAnchor="middle"
-                    className="text-[11px] font-bold pointer-events-none select-none"
-                    fill="var(--color-accent)"
-                  >
-                    {word}
-                  </text>
-                </g>
-              );
-            })}
-
-            {/* Result words */}
-            {spectrum.results.map((r) => {
-              const cx = projToX(r.projection);
-              const word = data.words[r.index];
-              const isHovered = hoveredWord === word;
-              return (
-                <g
-                  key={r.index}
-                  onMouseEnter={() => setHoveredWord(word)}
-                  onMouseLeave={() => setHoveredWord(null)}
-                  className="cursor-default"
-                >
-                  <circle
-                    cx={cx} cy={LINE_Y}
-                    r={isHovered ? 5 : 3.5}
-                    fill={isHovered ? "var(--color-accent)" : "var(--color-foreground)"}
-                    opacity={isHovered ? 1 : 0.7}
-                  />
-                  <text
-                    x={cx} y={LINE_Y + 18}
-                    textAnchor="middle"
-                    className={`text-[10px] pointer-events-none select-none ${isHovered ? "font-bold" : "font-medium"}`}
-                    fill={isHovered ? "var(--color-accent)" : "var(--color-foreground)"}
-                    opacity={isHovered ? 1 : 0.8}
-                  >
-                    {word}
-                  </text>
-                </g>
-              );
-            })}
-          </svg>
-        ) : (
-          <div className="flex items-center justify-center rounded-lg bg-surface p-8 text-xs text-muted">
-            {!wordSet.has(wordA) ? `"${wordA}" not in vocabulary.` :
-             !wordSet.has(wordB) ? `"${wordB}" not in vocabulary.` :
-             "Enter two different words to see the spectrum."}
+      {/* Vertical spectrum list */}
+      {entries ? (
+        <div className="space-y-0">
+          {/* Header row showing direction */}
+          <div className="mb-1 flex items-center text-[10px] text-muted">
+            <span className="w-24" />
+            <span className="flex-1 text-left">{wordA}</span>
+            <span className="flex-1 text-right">{wordB}</span>
           </div>
-        )}
-      </div>
+
+          {entries.map((entry) => (
+            <div
+              key={entry.word}
+              className={`flex items-center gap-2 rounded px-1 py-1 ${
+                entry.isAnchor ? "bg-accent/8" : "hover:bg-surface"
+              }`}
+            >
+              <span
+                className={`w-24 text-right text-[13px] ${
+                  entry.isAnchor
+                    ? "font-bold text-accent"
+                    : "font-medium text-foreground"
+                }`}
+              >
+                {entry.word}
+              </span>
+              {/* Position bar */}
+              <div className="relative flex-1 h-3">
+                <div className="absolute inset-y-0 left-0 right-0 flex items-center">
+                  <div className="h-px w-full bg-border" />
+                </div>
+                <div
+                  className="absolute top-1/2 -translate-y-1/2"
+                  style={{ left: `${entry.t * 100}%` }}
+                >
+                  <div
+                    className={`h-2.5 w-2.5 -ml-[5px] rounded-full ${
+                      entry.isAnchor ? "bg-accent" : "bg-foreground/60"
+                    }`}
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="flex items-center justify-center rounded-lg bg-surface p-8 text-xs text-muted">
+          {!wordSet.has(wordA) ? `"${wordA}" not in vocabulary.` :
+           !wordSet.has(wordB) ? `"${wordB}" not in vocabulary.` :
+           "Enter two different words to see the spectrum."}
+        </div>
+      )}
 
       {presetDescription && (
-        <div className="mt-2 rounded-lg bg-surface p-3 text-xs text-muted">
+        <div className="mt-3 rounded-lg bg-surface p-3 text-xs text-muted">
           {presetDescription}
         </div>
       )}
