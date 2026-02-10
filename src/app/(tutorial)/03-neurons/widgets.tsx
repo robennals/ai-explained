@@ -35,10 +35,18 @@ const NeuronPlayground = dynamic(
   { ssr: false }
 );
 
-const CoordinateDescentTrap = dynamic(
+const NeuronGeometry = dynamic(
   () =>
-    import("@/components/widgets/neurons/CoordinateDescentTrap").then(
-      (m) => m.CoordinateDescentTrap
+    import("@/components/widgets/neurons/NeuronGeometry").then(
+      (m) => m.NeuronGeometry
+    ),
+  { ssr: false }
+);
+
+const TwoLayerPlayground = dynamic(
+  () =>
+    import("@/components/widgets/neurons/TwoLayerPlayground").then(
+      (m) => m.TwoLayerPlayground
     ),
   { ssr: false }
 );
@@ -97,10 +105,18 @@ export function NeuronPlaygroundWidget() {
   );
 }
 
-export function CoordinateDescentTrapWidget() {
+export function NeuronGeometryWidget() {
   return (
     <WidgetSlot>
-      <CoordinateDescentTrap />
+      <NeuronGeometry />
+    </WidgetSlot>
+  );
+}
+
+export function TwoLayerPlaygroundWidget() {
+  return (
+    <WidgetSlot>
+      <TwoLayerPlayground />
     </WidgetSlot>
   );
 }

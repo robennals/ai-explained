@@ -6,7 +6,8 @@ import {
   NeuronDiagramWidget,
   NeuronScaleComparisonWidget,
   NeuronPlaygroundWidget,
-  CoordinateDescentTrapWidget,
+  NeuronGeometryWidget,
+  TwoLayerPlaygroundWidget,
   NetworkTrainerWidget,
 } from "./widgets";
 
@@ -28,7 +29,8 @@ export default function Chapter03() {
             NeuronDiagramWidget,
             NeuronScaleComparisonWidget,
             NeuronPlaygroundWidget,
-            CoordinateDescentTrapWidget,
+            NeuronGeometryWidget,
+            TwoLayerPlaygroundWidget,
             NetworkTrainerWidget,
           }}
         />

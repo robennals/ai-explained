@@ -61,35 +61,37 @@ When you clicked Optimize, the neuron found the right weights automatically. How
 **A neuron is a smooth, trainable logic gate.** With the right weights, it can compute AND, OR, NOT, and more — and because small changes to the weights produce small changes in the output, gradient descent can find those weights automatically. Neurons also handle in-between values naturally, making them building blocks for computation over uncertain, continuous data.
 </KeyInsight>
 
-## The Optimization Catch
+## Neurons as Geometry
 
-You might wonder: if each parameter has a gradient telling it which way to go, why not just optimize them one at a time? Slide weight A to its best value, then slide weight B, then bias, and repeat.
+Instead of truth tables, think about *space*. A neuron takes two inputs — call them A and B. Every possible combination of A and B is a point in a 2D square. The neuron's output assigns a color to each point: green for high, red for low. What does that map look like?
 
-It turns out this doesn't work well. The problem is that parameters interact. The best value for weight A depends on what weight B is set to, and vice versa. When you optimize A, you change the landscape for B. When you optimize B, you change the landscape for A. You end up zigzagging back and forth, making tiny progress.
-
-<CoordinateDescentTrapWidget />
+<NeuronGeometryWidget />
 
 <TryIt>
-Click "One at a time" and watch what happens: the optimizer zigzags back and forth along the narrow valley, making slow progress. Then click "Together" — gradient descent moves both parameters at once, cutting straight to the minimum. Or click "Compare both" to see them side by side.
+Click anywhere on the heatmap to probe that point. Try the challenges and watch the colored regions shift. Hit Optimize on AND or OR and watch the boundary snap into place. Then try XOR — no matter what the optimizer does, the boundary stays a straight line, and it can't separate the diagonal corners.
 </TryIt>
 
-This is why gradient descent updates all parameters at once. Each parameter gets its own gradient, and they all move together in a single step. The combined movement follows the true downhill direction — not the misleading direction you'd get from optimizing one parameter at a time.
-
-<KeyInsight>
-**Gradient descent optimizes all parameters simultaneously.** Optimizing one at a time can get stuck because parameters interact — the best value for one depends on the others. Moving them all together follows the true downhill direction.
-</KeyInsight>
-
-## Beyond One Neuron
-
-A single neuron can compute AND, OR, NOT, NAND, NOR — but not XOR. XOR asks: "is exactly one input on?" That requires two checks: "is at least one on?" (OR) AND "are they not both on?" (NAND). One neuron can only do one check. You need two neurons to do two checks, and a third to combine them.
-
-That's two layers: a **hidden layer** that does the checking, and an **output layer** that combines the results. This is the fundamental insight — each layer performs a computation, and the next layer builds on it. One layer = one check. Two layers = checks combined. More layers = more complex combinations.
+The key insight is geometric: a single neuron draws a **straight line** through input space. Everything on one side is green (high), everything on the other side is red (low). By adjusting the weights and bias, you can tilt and shift this line — but you can't bend it. AND, OR, and NOT are all separable by a single line. XOR is not: the "true" corners (0,1) and (1,0) sit on opposite diagonals, and no single line can separate them from the "false" corners.
 
 <Callout type="info" title="The XOR Crisis">
 In 1969, Minsky and Papert published *Perceptrons*, proving that single-layer networks can't solve XOR. This was taken as proof that neural networks were a dead end, and it killed most neural network research for over a decade — the "AI winter." The fix was always sitting there, obvious in hindsight: use more than one layer.
 </Callout>
 
-In fact, neural networks with enough neurons in enough layers can compute **anything** — this is the **universal approximation theorem**. But having the right architecture isn't enough. You also need to find the right weights. With a single neuron we could just follow the loss curve downhill. But a network with thousands of neurons has thousands of weights. How do you optimize all of them at once?
+What if we add a second layer? Two hidden neurons each draw their own line. The output neuron combines them. Two lines can carve out a region that one line never could.
+
+<TwoLayerPlaygroundWidget />
+
+<TryIt>
+Select the XOR challenge and click Optimize — watch two straight boundaries combine into a curved region that separates the diagonal corners. Try adjusting individual weights to see how each hidden neuron contributes its own line. Then try XNOR (both same) to see a different two-line combination.
+</TryIt>
+
+Each hidden neuron contributes one decision boundary. The output neuron combines them — AND-ing, OR-ing, or blending them together. With just two hidden neurons you can solve XOR. With more neurons and more layers, you can approximate **any** boundary, no matter how complex. This is the **universal approximation theorem**: a neural network with enough neurons can compute anything.
+
+<KeyInsight>
+**One neuron = one straight line through input space.** It can separate points that fall on opposite sides of a line (AND, OR) but not patterns that require curves (XOR). Adding layers lets neurons combine their lines into complex boundaries — which is why deep networks can learn anything.
+</KeyInsight>
+
+But having the right architecture isn't enough. You also need to find the right weights. With a single neuron we could just follow the loss curve downhill. But a network with thousands of neurons has thousands of weights. How do you optimize all of them at once?
 
 ## Training Deep Networks
 
