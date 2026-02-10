@@ -3,9 +3,10 @@ import { getAdjacentChapters } from "@/lib/curriculum";
 import Content from "./content.mdx";
 import {
   WordNumberLineWidget,
+  CombinedNumberLineWidget,
   Simple2DScatterWidget,
   EmbeddingPlaygroundWidget,
-  CustomAxisScatterWidget,
+  WordPairSpectrumWidget,
   EmbeddingLayerDiagramWidget,
 } from "./widgets";
 
@@ -24,9 +25,10 @@ export default function Chapter09() {
         <Content
           components={{
             WordNumberLineWidget,
+            CombinedNumberLineWidget,
             Simple2DScatterWidget,
             EmbeddingPlaygroundWidget,
-            CustomAxisScatterWidget,
+            WordPairSpectrumWidget,
             EmbeddingLayerDiagramWidget,
           }}
         />

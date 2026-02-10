@@ -11,6 +11,14 @@ const WordNumberLine = dynamic(
   { ssr: false }
 );
 
+const CombinedNumberLine = dynamic(
+  () =>
+    import("@/components/widgets/embeddings/CombinedNumberLine").then(
+      (m) => m.CombinedNumberLine
+    ),
+  { ssr: false }
+);
+
 const Simple2DScatter = dynamic(
   () =>
     import("@/components/widgets/embeddings/Simple2DScatter").then(
@@ -27,10 +35,10 @@ const EmbeddingPlayground = dynamic(
   { ssr: false }
 );
 
-const CustomAxisScatter = dynamic(
+const WordPairSpectrum = dynamic(
   () =>
-    import("@/components/widgets/embeddings/CustomAxisScatter").then(
-      (m) => m.CustomAxisScatter
+    import("@/components/widgets/embeddings/WordPairSpectrum").then(
+      (m) => m.WordPairSpectrum
     ),
   { ssr: false }
 );
@@ -65,6 +73,14 @@ export function WordNumberLineWidget() {
   );
 }
 
+export function CombinedNumberLineWidget() {
+  return (
+    <WidgetSlot>
+      <CombinedNumberLine />
+    </WidgetSlot>
+  );
+}
+
 export function Simple2DScatterWidget() {
   return (
     <WidgetSlot>
@@ -81,10 +97,10 @@ export function EmbeddingPlaygroundWidget() {
   );
 }
 
-export function CustomAxisScatterWidget() {
+export function WordPairSpectrumWidget() {
   return (
     <WidgetSlot>
-      <CustomAxisScatter />
+      <WordPairSpectrum />
     </WidgetSlot>
   );
 }
