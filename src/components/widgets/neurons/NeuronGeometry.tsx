@@ -346,16 +346,63 @@ export function NeuronGeometry() {
   const weightedSum = w1 * clickInput.x + w2 * clickInput.y + bias;
   const output = sigmoid(weightedSum);
 
-  // Neuron diagram layout
-  const DW = 360;
-  const DH = 220;
-  const INX = 45;
-  const INA_Y = 55;
-  const INB_Y = 165;
-  const SUMX = 170;
-  const SUMY = 110;
-  const OUTX = 310;
-  const OUTY = 110;
+  const prodA = w1 * clickInput.x;
+  const prodB = w2 * clickInput.y;
+
+  // Neuron diagram layout — matches NeuronPlayground exactly
+  const DW = 680;
+  const DH = 370;
+  const INX = 55;
+  const INA_Y = 65;
+  const INB_Y = 270;
+  const SUMX = 290;
+  const SUMY = 160;
+  const ACTX = 450;
+  const ACTY = 160;
+  const ACTW = 110;
+  const ACTH = 75;
+  const OUTX = 610;
+  const OUTY = 160;
+
+  // Arrow endpoints
+  const aStart = { x: INX + 22, y: INA_Y };
+  const aEnd = { x: SUMX - 28, y: SUMY };
+  const bStart = { x: INX + 22, y: INB_Y };
+  const bEnd = { x: SUMX - 28, y: SUMY };
+
+  // Weight slider attachment points
+  const waX = 155;
+  const waT = (waX - aStart.x) / (aEnd.x - aStart.x);
+  const waY = aStart.y + waT * (aEnd.y - aStart.y);
+  const wbX = 155;
+  const wbT = (wbX - bStart.x) / (bEnd.x - bStart.x);
+  const wbY = bStart.y + wbT * (bEnd.y - bStart.y);
+
+  // Sigmoid curve path
+  const sigmoidPath = useMemo(() => {
+    const pts: string[] = [];
+    const pL = ACTX - ACTW / 2 + 8;
+    const pR = ACTX + ACTW / 2 - 8;
+    const pT = ACTY - ACTH / 2 + 8;
+    const pB = ACTY + ACTH / 2 - 8;
+    for (let i = 0; i <= 100; i++) {
+      const xv = -10 + 20 * (i / 100);
+      const yv = sigmoid(xv);
+      pts.push(
+        `${i === 0 ? "M" : "L"}${(pL + (i / 100) * (pR - pL)).toFixed(1)},${(pB - yv * (pB - pT)).toFixed(1)}`
+      );
+    }
+    return pts.join(" ");
+  }, []);
+
+  // Operating point on sigmoid
+  const opFrac = Math.max(0, Math.min(1, (weightedSum + 10) / 20));
+  const pL = ACTX - ACTW / 2 + 8;
+  const pR = ACTX + ACTW / 2 - 8;
+  const pT = ACTY - ACTH / 2 + 8;
+  const pB = ACTY + ACTH / 2 - 8;
+  const opSx = pL + opFrac * (pR - pL);
+  const opSy = pB - output * (pB - pT);
 
   return (
     <WidgetContainer
@@ -363,10 +410,100 @@ export function NeuronGeometry() {
       description="A single neuron divides 2D space with a straight line."
       onReset={reset}
     >
-      <div className="flex flex-col lg:flex-row gap-4">
+      {/* Row 1: Neuron diagram — full width, matching NeuronPlayground layout */}
+      <svg
+        viewBox={`0 0 ${DW} ${DH}`}
+        className="w-full"
+        aria-label="Interactive neuron diagram"
+      >
+        <defs>
+          <marker id="ng-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#9ca3af" />
+          </marker>
+        </defs>
+
+        {/* === INPUT A === */}
+        <text x={INX} y={INA_Y - 26} textAnchor="middle" className="fill-foreground text-[12px] font-bold pointer-events-none select-none">
+          Input A
+        </text>
+        <circle cx={INX} cy={INA_Y} r={20} fill="#f0f4ff" stroke="#3b82f6" strokeWidth="2" />
+        <text x={INX} y={INA_Y + 5} textAnchor="middle" className="fill-accent text-[14px] font-bold font-mono pointer-events-none select-none">
+          {clickInput.x.toFixed(1)}
+        </text>
+
+        {/* === INPUT B === */}
+        <text x={INX} y={INB_Y - 26} textAnchor="middle" className="fill-foreground text-[12px] font-bold pointer-events-none select-none">
+          Input B
+        </text>
+        <circle cx={INX} cy={INB_Y} r={20} fill="#f0f4ff" stroke="#3b82f6" strokeWidth="2" />
+        <text x={INX} y={INB_Y + 5} textAnchor="middle" className="fill-accent text-[14px] font-bold font-mono pointer-events-none select-none">
+          {clickInput.y.toFixed(1)}
+        </text>
+
+        {/* === ARROW A → SUM === */}
+        <line x1={aStart.x} y1={aStart.y} x2={aEnd.x} y2={aEnd.y} stroke="#9ca3af" strokeWidth="1.5" markerEnd="url(#ng-arrow)" />
+        <line x1={waX} y1={waY} x2={waX} y2={waY + 4} stroke="#9ca3af" strokeWidth="0.8" strokeDasharray="2,2" />
+        <MiniSlider x={waX} y={waY + 4} value={w1} min={-15} max={15} step={0.1} onChange={setW1} label="Weight" interpret={interpretWeight} width={90} />
+        <text x={230} y={aStart.y + 0.82 * (aEnd.y - aStart.y) - 8} textAnchor="middle" className="fill-muted text-[9px] font-mono pointer-events-none select-none">
+          = {prodA.toFixed(1)}
+        </text>
+
+        {/* === ARROW B → SUM === */}
+        <line x1={bStart.x} y1={bStart.y} x2={bEnd.x} y2={bEnd.y} stroke="#9ca3af" strokeWidth="1.5" markerEnd="url(#ng-arrow)" />
+        <line x1={wbX} y1={wbY} x2={wbX} y2={wbY + 4} stroke="#9ca3af" strokeWidth="0.8" strokeDasharray="2,2" />
+        <MiniSlider x={wbX} y={wbY + 4} value={w2} min={-15} max={15} step={0.1} onChange={setW2} label="Weight" interpret={interpretWeight} width={90} />
+        <text x={230} y={bStart.y + 0.82 * (bEnd.y - bStart.y) + 14} textAnchor="middle" className="fill-muted text-[9px] font-mono pointer-events-none select-none">
+          = {prodB.toFixed(1)}
+        </text>
+
+        {/* === SUM NODE === */}
+        <text x={SUMX} y={SUMY - 32} textAnchor="middle" className="fill-foreground text-[12px] font-bold pointer-events-none select-none">
+          Sum
+        </text>
+        <circle cx={SUMX} cy={SUMY} r={26} fill="#fef9ee" stroke="#f59e0b" strokeWidth="2" />
+        <text x={SUMX} y={SUMY + 5} textAnchor="middle" className="fill-warning text-[14px] font-bold font-mono pointer-events-none select-none">
+          {weightedSum.toFixed(1)}
+        </text>
+
+        {/* === BIAS === */}
+        <line x1={SUMX} y1={SUMY + 40} x2={SUMX} y2={SUMY + 28} stroke="#9ca3af" strokeWidth="1" strokeDasharray="3,2" markerEnd="url(#ng-arrow)" />
+        <MiniSlider x={SUMX} y={SUMY + 40} value={bias} min={-20} max={20} step={0.1} onChange={setBias} label="Bias" interpret={interpretBias} width={90} />
+
+        {/* === SUM → ACTIVATION === */}
+        <line x1={SUMX + 28} y1={SUMY} x2={ACTX - ACTW / 2 - 4} y2={ACTY} stroke="#9ca3af" strokeWidth="1.5" markerEnd="url(#ng-arrow)" />
+
+        {/* === ACTIVATION FUNCTION BOX === */}
+        <rect x={ACTX - ACTW / 2} y={ACTY - ACTH / 2} width={ACTW} height={ACTH} rx={10} fill="#f0fdf4" stroke="#10b981" strokeWidth="2" />
+        <text x={ACTX} y={ACTY - ACTH / 2 - 6} textAnchor="middle" className="fill-success text-[9px] font-semibold uppercase tracking-wider pointer-events-none select-none">
+          Activation
+        </text>
+        <path d={sigmoidPath} fill="none" stroke="#10b981" strokeWidth="2" />
+        {/* Operating point crosshairs */}
+        <line x1={opSx} y1={pB} x2={opSx} y2={opSy} stroke="#f59e0b" strokeWidth="1" strokeDasharray="2,2" opacity={0.6} />
+        <line x1={pL} y1={opSy} x2={opSx} y2={opSy} stroke="#f59e0b" strokeWidth="1" strokeDasharray="2,2" opacity={0.6} />
+        <circle cx={opSx} cy={opSy} r={5} fill="#f59e0b" stroke="white" strokeWidth="1.5" />
+
+        {/* === ACTIVATION → OUTPUT === */}
+        <line x1={ACTX + ACTW / 2 + 2} y1={ACTY} x2={OUTX - 26} y2={OUTY} stroke="#9ca3af" strokeWidth="1.5" markerEnd="url(#ng-arrow)" />
+
+        {/* === OUTPUT NODE === */}
+        <text x={OUTX} y={OUTY - 30} textAnchor="middle" className="fill-foreground text-[12px] font-bold pointer-events-none select-none">
+          Output
+        </text>
+        <circle cx={OUTX} cy={OUTY} r={24} fill={outputColor(output)} stroke={outputColor(output)} strokeWidth="2" />
+        <text x={OUTX} y={OUTY + 5} textAnchor="middle" className="fill-white text-[14px] font-bold font-mono pointer-events-none select-none">
+          {output.toFixed(2)}
+        </text>
+        <text x={OUTX} y={OUTY + 40} textAnchor="middle" className="fill-foreground text-[11px] font-medium pointer-events-none select-none">
+          {output >= 0.9 ? "Definitely true" : output >= 0.65 ? "Probably true" : output > 0.35 ? "Uncertain" : output > 0.1 ? "Probably false" : "Definitely false"}
+        </text>
+      </svg>
+
+      {/* Row 2: Canvas + Challenges side by side */}
+      <div className="mt-4 flex flex-col sm:flex-row gap-5 items-start">
         {/* 2D Canvas */}
         <div className="flex-shrink-0">
-          <div className="text-[10px] font-medium text-muted mb-1">
+          <div className="text-xs font-medium text-muted mb-1">
             Output across input space (click to probe)
           </div>
           <div
@@ -380,7 +517,6 @@ export function NeuronGeometry() {
               height={CANVAS_SIZE}
               className="block"
             />
-            {/* SVG overlay for boundary, dots, click marker */}
             <svg
               width={CANVAS_SIZE}
               height={CANVAS_SIZE}
@@ -409,30 +545,10 @@ export function NeuronGeometry() {
                   const correct = target === 1 ? neuronOut > 0.8 : neuronOut < 0.2;
                   return (
                     <g key={i}>
-                      <circle
-                        cx={cx}
-                        cy={cy}
-                        r={12}
-                        fill={target === 1 ? "#10b981" : "#ef4444"}
-                        opacity={0.9}
-                      />
-                      <circle
-                        cx={cx}
-                        cy={cy}
-                        r={12}
-                        fill="none"
-                        stroke="white"
-                        strokeWidth={2}
-                      />
+                      <circle cx={cx} cy={cy} r={12} fill={target === 1 ? "#10b981" : "#ef4444"} opacity={0.9} />
+                      <circle cx={cx} cy={cy} r={12} fill="none" stroke="white" strokeWidth={2} />
                       {correct && (
-                        <text
-                          x={cx}
-                          y={cy + 4}
-                          textAnchor="middle"
-                          fill="white"
-                          fontSize="12"
-                          fontWeight="bold"
-                        >
+                        <text x={cx} y={cy + 4} textAnchor="middle" fill="white" fontSize="12" fontWeight="bold">
                           &#10003;
                         </text>
                       )}
@@ -461,126 +577,67 @@ export function NeuronGeometry() {
           </div>
         </div>
 
-        {/* Neuron diagram */}
+        {/* Challenges panel */}
         <div className="flex-1 min-w-0">
-          <div className="text-[10px] font-medium text-muted mb-1">
-            Neuron (values from {clickPos ? "clicked point" : "center"})
+          <div className="text-sm font-semibold text-foreground mb-2">
+            Challenges
           </div>
-          <svg viewBox={`0 0 ${DW} ${DH}`} className="w-full max-w-[380px]">
-            <defs>
-              <marker id="ng-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-                <path d="M 0 0 L 10 5 L 0 10 z" fill="#9ca3af" />
-              </marker>
-            </defs>
-
-            {/* Input A */}
-            <text x={INX} y={INA_Y - 20} textAnchor="middle" className="fill-foreground text-[11px] font-bold pointer-events-none select-none">
-              A
-            </text>
-            <circle cx={INX} cy={INA_Y} r={16} fill="#f0f4ff" stroke="#3b82f6" strokeWidth="2" />
-            <text x={INX} y={INA_Y + 4} textAnchor="middle" className="fill-accent text-[12px] font-bold font-mono pointer-events-none select-none">
-              {clickInput.x.toFixed(2)}
-            </text>
-
-            {/* Input B */}
-            <text x={INX} y={INB_Y - 20} textAnchor="middle" className="fill-foreground text-[11px] font-bold pointer-events-none select-none">
-              B
-            </text>
-            <circle cx={INX} cy={INB_Y} r={16} fill="#f0f4ff" stroke="#3b82f6" strokeWidth="2" />
-            <text x={INX} y={INB_Y + 4} textAnchor="middle" className="fill-accent text-[12px] font-bold font-mono pointer-events-none select-none">
-              {clickInput.y.toFixed(2)}
-            </text>
-
-            {/* Arrow A → Sum */}
-            <line x1={INX + 18} y1={INA_Y} x2={SUMX - 22} y2={SUMY} stroke="#9ca3af" strokeWidth="1.5" markerEnd="url(#ng-arrow)" />
-            <MiniSlider x={105} y={INA_Y - 28} value={w1} min={-15} max={15} step={0.1} onChange={setW1} label="Weight" interpret={interpretWeight} width={80} />
-
-            {/* Arrow B → Sum */}
-            <line x1={INX + 18} y1={INB_Y} x2={SUMX - 22} y2={SUMY} stroke="#9ca3af" strokeWidth="1.5" markerEnd="url(#ng-arrow)" />
-            <MiniSlider x={105} y={INB_Y - 18} value={w2} min={-15} max={15} step={0.1} onChange={setW2} label="Weight" interpret={interpretWeight} width={80} />
-
-            {/* Sum node */}
-            <circle cx={SUMX} cy={SUMY} r={20} fill="#fef9ee" stroke="#f59e0b" strokeWidth="2" />
-            <text x={SUMX} y={SUMY + 4} textAnchor="middle" className="fill-warning text-[11px] font-bold font-mono pointer-events-none select-none">
-              {weightedSum.toFixed(1)}
-            </text>
-            <text x={SUMX} y={SUMY - 24} textAnchor="middle" className="fill-foreground text-[10px] font-bold pointer-events-none select-none">
-              Sum
-            </text>
-
-            {/* Bias */}
-            <line x1={SUMX} y1={SUMY + 32} x2={SUMX} y2={SUMY + 22} stroke="#9ca3af" strokeWidth="1" strokeDasharray="3,2" markerEnd="url(#ng-arrow)" />
-            <MiniSlider x={SUMX} y={SUMY + 32} value={bias} min={-20} max={20} step={0.1} onChange={setBias} label="Bias" interpret={interpretBias} width={80} />
-
-            {/* Sum → Output */}
-            <line x1={SUMX + 22} y1={SUMY} x2={OUTX - 22} y2={OUTY} stroke="#9ca3af" strokeWidth="1.5" markerEnd="url(#ng-arrow)" />
-            <text x={(SUMX + OUTX) / 2} y={OUTY - 22} textAnchor="middle" className="fill-muted text-[9px] pointer-events-none select-none">
-              sigmoid
-            </text>
-
-            {/* Output node */}
-            <text x={OUTX} y={OUTY - 24} textAnchor="middle" className="fill-foreground text-[10px] font-bold pointer-events-none select-none">
-              Output
-            </text>
-            <circle cx={OUTX} cy={OUTY} r={20} fill={outputColor(output)} stroke={outputColor(output)} strokeWidth="2" />
-            <text x={OUTX} y={OUTY + 4} textAnchor="middle" className="fill-white text-[12px] font-bold font-mono pointer-events-none select-none">
-              {output.toFixed(2)}
-            </text>
-          </svg>
-
-          {/* Challenges */}
-          <div className="mt-2">
-            <div className="text-[10px] font-semibold text-foreground mb-1">Challenges</div>
-            <div className="flex flex-wrap gap-1.5">
-              {(["AND", "OR", "NOT (A)", "NAND"] as GateName[]).map((gate) => (
-                <button
-                  key={gate}
-                  onClick={() => activateChallenge(gate)}
-                  className={`px-2 py-1 text-[10px] font-medium rounded transition-colors ${
-                    gatesSolved[gate]
-                      ? "bg-success/20 text-success"
-                      : activeChallenge === gate
-                      ? "bg-accent/20 text-accent"
-                      : "bg-foreground/5 text-foreground hover:bg-foreground/10"
-                  }`}
-                >
-                  {gatesSolved[gate] ? "✓ " : ""}{gate}
-                </button>
-              ))}
+          <div className="text-xs text-muted mb-3">
+            Can you find weights that make the neuron compute each gate? Select one and adjust the sliders above, or hit Optimize.
+          </div>
+          <div className="flex flex-col gap-2">
+            {(["AND", "OR", "NOT (A)", "NAND"] as GateName[]).map((gate) => (
               <button
-                onClick={() => activateChallenge("XOR")}
-                className={`px-2 py-1 text-[10px] font-medium rounded transition-colors ${
-                  activeChallenge === "XOR"
-                    ? "bg-error/20 text-error"
-                    : "bg-foreground/5 text-error/60 hover:text-error"
+                key={gate}
+                onClick={() => activateChallenge(gate)}
+                className={`w-full text-left px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${
+                  gatesSolved[gate]
+                    ? "bg-success/10 text-success border border-success/30"
+                    : activeChallenge === gate
+                    ? "bg-accent/10 text-accent border border-accent/30"
+                    : "bg-foreground/5 text-foreground hover:bg-foreground/10 border border-transparent"
                 }`}
               >
-                XOR
+                {gatesSolved[gate] ? "✓ " : activeChallenge === gate ? "▸ " : "○ "}
+                {gate}
               </button>
-            </div>
-            {activeChallenge && (
-              <div className="mt-2 flex items-center gap-2">
-                <button
-                  onClick={startOptimize}
-                  className={`px-3 py-1.5 text-[10px] font-medium rounded-md transition-colors ${
-                    isOptimizing
-                      ? "bg-error text-white hover:bg-error/80"
-                      : "bg-accent text-white hover:bg-accent/80"
-                  }`}
-                >
-                  {isOptimizing ? "Stop" : "Optimize"}
-                </button>
-                {xorFailed && (
-                  <span className="text-[10px] font-medium text-error">
-                    Can&apos;t solve it — the boundary is always a straight line!
-                  </span>
-                )}
-                {!xorFailed && activeChallenge !== "XOR" && gatesSolved[activeChallenge] && (
-                  <span className="text-[10px] font-medium text-success">Solved!</span>
-                )}
-              </div>
-            )}
+            ))}
+            <button
+              onClick={() => activateChallenge("XOR")}
+              className={`w-full text-left px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${
+                activeChallenge === "XOR"
+                  ? "bg-error/10 text-error border border-error/30"
+                  : "bg-foreground/5 text-error/60 hover:text-error border border-transparent"
+              }`}
+            >
+              {activeChallenge === "XOR" ? "▸ " : "○ "}XOR
+            </button>
           </div>
+
+          {activeChallenge && (
+            <div className="mt-4 flex flex-col gap-2">
+              <button
+                onClick={startOptimize}
+                className={`w-full px-4 py-3 text-sm font-semibold rounded-lg transition-colors ${
+                  isOptimizing
+                    ? "bg-error text-white hover:bg-error/80"
+                    : "bg-accent text-white hover:bg-accent/80"
+                }`}
+              >
+                {isOptimizing ? "Stop Optimizing" : "Optimize"}
+              </button>
+              {xorFailed && (
+                <div className="text-sm font-medium text-error text-center py-1">
+                  Can&apos;t solve it — the boundary is always a straight line!
+                </div>
+              )}
+              {!xorFailed && activeChallenge !== "XOR" && gatesSolved[activeChallenge] && (
+                <div className="text-sm font-medium text-success text-center py-1">
+                  Solved!
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </WidgetContainer>
