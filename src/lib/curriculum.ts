@@ -37,6 +37,7 @@ export const chapters: Chapter[] = [
     prerequisites: [2],
     description:
       "A neuron is a smooth logic gate. Stack them with nonlinear activations and they can compute anything — without activation, depth is an illusion.",
+    ready: true,
   },
   {
     id: 4,

@@ -35,42 +35,18 @@ const NeuronPlayground = dynamic(
   { ssr: false }
 );
 
-const DecisionBoundaryExplorer = dynamic(
+const CoordinateDescentTrap = dynamic(
   () =>
-    import("@/components/widgets/neurons/DecisionBoundaryExplorer").then(
-      (m) => m.DecisionBoundaryExplorer
+    import("@/components/widgets/neurons/CoordinateDescentTrap").then(
+      (m) => m.CoordinateDescentTrap
     ),
   { ssr: false }
 );
 
-const XORBreakthrough = dynamic(
+const NetworkTrainer = dynamic(
   () =>
-    import("@/components/widgets/neurons/XORBreakthrough").then(
-      (m) => m.XORBreakthrough
-    ),
-  { ssr: false }
-);
-
-const LinearCollapseDemo = dynamic(
-  () =>
-    import("@/components/widgets/neurons/LinearCollapseDemo").then(
-      (m) => m.LinearCollapseDemo
-    ),
-  { ssr: false }
-);
-
-const NeuralNetworkTrainer = dynamic(
-  () =>
-    import("@/components/widgets/neurons/NeuralNetworkTrainer").then(
-      (m) => m.NeuralNetworkTrainer
-    ),
-  { ssr: false }
-);
-
-const ActivationFunctionExplorer = dynamic(
-  () =>
-    import("@/components/widgets/neurons/ActivationFunctionExplorer").then(
-      (m) => m.ActivationFunctionExplorer
+    import("@/components/widgets/neurons/NetworkTrainer").then(
+      (m) => m.NetworkTrainer
     ),
   { ssr: false }
 );
@@ -121,42 +97,18 @@ export function NeuronPlaygroundWidget() {
   );
 }
 
-export function DecisionBoundaryExplorerWidget() {
+export function CoordinateDescentTrapWidget() {
   return (
     <WidgetSlot>
-      <DecisionBoundaryExplorer />
+      <CoordinateDescentTrap />
     </WidgetSlot>
   );
 }
 
-export function XORBreakthroughWidget() {
+export function NetworkTrainerWidget() {
   return (
     <WidgetSlot>
-      <XORBreakthrough />
-    </WidgetSlot>
-  );
-}
-
-export function LinearCollapseDemoWidget() {
-  return (
-    <WidgetSlot>
-      <LinearCollapseDemo />
-    </WidgetSlot>
-  );
-}
-
-export function NeuralNetworkTrainerWidget() {
-  return (
-    <WidgetSlot>
-      <NeuralNetworkTrainer />
-    </WidgetSlot>
-  );
-}
-
-export function ActivationFunctionExplorerWidget() {
-  return (
-    <WidgetSlot>
-      <ActivationFunctionExplorer />
+      <NetworkTrainer />
     </WidgetSlot>
   );
 }

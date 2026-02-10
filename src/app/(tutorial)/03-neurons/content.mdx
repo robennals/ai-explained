@@ -48,121 +48,66 @@ A neuron is like a **smooth version of a logic gate**. With the right weights, a
 <NeuronPlaygroundWidget />
 
 <TryIt>
-Start by sliding the input values and watching how the output changes. Then try the gate challenges: can you find weight and bias settings that make the neuron compute AND? Press "Show" on any challenge to see one solution. Then try XOR — you won't find settings that work. We'll see why soon.
+Start by sliding the input values and watching how the output changes. Then try the gate challenges: click AND to see the target outputs. Can you find weight and bias settings that match? If you get stuck, hit Optimize and watch gradient descent find the right weights automatically. Then try XOR — even optimization can't solve it with one neuron.
 </TryIt>
 
 But there's something important here beyond just mimicking logic gates. Notice what happens when you slide an input to a value *between* 0 and 1 — say 0.6. The output isn't forced to snap to "true" or "false." It can be somewhere in between: 0.73, or 0.4, or any other value. The neuron handles *degrees* naturally.
 
 This matters because real-world data is rarely cleanly true or false. Is this email spam? Probably. Is that shadow in the photo a cat? Maybe. Is this patient sick? The test says 0.7 likely. A neuron can take uncertain inputs and produce a graded output — "probably true" rather than just "true" or "false."
 
+When you clicked Optimize, the neuron found the right weights automatically. How? It uses the same idea from Chapter 2: define a **loss** that measures how wrong the outputs are, then follow the gradient downhill. Because the neuron is smooth — small weight changes produce small output changes — the loss landscape has slopes you can follow. That's gradient descent: calculate how each weight affects the error, nudge every weight a little in the right direction, repeat. The activation function is what keeps everything smooth and trainable.
+
 <KeyInsight>
-**A neuron is a weighted sum plus an activation function.** With the right weights, even a simple two-input neuron can compute AND, OR, NOT, and more. But neurons aren't limited to binary logic — they naturally handle in-between values, making them building blocks for computation over uncertain, continuous data. And because small changes to the weights produce small changes in the output, they're exactly the kind of model that optimization can work with.
+**A neuron is a smooth, trainable logic gate.** With the right weights, it can compute AND, OR, NOT, and more — and because small changes to the weights produce small changes in the output, gradient descent can find those weights automatically. Neurons also handle in-between values naturally, making them building blocks for computation over uncertain, continuous data.
 </KeyInsight>
 
-## Drawing Lines
+## The Optimization Catch
 
-Why can't a single neuron do XOR? To understand, let's look at what a neuron is *geometrically*.
+You might wonder: if each parameter has a gradient telling it which way to go, why not just optimize them one at a time? Slide weight A to its best value, then slide weight B, then bias, and repeat.
 
-Plot the four input combinations on a 2D plane: (0,0), (0,1), (1,0), (1,1). The neuron's weighted sum — `wA x A + wB x B + bias` — defines a straight line through this plane. On one side of the line, the output is near 1. On the other side, near 0. The line itself is where the neuron is exactly 50/50 — the **decision boundary**.
+It turns out this doesn't work well. The problem is that parameters interact. The best value for weight A depends on what weight B is set to, and vice versa. When you optimize A, you change the landscape for B. When you optimize B, you change the landscape for A. You end up zigzagging back and forth, making tiny progress.
 
-AND is easy: draw a line that puts (1,1) on one side and everything else on the other. OR is easy: put (0,0) alone on one side. But XOR asks you to put (0,1) and (1,0) together on one side, with (0,0) and (1,1) on the other — and these points are on *opposite corners*. No single straight line can do it.
-
-This is called **linear separability**: a problem is linearly separable if you can solve it with a single straight line (or, in higher dimensions, a flat surface). AND and OR are linearly separable. XOR is not.
-
-<DecisionBoundaryExplorerWidget />
+<CoordinateDescentTrapWidget />
 
 <TryIt>
-Drag the line to solve AND — isolate the (1,1) corner from everything else. Then solve OR. Then try XOR: put (0,1) and (1,0) together while keeping (0,0) and (1,1) apart. No matter how you rotate or shift the line, you can't get all four right. Scroll to rotate, drag to move. XOR is fundamentally not a straight-line problem.
+Click "One at a time" and watch what happens: the optimizer zigzags back and forth along the narrow valley, making slow progress. Then click "Together" — gradient descent moves both parameters at once, cutting straight to the minimum. Or click "Compare both" to see them side by side.
 </TryIt>
+
+This is why gradient descent updates all parameters at once. Each parameter gets its own gradient, and they all move together in a single step. The combined movement follows the true downhill direction — not the misleading direction you'd get from optimizing one parameter at a time.
+
+<KeyInsight>
+**Gradient descent optimizes all parameters simultaneously.** Optimizing one at a time can get stuck because parameters interact — the best value for one depends on the others. Moving them all together follows the true downhill direction.
+</KeyInsight>
+
+## Beyond One Neuron
+
+A single neuron can compute AND, OR, NOT, NAND, NOR — but not XOR. XOR asks: "is exactly one input on?" That requires two checks: "is at least one on?" (OR) AND "are they not both on?" (NAND). One neuron can only do one check. You need two neurons to do two checks, and a third to combine them.
+
+That's two layers: a **hidden layer** that does the checking, and an **output layer** that combines the results. This is the fundamental insight — each layer performs a computation, and the next layer builds on it. One layer = one check. Two layers = checks combined. More layers = more complex combinations.
 
 <Callout type="info" title="The XOR Crisis">
-In 1969, Minsky and Papert published *Perceptrons*, proving that single-layer networks can't solve XOR. This was taken as proof that neural networks were a dead end. It killed most neural network research for over a decade — the "AI winter." The fix was always sitting there, obvious in hindsight: use more than one layer.
+In 1969, Minsky and Papert published *Perceptrons*, proving that single-layer networks can't solve XOR. This was taken as proof that neural networks were a dead end, and it killed most neural network research for over a decade — the "AI winter." The fix was always sitting there, obvious in hindsight: use more than one layer.
 </Callout>
 
-## Breaking Through
+In fact, neural networks with enough neurons in enough layers can compute **anything** — this is the **universal approximation theorem**. But having the right architecture isn't enough. You also need to find the right weights. With a single neuron we could just follow the loss curve downhill. But a network with thousands of neurons has thousands of weights. How do you optimize all of them at once?
 
-If one neuron draws one line, what happens when you use *two* neurons and combine their outputs?
+## Training Deep Networks
 
-Two lines. And with two lines, you can carve out regions that no single line could isolate.
+The answer is **backpropagation** — an algorithm that figures out how each weight in the network contributes to the overall error, then nudges every weight in the right direction simultaneously.
 
-Here's one way to build XOR from neurons:
-- Neuron A computes OR: "is *at least one* input on?"
-- Neuron B computes NAND (not-and): "are they *not both* on?"
-- Output neuron computes AND of A and B: "at least one is on, but not both."
+The idea is elegant: start at the output and work backward. The output neuron knows its error directly. For the layer before it, we ask: "how much did each neuron contribute to that error?" For the layer before *that*, we ask the same question again. The error signal flows backward through the network, layer by layer, telling each weight which way to adjust.
 
-That's XOR. Three neurons, two layers — problem solved.
+This is just the chain rule from calculus, applied systematically. Each layer passes the training signal backward to the previous layer. The result: every weight in the network gets its own personalized nudge, all from a single forward pass and backward pass.
 
-This is the fundamental insight about depth: **each layer transforms the data into a new representation where the next layer's job is easier.** The hidden layer doesn't solve the problem directly. It reshapes it into a problem that a single line *can* solve.
-
-<XORBreakthroughWidget />
+<NetworkTrainerWidget />
 
 <TryIt>
-Switch from 1 layer to 2 layers. Watch the right panel — it shows what the hidden layer "sees." The four input points have been *moved*: in this new space, the two XOR-true cases are on one side and the two XOR-false cases are on the other. The hidden layer transformed an impossible problem into an easy one.
+Try XOR first with 1 layer — it can't solve it, no matter how long you train. Switch to 2 layers and hit Train: watch the classification regions bend and separate the classes. Now try Spirals — you'll need 3+ layers and more neurons per layer. Notice how more layers let the network learn more complex boundaries.
 </TryIt>
 
 <KeyInsight>
-**Depth transforms problems.** A single neuron draws one line. A hidden layer transforms the entire input space — stretching, folding, rearranging the points — so that what was previously inseparable becomes separable. Each layer makes the next layer's job easier. This is why neural networks are built in layers.
+**Backpropagation makes deep networks trainable.** The training signal flows backward from the output through every layer, telling each weight which way to adjust. Combined with the smoothness of neurons, this means you can optimize networks with millions of weights — which is how modern AI works.
 </KeyInsight>
-
-## The Activation Trick
-
-You might be thinking: great, so more layers = more power. Let's just stack a hundred layers and solve everything!
-
-But there's a catch — and it's the most important thing in this chapter.
-
-What happens if you remove the activation function? A neuron without an activation function is just: `output = wA x A + wB x B + bias`. That's a **linear** function — it just multiplies and adds. And here's the thing about linear functions: **a linear function of a linear function is still a linear function.**
-
-Layer 1 takes inputs and multiplies and adds. Layer 2 takes those results and multiplies and adds. But the whole thing simplifies to... one multiplication and one addition. You could collapse a hundred layers into a single layer with different numbers. No matter how deep you go, you're still drawing a straight line.
-
-It's like multiplying a number by 3, then by 5, then by 2. You could have just multiplied by 30. Adding more multiplications never gets you anything beyond one multiplication.
-
-The activation function *breaks* this. Because it bends the curve — it's not a straight line — two layers with activation are genuinely more powerful than one. This nonlinearity is what makes depth meaningful. Remove it, and no matter how elaborate your architecture looks, you're still stuck with a single straight line.
-
-<LinearCollapseDemoWidget />
-
-<TryIt>
-Turn off the activation function and set depth to 5 layers. Hit Train. No matter how long it runs, the boundary stays straight — five layers of nothing is still nothing. Now turn activation back on, keep 5 layers, hit Train. Watch the boundary bend and curve around the data. The activation function isn't decoration. It's the entire reason depth works.
-</TryIt>
-
-<KeyInsight>
-**Without activation functions, depth is an illusion.** A stack of linear layers always collapses to a single linear layer — the decision boundary is a straight line no matter how deep you go. The nonlinear activation function is what makes each layer *genuinely add* to the network's expressive power.
-</KeyInsight>
-
-## What Can Neurons Compute?
-
-Neurons with activation functions, stacked in layers, can curve the decision boundary. But *how much* can they curve it? What can they actually compute?
-
-The answer, surprisingly, is: **anything**. This is the **universal approximation theorem** — a neural network with enough neurons can approximate any continuous function to any desired accuracy. In theory, even a single hidden layer suffices. In practice, "enough neurons" might mean millions. Adding more layers lets you do the same job with far fewer neurons — depth is exponentially more efficient than width.
-
-Let's see this in action. Below, you can place points on a canvas — blue and orange — and watch a neural network learn to classify them in real time. Draw any pattern you like: a circle inside a ring, a zigzag, a smiley face. Then see how the architecture affects what the network can learn.
-
-<NeuralNetworkTrainerWidget />
-
-<TryIt>
-Load the "circle" preset — blue points surrounded by orange. With 1 layer, the boundary can't wrap around the circle. Switch to 2 layers and watch it learn the ring shape. Now try "spirals" — that's the classic hard problem. You'll need at least 3 layers and more neurons. Try drawing your own pattern and experimenting with the architecture controls.
-</TryIt>
-
-<Callout type="info" title="Regression vs. Classification">
-The point-classification mode above predicts *categories* — blue or orange. That's **classification**. But the same neural network architecture can also predict *numbers* — how high is a curve at this point? That's **regression**. Same architecture, same training algorithm. The only difference is how you interpret the output.
-</Callout>
-
-## Not All Activations Are Equal
-
-We've been using sigmoid as our activation function. But there are other options, and the choice matters a lot for deep networks.
-
-The problem shows up during training. As we saw in Chapter 2, training works by figuring out which direction to adjust each weight to reduce the error. In deep networks, this signal has to travel backward through every layer. And some activation functions make this signal fade away as it passes through.
-
-Sigmoid has flat regions near 0 and 1 — once you're deep in the flat part, the signal for "which way to adjust" is nearly zero. Stack several layers of this, and the learning signal evaporates before it reaches the early layers. This is called the **vanishing gradient problem**.
-
-**ReLU** — `max(0, x)` — fixes this for positive inputs. It's the simplest possible activation: just cut off anything below zero. For positive values, the signal passes through at full strength. But if a neuron's input goes permanently negative, it outputs 0 and can never recover. It's a **dead neuron**.
-
-**Swish** — `x x sigmoid(x)` — is a modern compromise that avoids dead neurons while keeping signal flowing.
-
-<ActivationFunctionExplorerWidget />
-
-<TryIt>
-Set depth to 8 layers with sigmoid. Hit Train and watch the gradient heatmap — the early layers (top rows) are dark, meaning the learning signal has faded to nearly zero. They're barely learning. Switch to ReLU: the signal flows better. Switch to Swish: signals flow *and* fewer neurons die. This is why modern networks rarely use sigmoid as their activation.
-</TryIt>
 
 ## A Neuron's Family Tree
 
@@ -174,6 +119,6 @@ What's more surprising is how many fields independently discovered the same math
 
 ## What's Next
 
-We've met the building block — the neuron — and seen that it's a configurable logic operation with graded outputs. We've seen that stacking them in layers enables complexity, but *only* because the activation function prevents those layers from collapsing into one. We've watched neural networks learn to classify any pattern we can draw, and seen how the choice of activation function affects training.
+We've seen the full picture: neurons are smooth computation units, and because they're smooth, you can optimize them. Stack them in layers and you can compute anything. Backpropagation lets you train all the weights at once, even in deep networks. This is the core of how modern AI works — the architecture is simple, and training finds the right weights.
 
-But so far we've treated each layer as a box that "does something" to its inputs. What is that something, exactly? It turns out every layer is performing a geometric transformation — stretching, rotating, and folding the data in space. In the next chapter, we'll see the math behind that transformation, and discover a surprising connection: the same operations that power neural networks are exactly what video game graphics have been doing for decades.
+But we've been training on tiny problems with a handful of data points. Real AI systems learn from millions of examples, and getting that learning process right is an art. In the next chapter, we'll see how training actually works at scale — what can go wrong, and the techniques that make it work.
