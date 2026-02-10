@@ -1,0 +1,37 @@
+import { ChapterNav } from "@/components/layout/ChapterNav";
+import { getAdjacentChapters } from "@/lib/curriculum";
+import Content from "./content.mdx";
+import {
+  WordNumberLineWidget,
+  Simple2DScatterWidget,
+  EmbeddingPlaygroundWidget,
+  CustomAxisScatterWidget,
+  EmbeddingLayerDiagramWidget,
+} from "./widgets";
+
+export const metadata = {
+  title: "Embeddings and Vector Spaces — AI Explained",
+  description:
+    "From one-hot to learned representations. Word analogies, semantic structure, and exploring the geometry of meaning.",
+};
+
+export default function Chapter09() {
+  const { prev, next } = getAdjacentChapters("09-embeddings");
+
+  return (
+    <article>
+      <div className="prose prose-lg max-w-none">
+        <Content
+          components={{
+            WordNumberLineWidget,
+            Simple2DScatterWidget,
+            EmbeddingPlaygroundWidget,
+            CustomAxisScatterWidget,
+            EmbeddingLayerDiagramWidget,
+          }}
+        />
+      </div>
+      <ChapterNav prev={prev} next={next} />
+    </article>
+  );
+}

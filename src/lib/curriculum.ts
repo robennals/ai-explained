@@ -91,6 +91,7 @@ export const chapters: Chapter[] = [
     prerequisites: [5, 6],
     description:
       "From one-hot to learned representations. Word analogies, semantic structure, and rotatable dimensions of meaning.",
+    ready: true,
   },
   {
     id: 10,
