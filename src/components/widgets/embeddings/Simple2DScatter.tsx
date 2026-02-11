@@ -18,12 +18,13 @@ interface VennPoint {
   vennY: number; // size: 0 = small, 10 = big
 }
 
-// For the four-category preset.
+// For the four-category preset — positions are hand-tuned to land inside
+// the correct rectangle overlap zones.
 interface QuadPoint {
   word: string;
   category: "pet" | "predator" | "household" | "weapon" | "multi";
-  quadX: number; // 0 = dangerous, 10 = safe
-  quadY: number; // 0 = non-living, 10 = living
+  quadX: number;
+  quadY: number;
 }
 
 const VENN_WORDS: VennPoint[] = [
@@ -81,24 +82,31 @@ const SCATTER_WORDS: WordPoint[] = [
   { word: "gun",       category: "object", size: 1.5, dangerous: 10 },
 ];
 
+// Four overlapping rectangles — items in overlap zones belong to multiple categories.
+// Rectangle boundaries: each category covers ~65% of each axis.
+//   Pets:      x 3.5→10, y 3.5→10  (top-right)
+//   Predators: x 0→6.5,  y 3.5→10  (top-left)
+//   Household: x 3.5→10, y 0→6.5   (bottom-right)
+//   Weapons:   x 0→6.5,  y 0→6.5   (bottom-left)
+// Overlap zones are where rectangles intersect (x or y between 3.5 and 6.5).
 const QUAD_WORDS: QuadPoint[] = [
-  // Pets — top-right (safe + living)
+  // Pets — top-right corner (safe + living)
   { word: "cat",       category: "pet",      quadX: 8,   quadY: 8 },
   { word: "rabbit",    category: "pet",      quadX: 9,   quadY: 7.5 },
   { word: "goldfish",  category: "pet",      quadX: 8.5, quadY: 9 },
   { word: "hamster",   category: "pet",      quadX: 9.5, quadY: 8.5 },
 
-  // Predators — top-left (dangerous + living)
+  // Predators — top-left corner
   { word: "shark",     category: "predator", quadX: 1,   quadY: 8 },
   { word: "wolf",      category: "predator", quadX: 2,   quadY: 9 },
   { word: "snake",     category: "predator", quadX: 1.5, quadY: 7 },
 
-  // Household objects — bottom-right (safe + non-living)
+  // Household objects — bottom-right corner
   { word: "pillow",    category: "household", quadX: 9,   quadY: 2 },
   { word: "book",      category: "household", quadX: 8,   quadY: 1.5 },
   { word: "lamp",      category: "household", quadX: 8.5, quadY: 1 },
 
-  // Weapons — bottom-left (dangerous + non-living)
+  // Weapons — bottom-left corner
   { word: "sword",     category: "weapon",   quadX: 1.5, quadY: 2 },
   { word: "gun",       category: "weapon",   quadX: 1,   quadY: 1.5 },
   { word: "bomb",      category: "weapon",   quadX: 0.5, quadY: 1 },
@@ -135,7 +143,7 @@ const PRESETS: PresetDef[] = [
   {
     id: "four-categories",
     label: "Four Categories",
-    description: "Two axes create four quadrants: pets, predators, household objects, and weapons. Items near the boundaries \u2014 like dogs or knives \u2014 belong to multiple categories at once.",
+    description: "Four overlapping regions for pets, predators, household items, and weapons. Items in the overlap \u2014 like dogs or knives \u2014 belong to multiple categories at once.",
   },
 ];
 
@@ -243,18 +251,6 @@ export function Simple2DScatter() {
     }
   }
 
-  // Axis label text
-  const xLabel = isQuad
-    ? "Dangerous  \u2190  \u2192  Safe"
-    : isVenn
-      ? "Food  \u2190  \u2192  Animal"
-      : "Small  \u2190  \u2192  Big";
-  const yLabel = isQuad
-    ? "Non\u2011living  \u2190  \u2192  Living"
-    : isVenn
-      ? "Small  \u2190  \u2192  Big"
-      : "Safe  \u2190  \u2192  Dangerous";
-
   return (
     <WidgetContainer
       title="Two Dimensions of Meaning"
@@ -294,8 +290,8 @@ export function Simple2DScatter() {
           height={dims.height}
           className="overflow-visible"
         >
-          {/* Grid lines */}
-          {[0, 2, 4, 6, 8, 10].map((v) => (
+          {/* Grid lines (scatter and venn only) */}
+          {!isQuad && [0, 2, 4, 6, 8, 10].map((v) => (
             <g key={v}>
               <line
                 x1={xScale(v)} y1={MARGIN.top}
@@ -310,7 +306,7 @@ export function Simple2DScatter() {
             </g>
           ))}
 
-          {/* Venn diagram: overlapping rectangles */}
+          {/* Venn diagram: two overlapping rectangles */}
           {isVenn && (
             <>
               {/* Food region: x 0 → 6.5 */}
@@ -362,78 +358,82 @@ export function Simple2DScatter() {
             </>
           )}
 
-          {/* Four-category quadrant backgrounds */}
+          {/* Four-category: four overlapping rectangles */}
           {isQuad && (() => {
-            const midX = xScale(5);
-            const midY = yScale(5);
-            const quadrants = [
-              { x: midX, y: plotTop, w: xScale(10) - midX, h: midY - plotTop, fill: "#22c55e", label: "Pets", lx: xScale(8.5), ly: plotTop + 16 },
-              { x: xScale(0), y: plotTop, w: midX - xScale(0), h: midY - plotTop, fill: "#ef4444", label: "Predators", lx: xScale(1.5), ly: plotTop + 16 },
-              { x: midX, y: midY, w: xScale(10) - midX, h: plotBottom - midY, fill: "#3b82f6", label: "Household", lx: xScale(8.5), ly: plotBottom - 8 },
-              { x: xScale(0), y: midY, w: midX - xScale(0), h: plotBottom - midY, fill: "#f97316", label: "Weapons", lx: xScale(1.5), ly: plotBottom - 8 },
+            // Each rectangle covers ~65% of each axis, creating overlap in the center.
+            const rects = [
+              { x1: 3.5, y1: 3.5, x2: 10, y2: 10, fill: "#22c55e", label: "Pets",      lx: 8.5, ly: 9.5 },
+              { x1: 0,   y1: 3.5, x2: 6.5, y2: 10, fill: "#ef4444", label: "Predators", lx: 1.5, ly: 9.5 },
+              { x1: 3.5, y1: 0,   x2: 10,  y2: 6.5, fill: "#3b82f6", label: "Household", lx: 8.5, ly: 0.5 },
+              { x1: 0,   y1: 0,   x2: 6.5, y2: 6.5, fill: "#f97316", label: "Weapons",   lx: 1.5, ly: 0.5 },
             ];
             return (
               <>
-                {quadrants.map((q) => (
-                  <g key={q.label}>
-                    <rect
-                      x={q.x} y={q.y} width={q.w} height={q.h}
-                      fill={q.fill} fillOpacity={0.06}
-                      rx={0}
-                    />
-                    <text
-                      x={q.lx} y={q.ly}
-                      textAnchor="middle"
-                      className="text-[12px] font-semibold pointer-events-none select-none"
-                      fill={q.fill} opacity={0.5}
-                    >
-                      {q.label}
-                    </text>
-                  </g>
-                ))}
-                {/* Dashed center cross */}
-                <line
-                  x1={midX} y1={plotTop} x2={midX} y2={plotBottom}
-                  stroke="var(--color-foreground)" strokeWidth={1} strokeDasharray="6,4" opacity={0.15}
-                />
-                <line
-                  x1={xScale(0)} y1={midY} x2={xScale(10)} y2={midY}
-                  stroke="var(--color-foreground)" strokeWidth={1} strokeDasharray="6,4" opacity={0.15}
-                />
+                {rects.map((r) => {
+                  const sx = xScale(r.x1);
+                  const sy = yScale(r.y2); // y2 is higher value = top in SVG
+                  const sw = xScale(r.x2) - xScale(r.x1);
+                  const sh = yScale(r.y1) - yScale(r.y2);
+                  // Place label in the pure (non-overlapping) corner
+                  const labelY = r.y2 > 5 ? yScale(r.y2) + 16 : yScale(r.y1) - 8;
+                  return (
+                    <g key={r.label}>
+                      <rect
+                        x={sx} y={sy} width={sw} height={sh}
+                        fill={r.fill} fillOpacity={0.06}
+                        stroke={r.fill} strokeWidth={1.5} strokeDasharray="6,4" opacity={0.35}
+                        rx={4}
+                      />
+                      <text
+                        x={xScale(r.lx)}
+                        y={labelY}
+                        textAnchor="middle"
+                        className="text-[12px] font-semibold pointer-events-none select-none"
+                        fill={r.fill} opacity={0.5}
+                      >
+                        {r.label}
+                      </text>
+                    </g>
+                  );
+                })}
               </>
             );
           })()}
 
-          {/* Axes */}
-          <line
-            x1={MARGIN.left} y1={dims.height - MARGIN.bottom}
-            x2={dims.width - MARGIN.right} y2={dims.height - MARGIN.bottom}
-            stroke="var(--color-foreground)" strokeWidth={1.5} opacity={0.3}
-          />
-          <line
-            x1={MARGIN.left} y1={MARGIN.top}
-            x2={MARGIN.left} y2={dims.height - MARGIN.bottom}
-            stroke="var(--color-foreground)" strokeWidth={1.5} opacity={0.3}
-          />
+          {/* Axes (scatter and venn only) */}
+          {!isQuad && (
+            <>
+              <line
+                x1={MARGIN.left} y1={dims.height - MARGIN.bottom}
+                x2={dims.width - MARGIN.right} y2={dims.height - MARGIN.bottom}
+                stroke="var(--color-foreground)" strokeWidth={1.5} opacity={0.3}
+              />
+              <line
+                x1={MARGIN.left} y1={MARGIN.top}
+                x2={MARGIN.left} y2={dims.height - MARGIN.bottom}
+                stroke="var(--color-foreground)" strokeWidth={1.5} opacity={0.3}
+              />
 
-          {/* Axis labels */}
-          <text
-            x={dims.width / 2}
-            y={dims.height - 5}
-            textAnchor="middle"
-            className="fill-muted text-[11px] font-medium"
-          >
-            {xLabel}
-          </text>
-          <text
-            x={12}
-            y={dims.height / 2}
-            textAnchor="middle"
-            className="fill-muted text-[11px] font-medium"
-            transform={`rotate(-90, 12, ${dims.height / 2})`}
-          >
-            {yLabel}
-          </text>
+              {/* Axis labels */}
+              <text
+                x={dims.width / 2}
+                y={dims.height - 5}
+                textAnchor="middle"
+                className="fill-muted text-[11px] font-medium"
+              >
+                {isVenn ? "Food  \u2190  \u2192  Animal" : "Small  \u2190  \u2192  Big"}
+              </text>
+              <text
+                x={12}
+                y={dims.height / 2}
+                textAnchor="middle"
+                className="fill-muted text-[11px] font-medium"
+                transform={`rotate(-90, 12, ${dims.height / 2})`}
+              >
+                {isVenn ? "Small  \u2190  \u2192  Big" : "Safe  \u2190  \u2192  Dangerous"}
+              </text>
+            </>
+          )}
 
           {/* Data points */}
           {points.map((pt) => {
