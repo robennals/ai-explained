@@ -9,6 +9,7 @@ import {
   NeuronGeometryWidget,
   TwoLayerPlaygroundWidget,
   NetworkTrainerWidget,
+  SharpnessExplorerWidget,
 } from "./widgets";
 
 export const metadata = {
@@ -32,6 +33,7 @@ export default function Chapter03() {
             NeuronGeometryWidget,
             TwoLayerPlaygroundWidget,
             NetworkTrainerWidget,
+            SharpnessExplorerWidget,
           }}
         />
       </div>
