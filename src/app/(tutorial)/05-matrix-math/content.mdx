@@ -49,18 +49,18 @@ A 2&times;2 matrix is completely defined by four numbers. Those four numbers con
 
 ## Another Way to See It: New Axes
 
-There's a powerful second way to read a matrix. Instead of thinking "where do the old basis vectors end up?" (the columns), think about the **rows**: each row defines a new basis vector in terms of the old ones.
+There's a powerful second way to read a matrix. Instead of thinking "where do the old basis vectors end up?" (the columns), think about the **rows**: each row defines a new measurement direction.
 
-The <span style={{color: "#ef4444"}}>first row</span> says: "my new x-axis is made of this much old-x and this much old-y." The <span style={{color: "#22c55e"}}>second row</span> does the same for the new y-axis. You're defining a new coordinate system by pointing arrows in the old space and saying "measure along *these* directions instead."
+The <span style={{color: "#ef4444"}}>first row</span> says: "to find a point's new x-coordinate, take the dot product with *this* vector." The <span style={{color: "#22c55e"}}>second row</span> does the same for the new y-coordinate. You're defining a new coordinate system by choosing new directions to measure along.
 
-The left panel below shows the original image with the new axes drawn on top. The faint colored grid lines show where integer values of each new coordinate fall. The right panel shows the result of re-measuring the image using those new axes.
+The colored lines below are **iso-lines** — lines where one new coordinate has a constant value. On the left, you see the new coordinate grid overlaid on the original space: <span style={{color: "#ef4444"}}>red lines</span> show where the new x-coordinate is constant, <span style={{color: "#22c55e"}}>green lines</span> show where the new y-coordinate is constant. On the right, those same coordinates become the standard grid — red vertical lines and green horizontal lines. Each labeled point sits between the same pair of iso-lines in both views.
 
 <BasisVectorViewWidget />
 
 <TryIt>
-Start with **Identity** — the new axes match the old ones, so nothing changes. Now hit **Rotate 90&deg;** — the red arrow (new x-axis) now points down and the green arrow (new y-axis) points right. The cat rotates because we're measuring along different directions. Try **Shear** — the red arrow tilts, mixing in some old-y into the new x-measurement, and the cat leans. Try **Collapse** — the green arrow shrinks to nothing, destroying the y-measurement entirely.
+Start with **Identity** — the colored iso-lines match the standard grid and nothing changes. Now try **Shear** — the red iso-lines tilt, so the new x-coordinate includes some of the old y. Watch how the points slide horizontally but their y-coordinates stay the same. Try **Rotate 90&deg;** — both sets of iso-lines rotate, and the shape rotates to match. Try **Collapse** — both rows become the same, so the red and green iso-lines overlap and all points squish onto a single line.
 
-Notice how the faint grid lines on the left are perpendicular to the arrows — they mark where each new coordinate equals 0, 1, 2, etc. The arrow tells you *which direction* you're measuring along.
+Now try dragging just the "old y" slider in the red row. The red iso-lines tilt, and on the right you can see each point's new x-coordinate shift based on how much old-y it has. Points with higher old-y values get pushed further right.
 </TryIt>
 
 This dual interpretation — "where do old axes land?" (columns) vs. "what are my new measurement directions?" (rows) — is the same math read two ways. Both are useful. In neural networks, the row view is especially natural: each output neuron computes a dot product with one row of the weight matrix, measuring how much the input aligns with that row's direction.
