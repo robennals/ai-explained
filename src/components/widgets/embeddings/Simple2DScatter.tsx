@@ -18,6 +18,14 @@ interface VennPoint {
   vennY: number; // size: 0 = small, 10 = big
 }
 
+// For the four-category preset.
+interface QuadPoint {
+  word: string;
+  category: "pet" | "predator" | "household" | "weapon" | "multi";
+  quadX: number; // 0 = dangerous, 10 = safe
+  quadY: number; // 0 = non-living, 10 = living
+}
+
 const VENN_WORDS: VennPoint[] = [
   // Pure animals — right side (x=7-9.5), various sizes
   { word: "ant",       category: "animal", vennX: 8,   vennY: 0.5 },
@@ -73,7 +81,39 @@ const SCATTER_WORDS: WordPoint[] = [
   { word: "gun",       category: "object", size: 1.5, dangerous: 10 },
 ];
 
-type PresetId = "size-danger" | "animal-food";
+const QUAD_WORDS: QuadPoint[] = [
+  // Pets — top-right (safe + living)
+  { word: "cat",       category: "pet",      quadX: 8,   quadY: 8 },
+  { word: "rabbit",    category: "pet",      quadX: 9,   quadY: 7.5 },
+  { word: "goldfish",  category: "pet",      quadX: 8.5, quadY: 9 },
+  { word: "hamster",   category: "pet",      quadX: 9.5, quadY: 8.5 },
+
+  // Predators — top-left (dangerous + living)
+  { word: "shark",     category: "predator", quadX: 1,   quadY: 8 },
+  { word: "wolf",      category: "predator", quadX: 2,   quadY: 9 },
+  { word: "snake",     category: "predator", quadX: 1.5, quadY: 7 },
+
+  // Household objects — bottom-right (safe + non-living)
+  { word: "pillow",    category: "household", quadX: 9,   quadY: 2 },
+  { word: "book",      category: "household", quadX: 8,   quadY: 1.5 },
+  { word: "lamp",      category: "household", quadX: 8.5, quadY: 1 },
+
+  // Weapons — bottom-left (dangerous + non-living)
+  { word: "sword",     category: "weapon",   quadX: 1.5, quadY: 2 },
+  { word: "gun",       category: "weapon",   quadX: 1,   quadY: 1.5 },
+  { word: "bomb",      category: "weapon",   quadX: 0.5, quadY: 1 },
+
+  // Overlaps — pet ↔ predator (top center)
+  { word: "dog",       category: "multi",    quadX: 6,   quadY: 7.5 },
+  { word: "horse",     category: "multi",    quadX: 5.5, quadY: 9 },
+  { word: "bee",       category: "multi",    quadX: 4,   quadY: 8 },
+
+  // Overlaps — household ↔ weapon (bottom center)
+  { word: "knife",     category: "multi",    quadX: 4.5, quadY: 2 },
+  { word: "car",       category: "multi",    quadX: 5.5, quadY: 1.5 },
+];
+
+type PresetId = "size-danger" | "animal-food" | "four-categories";
 
 interface PresetDef {
   id: PresetId;
@@ -92,6 +132,11 @@ const PRESETS: PresetDef[] = [
     label: "Animal or Food?",
     description: "Chicken, salmon, and lamb are BOTH animals AND food \u2014 they sit in the overlap. Two dimensions let us represent overlapping categories, like a Venn diagram.",
   },
+  {
+    id: "four-categories",
+    label: "Four Categories",
+    description: "Two axes create four quadrants: pets, predators, household objects, and weapons. Items near the boundaries \u2014 like dogs or knives \u2014 belong to multiple categories at once.",
+  },
 ];
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -101,6 +146,11 @@ const CATEGORY_COLORS: Record<string, string> = {
   food: "#ef4444",
   object: "#8b5cf6",
   both: "#a855f7",
+  pet: "#22c55e",
+  predator: "#ef4444",
+  household: "#3b82f6",
+  weapon: "#f97316",
+  multi: "#a855f7",
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -110,6 +160,11 @@ const CATEGORY_LABELS: Record<string, string> = {
   food: "Food",
   object: "Other",
   both: "Animal + Food",
+  pet: "Pets",
+  predator: "Predators",
+  household: "Household",
+  weapon: "Weapons",
+  multi: "Multiple",
 };
 
 const MARGIN = { top: 20, right: 20, bottom: 40, left: 50 };
@@ -134,6 +189,7 @@ export function Simple2DScatter() {
 
   const preset = PRESETS[presetIdx];
   const isVenn = preset.id === "animal-food";
+  const isQuad = preset.id === "four-categories";
 
   const resetState = useCallback(() => {
     setPresetIdx(0);
@@ -147,14 +203,57 @@ export function Simple2DScatter() {
   const yScale = (v: number) => dims.height - MARGIN.bottom - (v / 10) * plotH;
 
   // Which categories to show in legend
-  const visibleCategories = isVenn
-    ? ["animal", "food", "both"]
-    : ["animal", "vehicle", "instrument", "food", "object"];
+  const visibleCategories = isQuad
+    ? ["pet", "predator", "household", "weapon", "multi"]
+    : isVenn
+      ? ["animal", "food", "both"]
+      : ["animal", "vehicle", "instrument", "food", "object"];
 
-  // Venn region boundaries in data coords
-  // Food rect: x 0→6.5, Animal rect: x 3.5→10, overlap: x 3.5→6.5
   const plotTop = MARGIN.top;
   const plotBottom = dims.height - MARGIN.bottom;
+
+  // Build the list of data points for rendering
+  const points: { word: string; cx: number; cy: number; color: string }[] = [];
+  if (isQuad) {
+    for (const entry of QUAD_WORDS) {
+      points.push({
+        word: entry.word,
+        cx: xScale(entry.quadX),
+        cy: yScale(entry.quadY),
+        color: CATEGORY_COLORS[entry.category],
+      });
+    }
+  } else if (isVenn) {
+    for (const entry of VENN_WORDS) {
+      points.push({
+        word: entry.word,
+        cx: xScale(entry.vennX),
+        cy: yScale(entry.vennY),
+        color: CATEGORY_COLORS[entry.category],
+      });
+    }
+  } else {
+    for (const entry of SCATTER_WORDS) {
+      points.push({
+        word: entry.word,
+        cx: xScale(entry.size),
+        cy: yScale(entry.dangerous),
+        color: CATEGORY_COLORS[entry.category],
+      });
+    }
+  }
+
+  // Axis label text
+  const xLabel = isQuad
+    ? "Dangerous  \u2190  \u2192  Safe"
+    : isVenn
+      ? "Food  \u2190  \u2192  Animal"
+      : "Small  \u2190  \u2192  Big";
+  const yLabel = isQuad
+    ? "Non\u2011living  \u2190  \u2192  Living"
+    : isVenn
+      ? "Small  \u2190  \u2192  Big"
+      : "Safe  \u2190  \u2192  Dangerous";
 
   return (
     <WidgetContainer
@@ -263,6 +362,48 @@ export function Simple2DScatter() {
             </>
           )}
 
+          {/* Four-category quadrant backgrounds */}
+          {isQuad && (() => {
+            const midX = xScale(5);
+            const midY = yScale(5);
+            const quadrants = [
+              { x: midX, y: plotTop, w: xScale(10) - midX, h: midY - plotTop, fill: "#22c55e", label: "Pets", lx: xScale(8.5), ly: plotTop + 16 },
+              { x: xScale(0), y: plotTop, w: midX - xScale(0), h: midY - plotTop, fill: "#ef4444", label: "Predators", lx: xScale(1.5), ly: plotTop + 16 },
+              { x: midX, y: midY, w: xScale(10) - midX, h: plotBottom - midY, fill: "#3b82f6", label: "Household", lx: xScale(8.5), ly: plotBottom - 8 },
+              { x: xScale(0), y: midY, w: midX - xScale(0), h: plotBottom - midY, fill: "#f97316", label: "Weapons", lx: xScale(1.5), ly: plotBottom - 8 },
+            ];
+            return (
+              <>
+                {quadrants.map((q) => (
+                  <g key={q.label}>
+                    <rect
+                      x={q.x} y={q.y} width={q.w} height={q.h}
+                      fill={q.fill} fillOpacity={0.06}
+                      rx={0}
+                    />
+                    <text
+                      x={q.lx} y={q.ly}
+                      textAnchor="middle"
+                      className="text-[12px] font-semibold pointer-events-none select-none"
+                      fill={q.fill} opacity={0.5}
+                    >
+                      {q.label}
+                    </text>
+                  </g>
+                ))}
+                {/* Dashed center cross */}
+                <line
+                  x1={midX} y1={plotTop} x2={midX} y2={plotBottom}
+                  stroke="var(--color-foreground)" strokeWidth={1} strokeDasharray="6,4" opacity={0.15}
+                />
+                <line
+                  x1={xScale(0)} y1={midY} x2={xScale(10)} y2={midY}
+                  stroke="var(--color-foreground)" strokeWidth={1} strokeDasharray="6,4" opacity={0.15}
+                />
+              </>
+            );
+          })()}
+
           {/* Axes */}
           <line
             x1={MARGIN.left} y1={dims.height - MARGIN.bottom}
@@ -282,7 +423,7 @@ export function Simple2DScatter() {
             textAnchor="middle"
             className="fill-muted text-[11px] font-medium"
           >
-            {isVenn ? "Food  \u2190  \u2192  Animal" : "Small  \u2190  \u2192  Big"}
+            {xLabel}
           </text>
           <text
             x={12}
@@ -291,81 +432,41 @@ export function Simple2DScatter() {
             className="fill-muted text-[11px] font-medium"
             transform={`rotate(-90, 12, ${dims.height / 2})`}
           >
-            {isVenn ? "Small  \u2190  \u2192  Big" : "Safe  \u2190  \u2192  Dangerous"}
+            {yLabel}
           </text>
 
           {/* Data points */}
-          {isVenn
-            ? VENN_WORDS.map((entry) => {
-                const cx = xScale(entry.vennX);
-                const cy = yScale(entry.vennY);
-                const color = CATEGORY_COLORS[entry.category];
-                const isHovered = hoveredWord === entry.word;
-                const dimmed = hoveredWord !== null && !isHovered;
-
-                return (
-                  <g
-                    key={entry.word}
-                    onMouseEnter={() => setHoveredWord(entry.word)}
-                    onMouseLeave={() => setHoveredWord(null)}
-                    className="cursor-default"
-                  >
-                    <circle cx={cx} cy={cy} r={12} fill="transparent" />
-                    <circle
-                      cx={cx} cy={cy}
-                      r={isHovered ? 6 : 5}
-                      fill={color}
-                      stroke={isHovered ? "var(--color-foreground)" : "white"}
-                      strokeWidth={isHovered ? 2 : 1}
-                      opacity={dimmed ? 0.25 : 1}
-                    />
-                    <text
-                      x={cx} y={cy - 10}
-                      textAnchor="middle"
-                      className={`text-[11px] pointer-events-none select-none ${isHovered ? "font-bold" : "font-medium"}`}
-                      fill={isHovered ? "var(--color-foreground)" : color}
-                      opacity={dimmed ? 0.25 : 1}
-                    >
-                      {entry.word}
-                    </text>
-                  </g>
-                );
-              })
-            : SCATTER_WORDS.map((entry) => {
-                const cx = xScale(entry.size);
-                const cy = yScale(entry.dangerous);
-                const color = CATEGORY_COLORS[entry.category];
-                const isHovered = hoveredWord === entry.word;
-                const dimmed = hoveredWord !== null && !isHovered;
-
-                return (
-                  <g
-                    key={entry.word}
-                    onMouseEnter={() => setHoveredWord(entry.word)}
-                    onMouseLeave={() => setHoveredWord(null)}
-                    className="cursor-default"
-                  >
-                    <circle cx={cx} cy={cy} r={12} fill="transparent" />
-                    <circle
-                      cx={cx} cy={cy}
-                      r={isHovered ? 6 : 5}
-                      fill={color}
-                      stroke={isHovered ? "var(--color-foreground)" : "white"}
-                      strokeWidth={isHovered ? 2 : 1}
-                      opacity={dimmed ? 0.25 : 1}
-                    />
-                    <text
-                      x={cx} y={cy - 10}
-                      textAnchor="middle"
-                      className={`text-[11px] pointer-events-none select-none ${isHovered ? "font-bold" : "font-medium"}`}
-                      fill={isHovered ? "var(--color-foreground)" : color}
-                      opacity={dimmed ? 0.25 : 1}
-                    >
-                      {entry.word}
-                    </text>
-                  </g>
-                );
-              })}
+          {points.map((pt) => {
+            const isHovered = hoveredWord === pt.word;
+            const dimmed = hoveredWord !== null && !isHovered;
+            return (
+              <g
+                key={pt.word}
+                onMouseEnter={() => setHoveredWord(pt.word)}
+                onMouseLeave={() => setHoveredWord(null)}
+                className="cursor-default"
+              >
+                <circle cx={pt.cx} cy={pt.cy} r={12} fill="transparent" />
+                <circle
+                  cx={pt.cx} cy={pt.cy}
+                  r={isHovered ? 6 : 5}
+                  fill={pt.color}
+                  stroke={isHovered ? "var(--color-foreground)" : "white"}
+                  strokeWidth={isHovered ? 2 : 1}
+                  opacity={dimmed ? 0.25 : 1}
+                />
+                <text
+                  x={pt.cx} y={pt.cy - 10}
+                  textAnchor="middle"
+                  className={`text-[11px] pointer-events-none select-none ${isHovered ? "font-bold" : "font-medium"}`}
+                  fill={isHovered ? "var(--color-foreground)" : pt.color}
+                  opacity={dimmed ? 0.25 : 1}
+                >
+                  {pt.word}
+                </text>
+              </g>
+            );
+          })}
         </svg>
       </div>
 
