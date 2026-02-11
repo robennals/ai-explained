@@ -22,7 +22,7 @@ interface VennPoint {
 // the correct rectangle overlap zones.
 interface QuadPoint {
   word: string;
-  category: "pet" | "predator" | "household" | "weapon" | "multi";
+  category: "wild" | "water" | "land" | "domestic" | "multi";
   quadX: number;
   quadY: number;
 }
@@ -82,43 +82,43 @@ const SCATTER_WORDS: WordPoint[] = [
   { word: "gun",       category: "object", size: 1.5, dangerous: 10 },
 ];
 
-// Four overlapping rectangles — items in overlap zones belong to multiple categories.
-// Rectangle boundaries: each category covers ~65% of each axis.
-//   Pets:      x 3.5→10, y 3.5→10  (top-right)
-//   Predators: x 0→6.5,  y 3.5→10  (top-left)
-//   Household: x 3.5→10, y 0→6.5   (bottom-right)
-//   Weapons:   x 0→6.5,  y 0→6.5   (bottom-left)
-// Overlap zones are where rectangles intersect (x or y between 3.5 and 6.5).
+// Four overlapping rectangles for animal categories.
+// Layout:
+//   Wild (TL)     |  Water (TR)       Overlap zones (2 rects only):
+//   x: 0→6.5      |  x: 3.5→10        Wild∩Water:    x 3.5→6.5, y 6.5→10  (top center)
+//   y: 3.5→10     |  y: 3.5→10        Wild∩Land:     x 0→3.5,   y 3.5→6.5 (left center)
+//   ───────────────+──────────────     Water∩Domestic: x 6.5→10,  y 3.5→6.5 (right center)
+//   Land (BL)     |  Domestic (BR)     Land∩Domestic:  x 3.5→6.5, y 0→3.5   (bottom center)
+//   x: 0→6.5      |  x: 3.5→10        All four:       x 3.5→6.5, y 3.5→6.5 (center)
+//   y: 0→6.5      |  y: 0→6.5
 const QUAD_WORDS: QuadPoint[] = [
-  // Pets — top-right corner (safe + living)
-  { word: "cat",       category: "pet",      quadX: 8,   quadY: 8 },
-  { word: "rabbit",    category: "pet",      quadX: 9,   quadY: 7.5 },
-  { word: "goldfish",  category: "pet",      quadX: 8.5, quadY: 9 },
-  { word: "hamster",   category: "pet",      quadX: 9.5, quadY: 8.5 },
+  // Wild ↔ Water overlap (top center) — ocean wildlife
+  { word: "shark",     category: "multi",    quadX: 5,   quadY: 8.5 },
+  { word: "whale",     category: "multi",    quadX: 4.5, quadY: 9.5 },
+  { word: "jellyfish", category: "multi",    quadX: 5.5, quadY: 9.5 },
+  { word: "seahorse",  category: "multi",    quadX: 6,   quadY: 8 },
 
-  // Predators — top-left corner
-  { word: "shark",     category: "predator", quadX: 1,   quadY: 8 },
-  { word: "wolf",      category: "predator", quadX: 2,   quadY: 9 },
-  { word: "snake",     category: "predator", quadX: 1.5, quadY: 7 },
+  // Wild ↔ Land overlap (left center) — land wildlife
+  { word: "wolf",      category: "multi",    quadX: 1.5, quadY: 5.5 },
+  { word: "deer",      category: "multi",    quadX: 2.5, quadY: 5 },
+  { word: "bear",      category: "multi",    quadX: 1.5, quadY: 4.5 },
+  { word: "ant",       category: "multi",    quadX: 2.5, quadY: 6 },
+  { word: "mole",      category: "multi",    quadX: 1,   quadY: 5 },
 
-  // Household objects — bottom-right corner
-  { word: "pillow",    category: "household", quadX: 9,   quadY: 2 },
-  { word: "book",      category: "household", quadX: 8,   quadY: 1.5 },
-  { word: "lamp",      category: "household", quadX: 8.5, quadY: 1 },
+  // Water ↔ Domestic overlap (right center) — pet fish
+  { word: "goldfish",  category: "multi",    quadX: 8,   quadY: 5 },
 
-  // Weapons — bottom-left corner
-  { word: "sword",     category: "weapon",   quadX: 1.5, quadY: 2 },
-  { word: "gun",       category: "weapon",   quadX: 1,   quadY: 1.5 },
-  { word: "bomb",      category: "weapon",   quadX: 0.5, quadY: 1 },
+  // Land ↔ Domestic overlap (bottom center) — pets / farm animals
+  { word: "cow",       category: "multi",    quadX: 5,   quadY: 2 },
+  { word: "chicken",   category: "multi",    quadX: 5.5, quadY: 1 },
+  { word: "cat",       category: "multi",    quadX: 4.5, quadY: 2.5 },
+  { word: "hamster",   category: "multi",    quadX: 6,   quadY: 1.5 },
+  { word: "rabbit",    category: "multi",    quadX: 5,   quadY: 0.5 },
 
-  // Overlaps — pet ↔ predator (top center)
-  { word: "dog",       category: "multi",    quadX: 6,   quadY: 7.5 },
-  { word: "horse",     category: "multi",    quadX: 5.5, quadY: 9 },
-  { word: "bee",       category: "multi",    quadX: 4,   quadY: 8 },
-
-  // Overlaps — household ↔ weapon (bottom center)
-  { word: "knife",     category: "multi",    quadX: 4.5, quadY: 2 },
-  { word: "car",       category: "multi",    quadX: 5.5, quadY: 1.5 },
+  // Center — animals genuinely spanning all four categories
+  { word: "frog",      category: "multi",    quadX: 4.5, quadY: 5.5 },
+  { word: "duck",      category: "multi",    quadX: 5.5, quadY: 5 },
+  { word: "turtle",    category: "multi",    quadX: 5,   quadY: 4.5 },
 ];
 
 type PresetId = "size-danger" | "animal-food" | "four-categories";
@@ -143,7 +143,7 @@ const PRESETS: PresetDef[] = [
   {
     id: "four-categories",
     label: "Four Categories",
-    description: "Four overlapping regions for pets, predators, household items, and weapons. Items in the overlap \u2014 like dogs or knives \u2014 belong to multiple categories at once.",
+    description: "Four overlapping regions for wild, water, land, and domestic animals. Where regions overlap, animals belong to multiple categories \u2014 a shark is both wild and aquatic, a goldfish is both aquatic and domestic. But even two dimensions isn\u2019t enough \u2014 a bear is wild and lives on land, but this layout puts it right next to a mole. You\u2019d need more dimensions to tell them apart.",
   },
 ];
 
@@ -154,10 +154,10 @@ const CATEGORY_COLORS: Record<string, string> = {
   food: "#ef4444",
   object: "#8b5cf6",
   both: "#a855f7",
-  pet: "#22c55e",
-  predator: "#ef4444",
-  household: "#3b82f6",
-  weapon: "#f97316",
+  wild: "#ef4444",
+  water: "#3b82f6",
+  land: "#22c55e",
+  domestic: "#f97316",
   multi: "#a855f7",
 };
 
@@ -168,10 +168,10 @@ const CATEGORY_LABELS: Record<string, string> = {
   food: "Food",
   object: "Other",
   both: "Animal + Food",
-  pet: "Pets",
-  predator: "Predators",
-  household: "Household",
-  weapon: "Weapons",
+  wild: "Wild",
+  water: "Water",
+  land: "Land",
+  domestic: "Domestic",
   multi: "Multiple",
 };
 
@@ -212,7 +212,7 @@ export function Simple2DScatter() {
 
   // Which categories to show in legend
   const visibleCategories = isQuad
-    ? ["pet", "predator", "household", "weapon", "multi"]
+    ? ["multi"]
     : isVenn
       ? ["animal", "food", "both"]
       : ["animal", "vehicle", "instrument", "food", "object"];
@@ -360,22 +360,21 @@ export function Simple2DScatter() {
 
           {/* Four-category: four overlapping rectangles */}
           {isQuad && (() => {
-            // Each rectangle covers ~65% of each axis, creating overlap in the center.
+            // Each rectangle covers ~65% of each axis, creating overlap where they intersect.
             const rects = [
-              { x1: 3.5, y1: 3.5, x2: 10, y2: 10, fill: "#22c55e", label: "Pets",      lx: 8.5, ly: 9.5 },
-              { x1: 0,   y1: 3.5, x2: 6.5, y2: 10, fill: "#ef4444", label: "Predators", lx: 1.5, ly: 9.5 },
-              { x1: 3.5, y1: 0,   x2: 10,  y2: 6.5, fill: "#3b82f6", label: "Household", lx: 8.5, ly: 0.5 },
-              { x1: 0,   y1: 0,   x2: 6.5, y2: 6.5, fill: "#f97316", label: "Weapons",   lx: 1.5, ly: 0.5 },
+              { x1: 0, y1: 3.5, x2: 6.5, y2: 10,  fill: "#ef4444", label: "Wild",     lx: 1.5, ly: 9.5 },
+              { x1: 3.5, y1: 3.5, x2: 10, y2: 10,  fill: "#3b82f6", label: "Water",    lx: 8.5, ly: 9.5 },
+              { x1: 0, y1: 0, x2: 6.5, y2: 6.5,    fill: "#22c55e", label: "Land",     lx: 1.5, ly: 0.5 },
+              { x1: 3.5, y1: 0, x2: 10, y2: 6.5,   fill: "#f97316", label: "Domestic", lx: 8.5, ly: 0.5 },
             ];
             return (
               <>
                 {rects.map((r) => {
                   const sx = xScale(r.x1);
-                  const sy = yScale(r.y2); // y2 is higher value = top in SVG
+                  const sy = yScale(r.y2); // higher y value = top in SVG
                   const sw = xScale(r.x2) - xScale(r.x1);
                   const sh = yScale(r.y1) - yScale(r.y2);
-                  // Place label in the pure (non-overlapping) corner
-                  const labelY = r.y2 > 5 ? yScale(r.y2) + 16 : yScale(r.y1) - 8;
+                  const labelY = yScale(r.ly);
                   return (
                     <g key={r.label}>
                       <rect
