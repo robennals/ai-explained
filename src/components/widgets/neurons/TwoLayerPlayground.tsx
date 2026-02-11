@@ -226,6 +226,7 @@ export function TwoLayerPlayground() {
     wO1: 10, wO2: 10, bO: -15,
     step: 0,
   });
+  const retryCountRef = useRef(0);
 
   useEffect(() => {
     return () => {
@@ -302,6 +303,35 @@ export function TwoLayerPlayground() {
     if (animRef.current) cancelAnimationFrame(animRef.current);
   }, []);
 
+  const randomizeWeights = useCallback(() => {
+    setIsOptimizing(false);
+    setOptimizeStatus(null);
+    if (animRef.current) cancelAnimationFrame(animRef.current);
+    const rng = mulberry32(Date.now());
+    const randW = () => (rng() - 0.5) * 4;
+    const randB = () => (rng() - 0.5) * 2;
+    setWH1a(randW()); setWH1b(randW()); setBH1(randB());
+    setWH2a(randW()); setWH2b(randW()); setBH2(randB());
+    setWO1(randW()); setWO2(randW()); setBO(randB());
+  }, []);
+
+  // Initialize fresh random weights into stateRef and sync to UI
+  const initRandomWeights = useCallback(() => {
+    const rng = mulberry32(Date.now() + Math.random() * 1e9);
+    const randW = () => (rng() - 0.5) * 4;
+    const randB = () => (rng() - 0.5) * 2;
+    const s = {
+      wH1a: randW(), wH1b: randW(), bH1: randB(),
+      wH2a: randW(), wH2b: randW(), bH2: randB(),
+      wO1: randW(), wO2: randW(), bO: randB(),
+      step: 0,
+    };
+    stateRef.current = s;
+    setWH1a(s.wH1a); setWH1b(s.wH1b); setBH1(s.bH1);
+    setWH2a(s.wH2a); setWH2b(s.wH2b); setBH2(s.bH2);
+    setWO1(s.wO1); setWO2(s.wO2); setBO(s.bO);
+  }, []);
+
   const startOptimize = useCallback(() => {
     if (!activeChallenge) return;
     if (isOptimizing) {
@@ -311,26 +341,15 @@ export function TwoLayerPlayground() {
     }
     setIsOptimizing(true);
     setOptimizeStatus(null);
+    retryCountRef.current = 0;
 
-    // Randomize weights to small values for a fresh start
-    const rng = mulberry32(Date.now());
-    const randW = () => (rng() - 0.5) * 4;
-    const randB = () => (rng() - 0.5) * 2;
-    const initState = {
-      wH1a: randW(), wH1b: randW(), bH1: randB(),
-      wH2a: randW(), wH2b: randW(), bH2: randB(),
-      wO1: randW(), wO2: randW(), bO: randB(),
-      step: 0,
-    };
-    stateRef.current = initState;
-    // Set UI to initial random weights
-    setWH1a(initState.wH1a); setWH1b(initState.wH1b); setBH1(initState.bH1);
-    setWH2a(initState.wH2a); setWH2b(initState.wH2b); setBH2(initState.bH2);
-    setWO1(initState.wO1); setWO2(initState.wO2); setBO(initState.bO);
+    initRandomWeights();
 
     const points = activeChallenge.points;
     const solvable = activeChallenge.solvable;
     const maxSteps = solvable ? 1500 : 600;
+    let prevLoss = Infinity;
+    let stuckCount = 0;
 
     const animate = () => {
       const s = stateRef.current;
@@ -344,7 +363,6 @@ export function TwoLayerPlayground() {
 
         for (const pt of points) {
           const a = pt.x, b = pt.y;
-          // Forward
           const z1 = s.wH1a * a + s.wH1b * b + s.bH1;
           const h1 = sigmoid(z1);
           const z2 = s.wH2a * a + s.wH2b * b + s.bH2;
@@ -370,7 +388,6 @@ export function TwoLayerPlayground() {
           g_bH2 += dH2;
         }
 
-        // Normalize gradients by number of points
         const n = points.length;
         const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
         s.wH1a = clamp(s.wH1a - lr * g_wH1a / n, -20, 20);
@@ -403,7 +420,26 @@ export function TwoLayerPlayground() {
         setOptimizeStatus("solved");
         return;
       }
-      if (s.step >= maxSteps) {
+
+      // Detect plateau: loss barely changing
+      if (s.step > 100 && Math.abs(totalLoss - prevLoss) < 0.001) {
+        stuckCount++;
+      } else {
+        stuckCount = 0;
+      }
+      prevLoss = totalLoss;
+      const isStuck = stuckCount >= 50;
+
+      if (s.step >= maxSteps || (isStuck && solvable)) {
+        // Retry with fresh weights if solvable and we have retries left
+        if (solvable && retryCountRef.current < 2) {
+          retryCountRef.current++;
+          initRandomWeights();
+          prevLoss = Infinity;
+          stuckCount = 0;
+          animRef.current = requestAnimationFrame(animate);
+          return;
+        }
         setIsOptimizing(false);
         setOptimizeStatus(solvable ? "done" : "impossible");
         return;
@@ -412,7 +448,7 @@ export function TwoLayerPlayground() {
     };
 
     animRef.current = requestAnimationFrame(animate);
-  }, [isOptimizing, activeChallenge]);
+  }, [isOptimizing, activeChallenge, initRandomWeights]);
 
   // Probed values
   const probeInput = clickPos ?? { x: 0.5, y: 0.5 };
@@ -644,14 +680,20 @@ export function TwoLayerPlayground() {
                 )}
                 {optimizeStatus === "impossible" && (
                   <div className="mt-1.5 text-[11px] font-medium text-warning text-center">
-                    Needs more neurons!
+                    Two neurons can&apos;t solve this — it needs more neurons!
                   </div>
                 )}
                 {optimizeStatus === "done" && (
-                  <div className="mt-1.5 text-[10px] text-muted text-center">
-                    Optimization finished — try adjusting weights manually
+                  <div className="mt-1.5 text-[11px] text-accent text-center">
+                    Got stuck — try randomizing the weights for a different starting point.
                   </div>
                 )}
+                <button
+                  onClick={randomizeWeights}
+                  className="mt-2 w-full px-3 py-1.5 text-[11px] font-medium rounded-md bg-foreground/5 text-foreground hover:bg-foreground/10 transition-colors"
+                >
+                  Randomize Weights
+                </button>
               </div>
             )}
           </div>

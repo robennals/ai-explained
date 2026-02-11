@@ -87,6 +87,10 @@ What if we add a second layer? Two hidden neurons each draw their own line. The 
 Select XOR and click Optimize — watch two straight boundaries combine to separate the diagonal corners. Try the other solvable challenges (Vertical Band, Horizontal Band, Wedge) to see different two-line combinations. Then try Checkerboard or Center Only — even the optimizer can't solve these with just two hidden neurons.
 </TryIt>
 
+<Callout type="info" title="When Training Gets Stuck">
+Sometimes the optimizer fails on a problem it should be able to solve. This happens when the random starting weights land in a flat region of the loss landscape — the gradients are too small for the optimizer to find its way out. The fix is simple: randomize the weights and try again. A different starting point often works on the first retry. We'll explore why this happens and how real systems handle it in later chapters.
+</Callout>
+
 Each hidden neuron contributes one decision boundary. The output neuron combines them — AND-ing, OR-ing, or blending them together. With just two hidden neurons you can solve XOR. With more neurons and more layers, you can approximate **any** boundary, no matter how complex. This is the **universal approximation theorem**: a neural network with enough neurons can compute anything.
 
 <KeyInsight>
@@ -111,10 +115,16 @@ But having the right architecture isn't enough. You also need to find the right 
 
 ## Training Deep Networks
 
+We've seen that one neuron draws a single line, and two neurons can combine their lines to solve XOR. What happens when we keep going? Each neuron you add contributes another boundary. Each layer you add lets the network combine boundaries from the previous layer into more complex shapes. With enough neurons and layers, a neural network can carve up input space into **any** pattern — it can compute any function you can imagine. This is the **universal approximation theorem**, and it's why neural networks are so powerful.
+
+The good news is that even as networks get bigger, they stay trainable. Every weight in the network contributes to the final output, which means every weight contributes to the error. And if it contributes to the error, it has a gradient — a direction we can nudge it to make the error smaller. Backpropagation computes all these gradients at once, flowing the error signal backward from the output through every layer, so that every weight gets updated simultaneously. A network with ten thousand weights is no harder to train *in principle* than one with ten — it just takes more computation.
+
+Let's see this in action. The widget below lets you build networks of different sizes and train them on various patterns. The challenge: what's the smallest network that can solve each one?
+
 <NetworkTrainerWidget />
 
 <TryIt>
-Try XOR first with 1 layer — it can't solve it, no matter how long you train. Switch to 2 layers and hit Train: watch the classification regions bend and separate the classes. Now try Spirals — you'll need 3+ layers and more neurons per layer. Notice how more layers let the network learn more complex boundaries.
+Load a preset pattern and hit Train. Can you find the **smallest** network that solves each one? Try XOR with 1 layer — it fails. Switch to 2 layers and it works. The Circle needs more neurons per layer. Spirals need multiple layers and many neurons. You can also draw your own patterns: click to place green dots, shift-click or right-click for red, then train to see if the network can learn your pattern. Use "Reset Network" to re-randomize weights without losing your dots, or "Show Optimal" to see the smallest network that works.
 </TryIt>
 
 <KeyInsight>
