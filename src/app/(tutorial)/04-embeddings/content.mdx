@@ -1,0 +1,125 @@
+# Embeddings and Vector Spaces
+
+<Lead>
+How do you turn a word into something a neural network can work with? You turn it into a list of numbers — but not just any numbers. The right numbers encode *meaning itself* as geometry.
+</Lead>
+
+## From True/False to Words
+
+In the previous chapter, we worked with logic values — things that are either true or false. But GPT doesn't work with true/false values. It works with *words*. And words are messy.
+
+One idea: give each word its own input neuron. There's a "dog" neuron, a "cat" neuron, a "magnificent" neuron. When the input is "dog", the dog neuron fires and everything else is zero. But English has over 170,000 words — that's 170,000 input neurons, and the network has to independently learn what every single one means. It gets no hint that "dog" and "puppy" are related, or that "big" and "enormous" mean the same thing.
+
+OK, so what if we just assign each word a single number instead? "Dog" = 1, "cat" = 2, "car" = 3, "puppy" = 4. Now we only need one input neuron. But the numbers are arbitrary — "dog" being 1 and "puppy" being 4 doesn't mean dogs are less than puppies. The network can't make sense of these numbers because they don't *mean* anything. Moving from 1 to 2 takes you from "dog" to "cat", but moving from 2 to 3 takes you from "cat" to "car" — there's no pattern to learn.
+
+What if we could make the numbers actually *mean* something?
+
+## Words on a Line
+
+What if we gave each word a number that captures something about what it means? For example, we could score every word by how *big* it is. An ant gets a low number. An elephant gets a high number. A truck is up there too.
+
+<WordNumberLineWidget />
+
+<TryIt>
+Toggle between axes. On "Size", notice how elephant ends up next to truck — they're both big, but have nothing else in common. Switch to "Alive" — now animals separate from objects, but elephant and mouse are neighbors. One number captures ONE property but conflates everything else.
+</TryIt>
+
+The problem is clear: one dimension isn't enough. No matter which property you choose, words that are different in other ways end up as neighbors. Elephant is next to truck on the size axis. Mouse is next to flute on the alive axis.
+
+## Being Clever with One Dimension
+
+But we can be surprisingly clever with just one number. What if we use different *regions* of the number line for different categories, and order items *within* each region by a different property?
+
+<CombinedNumberLineWidget />
+
+<TryIt>
+Try each preset. In "Animals × Foods", animals are on the left ordered by size, while foods are on the right ordered by sweetness. One number encodes the category AND a property within it. Try the other presets — each packs two categories with different orderings onto one line.
+</TryIt>
+
+This is surprisingly expressive! One number tells you both *what category* something belongs to (which region it's in) and *something about it* (its position within that region). Different parts of the number line mean different things. But it still can't handle more than two categories well — we'd need more room on the line than we have.
+
+## Adding a Second Dimension
+
+What if we use *two* numbers? Now each word is a point on a 2D plane instead of a point on a line.
+
+<Simple2DScatterWidget />
+
+<TryIt>
+In "Size × Danger", bear and shark are big AND dangerous, while knife and gun are small but deadly. Switch to "Animal or Food?" — chicken, salmon, and lamb appear in the overlap because they belong to both categories. Two dimensions let us represent things one dimension never could.
+</TryIt>
+
+Two dimensions are dramatically more expressive than one. With just two numbers, we can plot two independent properties at once, and even represent overlapping categories like a Venn diagram. But we still can't distinguish everything — dog and cat overlap, guitar and flute sit on top of each other. We'd need more dimensions: "is it a pet?", "does it have strings?", "is it edible?"
+
+## Beyond Two Dimensions
+
+Each new dimension adds discriminative power. With 5 dimensions, you could separate animals from vehicles from instruments from food. With 20 dimensions, you could tell a dog from a cat. With 50 or 100 dimensions, you could capture remarkably fine-grained distinctions.
+
+But here's the problem: how do you decide *which* dimensions to use? "How dangerous is the color blue?" doesn't make sense. "How electronic is a cow?" There's no universal set of labeled dimensions that works for all words.
+
+Real AI systems solve this differently. They don't use labeled dimensions at all. Instead, they learn a space where **similar words end up nearby** and **different words end up far apart**. The dimensions are just numbers — not "alive?" or "big?" — but the proximity structure captures meaning.
+
+This is like the difference between organizing books by (genre, length, year) versus letting a librarian arrange them so that related books are on nearby shelves. The librarian's system has no labels, but it works better because it captures relationships that no fixed labeling scheme could.
+
+<KeyInsight>
+Real embeddings don't use labeled dimensions. They learn positions where similar things are nearby. This is more powerful because it can encode relationships that no fixed set of labels could capture.
+</KeyInsight>
+
+## Exploring a Real Embedding
+
+Let's explore an actual word embedding — GloVe, trained by Stanford on 6 billion words of text. Each word is a point in 50-dimensional space. We can't visualize 50 dimensions, but we *can* ask: what's nearby?
+
+<EmbeddingPlaygroundWidget />
+
+<TryIt>
+Start with "dog" — its neighbors are other animals and pets. Try "guitar" — you get other instruments. Try "queen" — notice it sits near royalty words. Type your own words and see what clusters together.
+</TryIt>
+
+Notice that the embedding groups words by meaning without being told what any word means. "Dog" is near "cat" and "puppy". "Guitar" is near "piano" and "bass". This structure emerged just from reading text — the system learned that words appearing in similar contexts should be nearby.
+
+## Directions Have Meaning
+
+The embedding doesn't just group similar words together — *directions* in the space carry meaning too. The direction from "ant" to "whale" captures something like size. The direction from "boy" to "man" captures age. You can pick any two words, and the line between them defines a meaningful spectrum.
+
+<WordPairSpectrumWidget />
+
+<TryIt>
+Try "ant ↔ whale" — notice how animals arrange from small to large between the endpoints. Try "salad ↔ cake" for a healthy-to-indulgent food spectrum. Try "boy ↔ man" for an age spectrum. Pick your own word pairs and see what spectrums emerge.
+</TryIt>
+
+This is why unlabeled dimensions are so powerful. Even though no dimension is labeled "size" or "age," those concepts exist as directions in the space. And there are far more meaningful directions than there could ever be labeled dimensions — every pair of words defines a potential axis of meaning.
+
+<KeyInsight>
+In a well-trained embedding, directions carry meaning. The direction from small to large, from young to old, from simple to complex — these all exist as paths through the space. This structure emerges from training on text, with no human labeling.
+</KeyInsight>
+
+## Where Do Embeddings Come From?
+
+Two key ideas drive how embeddings are created:
+
+**Learned from context.** Systems like Word2Vec and GloVe are trained on the principle that "a word is known by the company it keeps." Words that appear near the same other words get similar vectors. "Dog" and "cat" both appear near "pet", "fur", "veterinarian" — so they end up close together in the embedding.
+
+**Learned for a task.** Inside a neural network, an embedding layer is simply a lookup table — a matrix with one row per word and one column per dimension. To get the embedding for a word, you look up its row. The matrix starts random and is shaped by backpropagation, just like any other set of weights. The network learns whatever representation helps it perform its task.
+
+Modern language models use much higher dimensions than our 50-dimensional GloVe example: GPT-2 uses 768 dimensions, GPT-3 uses 12,288 dimensions. And they embed not individual words but *tokens* — subword pieces that let the model handle any text, including words it has never seen before.
+
+<EmbeddingLayerDiagramWidget />
+
+<TryIt>
+Click different words and watch the highlighted row change. Toggle between "Before training" (random numbers) and "After training" (structured vectors from a real embedding). Before training, the vectors are meaningless noise. After training, similar words have similar patterns. The network learned this structure by adjusting the numbers to be useful for its task.
+</TryIt>
+
+## Beyond Words
+
+Embeddings are one of the most powerful ideas in modern AI. The pattern — take something discrete, map it to a point in continuous space, let training shape the geometry — applies far beyond words:
+
+- **Tokens** (subword pieces) in language models like GPT
+- **Image patches** in vision models
+- **Audio frames** in speech recognition
+- **Users and products** in recommendation systems
+- **Molecules** in drug discovery
+
+In every case, the same principle holds: similar things end up nearby, and the geometry of the space encodes meaningful relationships. An embedding is a learned translation from symbols to geometry — and the geometry of meaning emerges from the pressure to be useful.
+
+<KeyInsight>
+An embedding is a learned mapping from discrete symbols to continuous geometry. The network discovers what dimensions to use and what structure to create — driven entirely by the need to perform its task well. This idea extends far beyond words to images, audio, molecules, and more.
+</KeyInsight>
