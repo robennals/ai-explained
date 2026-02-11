@@ -16,8 +16,8 @@ export const metadata = {
     "From one-hot to learned representations. Word analogies, semantic structure, and exploring the geometry of meaning.",
 };
 
-export default function Chapter09() {
-  const { prev, next } = getAdjacentChapters("09-embeddings");
+export default function Chapter04() {
+  const { prev, next } = getAdjacentChapters("04-embeddings");
 
   return (
     <article>

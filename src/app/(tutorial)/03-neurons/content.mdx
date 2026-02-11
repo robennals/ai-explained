@@ -1,0 +1,126 @@
+# Neural Networks
+
+<Lead>
+Your brain is a neural network — 86 billion neurons connected by roughly 100 trillion synapses. GPT, Claude, and every other modern AI system are also neural networks, built from artificial versions of the same idea. They can write essays, generate images, translate languages, and hold conversations. You might expect the technology behind all of this to be fearsomely complex. It isn't. It's remarkably simple.
+</Lead>
+
+<NeuronScaleComparisonWidget />
+
+But notice something strange in this chart. GPT-5 has about as many connections as a mouse — yet it can write essays and translate languages, and mice generally can't. And elephants and sperm whales have far more connections than humans, yet aren't smarter than us. The number of connections isn't everything — what matters most is **how good the weights are**. That's what training is all about, and we'll get deeper into it in later chapters.
+
+## The Building Block
+
+A neural network is made of **neurons**, connected together in layers.
+
+<NetworkOverviewWidget />
+
+Each neuron receives inputs from the previous layer, does a little computation, and passes a result to the next layer. But what's happening inside each one? Let's zoom in.
+
+A neuron does two things:
+
+1. **Weighted sum.** Each input gets multiplied by a **weight** — a number that controls how much that input matters. All the weighted inputs get added together, plus a constant called the **bias**. This is just multiplication and addition: nothing fancy yet.
+2. **Activation function.** The result gets passed through a function that determines how much to pass on to the next layer. This is called the **activation function**, and it's what makes neurons more than just arithmetic. We'll see exactly why it matters later in this chapter.
+
+That's the whole thing. A neuron is a weighted sum followed by an activation function.
+
+<NeuronDiagramWidget />
+
+We said neural networks are remarkably simple, and they are. The structure of a neuron is just multiplication, addition, and passing the result through a function. Wire millions of them together and you have GPT — or the human brain. The hard part isn't building the network — it's finding the right values for all those weights and biases. That's what training is for, and we'll get deeper into it in later chapters. For now, let's understand what a single neuron can do.
+
+One common activation function is the **sigmoid** — an S-shaped curve that smoothly squashes any number into the range 0 to 1. Large positive inputs become close to 1. Large negative inputs become close to 0. Everything in between gets a smooth, graded value. It's a "soft switch": instead of snapping between off and on, it dims smoothly between them. We'll use sigmoid throughout this chapter, and meet other activation functions later.
+
+The key property: when you change a weight by a small amount, the output changes by a small amount. No sudden jumps, no unpredictable flips. That's exactly what Chapter 2 told us we need for optimization to work.
+
+## Neurons as Logic
+
+You may be familiar with basic logical operations like **AND**, **OR**, and **NOT**. These combine true-or-false values:
+
+- **AND**: "Are *both* things true?" You need an umbrella if it's raining AND you're going outside.
+- **OR**: "Is *at least one* thing true?" You'll get wet if it's raining OR someone sprays you with a hose.
+- **NOT**: Flips the answer. NOT true is false, NOT false is true.
+
+These simple operations are the basis for every digital computer. Inside every computer chip is a network of **logic gates** — tiny components that compute AND, OR, NOT, and similar operations on electrical signals. Wire enough of them together and you can compute anything: that's how your phone, your laptop, and every digital device works.
+
+But logic gates have a problem. Their outputs snap between 0 and 1 with nothing in between. There's no smooth gradient to follow, which means you can't train a network of logic gates using the optimization techniques from Chapter 2.
+
+A neuron is like a **smooth version of a logic gate**. With the right weights, a single two-input neuron can compute AND, OR, NOT, and more — but unlike a logic gate, its output changes smoothly when you adjust the weights. Let's see this in action:
+
+<NeuronPlaygroundWidget />
+
+<TryIt>
+Start by sliding the input values and watching how the output changes. Then try the gate challenges: click AND to see the target outputs. Can you find weight and bias settings that match? If you get stuck, hit Optimize and watch gradient descent find the right weights automatically. Then try XOR — even optimization can't solve it with one neuron.
+</TryIt>
+
+But there's something important here beyond just mimicking logic gates. Notice what happens when you slide an input to a value *between* 0 and 1 — say 0.6. The output isn't forced to snap to "true" or "false." It can be somewhere in between: 0.73, or 0.4, or any other value. The neuron handles *degrees* naturally.
+
+This matters because real-world data is rarely cleanly true or false. Is this email spam? Probably. Is that shadow in the photo a cat? Maybe. Is this patient sick? The test says 0.7 likely. A neuron can take uncertain inputs and produce a graded output — "probably true" rather than just "true" or "false."
+
+When you clicked Optimize, the neuron found the right weights automatically. How? It uses the same idea from Chapter 2: define a **loss** that measures how wrong the outputs are, then follow the gradient downhill. Because the neuron is smooth — small weight changes produce small output changes — the loss landscape has slopes you can follow. That's gradient descent: calculate how each weight affects the error, nudge every weight a little in the right direction, repeat. The activation function is what keeps everything smooth and trainable.
+
+<KeyInsight>
+**A neuron is a smooth, trainable logic gate.** With the right weights, it can compute AND, OR, NOT, and more — and because small changes to the weights produce small changes in the output, gradient descent can find those weights automatically. Neurons also handle in-between values naturally, making them building blocks for computation over uncertain, continuous data.
+</KeyInsight>
+
+## Neurons as Geometry
+
+Instead of truth tables, think about *space*. A neuron takes two inputs — call them A and B. Every possible combination of A and B is a point in a 2D square. The neuron's output assigns a color to each point: green for high, red for low. What does that map look like?
+
+<NeuronGeometryWidget />
+
+<TryIt>
+Click anywhere on the heatmap to probe that point. Try the challenges and watch the colored regions shift. Hit Optimize on AND or OR and watch the boundary snap into place. Then try XOR — no matter what the optimizer does, the boundary stays a straight line, and it can't separate the diagonal corners.
+</TryIt>
+
+The key insight is geometric: a single neuron draws a **straight line** through input space. Everything on one side is green (high), everything on the other side is red (low). By adjusting the weights and bias, you can tilt and shift this line — but you can't bend it. AND, OR, and NOT are all separable by a single line. XOR is not: the "true" corners (0,1) and (1,0) sit on opposite diagonals, and no single line can separate them from the "false" corners.
+
+<Callout type="info" title="The XOR Crisis">
+In 1969, Minsky and Papert published *Perceptrons*, proving that single-layer networks can't solve XOR. This was taken as proof that neural networks were a dead end, and it killed most neural network research for over a decade — the "AI winter." The fix was always sitting there, obvious in hindsight: use more than one layer.
+</Callout>
+
+What if we add a second layer? Two hidden neurons each draw their own line. The output neuron combines them. Two lines can carve out a region that one line never could.
+
+<TwoLayerPlaygroundWidget />
+
+<TryIt>
+Select the XOR challenge and click Optimize — watch two straight boundaries combine into a curved region that separates the diagonal corners. Try adjusting individual weights to see how each hidden neuron contributes its own line. Then try XNOR (both same) to see a different two-line combination.
+</TryIt>
+
+Each hidden neuron contributes one decision boundary. The output neuron combines them — AND-ing, OR-ing, or blending them together. With just two hidden neurons you can solve XOR. With more neurons and more layers, you can approximate **any** boundary, no matter how complex. This is the **universal approximation theorem**: a neural network with enough neurons can compute anything.
+
+<KeyInsight>
+**One neuron = one straight line through input space.** It can separate points that fall on opposite sides of a line (AND, OR) but not patterns that require curves (XOR). Adding layers lets neurons combine their lines into complex boundaries — which is why deep networks can learn anything.
+</KeyInsight>
+
+But having the right architecture isn't enough. You also need to find the right weights. With a single neuron we could just follow the loss curve downhill. But a network with thousands of neurons has thousands of weights. How do you optimize all of them at once?
+
+## Training Deep Networks
+
+The answer is **backpropagation** — an algorithm that figures out how each weight in the network contributes to the overall error, then nudges every weight in the right direction simultaneously.
+
+The idea is elegant: start at the output and work backward. The output neuron knows its error directly. For the layer before it, we ask: "how much did each neuron contribute to that error?" For the layer before *that*, we ask the same question again. The error signal flows backward through the network, layer by layer, telling each weight which way to adjust.
+
+This is just the chain rule from calculus, applied systematically. Each layer passes the training signal backward to the previous layer. The result: every weight in the network gets its own personalized nudge, all from a single forward pass and backward pass.
+
+<NetworkTrainerWidget />
+
+<TryIt>
+Try XOR first with 1 layer — it can't solve it, no matter how long you train. Switch to 2 layers and hit Train: watch the classification regions bend and separate the classes. Now try Spirals — you'll need 3+ layers and more neurons per layer. Notice how more layers let the network learn more complex boundaries.
+</TryIt>
+
+<KeyInsight>
+**Backpropagation makes deep networks trainable.** The training signal flows backward from the output through every layer, telling each weight which way to adjust. Combined with the smoothness of neurons, this means you can optimize networks with millions of weights — which is how modern AI works.
+</KeyInsight>
+
+## A Neuron's Family Tree
+
+The artificial neuron was inspired by biology. In 1943, McCulloch and Pitts proposed a mathematical model of a brain cell: it takes inputs from other neurons, each with a different strength (weight), sums them up, and fires if the total exceeds a threshold. Sound familiar?
+
+Real neurons are far more complex — they communicate with precisely timed electrical spikes, have intricate branching structures, and modify their connections through mechanisms that look nothing like the training algorithms we use. The artificial neuron is a cartoon of a brain cell. But it's a cartoon that turned out to be extraordinarily powerful.
+
+What's more surprising is how many fields independently discovered the same math. A single neuron with a sigmoid activation is closely related to **logistic regression**, a statistical technique from the 1800s. Statisticians, neuroscientists, and AI researchers all arrived at essentially the same equation from completely different starting points.
+
+## What's Next
+
+We've seen the full picture: neurons are smooth computation units, and because they're smooth, you can optimize them. Stack them in layers and you can compute anything. Backpropagation lets you train all the weights at once, even in deep networks. This is the core of how modern AI works — the architecture is simple, and training finds the right weights.
+
+But we've been training on tiny problems with a handful of data points. Real AI systems learn from millions of examples, and getting that learning process right is an art. In the next chapter, we'll see how training actually works at scale — what can go wrong, and the techniques that make it work.
