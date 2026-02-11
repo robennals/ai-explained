@@ -45,19 +45,93 @@ function outputColorRGB(v: number): [number, number, number] {
   }
 }
 
-const INPUT_COMBOS: [number, number][] = [
-  [0, 0],
-  [0, 1],
-  [1, 0],
-  [1, 1],
+// --- Challenge system with arbitrary data points ---
+
+interface DataPoint {
+  x: number;
+  y: number;
+  target: number;
+}
+
+interface Challenge {
+  name: string;
+  points: DataPoint[];
+  solvable: boolean;
+}
+
+// All challenges use a 3×3 grid: x,y ∈ {0, 0.5, 1}
+function grid3x3(pattern: number[]): DataPoint[] {
+  // pattern is 9 values, read top-to-bottom, left-to-right:
+  //   [top-left, top-center, top-right,
+  //    mid-left, center,     mid-right,
+  //    bot-left, bot-center, bot-right]
+  const coords: [number, number][] = [
+    [0, 1], [0.5, 1], [1, 1],
+    [0, 0.5], [0.5, 0.5], [1, 0.5],
+    [0, 0], [0.5, 0], [1, 0],
+  ];
+  return coords.map(([x, y], i) => ({ x, y, target: pattern[i] }));
+}
+
+const N = 0, Y = 1;
+
+const CHALLENGES: Challenge[] = [
+  {
+    name: "XOR",
+    solvable: true,
+    points: [
+      { x: 0, y: 0, target: 0 },
+      { x: 1, y: 0, target: 1 },
+      { x: 0, y: 1, target: 1 },
+      { x: 1, y: 1, target: 0 },
+    ],
+  },
+  {
+    name: "Vertical Band",
+    solvable: true,
+    points: grid3x3([
+      N, Y, N,
+      N, Y, N,
+      N, Y, N,
+    ]),
+  },
+  {
+    name: "Horizontal Band",
+    solvable: true,
+    points: grid3x3([
+      N, N, N,
+      Y, Y, Y,
+      N, N, N,
+    ]),
+  },
+  {
+    name: "Wedge",
+    solvable: true,
+    points: grid3x3([
+      N, N, N,
+      N, Y, N,
+      N, Y, N,
+    ]),
+  },
+  {
+    name: "Checkerboard",
+    solvable: false,
+    points: grid3x3([
+      Y, N, Y,
+      N, Y, N,
+      Y, N, Y,
+    ]),
+  },
+  {
+    name: "Center Only",
+    solvable: false,
+    points: grid3x3([
+      N, N, N,
+      N, Y, N,
+      N, N, N,
+    ]),
+  },
 ];
-
-type ChallengeName = "XOR" | "XNOR";
-
-const CHALLENGES: Record<ChallengeName, { targets: number[]; label: string }> = {
-  XOR: { targets: [0, 1, 1, 0], label: "XOR (one but not both)" },
-  XNOR: { targets: [1, 0, 0, 1], label: "XNOR (both same)" },
-};
 
 // Forward pass for 2→2→1
 function forward2Layer(
@@ -80,60 +154,51 @@ function bceLoss(output: number, target: number): number {
   return -(target * Math.log(o) + (1 - target) * Math.log(1 - o));
 }
 
-// Compact MiniSlider for SVG
-function MiniSlider({
-  x,
-  y,
+const CANVAS_SIZE = 280;
+
+// Simple seeded random for reproducible initial weights
+function mulberry32(seed: number) {
+  return function () {
+    let t = (seed += 0x6d2b79f5);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function WeightSlider({
   value,
   min,
   max,
   step,
   onChange,
   label,
-  showValue = true,
-  width = 70,
 }: {
-  x: number;
-  y: number;
   value: number;
   min: number;
   max: number;
   step: number;
   onChange: (v: number) => void;
   label: string;
-  showValue?: boolean;
-  width?: number;
 }) {
   return (
-    <foreignObject x={x - width / 2} y={y} width={width} height={60} style={{ overflow: "visible" }}>
-      <div className="flex flex-col items-center" style={{ overflow: "visible" }}>
-        {label && (
-          <div className="text-[9px] font-bold text-foreground whitespace-nowrap leading-none">
-            {label}
-          </div>
-        )}
-        {showValue && (
-          <div className="font-mono font-bold text-foreground text-[11px] leading-none">
-            {value.toFixed(1)}
-          </div>
-        )}
-        <div className="w-full py-px">
-          <input
-            type="range"
-            min={min}
-            max={max}
-            step={step}
-            value={value}
-            onChange={(e) => onChange(parseFloat(e.target.value))}
-            className="w-full h-1 accent-accent"
-          />
-        </div>
-      </div>
-    </foreignObject>
+    <div className="flex items-center gap-1.5">
+      <span className="text-[10px] font-mono text-muted w-7 text-right shrink-0">{label}</span>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={(e) => onChange(parseFloat(e.target.value))}
+        className="flex-1 h-1 accent-accent min-w-0"
+      />
+      <span className="text-[11px] font-mono font-bold text-foreground w-10 text-right shrink-0">
+        {value.toFixed(1)}
+      </span>
+    </div>
   );
 }
-
-const CANVAS_SIZE = 280;
 
 export function TwoLayerPlayground() {
   // Hidden layer 1 weights/bias
@@ -150,7 +215,7 @@ export function TwoLayerPlayground() {
   const [bO, setBO] = useState(-15.0);
 
   const [clickPos, setClickPos] = useState<{ x: number; y: number } | null>(null);
-  const [activeChallenge, setActiveChallenge] = useState<ChallengeName | null>(null);
+  const [activeChallengeIdx, setActiveChallengeIdx] = useState<number | null>(null);
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [optimizeStatus, setOptimizeStatus] = useState<string | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -161,6 +226,7 @@ export function TwoLayerPlayground() {
     wO1: 10, wO2: 10, bO: -15,
     step: 0,
   });
+  const retryCountRef = useRef(0);
 
   useEffect(() => {
     return () => {
@@ -173,11 +239,13 @@ export function TwoLayerPlayground() {
     setWH2a(-8.0); setWH2b(-8.0); setBH2(12.0);
     setWO1(10.0); setWO2(10.0); setBO(-15.0);
     setClickPos(null);
-    setActiveChallenge(null);
+    setActiveChallengeIdx(null);
     setIsOptimizing(false);
     setOptimizeStatus(null);
     if (animRef.current) cancelAnimationFrame(animRef.current);
   }, []);
+
+  const activeChallenge = activeChallengeIdx !== null ? CHALLENGES[activeChallengeIdx] : null;
 
   // Render heatmap
   useEffect(() => {
@@ -208,19 +276,13 @@ export function TwoLayerPlayground() {
     ctx.putImageData(imageData, 0, 0);
   }, [wH1a, wH1b, bH1, wH2a, wH2b, bH2, wO1, wO2, bO]);
 
-  const challengeTargets = useMemo(() => {
-    if (!activeChallenge) return null;
-    return CHALLENGES[activeChallenge].targets;
-  }, [activeChallenge]);
-
   const challengeSolved = useMemo(() => {
-    if (!challengeTargets) return false;
-    return challengeTargets.every((t, i) => {
-      const [a, b] = INPUT_COMBOS[i];
-      const { out } = forward2Layer(a, b, wH1a, wH1b, bH1, wH2a, wH2b, bH2, wO1, wO2, bO);
-      return t === 1 ? out > 0.8 : out < 0.2;
+    if (!activeChallenge) return false;
+    return activeChallenge.points.every((pt) => {
+      const { out } = forward2Layer(pt.x, pt.y, wH1a, wH1b, bH1, wH2a, wH2b, bH2, wO1, wO2, bO);
+      return pt.target === 1 ? out > 0.8 : out < 0.2;
     });
-  }, [challengeTargets, wH1a, wH1b, bH1, wH2a, wH2b, bH2, wO1, wO2, bO]);
+  }, [activeChallenge, wH1a, wH1b, bH1, wH2a, wH2b, bH2, wO1, wO2, bO]);
 
   const handleCanvasClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
@@ -234,15 +296,44 @@ export function TwoLayerPlayground() {
     []
   );
 
-  const activateChallenge = useCallback((name: ChallengeName) => {
-    setActiveChallenge(name);
+  const activateChallenge = useCallback((idx: number) => {
+    setActiveChallengeIdx(idx);
     setIsOptimizing(false);
     setOptimizeStatus(null);
     if (animRef.current) cancelAnimationFrame(animRef.current);
   }, []);
 
+  const randomizeWeights = useCallback(() => {
+    setIsOptimizing(false);
+    setOptimizeStatus(null);
+    if (animRef.current) cancelAnimationFrame(animRef.current);
+    const rng = mulberry32(Date.now());
+    const randW = () => (rng() - 0.5) * 4;
+    const randB = () => (rng() - 0.5) * 2;
+    setWH1a(randW()); setWH1b(randW()); setBH1(randB());
+    setWH2a(randW()); setWH2b(randW()); setBH2(randB());
+    setWO1(randW()); setWO2(randW()); setBO(randB());
+  }, []);
+
+  // Initialize fresh random weights into stateRef and sync to UI
+  const initRandomWeights = useCallback(() => {
+    const rng = mulberry32(Date.now() + Math.random() * 1e9);
+    const randW = () => (rng() - 0.5) * 4;
+    const randB = () => (rng() - 0.5) * 2;
+    const s = {
+      wH1a: randW(), wH1b: randW(), bH1: randB(),
+      wH2a: randW(), wH2b: randW(), bH2: randB(),
+      wO1: randW(), wO2: randW(), bO: randB(),
+      step: 0,
+    };
+    stateRef.current = s;
+    setWH1a(s.wH1a); setWH1b(s.wH1b); setBH1(s.bH1);
+    setWH2a(s.wH2a); setWH2b(s.wH2b); setBH2(s.bH2);
+    setWO1(s.wO1); setWO2(s.wO2); setBO(s.bO);
+  }, []);
+
   const startOptimize = useCallback(() => {
-    if (!challengeTargets) return;
+    if (!activeChallenge) return;
     if (isOptimizing) {
       setIsOptimizing(false);
       if (animRef.current) cancelAnimationFrame(animRef.current);
@@ -250,30 +341,26 @@ export function TwoLayerPlayground() {
     }
     setIsOptimizing(true);
     setOptimizeStatus(null);
-    stateRef.current = {
-      wH1a, wH1b, bH1,
-      wH2a, wH2b, bH2,
-      wO1, wO2, bO,
-      step: 0,
-    };
+    retryCountRef.current = 0;
 
-    const targets = challengeTargets;
-    const maxSteps = 500;
+    initRandomWeights();
+
+    const points = activeChallenge.points;
+    const solvable = activeChallenge.solvable;
+    const maxSteps = solvable ? 3000 : 600;
 
     const animate = () => {
       const s = stateRef.current;
       const lr = 1.5;
-      const stepsPerFrame = 3;
+      const stepsPerFrame = 5;
 
       for (let step = 0; step < stepsPerFrame; step++) {
-        // Accumulate gradients over 4 corners
         let g_wH1a = 0, g_wH1b = 0, g_bH1 = 0;
         let g_wH2a = 0, g_wH2b = 0, g_bH2 = 0;
         let g_wO1 = 0, g_wO2 = 0, g_bO = 0;
 
-        for (let i = 0; i < 4; i++) {
-          const [a, b] = INPUT_COMBOS[i];
-          // Forward
+        for (const pt of points) {
+          const a = pt.x, b = pt.y;
           const z1 = s.wH1a * a + s.wH1b * b + s.bH1;
           const h1 = sigmoid(z1);
           const z2 = s.wH2a * a + s.wH2b * b + s.bH2;
@@ -281,15 +368,12 @@ export function TwoLayerPlayground() {
           const zO = s.wO1 * h1 + s.wO2 * h2 + s.bO;
           const out = sigmoid(zO);
 
-          // BCE gradient: d_loss/d_out = (out - target) / (out * (1-out)), times sigmoid deriv = out - target
-          const dOut = out - targets[i];
+          const dOut = out - pt.target;
 
-          // Output layer gradients
           g_wO1 += dOut * h1;
           g_wO2 += dOut * h2;
           g_bO += dOut;
 
-          // Hidden layer gradients (backprop through output layer)
           const dH1 = dOut * s.wO1 * sigmoidDeriv(h1);
           const dH2 = dOut * s.wO2 * sigmoidDeriv(h2);
 
@@ -302,16 +386,17 @@ export function TwoLayerPlayground() {
           g_bH2 += dH2;
         }
 
+        const n = points.length;
         const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
-        s.wH1a = clamp(s.wH1a - lr * g_wH1a, -15, 15);
-        s.wH1b = clamp(s.wH1b - lr * g_wH1b, -15, 15);
-        s.bH1 = clamp(s.bH1 - lr * g_bH1, -20, 20);
-        s.wH2a = clamp(s.wH2a - lr * g_wH2a, -15, 15);
-        s.wH2b = clamp(s.wH2b - lr * g_wH2b, -15, 15);
-        s.bH2 = clamp(s.bH2 - lr * g_bH2, -20, 20);
-        s.wO1 = clamp(s.wO1 - lr * g_wO1, -15, 15);
-        s.wO2 = clamp(s.wO2 - lr * g_wO2, -15, 15);
-        s.bO = clamp(s.bO - lr * g_bO, -20, 20);
+        s.wH1a = clamp(s.wH1a - lr * g_wH1a / n, -20, 20);
+        s.wH1b = clamp(s.wH1b - lr * g_wH1b / n, -20, 20);
+        s.bH1 = clamp(s.bH1 - lr * g_bH1 / n, -30, 30);
+        s.wH2a = clamp(s.wH2a - lr * g_wH2a / n, -20, 20);
+        s.wH2b = clamp(s.wH2b - lr * g_wH2b / n, -20, 20);
+        s.bH2 = clamp(s.bH2 - lr * g_bH2 / n, -30, 30);
+        s.wO1 = clamp(s.wO1 - lr * g_wO1 / n, -20, 20);
+        s.wO2 = clamp(s.wO2 - lr * g_wO2 / n, -20, 20);
+        s.bO = clamp(s.bO - lr * g_bO / n, -30, 30);
         s.step++;
       }
 
@@ -320,28 +405,35 @@ export function TwoLayerPlayground() {
       setWO1(s.wO1); setWO2(s.wO2); setBO(s.bO);
 
       // Check convergence
-      let totalLoss = 0;
-      for (let i = 0; i < 4; i++) {
-        const [a, b] = INPUT_COMBOS[i];
-        const { out } = forward2Layer(a, b, s.wH1a, s.wH1b, s.bH1, s.wH2a, s.wH2b, s.bH2, s.wO1, s.wO2, s.bO);
-        totalLoss += bceLoss(out, targets[i]);
+      let allCorrect = true;
+      for (const pt of points) {
+        const { out } = forward2Layer(pt.x, pt.y, s.wH1a, s.wH1b, s.bH1, s.wH2a, s.wH2b, s.bH2, s.wO1, s.wO2, s.bO);
+        if (pt.target === 1 ? out <= 0.8 : out >= 0.2) allCorrect = false;
       }
 
-      if (totalLoss < 0.2) {
+      if (allCorrect) {
         setIsOptimizing(false);
         setOptimizeStatus("solved");
         return;
       }
+
       if (s.step >= maxSteps) {
+        // Retry with fresh weights if solvable and we have retries left
+        if (solvable && retryCountRef.current < 2) {
+          retryCountRef.current++;
+          initRandomWeights();
+          animRef.current = requestAnimationFrame(animate);
+          return;
+        }
         setIsOptimizing(false);
-        setOptimizeStatus("done");
+        setOptimizeStatus(solvable ? "done" : "impossible");
         return;
       }
       animRef.current = requestAnimationFrame(animate);
     };
 
     animRef.current = requestAnimationFrame(animate);
-  }, [isOptimizing, wH1a, wH1b, bH1, wH2a, wH2b, bH2, wO1, wO2, bO, challengeTargets]);
+  }, [isOptimizing, activeChallenge, initRandomWeights]);
 
   // Probed values
   const probeInput = clickPos ?? { x: 0.5, y: 0.5 };
@@ -352,15 +444,15 @@ export function TwoLayerPlayground() {
 
   // Network diagram SVG layout
   const NW = 520;
-  const NH = 300;
-  const INX = 40;
-  const INA_Y = 80;
-  const INB_Y = 220;
+  const NH = 180;
+  const INX = 50;
+  const INA_Y = 50;
+  const INB_Y = 130;
   const HX = 220;
-  const H1_Y = 80;
-  const H2_Y = 220;
-  const OX = 440;
-  const OY = 150;
+  const H1_Y = 50;
+  const H2_Y = 130;
+  const OX = 420;
+  const OY = 90;
 
   return (
     <WidgetContainer
@@ -368,76 +460,13 @@ export function TwoLayerPlayground() {
       description="Two hidden neurons combine their boundaries to solve problems one neuron can't."
       onReset={reset}
     >
-      <div className="flex flex-col lg:flex-row gap-4">
-        {/* 2D Canvas */}
-        <div className="flex-shrink-0">
-          <div className="text-[10px] font-medium text-muted mb-1">
-            Network output across input space
-          </div>
-          <div
-            className="relative rounded-lg overflow-hidden border border-border cursor-crosshair"
-            style={{ width: CANVAS_SIZE, height: CANVAS_SIZE }}
-            onClick={handleCanvasClick}
-          >
-            <canvas
-              ref={canvasRef}
-              width={CANVAS_SIZE}
-              height={CANVAS_SIZE}
-              className="block"
-            />
-            <svg
-              width={CANVAS_SIZE}
-              height={CANVAS_SIZE}
-              className="absolute inset-0 pointer-events-none"
-            >
-              {/* Challenge dots at corners */}
-              {challengeTargets &&
-                INPUT_COMBOS.map(([a, b], i) => {
-                  const cx = a * (CANVAS_SIZE - 20) + 10;
-                  const cy = (1 - b) * (CANVAS_SIZE - 20) + 10;
-                  const target = challengeTargets[i];
-                  const { out } = forward2Layer(a, b, wH1a, wH1b, bH1, wH2a, wH2b, bH2, wO1, wO2, bO);
-                  const correct = target === 1 ? out > 0.8 : out < 0.2;
-                  return (
-                    <g key={i}>
-                      <circle cx={cx} cy={cy} r={12} fill={target === 1 ? "#10b981" : "#ef4444"} opacity={0.9} />
-                      <circle cx={cx} cy={cy} r={12} fill="none" stroke="white" strokeWidth={2} />
-                      {correct && (
-                        <text x={cx} y={cy + 4} textAnchor="middle" fill="white" fontSize="12" fontWeight="bold">
-                          &#10003;
-                        </text>
-                      )}
-                    </g>
-                  );
-                })}
-              {/* Click marker */}
-              {clickPos && (
-                <circle
-                  cx={clickPos.x * CANVAS_SIZE}
-                  cy={(1 - clickPos.y) * CANVAS_SIZE}
-                  r={5}
-                  fill={outputColor(probeOut)}
-                  stroke="white"
-                  strokeWidth={2}
-                />
-              )}
-              {/* Axis labels */}
-              <text x={CANVAS_SIZE / 2} y={CANVAS_SIZE - 4} textAnchor="middle" fill="white" fontSize="11" fontWeight="bold" opacity={0.7}>
-                Input A →
-              </text>
-              <text x={8} y={CANVAS_SIZE / 2} textAnchor="middle" fill="white" fontSize="11" fontWeight="bold" opacity={0.7} transform={`rotate(-90, 8, ${CANVAS_SIZE / 2})`}>
-                Input B →
-              </text>
-            </svg>
-          </div>
-        </div>
-
-        {/* Network Diagram */}
-        <div className="flex-1 min-w-0">
+      <div className="flex flex-col gap-3">
+        {/* Row 1: Network Diagram */}
+        <div>
           <div className="text-[10px] font-medium text-muted mb-1">
             Network ({clickPos ? "clicked point" : "center"} values)
           </div>
-          <svg viewBox={`0 0 ${NW} ${NH}`} className="w-full">
+          <svg viewBox={`0 0 ${NW} ${NH}`} className="w-full" style={{ maxHeight: 200 }}>
             <defs>
               <marker id="tl-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
                 <path d="M 0 0 L 10 5 L 0 10 z" fill="#9ca3af" />
@@ -445,108 +474,213 @@ export function TwoLayerPlayground() {
             </defs>
 
             {/* Input A */}
-            <text x={INX} y={INA_Y - 22} textAnchor="middle" className="fill-foreground text-[11px] font-bold pointer-events-none select-none">A</text>
-            <circle cx={INX} cy={INA_Y} r={18} fill="#f0f4ff" stroke="#3b82f6" strokeWidth="2" />
-            <text x={INX} y={INA_Y + 4} textAnchor="middle" className="fill-accent text-[12px] font-bold font-mono pointer-events-none select-none">
+            <text x={INX} y={INA_Y - 20} textAnchor="middle" className="fill-foreground text-[11px] font-bold pointer-events-none select-none">A</text>
+            <circle cx={INX} cy={INA_Y} r={16} fill="#f0f4ff" stroke="#3b82f6" strokeWidth="2" />
+            <text x={INX} y={INA_Y + 4} textAnchor="middle" className="fill-accent text-[11px] font-bold font-mono pointer-events-none select-none">
               {probeInput.x.toFixed(2)}
             </text>
 
             {/* Input B */}
-            <text x={INX} y={INB_Y - 22} textAnchor="middle" className="fill-foreground text-[11px] font-bold pointer-events-none select-none">B</text>
-            <circle cx={INX} cy={INB_Y} r={18} fill="#f0f4ff" stroke="#3b82f6" strokeWidth="2" />
-            <text x={INX} y={INB_Y + 4} textAnchor="middle" className="fill-accent text-[12px] font-bold font-mono pointer-events-none select-none">
+            <text x={INX} y={INB_Y - 20} textAnchor="middle" className="fill-foreground text-[11px] font-bold pointer-events-none select-none">B</text>
+            <circle cx={INX} cy={INB_Y} r={16} fill="#f0f4ff" stroke="#3b82f6" strokeWidth="2" />
+            <text x={INX} y={INB_Y + 4} textAnchor="middle" className="fill-accent text-[11px] font-bold font-mono pointer-events-none select-none">
               {probeInput.y.toFixed(2)}
             </text>
 
-            {/* --- Arrows: A → H1 --- */}
-            <line x1={INX + 20} y1={INA_Y} x2={HX - 22} y2={H1_Y} stroke="#9ca3af" strokeWidth="1.5" markerEnd="url(#tl-arrow)" />
-            <MiniSlider x={120} y={INA_Y - 40} value={wH1a} min={-15} max={15} step={0.1} onChange={setWH1a} label="w" />
-
-            {/* --- Arrows: B → H1 --- */}
-            <line x1={INX + 20} y1={INB_Y} x2={HX - 22} y2={H1_Y} stroke="#9ca3af" strokeWidth="1.5" markerEnd="url(#tl-arrow)" />
-            <MiniSlider x={100} y={138} value={wH1b} min={-15} max={15} step={0.1} onChange={setWH1b} label="w" />
-
-            {/* --- Arrows: A → H2 --- */}
-            <line x1={INX + 20} y1={INA_Y} x2={HX - 22} y2={H2_Y} stroke="#9ca3af" strokeWidth="1.5" markerEnd="url(#tl-arrow)" />
-            <MiniSlider x={140} y={138} value={wH2a} min={-15} max={15} step={0.1} onChange={setWH2a} label="w" />
-
-            {/* --- Arrows: B → H2 --- */}
-            <line x1={INX + 20} y1={INB_Y} x2={HX - 22} y2={H2_Y} stroke="#9ca3af" strokeWidth="1.5" markerEnd="url(#tl-arrow)" />
-            <MiniSlider x={120} y={INB_Y + 10} value={wH2b} min={-15} max={15} step={0.1} onChange={setWH2b} label="w" />
+            {/* Arrows: A → H1 */}
+            <line x1={INX + 18} y1={INA_Y} x2={HX - 20} y2={H1_Y} stroke="#9ca3af" strokeWidth="1.5" markerEnd="url(#tl-arrow)" />
+            {/* Arrows: B → H1 */}
+            <line x1={INX + 18} y1={INB_Y} x2={HX - 20} y2={H1_Y + 10} stroke="#9ca3af" strokeWidth="1.5" markerEnd="url(#tl-arrow)" />
+            {/* Arrows: A → H2 */}
+            <line x1={INX + 18} y1={INA_Y} x2={HX - 20} y2={H2_Y - 10} stroke="#9ca3af" strokeWidth="1.5" markerEnd="url(#tl-arrow)" />
+            {/* Arrows: B → H2 */}
+            <line x1={INX + 18} y1={INB_Y} x2={HX - 20} y2={H2_Y} stroke="#9ca3af" strokeWidth="1.5" markerEnd="url(#tl-arrow)" />
 
             {/* Hidden H1 */}
-            <text x={HX} y={H1_Y - 24} textAnchor="middle" className="fill-foreground text-[10px] font-bold pointer-events-none select-none">H1</text>
-            <circle cx={HX} cy={H1_Y} r={20} fill={outputColor(probeH1)} stroke={outputColor(probeH1)} strokeWidth="2" />
+            <text x={HX} y={H1_Y - 22} textAnchor="middle" className="fill-foreground text-[10px] font-bold pointer-events-none select-none">H1</text>
+            <circle cx={HX} cy={H1_Y} r={18} fill={outputColor(probeH1)} stroke={outputColor(probeH1)} strokeWidth="2" />
             <text x={HX} y={H1_Y + 4} textAnchor="middle" className="fill-white text-[11px] font-bold font-mono pointer-events-none select-none">
               {probeH1.toFixed(2)}
             </text>
-            {/* H1 bias */}
-            <MiniSlider x={HX} y={H1_Y + 22} value={bH1} min={-20} max={20} step={0.1} onChange={setBH1} label="bias" />
 
             {/* Hidden H2 */}
-            <text x={HX} y={H2_Y - 24} textAnchor="middle" className="fill-foreground text-[10px] font-bold pointer-events-none select-none">H2</text>
-            <circle cx={HX} cy={H2_Y} r={20} fill={outputColor(probeH2)} stroke={outputColor(probeH2)} strokeWidth="2" />
+            <text x={HX} y={H2_Y - 22} textAnchor="middle" className="fill-foreground text-[10px] font-bold pointer-events-none select-none">H2</text>
+            <circle cx={HX} cy={H2_Y} r={18} fill={outputColor(probeH2)} stroke={outputColor(probeH2)} strokeWidth="2" />
             <text x={HX} y={H2_Y + 4} textAnchor="middle" className="fill-white text-[11px] font-bold font-mono pointer-events-none select-none">
               {probeH2.toFixed(2)}
             </text>
-            {/* H2 bias */}
-            <MiniSlider x={HX} y={H2_Y + 22} value={bH2} min={-20} max={20} step={0.1} onChange={setBH2} label="bias" />
 
-            {/* --- Arrows: H1 → Out --- */}
-            <line x1={HX + 22} y1={H1_Y} x2={OX - 22} y2={OY} stroke="#9ca3af" strokeWidth="1.5" markerEnd="url(#tl-arrow)" />
-            <MiniSlider x={340} y={H1_Y - 20} value={wO1} min={-15} max={15} step={0.1} onChange={setWO1} label="w" />
-
-            {/* --- Arrows: H2 → Out --- */}
-            <line x1={HX + 22} y1={H2_Y} x2={OX - 22} y2={OY} stroke="#9ca3af" strokeWidth="1.5" markerEnd="url(#tl-arrow)" />
-            <MiniSlider x={340} y={OY + 30} value={wO2} min={-15} max={15} step={0.1} onChange={setWO2} label="w" />
+            {/* Arrows: H1 → Out */}
+            <line x1={HX + 20} y1={H1_Y} x2={OX - 20} y2={OY - 5} stroke="#9ca3af" strokeWidth="1.5" markerEnd="url(#tl-arrow)" />
+            {/* Arrows: H2 → Out */}
+            <line x1={HX + 20} y1={H2_Y} x2={OX - 20} y2={OY + 5} stroke="#9ca3af" strokeWidth="1.5" markerEnd="url(#tl-arrow)" />
 
             {/* Output */}
-            <text x={OX} y={OY - 26} textAnchor="middle" className="fill-foreground text-[10px] font-bold pointer-events-none select-none">Output</text>
-            <circle cx={OX} cy={OY} r={22} fill={outputColor(probeOut)} stroke={outputColor(probeOut)} strokeWidth="2" />
-            <text x={OX} y={OY + 4} textAnchor="middle" className="fill-white text-[13px] font-bold font-mono pointer-events-none select-none">
+            <text x={OX} y={OY - 24} textAnchor="middle" className="fill-foreground text-[10px] font-bold pointer-events-none select-none">Output</text>
+            <circle cx={OX} cy={OY} r={20} fill={outputColor(probeOut)} stroke={outputColor(probeOut)} strokeWidth="2" />
+            <text x={OX} y={OY + 5} textAnchor="middle" className="fill-white text-[13px] font-bold font-mono pointer-events-none select-none">
               {probeOut.toFixed(2)}
             </text>
-            {/* Output bias */}
-            <MiniSlider x={OX} y={OY + 24} value={bO} min={-20} max={20} step={0.1} onChange={setBO} label="bias" />
-          </svg>
 
-          {/* Challenges */}
-          <div className="mt-1">
-            <div className="text-[10px] font-semibold text-foreground mb-1">Challenges</div>
-            <div className="flex flex-wrap gap-1.5 items-center">
-              {(Object.keys(CHALLENGES) as ChallengeName[]).map((name) => (
+            {/* Weight labels on arrows */}
+            <text x={(INX + HX) / 2 - 15} y={INA_Y - 12} textAnchor="middle" className="fill-muted text-[9px] font-mono pointer-events-none select-none">{wH1a.toFixed(1)}</text>
+            <text x={(INX + HX) / 2 - 30} y={(INA_Y + INB_Y) / 2 - 12} textAnchor="middle" className="fill-muted text-[9px] font-mono pointer-events-none select-none">{wH1b.toFixed(1)}</text>
+            <text x={(INX + HX) / 2 + 10} y={(INA_Y + INB_Y) / 2 + 14} textAnchor="middle" className="fill-muted text-[9px] font-mono pointer-events-none select-none">{wH2a.toFixed(1)}</text>
+            <text x={(INX + HX) / 2 - 15} y={INB_Y + 14} textAnchor="middle" className="fill-muted text-[9px] font-mono pointer-events-none select-none">{wH2b.toFixed(1)}</text>
+            <text x={(HX + OX) / 2} y={H1_Y - 8} textAnchor="middle" className="fill-muted text-[9px] font-mono pointer-events-none select-none">{wO1.toFixed(1)}</text>
+            <text x={(HX + OX) / 2} y={H2_Y + 14} textAnchor="middle" className="fill-muted text-[9px] font-mono pointer-events-none select-none">{wO2.toFixed(1)}</text>
+          </svg>
+        </div>
+
+        {/* Row 2: Slider Groups */}
+        <div className="grid grid-cols-3 gap-3">
+          <div className="bg-foreground/[0.03] rounded-lg p-2">
+            <div className="text-[10px] font-bold text-foreground mb-1">H1</div>
+            <div className="flex flex-col gap-1">
+              <WeightSlider value={wH1a} min={-20} max={20} step={0.1} onChange={setWH1a} label="wA" />
+              <WeightSlider value={wH1b} min={-20} max={20} step={0.1} onChange={setWH1b} label="wB" />
+              <WeightSlider value={bH1} min={-30} max={30} step={0.1} onChange={setBH1} label="bias" />
+            </div>
+          </div>
+          <div className="bg-foreground/[0.03] rounded-lg p-2">
+            <div className="text-[10px] font-bold text-foreground mb-1">H2</div>
+            <div className="flex flex-col gap-1">
+              <WeightSlider value={wH2a} min={-20} max={20} step={0.1} onChange={setWH2a} label="wA" />
+              <WeightSlider value={wH2b} min={-20} max={20} step={0.1} onChange={setWH2b} label="wB" />
+              <WeightSlider value={bH2} min={-30} max={30} step={0.1} onChange={setBH2} label="bias" />
+            </div>
+          </div>
+          <div className="bg-foreground/[0.03] rounded-lg p-2">
+            <div className="text-[10px] font-bold text-foreground mb-1">Output</div>
+            <div className="flex flex-col gap-1">
+              <WeightSlider value={wO1} min={-20} max={20} step={0.1} onChange={setWO1} label="wH1" />
+              <WeightSlider value={wO2} min={-20} max={20} step={0.1} onChange={setWO2} label="wH2" />
+              <WeightSlider value={bO} min={-30} max={30} step={0.1} onChange={setBO} label="bias" />
+            </div>
+          </div>
+        </div>
+
+        {/* Row 3: Canvas + Challenges */}
+        <div className="flex flex-col sm:flex-row gap-3">
+          {/* Canvas */}
+          <div className="flex-shrink-0">
+            <div className="text-[10px] font-medium text-muted mb-1">
+              Network output across input space
+            </div>
+            <div
+              className="relative rounded-lg overflow-hidden border border-border cursor-crosshair"
+              style={{ width: CANVAS_SIZE, height: CANVAS_SIZE }}
+              onClick={handleCanvasClick}
+            >
+              <canvas
+                ref={canvasRef}
+                width={CANVAS_SIZE}
+                height={CANVAS_SIZE}
+                className="block"
+              />
+              <svg
+                width={CANVAS_SIZE}
+                height={CANVAS_SIZE}
+                className="absolute inset-0 pointer-events-none"
+              >
+                {/* Challenge dots at data point positions */}
+                {activeChallenge &&
+                  activeChallenge.points.map((pt, i) => {
+                    const cx = pt.x * (CANVAS_SIZE - 20) + 10;
+                    const cy = (1 - pt.y) * (CANVAS_SIZE - 20) + 10;
+                    const { out } = forward2Layer(pt.x, pt.y, wH1a, wH1b, bH1, wH2a, wH2b, bH2, wO1, wO2, bO);
+                    const correct = pt.target === 1 ? out > 0.8 : out < 0.2;
+                    return (
+                      <g key={i}>
+                        <circle cx={cx} cy={cy} r={10} fill={pt.target === 1 ? "#10b981" : "#ef4444"} opacity={0.9} />
+                        <circle cx={cx} cy={cy} r={10} fill="none" stroke="white" strokeWidth={2} />
+                        {correct && (
+                          <text x={cx} y={cy + 4} textAnchor="middle" fill="white" fontSize="11" fontWeight="bold">
+                            &#10003;
+                          </text>
+                        )}
+                      </g>
+                    );
+                  })}
+                {/* Click marker */}
+                {clickPos && (
+                  <circle
+                    cx={clickPos.x * CANVAS_SIZE}
+                    cy={(1 - clickPos.y) * CANVAS_SIZE}
+                    r={5}
+                    fill={outputColor(probeOut)}
+                    stroke="white"
+                    strokeWidth={2}
+                  />
+                )}
+                {/* Axis labels */}
+                <text x={CANVAS_SIZE / 2} y={CANVAS_SIZE - 4} textAnchor="middle" fill="white" fontSize="11" fontWeight="bold" opacity={0.7}>
+                  Input A →
+                </text>
+                <text x={8} y={CANVAS_SIZE / 2} textAnchor="middle" fill="white" fontSize="11" fontWeight="bold" opacity={0.7} transform={`rotate(-90, 8, ${CANVAS_SIZE / 2})`}>
+                  Input B →
+                </text>
+              </svg>
+            </div>
+          </div>
+
+          {/* Challenges Panel */}
+          <div className="flex-1 min-w-0">
+            <div className="text-[10px] font-semibold text-foreground mb-2">Challenges</div>
+            <div className="flex flex-col gap-1.5">
+              {CHALLENGES.map((ch, idx) => (
                 <button
-                  key={name}
-                  onClick={() => activateChallenge(name)}
-                  className={`px-2 py-1 text-[10px] font-medium rounded transition-colors ${
-                    challengeSolved && activeChallenge === name
-                      ? "bg-success/20 text-success"
-                      : activeChallenge === name
-                      ? "bg-accent/20 text-accent"
+                  key={ch.name}
+                  onClick={() => activateChallenge(idx)}
+                  className={`w-full text-left px-3 py-1.5 text-[11px] font-medium rounded-md transition-colors ${
+                    challengeSolved && activeChallengeIdx === idx
+                      ? "bg-success/20 text-success ring-1 ring-success/30"
+                      : activeChallengeIdx === idx
+                      ? "bg-accent/20 text-accent ring-1 ring-accent/30"
                       : "bg-foreground/5 text-foreground hover:bg-foreground/10"
                   }`}
                 >
-                  {challengeSolved && activeChallenge === name ? "✓ " : ""}{name}
+                  {challengeSolved && activeChallengeIdx === idx ? "✓ " : ""}
+                  {ch.name}
+                  {!ch.solvable && <span className="text-[9px] text-muted ml-1">(hard)</span>}
                 </button>
               ))}
-              {activeChallenge && (
-                <>
-                  <button
-                    onClick={startOptimize}
-                    className={`px-3 py-1 text-[10px] font-medium rounded-md transition-colors ${
-                      isOptimizing
-                        ? "bg-error text-white hover:bg-error/80"
-                        : "bg-accent text-white hover:bg-accent/80"
-                    }`}
-                  >
-                    {isOptimizing ? "Stop" : "Optimize"}
-                  </button>
-                  {optimizeStatus === "solved" && (
-                    <span className="text-[10px] font-medium text-success">Solved!</span>
-                  )}
-                </>
-              )}
             </div>
+            {activeChallenge && (
+              <div className="mt-3">
+                <button
+                  onClick={startOptimize}
+                  className={`w-full px-3 py-2 text-[12px] font-bold rounded-md transition-colors ${
+                    isOptimizing
+                      ? "bg-error text-white hover:bg-error/80"
+                      : "bg-accent text-white hover:bg-accent/80"
+                  }`}
+                >
+                  {isOptimizing ? "Stop" : "Optimize"}
+                </button>
+                {optimizeStatus === "solved" && (
+                  <div className="mt-1.5 text-[11px] font-medium text-success text-center">
+                    Solved!
+                  </div>
+                )}
+                {optimizeStatus === "impossible" && (
+                  <div className="mt-1.5 text-[11px] font-medium text-warning text-center">
+                    Two neurons can&apos;t solve this — it needs more neurons!
+                  </div>
+                )}
+                {optimizeStatus === "done" && (
+                  <div className="mt-1.5 text-[11px] text-accent text-center">
+                    Got stuck — try randomizing the weights for a different starting point.
+                  </div>
+                )}
+                <button
+                  onClick={randomizeWeights}
+                  className="mt-2 w-full px-3 py-1.5 text-[11px] font-medium rounded-md bg-foreground/5 text-foreground hover:bg-foreground/10 transition-colors"
+                >
+                  Randomize Weights
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

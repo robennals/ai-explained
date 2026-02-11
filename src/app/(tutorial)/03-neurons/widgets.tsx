@@ -59,6 +59,14 @@ const NetworkTrainer = dynamic(
   { ssr: false }
 );
 
+const SharpnessExplorer = dynamic(
+  () =>
+    import("@/components/widgets/neurons/SharpnessExplorer").then(
+      (m) => m.SharpnessExplorer
+    ),
+  { ssr: false }
+);
+
 function WidgetSlot({ children }: { children: React.ReactNode }) {
   return (
     <Suspense
@@ -125,6 +133,14 @@ export function NetworkTrainerWidget() {
   return (
     <WidgetSlot>
       <NetworkTrainer />
+    </WidgetSlot>
+  );
+}
+
+export function SharpnessExplorerWidget() {
+  return (
+    <WidgetSlot>
+      <SharpnessExplorer />
     </WidgetSlot>
   );
 }
