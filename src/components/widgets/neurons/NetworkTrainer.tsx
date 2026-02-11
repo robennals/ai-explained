@@ -421,12 +421,7 @@ export function NetworkTrainer() {
       setLossHistory([...localLossHistory]);
       redraw();
 
-      // Detect plateau: if loss > threshold and hasn't improved much over recent history, retry early
-      const isStuck = frameLoss > 0.05 && localEpoch >= 300 &&
-        localLossHistory.length >= 200 &&
-        localLossHistory[localLossHistory.length - 200] - frameLoss < 0.01;
-
-      if (localEpoch >= 2000 || isStuck) {
+      if (localEpoch >= 2000) {
         // If loss is still high and we have retries left, try fresh weights
         if (frameLoss > 0.05 && retryCountRef.current < 2) {
           retryCountRef.current++;
@@ -439,11 +434,9 @@ export function NetworkTrainer() {
           animRef.current = requestAnimationFrame(animate);
           return;
         }
-        if (localEpoch >= 2000 || isStuck) {
-          trainingRef.current = false;
-          setIsTraining(false);
-          return;
-        }
+        trainingRef.current = false;
+        setIsTraining(false);
+        return;
       }
 
       animRef.current = requestAnimationFrame(animate);

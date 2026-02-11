@@ -347,9 +347,7 @@ export function TwoLayerPlayground() {
 
     const points = activeChallenge.points;
     const solvable = activeChallenge.solvable;
-    const maxSteps = solvable ? 1500 : 600;
-    let prevLoss = Infinity;
-    let stuckCount = 0;
+    const maxSteps = solvable ? 3000 : 600;
 
     const animate = () => {
       const s = stateRef.current;
@@ -407,11 +405,9 @@ export function TwoLayerPlayground() {
       setWO1(s.wO1); setWO2(s.wO2); setBO(s.bO);
 
       // Check convergence
-      let totalLoss = 0;
       let allCorrect = true;
       for (const pt of points) {
         const { out } = forward2Layer(pt.x, pt.y, s.wH1a, s.wH1b, s.bH1, s.wH2a, s.wH2b, s.bH2, s.wO1, s.wO2, s.bO);
-        totalLoss += bceLoss(out, pt.target);
         if (pt.target === 1 ? out <= 0.8 : out >= 0.2) allCorrect = false;
       }
 
@@ -421,22 +417,11 @@ export function TwoLayerPlayground() {
         return;
       }
 
-      // Detect plateau: loss barely changing
-      if (s.step > 100 && Math.abs(totalLoss - prevLoss) < 0.001) {
-        stuckCount++;
-      } else {
-        stuckCount = 0;
-      }
-      prevLoss = totalLoss;
-      const isStuck = stuckCount >= 50;
-
-      if (s.step >= maxSteps || (isStuck && solvable)) {
+      if (s.step >= maxSteps) {
         // Retry with fresh weights if solvable and we have retries left
         if (solvable && retryCountRef.current < 2) {
           retryCountRef.current++;
           initRandomWeights();
-          prevLoss = Infinity;
-          stuckCount = 0;
           animRef.current = requestAnimationFrame(animate);
           return;
         }
