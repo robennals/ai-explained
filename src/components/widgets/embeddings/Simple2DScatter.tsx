@@ -18,11 +18,10 @@ interface VennPoint {
   vennY: number; // size: 0 = small, 10 = big
 }
 
-// For the four-category preset — positions are hand-tuned to land inside
-// the correct rectangle overlap zones.
+// For the four-category presets — positions are hand-tuned.
 interface QuadPoint {
   word: string;
-  category: "wild" | "water" | "land" | "domestic" | "multi";
+  category: "wild" | "water" | "land" | "domestic" | "multi" | "animal" | "building" | "planet" | "instrument";
   quadX: number;
   quadY: number;
 }
@@ -121,7 +120,38 @@ const QUAD_WORDS: QuadPoint[] = [
   { word: "turtle",    category: "multi",    quadX: 5,   quadY: 4.5 },
 ];
 
-type PresetId = "size-danger" | "animal-food" | "four-categories";
+// Four clearly distinct, non-overlapping categories in separate quadrants.
+const DISTINCT_WORDS: QuadPoint[] = [
+  // Animals (top-left quadrant)
+  { word: "dog",       category: "animal",     quadX: 1,   quadY: 8 },
+  { word: "cat",       category: "animal",     quadX: 2.5, quadY: 9 },
+  { word: "elephant",  category: "animal",     quadX: 1.5, quadY: 7 },
+  { word: "ant",       category: "animal",     quadX: 3,   quadY: 7.5 },
+  { word: "eagle",     category: "animal",     quadX: 2,   quadY: 6.5 },
+
+  // Buildings (top-right quadrant)
+  { word: "house",      category: "building",  quadX: 7,   quadY: 8 },
+  { word: "church",     category: "building",  quadX: 8.5, quadY: 9 },
+  { word: "skyscraper", category: "building",  quadX: 8,   quadY: 7 },
+  { word: "barn",       category: "building",  quadX: 9,   quadY: 7.5 },
+  { word: "lighthouse", category: "building",  quadX: 7.5, quadY: 6.5 },
+
+  // Planets (bottom-left quadrant)
+  { word: "mercury",   category: "planet",     quadX: 1.5, quadY: 3 },
+  { word: "venus",     category: "planet",     quadX: 2.5, quadY: 2 },
+  { word: "mars",      category: "planet",     quadX: 1,   quadY: 1.5 },
+  { word: "jupiter",   category: "planet",     quadX: 3,   quadY: 1 },
+  { word: "saturn",    category: "planet",     quadX: 2,   quadY: 3.5 },
+
+  // Instruments (bottom-right quadrant)
+  { word: "guitar",    category: "instrument", quadX: 7.5, quadY: 3 },
+  { word: "piano",     category: "instrument", quadX: 8.5, quadY: 2 },
+  { word: "flute",     category: "instrument", quadX: 7,   quadY: 1.5 },
+  { word: "drum",      category: "instrument", quadX: 9,   quadY: 1 },
+  { word: "violin",    category: "instrument", quadX: 8,   quadY: 3.5 },
+];
+
+type PresetId = "size-danger" | "animal-food" | "four-distinct" | "four-overlap";
 
 interface PresetDef {
   id: PresetId;
@@ -141,8 +171,13 @@ const PRESETS: PresetDef[] = [
     description: "Chicken, salmon, and lamb are BOTH animals AND food \u2014 they sit in the overlap. Two dimensions let us represent overlapping categories, like a Venn diagram.",
   },
   {
-    id: "four-categories",
-    label: "Four Categories",
+    id: "four-distinct",
+    label: "Four Distinct Categories",
+    description: "Animals, buildings, planets, and instruments have nothing in common \u2014 so they sit in four clean, separate quadrants. Two dimensions work perfectly when categories don\u2019t overlap.",
+  },
+  {
+    id: "four-overlap",
+    label: "Four Overlapping Categories",
     description: "Four overlapping regions for wild, water, land, and domestic animals. Where regions overlap, animals belong to multiple categories \u2014 a shark is both wild and aquatic, a goldfish is both aquatic and domestic. But even two dimensions isn\u2019t enough \u2014 a bear is wild and lives on land, but this layout puts it right next to a mole. You\u2019d need more dimensions to tell them apart.",
   },
 ];
@@ -159,6 +194,8 @@ const CATEGORY_COLORS: Record<string, string> = {
   land: "#22c55e",
   domestic: "#f97316",
   multi: "#a855f7",
+  building: "#3b82f6",
+  planet: "#8b5cf6",
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -173,6 +210,8 @@ const CATEGORY_LABELS: Record<string, string> = {
   land: "Land",
   domestic: "Domestic",
   multi: "Multiple",
+  building: "Buildings",
+  planet: "Planets",
 };
 
 const MARGIN = { top: 20, right: 20, bottom: 40, left: 50 };
@@ -197,7 +236,9 @@ export function Simple2DScatter() {
 
   const preset = PRESETS[presetIdx];
   const isVenn = preset.id === "animal-food";
-  const isQuad = preset.id === "four-categories";
+  const isQuad = preset.id === "four-overlap";
+  const isDistinct = preset.id === "four-distinct";
+  const isQuadLike = isQuad || isDistinct;
 
   const resetState = useCallback(() => {
     setPresetIdx(0);
@@ -211,7 +252,9 @@ export function Simple2DScatter() {
   const yScale = (v: number) => dims.height - MARGIN.bottom - (v / 10) * plotH;
 
   // Which categories to show in legend
-  const visibleCategories = isQuad
+  const visibleCategories = isDistinct
+    ? ["animal", "building", "planet", "instrument"]
+    : isQuad
     ? ["multi"]
     : isVenn
       ? ["animal", "food", "both"]
@@ -222,7 +265,16 @@ export function Simple2DScatter() {
 
   // Build the list of data points for rendering
   const points: { word: string; cx: number; cy: number; color: string }[] = [];
-  if (isQuad) {
+  if (isDistinct) {
+    for (const entry of DISTINCT_WORDS) {
+      points.push({
+        word: entry.word,
+        cx: xScale(entry.quadX),
+        cy: yScale(entry.quadY),
+        color: CATEGORY_COLORS[entry.category],
+      });
+    }
+  } else if (isQuad) {
     for (const entry of QUAD_WORDS) {
       points.push({
         word: entry.word,
@@ -291,7 +343,7 @@ export function Simple2DScatter() {
           className="overflow-visible"
         >
           {/* Grid lines (scatter and venn only) */}
-          {!isQuad && [0, 2, 4, 6, 8, 10].map((v) => (
+          {!isQuadLike && [0, 2, 4, 6, 8, 10].map((v) => (
             <g key={v}>
               <line
                 x1={xScale(v)} y1={MARGIN.top}
@@ -358,6 +410,45 @@ export function Simple2DScatter() {
             </>
           )}
 
+          {/* Four distinct categories: four non-overlapping quadrants */}
+          {isDistinct && (() => {
+            const rects = [
+              { x1: 0, y1: 5, x2: 5, y2: 10,   fill: "#22c55e", label: "Animals",     lx: 1.5, ly: 9.5 },
+              { x1: 5, y1: 5, x2: 10, y2: 10,   fill: "#3b82f6", label: "Buildings",   lx: 8.5, ly: 9.5 },
+              { x1: 0, y1: 0, x2: 5, y2: 5,      fill: "#8b5cf6", label: "Planets",     lx: 1.5, ly: 0.5 },
+              { x1: 5, y1: 0, x2: 10, y2: 5,     fill: "#f97316", label: "Instruments", lx: 8.5, ly: 0.5 },
+            ];
+            return (
+              <>
+                {rects.map((r) => {
+                  const sx = xScale(r.x1);
+                  const sy = yScale(r.y2);
+                  const sw = xScale(r.x2) - xScale(r.x1);
+                  const sh = yScale(r.y1) - yScale(r.y2);
+                  return (
+                    <g key={r.label}>
+                      <rect
+                        x={sx} y={sy} width={sw} height={sh}
+                        fill={r.fill} fillOpacity={0.06}
+                        stroke={r.fill} strokeWidth={1.5} strokeDasharray="6,4" opacity={0.35}
+                        rx={4}
+                      />
+                      <text
+                        x={xScale(r.lx)}
+                        y={yScale(r.ly)}
+                        textAnchor="middle"
+                        className="text-[12px] font-semibold pointer-events-none select-none"
+                        fill={r.fill} opacity={0.5}
+                      >
+                        {r.label}
+                      </text>
+                    </g>
+                  );
+                })}
+              </>
+            );
+          })()}
+
           {/* Four-category: four overlapping rectangles */}
           {isQuad && (() => {
             // Each rectangle covers ~65% of each axis, creating overlap where they intersect.
@@ -400,7 +491,7 @@ export function Simple2DScatter() {
           })()}
 
           {/* Axes (scatter and venn only) */}
-          {!isQuad && (
+          {!isQuadLike && (
             <>
               <line
                 x1={MARGIN.left} y1={dims.height - MARGIN.bottom}
