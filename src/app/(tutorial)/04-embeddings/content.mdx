@@ -50,6 +50,22 @@ In "Size × Danger", bear and shark are big AND dangerous, while knife and gun a
 
 Two dimensions are dramatically more expressive than one. With just two numbers, we can plot two independent properties at once, and even represent overlapping categories like a Venn diagram. But we still can't distinguish everything — dog and cat overlap, guitar and flute sit on top of each other. We'd need more dimensions: "is it a pet?", "does it have strings?", "is it edible?"
 
+## Beyond Two Dimensions
+
+Each new dimension adds discriminative power. With 5 dimensions, you could separate animals from vehicles from instruments from food. With 20 dimensions, you could tell a dog from a cat. With 50 or 100 dimensions, you could capture remarkably fine-grained distinctions.
+
+But here's the problem: how do you decide *which* dimensions to use? "How dangerous is the color blue?" doesn't make sense. "How electronic is a cow?" There's no universal set of labeled dimensions that works for all words.
+
+Real AI systems solve this differently. They don't use labeled dimensions at all. Instead, they learn a space where **similar words end up nearby** and **different words end up far apart**. The dimensions are just numbers — not "alive?" or "big?" — but the proximity structure captures meaning.
+
+And it's not just proximity. The spatial *relationships* between nearby words often carry meaning too. In a well-trained embedding, the direction from "small" to "big" tends to be consistent — move an ant in that direction and you get larger animals. The direction from "man" to "woman" captures gender, so applying it to "king" lands you near "queen." These regularities aren't designed in; they emerge from training, because a space with consistent structure is more useful than one without it.
+
+This is like the difference between organizing books by (genre, length, year) versus letting a librarian arrange them so that related books are on nearby shelves. The librarian's system has no labels, but it works better because it captures relationships that no fixed labeling scheme could.
+
+<KeyInsight>
+Real embeddings don't use labeled dimensions. They learn positions where similar things are nearby and where directions between words encode consistent relationships — size, gender, tense, and countless others — all without any human labeling.
+</KeyInsight>
+
 ## Neural Networks Meet Embeddings
 
 In the previous chapter, you built neurons that classified inputs by drawing a decision boundary. Those inputs were abstract numbers. But now each input has a name — its position in the embedding encodes meaning. Can a neuron learn to read that meaning?
@@ -63,20 +79,6 @@ Start with "Dangerous" — the neuron needs to draw a boundary separating the da
 </TryIt>
 
 This is only a toy example with two dimensions — but the same principle scales up. Real language models feed high-dimensional embeddings (hundreds or thousands of numbers per word) into neural networks with many layers, and those networks learn to read meaning from the geometry of the embedding space.
-
-## Beyond Two Dimensions
-
-Each new dimension adds discriminative power. With 5 dimensions, you could separate animals from vehicles from instruments from food. With 20 dimensions, you could tell a dog from a cat. With 50 or 100 dimensions, you could capture remarkably fine-grained distinctions.
-
-But here's the problem: how do you decide *which* dimensions to use? "How dangerous is the color blue?" doesn't make sense. "How electronic is a cow?" There's no universal set of labeled dimensions that works for all words.
-
-Real AI systems solve this differently. They don't use labeled dimensions at all. Instead, they learn a space where **similar words end up nearby** and **different words end up far apart**. The dimensions are just numbers — not "alive?" or "big?" — but the proximity structure captures meaning.
-
-This is like the difference between organizing books by (genre, length, year) versus letting a librarian arrange them so that related books are on nearby shelves. The librarian's system has no labels, but it works better because it captures relationships that no fixed labeling scheme could.
-
-<KeyInsight>
-Real embeddings don't use labeled dimensions. They learn positions where similar things are nearby. This is more powerful because it can encode relationships that no fixed set of labels could capture.
-</KeyInsight>
 
 ## Exploring a Real Embedding
 
