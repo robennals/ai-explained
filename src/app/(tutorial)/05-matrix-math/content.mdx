@@ -85,28 +85,27 @@ When the matrix has **more rows than columns**, it does the opposite — it *emb
 
 ## The Neural Network Connection
 
-Here's the punchline of this chapter. A single layer in a neural network does three things in sequence:
+Here's the punchline. A neural network layer takes some inputs, multiplies each one by a **weight**, and adds up the results. That's it — it's just multiplying by a matrix.
 
-1. **Matrix multiply**: multiply the inputs by a weight matrix (rotate and stretch the space)
-2. **Add bias**: shift everything by a fixed offset (translate the space)
-3. **Apply activation function**: bend the space non-linearly (e.g., clip negative values to zero with ReLU)
+Say we have two inputs and two outputs. We need four weights — let's call them <span style={{color: "#ef4444"}}>**a**</span>, <span style={{color: "#22c55e"}}>**b**</span>, <span style={{color: "#3b82f6"}}>**c**</span>, and <span style={{color: "#a855f7"}}>**d**</span>:
 
-The matrix part is everything we've been exploring. The bias is a simple shift — it moves the origin. And the activation function is the crucial non-linear ingredient that lets neural networks learn things that pure matrices can't.
+- **output 1** = <span style={{color: "#ef4444"}}>a</span> &times; input 1 + <span style={{color: "#22c55e"}}>b</span> &times; input 2
+- **output 2** = <span style={{color: "#3b82f6"}}>c</span> &times; input 1 + <span style={{color: "#a855f7"}}>d</span> &times; input 2
 
-Without activation functions, stacking layers would be pointless: a matrix times a matrix is just another matrix. Two rotations compose into one rotation. But add a non-linear bend between each layer, and suddenly you can build arbitrarily complex transformations.
+Those four weights are exactly the four numbers in a matrix! The neuron diagram and the matrix are just two ways of writing the same thing — same numbers, same colors, same math.
 
 <NeuronVsMatrixWidget />
 
 <TryIt>
-Adjust the weight sliders and watch both views update at the same time. The neuron diagram on the left and the geometric view on the right are showing the **exact same math** — just drawn differently! Try **Rotate 90&deg;** — the neuron weights become [0, &minus;1, 1, 0] and the colored dots spin a quarter turn. Try **Collapse to line** — one output neuron goes dead and the dots all squish onto a single line.
+Adjust the sliders and watch everything update together — the neuron diagram, the matrix, and the geometric view are all showing the **exact same math**. Try **Rotate 90&deg;** and watch the arrow spin. Try **Collapse to line** and watch the arrow get squished flat.
 </TryIt>
 
-This dual interpretation is profound:
+This is a big idea:
 
-- In the **neuron view**, we think: *"Each output computes a weighted sum of inputs."*
-- In the **matrix view**, we think: *"The layer rotates and stretches the input space."*
+- In the **neuron view**, we think: *"Each output adds up the inputs, multiplied by weights."*
+- In the **geometric view**, we think: *"The weights rotate and stretch the space."*
 
-Both are true simultaneously. They're just two ways of seeing the same math.
+Both are true. They're just two ways of seeing the same thing.
 
 <KeyInsight>
 A neural network layer and a matrix transformation are the same thing, drawn differently. When we train a neural network, we're learning the right matrix at each layer — the right geometric transformation to apply to the data. Real neural networks work in hundreds or thousands of dimensions — a single layer in a typical language model transforms a 768-dimensional space, with over half a million matrix entries — but the math is identical to our 2D examples. Just... bigger.
