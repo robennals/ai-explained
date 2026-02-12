@@ -7,10 +7,6 @@ function sigmoid(x: number): number {
   return 1 / (1 + Math.exp(-Math.max(-500, Math.min(500, x))));
 }
 
-function sigmoidDeriv(out: number): number {
-  return out * (1 - out);
-}
-
 function outputColor(v: number): string {
   if (v <= 0.5) {
     const t = v / 0.5;
@@ -76,7 +72,7 @@ const WORDS: WordDataPoint[] = [
 interface Challenge {
   name: string;
   description: string;
-  targetWords: string[]; // words that should be target=1
+  targetWords: string[];
 }
 
 const CHALLENGES: Challenge[] = [
@@ -111,17 +107,12 @@ function getChallengePoints(challenge: Challenge): { word: string; x: number; y:
   }));
 }
 
-// Forward pass for 2→2→1
-function forward2Layer(
-  a: number, b: number,
-  wH1a: number, wH1b: number, bH1: number,
-  wH2a: number, wH2b: number, bH2: number,
-  wO1: number, wO2: number, bO: number,
-): { h1: number; h2: number; out: number } {
-  const h1 = sigmoid(wH1a * a + wH1b * b + bH1);
-  const h2 = sigmoid(wH2a * a + wH2b * b + bH2);
-  const out = sigmoid(wO1 * h1 + wO2 * h2 + bO);
-  return { h1, h2, out };
+// Forward pass for single neuron: 2 inputs → 1 output
+function forward(
+  size: number, danger: number,
+  wS: number, wD: number, bias: number,
+): number {
+  return sigmoid(wS * size + wD * danger + bias);
 }
 
 const CANVAS_SIZE = 280;
@@ -143,7 +134,7 @@ function WeightSlider({
 }) {
   return (
     <div className="flex items-center gap-1.5">
-      <span className="text-[10px] font-mono text-muted w-7 text-right shrink-0">{label}</span>
+      <span className="text-[10px] font-mono text-muted w-10 text-right shrink-0">{label}</span>
       <input
         type="range" min={min} max={max} step={step} value={value}
         onChange={(e) => onChange(parseFloat(e.target.value))}
@@ -157,15 +148,9 @@ function WeightSlider({
 }
 
 export function EmbeddingClassifier() {
-  const [wH1a, setWH1a] = useState(8.0);
-  const [wH1b, setWH1b] = useState(8.0);
-  const [bH1, setBH1] = useState(-4.0);
-  const [wH2a, setWH2a] = useState(-8.0);
-  const [wH2b, setWH2b] = useState(-8.0);
-  const [bH2, setBH2] = useState(12.0);
-  const [wO1, setWO1] = useState(10.0);
-  const [wO2, setWO2] = useState(10.0);
-  const [bO, setBO] = useState(-15.0);
+  const [wS, setWS] = useState(0.0);
+  const [wD, setWD] = useState(0.0);
+  const [bias, setBias] = useState(0.0);
 
   const [clickPos, setClickPos] = useState<{ x: number; y: number } | null>(null);
   const [activeChallengeIdx, setActiveChallengeIdx] = useState<number | null>(null);
@@ -173,12 +158,7 @@ export function EmbeddingClassifier() {
   const [optimizeStatus, setOptimizeStatus] = useState<string | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animRef = useRef<number>(0);
-  const stateRef = useRef({
-    wH1a: 8, wH1b: 8, bH1: -4,
-    wH2a: -8, wH2b: -8, bH2: 12,
-    wO1: 10, wO2: 10, bO: -15,
-    step: 0,
-  });
+  const stateRef = useRef({ wS: 0, wD: 0, bias: 0, step: 0 });
   const retryCountRef = useRef(0);
 
   useEffect(() => {
@@ -188,9 +168,7 @@ export function EmbeddingClassifier() {
   }, []);
 
   const reset = useCallback(() => {
-    setWH1a(8.0); setWH1b(8.0); setBH1(-4.0);
-    setWH2a(-8.0); setWH2b(-8.0); setBH2(12.0);
-    setWO1(10.0); setWO2(10.0); setBO(-15.0);
+    setWS(0.0); setWD(0.0); setBias(0.0);
     setClickPos(null);
     setActiveChallengeIdx(null);
     setIsOptimizing(false);
@@ -212,9 +190,9 @@ export function EmbeddingClassifier() {
     const res = 2;
     for (let py = 0; py < size; py += res) {
       for (let px = 0; px < size; px += res) {
-        const a = px / (size - 1);
-        const b = 1 - py / (size - 1);
-        const { out } = forward2Layer(a, b, wH1a, wH1b, bH1, wH2a, wH2b, bH2, wO1, wO2, bO);
+        const x = px / (size - 1);
+        const y = 1 - py / (size - 1);
+        const out = forward(x, y, wS, wD, bias);
         const [r, g, bv] = outputColorRGB(out);
         for (let dy = 0; dy < res && py + dy < size; dy++) {
           for (let dx = 0; dx < res && px + dx < size; dx++) {
@@ -228,15 +206,15 @@ export function EmbeddingClassifier() {
       }
     }
     ctx.putImageData(imageData, 0, 0);
-  }, [wH1a, wH1b, bH1, wH2a, wH2b, bH2, wO1, wO2, bO]);
+  }, [wS, wD, bias]);
 
   const challengeSolved = useMemo(() => {
     if (!activePoints) return false;
     return activePoints.every((pt) => {
-      const { out } = forward2Layer(pt.x, pt.y, wH1a, wH1b, bH1, wH2a, wH2b, bH2, wO1, wO2, bO);
+      const out = forward(pt.x, pt.y, wS, wD, bias);
       return pt.target === 1 ? out > 0.8 : out < 0.2;
     });
-  }, [activePoints, wH1a, wH1b, bH1, wH2a, wH2b, bH2, wO1, wO2, bO]);
+  }, [activePoints, wS, wD, bias]);
 
   const handleCanvasClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
@@ -263,26 +241,19 @@ export function EmbeddingClassifier() {
     if (animRef.current) cancelAnimationFrame(animRef.current);
     const rng = mulberry32(Date.now());
     const randW = () => (rng() - 0.5) * 4;
-    const randB = () => (rng() - 0.5) * 2;
-    setWH1a(randW()); setWH1b(randW()); setBH1(randB());
-    setWH2a(randW()); setWH2b(randW()); setBH2(randB());
-    setWO1(randW()); setWO2(randW()); setBO(randB());
+    setWS(randW()); setWD(randW()); setBias((rng() - 0.5) * 2);
   }, []);
 
   const initRandomWeights = useCallback(() => {
     const rng = mulberry32(Date.now() + Math.random() * 1e9);
-    const randW = () => (rng() - 0.5) * 4;
-    const randB = () => (rng() - 0.5) * 2;
     const s = {
-      wH1a: randW(), wH1b: randW(), bH1: randB(),
-      wH2a: randW(), wH2b: randW(), bH2: randB(),
-      wO1: randW(), wO2: randW(), bO: randB(),
+      wS: (rng() - 0.5) * 4,
+      wD: (rng() - 0.5) * 4,
+      bias: (rng() - 0.5) * 2,
       step: 0,
     };
     stateRef.current = s;
-    setWH1a(s.wH1a); setWH1b(s.wH1b); setBH1(s.bH1);
-    setWH2a(s.wH2a); setWH2b(s.wH2b); setBH2(s.bH2);
-    setWO1(s.wO1); setWO2(s.wO2); setBO(s.bO);
+    setWS(s.wS); setWD(s.wD); setBias(s.bias);
   }, []);
 
   const startOptimize = useCallback(() => {
@@ -303,62 +274,33 @@ export function EmbeddingClassifier() {
 
     const animate = () => {
       const s = stateRef.current;
-      const lr = 1.5;
-      const stepsPerFrame = 5;
+      const lr = 2.0;
+      const stepsPerFrame = 8;
 
       for (let step = 0; step < stepsPerFrame; step++) {
-        let g_wH1a = 0, g_wH1b = 0, g_bH1 = 0;
-        let g_wH2a = 0, g_wH2b = 0, g_bH2 = 0;
-        let g_wO1 = 0, g_wO2 = 0, g_bO = 0;
+        let g_wS = 0, g_wD = 0, g_bias = 0;
 
         for (const pt of points) {
-          const a = pt.x, b = pt.y;
-          const z1 = s.wH1a * a + s.wH1b * b + s.bH1;
-          const h1 = sigmoid(z1);
-          const z2 = s.wH2a * a + s.wH2b * b + s.bH2;
-          const h2 = sigmoid(z2);
-          const zO = s.wO1 * h1 + s.wO2 * h2 + s.bO;
-          const out = sigmoid(zO);
-
+          const out = forward(pt.x, pt.y, s.wS, s.wD, s.bias);
           const dOut = out - pt.target;
-
-          g_wO1 += dOut * h1;
-          g_wO2 += dOut * h2;
-          g_bO += dOut;
-
-          const dH1 = dOut * s.wO1 * sigmoidDeriv(h1);
-          const dH2 = dOut * s.wO2 * sigmoidDeriv(h2);
-
-          g_wH1a += dH1 * a;
-          g_wH1b += dH1 * b;
-          g_bH1 += dH1;
-
-          g_wH2a += dH2 * a;
-          g_wH2b += dH2 * b;
-          g_bH2 += dH2;
+          g_wS += dOut * pt.x;
+          g_wD += dOut * pt.y;
+          g_bias += dOut;
         }
 
         const n = points.length;
         const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
-        s.wH1a = clamp(s.wH1a - lr * g_wH1a / n, -20, 20);
-        s.wH1b = clamp(s.wH1b - lr * g_wH1b / n, -20, 20);
-        s.bH1 = clamp(s.bH1 - lr * g_bH1 / n, -30, 30);
-        s.wH2a = clamp(s.wH2a - lr * g_wH2a / n, -20, 20);
-        s.wH2b = clamp(s.wH2b - lr * g_wH2b / n, -20, 20);
-        s.bH2 = clamp(s.bH2 - lr * g_bH2 / n, -30, 30);
-        s.wO1 = clamp(s.wO1 - lr * g_wO1 / n, -20, 20);
-        s.wO2 = clamp(s.wO2 - lr * g_wO2 / n, -20, 20);
-        s.bO = clamp(s.bO - lr * g_bO / n, -30, 30);
+        s.wS = clamp(s.wS - lr * g_wS / n, -20, 20);
+        s.wD = clamp(s.wD - lr * g_wD / n, -20, 20);
+        s.bias = clamp(s.bias - lr * g_bias / n, -30, 30);
         s.step++;
       }
 
-      setWH1a(s.wH1a); setWH1b(s.wH1b); setBH1(s.bH1);
-      setWH2a(s.wH2a); setWH2b(s.wH2b); setBH2(s.bH2);
-      setWO1(s.wO1); setWO2(s.wO2); setBO(s.bO);
+      setWS(s.wS); setWD(s.wD); setBias(s.bias);
 
       let allCorrect = true;
       for (const pt of points) {
-        const { out } = forward2Layer(pt.x, pt.y, s.wH1a, s.wH1b, s.bH1, s.wH2a, s.wH2b, s.bH2, s.wO1, s.wO2, s.bO);
+        const out = forward(pt.x, pt.y, s.wS, s.wD, s.bias);
         if (pt.target === 1 ? out <= 0.8 : out >= 0.2) allCorrect = false;
       }
 
@@ -387,36 +329,65 @@ export function EmbeddingClassifier() {
 
   // Probed values
   const probeInput = clickPos ?? { x: 0.5, y: 0.5 };
-  const { h1: probeH1, h2: probeH2, out: probeOut } = forward2Layer(
-    probeInput.x, probeInput.y,
-    wH1a, wH1b, bH1, wH2a, wH2b, bH2, wO1, wO2, bO
-  );
+  const weightedSum = wS * probeInput.x + wD * probeInput.y + bias;
+  const probeOut = sigmoid(weightedSum);
+  const prodS = wS * probeInput.x;
+  const prodD = wD * probeInput.y;
 
-  // Network diagram SVG layout
-  const NW = 520;
-  const NH = 180;
+  // Full neuron diagram layout: Inputs → Sum → Activation → Output
+  const NW = 620;
+  const NH = 220;
   const INX = 50;
-  const INA_Y = 50;
-  const INB_Y = 130;
-  const HX = 220;
-  const H1_Y = 50;
-  const H2_Y = 130;
-  const OX = 420;
-  const OY = 90;
+  const INA_Y = 60;
+  const INB_Y = 160;
+  const SUM_X = 240;
+  const SUM_Y = 110;
+  const ACT_X = 400;
+  const ACT_Y = 110;
+  const ACT_W = 100;
+  const ACT_H = 68;
+  const OUT_X = 560;
+  const OUT_Y = 110;
+
+  // Sigmoid curve for activation box
+  const sigmoidPath = useMemo(() => {
+    const pts: string[] = [];
+    const pL = ACT_X - ACT_W / 2 + 8;
+    const pR = ACT_X + ACT_W / 2 - 8;
+    const pT = ACT_Y - ACT_H / 2 + 8;
+    const pB = ACT_Y + ACT_H / 2 - 8;
+    for (let i = 0; i <= 100; i++) {
+      const xv = -10 + 20 * (i / 100);
+      const yv = sigmoid(xv);
+      pts.push(
+        `${i === 0 ? "M" : "L"}${(pL + (i / 100) * (pR - pL)).toFixed(1)},${(pB - yv * (pB - pT)).toFixed(1)}`
+      );
+    }
+    return pts.join(" ");
+  }, []);
+
+  // Operating point on sigmoid
+  const opFrac = Math.max(0, Math.min(1, (weightedSum + 10) / 20));
+  const pL = ACT_X - ACT_W / 2 + 8;
+  const pR = ACT_X + ACT_W / 2 - 8;
+  const pT = ACT_Y - ACT_H / 2 + 8;
+  const pB = ACT_Y + ACT_H / 2 - 8;
+  const opSx = pL + opFrac * (pR - pL);
+  const opSy = pB - probeOut * (pB - pT);
 
   return (
     <WidgetContainer
       title="Neural Network on Embeddings"
-      description="A neural network reads 2D embedding coordinates and learns to classify words by meaning."
+      description="A single neuron reads 2D embedding coordinates and learns to classify words by meaning."
       onReset={reset}
     >
       <div className="flex flex-col gap-3">
-        {/* Row 1: Network Diagram */}
+        {/* Row 1: Full neuron diagram */}
         <div>
           <div className="text-[10px] font-medium text-muted mb-1">
-            Network ({clickPos ? "clicked point" : "center"} values)
+            Neuron ({clickPos ? "clicked point" : "center"} values)
           </div>
-          <svg viewBox={`0 0 ${NW} ${NH}`} className="w-full" style={{ maxHeight: 200 }}>
+          <svg viewBox={`0 0 ${NW} ${NH}`} className="w-full" style={{ maxHeight: 240 }}>
             <defs>
               <marker id="ec-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
                 <path d="M 0 0 L 10 5 L 0 10 z" fill="#9ca3af" />
@@ -424,94 +395,90 @@ export function EmbeddingClassifier() {
             </defs>
 
             {/* Input: Size */}
-            <text x={INX} y={INA_Y - 20} textAnchor="middle" className="fill-foreground text-[10px] font-bold pointer-events-none select-none">Size</text>
-            <circle cx={INX} cy={INA_Y} r={16} fill="#f0f4ff" stroke="#3b82f6" strokeWidth="2" />
-            <text x={INX} y={INA_Y + 4} textAnchor="middle" className="fill-accent text-[11px] font-bold font-mono pointer-events-none select-none">
+            <text x={INX} y={INA_Y - 22} textAnchor="middle" className="fill-foreground text-[11px] font-bold pointer-events-none select-none">Size</text>
+            <circle cx={INX} cy={INA_Y} r={18} fill="#f0f4ff" stroke="#3b82f6" strokeWidth="2" />
+            <text x={INX} y={INA_Y + 5} textAnchor="middle" className="fill-accent text-[12px] font-bold font-mono pointer-events-none select-none">
               {probeInput.x.toFixed(2)}
             </text>
 
             {/* Input: Danger */}
-            <text x={INX} y={INB_Y - 20} textAnchor="middle" className="fill-foreground text-[10px] font-bold pointer-events-none select-none">Danger</text>
-            <circle cx={INX} cy={INB_Y} r={16} fill="#f0f4ff" stroke="#3b82f6" strokeWidth="2" />
-            <text x={INX} y={INB_Y + 4} textAnchor="middle" className="fill-accent text-[11px] font-bold font-mono pointer-events-none select-none">
+            <text x={INX} y={INB_Y - 22} textAnchor="middle" className="fill-foreground text-[11px] font-bold pointer-events-none select-none">Danger</text>
+            <circle cx={INX} cy={INB_Y} r={18} fill="#f0f4ff" stroke="#3b82f6" strokeWidth="2" />
+            <text x={INX} y={INB_Y + 5} textAnchor="middle" className="fill-accent text-[12px] font-bold font-mono pointer-events-none select-none">
               {probeInput.y.toFixed(2)}
             </text>
 
-            {/* Arrows */}
-            <line x1={INX + 18} y1={INA_Y} x2={HX - 20} y2={H1_Y} stroke="#9ca3af" strokeWidth="1.5" markerEnd="url(#ec-arrow)" />
-            <line x1={INX + 18} y1={INB_Y} x2={HX - 20} y2={H1_Y + 10} stroke="#9ca3af" strokeWidth="1.5" markerEnd="url(#ec-arrow)" />
-            <line x1={INX + 18} y1={INA_Y} x2={HX - 20} y2={H2_Y - 10} stroke="#9ca3af" strokeWidth="1.5" markerEnd="url(#ec-arrow)" />
-            <line x1={INX + 18} y1={INB_Y} x2={HX - 20} y2={H2_Y} stroke="#9ca3af" strokeWidth="1.5" markerEnd="url(#ec-arrow)" />
-
-            {/* Hidden H1 */}
-            <text x={HX} y={H1_Y - 22} textAnchor="middle" className="fill-foreground text-[10px] font-bold pointer-events-none select-none">H1</text>
-            <circle cx={HX} cy={H1_Y} r={18} fill={outputColor(probeH1)} stroke={outputColor(probeH1)} strokeWidth="2" />
-            <text x={HX} y={H1_Y + 4} textAnchor="middle" className="fill-white text-[11px] font-bold font-mono pointer-events-none select-none">
-              {probeH1.toFixed(2)}
+            {/* Arrow: Size → Sum */}
+            <line x1={INX + 20} y1={INA_Y} x2={SUM_X - 24} y2={SUM_Y} stroke="#9ca3af" strokeWidth="1.5" markerEnd="url(#ec-arrow)" />
+            {/* Weight label on arrow */}
+            <text x={130} y={INA_Y - 4} textAnchor="middle" className="fill-muted text-[9px] font-mono pointer-events-none select-none">w={wS.toFixed(1)}</text>
+            {/* Product label near sum end */}
+            <text x={195} y={INA_Y + 0.7 * (SUM_Y - INA_Y) - 6} textAnchor="middle" className="fill-muted text-[8px] font-mono pointer-events-none select-none">
+              ={prodS.toFixed(1)}
             </text>
 
-            {/* Hidden H2 */}
-            <text x={HX} y={H2_Y - 22} textAnchor="middle" className="fill-foreground text-[10px] font-bold pointer-events-none select-none">H2</text>
-            <circle cx={HX} cy={H2_Y} r={18} fill={outputColor(probeH2)} stroke={outputColor(probeH2)} strokeWidth="2" />
-            <text x={HX} y={H2_Y + 4} textAnchor="middle" className="fill-white text-[11px] font-bold font-mono pointer-events-none select-none">
-              {probeH2.toFixed(2)}
+            {/* Arrow: Danger → Sum */}
+            <line x1={INX + 20} y1={INB_Y} x2={SUM_X - 24} y2={SUM_Y} stroke="#9ca3af" strokeWidth="1.5" markerEnd="url(#ec-arrow)" />
+            {/* Weight label on arrow */}
+            <text x={130} y={INB_Y + 14} textAnchor="middle" className="fill-muted text-[9px] font-mono pointer-events-none select-none">w={wD.toFixed(1)}</text>
+            {/* Product label near sum end */}
+            <text x={195} y={INB_Y + 0.7 * (SUM_Y - INB_Y) + 14} textAnchor="middle" className="fill-muted text-[8px] font-mono pointer-events-none select-none">
+              ={prodD.toFixed(1)}
             </text>
 
-            {/* Arrows: H → Out */}
-            <line x1={HX + 20} y1={H1_Y} x2={OX - 20} y2={OY - 5} stroke="#9ca3af" strokeWidth="1.5" markerEnd="url(#ec-arrow)" />
-            <line x1={HX + 20} y1={H2_Y} x2={OX - 20} y2={OY + 5} stroke="#9ca3af" strokeWidth="1.5" markerEnd="url(#ec-arrow)" />
+            {/* Sum node */}
+            <text x={SUM_X} y={SUM_Y - 28} textAnchor="middle" className="fill-foreground text-[11px] font-bold pointer-events-none select-none">Sum</text>
+            <circle cx={SUM_X} cy={SUM_Y} r={22} fill="#fef9ee" stroke="#f59e0b" strokeWidth="2" />
+            <text x={SUM_X} y={SUM_Y + 5} textAnchor="middle" className="fill-warning text-[13px] font-bold font-mono pointer-events-none select-none">
+              {weightedSum.toFixed(1)}
+            </text>
 
-            {/* Output */}
-            <text x={OX} y={OY - 24} textAnchor="middle" className="fill-foreground text-[10px] font-bold pointer-events-none select-none">Output</text>
-            <circle cx={OX} cy={OY} r={20} fill={outputColor(probeOut)} stroke={outputColor(probeOut)} strokeWidth="2" />
-            <text x={OX} y={OY + 5} textAnchor="middle" className="fill-white text-[13px] font-bold font-mono pointer-events-none select-none">
+            {/* Bias arrow into sum from below */}
+            <line x1={SUM_X} y1={SUM_Y + 46} x2={SUM_X} y2={SUM_Y + 24} stroke="#9ca3af" strokeWidth="1" strokeDasharray="3,2" markerEnd="url(#ec-arrow)" />
+            <text x={SUM_X} y={SUM_Y + 58} textAnchor="middle" className="fill-muted text-[9px] font-mono pointer-events-none select-none">bias={bias.toFixed(1)}</text>
+
+            {/* Arrow: Sum → Activation */}
+            <line x1={SUM_X + 24} y1={SUM_Y} x2={ACT_X - ACT_W / 2 - 4} y2={ACT_Y} stroke="#9ca3af" strokeWidth="1.5" markerEnd="url(#ec-arrow)" />
+
+            {/* Activation function box */}
+            <rect x={ACT_X - ACT_W / 2} y={ACT_Y - ACT_H / 2} width={ACT_W} height={ACT_H} rx={8} fill="#f0fdf4" stroke="#10b981" strokeWidth="2" />
+            <text x={ACT_X} y={ACT_Y - ACT_H / 2 - 6} textAnchor="middle" className="fill-success text-[8px] font-semibold uppercase tracking-wider pointer-events-none select-none">
+              Activation
+            </text>
+            {/* Sigmoid curve */}
+            <path d={sigmoidPath} fill="none" stroke="#10b981" strokeWidth="2" />
+            {/* Operating point crosshairs */}
+            <line x1={opSx} y1={pB} x2={opSx} y2={opSy} stroke="#f59e0b" strokeWidth="1" strokeDasharray="2,2" opacity={0.6} />
+            <line x1={pL} y1={opSy} x2={opSx} y2={opSy} stroke="#f59e0b" strokeWidth="1" strokeDasharray="2,2" opacity={0.6} />
+            <circle cx={opSx} cy={opSy} r={4} fill="#f59e0b" stroke="white" strokeWidth="1.5" />
+
+            {/* Arrow: Activation → Output */}
+            <line x1={ACT_X + ACT_W / 2 + 2} y1={ACT_Y} x2={OUT_X - 22} y2={OUT_Y} stroke="#9ca3af" strokeWidth="1.5" markerEnd="url(#ec-arrow)" />
+
+            {/* Output node */}
+            <text x={OUT_X} y={OUT_Y - 26} textAnchor="middle" className="fill-foreground text-[11px] font-bold pointer-events-none select-none">Output</text>
+            <circle cx={OUT_X} cy={OUT_Y} r={22} fill={outputColor(probeOut)} stroke={outputColor(probeOut)} strokeWidth="2" />
+            <text x={OUT_X} y={OUT_Y + 5} textAnchor="middle" className="fill-white text-[14px] font-bold font-mono pointer-events-none select-none">
               {probeOut.toFixed(2)}
             </text>
-
-            {/* Weight labels */}
-            <text x={(INX + HX) / 2 - 15} y={INA_Y - 12} textAnchor="middle" className="fill-muted text-[9px] font-mono pointer-events-none select-none">{wH1a.toFixed(1)}</text>
-            <text x={(INX + HX) / 2 - 30} y={(INA_Y + INB_Y) / 2 - 12} textAnchor="middle" className="fill-muted text-[9px] font-mono pointer-events-none select-none">{wH1b.toFixed(1)}</text>
-            <text x={(INX + HX) / 2 + 10} y={(INA_Y + INB_Y) / 2 + 14} textAnchor="middle" className="fill-muted text-[9px] font-mono pointer-events-none select-none">{wH2a.toFixed(1)}</text>
-            <text x={(INX + HX) / 2 - 15} y={INB_Y + 14} textAnchor="middle" className="fill-muted text-[9px] font-mono pointer-events-none select-none">{wH2b.toFixed(1)}</text>
-            <text x={(HX + OX) / 2} y={H1_Y - 8} textAnchor="middle" className="fill-muted text-[9px] font-mono pointer-events-none select-none">{wO1.toFixed(1)}</text>
-            <text x={(HX + OX) / 2} y={H2_Y + 14} textAnchor="middle" className="fill-muted text-[9px] font-mono pointer-events-none select-none">{wO2.toFixed(1)}</text>
           </svg>
         </div>
 
-        {/* Row 2: Slider Groups */}
-        <div className="grid grid-cols-3 gap-3">
-          <div className="bg-foreground/[0.03] rounded-lg p-2">
-            <div className="text-[10px] font-bold text-foreground mb-1">H1</div>
-            <div className="flex flex-col gap-1">
-              <WeightSlider value={wH1a} min={-20} max={20} step={0.1} onChange={setWH1a} label="wS" />
-              <WeightSlider value={wH1b} min={-20} max={20} step={0.1} onChange={setWH1b} label="wD" />
-              <WeightSlider value={bH1} min={-30} max={30} step={0.1} onChange={setBH1} label="bias" />
-            </div>
-          </div>
-          <div className="bg-foreground/[0.03] rounded-lg p-2">
-            <div className="text-[10px] font-bold text-foreground mb-1">H2</div>
-            <div className="flex flex-col gap-1">
-              <WeightSlider value={wH2a} min={-20} max={20} step={0.1} onChange={setWH2a} label="wS" />
-              <WeightSlider value={wH2b} min={-20} max={20} step={0.1} onChange={setWH2b} label="wD" />
-              <WeightSlider value={bH2} min={-30} max={30} step={0.1} onChange={setBH2} label="bias" />
-            </div>
-          </div>
-          <div className="bg-foreground/[0.03] rounded-lg p-2">
-            <div className="text-[10px] font-bold text-foreground mb-1">Output</div>
-            <div className="flex flex-col gap-1">
-              <WeightSlider value={wO1} min={-20} max={20} step={0.1} onChange={setWO1} label="wH1" />
-              <WeightSlider value={wO2} min={-20} max={20} step={0.1} onChange={setWO2} label="wH2" />
-              <WeightSlider value={bO} min={-30} max={30} step={0.1} onChange={setBO} label="bias" />
-            </div>
+        {/* Row 2: Sliders */}
+        <div className="bg-foreground/[0.03] rounded-lg p-2">
+          <div className="grid grid-cols-3 gap-3">
+            <WeightSlider value={wS} min={-20} max={20} step={0.1} onChange={setWS} label="wSize" />
+            <WeightSlider value={wD} min={-20} max={20} step={0.1} onChange={setWD} label="wDanger" />
+            <WeightSlider value={bias} min={-30} max={30} step={0.1} onChange={setBias} label="bias" />
           </div>
         </div>
 
-        {/* Row 3: Canvas + Challenges */}
+        {/* Row 2: Canvas + Challenges */}
         <div className="flex flex-col sm:flex-row gap-3">
           {/* Canvas */}
           <div className="flex-shrink-0">
             <div className="text-[10px] font-medium text-muted mb-1">
-              Network output across embedding space
+              Neuron output across embedding space
             </div>
             <div
               className="relative rounded-lg overflow-hidden border border-border cursor-crosshair"
@@ -535,7 +502,7 @@ export function EmbeddingClassifier() {
                   const cy = (1 - w.y) * (CANVAS_SIZE - 20) + 10;
                   const point = activePoints?.find((p) => p.word === w.word);
                   const isTarget = point?.target === 1;
-                  const { out } = forward2Layer(w.x, w.y, wH1a, wH1b, bH1, wH2a, wH2b, bH2, wO1, wO2, bO);
+                  const out = forward(w.x, w.y, wS, wD, bias);
                   const correct = activePoints
                     ? (isTarget ? out > 0.8 : out < 0.2)
                     : false;
@@ -628,7 +595,7 @@ export function EmbeddingClassifier() {
                 </button>
                 {optimizeStatus === "solved" && (
                   <div className="mt-1.5 text-[11px] font-medium text-success text-center">
-                    Solved! The network learned to classify by meaning.
+                    Solved! The neuron learned to classify by meaning.
                   </div>
                 )}
                 {optimizeStatus === "done" && (
