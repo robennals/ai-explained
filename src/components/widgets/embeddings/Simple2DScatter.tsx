@@ -18,6 +18,15 @@ interface VennPoint {
   vennY: number; // size: 0 = small, 10 = big
 }
 
+// For the four-category preset — positions are hand-tuned to land inside
+// the correct rectangle overlap zones.
+interface QuadPoint {
+  word: string;
+  category: "wild" | "water" | "land" | "domestic" | "multi";
+  quadX: number;
+  quadY: number;
+}
+
 const VENN_WORDS: VennPoint[] = [
   // Pure animals — right side (x=7-9.5), various sizes
   { word: "ant",       category: "animal", vennX: 8,   vennY: 0.5 },
@@ -73,7 +82,46 @@ const SCATTER_WORDS: WordPoint[] = [
   { word: "gun",       category: "object", size: 1.5, dangerous: 10 },
 ];
 
-type PresetId = "size-danger" | "animal-food";
+// Four overlapping rectangles for animal categories.
+// Layout:
+//   Wild (TL)     |  Water (TR)       Overlap zones (2 rects only):
+//   x: 0→6.5      |  x: 3.5→10        Wild∩Water:    x 3.5→6.5, y 6.5→10  (top center)
+//   y: 3.5→10     |  y: 3.5→10        Wild∩Land:     x 0→3.5,   y 3.5→6.5 (left center)
+//   ───────────────+──────────────     Water∩Domestic: x 6.5→10,  y 3.5→6.5 (right center)
+//   Land (BL)     |  Domestic (BR)     Land∩Domestic:  x 3.5→6.5, y 0→3.5   (bottom center)
+//   x: 0→6.5      |  x: 3.5→10        All four:       x 3.5→6.5, y 3.5→6.5 (center)
+//   y: 0→6.5      |  y: 0→6.5
+const QUAD_WORDS: QuadPoint[] = [
+  // Wild ↔ Water overlap (top center) — ocean wildlife
+  { word: "shark",     category: "multi",    quadX: 5,   quadY: 8.5 },
+  { word: "whale",     category: "multi",    quadX: 4.5, quadY: 9.5 },
+  { word: "jellyfish", category: "multi",    quadX: 5.5, quadY: 9.5 },
+  { word: "seahorse",  category: "multi",    quadX: 6,   quadY: 8 },
+
+  // Wild ↔ Land overlap (left center) — land wildlife
+  { word: "wolf",      category: "multi",    quadX: 1.5, quadY: 5.5 },
+  { word: "deer",      category: "multi",    quadX: 2.5, quadY: 5 },
+  { word: "bear",      category: "multi",    quadX: 1.5, quadY: 4.5 },
+  { word: "ant",       category: "multi",    quadX: 2.5, quadY: 6 },
+  { word: "mole",      category: "multi",    quadX: 1,   quadY: 5 },
+
+  // Water ↔ Domestic overlap (right center) — pet fish
+  { word: "goldfish",  category: "multi",    quadX: 8,   quadY: 5 },
+
+  // Land ↔ Domestic overlap (bottom center) — pets / farm animals
+  { word: "cow",       category: "multi",    quadX: 5,   quadY: 2 },
+  { word: "chicken",   category: "multi",    quadX: 5.5, quadY: 1 },
+  { word: "cat",       category: "multi",    quadX: 4.5, quadY: 2.5 },
+  { word: "hamster",   category: "multi",    quadX: 6,   quadY: 1.5 },
+  { word: "rabbit",    category: "multi",    quadX: 5,   quadY: 0.5 },
+
+  // Center — animals genuinely spanning all four categories
+  { word: "frog",      category: "multi",    quadX: 4.5, quadY: 5.5 },
+  { word: "duck",      category: "multi",    quadX: 5.5, quadY: 5 },
+  { word: "turtle",    category: "multi",    quadX: 5,   quadY: 4.5 },
+];
+
+type PresetId = "size-danger" | "animal-food" | "four-categories";
 
 interface PresetDef {
   id: PresetId;
@@ -92,6 +140,11 @@ const PRESETS: PresetDef[] = [
     label: "Animal or Food?",
     description: "Chicken, salmon, and lamb are BOTH animals AND food \u2014 they sit in the overlap. Two dimensions let us represent overlapping categories, like a Venn diagram.",
   },
+  {
+    id: "four-categories",
+    label: "Four Categories",
+    description: "Four overlapping regions for wild, water, land, and domestic animals. Where regions overlap, animals belong to multiple categories \u2014 a shark is both wild and aquatic, a goldfish is both aquatic and domestic. But even two dimensions isn\u2019t enough \u2014 a bear is wild and lives on land, but this layout puts it right next to a mole. You\u2019d need more dimensions to tell them apart.",
+  },
 ];
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -101,6 +154,11 @@ const CATEGORY_COLORS: Record<string, string> = {
   food: "#ef4444",
   object: "#8b5cf6",
   both: "#a855f7",
+  wild: "#ef4444",
+  water: "#3b82f6",
+  land: "#22c55e",
+  domestic: "#f97316",
+  multi: "#a855f7",
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -110,6 +168,11 @@ const CATEGORY_LABELS: Record<string, string> = {
   food: "Food",
   object: "Other",
   both: "Animal + Food",
+  wild: "Wild",
+  water: "Water",
+  land: "Land",
+  domestic: "Domestic",
+  multi: "Multiple",
 };
 
 const MARGIN = { top: 20, right: 20, bottom: 40, left: 50 };
@@ -134,6 +197,7 @@ export function Simple2DScatter() {
 
   const preset = PRESETS[presetIdx];
   const isVenn = preset.id === "animal-food";
+  const isQuad = preset.id === "four-categories";
 
   const resetState = useCallback(() => {
     setPresetIdx(0);
@@ -147,14 +211,45 @@ export function Simple2DScatter() {
   const yScale = (v: number) => dims.height - MARGIN.bottom - (v / 10) * plotH;
 
   // Which categories to show in legend
-  const visibleCategories = isVenn
-    ? ["animal", "food", "both"]
-    : ["animal", "vehicle", "instrument", "food", "object"];
+  const visibleCategories = isQuad
+    ? ["multi"]
+    : isVenn
+      ? ["animal", "food", "both"]
+      : ["animal", "vehicle", "instrument", "food", "object"];
 
-  // Venn region boundaries in data coords
-  // Food rect: x 0→6.5, Animal rect: x 3.5→10, overlap: x 3.5→6.5
   const plotTop = MARGIN.top;
   const plotBottom = dims.height - MARGIN.bottom;
+
+  // Build the list of data points for rendering
+  const points: { word: string; cx: number; cy: number; color: string }[] = [];
+  if (isQuad) {
+    for (const entry of QUAD_WORDS) {
+      points.push({
+        word: entry.word,
+        cx: xScale(entry.quadX),
+        cy: yScale(entry.quadY),
+        color: CATEGORY_COLORS[entry.category],
+      });
+    }
+  } else if (isVenn) {
+    for (const entry of VENN_WORDS) {
+      points.push({
+        word: entry.word,
+        cx: xScale(entry.vennX),
+        cy: yScale(entry.vennY),
+        color: CATEGORY_COLORS[entry.category],
+      });
+    }
+  } else {
+    for (const entry of SCATTER_WORDS) {
+      points.push({
+        word: entry.word,
+        cx: xScale(entry.size),
+        cy: yScale(entry.dangerous),
+        color: CATEGORY_COLORS[entry.category],
+      });
+    }
+  }
 
   return (
     <WidgetContainer
@@ -195,8 +290,8 @@ export function Simple2DScatter() {
           height={dims.height}
           className="overflow-visible"
         >
-          {/* Grid lines */}
-          {[0, 2, 4, 6, 8, 10].map((v) => (
+          {/* Grid lines (scatter and venn only) */}
+          {!isQuad && [0, 2, 4, 6, 8, 10].map((v) => (
             <g key={v}>
               <line
                 x1={xScale(v)} y1={MARGIN.top}
@@ -211,7 +306,7 @@ export function Simple2DScatter() {
             </g>
           ))}
 
-          {/* Venn diagram: overlapping rectangles */}
+          {/* Venn diagram: two overlapping rectangles */}
           {isVenn && (
             <>
               {/* Food region: x 0 → 6.5 */}
@@ -263,109 +358,114 @@ export function Simple2DScatter() {
             </>
           )}
 
-          {/* Axes */}
-          <line
-            x1={MARGIN.left} y1={dims.height - MARGIN.bottom}
-            x2={dims.width - MARGIN.right} y2={dims.height - MARGIN.bottom}
-            stroke="var(--color-foreground)" strokeWidth={1.5} opacity={0.3}
-          />
-          <line
-            x1={MARGIN.left} y1={MARGIN.top}
-            x2={MARGIN.left} y2={dims.height - MARGIN.bottom}
-            stroke="var(--color-foreground)" strokeWidth={1.5} opacity={0.3}
-          />
+          {/* Four-category: four overlapping rectangles */}
+          {isQuad && (() => {
+            // Each rectangle covers ~65% of each axis, creating overlap where they intersect.
+            const rects = [
+              { x1: 0, y1: 3.5, x2: 6.5, y2: 10,  fill: "#ef4444", label: "Wild",     lx: 1.5, ly: 9.5 },
+              { x1: 3.5, y1: 3.5, x2: 10, y2: 10,  fill: "#3b82f6", label: "Water",    lx: 8.5, ly: 9.5 },
+              { x1: 0, y1: 0, x2: 6.5, y2: 6.5,    fill: "#22c55e", label: "Land",     lx: 1.5, ly: 0.5 },
+              { x1: 3.5, y1: 0, x2: 10, y2: 6.5,   fill: "#f97316", label: "Domestic", lx: 8.5, ly: 0.5 },
+            ];
+            return (
+              <>
+                {rects.map((r) => {
+                  const sx = xScale(r.x1);
+                  const sy = yScale(r.y2); // higher y value = top in SVG
+                  const sw = xScale(r.x2) - xScale(r.x1);
+                  const sh = yScale(r.y1) - yScale(r.y2);
+                  const labelY = yScale(r.ly);
+                  return (
+                    <g key={r.label}>
+                      <rect
+                        x={sx} y={sy} width={sw} height={sh}
+                        fill={r.fill} fillOpacity={0.06}
+                        stroke={r.fill} strokeWidth={1.5} strokeDasharray="6,4" opacity={0.35}
+                        rx={4}
+                      />
+                      <text
+                        x={xScale(r.lx)}
+                        y={labelY}
+                        textAnchor="middle"
+                        className="text-[12px] font-semibold pointer-events-none select-none"
+                        fill={r.fill} opacity={0.5}
+                      >
+                        {r.label}
+                      </text>
+                    </g>
+                  );
+                })}
+              </>
+            );
+          })()}
 
-          {/* Axis labels */}
-          <text
-            x={dims.width / 2}
-            y={dims.height - 5}
-            textAnchor="middle"
-            className="fill-muted text-[11px] font-medium"
-          >
-            {isVenn ? "Food  \u2190  \u2192  Animal" : "Small  \u2190  \u2192  Big"}
-          </text>
-          <text
-            x={12}
-            y={dims.height / 2}
-            textAnchor="middle"
-            className="fill-muted text-[11px] font-medium"
-            transform={`rotate(-90, 12, ${dims.height / 2})`}
-          >
-            {isVenn ? "Small  \u2190  \u2192  Big" : "Safe  \u2190  \u2192  Dangerous"}
-          </text>
+          {/* Axes (scatter and venn only) */}
+          {!isQuad && (
+            <>
+              <line
+                x1={MARGIN.left} y1={dims.height - MARGIN.bottom}
+                x2={dims.width - MARGIN.right} y2={dims.height - MARGIN.bottom}
+                stroke="var(--color-foreground)" strokeWidth={1.5} opacity={0.3}
+              />
+              <line
+                x1={MARGIN.left} y1={MARGIN.top}
+                x2={MARGIN.left} y2={dims.height - MARGIN.bottom}
+                stroke="var(--color-foreground)" strokeWidth={1.5} opacity={0.3}
+              />
+
+              {/* Axis labels */}
+              <text
+                x={dims.width / 2}
+                y={dims.height - 5}
+                textAnchor="middle"
+                className="fill-muted text-[11px] font-medium"
+              >
+                {isVenn ? "Food  \u2190  \u2192  Animal" : "Small  \u2190  \u2192  Big"}
+              </text>
+              <text
+                x={12}
+                y={dims.height / 2}
+                textAnchor="middle"
+                className="fill-muted text-[11px] font-medium"
+                transform={`rotate(-90, 12, ${dims.height / 2})`}
+              >
+                {isVenn ? "Small  \u2190  \u2192  Big" : "Safe  \u2190  \u2192  Dangerous"}
+              </text>
+            </>
+          )}
 
           {/* Data points */}
-          {isVenn
-            ? VENN_WORDS.map((entry) => {
-                const cx = xScale(entry.vennX);
-                const cy = yScale(entry.vennY);
-                const color = CATEGORY_COLORS[entry.category];
-                const isHovered = hoveredWord === entry.word;
-                const dimmed = hoveredWord !== null && !isHovered;
-
-                return (
-                  <g
-                    key={entry.word}
-                    onMouseEnter={() => setHoveredWord(entry.word)}
-                    onMouseLeave={() => setHoveredWord(null)}
-                    className="cursor-default"
-                  >
-                    <circle cx={cx} cy={cy} r={12} fill="transparent" />
-                    <circle
-                      cx={cx} cy={cy}
-                      r={isHovered ? 6 : 5}
-                      fill={color}
-                      stroke={isHovered ? "var(--color-foreground)" : "white"}
-                      strokeWidth={isHovered ? 2 : 1}
-                      opacity={dimmed ? 0.25 : 1}
-                    />
-                    <text
-                      x={cx} y={cy - 10}
-                      textAnchor="middle"
-                      className={`text-[11px] pointer-events-none select-none ${isHovered ? "font-bold" : "font-medium"}`}
-                      fill={isHovered ? "var(--color-foreground)" : color}
-                      opacity={dimmed ? 0.25 : 1}
-                    >
-                      {entry.word}
-                    </text>
-                  </g>
-                );
-              })
-            : SCATTER_WORDS.map((entry) => {
-                const cx = xScale(entry.size);
-                const cy = yScale(entry.dangerous);
-                const color = CATEGORY_COLORS[entry.category];
-                const isHovered = hoveredWord === entry.word;
-                const dimmed = hoveredWord !== null && !isHovered;
-
-                return (
-                  <g
-                    key={entry.word}
-                    onMouseEnter={() => setHoveredWord(entry.word)}
-                    onMouseLeave={() => setHoveredWord(null)}
-                    className="cursor-default"
-                  >
-                    <circle cx={cx} cy={cy} r={12} fill="transparent" />
-                    <circle
-                      cx={cx} cy={cy}
-                      r={isHovered ? 6 : 5}
-                      fill={color}
-                      stroke={isHovered ? "var(--color-foreground)" : "white"}
-                      strokeWidth={isHovered ? 2 : 1}
-                      opacity={dimmed ? 0.25 : 1}
-                    />
-                    <text
-                      x={cx} y={cy - 10}
-                      textAnchor="middle"
-                      className={`text-[11px] pointer-events-none select-none ${isHovered ? "font-bold" : "font-medium"}`}
-                      fill={isHovered ? "var(--color-foreground)" : color}
-                      opacity={dimmed ? 0.25 : 1}
-                    >
-                      {entry.word}
-                    </text>
-                  </g>
-                );
-              })}
+          {points.map((pt) => {
+            const isHovered = hoveredWord === pt.word;
+            const dimmed = hoveredWord !== null && !isHovered;
+            return (
+              <g
+                key={pt.word}
+                onMouseEnter={() => setHoveredWord(pt.word)}
+                onMouseLeave={() => setHoveredWord(null)}
+                className="cursor-default"
+              >
+                <circle cx={pt.cx} cy={pt.cy} r={12} fill="transparent" />
+                <circle
+                  cx={pt.cx} cy={pt.cy}
+                  r={isHovered ? 6 : 5}
+                  fill={pt.color}
+                  stroke={isHovered ? "var(--color-foreground)" : "white"}
+                  strokeWidth={isHovered ? 2 : 1}
+                  opacity={dimmed ? 0.25 : 1}
+                />
+                <text
+                  x={pt.cx} y={pt.cy - 10}
+                  textAnchor="middle"
+                  className={`text-[11px] pointer-events-none select-none ${isHovered ? "font-bold" : "font-medium"}`}
+                  fill={isHovered ? "var(--color-foreground)" : pt.color}
+                  opacity={dimmed ? 0.25 : 1}
+                >
+                  {pt.word}
+                </text>
+              </g>
+            );
+          })}
         </svg>
       </div>
 
