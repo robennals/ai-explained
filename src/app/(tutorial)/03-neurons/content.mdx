@@ -135,4 +135,4 @@ Load a preset pattern and hit Train. Can you find the **smallest** network that 
 
 We've seen the full picture: neurons are smooth computation units, and because they're smooth, you can optimize them. Stack them in layers and you can compute anything. Backpropagation lets you train all the weights at once, even in deep networks. This is the core of how modern AI works — the architecture is simple, and training finds the right weights.
 
-But we've been training on tiny problems with a handful of data points. Real AI systems learn from millions of examples, and getting that learning process right is an art. In the next chapter, we'll see how training actually works at scale — what can go wrong, and the techniques that make it work.
+But so far we've been working with boolean logic and points in 2D space. Real AI systems like GPT don't work with true/false values — they work with *words*. How do you turn a word into something a neural network can process? In the next chapter, we'll see how words and concepts can be represented as lists of numbers — *embeddings* — where the numbers encode meaning itself as geometry.
