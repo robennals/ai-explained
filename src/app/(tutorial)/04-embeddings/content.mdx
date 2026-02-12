@@ -50,6 +50,20 @@ In "Size × Danger", bear and shark are big AND dangerous, while knife and gun a
 
 Two dimensions are dramatically more expressive than one. With just two numbers, we can plot two independent properties at once, and even represent overlapping categories like a Venn diagram. But we still can't distinguish everything — dog and cat overlap, guitar and flute sit on top of each other. We'd need more dimensions: "is it a pet?", "does it have strings?", "is it edible?"
 
+## Neural Networks Meet Embeddings
+
+In the previous chapter, you built neural networks that classified 2D points. Those points were abstract dots on a grid. But now each dot has a name — its position in the embedding encodes meaning. Can a neural network learn to read that meaning?
+
+Let's find out. Below is the same kind of two-layer network, but now the two inputs are a word's Size and Danger coordinates from the scatter plot above. Each word sits at its embedding position, and the network has to learn which words match a concept.
+
+<EmbeddingClassifierWidget />
+
+<TryIt>
+Start with "Dangerous" — the network needs to separate the top half (bear, shark, knife, gun) from everything else. Hit Optimize and watch it learn. Then try "Big" — it draws a vertical boundary instead. "Big & Dangerous" is harder: only bear and shark qualify, so the network must combine BOTH neurons to carve out the top-right corner. Try all four challenges and see how the decision boundary changes shape for each concept.
+</TryIt>
+
+This is only a toy example with two dimensions — but the same principle scales up. Real language models feed high-dimensional embeddings (hundreds or thousands of numbers per word) into neural networks with many layers, and those networks learn to read meaning from the geometry of the embedding space.
+
 ## Beyond Two Dimensions
 
 Each new dimension adds discriminative power. With 5 dimensions, you could separate animals from vehicles from instruments from food. With 20 dimensions, you could tell a dog from a cat. With 50 or 100 dimensions, you could capture remarkably fine-grained distinctions.

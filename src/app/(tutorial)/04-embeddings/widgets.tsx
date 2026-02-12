@@ -51,6 +51,14 @@ const EmbeddingLayerDiagram = dynamic(
   { ssr: false }
 );
 
+const EmbeddingClassifier = dynamic(
+  () =>
+    import("@/components/widgets/embeddings/EmbeddingClassifier").then(
+      (m) => m.EmbeddingClassifier
+    ),
+  { ssr: false }
+);
+
 function WidgetSlot({ children }: { children: React.ReactNode }) {
   return (
     <Suspense
@@ -109,6 +117,14 @@ export function EmbeddingLayerDiagramWidget() {
   return (
     <WidgetSlot>
       <EmbeddingLayerDiagram />
+    </WidgetSlot>
+  );
+}
+
+export function EmbeddingClassifierWidget() {
+  return (
+    <WidgetSlot>
+      <EmbeddingClassifier />
     </WidgetSlot>
   );
 }
