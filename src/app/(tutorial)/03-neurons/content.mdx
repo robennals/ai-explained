@@ -70,7 +70,7 @@ This matters because real-world data is rarely cleanly true or false. Is this em
 When you clicked Optimize, the neuron found the right weights automatically. How? It uses the same idea from Chapter 2: define a **loss** that measures how wrong the outputs are, then follow the gradient downhill. Because the neuron is smooth — small weight changes produce small output changes — the loss landscape has slopes you can follow. That's gradient descent: calculate how each weight affects the error, nudge every weight a little in the right direction, repeat. The activation function is what keeps everything smooth and trainable.
 
 <KeyInsight>
-**A neuron is a smooth, trainable logic gate.** With the right weights, it can compute AND, OR, NOT, and more — and because small changes to the weights produce small changes in the output, gradient descent can find those weights automatically. Neurons also handle in-between values naturally, making them building blocks for computation over uncertain, continuous data.
+**A neuron is like a smooth, trainable logic gate.** With the right weights, it can compute AND, OR, NOT, and more — and because small changes to the weights produce small changes in the output, gradient descent can find those weights automatically. Neurons also handle in-between values naturally, making them building blocks for computation over uncertain, continuous data.
 </KeyInsight>
 
 ## Neurons as Geometry
@@ -101,10 +101,10 @@ Select XOR and click Optimize — watch two straight boundaries combine to separ
 Sometimes the optimizer fails on a problem it should be able to solve. This happens when the random starting weights land in a flat region of the loss landscape — the gradients are too small for the optimizer to find its way out. The fix is simple: randomize the weights and try again. A different starting point often works on the first retry. We'll explore why this happens and how real systems handle it in later chapters.
 </Callout>
 
-Each hidden neuron contributes one decision boundary. The output neuron combines them — AND-ing, OR-ing, or blending them together. With just two hidden neurons you can solve XOR. With more neurons and more layers, you can approximate **any** boundary, no matter how complex. This is the **universal approximation theorem**: a neural network with enough neurons can compute anything.
+Each hidden neuron contributes one decision boundary. The output neuron combines them — AND-ing, OR-ing, or blending them together. With just two hidden neurons you can solve XOR. 
 
 <KeyInsight>
-**One neuron = one straight line through input space.** It can separate points that fall on opposite sides of a line (AND, OR) but not patterns that require curves (XOR). Adding layers lets neurons combine their lines into complex boundaries — which is why deep networks can learn anything. And because every weight in the network contributes to the error, every weight has a gradient we can follow — so gradient descent can optimize the whole network at once.
+**One neuron = one straight line through input space.** It can separate points that fall on opposite sides of a line (AND, OR) but not patterns that require curves (XOR). Adding layers lets neurons combine their lines into more complex boundaries. Two neurons can solve XOR — how far can we go?
 </KeyInsight>
 
 ## Sharp vs. Blurry
@@ -121,13 +121,13 @@ Drag the sharpness slider and watch both views. At low sharpness, the sigmoid is
 
 At the extreme, a very sharp neuron acts like a logic gate — snapping between 0 and 1 with almost nothing in between. This might sound desirable, but it's actually a problem for training. Remember: gradient descent needs smooth slopes to follow. When the sigmoid is nearly flat on both sides of a sharp step, the gradient almost vanishes — the optimizer can't tell which direction to move. This is why real networks use techniques called **regularization** (basically, rules that say "don't let any weight get too big") to keep neurons in the smooth, trainable middle ground.
 
-But having the right architecture isn't enough. You also need to find the right weights — and in a real network there are millions of them. The algorithm that computes all the gradients at once is called **backpropagation**. It works through the network from output back to input, nudging every weight in the right direction simultaneously.
-
 ## Training Deep Networks
 
-We've seen that one neuron draws a single line, and two neurons can combine their lines to solve XOR. What happens when we keep going? Each neuron you add contributes another boundary. Each layer you add lets the network combine boundaries from the previous layer into more complex shapes. With enough neurons and layers, a neural network can carve up input space into **any** pattern — it can compute any function you can imagine. This is the **universal approximation theorem**, and it's why neural networks are so powerful.
+We've seen that one neuron draws a single line, and two neurons can combine their lines to solve XOR. What happens when we keep going? Each neuron you add contributes another boundary. Each layer lets the network combine boundaries from the previous layer into more complex shapes. With enough neurons and layers, a neural network can carve up input space into **any** pattern — it can learn any function you can imagine. This is called the **universal approximation theorem**, and it's why neural networks are so powerful.
 
-The good news is that even as networks get bigger, they stay trainable. Every weight in the network contributes to the final output, which means every weight contributes to the error. And if it contributes to the error, it has a gradient — a direction we can nudge it to make the error smaller. Backpropagation computes all these gradients at once, flowing the error signal backward from the output through every layer, so that every weight gets updated simultaneously. A network with ten thousand weights is no harder to train *in principle* than one with ten — it just takes more computation.
+But can we actually *train* a big network? Here's why the answer is yes. Every weight in the network contributes to the final output, which means every weight contributes to the error. And if it contributes to the error, it has a gradient — a direction we can nudge it to make the error smaller.
+
+The algorithm that computes all these gradients at once is called **backpropagation**. It flows the error signal backward from the output through every layer, so that every weight gets updated simultaneously. A network with ten thousand weights is no harder to train *in principle* than one with ten — it just takes more computation.
 
 Let's see this in action. The widget below lets you build networks of different sizes and train them on various patterns. The challenge: what's the smallest network that can solve each one?
 
