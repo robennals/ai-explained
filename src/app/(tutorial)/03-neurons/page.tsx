@@ -13,7 +13,7 @@ import {
 } from "./widgets";
 
 export const metadata = {
-  title: "Neural Networks — AI Explained",
+  title: "Neural Networks — Learn AI by Messing About",
   description:
     "Neural networks are remarkably simple: just neurons stacked in layers. The hard part isn't the architecture — it's finding the right weights.",
 };

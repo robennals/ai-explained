@@ -6,7 +6,7 @@ export default function HomePage() {
     <main className="mx-auto max-w-4xl px-6 py-16">
       <div className="mb-16 text-center">
         <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-          AI Explained
+          Learn AI by Messing About
         </h1>
         <p className="mx-auto mt-4 max-w-2xl text-lg leading-relaxed text-muted">
           An interactive guide to understanding AI from first principles.

@@ -9,7 +9,7 @@ import {
 } from "./widgets";
 
 export const metadata = {
-  title: "The Power of Incremental Improvement — AI Explained",
+  title: "The Power of Incremental Improvement — Learn AI by Messing About",
   description:
     "Evolution, A/B testing, and gradient descent are all the same algorithm. Reliable tiny improvements, repeated billions of times.",
 };

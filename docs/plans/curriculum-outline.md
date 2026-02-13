@@ -1,4 +1,4 @@
-# AI Explained — Curriculum Outline
+# Learn AI by Messing About — Curriculum Outline
 
 ## Editorial Philosophy
 
