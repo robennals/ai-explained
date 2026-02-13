@@ -67,6 +67,22 @@ const SharpnessExplorer = dynamic(
   { ssr: false }
 );
 
+const SigmoidExplorer = dynamic(
+  () =>
+    import("@/components/widgets/neurons/SigmoidExplorer").then(
+      (m) => m.SigmoidExplorer
+    ),
+  { ssr: false }
+);
+
+const SigmoidZoom = dynamic(
+  () =>
+    import("@/components/widgets/neurons/SigmoidZoom").then(
+      (m) => m.SigmoidZoom
+    ),
+  { ssr: false }
+);
+
 function WidgetSlot({ children }: { children: React.ReactNode }) {
   return (
     <Suspense
@@ -141,6 +157,22 @@ export function SharpnessExplorerWidget() {
   return (
     <WidgetSlot>
       <SharpnessExplorer />
+    </WidgetSlot>
+  );
+}
+
+export function SigmoidExplorerWidget() {
+  return (
+    <WidgetSlot>
+      <SigmoidExplorer />
+    </WidgetSlot>
+  );
+}
+
+export function SigmoidZoomWidget() {
+  return (
+    <WidgetSlot>
+      <SigmoidZoom />
     </WidgetSlot>
   );
 }
