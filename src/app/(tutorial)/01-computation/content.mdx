@@ -12,15 +12,19 @@ And all of these — every single one — work the same way under the hood.
 
 This tutorial is going to teach you how. Not at a hand-wavy, "it's like a brain" level — actually how, with enough detail that you could build one yourself. By the end, you won't just vaguely "get" AI. You'll deeply understand how these systems work, why they work, and what it would take to make one from scratch.
 
-But we have to start at the beginning. And the beginning is a deceptively simple idea that, once you really absorb it, makes everything else click:
+But we have to start at the beginning. And the beginning is a surprisingly simple idea that, once you really absorb it, makes everything else click:
 
-**Everything an AI works with — every word, image, and sound — is just numbers. Everything an AI *does* is a function that turns numbers into numbers. And that function itself is made of numbers — billions of adjustable values called *parameters*. Building an AI is the art of finding the right values for those numbers.**
+**Here's the big picture:**
+- **Everything an AI works with is just numbers** — every word, image, and sound.
+- **An AI is a function numbers into numbers** - words to words, words to images, etc.
+- **The function itself is made of numbers** — billions of adjustable values called *parameters*.
+- **Traning an AI is the art of finding the right values for those numbers**.
 
 That's the whole game. The rest is details. Let's unpack it.
 
 ## Everything Is Numbers
 
-You might think of a text message as letters, a photo as colors, a song as sound. But inside a computer, all of them are the same thing: **arrays of numbers**.
+You might think of a text message as letters, a photo as colors, a song as sound. But inside a computer, all of them are the same thing: **lists of numbers**.
 
 **Text** is numbers. Every character has a number assigned to it (that's what Unicode is). The letter "H" is 72. The letter "e" is 101. Your text message is a sequence of numbers.
 
@@ -39,14 +43,14 @@ In the Text tab, type your name and watch each letter turn into a number. In the
 </TryIt>
 
 <KeyInsight>
-**Everything a computer works with — text, images, colors, sound, video — is just arrays of numbers.** This means every kind of "thinking" a computer does is really just *turning one array of numbers into another*.
+**Everything a computer works with — text, images, colors, sound, video — is just lists of numbers.** This means every kind of "thinking" a computer does is really just *turning one list of numbers into another*.
 </KeyInsight>
 
 ## Thinking Is a Function
 
 Once you see that everything is numbers, something clicks: every kind of "intelligent" behavior is really just a **function** — something that takes numbers in and puts numbers out.
 
-- **"Is this a cat?"** = a function that takes pixel values and outputs a confidence score
+- **"Is this a cat?"** = a function that takes pixel values and outputs a number representing how sure it is
 - **"Translate to French"** = a function that takes English character codes and outputs French character codes
 - **"Write a poem about rain"** = a function that takes prompt characters and outputs poem characters
 - **"Generate an image of a sunset"** = a function that takes text and outputs pixel values
@@ -56,7 +60,7 @@ Every single one of these is the same shape: **numbers in, numbers out**.
 <FunctionMachineWidget />
 
 <TryIt>
-Click through the different tasks. Notice that despite doing wildly different things — recognizing images, translating text, answering questions, generating art — they all have the same shape: an array of numbers goes in, an array of numbers comes out. The only difference is what the function *does*.
+Click through the different tasks. Notice that despite doing wildly different things — recognizing images, translating text, answering questions, generating art — they all have the same shape: a list of numbers goes in, a list of numbers comes out. The only difference is what the function *does*.
 </TryIt>
 
 So all of AI reduces to one problem: **find the right function**.
@@ -89,7 +93,7 @@ Try to match the target curve by adjusting the sliders. Pay attention to how eac
 
 Before we go further, here's a question worth asking: are there limits to what functions a machine can compute?
 
-In 1936, mathematicians Alan Turing and Alonzo Church independently proved something astonishing: there exist machines that can compute **any function that can be computed at all**. Not just arithmetic — *anything*. This is called the **Church-Turing thesis**.
+Here's a wild fact: back in 1936, two mathematicians — Alan Turing and Alonzo Church — independently arrived at a remarkable idea, working completely independently: that you can build a machine capable of computing **any function that can be computed at all**. Not just arithmetic — *anything*. This idea is called the **Church-Turing thesis** — and while it can't be formally proven, no one has ever found a counterexample.
 
 This means that, in principle, if "thinking" is computation (turning numbers into numbers), then a computer can do anything a human mind can do. The question isn't *whether* the right function exists — it's whether we can *find* it.
 
@@ -118,7 +122,7 @@ So here's where we are:
 1. **Everything is numbers** — text, images, sound, all of it
 2. **Thinking is a function** — every intelligent task is numbers-in, numbers-out
 3. **Models are machines with knobs** — different settings compute different functions
-4. **The right function exists** — the Church-Turing thesis guarantees it
+4. **The right function exists** — at least, the Church-Turing thesis says so
 5. **Brute force is impossible** — a lookup table would be bigger than the universe
 
 We need models that **compress** — that capture the right pattern with far fewer parameters than a lookup table would need entries. And we need a way to **find** the right parameter values automatically, not by hand.

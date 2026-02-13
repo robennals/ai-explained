@@ -1,7 +1,9 @@
 # Neural Networks
 
 <Lead>
-Your brain is a neural network. GPT, Claude, and every other modern AI system are also neural networks, built from artificial versions of the same idea. They can write essays, generate images, translate languages, and hold conversations. You might expect the technology behind all of this to be fearsomely complex. It isn't. It's remarkably simple.
+What's the simplest building block that can learn to compute anything? Your brain
+uses one. GPT and Claude use an artificial version of the same idea. You might
+expect it to be fearsomely complex. It isn't. It's remarkably simple.
 </Lead>
 
 A neural network is made of **neurons**, connected together in layers. Each connection has a **weight** — a number that controls how much attention one neuron pays to another.
@@ -12,7 +14,7 @@ So how big are these networks? Here's a comparison of biological brains and AI s
 
 <NeuronScaleComparisonWidget />
 
-But notice something strange in this chart. GPT-5 has about as many connections as a mouse — yet it can write essays and translate languages, and mice generally can't. And elephants and sperm whales have far more connections than humans, yet aren't smarter than us. The number of connections isn't everything — what matters most is **how good the weights are**. That's what training is all about, and we'll get deeper into it in later chapters.
+But notice something strange in this chart. GPT-5 has roughly as many connections as a mouse brain — though comparing artificial parameters to biological synapses is a rough analogy, not an exact match. Yet it can write essays and translate languages, and mice generally can't. And elephants and sperm whales have far more connections than humans, yet aren't smarter than us. The number of connections isn't everything — what matters most is **how good the weights are**. That's what training is all about, and we'll get deeper into it in later chapters.
 
 ## The Building Block
 
@@ -45,6 +47,8 @@ These simple operations are the basis for every digital computer. Inside every c
 
 But logic gates have a problem. Their outputs snap between 0 and 1 with nothing in between. There's no smooth gradient to follow, which means you can't train a network of logic gates using the optimization techniques from Chapter 2.
 
+There's one more operation worth knowing: **XOR** (short for "exclusive or"). It means "one or the other, but not both." Imagine a bunk bed — you have to sleep in the top bunk or the bottom bunk, but you can't sleep in both at the same time, and you can't sleep in neither (you have to pick one!). That's XOR. It turns out to be the trickiest of the bunch, as we're about to see.
+
 A neuron is like a **smooth version of a logic gate**. With the right weights, a single two-input neuron can compute AND, OR, NOT, and more — but unlike a logic gate, its output changes smoothly when you adjust the weights. Let's see this in action:
 
 <NeuronPlaygroundWidget />
@@ -70,7 +74,7 @@ Instead of truth tables, think about *space*. A neuron takes two inputs — call
 <NeuronGeometryWidget />
 
 <TryIt>
-Click anywhere on the heatmap to probe that point. Try the challenges and watch the colored regions shift. Hit Optimize on AND or OR and watch the boundary snap into place. Then try XOR — no matter what the optimizer does, the boundary stays a straight line, and it can't separate the diagonal corners.
+Click anywhere on the colored map (called a heatmap) to probe that point. Try the challenges and watch the colored regions shift. Hit Optimize on AND or OR and watch the boundary snap into place. Then try XOR — no matter what the optimizer does, the boundary stays a straight line, and it can't separate the diagonal corners.
 </TryIt>
 
 The key insight is geometric: a single neuron draws a **straight line** through input space. Everything on one side is green (high), everything on the other side is red (low). By adjusting the weights and bias, you can tilt and shift this line — but you can't bend it. AND, OR, and NOT are all separable by a single line. XOR is not: the "true" corners (0,1) and (1,0) sit on opposite diagonals, and no single line can separate them from the "false" corners.
@@ -109,7 +113,7 @@ A neuron's boundary isn't a hard edge — it's a smooth gradient from low to hig
 Drag the sharpness slider and watch both views. At low sharpness, the sigmoid is a gentle slope and the 2D map is a smooth blend. Crank it up and the curve snaps toward a step function — the boundary becomes a hard edge. Notice the weights and bias scale together.
 </TryIt>
 
-At the extreme, a very sharp neuron acts like a logic gate — snapping between 0 and 1 with almost nothing in between. This might sound desirable, but it's actually a problem for training. Remember: gradient descent needs smooth slopes to follow. When the sigmoid is nearly flat on both sides of a sharp step, the gradient almost vanishes — the optimizer can't tell which direction to move. This is why real networks use **regularization** techniques that gently discourage weights from growing too large, keeping the neurons in the smooth, trainable middle ground.
+At the extreme, a very sharp neuron acts like a logic gate — snapping between 0 and 1 with almost nothing in between. This might sound desirable, but it's actually a problem for training. Remember: gradient descent needs smooth slopes to follow. When the sigmoid is nearly flat on both sides of a sharp step, the gradient almost vanishes — the optimizer can't tell which direction to move. This is why real networks use techniques called **regularization** (basically, rules that say "don't let any weight get too big") to keep neurons in the smooth, trainable middle ground.
 
 But having the right architecture isn't enough. You also need to find the right weights — and in a real network there are millions of them. The algorithm that computes all the gradients at once is called **backpropagation**. It works through the network from output back to input, nudging every weight in the right direction simultaneously.
 

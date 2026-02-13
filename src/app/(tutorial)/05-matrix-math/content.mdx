@@ -1,7 +1,10 @@
 # Matrix Math and Linear Transformations
 
 <Lead>
-Every layer in a neural network takes numbers in, multiplies and adds, and puts numbers out. That operation has a name — matrix multiplication — and a beautiful geometric meaning. Each layer is a transformation of space itself.
+What does a neural network actually *do* to your data as it passes through each
+layer? It multiplies and adds — and that operation has a name: matrix
+multiplication. It also has a beautiful geometric meaning. Each layer is a
+transformation of space itself.
 </Lead>
 
 ## Starting Simple: One Dimension
@@ -16,13 +19,13 @@ In one dimension, a "matrix" is just a single number. You multiply every input b
 Drag the slider to different values. What happens when you multiply by 0? By &minus;1? By a number between 0 and 1? Notice that zero itself never moves, no matter what you multiply by — it's a **fixed point** of every linear transformation.
 </TryIt>
 
-Here's a simple but important idea: in 1D, the number "1" is a **basis vector** — a building block. Every other number is just some multiple of 1. When you multiply by 2, you're saying "take the basis vector 1, and stretch it to 2." That single number tells you where the basis vector lands after the transformation, and *everything else follows automatically*.
+Here's a simple but important idea: in 1D, the number "1" is a **basis vector** — think of it as a building block arrow that you stretch or shrink to reach any other number. Every other number is just some multiple of 1. When you multiply by 2, you're saying "take the basis vector 1, and stretch it to 2." That single number tells you where the basis vector lands after the transformation, and *everything else follows automatically*.
 
 In 1D, there's not much a "matrix" can do: stretch, shrink, flip, or collapse to a point. One number, one effect. Let's add a dimension.
 
 ## Two Dimensions: Where It Gets Interesting
 
-In 1D we had one basis vector. In 2D we have **two**: one pointing right along the x-axis, and one pointing up along the y-axis. Every point in 2D is some combination of "go right" and "go up" — it's built from those two building blocks.
+In 1D we had one basis vector (one building block arrow). In 2D we have **two**: one pointing right along the x-axis, and one pointing up along the y-axis. Every point in 2D is some combination of "go right" and "go up" — it's built from those two building blocks.
 
 A 2&times;2 matrix tells you where each basis vector lands. That takes **four numbers**, arranged in a grid:
 
@@ -49,6 +52,8 @@ A 2&times;2 matrix is completely defined by four numbers. Those four numbers con
 
 ## Another Way to See It: New Axes
 
+Don't worry if this section doesn't fully click right away — the main point is that there are two useful ways to read what a matrix does.
+
 There's a powerful second way to read a matrix. Instead of thinking "where do the old basis vectors end up?" (the columns), think about the **rows**: each row defines a new basis vector in terms of the old ones.
 
 The <span style={{color: "#ef4444"}}>first row</span> says: "my new x-axis is made of this much old-x and this much old-y." The <span style={{color: "#22c55e"}}>second row</span> does the same for the new y-axis. You're defining a new coordinate system by pointing arrows in the old space and saying "measure along *these* directions instead."
@@ -63,7 +68,7 @@ Start with **Identity** — the new axes match the old ones, so nothing changes.
 Notice how the faint grid lines on the left are perpendicular to the arrows — they mark where each new coordinate equals 0, 1, 2, etc. The arrow tells you *which direction* you're measuring along.
 </TryIt>
 
-This dual interpretation — "where do old axes land?" (columns) vs. "what are my new measurement directions?" (rows) — is the same math read two ways. Both are useful. In neural networks, the row view is especially natural: each output neuron computes a dot product with one row of the weight matrix, measuring how much the input aligns with that row's direction.
+This dual interpretation — "where do old axes land?" (columns) vs. "what are my new measurement directions?" (rows) — is the same math read two ways. Both are useful. In neural networks, the row view is especially natural: each output neuron computes a **dot product** (multiply matching pairs of numbers together and add them up) with one row of the weight matrix, measuring how much the input aligns with that row's direction.
 
 ## Changing Dimensions
 
@@ -78,7 +83,7 @@ Below, you can see 2D points being projected onto a line. Each colored point has
 <TryIt>
 Start with the **Arrow** shape. At **0&deg;** (horizontal line), you're only keeping each point's x-coordinate — the arrow gets squished onto the x-axis. Switch to **90&deg;** (vertical) and you keep only the y-coordinate. Now try **45&deg;** — you get a mix of both.
 
-Notice how some directions preserve the shape's structure better than others. At 0&deg;, points B and C land in almost the same spot — they're "confused." At 45&deg;, all the points spread out more evenly. Finding the direction that preserves the most information is exactly what algorithms like PCA (principal component analysis) do.
+Notice how some directions preserve the shape's structure better than others. At 0&deg;, points B and C land in almost the same spot — they're "confused." At 45&deg;, all the points spread out more evenly. Finding the direction that preserves the most information is a key idea in data science.
 </TryIt>
 
 When the matrix has **more rows than columns**, it does the opposite — it *embeds* a lower dimension into a higher one. A 768&times;1 matrix takes a single number and places it into a 768-dimensional space. Neural networks do both: expanding dimensions to create richer representations, then compressing them back down.
@@ -89,7 +94,7 @@ Here's the punchline of this chapter. A single layer in a neural network does th
 
 1. **Matrix multiply**: multiply the inputs by a weight matrix (rotate and stretch the space)
 2. **Add bias**: shift everything by a fixed offset (translate the space)
-3. **Apply activation function**: bend the space non-linearly (e.g., clip negative values to zero with ReLU)
+3. **Apply activation function**: bend the space non-linearly (e.g., clip all negative values to zero (an operation called **ReLU** — a fancy name for a simple idea))
 
 The matrix part is everything we've been exploring. The bias is a simple shift — it moves the origin. And the activation function is the crucial non-linear ingredient that lets neural networks learn things that pure matrices can't.
 
@@ -122,4 +127,4 @@ That's what training discovers: the right sequence of rotations, stretches, and 
 
 ## What's Next
 
-We've seen that every neural network layer is a matrix transformation — a geometric reshaping of space. But how does the network actually *find* the right matrices? In the next chapter, we'll see how gradient descent rolls downhill through a landscape with millions of dimensions, automatically discovering the transformations that untangle data.
+We've seen that every neural network layer is a matrix transformation — a geometric reshaping of space. But how does the network actually *find* the right matrices? In future chapters, we'll see how gradient descent rolls downhill through a landscape with millions of dimensions, automatically discovering the transformations that untangle data.

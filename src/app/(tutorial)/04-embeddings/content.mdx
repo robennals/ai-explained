@@ -52,7 +52,9 @@ Two dimensions are dramatically more expressive than one. With just two numbers,
 
 ## Beyond Two Dimensions
 
-Each new dimension adds discriminative power. With 5 dimensions, you could separate animals from vehicles from instruments from food. With 20 dimensions, you could tell a dog from a cat. With 50 or 100 dimensions, you could capture remarkably fine-grained distinctions.
+Each new dimension helps you tell more things apart. With 5 dimensions, you could separate animals from vehicles from instruments from food. With 20 dimensions, you could tell a dog from a cat. With 50 or 100 dimensions, you could capture remarkably fine-grained distinctions.
+
+This list of numbers that represents a position in space is called a **vector**. It's really just a list of numbers — nothing scarier than that. When people say "vector space," they just mean a space where every point is described by a list of numbers.
 
 But here's the problem: how do you decide *which* dimensions to use? "How dangerous is the color blue?" doesn't make sense. "How electronic is a cow?" There's no universal set of labeled dimensions that works for all words.
 
@@ -114,7 +116,7 @@ Two key ideas drive how embeddings are created:
 
 **Learned from context.** Systems like Word2Vec and GloVe are trained on the principle that "a word is known by the company it keeps." Words that appear near the same other words get similar vectors. "Dog" and "cat" both appear near "pet", "fur", "veterinarian" — so they end up close together in the embedding.
 
-**Learned for a task.** Inside a neural network, an embedding layer is simply a lookup table — a matrix with one row per word and one column per dimension. To get the embedding for a word, you look up its row. The matrix starts random and is shaped by backpropagation, just like any other set of weights. The network learns whatever representation helps it perform its task.
+**Learned for a task.** Inside a neural network, an embedding layer is simply a lookup table — a big grid of numbers with one row per word and one column per dimension. To get the embedding for a word, you look up its row. The matrix starts random and is shaped by backpropagation, just like any other set of weights. The network learns whatever representation helps it perform its task.
 
 Modern language models use much higher dimensions than our 50-dimensional GloVe example: GPT-2 uses 768 dimensions, GPT-3 uses 12,288 dimensions. And they embed not individual words but *tokens* — subword pieces that let the model handle any text, including words it has never seen before.
 
@@ -139,3 +141,9 @@ In every case, the same principle holds: similar things end up nearby, and the g
 <KeyInsight>
 An embedding is a learned mapping from discrete symbols to continuous geometry. The network discovers what dimensions to use and what structure to create — driven entirely by the need to perform its task well. This idea extends far beyond words to images, audio, molecules, and more.
 </KeyInsight>
+
+## What's Next
+
+We've seen that embeddings turn words into lists of numbers — points in a high-dimensional space where proximity means similarity and directions encode relationships. But how do neural networks actually *process* these lists of numbers? What math is happening inside each layer?
+
+In the next chapter, we'll discover that every neural network layer is doing the same thing: **matrix multiplication** — a geometric transformation that rotates, stretches, and reshapes space. It sounds abstract, but it has a beautiful visual meaning you can watch unfold.
