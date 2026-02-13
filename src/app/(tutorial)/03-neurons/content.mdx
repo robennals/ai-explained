@@ -33,7 +33,13 @@ We said neural networks are remarkably simple, and they are. The structure of a 
 
 One common activation function is the **sigmoid** — an S-shaped curve that smoothly squashes any number into the range 0 to 1. Large positive inputs become close to 1. Large negative inputs become close to 0. Everything in between gets a smooth, graded value. It's a "soft switch": instead of snapping between off and on, it dims smoothly between them. We'll use sigmoid throughout this chapter, and meet other activation functions later.
 
-The key property: when you change a weight by a small amount, the output changes by a small amount. No sudden jumps, no unpredictable flips. That's exactly what Chapter 2 told us we need for optimization to work.
+<SigmoidExplorerWidget />
+
+Nature abhors a vacuum — but it loves an S-curve. An enormous number of real-world phenomena follow this shape: population growth, technology adoption, learning curves, the spread of diseases. And if a trend *doesn't* look S-shaped to you, it's probably because you're only seeing part of one. If it looks **exponential**, you're seeing the beginning of an S-curve. If it looks **linear**, you're seeing the middle. If it looks like **diminishing returns**, you're seeing the end.
+
+<SigmoidZoomWidget />
+
+The key property for neural networks: when you change a weight by a small amount, the output changes by a small amount. No sudden jumps, no unpredictable flips. That's exactly what Chapter 2 told us we need for optimization to work.
 
 ## Neurons as Logic
 

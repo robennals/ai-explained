@@ -10,6 +10,8 @@ import {
   TwoLayerPlaygroundWidget,
   NetworkTrainerWidget,
   SharpnessExplorerWidget,
+  SigmoidExplorerWidget,
+  SigmoidZoomWidget,
 } from "./widgets";
 
 export const metadata = {
@@ -34,6 +36,8 @@ export default function Chapter03() {
             TwoLayerPlaygroundWidget,
             NetworkTrainerWidget,
             SharpnessExplorerWidget,
+            SigmoidExplorerWidget,
+            SigmoidZoomWidget,
           }}
         />
       </div>
