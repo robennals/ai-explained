@@ -8,10 +8,11 @@ import {
   EmbeddingPlaygroundWidget,
   WordPairSpectrumWidget,
   EmbeddingLayerDiagramWidget,
+  EmbeddingClassifierWidget,
 } from "./widgets";
 
 export const metadata = {
-  title: "Embeddings and Vector Spaces — AI Explained",
+  title: "Embeddings and Vector Spaces — Learn AI by Messing About",
   description:
     "From one-hot to learned representations. Word analogies, semantic structure, and exploring the geometry of meaning.",
 };
@@ -30,6 +31,7 @@ export default function Chapter04() {
             EmbeddingPlaygroundWidget,
             WordPairSpectrumWidget,
             EmbeddingLayerDiagramWidget,
+            EmbeddingClassifierWidget,
           }}
         />
       </div>

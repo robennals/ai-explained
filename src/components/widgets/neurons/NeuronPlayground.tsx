@@ -492,7 +492,7 @@ export function NeuronPlayground() {
           max={15}
           step={0.1}
           onChange={setW1}
-          label="Weight"
+          label="Weight A"
           interpret={interpretWeight}
           width={90}
         />
@@ -534,7 +534,7 @@ export function NeuronPlayground() {
           max={15}
           step={0.1}
           onChange={setW2}
-          label="Weight"
+          label="Weight B"
           interpret={interpretWeight}
           width={90}
         />

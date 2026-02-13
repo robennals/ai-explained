@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Head -->
+  <rect x="1" y="1" width="30" height="30" rx="7" fill="#f59e0b"/>
+  <!-- Eyes -->
+  <circle cx="11" cy="13" r="4" fill="white"/>
+  <circle cx="21" cy="13" r="4" fill="white"/>
+  <!-- Pupils -->
+  <circle cx="12.5" cy="12" r="1.8" fill="#1a1a2e"/>
+  <circle cx="22.5" cy="12" r="1.8" fill="#1a1a2e"/>
+  <!-- Crooked smile -->
+  <path d="M10 22 Q14 27 22 22" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/>
+</svg>
