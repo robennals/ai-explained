@@ -5,7 +5,8 @@ import { WidgetContainer } from "../shared/WidgetContainer";
 import { loadTinyStoriesTokenizer, type EncodedPiece } from "./bpeTokenizer";
 
 const EXAMPLES = [
-  "walking walked walker",
+  "treeishness",
+  "superman, superb, superlative", 
   "The dragonfly danced gracefully.",
   "The qwertyflorp blinked twice.",
   "reusable, rereading, and unbelievable",
@@ -99,7 +100,7 @@ export function TokenizationPlayground() {
   return (
     <WidgetContainer
       title="Tokenizer Playground"
-      description="Real 4096-token TinyStories WordPiece tokenizer. Click an example or type your own text."
+      description="Enter some text and see how a tokenizer breaks it into sub-words. This is using a 4096 word WordPiece model."
       onReset={resetState}
     >
       <div className="mb-3 flex flex-wrap gap-2">

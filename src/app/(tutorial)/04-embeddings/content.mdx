@@ -110,38 +110,53 @@ This is why unlabeled dimensions are so powerful. Even though no dimension is la
 In a well-trained embedding, directions carry meaning. The direction from small to large, from young to old, from simple to complex — these all exist as paths through the space. This structure emerges from training on text, with no human labeling.
 </KeyInsight>
 
+
 ## From Words to Tokens (Subwords)
 
-So far we've talked about "word embeddings," but modern language models don't actually split text by whole words. They use **tokens**: chunks that can be full words, pieces of words, punctuation, or spaces.
+Real language models usually do **not** treat each full word as one unit.
+Instead, they usually break text into **tokens**.
 
-Why? If every distinct word needed its own token, vocabulary size would explode. English alone has huge numbers of rare forms, misspellings, names, and invented words. A model would waste capacity memorizing one-offs.
+A token can be:
+- a whole word (`cat`)
+- part of a word (`-ing`)
+- punctuation and other symbols (`!`)
 
-Subword tokenization fixes this. Instead of storing a separate entry for every word, the model learns reusable pieces. A word like **walking** might be split into pieces like **walk** and **ing**. Then if it sees **moonwalking**, **sleepwalking**, or a rare new word, it can still reuse chunks it already understands.
+Why break words into parts?
 
-Two common methods are **BPE** and **WordPiece**. They both build reusable subword chunks, so words like `walking`, `walked`, and `walker` can share pieces. That keeps vocabularies manageable and helps models handle rare or new words.
+Because language has way too many possible words. 
+People invent new words, spell things differently, and use rare words all the time. If we tried to create an embedding for every possible word then the data set would get impractically large, and rare words wouldn't have been seen enough times for the embedding to know what they meant.
+
+Take for example the word `treeishness`. You've probably never seen that word before, but you have a pretty good idea what it means because you can break it down into `tree`, `-ish`, and `-ness`.
+
+Modern language models use tokenizers that solve the problem the same way. The most common words get their own token, but others get assembled out of smaller parts. Try it out below.
 
 <TokenizationPlaygroundWidget />
 
 <TryIt>
-Click "walking walked walker" and look for repeated parts. Then try a made-up word like "qwertyflorp" and notice it still gets tokenized into known chunks. Add punctuation and spaces to see that they are tokens too.
+Click "superman, superb, superlative" and look for repeated chunks.
+Then try a made-up word like "qwertyflorp" and see how it still gets broken into smaller known parts.
+Try punctuation too (`!`, `,`, `?`) and notice those are tokens as well.
 </TryIt>
+
 
 
 ## Where Do Embeddings Come From?
 
-Two key ideas drive how embeddings are created:
+Embeddings are typically generated in one of two ways:
 
 **Learned from context.** Systems like Word2Vec and GloVe are trained on the principle that "a word is known by the company it keeps." Words that appear near the same other words get similar vectors. "Dog" and "cat" both appear near "pet", "fur", "veterinarian" — so they end up close together in the embedding.
 
-**Learned for a task.** Inside a neural network, an embedding layer is simply a lookup table — a big grid of numbers with one row per word and one column per dimension. To get the embedding for a word, you look up its row. The matrix starts random and is shaped by backpropagation, just like any other set of weights. The network learns whatever representation helps it perform its task.
+**Learned for a task.** Inside a neural network, the embedding is simply the first layer. This layer has a large number of inputs corresponding to all possible input tokens, and a smaller number of outputs, corresponding to the dimensions of the embedding. The embedding layer naturally learns the embedding that performs best at whatever the network is trying to do.
 
-Modern language models use much higher dimensions than our 50-dimensional GloVe example: GPT-2 uses 768 dimensions, GPT-3 uses 12,288 dimensions. And they embed not individual words but *tokens* — subword pieces that let the model handle any text, including words it has never seen before.
+Modern language models use much higher dimensions than our 50-dimensional GloVe example: GPT-2 uses 768 dimensions, GPT-3 uses 12,288 dimensions. 
 
 <EmbeddingLayerDiagramWidget />
 
 <TryIt>
 Click different words and watch the highlighted row change. Toggle between "Before training" (random numbers) and "After training" (structured vectors from a real embedding). Before training, the vectors are meaningless noise. After training, similar words have similar patterns. The network learned this structure by adjusting the numbers to be useful for its task.
 </TryIt>
+
+
 
 
 ## Beyond Words
