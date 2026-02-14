@@ -59,6 +59,14 @@ const EmbeddingClassifier = dynamic(
   { ssr: false }
 );
 
+const TokenizationPlayground = dynamic(
+  () =>
+    import("@/components/widgets/embeddings/TokenizationPlayground").then(
+      (m) => m.TokenizationPlayground
+    ),
+  { ssr: false }
+);
+
 function WidgetSlot({ children }: { children: React.ReactNode }) {
   return (
     <Suspense
@@ -125,6 +133,14 @@ export function EmbeddingClassifierWidget() {
   return (
     <WidgetSlot>
       <EmbeddingClassifier />
+    </WidgetSlot>
+  );
+}
+
+export function TokenizationPlaygroundWidget() {
+  return (
+    <WidgetSlot>
+      <TokenizationPlayground />
     </WidgetSlot>
   );
 }

@@ -110,6 +110,23 @@ This is why unlabeled dimensions are so powerful. Even though no dimension is la
 In a well-trained embedding, directions carry meaning. The direction from small to large, from young to old, from simple to complex — these all exist as paths through the space. This structure emerges from training on text, with no human labeling.
 </KeyInsight>
 
+## From Words to Tokens (Subwords)
+
+So far we've talked about "word embeddings," but modern language models don't actually split text by whole words. They use **tokens**: chunks that can be full words, pieces of words, punctuation, or spaces.
+
+Why? If every distinct word needed its own token, vocabulary size would explode. English alone has huge numbers of rare forms, misspellings, names, and invented words. A model would waste capacity memorizing one-offs.
+
+Subword tokenization fixes this. Instead of storing a separate entry for every word, the model learns reusable pieces. A word like **walking** might be split into pieces like **walk** and **ing**. Then if it sees **moonwalking**, **sleepwalking**, or a rare new word, it can still reuse chunks it already understands.
+
+Two common methods are **BPE** and **WordPiece**. They both build reusable subword chunks, so words like `walking`, `walked`, and `walker` can share pieces. That keeps vocabularies manageable and helps models handle rare or new words.
+
+<TokenizationPlaygroundWidget />
+
+<TryIt>
+Click "walking walked walker" and look for repeated parts. Then try a made-up word like "qwertyflorp" and notice it still gets tokenized into known chunks. Add punctuation and spaces to see that they are tokens too.
+</TryIt>
+
+
 ## Where Do Embeddings Come From?
 
 Two key ideas drive how embeddings are created:
@@ -125,6 +142,7 @@ Modern language models use much higher dimensions than our 50-dimensional GloVe 
 <TryIt>
 Click different words and watch the highlighted row change. Toggle between "Before training" (random numbers) and "After training" (structured vectors from a real embedding). Before training, the vectors are meaningless noise. After training, similar words have similar patterns. The network learned this structure by adjusting the numbers to be useful for its task.
 </TryIt>
+
 
 ## Beyond Words
 
