@@ -3,6 +3,7 @@ import { Callout } from "@/components/mdx/Callout";
 import { KeyInsight } from "@/components/mdx/KeyInsight";
 import { Lead } from "@/components/mdx/Lead";
 import { TryIt } from "@/components/mdx/TryIt";
+import { TryItInPyTorch } from "@/components/mdx/TryItInPyTorch";
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {
@@ -10,6 +11,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     KeyInsight,
     Lead,
     TryIt,
+    TryItInPyTorch,
     ...components,
   };
 }

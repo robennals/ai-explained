@@ -158,6 +158,15 @@ export const chapters: Chapter[] = [
     description:
       "Pixel-by-pixel generation fails. Diffusion models start with pure noise and denoise. Latent space is a map of all possible images.",
   },
+  {
+    id: 17,
+    slug: "appendix-pytorch",
+    title: "PyTorch from Scratch",
+    subtitle: "A hands-on introduction to the code behind AI",
+    prerequisites: [],
+    description:
+      "Install PyTorch, write your first tensor operations, and train a simple neural network. A standalone guide for readers who want to go from understanding to building.",
+  },
 ];
 
 export function getChapter(slug: string): Chapter | undefined {

@@ -12,6 +12,7 @@ Interactive visual tutorial website for understanding AI from first principles. 
 pnpm dev              # Start dev server at localhost:3000
 pnpm build            # Production build
 pnpm lint             # ESLint + MDX validation
+pnpm test:notebooks   # Execute all Jupyter notebooks (requires Python + torch)
 npx playwright test   # E2E tests (expects dev server running)
 ```
 
@@ -33,7 +34,7 @@ Chapter metadata (title, slug, prerequisites, descriptions) lives in `src/lib/cu
 ### MDX Pipeline
 
 - `@next/mdx` with `remark-math` + `rehype-katex` (LaTeX) + `rehype-pretty-code` (Shiki syntax highlighting)
-- Custom MDX components registered in `mdx-components.tsx`: `<Callout>`, `<KeyInsight>`, `<Lead>`, `<TryIt>`
+- Custom MDX components registered in `mdx-components.tsx`: `<Callout>`, `<KeyInsight>`, `<Lead>`, `<TryIt>`, `<TryItInPyTorch>`
 - MDX component source in `src/components/mdx/`
 
 ### Widget System
@@ -65,6 +66,16 @@ src/components/widgets/
 2. Create `src/app/(tutorial)/{slug}/` with `page.tsx`, `content.mdx`, `widgets.tsx`
 3. Create widgets in `src/components/widgets/{topic}/`
 4. Follow the `01-computation` chapter as a template
+
+## PyTorch Notebooks
+
+The `notebooks/` directory contains Jupyter notebooks — one per chapter — that let readers run real PyTorch code in Google Colab. Each chapter's `content.mdx` links to its notebook via the `<TryItInPyTorch notebook="...">` component, which builds a Colab URL: `https://colab.research.google.com/github/robennals/ai-explained/blob/main/notebooks/{name}.ipynb`
+
+When modifying a chapter, check if the companion notebook needs updating. When adding a new chapter, create a companion notebook following the existing pattern.
+
+Every term must be defined before it's used in the notebook — either with a brief inline explanation, or a reference to the chapter where it's covered (e.g. "nn.Linear uses matrix multiplication — see Chapter 5"). See `docs/plans/pytorch-prerequisites.md` for the full forward-reference tracking.
+
+Test notebooks: `pnpm test:notebooks` (requires `pip install torch matplotlib jupyter tiktoken`). Note: notebook 04 downloads ~66MB of GloVe embeddings on first run.
 
 ## MDX Gotchas
 
