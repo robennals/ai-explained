@@ -142,18 +142,24 @@ Try punctuation too (`!`, `,`, `?`) and notice those are tokens as well.
 
 ## Where Do Embeddings Come From?
 
-Embeddings are typically generated in one of two ways:
+We've seen that embeddings are lists of numbers that capture meaning. But how does a neural network get those numbers in the first place?
 
-**Learned from context.** Systems like Word2Vec and GloVe are trained on the principle that "a word is known by the company it keeps." Words that appear near the same other words get similar vectors. "Dog" and "cat" both appear near "pet", "fur", "veterinarian" — so they end up close together in the embedding.
+**Learning from context.** Some embeddings (like the GloVe ones we explored above) are trained by reading huge amounts of text and noticing which words keep showing up together. "Dog" and "cat" both appear near words like "pet", "fur", and "veterinarian" — so they end up close together in the embedding. The system figures out that words used in similar sentences probably mean similar things.
 
-**Learned for a task.** Inside a neural network, the embedding is simply the first layer. This layer has a large number of inputs corresponding to all possible input tokens, and a smaller number of outputs, corresponding to the dimensions of the embedding. The embedding layer naturally learns the embedding that performs best at whatever the network is trying to do.
+**Learning as part of a network.** In modern language models, the embedding is actually the very first layer of the neural network. Here's how it works:
 
-Modern language models use much higher dimensions than our 50-dimensional GloVe example: GPT-2 uses 768 dimensions, GPT-3 uses 12,288 dimensions. 
+The network has one input for every possible token — that could be 50,000 or more. When a token comes in, the network uses **one-hot encoding**: it sets that token's input to 1 and every other input to 0. It's like raising your hand in a crowd — only one hand goes up, and that tells everyone which person you are.
+
+Each of those inputs is connected to every output in the next layer by a **weight** (a number the network has learned). Since only one input is "on" (set to 1) and all the others are "off" (set to 0), the outputs just equal the weights coming from that one active input. Those weights *are* the embedding.
+
+So an embedding layer is really just a big table of learned weights. Each token has its own row of weights, and that row is the token's embedding. During training, the network adjusts these weights to make the embeddings as useful as possible for its task.
+
+Modern language models use much bigger embeddings than our 50-dimensional GloVe example: GPT-2 uses 768 dimensions, GPT-3 uses 12,288 dimensions.
 
 <EmbeddingLayerDiagramWidget />
 
 <TryIt>
-Click different words and watch the highlighted row change. Toggle between "Before training" (random numbers) and "After training" (structured vectors from a real embedding). Before training, the vectors are meaningless noise. After training, similar words have similar patterns. The network learned this structure by adjusting the numbers to be useful for its task.
+Click different tokens on the left. Notice how only the clicked token lights up with a 1, and all others show 0 — that's one-hot encoding. The lines show the weights connecting that token to each output dimension, and those weights become the embedding values on the right. Toggle "Before training" to see random weights, then "After training" to see weights the network has learned. Try clicking "dog" then "cat" — after training, their values look more similar to each other than to "car".
 </TryIt>
 
 
