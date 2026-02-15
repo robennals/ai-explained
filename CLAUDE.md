@@ -81,6 +81,15 @@ Test notebooks: `pnpm test:notebooks` (requires `pip install torch matplotlib ju
 
 - **Never use raw `<p>` tags in MDX files.** MDX wraps paragraph text in its own `<p>`, so a raw `<p>text</p>` becomes `<p><p>text</p></p>` — invalid HTML that causes React hydration errors. Use `<Lead>` for intro paragraphs or `<div>` if you need a block wrapper. The `pnpm lint` command includes a check for this (`scripts/lint-mdx-no-raw-p.sh`).
 
+## Large Files
+
+**Never commit large data files** (model weights, embeddings, datasets, zip archives) to git. These bloat the repo permanently — even removing them later leaves them in history.
+
+- `data/` — local directory for large downloaded files, fully gitignored. Scripts and notebooks should download what they need here on demand.
+- `notebooks/` — gitignore covers `glove.*` and other large artifacts. Notebooks should download data at runtime (see `04-embeddings.ipynb` for the pattern).
+
+If a script needs a large file, it should check if the file exists and download it if not, rather than expecting it to be in the repo.
+
 ## Key Conventions
 
 - Import alias: `@/*` maps to `./src/*`
