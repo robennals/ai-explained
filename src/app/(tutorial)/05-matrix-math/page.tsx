@@ -7,6 +7,7 @@ import {
   BasisVectorViewWidget,
   DimensionProjectionWidget,
   NeuronVsMatrixWidget,
+  ActivationEffectWidget,
 } from "./widgets";
 
 export const metadata = {
@@ -28,6 +29,7 @@ export default function Chapter05() {
             BasisVectorViewWidget,
             DimensionProjectionWidget,
             NeuronVsMatrixWidget,
+            ActivationEffectWidget,
           }}
         />
       </div>

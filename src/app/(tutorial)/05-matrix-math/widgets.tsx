@@ -43,6 +43,14 @@ const NeuronVsMatrix = dynamic(
   { ssr: false }
 );
 
+const ActivationEffect = dynamic(
+  () =>
+    import("@/components/widgets/matrices/ActivationEffect").then(
+      (m) => m.ActivationEffect
+    ),
+  { ssr: false }
+);
+
 function WidgetSlot({ children }: { children: React.ReactNode }) {
   return (
     <Suspense
@@ -93,6 +101,14 @@ export function NeuronVsMatrixWidget() {
   return (
     <WidgetSlot>
       <NeuronVsMatrix />
+    </WidgetSlot>
+  );
+}
+
+export function ActivationEffectWidget() {
+  return (
+    <WidgetSlot>
+      <ActivationEffect />
     </WidgetSlot>
   );
 }

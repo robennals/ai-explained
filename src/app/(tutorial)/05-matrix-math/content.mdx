@@ -117,6 +117,20 @@ Both are true simultaneously. They're just two ways of seeing the same math.
 A neural network layer and a matrix transformation are the same thing, drawn differently. When we train a neural network, we're learning the right matrix at each layer — the right geometric transformation to apply to the data. Real neural networks work in hundreds or thousands of dimensions — a single layer in a typical language model transforms a 768-dimensional space, with over half a million matrix entries — but the math is identical to our 2D examples. Just... bigger.
 </KeyInsight>
 
+## But Wait — We Forgot the Activation Function
+
+In the previous section, we said a neural network layer is a matrix multiplication. That's almost true — but we left out two ingredients. After the matrix transforms the space, the network adds a **bias** (a fixed shift) and then applies an **activation function** to every output value.
+
+Once again we'll be using the **sigmoid** activation function, which squashes every value into the range 0 to 1. The bias shifts the data before the sigmoid acts on it, controlling *where* in the sigmoid's curve each value lands. What do these extra steps look like geometrically? A matrix transformation preserves straight lines — it can rotate, stretch, and shear, but a straight line always stays straight. The sigmoid breaks that rule. It *warps* the space, bending straight edges into curves and crushing everything into a small box.
+
+<ActivationEffectWidget />
+
+<TryIt>
+Start with **Identity** — the arrow looks normal because sigmoid undoes itself when the matrix doesn't change anything. Now try **Stretch 3&times;** — the arrow warps and squashes because the sigmoid clips values far from zero, bending straight edges into curves. **Spin &amp; grow** — a big rotation gets warped into a blob. **Shift up** keeps the matrix at identity but adds a positive bias to the y-output, pushing everything toward the top of the sigmoid's range. **Funhouse** combines skewed weights with uneven biases for an asymmetric distortion. Try switching to **Cat** or **Mona Lisa** to see the warping effect on a real image.
+</TryIt>
+
+This is why activation functions matter so much. Without them, every layer would just be another matrix — and stacking matrices just gives you one big matrix. With activation functions bending the space between each layer, the network can fold and warp its input into shapes that no single matrix could produce.
+
 ## Training Is Geometry
 
 When you train a neural network, you're searching for the right sequence of geometric transformations. Each layer rotates, stretches, and (with activation functions) bends the input space, gradually reshaping it until the data is arranged in a way that makes the answer obvious.
