@@ -6,6 +6,7 @@ export interface Chapter {
   prerequisites: number[];
   description: string;
   ready?: boolean;
+  section?: "appendix";
 }
 
 export const chapters: Chapter[] = [
@@ -152,19 +153,47 @@ export const chapters: Chapter[] = [
     description:
       "Pixel-by-pixel generation fails. Diffusion models start with pure noise and denoise. Latent space is a map of all possible images.",
   },
+  {
+    id: 17,
+    slug: "appendix-pytorch",
+    title: "PyTorch from Scratch",
+    subtitle: "A hands-on introduction to the code behind AI",
+    prerequisites: [],
+    description:
+      "Install PyTorch, write your first tensor operations, and train a simple neural network. A standalone guide for readers who want to go from understanding to building.",
+    section: "appendix",
+    ready: true,
+  },
 ];
 
 export function getChapter(slug: string): Chapter | undefined {
   return chapters.find((c) => c.slug === slug);
 }
 
+export function getMainChapters(): Chapter[] {
+  return chapters.filter((c) => !c.section);
+}
+
+export function getAppendixChapters(): Chapter[] {
+  return chapters.filter((c) => c.section === "appendix");
+}
+
+export function getAppendixLabel(chapter: Chapter): string {
+  const appendixes = getAppendixChapters();
+  const idx = appendixes.findIndex((c) => c.id === chapter.id);
+  return `A${idx + 1}`;
+}
+
 export function getAdjacentChapters(slug: string): {
   prev: Chapter | undefined;
   next: Chapter | undefined;
 } {
-  const idx = chapters.findIndex((c) => c.slug === slug);
+  const chapter = chapters.find((c) => c.slug === slug);
+  // Navigate within the same section (main or appendix)
+  const pool = chapter?.section === "appendix" ? getAppendixChapters() : getMainChapters();
+  const idx = pool.findIndex((c) => c.slug === slug);
   return {
-    prev: idx > 0 ? chapters[idx - 1] : undefined,
-    next: idx < chapters.length - 1 ? chapters[idx + 1] : undefined,
+    prev: idx > 0 ? pool[idx - 1] : undefined,
+    next: idx < pool.length - 1 ? pool[idx + 1] : undefined,
   };
 }

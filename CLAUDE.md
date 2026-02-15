@@ -12,6 +12,7 @@ Interactive visual tutorial website for understanding AI from first principles. 
 pnpm dev              # Start dev server at localhost:3000
 pnpm build            # Production build
 pnpm lint             # ESLint + MDX validation
+pnpm test:notebooks   # Execute all Jupyter notebooks (requires Python + torch)
 npx playwright test   # E2E tests (expects dev server running)
 ```
 
@@ -33,7 +34,7 @@ Chapter metadata (title, slug, prerequisites, descriptions) lives in `src/lib/cu
 ### MDX Pipeline
 
 - `@next/mdx` with `remark-math` + `rehype-katex` (LaTeX) + `rehype-pretty-code` (Shiki syntax highlighting)
-- Custom MDX components registered in `mdx-components.tsx`: `<Callout>`, `<KeyInsight>`, `<Lead>`, `<TryIt>`
+- Custom MDX components registered in `mdx-components.tsx`: `<Callout>`, `<KeyInsight>`, `<Lead>`, `<TryIt>`, `<TryItInPyTorch>`
 - MDX component source in `src/components/mdx/`
 
 ### Widget System
@@ -66,9 +67,28 @@ src/components/widgets/
 3. Create widgets in `src/components/widgets/{topic}/`
 4. Follow the `01-computation` chapter as a template
 
+## PyTorch Notebooks
+
+The `notebooks/` directory contains Jupyter notebooks — one per chapter — that let readers run real PyTorch code in Google Colab. Each chapter's `content.mdx` links to its notebook via the `<TryItInPyTorch notebook="...">` component, which builds a Colab URL: `https://colab.research.google.com/github/robennals/ai-explained/blob/main/notebooks/{name}.ipynb`
+
+When modifying a chapter, check if the companion notebook needs updating. When adding a new chapter, create a companion notebook following the existing pattern.
+
+Every term must be defined before it's used in the notebook — either with a brief inline explanation, or a reference to the chapter where it's covered (e.g. "nn.Linear uses matrix multiplication — see Chapter 5"). See `docs/plans/pytorch-prerequisites.md` for the full forward-reference tracking.
+
+Test notebooks: `pnpm test:notebooks` (requires `pip install torch matplotlib jupyter tiktoken`). Note: notebook 04 downloads ~66MB of GloVe embeddings on first run.
+
 ## MDX Gotchas
 
 - **Never use raw `<p>` tags in MDX files.** MDX wraps paragraph text in its own `<p>`, so a raw `<p>text</p>` becomes `<p><p>text</p></p>` — invalid HTML that causes React hydration errors. Use `<Lead>` for intro paragraphs or `<div>` if you need a block wrapper. The `pnpm lint` command includes a check for this (`scripts/lint-mdx-no-raw-p.sh`).
+
+## Large Files
+
+**Never commit large data files** (model weights, embeddings, datasets, zip archives) to git. These bloat the repo permanently — even removing them later leaves them in history.
+
+- `data/` — local directory for large downloaded files, fully gitignored. Scripts and notebooks should download what they need here on demand.
+- `notebooks/` — gitignore covers `glove.*` and other large artifacts. Notebooks should download data at runtime (see `04-embeddings.ipynb` for the pattern).
+
+If a script needs a large file, it should check if the file exists and download it if not, rather than expecting it to be in the repo.
 
 ## Key Conventions
 

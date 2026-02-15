@@ -183,3 +183,7 @@ An embedding is a learned mapping from discrete symbols to continuous geometry. 
 We've seen that embeddings turn words into lists of numbers — points in a high-dimensional space where proximity means similarity and directions encode relationships. But how do neural networks actually *process* these lists of numbers? What math is happening inside each layer?
 
 In the next chapter, we'll discover that every neural network layer is doing the same thing: **matrix multiplication** — a geometric transformation that rotates, stretches, and reshapes space. It sounds abstract, but it has a beautiful visual meaning you can watch unfold.
+
+<TryItInPyTorch notebook="04-embeddings">
+Build one-hot vectors, train your own word embeddings, explore real word analogies (king − man + woman = queen) with GloVe, and see how GPT-4's tokenizer splits text.
+</TryItInPyTorch>
