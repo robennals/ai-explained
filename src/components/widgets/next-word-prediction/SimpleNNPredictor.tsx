@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
+import { SliderControl } from "../shared/SliderControl";
 import { loadTinyStoriesTokenizer } from "../embeddings/bpeTokenizer";
 import type { EncodedPiece } from "../embeddings/bpeTokenizer";
 
@@ -43,14 +44,12 @@ async function loadModel(): Promise<Model> {
   if (modelPromise) return modelPromise;
 
   modelPromise = (async () => {
-    // Load config + vocab JSON
     const configResp = await fetch(`${MODEL_BASE}.json`);
     if (!configResp.ok) throw new Error(`Model config: ${configResp.status}`);
     const json = await configResp.json();
     const config: ModelConfig = json.config;
     const vocab: string[] = json.vocab;
 
-    // Load binary weights
     const binResp = await fetch(`${MODEL_BASE}.weights.bin`);
     if (!binResp.ok) throw new Error(`Model weights: ${binResp.status}`);
     const buf = await binResp.arrayBuffer();
@@ -58,19 +57,17 @@ async function loadModel(): Promise<Model> {
 
     let offset = 0;
 
-    function readTensor(): { shape: number[]; data: Float32Array } {
+    function readTensor(): { data: Float32Array } {
       const ndims = view.getUint32(offset, true);
       offset += 4;
-      const shape: number[] = [];
+      let nElements = 1;
       for (let i = 0; i < ndims; i++) {
-        shape.push(view.getUint32(offset, true));
+        nElements *= view.getUint32(offset, true);
         offset += 4;
       }
-      let nElements = 1;
-      for (const d of shape) nElements *= d;
       const data = new Float32Array(buf, offset, nElements);
       offset += nElements * 4;
-      return { shape, data };
+      return { data };
     }
 
     const embedding = readTensor();
@@ -95,15 +92,15 @@ async function loadModel(): Promise<Model> {
   return modelPromise;
 }
 
+/** Return top-K predictions with probabilities. */
 function predict(model: Model, tokenIds: number[], topK: number = 5): Prediction[] {
   const { config, vocab, weights } = model;
   const { embed_dim, context_len, hidden_dim, vocab_size } = config;
 
-  // Take the last context_len tokens
   const ids = tokenIds.slice(-context_len);
   if (ids.length < context_len) return [];
 
-  // Embedding lookup + flatten: (context_len * embed_dim,)
+  // Embedding lookup + flatten
   const flat = new Float32Array(context_len * embed_dim);
   for (let i = 0; i < context_len; i++) {
     const embOffset = ids[i] * embed_dim;
@@ -120,7 +117,7 @@ function predict(model: Model, tokenIds: number[], topK: number = 5): Prediction
     for (let j = 0; j < context_len * embed_dim; j++) {
       sum += weights.fc1_weight[rowOffset + j] * flat[j];
     }
-    hidden[i] = sum > 0 ? sum : 0; // ReLU
+    hidden[i] = sum > 0 ? sum : 0;
   }
 
   // fc2: logits = W2 @ hidden + b2
@@ -160,25 +157,91 @@ function predict(model: Model, tokenIds: number[], topK: number = 5): Prediction
   }));
 }
 
-// ---------------------------------------------------------------------------
-// Format a token for display (strip ## prefix, handle special tokens)
-// ---------------------------------------------------------------------------
+/** Sample one token from the model using temperature. */
+function sampleToken(
+  model: Model,
+  tokenIds: number[],
+  temperature: number,
+): { token: string; tokenId: number } | null {
+  const { config, vocab, weights } = model;
+  const { embed_dim, context_len, hidden_dim, vocab_size } = config;
+
+  const ids = tokenIds.slice(-context_len);
+  if (ids.length < context_len) return null;
+
+  const flat = new Float32Array(context_len * embed_dim);
+  for (let i = 0; i < context_len; i++) {
+    const embOffset = ids[i] * embed_dim;
+    for (let j = 0; j < embed_dim; j++) {
+      flat[i * embed_dim + j] = weights.embedding[embOffset + j];
+    }
+  }
+
+  const hidden = new Float32Array(hidden_dim);
+  for (let i = 0; i < hidden_dim; i++) {
+    let sum = weights.fc1_bias[i];
+    const rowOffset = i * (context_len * embed_dim);
+    for (let j = 0; j < context_len * embed_dim; j++) {
+      sum += weights.fc1_weight[rowOffset + j] * flat[j];
+    }
+    hidden[i] = sum > 0 ? sum : 0;
+  }
+
+  const logits = new Float32Array(vocab_size);
+  for (let i = 0; i < vocab_size; i++) {
+    let sum = weights.fc2_bias[i];
+    const rowOffset = i * hidden_dim;
+    for (let j = 0; j < hidden_dim; j++) {
+      sum += weights.fc2_weight[rowOffset + j] * hidden[j];
+    }
+    logits[i] = sum;
+  }
+
+  // Temperature-scaled softmax
+  const t = Math.max(temperature, 0.01);
+  let maxLogit = -Infinity;
+  for (let i = 0; i < vocab_size; i++) {
+    if (logits[i] > maxLogit) maxLogit = logits[i];
+  }
+  let sumExp = 0;
+  const probs = new Float32Array(vocab_size);
+  for (let i = 0; i < vocab_size; i++) {
+    probs[i] = Math.exp((logits[i] - maxLogit) / t);
+    sumExp += probs[i];
+  }
+  for (let i = 0; i < vocab_size; i++) {
+    probs[i] /= sumExp;
+  }
+
+  // Sample from distribution
+  const r = Math.random();
+  let cumulative = 0;
+  for (let i = 0; i < vocab_size; i++) {
+    cumulative += probs[i];
+    if (r <= cumulative) {
+      return { token: vocab[i], tokenId: i };
+    }
+  }
+
+  return { token: vocab[vocab_size - 1], tokenId: vocab_size - 1 };
+}
+
 function displayToken(token: string): string {
   if (token.startsWith("##")) return token.slice(2);
   return token;
+}
+
+/** Join a token onto existing text (no space for ## continuation tokens). */
+function appendToken(text: string, token: string): string {
+  if (token.startsWith("##")) return text + token.slice(2);
+  return text + " " + token;
 }
 
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
-type Tab = "explore" | "compare";
-
-const COMPARE_GROUPS = [
-  { label: "Animals", words: ["cat", "dog", "bird", "fish"] },
-  { label: "People", words: ["boy", "girl", "mom", "dad"] },
-  { label: "Feelings", words: ["happy", "sad", "scared", "angry"] },
-];
+type Tab = "explore" | "generate";
 
 export function SimpleNNPredictor() {
   const [tab, setTab] = useState<Tab>("explore");
@@ -189,14 +252,16 @@ export function SimpleNNPredictor() {
   const tokRef = useRef<{ encode: (t: string) => EncodedPiece[] } | null>(null);
   const [modelConfig, setModelConfig] = useState<ModelConfig | null>(null);
 
-  // Predictions for explore mode
+  // Explore state
   const [explorePreds, setExplorePreds] = useState<Prediction[]>([]);
   const [exploreTokens, setExploreTokens] = useState<EncodedPiece[]>([]);
 
-  // Predictions for compare mode
-  const [comparePreds, setComparePreds] = useState<
-    Map<string, Prediction[]>
-  >(new Map());
+  // Generate state
+  const [genPrompt, setGenPrompt] = useState("once upon a");
+  const [genOutput, setGenOutput] = useState("");
+  const [generating, setGenerating] = useState(false);
+  const [temperature, setTemperature] = useState(0.8);
+  const cancelRef = useRef(false);
 
   // Load model and tokenizer
   useEffect(() => {
@@ -221,49 +286,74 @@ export function SimpleNNPredictor() {
     return () => { cancelled = true; };
   }, []);
 
-  // Run inference when text or tab changes
+  // Run explore inference when text changes
   useEffect(() => {
     if (loading || error || !modelRef.current || !tokRef.current) return;
+    if (tab !== "explore") return;
 
-    if (tab === "explore") {
-      const pieces = tokRef.current.encode(text);
-      setExploreTokens(pieces);
-      const ids = pieces.map((p) => p.id);
-      if (ids.length >= modelRef.current.config.context_len) {
-        setExplorePreds(predict(modelRef.current, ids, 10));
-      } else {
-        setExplorePreds([]);
-      }
+    const pieces = tokRef.current.encode(text);
+    setExploreTokens(pieces);
+    const ids = pieces.map((p) => p.id);
+    if (ids.length >= modelRef.current.config.context_len) {
+      setExplorePreds(predict(modelRef.current, ids, 10));
     } else {
-      // Compare: run predictions for all words in all groups
-      const results = new Map<string, Prediction[]>();
-      for (const group of COMPARE_GROUPS) {
-        for (const word of group.words) {
-          const pieces = tokRef.current!.encode(`the ${word}`);
-          const ids = pieces.map((p) => p.id);
-          if (ids.length >= modelRef.current!.config.context_len) {
-            results.set(word, predict(modelRef.current!, ids, 5));
-          }
-        }
-      }
-      setComparePreds(results);
+      setExplorePreds([]);
     }
   }, [text, tab, loading, error]);
 
   const handlePredictionClick = useCallback((pred: Prediction) => {
-    setText((prev) => {
-      const token = pred.token;
-      // If it's a continuation token (##...), append without space
-      if (token.startsWith("##")) {
-        return prev + token.slice(2);
+    setText((prev) => appendToken(prev, pred.token));
+  }, []);
+
+  const handleGenerate = useCallback(() => {
+    if (!modelRef.current || !tokRef.current || generating) return;
+
+    const model = modelRef.current;
+    const tok = tokRef.current;
+    cancelRef.current = false;
+    setGenerating(true);
+    setGenOutput(genPrompt);
+
+    const pieces = tok.encode(genPrompt);
+    const ids = pieces.map((p) => p.id);
+    let currentIds = [...ids];
+    let currentText = genPrompt;
+    let step = 0;
+    const maxSteps = 40;
+
+    const interval = setInterval(() => {
+      if (cancelRef.current || step >= maxSteps) {
+        clearInterval(interval);
+        setGenerating(false);
+        return;
       }
-      return prev + " " + token;
-    });
+
+      const result = sampleToken(model, currentIds, temperature);
+      if (!result) {
+        clearInterval(interval);
+        setGenerating(false);
+        return;
+      }
+
+      currentText = appendToken(currentText, result.token);
+      currentIds.push(result.tokenId);
+      setGenOutput(currentText);
+      step++;
+    }, 80);
+  }, [genPrompt, generating, temperature]);
+
+  const handleStopGenerate = useCallback(() => {
+    cancelRef.current = true;
   }, []);
 
   const resetState = useCallback(() => {
     setText("once upon a");
     setTab("explore");
+    setGenPrompt("once upon a");
+    setGenOutput("");
+    setGenerating(false);
+    cancelRef.current = true;
+    setTemperature(0.8);
   }, []);
 
   if (error) {
@@ -299,14 +389,14 @@ export function SimpleNNPredictor() {
           Explore
         </button>
         <button
-          onClick={() => setTab("compare")}
+          onClick={() => { setTab("generate"); cancelRef.current = true; setGenerating(false); }}
           className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-            tab === "compare"
+            tab === "generate"
               ? "bg-white text-foreground shadow-sm"
               : "text-muted hover:text-foreground"
           }`}
         >
-          Compare Words
+          Generate
         </button>
       </div>
 
@@ -325,7 +415,16 @@ export function SimpleNNPredictor() {
           onPredictionClick={handlePredictionClick}
         />
       ) : (
-        <CompareTab predictions={comparePreds} />
+        <GenerateTab
+          prompt={genPrompt}
+          setPrompt={setGenPrompt}
+          output={genOutput}
+          generating={generating}
+          temperature={temperature}
+          setTemperature={setTemperature}
+          onGenerate={handleGenerate}
+          onStop={handleStopGenerate}
+        />
       )}
 
       {/* Model info */}
@@ -365,7 +464,6 @@ function ExploreTab({
 
   return (
     <div className="space-y-4">
-      {/* Text input */}
       <div>
         <input
           type="text"
@@ -376,7 +474,6 @@ function ExploreTab({
         />
       </div>
 
-      {/* Tokens the model sees */}
       {tokens.length > 0 && (
         <div className="flex flex-wrap items-center gap-1.5">
           <span className="text-xs text-muted">Tokens:</span>
@@ -404,7 +501,6 @@ function ExploreTab({
         </div>
       )}
 
-      {/* Context arrow */}
       {contextTokens.length === contextLen && (
         <div className="flex items-center gap-2 text-xs text-muted">
           <span>Model sees:</span>
@@ -415,7 +511,6 @@ function ExploreTab({
         </div>
       )}
 
-      {/* Predictions */}
       {predictions.length > 0 ? (
         <div className="space-y-1">
           <div className="text-xs font-medium text-muted mb-2">
@@ -455,70 +550,95 @@ function ExploreTab({
 }
 
 // ---------------------------------------------------------------------------
-// Compare tab
+// Generate tab
 // ---------------------------------------------------------------------------
-function CompareTab({
-  predictions,
+function GenerateTab({
+  prompt,
+  setPrompt,
+  output,
+  generating,
+  temperature,
+  setTemperature,
+  onGenerate,
+  onStop,
 }: {
-  predictions: Map<string, Prediction[]>;
+  prompt: string;
+  setPrompt: (s: string) => void;
+  output: string;
+  generating: boolean;
+  temperature: number;
+  setTemperature: (t: number) => void;
+  onGenerate: () => void;
+  onStop: () => void;
 }) {
+  const tempLabel =
+    temperature < 0.3
+      ? "Very predictable"
+      : temperature < 0.6
+        ? "Conservative"
+        : temperature < 1.0
+          ? "Balanced"
+          : temperature < 1.5
+            ? "Creative"
+            : "Wild";
+
   return (
-    <div className="space-y-6">
-      <div className="text-xs text-muted">
-        The model sees &ldquo;the [word]&rdquo; and predicts what comes next.
-        Similar words get similar predictions — the model generalizes through
-        embeddings.
+    <div className="space-y-4">
+      {/* Prompt input */}
+      <div className="flex gap-2">
+        <input
+          type="text"
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
+          disabled={generating}
+          placeholder="Enter a prompt..."
+          className="flex-1 rounded-lg border border-border bg-white px-3 py-2 font-mono text-sm text-foreground outline-none transition-colors placeholder:text-muted/50 focus:border-accent focus:ring-1 focus:ring-accent/30 disabled:opacity-50"
+        />
+        {generating ? (
+          <button
+            onClick={onStop}
+            className="rounded-lg bg-red-100 px-4 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-200"
+          >
+            Stop
+          </button>
+        ) : (
+          <button
+            onClick={onGenerate}
+            className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent/90"
+          >
+            Generate
+          </button>
+        )}
       </div>
-      {COMPARE_GROUPS.map((group) => (
-        <div key={group.label}>
-          <div className="mb-2 text-xs font-semibold text-foreground uppercase tracking-wide">
-            {group.label}
-          </div>
-          <div className="space-y-3">
-            {group.words.map((word) => {
-              const preds = predictions.get(word);
-              if (!preds || preds.length === 0) return null;
-              const maxProb = preds[0].prob;
-              return (
-                <div key={word} className="space-y-0.5">
-                  <div className="text-xs text-muted">
-                    the <span className="font-medium text-foreground">{word}</span> &rarr;
-                  </div>
-                  <div className="flex flex-wrap gap-x-3 gap-y-0.5">
-                    {preds.slice(0, 5).map((pred) => (
-                      <div
-                        key={pred.tokenId}
-                        className="flex items-center gap-1"
-                      >
-                        <div
-                          className="h-2.5 rounded-sm bg-accent/60"
-                          style={{
-                            width: `${Math.max(4, (pred.prob / maxProb) * 48)}px`,
-                          }}
-                        />
-                        <span className="font-mono text-xs text-foreground">
-                          {displayToken(pred.token)}
-                        </span>
-                        <span className="font-mono text-[10px] text-muted">
-                          {(pred.prob * 100).toFixed(0)}%
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
+
+      {/* Temperature slider */}
+      <SliderControl
+        label="Temperature"
+        value={temperature}
+        onChange={setTemperature}
+        min={0.1}
+        max={2.0}
+        step={0.1}
+        formatValue={() => `${temperature.toFixed(1)} — ${tempLabel}`}
+      />
+
+      {/* Output */}
+      {output && (
+        <div className="rounded-lg border border-border bg-surface px-4 py-3">
+          <div className="font-mono text-sm leading-relaxed text-foreground whitespace-pre-wrap">
+            {output}
+            {generating && (
+              <span className="animate-pulse text-accent">|</span>
+            )}
           </div>
         </div>
-      ))}
+      )}
 
-      {/* Insight callout */}
-      <div className="rounded-lg bg-green-50 px-4 py-3 text-sm text-green-800">
-        Notice how &ldquo;cat&rdquo; and &ldquo;dog&rdquo; produce similar predictions
-        — the model learned that animals behave similarly in stories. Same for
-        &ldquo;boy&rdquo; and &ldquo;girl,&rdquo; or &ldquo;happy&rdquo; and &ldquo;sad.&rdquo;
-        The neural network generalizes through embeddings: similar words in, similar predictions out.
-      </div>
+      {!output && !generating && (
+        <div className="rounded-lg bg-surface px-4 py-8 text-center text-sm text-muted">
+          Enter a prompt and hit Generate to watch the model write word by word.
+        </div>
+      )}
     </div>
   );
 }

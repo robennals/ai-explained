@@ -71,9 +71,9 @@ The network doesn't need to have seen every possible word — it just needs to l
 <SimpleNNPredictorWidget />
 
 <TryIt>
-**Explore tab**: Type text and see live predictions. Click any prediction to extend the sentence — try building a story! Notice how "once upon a" confidently predicts "time." Try different story beginnings like "the little" or "she was very."
+**Explore tab**: Type text and see live predictions. Click any prediction to extend the sentence — try building a story! Notice how "once upon a" confidently predicts "time." Try different story beginnings like "the little" or "she was very." Compare similar words: type "the cat" vs "the dog" and notice they get similar predictions — the model generalizes through embeddings.
 
-**Compare tab**: See how similar words produce similar predictions. "Cat" and "dog" both predict "was" as the top word — the model learned that animals behave similarly in stories, even though it never saw a rule saying so.
+**Generate tab**: Enter a prompt and hit Generate to watch the model write word by word. Try the temperature slider: low temperature always picks the safest prediction (repetitive but grammatical), high temperature picks more randomly (creative but chaotic). Try generating from the same prompt twice at high temperature — you'll get different stories each time!
 </TryIt>
 
 <KeyInsight>
