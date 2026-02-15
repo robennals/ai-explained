@@ -146,20 +146,18 @@ We've seen that embeddings are lists of numbers that capture meaning. But how do
 
 **Learning from context.** Some embeddings (like the GloVe ones we explored above) are trained by reading huge amounts of text and noticing which words keep showing up together. "Dog" and "cat" both appear near words like "pet", "fur", and "veterinarian" — so they end up close together in the embedding. The system figures out that words used in similar sentences probably mean similar things.
 
-**Learning as part of a network.** In modern language models, the embedding is actually the very first layer of the neural network. Here's how it works:
+**Learning as part of a network.** In modern language models, the embedding is actually the very first layer of the neural network — the layer that takes in tokens and produces numbers for the rest of the network to work with. It looks like the network diagrams from the previous chapter: a layer of input nodes connected by weights to a layer of output nodes, which then feed into more layers.
 
-The network has one input for every possible token — that could be 50,000 or more. When a token comes in, the network uses **one-hot encoding**: it sets that token's input to 1 and every other input to 0. It's like raising your hand in a crowd — only one hand goes up, and that tells everyone which person you are.
+But there's a trick for how the input works. The network has one input node for every possible token. When a token comes in, the network sets that token's input to 1 and every other input to 0. This is called **one-hot encoding** — it's like raising your hand in a crowd: only one hand goes up, and that tells everyone which person you are.
 
-Each of those inputs is connected to every output in the next layer by a **weight** (a number the network has learned). Since only one input is "on" (set to 1) and all the others are "off" (set to 0), the outputs just equal the weights coming from that one active input. Those weights *are* the embedding.
-
-So an embedding layer is really just a big table of learned weights. Each token has its own row of weights, and that row is the token's embedding. During training, the network adjusts these weights to make the embeddings as useful as possible for its task.
+Remember from the previous chapter that each connection between neurons carries a **weight**. Since only one input is "on" (set to 1) and all the others are "off" (set to 0), the outputs just equal the weights coming from that one active input. Those weights *are* the embedding. During training, we learn the embedding through gradient descent, just like we learn any other weights.
 
 Modern language models use much bigger embeddings than our 50-dimensional GloVe example: GPT-2 uses 768 dimensions, GPT-3 uses 12,288 dimensions.
 
 <EmbeddingLayerDiagramWidget />
 
 <TryIt>
-Click different tokens on the left. Notice how only the clicked token lights up with a 1, and all others show 0 — that's one-hot encoding. The lines show the weights connecting that token to each output dimension, and those weights become the embedding values on the right. Toggle "Before training" to see random weights, then "After training" to see weights the network has learned. Try clicking "dog" then "cat" — after training, their values look more similar to each other than to "car".
+Select different tokens from the dropdown. Notice how the selected token's input lights up with a 1, and all the others show 0 — that's one-hot encoding. The bright lines show the weights connecting that token to the embedding layer, and those weights become the embedding values on the right. The embedding then feeds into more layers of neurons — the rest of the network. Try selecting "dog" then "cat" — their embedding values look more similar to each other than to "car".
 </TryIt>
 
 
@@ -167,9 +165,8 @@ Click different tokens on the left. Notice how only the clicked token lights up 
 
 ## Beyond Words
 
-Embeddings are one of the most powerful ideas in modern AI. The pattern — take something discrete, map it to a point in continuous space, let training shape the geometry — applies far beyond words:
+Embeddings are one of the most powerful ideas in modern AI. The pattern — take something discrete, map it to a point in continuous space, let training shape the geometry — applies far beyond words and tokens:
 
-- **Tokens** (subword pieces) in language models like GPT
 - **Image patches** in vision models
 - **Audio frames** in speech recognition
 - **Users and products** in recommendation systems
