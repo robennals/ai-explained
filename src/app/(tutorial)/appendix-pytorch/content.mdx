@@ -54,52 +54,78 @@ That's the CPU-only version, which is fine for everything in this tutorial. But 
 
 ## Tensors
 
-A **tensor** is PyTorch's word for "array of numbers." If you've used NumPy, a tensor is essentially the same thing as an `ndarray` — but tensors can run on GPUs and track gradients.
+A **tensor** is PyTorch's word for "a box of numbers." It's the fundamental building block — every piece of data in PyTorch is a tensor.
+
+### A Quick Python Primer
+
+Before we dive in, a few bits of Python syntax you'll see everywhere:
+
+**Decimal points make numbers precise.** Writing `3.0` instead of `3` tells Python this is a decimal number (a "float"), not a whole number (an "integer"). AI math needs decimal precision — values like `0.7` or `-1.234` — so you'll see that trailing `.0` a lot. Writing `1.` is shorthand for `1.0`.
+
+**Square brackets make lists.** In Python, `[1.0, 2.0, 3.0]` is a list of three numbers. You can picture it as a row of boxes:
+
+<TensorDisplay data={[1.0, 2.0, 3.0]} label="a list — one row of numbers" />
+
+**Lists can contain lists.** `[[1.0, 2.0], [3.0, 4.0]]` is a list containing two lists — which gives you a grid:
+
+<TensorDisplay data={[[1.0, 2.0], [3.0, 4.0]]} label="a list of lists — a grid of numbers" />
+
+This is how you build up dimensions: a list of numbers is a row, a list of rows is a grid, a list of grids is a cube, and so on. PyTorch tensors work the same way.
 
 ### Creating Tensors
 
 ```python
 import torch
 
-# From a Python list
+# A 1D tensor (a row of numbers)
 x = torch.tensor([1.0, 2.0, 3.0])
-
-# A 2x3 matrix
-m = torch.tensor([[1.0, 2.0, 3.0],
-                   [4.0, 5.0, 6.0]])
-
-# Zeros, ones, random
-z = torch.zeros(3, 4)       # 3x4 matrix of zeros
-o = torch.ones(2, 2)        # 2x2 matrix of ones
-r = torch.randn(5, 3)       # 5x3 matrix of random numbers (normal distribution)
 ```
 
-### Shape and Dtype
+This creates a tensor with three numbers in a row — just like the table above. You can also create 2D tensors (grids):
 
-Every tensor has a **shape** (its dimensions) and a **dtype** (the type of number it stores):
+```python
+# A 2D tensor (a table of numbers — 2 rows, 3 columns)
+m = torch.tensor([[1.0, 2.0, 3.0],
+                   [4.0, 5.0, 6.0]])
+```
+
+That's a 2-by-3 grid:
+
+<TensorDisplay data={[[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]} />
+
+PyTorch also has shortcuts for common patterns:
+
+```python
+z = torch.zeros(3, 4)       # 3x4 grid, all zeros
+o = torch.ones(2, 2)        # 2x2 grid, all ones
+r = torch.randn(5, 3)       # 5x3 grid, filled with random numbers
+```
+
+### Shape
+
+Every tensor has a **shape** — the size of each dimension. This tells you how the numbers are arranged:
 
 ```python
 x = torch.randn(3, 4)
-print(x.shape)   # torch.Size([3, 4])
-print(x.dtype)   # torch.float32
+print(x.shape)   # torch.Size([3, 4]) — 3 rows, 4 columns
 ```
 
 Shape matters a lot. A common source of bugs is tensors with the wrong shape. When something goes wrong, `print(x.shape)` is usually your first debugging move.
 
 ### Basic Math
 
-Tensor math works element-wise by default:
+When you do math on two tensors of the same shape, it happens **element by element** — each number pairs up with the number in the same position:
 
 ```python
 a = torch.tensor([1.0, 2.0, 3.0])
 b = torch.tensor([4.0, 5.0, 6.0])
 
-a + b       # tensor([5., 7., 9.])
-a * b       # tensor([4., 10., 18.])
-a ** 2      # tensor([1., 4., 9.])
+a + b       # tensor([5., 7., 9.])     — 1+4, 2+5, 3+6
+a * b       # tensor([4., 10., 18.])   — 1×4, 2×5, 3×6
+a ** 2      # tensor([1., 4., 9.])     — 1², 2², 3²
 ```
 
-For matrix multiplication (the workhorse of neural networks — see [Chapter 5](/05-matrix-math)), use `@`:
+For **matrix multiplication** (the workhorse of neural networks — see [Chapter 5](/05-matrix-math)), use `@`:
 
 ```python
 # Matrix multiply: (2x3) @ (3x4) -> (2x4)
@@ -111,24 +137,49 @@ print(C.shape)  # torch.Size([2, 4])
 
 ## Automatic Differentiation
 
-This is PyTorch's killer feature. Training a neural network requires computing **gradients** — how much each parameter should change to reduce the error (see [Chapter 2](/02-optimization)). Computing gradients by hand for millions of parameters would be impossible. PyTorch does it automatically.
+This is PyTorch's killer feature. Training a neural network means adjusting millions of parameters to reduce the error (see [Chapter 2](/02-optimization)). To know *which direction* to adjust each parameter, you need to know: **if I nudge this parameter a tiny bit, how much does the error change?** That's called a **gradient**.
 
-Tell PyTorch to track a tensor by setting `requires_grad=True`:
+If you know calculus, a gradient is a derivative. If you don't — no problem. Just think of it as: "how sensitive is the output to a small change in this input?" If the gradient is large, a small nudge to the input causes a big change in the output. If it's near zero, that input barely matters.
+
+Computing gradients by hand for millions of parameters would be completely impractical. PyTorch does it automatically.
+
+### How It Works
+
+Tell PyTorch to track a tensor by setting `requires_grad=True`. Then do math with it. PyTorch silently records every operation. When you're done, call `.backward()` on the result, and PyTorch works backward through the chain of operations to figure out each input's gradient.
 
 ```python
 x = torch.tensor(3.0, requires_grad=True)
 
 # Do some math
-y = x ** 2 + 2 * x + 1  # y = x² + 2x + 1
+y = x ** 2 + 2 * x + 1
 
 # Compute gradients
 y.backward()
 
-# dy/dx = 2x + 2 = 2(3) + 2 = 8
 print(x.grad)  # tensor(8.)
 ```
 
-`y.backward()` walks backward through every operation that produced `y`, computing how much `y` changes when each input changes. This is called **backpropagation**, and it's how neural networks learn.
+That `8.0` means: "if you increase `x` by a tiny amount, `y` will increase by about 8 times that amount." (You can verify: when `x` is `3.0`, `y` is `16.0`. When `x` is `3.01`, `y` is `16.0801` — an increase of `0.0801`, which is roughly `8 × 0.01`.)
+
+### .backward() Updates Everything at Once
+
+Here's the key thing: when you call `y.backward()`, PyTorch computes the gradient of `y` with respect to **every** tracked tensor that contributed to `y` — not just one. Each of those tensors gets its gradient stored in `.grad`:
+
+```python
+a = torch.tensor(2.0, requires_grad=True)
+b = torch.tensor(5.0, requires_grad=True)
+
+y = a * b + a ** 2   # y depends on both a and b
+
+y.backward()
+
+print(a.grad)  # tensor(9.) — how much y changes when a changes
+print(b.grad)  # tensor(2.) — how much y changes when b changes
+```
+
+This is how neural networks learn: the "error" is one number at the end of the computation, and `.backward()` computes how sensitive that error is to *every single parameter* in the network — all in one pass. This process is called **backpropagation**.
+
+You can only call `.backward()` on a single value (not an array of values), because you're asking "how does *this one number* change when each input changes?" In a neural network, that single number is always the loss — the measure of how wrong the network is.
 
 You almost never call `.backward()` directly — PyTorch's optimizers handle it. But understanding that it exists, and that it works by tracking operations, helps you debug when things go wrong.
 
@@ -164,27 +215,6 @@ model = nn.Sequential(
 ```
 
 This is a three-layer neural network. The `ReLU` activations between layers are crucial — without them, stacking linear layers would just give you another linear layer ([Chapter 3](/03-neurons) explains why).
-
-### Custom Modules
-
-For more control, subclass `nn.Module`:
-
-```python
-class MyNetwork(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.hidden = nn.Linear(2, 16)
-        self.output = nn.Linear(16, 1)
-
-    def forward(self, x):
-        x = torch.relu(self.hidden(x))
-        x = self.output(x)
-        return x
-
-model = MyNetwork()
-```
-
-The `forward` method defines how data flows through the network. PyTorch calls it when you do `model(x)`.
 
 ## The Training Loop
 
