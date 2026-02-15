@@ -32,7 +32,7 @@ export const chapters: Chapter[] = [
   {
     id: 3,
     slug: "03-neurons",
-    title: "Neural Networks",
+    title: "Building a Brain",
     subtitle: "The building block that can compute anything",
     prerequisites: [2],
     description:
@@ -61,43 +61,44 @@ export const chapters: Chapter[] = [
   },
   {
     id: 6,
-    slug: "05-learning-from-mistakes",
-    title: "Learning from Mistakes",
-    subtitle: "How networks learn by failing",
-    prerequisites: [3],
-    description:
-      "The loss function defines what 'wrong' means. Gradient descent finds the way downhill. Train too well and the model memorizes instead of learning.",
-  },
-  {
-    id: 7,
     slug: "06-geometry-of-meaning",
     title: "The Geometry of Meaning",
     subtitle: "How AI turns words into math",
-    prerequisites: [6],
+    prerequisites: [4],
     description:
       "Embeddings place words in space where meaning has geometry. King minus man plus woman equals queen. This is how AI 'understands' language.",
   },
   {
-    id: 8,
+    id: 7,
     slug: "07-attention-transformers",
     title: "Attention and Transformers",
     subtitle: "The architecture that changed everything",
-    prerequisites: [7],
+    prerequisites: [6],
     description:
       "Before transformers, models forgot early words like a telephone game. Attention lets every word look at every other word directly.",
   },
   {
+    id: 8,
+    slug: "08-learning-from-mistakes",
+    title: "Learning from Mistakes",
+    subtitle: "How networks learn by failing",
+    prerequisites: [7],
+    description:
+      "The loss function defines what 'wrong' means. Gradient descent finds the way downhill. Train too well and the model memorizes instead of learning.",
+    ready: true,
+  },
+  {
     id: 9,
-    slug: "08-how-llms-learn",
+    slug: "09-how-llms-learn",
     title: "How LLMs Learn to Talk",
     subtitle: "From raw text to conversation",
-    prerequisites: [8],
+    prerequisites: [7],
     description:
       "An LLM learns by predicting the next word. Seems too simple — but requires understanding grammar, facts, humor, and reasoning. Tokenization shapes what it can see.",
   },
   {
     id: 10,
-    slug: "09-transfer-learning",
+    slug: "10-transfer-learning",
     title: "Transfer Learning",
     subtitle: "Train once, use everywhere",
     prerequisites: [9],
@@ -106,7 +107,7 @@ export const chapters: Chapter[] = [
   },
   {
     id: 11,
-    slug: "10-distillation",
+    slug: "11-distillation",
     title: "Distillation",
     subtitle: "Big model teaches small model",
     prerequisites: [10],
@@ -115,16 +116,16 @@ export const chapters: Chapter[] = [
   },
   {
     id: 12,
-    slug: "11-mixture-of-experts",
+    slug: "12-mixture-of-experts",
     title: "Mixture of Experts",
     subtitle: "Not every neuron fires for every thought",
-    prerequisites: [8],
+    prerequisites: [7],
     description:
       "A router sends each question to specialist sub-networks. A trillion parameters, but only a fraction active per question. Smarter without getting slower.",
   },
   {
     id: 13,
-    slug: "12-thinking-step-by-step",
+    slug: "13-thinking-step-by-step",
     title: "Thinking Step by Step",
     subtitle: "How AI learned to reason",
     prerequisites: [9],
@@ -133,7 +134,7 @@ export const chapters: Chapter[] = [
   },
   {
     id: 14,
-    slug: "13-scaling-emergence",
+    slug: "14-scaling-emergence",
     title: "Scaling and Emergence",
     subtitle: "Bigger models, surprising abilities",
     prerequisites: [10],
@@ -142,7 +143,7 @@ export const chapters: Chapter[] = [
   },
   {
     id: 15,
-    slug: "14-alignment",
+    slug: "15-alignment",
     title: "Teaching AI Right from Wrong",
     subtitle: "RLHF, Goodhart's Law, and the alignment problem",
     prerequisites: [9],
@@ -151,10 +152,10 @@ export const chapters: Chapter[] = [
   },
   {
     id: 16,
-    slug: "15-image-generation",
+    slug: "16-image-generation",
     title: "Creating Images from Noise",
     subtitle: "Diffusion models and latent space",
-    prerequisites: [6, 7],
+    prerequisites: [5, 6],
     description:
       "Pixel-by-pixel generation fails. Diffusion models start with pure noise and denoise. Latent space is a map of all possible images.",
   },
