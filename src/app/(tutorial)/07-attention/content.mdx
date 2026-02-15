@@ -1,0 +1,146 @@
+# Attention
+
+<Lead>
+In the last chapter, we saw that predicting the next word requires understanding — but our models could only look at a fixed window of recent words. What if the model could *choose* which earlier words to focus on? That idea, called attention, is the breakthrough that makes modern AI work. And it's built entirely from things you already know.
+</Lead>
+
+## The Cocktail Party
+
+Imagine you're at a crowded party. Dozens of people are talking at once — a wall of sound. But then someone across the room says your name, and suddenly your brain snaps to attention. You weren't processing all those conversations equally. You were *attending* to what's relevant and filtering out the rest.
+
+Your brain is constantly doing this: choosing what to focus on, based on what matters right now. When you read the sentence "The dog chased the ball because **it** was round," your brain automatically knows "it" refers to "the ball" — not "the dog." You attend to "ball" because that's the word that helps you understand "it" in this context.
+
+Our next-word predictor needs to do the same thing. Instead of blindly looking at the last few words, it needs to *choose* which earlier words to pay attention to. Let's build up this idea step by step.
+
+## A Toy Problem: Pattern Attention
+
+Before tackling language, let's see attention work on something simpler. Below are sequences of colored shapes. The model needs to predict the next shape's color. Here's the twist: the answer always depends on the symbol at a *specific position* — not the most recent one.
+
+<PatternAttentionWidget />
+
+<TryIt>
+Click "New Sequence" several times. Watch the attention weights — the glowing lines show which earlier symbols the model is looking at. Can you figure out the rule? Look at which position always gets the most attention. The model learned to *ignore* the recent symbols and focus on the one that matters!
+</TryIt>
+
+The key insight: the model doesn't look at everything equally. It learned to **attend** to the position that contains the answer, and ignore the rest. The attention weights tell us *where the model is looking*.
+
+But this toy example used fixed positions. In language, the relevant word isn't always at position 2 — it could be anywhere. "It" might refer to a word 3 positions back, or 30 positions back. We need attention based on *meaning*, not position.
+
+## Queries and Keys: A Library Analogy
+
+Imagine you walk into a library with a question: "I need a book about cooking." Every book has a label on its spine: "French cuisine," "quantum physics," "gardening," "Thai cooking."
+
+What do you do? You compare your question to each label. "Cooking" vs. "French cuisine" — close match! "Cooking" vs. "quantum physics" — not a match. "Cooking" vs. "Thai cooking" — great match!
+
+Attention works the same way:
+
+- Each word produces a **query**: "What am I looking for?" (your question in the library)
+- Each word produces a **key**: "What information do I have?" (the book's spine label)
+- The **dot product** of the query and key measures relevance — we know dot products from Chapter 5! High dot product = "this word is relevant to me."
+
+So when the word "it" in "The dog chased the ball because it was round" generates its query, it's essentially asking "What noun am I referring to?" Each earlier word has a key advertising what it is. The dot product between "it"'s query and "ball"'s key is high, because they're a good match.
+
+## Values: What You Actually Read
+
+Here's a subtlety. The book's spine label isn't the book's content. A book labeled "French cuisine" actually *contains* recipes, techniques, and history. You use the label to *find* the right book, but what you take away is the *content*.
+
+Similarly, what a word *advertises* (its key) isn't the same as what it *contributes* (its value). So each word actually plays three roles:
+
+- **Query (Q)**: "What am I looking for?"
+- **Key (K)**: "What do I offer?"
+- **Value (V)**: "What do I give when asked?"
+
+The query and key determine *how much* attention to pay. The value is *what information* gets passed along. Let's see this in action:
+
+<AttentionStepThroughWidget />
+
+<TryIt>
+Step through the attention computation one stage at a time. Watch how the target word's query gets compared to every key via dot products, then softmax turns the scores into percentages, and finally the values get blended together weighted by those percentages. Try both example sentences.
+</TryIt>
+
+You might have noticed a new operation in step 4: **softmax**. All it does is turn a list of numbers into percentages that add up to 100%. The biggest score gets the lion's share, and the small scores shrink to nearly nothing — like a competition where the winner takes most of the prize. This ensures the model concentrates its attention rather than spreading it evenly.
+
+<KeyInsight>
+Attention is just three steps we already understand: (1) make queries and keys from embeddings using learned weight matrices, (2) measure relevance with dot products (Chapter 5), and (3) take a weighted average of values. **No new math — just a clever wiring of familiar pieces.**
+</KeyInsight>
+
+## Multiple Heads: Looking for Different Things
+
+When you read "The cat sat on the mat because it was tired," you need to answer several questions at once:
+
+- **What does "it" refer to?** → The cat (meaning)
+- **What's the grammar?** → "it was" — "was" needs to agree with "it" (grammar)
+- **What's the subject of the sentence?** → The cat sat (structure)
+
+One set of Q/K/V weights can only ask one kind of question. So transformers use **multiple attention heads** — each with its own Q, K, and V weights, each learning to look for different kinds of relationships.
+
+<MultiHeadWidget />
+
+<TryIt>
+Look at how each head focuses on different things. Head 1 attends to nearby words (grammar). Head 2 finds what "it" refers to — it lights up on "cat"! Head 3 connects subjects to their verbs. Toggle heads on and off to see each one's pattern in isolation.
+</TryIt>
+
+Each head is a specialist. One head might learn to track pronoun references. Another tracks subject-verb agreement. Another looks for adjective-noun pairs. They all run in parallel, and their outputs get combined. This is why attention is so powerful — it can capture many different kinds of relationships simultaneously.
+
+## Attention Is Order-Blind
+
+Now here's something that might surprise you. Let's take a sentence and scramble the word order:
+
+<PositionScrambleWidget />
+
+<TryIt>
+Click "Scramble!" and look at the attention heatmap. The scores between words don't change! "Cat" and "dog" have the same attention score regardless of their positions. Try scrambling multiple times — the matrix values stay identical. This is a real problem.
+</TryIt>
+
+Wait — the attention scores are *exactly the same* whether the sentence is "The cat chased the dog" or "dog the chased cat The"? That can't be right. Those sentences mean completely different things!
+
+The problem is that attention only looks at embeddings, and embeddings don't encode position. The word "cat" has the same embedding whether it's the first word or the last word. Attention has no idea *where* words are in the sentence — it only knows *what* they are.
+
+We need to give the model information about word order. But how?
+
+## Why Simple Fixes Don't Work
+
+**First idea: add the position number to each embedding.** Just add 1 to the first word's embedding, 2 to the second, and so on. Problem: what happens at position 10,001, a position the model never saw during training? And position 50 means something different in a 60-word sentence versus a 200-word sentence, but they'd get the same encoding.
+
+**Second idea: encode the distance between word pairs directly.** The problem is that attention computes Q·K dot products for every pair of words. To include distance, we'd need to modify each dot product differently depending on which pair we're looking at. That's expensive and complicated.
+
+What we really want is for the dot product to *automatically* capture how far apart two words are, without adding anything extra to the computation.
+
+## The Rotation Trick
+
+Here's the clever insight — a callback to Chapter 5 on matrix transformations.
+
+Instead of *adding* a position number to each embedding, we **rotate** each word's embedding by an angle that depends on its position. Word at position 1 gets rotated a little. Word at position 5 gets rotated more. Word at position 100 gets rotated a lot more.
+
+Why does this work? Remember from Chapter 5 that the dot product of two vectors depends on the angle between them. When we rotate two vectors by different amounts, the dot product depends on the *difference* in their rotation angles — which is exactly the *relative distance* between the words!
+
+Two words that are 3 positions apart always have the same angular difference, whether they're at positions 1 & 4, or positions 50 & 53. The dot product automatically captures relative distance.
+
+<RotationPositionWidget />
+
+<TryIt>
+Move the position sliders around. Keep the gap the same (say, 3) but change the absolute positions — the dot product stays the same! Now change the gap — the dot product changes. Click "Same gap, different positions" to see this clearly. The rotation trick encodes relative position into the dot product for free.
+</TryIt>
+
+Think of it like a merry-go-round. You and a friend are both riding it. No matter where the merry-go-round is in its spin, you can always tell how far apart you are by looking across. Your *relative* position is what matters, and it's encoded in the angle between you.
+
+<KeyInsight>
+By rotating embeddings based on position, the dot product automatically captures *relative distance* between words. The model doesn't need to know "I'm at position 5" — it naturally learns that "3 positions apart" always looks the same in the attention scores. **No extra computation needed — the math just works out.**
+</KeyInsight>
+
+This technique is called **Rotary Position Encoding (RoPE)**, and it's used in most modern language models including Llama and many others. It's elegant because it adds no parameters, works for any sequence length, and the relative position information shows up exactly where we need it — in the dot products that attention already computes.
+
+## What We've Built
+
+Let's take stock. Attention is:
+
+1. **Query, Key, Value** — Each word gets three representations, learned from embeddings
+2. **Dot products** — Measure how relevant each word is to each other word
+3. **Softmax** — Turn relevance scores into percentages
+4. **Weighted sum** — Blend values according to attention percentages
+5. **Multiple heads** — Run several attention patterns in parallel
+6. **Rotary positions** — Rotate embeddings so dot products automatically capture word distance
+
+Every piece is something we already understood from earlier chapters. Attention is just a clever *wiring* of familiar operations.
+
+In the next chapter, we'll wire attention together with feed-forward neural networks to build the **transformer** — the architecture behind ChatGPT, Claude, and every modern language model. And we'll see what happens when you train it to do that simple task from Chapter 6: predict the next word.

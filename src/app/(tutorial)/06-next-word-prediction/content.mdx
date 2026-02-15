@@ -1,0 +1,99 @@
+# Predicting the Next Word
+
+<Lead>
+Here's a strange claim: if a machine can accurately predict the next word in a sentence, it must *understand* the sentence. That sounds wrong — prediction seems too simple to require understanding. But by the end of this chapter, you'll see why it's true, and why this one idea is the foundation of modern AI.
+</Lead>
+
+## The Game
+
+Let's start with a game. I'll show you the beginning of a sentence, and you try to guess the next word. Ready?
+
+<NextWordGameWidget />
+
+<TryIt>
+Play through all the sentences. Some are easy, some are tricky. Pay attention to *what you needed to know* to guess correctly — grammar? Facts about the world? Common sense? Emotions?
+</TryIt>
+
+Notice what just happened. To predict the next word of "The capital of France is ___," you needed to *know* that the capital of France is Paris. To predict what someone did after opening a letter, you needed to understand *human emotions*. To predict "two plus two equals ___," you needed *arithmetic*.
+
+<KeyInsight>
+Predicting the next word isn't a simple trick — it requires grammar, facts, common sense, even emotional understanding. The better you predict, the more you must understand. **Prediction IS understanding.**
+</KeyInsight>
+
+This is what we're going to teach a computer to do. And it turns out this single task — predict the next word — is the key to building AI systems that can write, reason, and hold conversations.
+
+## The Simplest Approach: Count What Comes Next
+
+How would *you* build a next-word predictor? Here's the most obvious strategy: read a huge pile of English text, and for every word, count what word usually follows it.
+
+The word "of" is almost always followed by "the" (about 33% of the time). The word "he" is usually followed by "was." The word "she" by "was." You get the idea.
+
+This is called a **bigram model** — it predicts the next word based on just the *one* previous word. It's a giant lookup table: for each word, store a list of what typically follows it, ranked by frequency.
+
+<BigramExplorerWidget />
+
+<TryIt>
+**Explore mode**: Pick a starting word like "he" or "she," then click the predictions to build a sentence one word at a time. You're doing exactly what the bigram model does — picking the next word based only on the current one. Notice how "of" → "the" is a very strong prediction (33%!), while other words have more spread-out options. After a few clicks, read your sentence back — each pair of words sounds fine, but the whole thing is nonsense!
+
+**Generate mode**: Pick a starting word and hit Generate to watch the model build sentences automatically. Try the temperature slider: low temperature always picks the top prediction (safe but repetitive), high temperature picks more randomly (wilder). Watch 30 words appear — same result as doing it by hand, just faster.
+</TryIt>
+
+Each individual prediction is reasonable — "of the," "he was," "it is" all sound right. But string them together and you get a random walk through common word pairs. The model has no memory beyond one word. "The cat sat on" means nothing to it — all it sees is "on."
+
+How does the model choose between its options? It uses the frequencies as *probabilities*. If "the" follows "of" 33% of the time, the model has a 33% chance of picking it. This randomness is controlled by **temperature**: at low temperature, the model almost always picks the single most likely word. At high temperature, it picks more evenly from all options. We'll see temperature again when we get to real language models.
+
+## The N-gram Wall
+
+You can probably see where this is going. What about *trigrams* (3 words of context)? 4-grams? 10-grams? More context should help, right?
+
+It does — but we hit a wall. The same wall we saw back in Chapter 1 with the lookup table explosion.
+
+<NgramExplosionWidget />
+
+<TryIt>
+Start with bigrams (context size 2) and a small vocabulary. Increase the context size and watch the combinations explode. By the time you reach 5-grams with a realistic vocabulary, you need more entries than there are words on the entire internet. At 10-grams, you've blown past the atoms in the universe.
+</TryIt>
+
+Here's the problem: a 10-gram model needs to have seen every possible sequence of 10 words to make good predictions. But with a vocabulary of 50,000 words, there are 50,000^10 possible 10-word sequences. That's a number with 47 digits. There aren't enough books, websites, or documents in the world to cover even a tiny fraction of those combinations.
+
+Most 10-word sequences the model encounters will be ones it has *never seen before*. It can't predict what comes after "The curious elephant carefully examined the ancient" if it's never seen that exact sequence in its training data.
+
+We need a model that can **generalize** — that can make reasonable predictions for word combinations it's never encountered. Sound familiar? This is exactly the problem we solved with neural networks in Chapter 3, and embeddings in Chapter 4.
+
+## Neural Networks to the Rescue
+
+Here's the idea: instead of a lookup table, use a neural network. Feed it the *embedding* of the previous word (from Chapter 4), pass it through some layers, and have it output a prediction for the next word.
+
+Why would this work? Because embeddings capture *meaning*. "Cat" and "dog" have similar embeddings because they appear in similar contexts. So a neural network that learns "The cat ___" → "sat" will automatically generalize to "The dog ___" → "sat" — because the inputs look almost the same!
+
+The network doesn't need to have seen every possible word — it just needs to learn patterns over the *continuous space* of embeddings.
+
+<SimpleNNPredictorWidget />
+
+<TryIt>
+Compare predictions for similar words like "cat" and "dog," or "king" and "queen." Notice how similar words get similar predictions — the model generalizes through embeddings! Then compare very different words like "cat" and "president." Different meanings, different predictions.
+</TryIt>
+
+<KeyInsight>
+Neural networks + embeddings solve the lookup table problem. Instead of memorizing every possible word sequence, the network learns patterns over *meanings*. Similar words produce similar predictions automatically, because they have similar embeddings.
+</KeyInsight>
+
+## More Context, Same Problem
+
+Our neural network predictor works well with one word of context. What about more? We could concatenate the embeddings of the last 2, 3, or 5 words and feed them all into the network. More context = better predictions.
+
+But this approach has serious limitations:
+
+**Fixed window size.** We have to decide in advance how many previous words to look at. Looking at the last 5 words? Great — but what about sentence 6 words back that completely changes the meaning? "The doctor told the patient that **she** would recover" — "she" refers to "patient" (4 words back) or "doctor" (6 words back), and we might need *both* to understand.
+
+**Position slots.** When we concatenate 3 embeddings, position matters. The network has separate weights for "word at position 1," "word at position 2," and "word at position 3." So "the big dog" and "a big dog" look quite different to the model — "the" and "a" activate completely different weights because they're in different slots, even though the sentences mean almost the same thing.
+
+**Size explosion.** Longer windows mean more input dimensions, which means more parameters, which means harder training. A window of 10 words with 300-dimensional embeddings gives 3,000 input features. That's manageable, but we'd really like to look at hundreds of words for context.
+
+We need something fundamentally different. Not a fixed window. Not a lookup table. Something that can *dynamically choose* which earlier words matter, based on what it's trying to predict.
+
+## What's Next
+
+What if the network could *choose* which earlier words to pay attention to? Instead of blindly concatenating the last 5 words, what if it could look at every word that came before and decide: "For predicting *this* word, I need to focus on *that* word three sentences ago, and *that* word right before me, and ignore everything else"?
+
+That's the idea behind **attention** — and it changed everything. In the next chapter, we'll see how it works, built from pieces you already know: embeddings, dot products, and neural networks.
