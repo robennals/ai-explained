@@ -9,6 +9,7 @@ import {
   WordPairSpectrumWidget,
   EmbeddingLayerDiagramWidget,
   EmbeddingClassifierWidget,
+  TokenizationPlaygroundWidget,
 } from "./widgets";
 
 export const metadata = {
@@ -32,6 +33,7 @@ export default function Chapter04() {
             WordPairSpectrumWidget,
             EmbeddingLayerDiagramWidget,
             EmbeddingClassifierWidget,
+            TokenizationPlaygroundWidget,
           }}
         />
       </div>
