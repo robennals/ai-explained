@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# large data files (downloaded on demand by notebooks/scripts)
+notebooks/glove.*
