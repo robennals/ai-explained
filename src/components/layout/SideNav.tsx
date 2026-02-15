@@ -16,6 +16,23 @@ export function SideNav() {
         {chapters.map((ch) => {
           const href = `/${ch.slug}`;
           const isActive = pathname === href;
+
+          if (!ch.ready) {
+            return (
+              <li key={ch.id}>
+                <div className="flex items-start gap-3 rounded-lg px-3 py-2 text-sm text-muted/50 cursor-default">
+                  <span className="mt-0.5 shrink-0 w-5 text-right font-mono text-xs">
+                    {ch.id}
+                  </span>
+                  <div className="leading-snug">
+                    <span>{ch.title}</span>
+                    <span className="block text-[10px] uppercase tracking-wide mt-0.5">Coming soon</span>
+                  </div>
+                </div>
+              </li>
+            );
+          }
+
           return (
             <li key={ch.id}>
               <Link

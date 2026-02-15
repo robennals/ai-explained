@@ -110,27 +110,63 @@ This is why unlabeled dimensions are so powerful. Even though no dimension is la
 In a well-trained embedding, directions carry meaning. The direction from small to large, from young to old, from simple to complex — these all exist as paths through the space. This structure emerges from training on text, with no human labeling.
 </KeyInsight>
 
+
+## From Words to Tokens (Subwords)
+
+Real language models usually do **not** treat each full word as one unit.
+Instead, they usually break text into **tokens**.
+
+A token can be:
+- a whole word (`cat`)
+- part of a word (`-ing`)
+- punctuation and other symbols (`!`)
+
+Why break words into parts?
+
+Because language has way too many possible words. 
+People invent new words, spell things differently, and use rare words all the time. If we tried to create an embedding for every possible word then the data set would get impractically large, and rare words wouldn't have been seen enough times for the embedding to know what they meant.
+
+Take for example the word `treeishness`. You've probably never seen that word before, but you have a pretty good idea what it means because you can break it down into `tree`, `-ish`, and `-ness`.
+
+Modern language models use tokenizers that solve the problem the same way. The most common words get their own token, but others get assembled out of smaller parts. Try it out below.
+
+<TokenizationPlaygroundWidget />
+
+<TryIt>
+Click "superman, superb, superlative" and look for repeated chunks.
+Then try a made-up word like "qwertyflorp" and see how it still gets broken into smaller known parts.
+Try punctuation too (`!`, `,`, `?`) and notice those are tokens as well.
+</TryIt>
+
+
+
 ## Where Do Embeddings Come From?
 
-Two key ideas drive how embeddings are created:
+We've seen that embeddings are lists of numbers that capture meaning. But how does a neural network get those numbers in the first place?
 
-**Learned from context.** Systems like Word2Vec and GloVe are trained on the principle that "a word is known by the company it keeps." Words that appear near the same other words get similar vectors. "Dog" and "cat" both appear near "pet", "fur", "veterinarian" — so they end up close together in the embedding.
+**Learning from context.** Some embeddings (like the GloVe ones we explored above) are trained by reading huge amounts of text and noticing which words keep showing up together. "Dog" and "cat" both appear near words like "pet", "fur", and "veterinarian" — so they end up close together in the embedding. The system figures out that words used in similar sentences probably mean similar things.
 
-**Learned for a task.** Inside a neural network, an embedding layer is simply a lookup table — a big grid of numbers with one row per word and one column per dimension. To get the embedding for a word, you look up its row. The matrix starts random and is shaped by backpropagation, just like any other set of weights. The network learns whatever representation helps it perform its task.
+**Learning as part of a network.** In modern language models, the embedding is actually the very first layer of the neural network — the layer that takes in tokens and produces numbers for the rest of the network to work with. It looks like the network diagrams from the previous chapter: a layer of input nodes connected by weights to a layer of output nodes, which then feed into more layers.
 
-Modern language models use much higher dimensions than our 50-dimensional GloVe example: GPT-2 uses 768 dimensions, GPT-3 uses 12,288 dimensions. And they embed not individual words but *tokens* — subword pieces that let the model handle any text, including words it has never seen before.
+But there's a trick for how the input works. The network has one input node for every possible token. When a token comes in, the network sets that token's input to 1 and every other input to 0. This is called **one-hot encoding** — it's like raising your hand in a crowd: only one hand goes up, and that tells everyone which person you are.
+
+Remember from the previous chapter that each connection between neurons carries a **weight**. Since only one input is "on" (set to 1) and all the others are "off" (set to 0), the outputs just equal the weights coming from that one active input. Those weights *are* the embedding. During training, we learn the embedding through gradient descent, just like we learn any other weights.
+
+Modern language models use much bigger embeddings than our 50-dimensional GloVe example: GPT-2 uses 768 dimensions, GPT-3 uses 12,288 dimensions.
 
 <EmbeddingLayerDiagramWidget />
 
 <TryIt>
-Click different words and watch the highlighted row change. Toggle between "Before training" (random numbers) and "After training" (structured vectors from a real embedding). Before training, the vectors are meaningless noise. After training, similar words have similar patterns. The network learned this structure by adjusting the numbers to be useful for its task.
+Select different tokens from the dropdown. Notice how the selected token's input lights up with a 1, and all the others show 0 — that's one-hot encoding. The bright lines show the weights connecting that token to the embedding layer, and those weights become the embedding values on the right. The embedding then feeds into more layers of neurons — the rest of the network. Try selecting "dog" then "cat" — their embedding values look more similar to each other than to "car".
 </TryIt>
+
+
+
 
 ## Beyond Words
 
-Embeddings are one of the most powerful ideas in modern AI. The pattern — take something discrete, map it to a point in continuous space, let training shape the geometry — applies far beyond words:
+Embeddings are one of the most powerful ideas in modern AI. The pattern — take something discrete, map it to a point in continuous space, let training shape the geometry — applies far beyond words and tokens:
 
-- **Tokens** (subword pieces) in language models like GPT
 - **Image patches** in vision models
 - **Audio frames** in speech recognition
 - **Users and products** in recommendation systems
