@@ -1,0 +1,298 @@
+# PyTorch from Scratch
+
+<Lead>
+Every chapter in this tutorial has an optional "Try it in PyTorch" section at the bottom. This appendix gets you set up so you can actually run that code — and teaches you enough PyTorch to understand what it's doing.
+</Lead>
+
+## What Is PyTorch?
+
+PyTorch is the most popular framework for building AI. It's what researchers at OpenAI, Meta, Google DeepMind, and most universities use to train neural networks. If you read an AI paper, the code is almost certainly PyTorch.
+
+At its core, PyTorch does two things:
+
+1. **Tensor math** — fast operations on big arrays of numbers, running on your GPU if you have one
+2. **Automatic differentiation** — it tracks every operation you do, so it can automatically compute gradients for training
+
+That's it. Everything else — neural network layers, optimizers, data loaders — is built on top of those two primitives.
+
+## Google Colab: The Easy Way
+
+You don't need to install anything on your own machine. **Google Colab** gives you a free Python environment in your browser with PyTorch already installed. It even gives you access to a GPU.
+
+Every "Try it in PyTorch" section in this tutorial links directly to a Colab notebook. You click the link, and you're running code — no setup, no installation, no fighting with Python environments.
+
+To use Colab:
+
+1. Click any "Open in Google Colab" button in this tutorial
+2. Sign in with a Google account (free)
+3. Click a code cell and press Shift+Enter to run it
+4. The notebook runs on Google's servers — your computer just shows the results
+
+Colab is genuinely the easiest way to get started. If you just want to run the tutorial notebooks, you can skip the rest of this section entirely.
+
+## Installing PyTorch Locally
+
+If you want PyTorch on your own machine — maybe you want to experiment beyond the notebooks, or you prefer working in your own editor — here's how.
+
+First, you need Python (3.9 or newer). Then install PyTorch with pip:
+
+```bash
+pip install torch
+```
+
+Verify it worked:
+
+```python
+import torch
+print(torch.__version__)  # e.g. "2.5.1"
+```
+
+That's the CPU-only version, which is fine for everything in this tutorial. But PyTorch can also use your GPU to run tensor math much faster:
+
+- **NVIDIA GPUs** — PyTorch supports CUDA acceleration. See the [official install guide](https://pytorch.org/get-started/locally/) for CUDA-specific instructions.
+- **Apple Silicon Macs** — If you have an M1/M2/M3/M4 Mac, PyTorch can use the GPU via Apple's **MPS** (Metal Performance Shaders) backend. It works out of the box with the standard `pip install torch` — no extra setup needed. Move tensors to the GPU with `x.to("mps")`.
+
+## Tensors
+
+A **tensor** is PyTorch's word for "array of numbers." If you've used NumPy, a tensor is essentially the same thing as an `ndarray` — but tensors can run on GPUs and track gradients.
+
+### Creating Tensors
+
+```python
+import torch
+
+# From a Python list
+x = torch.tensor([1.0, 2.0, 3.0])
+
+# A 2x3 matrix
+m = torch.tensor([[1.0, 2.0, 3.0],
+                   [4.0, 5.0, 6.0]])
+
+# Zeros, ones, random
+z = torch.zeros(3, 4)       # 3x4 matrix of zeros
+o = torch.ones(2, 2)        # 2x2 matrix of ones
+r = torch.randn(5, 3)       # 5x3 matrix of random numbers (normal distribution)
+```
+
+### Shape and Dtype
+
+Every tensor has a **shape** (its dimensions) and a **dtype** (the type of number it stores):
+
+```python
+x = torch.randn(3, 4)
+print(x.shape)   # torch.Size([3, 4])
+print(x.dtype)   # torch.float32
+```
+
+Shape matters a lot. A common source of bugs is tensors with the wrong shape. When something goes wrong, `print(x.shape)` is usually your first debugging move.
+
+### Basic Math
+
+Tensor math works element-wise by default:
+
+```python
+a = torch.tensor([1.0, 2.0, 3.0])
+b = torch.tensor([4.0, 5.0, 6.0])
+
+a + b       # tensor([5., 7., 9.])
+a * b       # tensor([4., 10., 18.])
+a ** 2      # tensor([1., 4., 9.])
+```
+
+For matrix multiplication (the workhorse of neural networks — see [Chapter 5](/05-matrix-math)), use `@`:
+
+```python
+# Matrix multiply: (2x3) @ (3x4) -> (2x4)
+A = torch.randn(2, 3)
+B = torch.randn(3, 4)
+C = A @ B
+print(C.shape)  # torch.Size([2, 4])
+```
+
+## Automatic Differentiation
+
+This is PyTorch's killer feature. Training a neural network requires computing **gradients** — how much each parameter should change to reduce the error (see [Chapter 2](/02-optimization)). Computing gradients by hand for millions of parameters would be impossible. PyTorch does it automatically.
+
+Tell PyTorch to track a tensor by setting `requires_grad=True`:
+
+```python
+x = torch.tensor(3.0, requires_grad=True)
+
+# Do some math
+y = x ** 2 + 2 * x + 1  # y = x² + 2x + 1
+
+# Compute gradients
+y.backward()
+
+# dy/dx = 2x + 2 = 2(3) + 2 = 8
+print(x.grad)  # tensor(8.)
+```
+
+`y.backward()` walks backward through every operation that produced `y`, computing how much `y` changes when each input changes. This is called **backpropagation**, and it's how neural networks learn.
+
+You almost never call `.backward()` directly — PyTorch's optimizers handle it. But understanding that it exists, and that it works by tracking operations, helps you debug when things go wrong.
+
+## Building a Neural Network
+
+PyTorch provides `torch.nn` — a library of common neural network building blocks.
+
+### nn.Linear
+
+The most fundamental layer. It computes `y = x @ W.T + b` — a matrix multiplication plus a bias (see [Chapter 3](/03-neurons) and [Chapter 5](/05-matrix-math)):
+
+```python
+import torch.nn as nn
+
+layer = nn.Linear(in_features=3, out_features=2)
+x = torch.randn(1, 3)      # one input with 3 features
+y = layer(x)                # output has 2 features
+print(y.shape)              # torch.Size([1, 2])
+```
+
+### nn.Sequential
+
+Stack layers together into a network:
+
+```python
+model = nn.Sequential(
+    nn.Linear(2, 16),   # 2 inputs -> 16 hidden neurons
+    nn.ReLU(),           # activation function (Chapter 3)
+    nn.Linear(16, 16),  # 16 -> 16
+    nn.ReLU(),
+    nn.Linear(16, 1),   # 16 -> 1 output
+)
+```
+
+This is a three-layer neural network. The `ReLU` activations between layers are crucial — without them, stacking linear layers would just give you another linear layer ([Chapter 3](/03-neurons) explains why).
+
+### Custom Modules
+
+For more control, subclass `nn.Module`:
+
+```python
+class MyNetwork(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.hidden = nn.Linear(2, 16)
+        self.output = nn.Linear(16, 1)
+
+    def forward(self, x):
+        x = torch.relu(self.hidden(x))
+        x = self.output(x)
+        return x
+
+model = MyNetwork()
+```
+
+The `forward` method defines how data flows through the network. PyTorch calls it when you do `model(x)`.
+
+## The Training Loop
+
+Training a neural network follows the same pattern every time:
+
+```python
+model = nn.Sequential(
+    nn.Linear(2, 16), nn.ReLU(),
+    nn.Linear(16, 1),
+)
+
+loss_fn = nn.MSELoss()                        # mean squared error
+optimizer = torch.optim.SGD(model.parameters(), lr=0.01)  # stochastic gradient descent
+
+for epoch in range(1000):
+    predictions = model(inputs)               # 1. Forward pass
+    loss = loss_fn(predictions, targets)       # 2. Compute loss
+    optimizer.zero_grad()                      # 3. Clear old gradients
+    loss.backward()                            # 4. Compute new gradients
+    optimizer.step()                           # 5. Update parameters
+```
+
+Five lines, repeated thousands of times. That's the core of how every neural network is trained — from a toy example to GPT-4. The model, loss function, and optimizer change, but the loop stays the same.
+
+Let's break it down:
+
+1. **Forward pass** — run inputs through the model to get predictions
+2. **Compute loss** — measure how wrong the predictions are (see [Chapter 2](/02-optimization))
+3. **Zero gradients** — clear gradients from the previous step (PyTorch accumulates them by default)
+4. **Backward pass** — compute how much each parameter contributed to the error
+5. **Update parameters** — nudge each parameter in the direction that reduces the error
+
+## Putting It Together: Learning XOR
+
+Let's train a network to learn XOR — a problem that a single neuron can't solve (see [Chapter 3](/03-neurons)) but a two-layer network can.
+
+XOR returns 1 when its inputs differ, and 0 when they're the same:
+
+<table>
+  <thead>
+    <tr><th>Input A</th><th>Input B</th><th>Output</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>0</td><td>0</td><td>0</td></tr>
+    <tr><td>0</td><td>1</td><td>1</td></tr>
+    <tr><td>1</td><td>0</td><td>1</td></tr>
+    <tr><td>1</td><td>1</td><td>0</td></tr>
+  </tbody>
+</table>
+
+Here's the complete code:
+
+```python
+import torch
+import torch.nn as nn
+
+# Training data
+inputs = torch.tensor([[0., 0.], [0., 1.], [1., 0.], [1., 1.]])
+targets = torch.tensor([[0.], [1.], [1.], [0.]])
+
+# Model: 2 inputs -> 8 hidden neurons -> 1 output
+model = nn.Sequential(
+    nn.Linear(2, 8),
+    nn.ReLU(),
+    nn.Linear(8, 1),
+    nn.Sigmoid(),       # squash output to 0-1
+)
+
+loss_fn = nn.BCELoss()  # binary cross-entropy for 0/1 classification
+optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
+
+# Train
+for epoch in range(2000):
+    predictions = model(inputs)
+    loss = loss_fn(predictions, targets)
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
+
+    if epoch % 500 == 0:
+        print(f"Epoch {epoch}: loss = {loss.item():.4f}")
+
+# Test
+with torch.no_grad():
+    results = model(inputs)
+    print("\nResults:")
+    for inp, out in zip(inputs, results):
+        print(f"  {inp.tolist()} -> {out.item():.3f}")
+```
+
+Run this and you'll see the loss drop over time, and the final outputs will be close to `[0, 1, 1, 0]` — the network learned XOR.
+
+A few things to notice:
+
+- **`nn.Sigmoid()`** squashes the output to the 0–1 range, which is what we want for a yes/no answer
+- **`nn.BCELoss()`** (binary cross-entropy) is the right loss function for binary classification
+- **`torch.no_grad()`** tells PyTorch not to track gradients during testing — saves memory and speeds things up
+- **`Adam`** instead of `SGD` — Adam is a smarter optimizer that adapts its learning rate per-parameter. It usually works better out of the box
+
+## Where to Go Next
+
+You now know enough PyTorch to follow every notebook in this tutorial. Here's where to go from here:
+
+- **Run the chapter notebooks** — each chapter has a "Try it in PyTorch" section with a link to a Colab notebook
+- **[PyTorch official tutorials](https://pytorch.org/tutorials/)** — well-written guides for going deeper
+- **[PyTorch documentation](https://pytorch.org/docs/stable/)** — the reference for every function and module
+- **Experiment** — change the XOR example above. Try different hidden sizes, learning rates, or optimizers. Break things. That's how you learn.
+
+<TryItInPyTorch notebook="appendix-pytorch">
+All the code from this appendix in a single runnable notebook. Create tensors, compute gradients, build a neural network, and train it to learn XOR — all in Google Colab, no setup required.
+</TryItInPyTorch>

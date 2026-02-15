@@ -1,7 +1,10 @@
 import Link from "next/link";
-import { chapters } from "@/lib/curriculum";
+import { getMainChapters, getAppendixChapters, getAppendixLabel } from "@/lib/curriculum";
 
 export default function HomePage() {
+  const mainChapters = getMainChapters();
+  const appendixChapters = getAppendixChapters();
+
   return (
     <main className="mx-auto max-w-4xl px-6 py-16">
       <div className="mb-16 text-center">
@@ -37,7 +40,7 @@ export default function HomePage() {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        {chapters.map((ch) =>
+        {mainChapters.map((ch) =>
           ch.ready ? (
             <Link
               key={ch.id}
@@ -79,6 +82,58 @@ export default function HomePage() {
           )
         )}
       </div>
+
+      {appendixChapters.length > 0 && (
+        <>
+          <h2 className="mt-16 mb-4 text-xl font-bold text-foreground">
+            Appendixes
+          </h2>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {appendixChapters.map((ch) => {
+              const label = getAppendixLabel(ch);
+              return ch.ready ? (
+                <Link
+                  key={ch.id}
+                  href={`/${ch.slug}`}
+                  className="group rounded-xl border border-border bg-white p-5 shadow-sm transition-all hover:border-accent/30 hover:shadow-md"
+                >
+                  <div className="flex items-start gap-3">
+                    <span className="mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-accent/10 font-mono text-xs font-bold text-accent group-hover:bg-accent/15">
+                      {label}
+                    </span>
+                    <div className="min-w-0">
+                      <h2 className="font-semibold text-foreground group-hover:text-accent-dark">
+                        {ch.title}
+                      </h2>
+                      <p className="mt-0.5 text-xs text-muted">{ch.subtitle}</p>
+                    </div>
+                  </div>
+                </Link>
+              ) : (
+                <div
+                  key={ch.id}
+                  className="rounded-xl border border-dashed border-border/70 bg-surface/50 p-5"
+                >
+                  <div className="flex items-start gap-3">
+                    <span className="mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-surface font-mono text-xs font-bold text-muted/50">
+                      {label}
+                    </span>
+                    <div className="min-w-0">
+                      <h2 className="font-semibold text-muted">
+                        {ch.title}
+                      </h2>
+                      <p className="mt-0.5 text-xs text-muted/70">{ch.subtitle}</p>
+                      <p className="mt-1.5 text-[11px] font-medium uppercase tracking-wide text-muted/50">
+                        Coming soon
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
     </main>
   );
 }

@@ -4,7 +4,8 @@ interface TryItInPyTorchProps {
 }
 
 export function TryItInPyTorch({ notebook, children }: TryItInPyTorchProps) {
-  const colabUrl = `https://colab.research.google.com/github/robennals/ai-explained/blob/main/notebooks/${notebook}.ipynb`;
+  const branch = process.env.NEXT_PUBLIC_GIT_BRANCH ?? "main";
+  const colabUrl = `https://colab.research.google.com/github/robennals/ai-explained/blob/${branch}/notebooks/${notebook}.ipynb`;
 
   return (
     <div className="my-8 rounded-xl border border-orange-500/20 bg-gradient-to-r from-orange-500/5 to-transparent p-6">
