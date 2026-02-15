@@ -62,16 +62,18 @@ We need a model that can **generalize** — that can make reasonable predictions
 
 ## Neural Networks to the Rescue
 
-Here's the idea: instead of a lookup table, use a neural network. Feed it the *embedding* of the previous word (from Chapter 4), pass it through some layers, and have it output a prediction for the next word.
+Here's the idea: instead of a lookup table, use a neural network. Feed it the *embeddings* of the previous few words (from Chapter 4), pass them through some layers, and have it output a prediction for the next word.
 
-Why would this work? Because embeddings capture *meaning*. "Cat" and "dog" have similar embeddings because they appear in similar contexts. So a neural network that learns "The cat ___" → "sat" will automatically generalize to "The dog ___" → "sat" — because the inputs look almost the same!
+Why would this work? Because embeddings capture *meaning*. "Cat" and "dog" have similar embeddings because they appear in similar contexts. So a neural network that learns "the cat ___" → "was" will automatically generalize to "the dog ___" → "was" — because the inputs look almost the same!
 
-The network doesn't need to have seen every possible word — it just needs to learn patterns over the *continuous space* of embeddings.
+The network doesn't need to have seen every possible word — it just needs to learn patterns over the *continuous space* of embeddings. Below is a real neural network we trained on 50,000 children's stories. It looks at the last 3 tokens and predicts what comes next.
 
 <SimpleNNPredictorWidget />
 
 <TryIt>
-Compare predictions for similar words like "cat" and "dog," or "king" and "queen." Notice how similar words get similar predictions — the model generalizes through embeddings! Then compare very different words like "cat" and "president." Different meanings, different predictions.
+**Explore tab**: Type text and see live predictions. Click any prediction to extend the sentence — try building a story! Notice how "once upon a" confidently predicts "time." Try different story beginnings like "the little" or "she was very."
+
+**Compare tab**: See how similar words produce similar predictions. "Cat" and "dog" both predict "was" as the top word — the model learned that animals behave similarly in stories, even though it never saw a rule saying so.
 </TryIt>
 
 <KeyInsight>
@@ -80,7 +82,7 @@ Neural networks + embeddings solve the lookup table problem. Instead of memorizi
 
 ## More Context, Same Problem
 
-Our neural network predictor works well with one word of context. What about more? We could concatenate the embeddings of the last 2, 3, or 5 words and feed them all into the network. More context = better predictions.
+Our neural network uses 3 tokens of context — a big improvement over bigrams. We could try 5, 10, or even 20 tokens. More context = better predictions.
 
 But this approach has serious limitations:
 

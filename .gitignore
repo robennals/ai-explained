@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# wrangler (R2 local state)
+.wrangler/
+
+# model files (served from R2, not git)
+public/data/next-word-model/
