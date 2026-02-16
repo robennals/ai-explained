@@ -26,15 +26,12 @@ That's the whole game. The rest is details. Let's unpack it.
 
 You might think of a text message as letters, a photo as colors, a song as sound. But inside a computer, all of them are the same thing: **lists of numbers**.
 
-**Text** is numbers. Every character has a number assigned to it (that's what Unicode is). The letter "H" is 72. The letter "e" is 101. Your text message is a sequence of numbers.
+- **Text** is numbers. Every character has a number assigned to it — the letter "H" has a number, so does "e", even the space between words. Your text message is a sequence of numbers.
+- **Images** are numbers. Every pixel is described by three numbers — how much Red, Green, and Blue light to mix. A photo is just a giant grid of these number-triplets.
+- **Colors** are numbers. Every color you've ever seen can be described by just three numbers. Adjust those three numbers, and you get a completely different color.
+- **Sound** is numbers. A microphone samples the air pressure thousands of times per second. Each sample is a number. A three-minute song is about 8 million numbers.
 
-**Images** are numbers. Every pixel is described by three numbers — how much Red, Green, and Blue light to mix. A photo is just a giant grid of these number-triplets.
-
-**Colors** are numbers. Every color you've ever seen can be described by just three numbers. Adjust those three numbers, and you get a completely different color.
-
-**Sound** is numbers. A microphone samples the air pressure thousands of times per second. Each sample is a number. A three-minute song is about 8 million numbers.
-
-Try it yourself:
+Throughout this tutorial, you'll find interactive **playgrounds** like the one below. These aren't just pictures — you can click on the tabs, type, drag sliders, and experiment. Try it yourself:
 
 <NumbersEverywhereWidget>
 In the Text tab, type your name and watch each letter turn into a number. In the Color tab, try to make your favorite color using just three sliders. In the Image tab, paint something and notice: the computer only sees numbers. In the Sound tab, click a preset like "aaah" or "eeee" and press Play — you'll hear a synthesized vowel, and see the raw numbers that represent it.
@@ -83,7 +80,7 @@ Try to match the target curve by adjusting the sliders. Pay attention to how eac
 **A model is a machine with adjustable knobs.** Different knob settings compute different functions. Finding the right function means finding the right knob settings. With just 4 knobs, hand-tuning is already frustrating. Real AI models have *billions* of knobs. We're going to need a way to tune them automatically.
 </KeyInsight>
 
-## Can a Machine Compute Anything?
+## Can One Machine Compute Everything?
 
 Before we go further, here's a question worth asking: are there limits to what functions a machine can compute?
 
@@ -97,7 +94,9 @@ Here's a thought experiment. Forget about clever math. What if we just made a gi
 
 Want image recognition? Make a table with one row for every possible image, and in each row, write what's in the image. Want translation? A row for every possible English sentence, paired with its French translation.
 
-In theory, this works! Every function over finite inputs can be represented as a lookup table. Problem solved... right?
+This might sound crazy, but think about it: **the number of possible inputs is always finite**. A 512×512 image has a fixed number of pixels, and each pixel has a fixed number of possible colors — so there's a definite, countable number of possible 512×512 images. A text message has a maximum length, and each character comes from a finite set — so there's a finite number of possible messages. Since the inputs are finite, you could — in principle — list every one and write the correct answer next to it.
+
+Problem solved... right?
 
 Let's see how big that table would need to be:
 
