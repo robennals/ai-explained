@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { Suspense } from "react";
+import { TryItProvider } from "@/components/widgets/shared/WidgetContainer";
 
 const NextWordGame = dynamic(
   () =>
@@ -35,7 +36,7 @@ const SimpleNNPredictor = dynamic(
   { ssr: false }
 );
 
-function WidgetSlot({ children }: { children: React.ReactNode }) {
+function WidgetSlot({ children, tryIt, label }: { children: React.ReactNode; tryIt?: React.ReactNode; label?: string }) {
   return (
     <Suspense
       fallback={
@@ -44,38 +45,40 @@ function WidgetSlot({ children }: { children: React.ReactNode }) {
         </div>
       }
     >
-      {children}
+      <TryItProvider content={tryIt} label={label}>
+        {children}
+      </TryItProvider>
     </Suspense>
   );
 }
 
-export function NextWordGameWidget() {
+export function NextWordGameWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children}>
       <NextWordGame />
     </WidgetSlot>
   );
 }
 
-export function BigramExplorerWidget() {
+export function BigramExplorerWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children}>
       <BigramExplorer />
     </WidgetSlot>
   );
 }
 
-export function NgramExplosionWidget() {
+export function NgramExplosionWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children} label="Explore it">
       <NgramExplosion />
     </WidgetSlot>
   );
 }
 
-export function SimpleNNPredictorWidget() {
+export function SimpleNNPredictorWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children}>
       <SimpleNNPredictor />
     </WidgetSlot>
   );

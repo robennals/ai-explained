@@ -50,11 +50,9 @@ The beautiful thing about this approach: *you don't need to understand the syste
 
 Let's feel this in action:
 
-<OptimizationGameWidget />
-
-<TryIt>
+<OptimizationGameWidget>
 Start in "Blind" mode and try to find the hidden target. All you learn from each guess is "not here" — a little ✗ appears and you have zero idea whether you're getting closer. After a dozen guesses, hit "Reveal target" and see how hopeless it was. Then switch to "With signal." Now each dot's size and color tells you how close you are, and you're constrained to small steps near your last guess. Watch how quickly you zero in. Same problem, but the incremental signal makes all the difference.
-</TryIt>
+</OptimizationGameWidget>
 
 ## Smooth Functions Can Be Optimized
 
@@ -62,11 +60,9 @@ Incremental optimization is powerful, but it only works when the function you're
 
 Think about dropping a ball on a smooth curve versus a staircase. On the curve, the ball can always feel which way is downhill and roll toward the bottom. On the staircase, each step is flat — there's no slope to follow, so the ball just sits wherever it lands. The function has a lowest point, but there's no local signal pointing toward it.
 
-<SmoothVsRuggedWidget />
-
-<TryIt>
+<SmoothVsRuggedWidget>
 Click anywhere above the landscape to drop a ball. On the smooth curve, it rolls downhill to the bottom every time — gradient descent works because there's always a slope to follow. On the step function, the ball just sits wherever it lands. Each step is flat, so there's no gradient — no local information about which direction leads to the lowest point.
-</TryIt>
+</SmoothVsRuggedWidget>
 
 <KeyInsight>
 **Smoothness is what makes optimization possible.** A smooth function gives you a signal at every point — which way is downhill. A non-smooth function (like a step function or a text string) gives you no local signal to follow.
@@ -84,11 +80,9 @@ Both representations describe the exact same function. But try to *change* it to
 
 **Sliders**: Drag the multiplier from 4.0 smoothly down to 2.0. At every intermediate value — 3.7, 3.2, 2.5 — the function is valid and you can see whether you're getting closer. Small changes produce small, predictable effects.
 
-<ModelComparisonWidget />
-
-<TryIt>
+<ModelComparisonWidget>
 Try matching the dashed target line on both sides. On the slider side, just drag — watch the line glide smoothly into place. On the text side, try editing "times four plus two" into "times 2 minus 3." Notice how most intermediate edits break the parser entirely. You can get there eventually, but there's no smooth path — just discrete jumps between valid states.
-</TryIt>
+</ModelComparisonWidget>
 
 ## The Gradient Trick
 
@@ -100,11 +94,9 @@ Think of it this way: random search is like feeling around in the dark, taking a
 
 We'll cover the full math in a later chapter. For now, just see the difference it makes:
 
-<GradientVisualizationWidget />
-
-<TryIt>
+<GradientVisualizationWidget>
 Click to set a starting point on the loss landscape (blue = low loss, white = high loss). Then run "Random walk" — it takes 50 random steps, keeping only improvements. Then run "Gradient descent" from the same point — it takes 50 steps guided by the gradient. Watch the gradient version zoom straight to the minimum while the random walk meanders. The gradient method is not smarter — it's just following better directions.
-</TryIt>
+</GradientVisualizationWidget>
 
 <KeyInsight>
 **The gradient tells you which way is downhill for every parameter simultaneously.** Random search tries directions and keeps lucky ones. Gradient descent *calculates* the best direction. With millions of parameters, this is the difference between feasible and impossible.

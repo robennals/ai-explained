@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { Suspense } from "react";
+import { TryItProvider } from "@/components/widgets/shared/WidgetContainer";
 
 const Transform1D = dynamic(
   () =>
@@ -51,7 +52,7 @@ const ActivationEffect = dynamic(
   { ssr: false }
 );
 
-function WidgetSlot({ children }: { children: React.ReactNode }) {
+function WidgetSlot({ children, tryIt, label }: { children: React.ReactNode; tryIt?: React.ReactNode; label?: string }) {
   return (
     <Suspense
       fallback={
@@ -60,54 +61,56 @@ function WidgetSlot({ children }: { children: React.ReactNode }) {
         </div>
       }
     >
-      {children}
+      <TryItProvider content={tryIt} label={label}>
+        {children}
+      </TryItProvider>
     </Suspense>
   );
 }
 
-export function Transform1DWidget() {
+export function Transform1DWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children}>
       <Transform1D />
     </WidgetSlot>
   );
 }
 
-export function Transform2DWidget() {
+export function Transform2DWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children}>
       <Transform2D />
     </WidgetSlot>
   );
 }
 
-export function BasisVectorViewWidget() {
+export function BasisVectorViewWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children} label="Explore it">
       <BasisVectorView />
     </WidgetSlot>
   );
 }
 
-export function DimensionProjectionWidget() {
+export function DimensionProjectionWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children}>
       <DimensionProjection />
     </WidgetSlot>
   );
 }
 
-export function NeuronVsMatrixWidget() {
+export function NeuronVsMatrixWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children}>
       <NeuronVsMatrix />
     </WidgetSlot>
   );
 }
 
-export function ActivationEffectWidget() {
+export function ActivationEffectWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children} label="Explore it">
       <ActivationEffect />
     </WidgetSlot>
   );

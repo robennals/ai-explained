@@ -14,11 +14,9 @@ This is something our fixed-window model from the last chapter can't do. It sees
 
 But for a human reader, this kind of selective looking-back happens constantly. Let's see just how much of language depends on it.
 
-<WhyAttentionMattersWidget />
-
-<TryIt>
+<WhyAttentionMattersWidget>
 Click the underlined words in each sentence. Notice how different words need different kinds of context: pronouns need their referents, ambiguous words need disambiguating clues, verbs need their subjects even when separated by long clauses. Flip through all five examples — each demonstrates a different reason why "looking back selectively" is essential.
-</TryIt>
+</WhyAttentionMattersWidget>
 
 Every one of these examples requires the same ability: given a word, *choose* which other words in the sentence are relevant to understanding it. Not the nearest words. Not a fixed window. The *right* words, wherever they happen to be.
 
@@ -43,11 +41,9 @@ The interesting one is **it**: its key is [0, 0] — it doesn't advertise itself
 
 To measure how well a query matches a key, we use the **dot product** from Chapter 5 — multiply corresponding numbers and add them up. A high dot product means a good match. Then we run the scores through a function called **softmax** (we'll explore how it works in the next section) that converts them into attention weights — positive numbers that add up to 100%.
 
-<ToyAttentionWidget />
-
-<TryIt>
+<ToyAttentionWidget>
 Click each token to see its attention computed step by step. Start with "it" — watch how its query [3, 0] matches the noun's key [3, 0] (dot product = 9) but not the filler's key [0, 3] (dot product = 0). Then switch sentences — the noun moves to a different position, but "it" still finds it. That's the power of content-based attention.
-</TryIt>
+</ToyAttentionWidget>
 
 Notice something crucial about **it**: its key is [0, 0] — it doesn't advertise itself as anything — but its query is [3, 0] — "I'm looking for a noun." *What you are* isn't the same as *what you're looking for.* This is why we need separate queries and keys — a pronoun needs to find nouns without being mistaken for one itself.
 
@@ -59,11 +55,9 @@ The dot products give us raw scores — but they can be any numbers: large, smal
 
 Think of softmax as a competition: each score is a voice in a crowd, and what matters is **who's shouting loudest relative to everyone else**. If one score is moderately high and the others are near zero, it wins by default — even without being very confident. But if another score comes along much higher, it drowns out the moderate one and takes nearly all the weight. The *absolute* values matter less than the *gaps* between them.
 
-<SoftmaxExplorerWidget />
-
-<TryIt>
+<SoftmaxExplorerWidget>
 Start with "All equal" — everyone gets 25%. Then try "Moderate, rest silent" — A isn't very loud, but it wins by default because nobody else is saying anything. Now click "Moderate meets loud" — B comes in much higher and completely drowns out A. That's the key dynamic: softmax is about *relative* loudness. Then try making all scores large but equal (like 8, 8, 8, 8) — still 25% each! It's the gaps that matter, not the magnitudes.
-</TryIt>
+</SoftmaxExplorerWidget>
 
 ## But Wait — Where Are the Words?
 
@@ -87,21 +81,17 @@ Why does this work? Remember from Chapter 5 that the dot product of two vectors 
 
 Two words that are 3 positions apart always have the same angular difference, whether they're at positions 1 & 4, or positions 50 & 53. The dot product automatically captures relative distance.
 
-<RotationPositionWidget />
-
-<TryIt>
+<RotationPositionWidget>
 Move the position sliders around. Keep the gap the same (say, 3) but change the absolute positions — the dot product stays the same! Now change the gap — the dot product changes. The dashed projection line shows this visually: its length *is* the dot product. Click "Same gap, different positions" to see the projection stay constant.
-</TryIt>
+</RotationPositionWidget>
 
 ### RoPE with Our Toy Tokens
 
 Let's see this work with our familiar toy vocabulary. Below, "it" is trying to figure out which noun to attend to. Both nouns have identical keys — so without position information, they get *equal* attention scores. But watch what happens when you turn on rotation:
 
-<RoPEToyTokensWidget />
-
-<TryIt>
+<RoPEToyTokensWidget>
 Start with the rotation speed at 0° — both nouns get identical scores. Now slowly drag it up. The closer noun starts winning because its key is rotated to a more similar angle to "it"'s query. Try different sentences to see the effect with different word orders. This is the core insight of RoPE: rotation breaks the tie between otherwise-identical tokens based on distance.
-</TryIt>
+</RoPEToyTokensWidget>
 
 ### Does Rotation Tell Us Direction?
 
@@ -143,11 +133,9 @@ Attention models use **multiple attention heads** — each with its own Q, K, an
 
 This isn't a theoretical idea — we can see it happening inside a real model. Below are attention weights from **BERT**, a well-known language model with 12 layers of 12 heads each (that's 144 attention heads total). We've picked four heads that learned strikingly different patterns:
 
-<BertAttentionWidget />
-
-<TryIt>
+<BertAttentionWidget>
 Switch between the four heads and click words to see their attention. Start with "Self / pronoun" and click "it" in the first sentence — watch it split attention between "dog" and "cat." Then switch to "Next word" — every word rigidly attends to the one after it. Try "Previous word" — the mirror image. Finally, "Broad context" shows wider structural connections. These are real attention weights from a real model — each head genuinely learned a different job.
-</TryIt>
+</BertAttentionWidget>
 
 Each head is a specialist. The "Next word" and "Previous word" heads build a chain of local context — they only work because the model has positional encoding telling it where each word sits. The "Self / pronoun" head resolves references and links related concepts. The "Broad context" head captures sentence structure. No one told these heads what to specialize in — they discovered their roles through training, because different kinds of attention are all useful for predicting language.
 

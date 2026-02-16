@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { Suspense } from "react";
+import { TryItProvider } from "@/components/widgets/shared/WidgetContainer";
 
 const WordNumberLine = dynamic(
   () =>
@@ -67,7 +68,7 @@ const TokenizationPlayground = dynamic(
   { ssr: false }
 );
 
-function WidgetSlot({ children }: { children: React.ReactNode }) {
+function WidgetSlot({ children, tryIt, label }: { children: React.ReactNode; tryIt?: React.ReactNode; label?: string }) {
   return (
     <Suspense
       fallback={
@@ -76,70 +77,72 @@ function WidgetSlot({ children }: { children: React.ReactNode }) {
         </div>
       }
     >
-      {children}
+      <TryItProvider content={tryIt} label={label}>
+        {children}
+      </TryItProvider>
     </Suspense>
   );
 }
 
-export function WordNumberLineWidget() {
+export function WordNumberLineWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children} label="Explore it">
       <WordNumberLine />
     </WidgetSlot>
   );
 }
 
-export function CombinedNumberLineWidget() {
+export function CombinedNumberLineWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children} label="Explore it">
       <CombinedNumberLine />
     </WidgetSlot>
   );
 }
 
-export function Simple2DScatterWidget() {
+export function Simple2DScatterWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children} label="Explore it">
       <Simple2DScatter />
     </WidgetSlot>
   );
 }
 
-export function EmbeddingPlaygroundWidget() {
+export function EmbeddingPlaygroundWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children} label="Explore it">
       <EmbeddingPlayground />
     </WidgetSlot>
   );
 }
 
-export function WordPairSpectrumWidget() {
+export function WordPairSpectrumWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children} label="Explore it">
       <WordPairSpectrum />
     </WidgetSlot>
   );
 }
 
-export function EmbeddingLayerDiagramWidget() {
+export function EmbeddingLayerDiagramWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children} label="Explore it">
       <EmbeddingLayerDiagram />
     </WidgetSlot>
   );
 }
 
-export function EmbeddingClassifierWidget() {
+export function EmbeddingClassifierWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children}>
       <EmbeddingClassifier />
     </WidgetSlot>
   );
 }
 
-export function TokenizationPlaygroundWidget() {
+export function TokenizationPlaygroundWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children} label="Explore it">
       <TokenizationPlayground />
     </WidgetSlot>
   );
