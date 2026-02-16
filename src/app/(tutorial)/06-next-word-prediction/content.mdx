@@ -94,6 +94,16 @@ But this approach has serious limitations:
 
 We need something fundamentally different. Not a fixed window. Not a lookup table. Something that can *dynamically choose* which earlier words matter, based on what it's trying to predict.
 
+## "It Just Predicts the Next Word"
+
+You'll sometimes hear people dismiss large language models by saying they "just predict the next word" — as if that means they can't really be intelligent. By now, you should be suspicious of this argument. As we've seen, predicting the next word well requires grammar, facts, common sense, and even emotional understanding. It's not a simple trick — it's a task that *demands* broad knowledge of the world.
+
+Next-word prediction is also a remarkably powerful training signal, because it lets us extract knowledge from everything humans have ever written. Every sentence ever published becomes a training example. Every Wikipedia article, every novel, every scientific paper teaches the model something about how the world works — all through the lens of "what word comes next?"
+
+That said, modern AI systems don't stop at next-word prediction. In later chapters we'll see techniques that push far beyond it: reinforcement learning from human feedback (teaching models to be helpful rather than just fluent), chain-of-thought reasoning (letting models think step by step through hard problems), and self-play (where models improve by competing against themselves). Next-word prediction is the foundation, but the building has many floors.
+
+There's also a deeper irony in dismissing prediction as unintelligent. The neuroscientist Karl Friston's *free energy principle* proposes that the brain itself is fundamentally a prediction machine — it builds an internal model of the world and constantly predicts what it will experience next, updating that model when predictions fail. If Friston is right, then learning by prediction isn't a cheap shortcut to intelligence. It may be *how all intelligence works*.
+
 ## What's Next
 
 What if the network could *choose* which earlier words to pay attention to? Instead of blindly concatenating the last 5 words, what if it could look at every word that came before and decide: "For predicting *this* word, I need to focus on *that* word three sentences ago, and *that* word right before me, and ignore everything else"?
