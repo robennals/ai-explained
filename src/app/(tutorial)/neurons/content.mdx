@@ -132,7 +132,7 @@ Use the sliders to build a network with 4 inputs, 3 hidden layers of 5 neurons e
 
 The point is: this would be *impossible* to do by hand for anything interesting. That's why we need to find values by training on real data, which we'll learn about in later chapters.
 
-But here's why it works in principle. Every weight in the network contributes to the final output. If it contributes to the output, we can measure how changing it affects the error. And if we can measure that, we can use the optimization from Chapter 2 on **every weight at once**. The algorithm that does this is called **backpropagation** — it flows the error signal backward through every layer so each weight gets a nudge in the right direction.
+But how do we train the weights in all these hidden layers? It turns out to be surprisingly straightforward. Every weight in the network — even ones buried deep inside — contributes to the final output. And if it contributes to the output, it contributes to the error. That means every weight has a **gradient** (as we saw in the optimization chapter), telling us which direction to nudge it to reduce the error. So we can use gradient descent on **every weight at once**. The algorithm that makes this practical is called **backpropagation** — it efficiently computes the gradient for every weight by flowing the error signal backward through each layer. We'll go into the details in a later chapter on training.
 
 How big do real networks get? GPT-3 has 96 layers. GPT-5 likely has even more. Even AI models that run on your smartphone have 20+ layers. The architecture is simple — the same building block repeated millions of times. The magic is in finding the right weights.
 
