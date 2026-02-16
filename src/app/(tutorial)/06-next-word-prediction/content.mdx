@@ -99,3 +99,7 @@ We need something fundamentally different. Not a fixed window. Not a lookup tabl
 What if the network could *choose* which earlier words to pay attention to? Instead of blindly concatenating the last 5 words, what if it could look at every word that came before and decide: "For predicting *this* word, I need to focus on *that* word three sentences ago, and *that* word right before me, and ignore everything else"?
 
 That's the idea behind **attention** — and it changed everything. In the next chapter, we'll see how it works, built from pieces you already know: embeddings, dot products, and neural networks.
+
+<TryItInPyTorch notebook="06-next-word-prediction">
+Build a bigram model from word counts, see the n-gram explosion, train a neural network next-word predictor, visualize how similar words cluster in embedding space, and experiment with temperature sampling.
+</TryItInPyTorch>
