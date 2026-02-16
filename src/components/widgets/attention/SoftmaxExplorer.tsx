@@ -46,10 +46,16 @@ const PRESETS: Preset[] = [
       "When all scores are the same, softmax splits weight evenly — 25% each. Nobody is shouting louder than anyone else.",
   },
   {
-    label: "One clear winner",
-    scores: [9, 1, 1, 1],
+    label: "Moderate, rest silent",
+    scores: [3, 0, 0, 0],
     description:
-      "A gets nearly all the weight. The gap between 9 and 1 is large enough that softmax makes A completely dominant.",
+      "A is only moderately confident, but nobody else is saying anything. A wins by default — it gets most of the weight even though its score isn't huge.",
+  },
+  {
+    label: "Moderate meets loud",
+    scores: [3, 8, 0, 0],
+    description:
+      "A was winning comfortably — but now B is shouting much louder. B drowns out A and takes nearly all the weight. The moderate voice barely registers.",
   },
   {
     label: "Close race",
@@ -108,22 +114,6 @@ export function SoftmaxExplorer() {
           ))}
         </div>
 
-        {/* Equation */}
-        <div className="rounded-lg border border-border bg-surface px-4 py-3 text-center">
-          <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted">
-            Formula
-          </div>
-          <div className="font-mono text-sm">
-            softmax(x<sub>i</sub>) = e<sup>x<sub>i</sub></sup> / (
-            {LABELS.map((l, i) => (
-              <span key={i}>
-                {i > 0 && " + "}e<sup>x<sub>{l}</sub></sup>
-              </span>
-            ))}
-            )
-          </div>
-        </div>
-
         {/* Sliders + bars */}
         <div className="grid gap-4">
           {scores.map((score, i) => {
@@ -169,28 +159,12 @@ export function SoftmaxExplorer() {
           })}
         </div>
 
-        {/* Computation detail */}
-        <div className="rounded-lg border border-border bg-surface px-4 py-3">
-          <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">
-            Step by step
-          </div>
-          <div className="flex flex-col gap-1 font-mono text-sm">
-            <div className="text-muted">
-              Raw scores: [{scores.map((s) => s.toFixed(1)).join(", ")}]
-            </div>
-            <div className="text-muted">
-              Exponentials: [{scores.map((s) => {
-                const max = Math.max(...scores);
-                return Math.exp(s - max).toFixed(2);
-              }).join(", ")}]
-            </div>
-            <div>
-              Weights: [{weights.map((w) => (w * 100).toFixed(1) + "%").join(", ")}]
-            </div>
-            <div className="text-muted">
-              Total: {(weights.reduce((a, b) => a + b, 0) * 100).toFixed(1)}%
-            </div>
-          </div>
+        {/* Formula — shown but not emphasized */}
+        <div className="rounded border border-border bg-foreground/[0.02] px-4 py-2.5 text-center">
+          <span className="text-xs text-muted">The formula, if you&apos;re curious: </span>
+          <span className="font-mono text-xs text-foreground/70">
+            weight(i) = e<sup>score(i)</sup> / Σ e<sup>score(j)</sup>
+          </span>
         </div>
 
         {/* Contextual description */}

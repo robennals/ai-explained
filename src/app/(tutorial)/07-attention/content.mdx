@@ -26,9 +26,11 @@ This is what **attention** does. It gives the model the ability to look at every
 
 ## Building Attention from Scratch
 
-So how do we actually build a mechanism that does this? We need each word to be able to "ask a question" and find the other words that answer it. Let's start with the simplest possible example — so simple that every number is visible.
+So how do we actually build a mechanism that does this? We need each word to be able to "ask a question" and find the other words that answer it. Let's start with the simplest possible example.
 
-Imagine a tiny vocabulary of just four tokens: **cat**, **dog**, **bla** (filler), and **it** (a pronoun). Each token gets two vectors:
+Imagine a tiny vocabulary of just four tokens: **cat**, **dog**, **bla** (filler), and **it** (a pronoun). Our goal is to work out what noun **it** is refering to in any given sentence.
+
+Each token gets two vectors:
 
 - A **key** — a short vector that advertises *what this token is*
 - A **query** — a short vector that describes *what this token is looking for*
@@ -53,46 +55,15 @@ Notice something crucial about **it**: its key is [0, 0] — it doesn't advertis
 
 The toy example uses **softmax** to turn raw dot-product scores into attention weights. What does this function actually do, and why do we need it?
 
-The dot products give us raw scores — but they can be any numbers: large, small, negative, zero. We need to convert them into weights that are all positive and add up to 100%, so we can use them to blend information. Softmax does this using exponentials: e raised to the power of each score. Since e^x is always positive, every weight is guaranteed to be positive. Then we divide by the total so everything sums to 1.
+The dot products give us raw scores — but they can be any numbers: large, small, negative, zero. We need to convert them into weights that are all positive and add up to 100%, so we can use them to blend information. Softmax does exactly this. (Under the hood it uses exponentials, but you don't need to understand the formula to understand what it does.)
 
-But softmax does something more interesting than just normalizing. Think of it as a competition: each score is a voice in a crowd, and what matters is **who's shouting loudest relative to everyone else**. If one score is moderately high and the others are near zero, it wins by default — even without being very confident. But if another score comes along much higher, it drowns out the moderate one and takes nearly all the weight. The *absolute* values matter less than the *gaps* between them.
+Think of softmax as a competition: each score is a voice in a crowd, and what matters is **who's shouting loudest relative to everyone else**. If one score is moderately high and the others are near zero, it wins by default — even without being very confident. But if another score comes along much higher, it drowns out the moderate one and takes nearly all the weight. The *absolute* values matter less than the *gaps* between them.
 
 <SoftmaxExplorerWidget />
 
 <TryIt>
-Start with "All equal" — everyone gets 25%. Then try "One clear winner" — A at 9 dominates completely. Now try "Close race" — the scores are close together, so weight is spread around. Drag slider A up slowly from 3 and watch it gradually take over. Then try making all scores large but equal (like 8, 8, 8, 8) — still 25% each! It's the differences that matter, not the magnitudes.
+Start with "All equal" — everyone gets 25%. Then try "Moderate, rest silent" — A isn't very loud, but it wins by default because nobody else is saying anything. Now click "Moderate meets loud" — B comes in much higher and completely drowns out A. That's the key dynamic: softmax is about *relative* loudness. Then try making all scores large but equal (like 8, 8, 8, 8) — still 25% each! It's the gaps that matter, not the magnitudes.
 </TryIt>
-
-## Values: Building New Representations
-
-So far, attention tells us *where to look*. But we also need to know *what information to extract*. When "it" attends to "dog," what does it actually receive?
-
-Each word has a third vector called a **value** — this represents the information the word *contributes* when attended to. So each word plays three roles:
-
-- **Query (Q)**: "What am I looking for?"
-- **Key (K)**: "What do I offer?"
-- **Value (V)**: "Here's my information, if you need it."
-
-The query and key determine *how much* attention to pay. The value is *what information* gets passed along. The output for each word is a weighted average of all the values, where the weights come from the attention scores.
-
-Let's extend our toy example. We'll give each token a two-dimensional value vector that encodes its identity — a one-hot encoding of "which noun am I?":
-
-- **cat**: V = [1, 0] — "I'm a cat"
-- **dog**: V = [0, 1] — "I'm a dog"
-- **bla**: V = [0, 0] — "I'm nothing interesting"
-- **it**: V = [0, 0] — "I don't know what I am yet"
-
-Now watch what happens when we run attention. Every token gets a new output — a weighted blend of all the values. The crucial insight: attention doesn't just *read* tokens — it **generates a new representation for every token**. After one pass of attention, "it" is no longer a generic pronoun with V = [0, 0] — its new representation carries the identity of whatever noun it found.
-
-<ToyValuesWidget />
-
-<TryIt>
-All four outputs are shown at once — this is what the attention layer produces. Click **it** to see how its output absorbed the noun's identity: in "cat bla bla it," the output is nearly [1.00, 0.00] — cat's value. Switch sentences and watch the output change to match whichever noun is present. Then click **cat** or **bla** to see what happens to tokens that mostly attend to themselves.
-</TryIt>
-
-<KeyInsight>
-Attention generates a **new representation** for every token by blending values from across the sentence. The original token "it" carries no information about which noun it refers to — but after attention, its output vector *encodes that noun's identity*. This is how context flows through the model: each layer of attention enriches every token with information from the tokens around it.
-</KeyInsight>
 
 ## Attention Is Order-Blind
 
