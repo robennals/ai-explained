@@ -78,7 +78,6 @@ export const chapters: Chapter[] = [
     prerequisites: [6],
     description:
       "Attention — letting each word choose which other words to focus on — is the breakthrough behind modern AI. Built from things you already know: embeddings, dot products, and neural networks.",
-    ready: true,
   },
   {
     id: 8,
@@ -88,7 +87,6 @@ export const chapters: Chapter[] = [
     prerequisites: [7],
     description:
       "The transformer wires attention and neural networks together. Trained only to predict the next word, it learns grammar, narrative, and common sense — from nothing but prediction.",
-    ready: true,
   },
   {
     id: 9,
@@ -191,9 +189,10 @@ export function getAdjacentChapters(slug: string): {
   const chapter = chapters.find((c) => c.slug === slug);
   // Navigate within the same section (main or appendix)
   const pool = chapter?.section === "appendix" ? getAppendixChapters() : getMainChapters();
-  const idx = pool.findIndex((c) => c.slug === slug);
+  const readyPool = pool.filter((c) => c.ready);
+  const idx = readyPool.findIndex((c) => c.slug === slug);
   return {
-    prev: idx > 0 ? pool[idx - 1] : undefined,
-    next: idx < pool.length - 1 ? pool[idx + 1] : undefined,
+    prev: idx > 0 ? readyPool[idx - 1] : undefined,
+    next: idx < readyPool.length - 1 ? readyPool[idx + 1] : undefined,
   };
 }
