@@ -4,7 +4,7 @@ import { useState, useCallback, useRef } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
 
 const SVG_WIDTH = 500;
-const SVG_HEIGHT = 400;
+const SVG_HEIGHT = 280;
 const CONSTRAINT_RADIUS = 60;
 const FOUND_THRESHOLD = 15;
 
@@ -120,7 +120,7 @@ export function OptimizationGame() {
       description="Find a hidden target — compare searching with no signal vs. an incremental signal"
       onReset={reset}
     >
-      {/* Mode tabs */}
+      {/* Mode tabs + action buttons */}
       <div className="mb-3 flex items-center gap-2">
         <button
           onClick={() => switchMode("blind")}
@@ -142,6 +142,20 @@ export function OptimizationGame() {
         >
           With signal
         </button>
+        <div className="ml-auto flex gap-2">
+          <button
+            onClick={() => setRevealed(true)}
+            className="rounded-md bg-accent/10 px-3 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-accent/20"
+          >
+            Reveal target
+          </button>
+          <button
+            onClick={reset}
+            className="rounded-md bg-surface px-3 py-1.5 text-xs font-medium text-muted transition-colors hover:text-foreground"
+          >
+            New game
+          </button>
+        </div>
       </div>
 
       {/* Stats bar */}
@@ -395,21 +409,6 @@ export function OptimizationGame() {
         </p>
       )}
 
-      {/* Buttons */}
-      <div className="flex gap-2">
-        <button
-          onClick={() => setRevealed(true)}
-          className="rounded-md bg-accent/10 px-3 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-accent/20"
-        >
-          Reveal target
-        </button>
-        <button
-          onClick={reset}
-          className="rounded-md bg-surface px-3 py-1.5 text-xs font-medium text-muted transition-colors hover:text-foreground"
-        >
-          New game
-        </button>
-      </div>
     </WidgetContainer>
   );
 }

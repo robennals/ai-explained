@@ -144,7 +144,7 @@ How big do real networks get? GPT-3 has 96 layers. GPT-5 likely has even more. E
 
 We've built up from a single neuron to deep networks. A neuron is just a weighted sum and an activation function — remarkably simple. But wire enough of them together, and finding the right weights is what creates the intelligence. Backpropagation makes that possible, even for networks with billions of weights.
 
-But so far we've been working with small numbers — 0s and 1s, a handful of inputs. Real AI systems like GPT don't work with true/false values — they work with *words*. How do you turn a word into something a neural network can process? In the next chapter, we'll see how words and concepts can be represented as lists of numbers — *embeddings* — where the numbers encode meaning itself.
+But what *is* that weighted sum, really? In the next chapter, we'll meet **vectors** — lists of numbers that describe things — and discover that a neuron's weighted sum is actually a geometric operation called a dot product. This connection reveals *why* a single neuron can only draw a straight line through input space, *why* XOR is impossible for one neuron, and *why* activation functions are the key to making depth work.
 
 <TryItInPyTorch notebook="neurons">
 Build a neuron from scratch, implement AND/OR gates, watch a single neuron fail on XOR, then train a two-layer network that succeeds — and visualize its decision boundary.

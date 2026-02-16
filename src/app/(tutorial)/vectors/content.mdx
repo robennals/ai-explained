@@ -1,0 +1,167 @@
+# Vectors
+
+<Lead>
+The word "vector" sounds intimidating. It isn't. A vector is just a list of numbers.
+But this simple idea turns out to be the key to understanding what neurons actually do — and why stacking them in layers works at all.
+</Lead>
+
+## A List of Numbers
+
+You already use vectors every day. Your GPS location is two numbers: (latitude, longitude). An RGB color is three numbers: (red, green, blue). A velocity is two numbers: (east/west speed, north/south speed). An RPG character might have stats like (health, strength, speed). Each of these is a vector — a list of numbers where each slot means something specific.
+
+<VectorExamplesWidget>
+Toggle between examples. Notice how each vector has a different number of slots (dimensions), and each slot measures something different. Change the sliders and watch the visual update — the numbers *are* the thing they describe. The velocity example is interesting: its two numbers naturally define a direction and a speed.
+</VectorExamplesWidget>
+
+The key idea: a vector is a compact way to describe something as a list of measurements. The number of measurements is the vector's **dimension** — a GPS coordinate is 2-dimensional, an RGB color is 3-dimensional.
+
+## Describing Animals with Vectors
+
+Let's try describing animals as vectors. We'll score each animal on six properties: big, scary, hairy, cuddly, fast, and fat. Each score is a number between 0 and 1.
+
+<AnimalPropertyExplorerWidget>
+Click two different animals to compare their vectors side by side. Bear and dog are both hairy, but very different on scary. Cat and rabbit are close on cuddly but far apart on size. Which pair of animals has the most similar vectors?
+</AnimalPropertyExplorerWidget>
+
+Notice something important: the vector captures what we *chose* to measure. If we'd picked different properties — "can it fly?", "does it live in water?" — the same animals would get different vectors, and different animals would seem similar. **The choice of dimensions determines what the vector can distinguish.**
+
+## One Dimension
+
+With just one number, each animal is a point on a line. Let's place them by a single property.
+
+<Vector1DExplorerWidget>
+Switch between properties. On "Big," elephant and bear are far apart from mouse and rabbit — but cat and eagle end up right next to each other despite being nothing alike. On "Scary," shark and bear are neighbors even though one lives in the ocean and the other in a forest. One dimension captures one thing but conflates everything else.
+</Vector1DExplorerWidget>
+
+## Two Dimensions
+
+With two numbers, each animal is a point on a plane. Now we can capture two properties at once.
+
+<Vector2DExplorerWidget>
+Start with Big x Scary. Bear is big AND scary — upper right. Rabbit is small AND not scary — lower left. Shark and bear are both scary but you can tell them apart by which *kind* of scary. Try switching axes — every combination reveals different clusters. Notice how animals that were stuck together in 1D get pulled apart in 2D.
+</Vector2DExplorerWidget>
+
+Two dimensions are much more expressive than one. With two numbers, we can distinguish things that a single number couldn't separate.
+
+## Three Dimensions
+
+With three numbers, each animal is a point in 3D space.
+
+<Vector3DExplorerWidget>
+Drag to rotate the view. Try Big x Scary x Cuddly — bear and shark overlap on big and scary, but adding cuddly pulls them apart because bear is cuddly and shark definitely isn't. Each new dimension lets you distinguish things that were previously mixed together.
+</Vector3DExplorerWidget>
+
+Three dimensions is the most we can directly visualize. But our animal vectors have *six* properties — they really live in 6D space. We can't draw that, but the geometric intuition still works: **nearby points are similar, far-apart points are different, and adding more dimensions lets you make finer distinctions.** This intuition will carry us through the rest of AI.
+
+## Direction and Magnitude
+
+There's another way to think about a vector besides "a list of numbers." Any vector can be split into two parts:
+
+- **Direction**: which way it points (the **unit vector** — a vector of length 1)
+- **Magnitude**: how long it is
+
+Think of velocity: the direction tells you *where* you're heading, and the magnitude tells you *how fast*. Or think of color intensity: the direction gives you the *hue*, and the magnitude gives you the *brightness*.
+
+<DirectionMagnitudeExplorerWidget>
+In free-drag mode, drag the arrow anywhere. In Direction + Magnitude mode, the direction is locked to the unit circle and you control the magnitude separately with the slider. Notice how the dashed unit vector always points the same way as the full vector — it's the vector's "pure direction" with the length stripped away.
+</DirectionMagnitudeExplorerWidget>
+
+This decomposition — direction times magnitude — will matter a lot in a moment, when we look at what the dot product really means.
+
+## The Dot Product
+
+The **dot product** is the single most important vector operation in AI. It takes two vectors and produces a single number. There are two ways to compute it, and they always give the same answer.
+
+**Way 1 — multiply the parts and add:** Multiply each pair of corresponding numbers, then add the results. For vectors (a₁, a₂) and (b₁, b₂): dot product = a₁ × b₁ + a₂ × b₂.
+
+**Way 2 — projection:** Multiply the magnitudes of both vectors by the cosine of the angle between them: |a| × |b| × cos(θ).
+
+<DotProductExplorerWidget>
+Drag the arrow tips. In Component view, watch the individual products and their sum. Switch to Projection view to see the angle and the shadow of one vector onto the other. Rotate one vector around — when they point the same way, the dot product is large and positive. When perpendicular, it's zero. When opposite, it's negative. Both views always show the same number.
+</DotProductExplorerWidget>
+
+The dot product measures **how much two vectors agree**. This is why it appears everywhere in AI: whenever a network needs to ask "how similar are these two things?", the answer is a dot product.
+
+When both vectors are unit vectors (length 1), the dot product simplifies to just cos(θ) — pure directional agreement with no magnitude involved. This is called **cosine similarity**, and we'll see it again when we get to embeddings.
+
+<KeyInsight>
+**The dot product measures alignment.** Same direction → large positive. Perpendicular → zero. Opposite → large negative. This single operation is the foundation of how neural networks process information.
+</KeyInsight>
+
+## A Neuron Is a Dot Product
+
+Here's the connection that ties everything together. Remember from the previous chapter that a neuron computes a **weighted sum** of its inputs, adds a bias, then applies the sigmoid:
+
+output = sigmoid(w₁ × x₁ + w₂ × x₂ + bias)
+
+That weighted sum — w₁ × x₁ + w₂ × x₂ — is a dot product. The neuron has a **weight vector** (w₁, w₂) and receives an **input vector** (x₁, x₂), and it computes their dot product.
+
+What does this mean? The neuron is asking: **"how much does this input point in the direction of my weights?"** When the input vector aligns with the weight vector, the dot product is large, the sigmoid outputs close to 1, and the neuron fires strongly. When they're perpendicular, the dot product is near zero. When they point in opposite directions, the neuron stays quiet.
+
+<NeuronDotProductWidget>
+Adjust the weight and input vectors. Watch the angle between them — when the vectors align (small angle), the output is high. When they're perpendicular (90°), the output depends mostly on the bias. When they oppose each other (large angle), the output drops. Try making the bias very negative — now the vectors need to be *very* well aligned for the neuron to fire. The neuron is a direction detector.
+</NeuronDotProductWidget>
+
+<KeyInsight>
+**A neuron is a direction detector.** It computes the dot product of its input vector with its weight vector, adds a bias to shift the threshold, and squashes the result through the sigmoid. The weights define a direction in input space, and the neuron fires when the input points that way.
+</KeyInsight>
+
+## A Neuron Draws a Line
+
+If a neuron fires when its input aligns with its weights, what does that look like geometrically?
+
+Plot every possible input as a point in 2D space. The neuron's weighted sum — w₁ × x₁ + w₂ × x₂ + bias — defines a straight line through this space. On one side of the line, the output is close to 1. On the other side, close to 0. The line itself is the **decision boundary** — where the neuron is exactly 50/50.
+
+<DecisionBoundaryExplorerWidget>
+Drag the line to solve AND — isolate the (1,1) corner. Then solve OR — isolate (0,0) on the other side. Both are easy. Now try XOR: put (0,1) and (1,0) together while keeping (0,0) and (1,1) apart. No matter how you rotate or shift the line, you can't get all four right. XOR is not a straight-line problem.
+</DecisionBoundaryExplorerWidget>
+
+This is called **linear separability**: a problem is linearly separable if you can solve it with a single straight line (or, in higher dimensions, a flat surface). AND and OR are linearly separable. XOR is not — the "true" corners sit on opposite diagonals, and no single straight line can separate them from the "false" corners.
+
+## Two Lines Solve XOR
+
+If one neuron draws one line, what happens with *two* neurons? Two lines. And two lines can carve out regions that one line never could.
+
+Each hidden neuron transforms the input into its own coordinate. In this new space, points that were on opposite corners get moved to the same side — what was inseparable becomes separable.
+
+<XORBreakthroughWidget>
+Switch from 1 layer to 2 layers. Watch the right panel — it shows what the hidden layer "sees." The four input points have been *moved*: in this new space, the two XOR-true cases are on one side and the two XOR-false cases are on the other. The hidden layer transformed an impossible problem into an easy one.
+</XORBreakthroughWidget>
+
+This is the fundamental insight about depth: **each layer transforms the data into a new representation where the next layer's job is easier.** The hidden layer doesn't solve the problem directly — it reshapes it into a problem that a single line *can* solve.
+
+<KeyInsight>
+**Depth transforms problems.** A single neuron draws one line. A hidden layer transforms the entire input space — stretching, folding, rearranging — so that what was inseparable becomes separable. Each layer makes the next layer's job easier.
+</KeyInsight>
+
+## Why Activation Functions Matter
+
+If adding layers is so powerful, why not just stack a hundred? There's a catch — and it's the most important idea in this chapter.
+
+Without the activation function, a neuron is just: output = w₁ × x₁ + w₂ × x₂ + bias. That's a **linear** function — just multiplication and addition. And here's the thing: **a linear function of a linear function is still a linear function.**
+
+Layer 1 multiplies and adds. Layer 2 multiplies and adds again. But the whole thing simplifies to one multiplication and one addition. You could collapse a hundred layers into a single layer with different numbers. No matter how deep you go, you're still drawing one straight line.
+
+It's like multiplying a number by 3, then by 5, then by 2. You could have just multiplied by 30.
+
+The activation function *breaks* this. Because it bends the curve — it's not a straight line — two layers with activation are genuinely more powerful than one. This nonlinearity is what makes depth meaningful.
+
+<LinearCollapseDemoWidget>
+Turn off the activation function and set depth to 5 layers. Hit Train. No matter how long it runs, the boundary stays a straight line — five layers of nothing is still nothing. Now turn activation back on, keep 5 layers, hit Train. Watch the boundary bend and curve around the data. The activation function is the entire reason depth works.
+</LinearCollapseDemoWidget>
+
+<KeyInsight>
+**Without activation functions, depth is an illusion.** A stack of linear layers always collapses to a single linear layer — the decision boundary is a straight line no matter how deep you go. The nonlinear activation is what makes each layer genuinely add to the network's expressive power.
+</KeyInsight>
+
+## What's Next
+
+A vector is just a list of numbers — but it's a remarkably powerful idea. We've seen that a neuron computes the dot product of its input vector with its weight vector, which means it's a direction detector that draws a straight line through input space. Stacking neurons with activation functions lets networks curve those lines into any shape.
+
+But so far we've been describing things with *hand-picked* properties — big, scary, hairy. That works for animals, because animals are one kind of thing and we can choose sensible properties for them. But what about words? "Dog" and "democracy" and "purple" and "running" — there's no single set of properties that makes sense for all of them. "How scary is the color blue?" isn't a meaningful question.
+
+In the next chapter, we'll see how AI solves this problem: instead of choosing dimensions by hand, it *learns* vectors where similar words end up nearby and directions encode meaningful relationships — all without any human labeling.
+
+<TryItInPyTorch notebook="vectors">
+Create vectors in PyTorch, compute dot products and cosine similarity, build a neuron as a dot product, plot decision boundaries for AND/OR/XOR, and see why activation functions make depth meaningful.
+</TryItInPyTorch>

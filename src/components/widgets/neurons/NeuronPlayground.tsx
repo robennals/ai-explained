@@ -161,7 +161,7 @@ export function NeuronPlayground() {
   const [w1, setW1] = useState(0);
   const [w2, setW2] = useState(0);
   const [bias, setBias] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(false);
+  const [, setIsAnimating] = useState(false);
   const [animatingTo, setAnimatingTo] = useState<GateName | null>(null);
   const animRef = useRef<number>(0);
 

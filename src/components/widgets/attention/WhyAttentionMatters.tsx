@@ -159,8 +159,8 @@ export function WhyAttentionMatters() {
   // Measure word positions and compute arrows after layout settles
   useEffect(() => {
     if (!hasSelection || !containerRef.current) {
-      setArrows([]);
-      return;
+      const raf = requestAnimationFrame(() => setArrows([]));
+      return () => cancelAnimationFrame(raf);
     }
 
     // Wait a frame so the padding-top change has been applied

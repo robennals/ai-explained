@@ -42,58 +42,68 @@ export const chapters: Chapter[] = [
   },
   {
     id: 4,
+    slug: "vectors",
+    title: "Vectors",
+    subtitle: "Lists of numbers that describe the world",
+    prerequisites: [3],
+    description:
+      "A vector is just a list of numbers — but lists of numbers can describe position, color, animals, and anything else. See neurons as vector operations and discover why activation functions make depth meaningful.",
+    ready: true,
+  },
+  {
+    id: 5,
     slug: "embeddings",
     title: "Embeddings and Vector Spaces",
     subtitle: "How AI turns words into math",
-    prerequisites: [3],
+    prerequisites: [4],
     description:
       "From one-hot to learned representations. Word analogies, semantic structure, and the geometry of meaning.",
     ready: true,
   },
   {
-    id: 5,
+    id: 6,
     slug: "matrix-math",
     title: "Matrix Math and Linear Transformations",
     subtitle: "Neural networks as geometry",
-    prerequisites: [3],
+    prerequisites: [4],
     description:
       "Every layer is a geometric transformation. See how matrices rotate, scale, and shear space — from 1D to 4D and beyond — and why that's the same thing as a layer of neurons.",
     ready: true,
   },
   {
-    id: 6,
+    id: 7,
     slug: "next-word-prediction",
     title: "Predicting the Next Word",
     subtitle: "Why prediction requires understanding",
-    prerequisites: [4, 5],
+    prerequisites: [5, 6],
     description:
       "If you can predict the next word accurately, you must understand grammar, facts, and common sense. From n-grams to neural networks — prediction IS understanding.",
     ready: true,
   },
   {
-    id: 7,
+    id: 8,
     slug: "attention",
     title: "Attention",
     subtitle: "Letting words choose what to look at",
-    prerequisites: [6],
+    prerequisites: [7],
     description:
       "Attention — letting each word choose which other words to focus on — is the breakthrough behind modern AI. Built from things you already know: embeddings, dot products, and neural networks.",
   },
   {
-    id: 8,
+    id: 9,
     slug: "transformers",
     title: "Transformers",
     subtitle: "The architecture that changed everything",
-    prerequisites: [7],
+    prerequisites: [8],
     description:
       "The transformer wires attention and neural networks together. Trained only to predict the next word, it learns grammar, narrative, and common sense — from nothing but prediction.",
   },
   {
-    id: 9,
+    id: 10,
     slug: "transfer-learning",
     title: "Transfer Learning",
     subtitle: "Train once, use everywhere",
-    prerequisites: [8],
+    prerequisites: [9],
     description:
       "Pre-trained models transfer knowledge to new tasks with minimal data. Fine-tune on 1,000 examples and beat training from scratch on 100,000.",
   },
@@ -111,7 +121,7 @@ export const chapters: Chapter[] = [
     slug: "mixture-of-experts",
     title: "Mixture of Experts",
     subtitle: "Not every neuron fires for every thought",
-    prerequisites: [8],
+    prerequisites: [9],
     description:
       "A router sends each question to specialist sub-networks. A trillion parameters, but only a fraction active per question. Smarter without getting slower.",
   },
@@ -120,7 +130,7 @@ export const chapters: Chapter[] = [
     slug: "thinking-step-by-step",
     title: "Thinking Step by Step",
     subtitle: "How AI learned to reason",
-    prerequisites: [9],
+    prerequisites: [10],
     description:
       "Standard LLMs answer in one shot with no scratch paper. Chain-of-thought and thinking models use their own output as working memory to solve harder problems.",
   },
@@ -138,7 +148,7 @@ export const chapters: Chapter[] = [
     slug: "alignment",
     title: "Teaching AI Right from Wrong",
     subtitle: "RLHF, Goodhart's Law, and the alignment problem",
-    prerequisites: [9],
+    prerequisites: [10],
     description:
       "RLHF transforms a text completer into a helpful assistant. But optimize too hard and the model learns to tell you what you want to hear, not what's true.",
   },
@@ -147,7 +157,7 @@ export const chapters: Chapter[] = [
     slug: "image-generation",
     title: "Creating Images from Noise",
     subtitle: "Diffusion models and latent space",
-    prerequisites: [6, 7],
+    prerequisites: [7, 8],
     description:
       "Pixel-by-pixel generation fails. Diffusion models start with pure noise and denoise. Latent space is a map of all possible images.",
   },

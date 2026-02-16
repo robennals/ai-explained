@@ -1,12 +1,16 @@
 # Embeddings and Vector Spaces
 
 <Lead>
-How do you turn a word into something a neural network can work with? You turn it into a list of numbers — but not just any numbers. The right numbers encode *meaning itself* as geometry.
+In the last chapter, we described animals with hand-picked properties like size and scariness. That worked because animals are one kind of thing. But words represent *everything* — and there's no universal set of properties for all of them. AI solves this by letting the network discover its own dimensions.
 </Lead>
 
-## From True/False to Words
+## From Animals to Words
 
-In the previous chapter, we worked with logic values — things that are either true or false. But GPT doesn't work with true/false values. It works with *words*. And words are messy.
+In the previous chapter, we described animals as vectors — lists of numbers like (big, scary, hairy, cuddly, fast, fat). This worked beautifully: bears are big and scary, rabbits are small and cuddly, and the distance between their vectors captures how different they are.
+
+But what if we want to represent *words* — not just animals, but everything? "Dog" and "democracy" and "purple" and "running." There's no single set of properties that makes sense for all of them. "How scary is the color blue?" isn't a meaningful question. "How hairy is democracy?" doesn't even make sense.
+
+We need a different approach. Instead of choosing dimensions by hand, we'll let the network figure out *which numbers to use*. But first, let's see why the obvious approaches fail.
 
 One idea: give each word its own input neuron. There's a "dog" neuron, a "cat" neuron, a "magnificent" neuron. When the input is "dog", the dog neuron fires and everything else is zero. But English has over 170,000 words — that's 170,000 input neurons, and the network has to independently learn what every single one means. It gets no hint that "dog" and "puppy" are related, or that "big" and "enormous" mean the same thing.
 
@@ -46,15 +50,13 @@ Two dimensions are dramatically more expressive than one. With just two numbers,
 
 ## Beyond Two Dimensions
 
-Each new dimension helps you tell more things apart. With 5 dimensions, you could separate animals from vehicles from instruments from food. With 20 dimensions, you could tell a dog from a cat. With 50 or 100 dimensions, you could capture remarkably fine-grained distinctions.
+We saw in the vectors chapter that more dimensions let you make finer distinctions. With 5 dimensions, you could separate animals from vehicles from instruments. With 50 or 100, you could capture remarkably fine-grained differences.
 
-This list of numbers that represents a position in space is called a **vector**. It's really just a list of numbers — nothing scarier than that. When people say "vector space," they just mean a space where every point is described by a list of numbers.
+But here's the key problem for language: how do you decide *which* dimensions to use? With animals, we picked "big" and "scary" and it worked. With words? "How dangerous is the color blue?" doesn't make sense. There's no universal set of labeled dimensions that works for all words.
 
-But here's the problem: how do you decide *which* dimensions to use? "How dangerous is the color blue?" doesn't make sense. "How electronic is a cow?" There's no universal set of labeled dimensions that works for all words.
+Real AI systems solve this by not using labeled dimensions at all. Instead, they learn a space where **similar words end up nearby** and **different words end up far apart**. The dimensions are just numbers — not "alive?" or "big?" — but the proximity structure captures meaning.
 
-Real AI systems solve this differently. They don't use labeled dimensions at all. Instead, they learn a space where **similar words end up nearby** and **different words end up far apart**. The dimensions are just numbers — not "alive?" or "big?" — but the proximity structure captures meaning.
-
-And it's not just proximity. The spatial *relationships* between nearby words often carry meaning too. In a well-trained embedding, the direction from "small" to "big" tends to be consistent — move an ant in that direction and you get larger animals. The direction from "man" to "woman" captures gender, so applying it to "king" lands you near "queen." These regularities aren't designed in; they emerge from training, because a space with consistent structure is more useful than one without it.
+And it's not just proximity. The spatial *relationships* between nearby words carry meaning too. The direction from "small" to "big" tends to be consistent — move an ant in that direction and you get larger animals. The direction from "man" to "woman" captures gender, so applying it to "king" lands you near "queen." These regularities aren't designed in; they emerge from training, because a space with consistent structure is more useful than one without it.
 
 This is like the difference between organizing books by (genre, length, year) versus letting a librarian arrange them so that related books are on nearby shelves. The librarian's system has no labels, but it works better because it captures relationships that no fixed labeling scheme could.
 
@@ -64,7 +66,7 @@ Real embeddings don't use labeled dimensions. They learn positions where similar
 
 ## Neural Networks Meet Embeddings
 
-In the previous chapter, you built neurons that classified inputs by drawing a decision boundary. Those inputs were abstract numbers. But now each input has a name — its position in the embedding encodes meaning. Can a neuron learn to read that meaning?
+In the vectors chapter, we saw that a neuron draws a decision boundary — a straight line through its input space. Now each input has a name — its position in the embedding encodes meaning. Can a neuron learn to read that meaning?
 
 Let's find out. Below is a single neuron whose two inputs are a word's Size and Danger coordinates from the scatter plot above. Each word sits at its embedding position, and the neuron has to learn which words match a concept.
 
@@ -101,8 +103,8 @@ In a well-trained embedding, directions carry meaning. The direction from small 
 
 ## From Words to Tokens (Subwords)
 
-Real language models usually do **not** treat each full word as one unit.
-Instead, they usually break text into **tokens**.
+Real language models do **not** treat each full word as one unit.
+Instead, they break text into **tokens**.
 
 A token can be:
 - a whole word (`cat`)
