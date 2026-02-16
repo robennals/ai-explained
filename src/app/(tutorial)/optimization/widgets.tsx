@@ -20,18 +20,18 @@ const SmoothVsRugged = dynamic(
   { ssr: false }
 );
 
-const ModelComparison = dynamic(
+const Gradient2DCurve = dynamic(
   () =>
-    import("@/components/widgets/optimization/ModelComparison").then(
-      (m) => m.ModelComparison
+    import("@/components/widgets/optimization/Gradient2DCurve").then(
+      (m) => m.Gradient2DCurve
     ),
   { ssr: false }
 );
 
-const GradientVisualization = dynamic(
+const Gradient3DSurface = dynamic(
   () =>
-    import("@/components/widgets/optimization/GradientVisualization").then(
-      (m) => m.GradientVisualization
+    import("@/components/widgets/optimization/Gradient3DSurface").then(
+      (m) => m.Gradient3DSurface
     ),
   { ssr: false }
 );
@@ -68,18 +68,18 @@ export function SmoothVsRuggedWidget({ children }: { children?: React.ReactNode 
   );
 }
 
-export function ModelComparisonWidget({ children }: { children?: React.ReactNode }) {
+export function Gradient2DCurveWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children}>
-      <ModelComparison />
+      <Gradient2DCurve />
     </WidgetSlot>
   );
 }
 
-export function GradientVisualizationWidget({ children }: { children?: React.ReactNode }) {
+export function Gradient3DSurfaceWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children}>
-      <GradientVisualization />
+      <Gradient3DSurface />
     </WidgetSlot>
   );
 }

@@ -40,7 +40,6 @@ Let's name this pattern: **incremental optimization**. The recipe is simple:
 That's it. And this single algorithm is behind:
 
 - **Natural selection** — random mutations, tested by survival, kept or eliminated
-- **A/B testing** — two website versions, tested by click rates, winner kept
 - **The scientific method** — hypotheses, tested by experiment, accepted or rejected
 - **Trial and error** — try something, see if it works, adjust
 
@@ -68,51 +67,41 @@ Click anywhere above the landscape to drop a ball. On the smooth curve, it rolls
 **Smoothness is what makes optimization possible.** A smooth function gives you a signal at every point — which way is downhill. A non-smooth function (like a step function or a text string) gives you no local signal to follow.
 </KeyInsight>
 
-## Not All Representations Are Equal
-
-Here's the crucial connection: **the way you represent something determines whether you can optimize it**.
-
-Consider a simple function: "multiply by some number, then add another number." You could write this as text — say, `times four plus two` — or you could represent the same function with two sliders, one for the multiplier and one for the offset.
-
-Both representations describe the exact same function. But try to *change* it to match a target, and the difference is night and day.
-
-**Text**: To change "four" to "two," you have to delete characters and retype. There's no "halfway" between the words "four" and "two." Most mid-edit states (`times fo plus two`, `times tw plus two`) don't even parse. Every edit is a big, unpredictable jump.
-
-**Sliders**: Drag the multiplier from 4.0 smoothly down to 2.0. At every intermediate value — 3.7, 3.2, 2.5 — the function is valid and you can see whether you're getting closer. Small changes produce small, predictable effects.
-
-<ModelComparisonWidget>
-Try matching the dashed target line on both sides. On the slider side, just drag — watch the line glide smoothly into place. On the text side, try editing "times four plus two" into "times 2 minus 3." Notice how most intermediate edits break the parser entirely. You can get there eventually, but there's no smooth path — just discrete jumps between valid states.
-</ModelComparisonWidget>
-
 ## The Gradient Trick
 
-When a model is smooth, you can do something even better than trying random small changes. If the model is also **differentiable** — meaning you can calculate how the output changes as you tweak each parameter — there's a powerful shortcut.
+So far we've been talking about optimization in general. Let's get specific about *how* to find the bottom of a curve.
 
-Instead of *guessing* which direction to turn each knob, you can **calculate** which direction is downhill for every parameter simultaneously. This calculation is called the **gradient**, and it tells you exactly how to adjust every knob to reduce the error as quickly as possible.
+Imagine you're standing on a hill and you want to reach the valley floor. You could take random steps in different directions, check whether each one took you lower, and keep the ones that helped. That works — but it's slow, because most random steps don't go straight downhill.
 
-Think of it this way: random search is like feeling around in the dark, taking a step, and checking if you went downhill. The gradient is like having a compass that always points downhill — for every dimension at once. With billions of parameters, this makes an astronomical difference.
+But there's something much better. At any point on a smooth curve, you can look at the **slope** — the steepness of the hill right where you're standing. The slope tells you *exactly which direction is downhill*. This slope is called the **gradient**, and following it is called **gradient descent**.
 
-We'll cover the full math in a later chapter. For now, just see the difference it makes:
+<Gradient2DCurveWidget>
+Click on the curve to place a ball. The red arrow is the gradient — it points downhill from wherever the ball is. Try "Random steps" first: it picks random spots nearby and only keeps the ones that reduce the error. Then try "Gradient descent" from the same spot — it follows the gradient arrow each step. Watch how much faster gradient descent reaches the bottom.
+</Gradient2DCurveWidget>
 
-<GradientVisualizationWidget>
-Click to set a starting point on the loss landscape (blue = low loss, white = high loss). Then run "Random walk" — it takes 50 random steps, keeping only improvements. Then run "Gradient descent" from the same point — it takes 50 steps guided by the gradient. Watch the gradient version zoom straight to the minimum while the random walk meanders. The gradient method is not smarter — it's just following better directions.
-</GradientVisualizationWidget>
+That's the idea in one dimension: follow the slope downhill. But real models don't have just one knob — they have millions. Imagine a landscape with a dimension for each parameter. Instead of a curve, you have a vast, high-dimensional surface. And instead of a simple slope, the gradient becomes an arrow pointing in the steepest downhill direction across *all* dimensions at once.
+
+Here's what that looks like with just two parameters — a 3D surface where height is the error:
+
+<Gradient3DSurfaceWidget>
+Drag to rotate the surface. Click to set a starting point, then compare random steps vs. gradient descent. With two parameters, the gradient is an arrow on the surface pointing downhill. With millions of parameters, it's the same idea — just in a space too large to visualize.
+</Gradient3DSurfaceWidget>
 
 <KeyInsight>
 **The gradient tells you which way is downhill for every parameter simultaneously.** Random search tries directions and keeps lucky ones. Gradient descent *calculates* the best direction. With millions of parameters, this is the difference between feasible and impossible.
 </KeyInsight>
 
-## Why Neural Networks Won
+## Why This Changes Everything
 
-Here's the punchline. Neural networks aren't the only kind of model that can theoretically compute any function. Lookup tables can too (as we saw in Chapter 1). Decision trees can. Rule systems can.
+Here's the punchline. In Chapter 1, we saw that a model is a machine with adjustable knobs. The question was: how do you find the right settings when there are millions of knobs?
 
-But neural networks have a special property: they're **smooth and differentiable**. When you change a parameter slightly, the output changes slightly and predictably. This means gradient descent works on them — you can calculate how to adjust every single parameter to make the model a little bit better, and do this billions of times.
+The answer is: **build the model so that small knob-turns produce small, predictable changes in the output**. When a model has this property — when it's *smooth* — you can calculate the slope at any point. That slope (the gradient) tells you exactly how to turn every knob to make the model a tiny bit better.
 
-No single adjustment is impressive. Each one is a tiny, mechanical nudge — make this parameter 0.001 bigger, that one 0.002 smaller. But the gradient makes each nudge *reliably point in the right direction*. Do billions of these reliable tiny improvements per second, and the model converges on astonishing capabilities.
+No single adjustment is impressive. Each one is a tiny tweak — make this parameter 0.001 bigger, that one 0.002 smaller. But the gradient means each tweak *reliably moves in the right direction*. Make billions of these tiny improvements per second, and the model develops amazing abilities.
 
-It's A/B testing at the speed of mathematics. Evolution compressed from billions of years into hours — not by being smarter about each step, but by making each step *reliable* and then taking an enormous number of them.
+It's like evolution, compressed from billions of years into hours — not by being smarter about each step, but by making each step *reliable* and then taking a huge number of them.
 
-AI didn't take off when we figured out the theory — the basic ideas have been around for decades. It took off when we had enough data to measure progress on, enough computing power to make billions of tiny adjustments quickly, and the right model type — neural networks — whose smooth, differentiable landscape makes each of those adjustments reliably improve the model.
+AI didn't take off when people figured out the theory — the basic ideas have been around for decades. It took off when there was enough data to measure progress on, enough computing power to make billions of tiny adjustments quickly, and the right kind of model — one where small changes to the knobs always lead to small, predictable changes in the output.
 
 ## What's Next
 
