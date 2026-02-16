@@ -8,7 +8,9 @@ expect it to be fearsomely complex. It isn't. It's remarkably simple.
 
 A neural network is made of **neurons**, connected together in layers. Each connection has a **weight** — a number that controls how much attention one neuron pays to another.
 
-<NetworkOverviewWidget />
+<NetworkOverviewWidget>
+Click the different neurons to see what each type does. Don't worry if it doesn't all make sense yet — the rest of this chapter will explain how it works.
+</NetworkOverviewWidget>
 
 So how big are these networks? Here's a comparison of biological brains and AI systems, measured by their number of connections:
 
@@ -75,11 +77,9 @@ These simple operations are the basis for every digital computer. Inside every c
 Click the inputs to toggle them between 0 and 1. Switch between AND, OR, and NOT with the tabs. Click the truth table rows to jump to that input combination.
 </LogicGatePlaygroundWidget>
 
-Wire enough gates together and you can build circuits that do real computation.
+Wire enough gates together and you can compute anything. Real computer chips have **billions** of gates — your phone, your laptop, every digital device works this way.
 
 <GateCircuitDiagramWidget />
-
-Real computer chips assemble **billions** of gates on a single chip — enough to compute anything. Your phone, your laptop, every digital device works this way.
 
 But logic gates have a problem. Their outputs snap between 0 and 1 with nothing in between. There's no smooth gradient to follow, which means you can't train a network of logic gates using the optimization techniques from Chapter 2. You can't ask "how should I adjust this gate to make the answer a *little* more correct?" — it's all or nothing.
 
@@ -103,7 +103,7 @@ This matters because real-world data is rarely cleanly true or false. Is this em
 
 There's one more operation worth knowing: **XOR** (short for "exclusive or"). It means "one or the other, but not both." A single neuron can't solve it — no matter what weights you try, you can't get all four input combinations right at once.
 
-But what if we use *two* neurons feeding into a third?
+But what if we use *two* neurons feeding into a third? The two middle neurons are called **hidden neurons** — they don't produce the final answer, but instead compute intermediate results that the output neuron needs.
 
 Here's the trick:
 - **Neuron 1** computes OR: "is *at least one* input on?"
@@ -120,6 +120,14 @@ Click each neuron to see its weights. Click the input nodes to toggle them betwe
 In 1969, Minsky and Papert published *Perceptrons*, proving that single-layer networks can't solve XOR. This was taken as proof that neural networks were a dead end, and it killed most neural network research for over a decade — the "AI winter." The fix was always sitting there, obvious in hindsight: use more than one layer.
 </Callout>
 
+## What Hidden Layers Compute
+
+To solve complex problems, you often need to compute intermediate things first. You can't jump straight from raw pixels to "that's a cat" — you need stepping stones.
+
+That's what hidden layers provide. Each layer takes the previous layer's outputs and combines them into something more complex. The first hidden layer might detect simple patterns — edges, color patches, textures. The next layer combines those into parts — eyes, ears, fur. A later layer combines *those* into whole objects — "cat" or "dog."
+
+This is why depth matters. A single layer can only combine the raw inputs in simple ways. But with multiple layers, each one adds another level of abstraction, building up from simple features to complex concepts. The network learns *what* to compute at each layer during training — we don't have to tell it to look for edges or eyes. It figures that out on its own.
+
 ## Deeper Networks
 
 If two neurons can solve XOR, what happens when we keep adding more? Each neuron you add contributes another piece of the computation. Each layer lets the network combine results from the previous layer into something more complex.
@@ -132,9 +140,11 @@ Use the sliders to build a network with 4 inputs, 3 hidden layers of 5 neurons e
 
 The point is: this would be *impossible* to do by hand for anything interesting. That's why we need to find values by training on real data, which we'll learn about in later chapters.
 
-But how do we train the weights in all these hidden layers? It turns out to be surprisingly straightforward. Every weight in the network — even ones buried deep inside — contributes to the final output. And if it contributes to the output, it contributes to the error. That means every weight has a **gradient** (as we saw in the optimization chapter), telling us which direction to nudge it to reduce the error. So we can use gradient descent on **every weight at once**. The algorithm that makes this practical is called **backpropagation** — it efficiently computes the gradient for every weight by flowing the error signal backward through each layer. We'll go into the details in a later chapter on training.
-
 How big do real networks get? GPT-3 has 96 layers. GPT-5 likely has even more. Even AI models that run on your smartphone have 20+ layers. The architecture is simple — the same building block repeated millions of times. The magic is in finding the right weights.
+
+## Training Deep Networks
+
+But how do we train the weights in all these hidden layers? It turns out to be surprisingly straightforward. Every weight in the network — even ones buried deep inside — contributes to the final output. And if it contributes to the output, it contributes to the error. That means every weight has a **gradient** (as we saw in the optimization chapter), telling us which direction to nudge it to reduce the error. So we can use gradient descent on **every weight at once**. The algorithm that makes this practical is called **backpropagation** — it efficiently computes the gradient for every weight by flowing the error signal backward through each layer. We'll go into the details in a later chapter on training.
 
 <KeyInsight>
 **Stacking neurons in layers lets you compute anything.** Each layer combines the previous layer's outputs into something more complex. Backpropagation lets you train all the weights at once by flowing the error signal backward through every layer. A network with ten thousand weights is no harder to train *in principle* than one with ten — it just takes more computation.
