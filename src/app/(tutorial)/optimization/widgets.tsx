@@ -12,6 +12,14 @@ const OptimizationGame = dynamic(
   { ssr: false }
 );
 
+const ErrorMeasurement = dynamic(
+  () =>
+    import("@/components/widgets/optimization/ErrorMeasurement").then(
+      (m) => m.ErrorMeasurement
+    ),
+  { ssr: false }
+);
+
 const SmoothVsRugged = dynamic(
   () =>
     import("@/components/widgets/optimization/SmoothVsRugged").then(
@@ -56,6 +64,14 @@ export function OptimizationGameWidget({ children }: { children?: React.ReactNod
   return (
     <WidgetSlot tryIt={children}>
       <OptimizationGame />
+    </WidgetSlot>
+  );
+}
+
+export function ErrorMeasurementWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <ErrorMeasurement />
     </WidgetSlot>
   );
 }

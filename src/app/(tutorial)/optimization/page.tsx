@@ -3,6 +3,7 @@ import { getAdjacentChapters } from "@/lib/curriculum";
 import Content from "./content.mdx";
 import {
   OptimizationGameWidget,
+  ErrorMeasurementWidget,
   SmoothVsRuggedWidget,
   Gradient2DCurveWidget,
   Gradient3DSurfaceWidget,
@@ -23,6 +24,7 @@ export default function Chapter02() {
         <Content
           components={{
             OptimizationGameWidget,
+            ErrorMeasurementWidget,
             SmoothVsRuggedWidget,
             Gradient2DCurveWidget,
             Gradient3DSurfaceWidget,

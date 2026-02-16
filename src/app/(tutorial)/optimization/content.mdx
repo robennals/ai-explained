@@ -53,6 +53,22 @@ Let's feel this in action:
 Start in "Blind" mode and try to find the hidden target. All you learn from each guess is "not here" — a little ✗ appears and you have zero idea whether you're getting closer. After a dozen guesses, hit "Reveal target" and see how hopeless it was. Then switch to "With signal." Now each dot's size and color tells you how close you are, and you're constrained to small steps near your last guess. Watch how quickly you zero in. Same problem, but the incremental signal makes all the difference.
 </OptimizationGameWidget>
 
+## You Need a Way to Measure the Error
+
+Before you can improve something, you need a number that tells you *how far off it is*. This number is called the **error** — the gap between where you are and where you want to be.
+
+This idea shows up everywhere. A student gets 72 out of 100 on a test — the error is 28 points. A runner finishes in 14.2 seconds — the error is 14.2 seconds. A restaurant has 3.2 stars — the error is the gap to a perfect 5.
+
+<ErrorMeasurementWidget>
+Switch between examples and drag the slider. Notice how every example has the same structure: there's a current value and an error that measures how far off it is. Making the error smaller is what optimization means.
+</ErrorMeasurementWidget>
+
+<Callout>
+You might have noticed something odd: the "perfect" time for a race is zero seconds, which is impossible! That's fine. Sometimes you can't actually reach zero error, and often you don't even know how good it's possible to get. All that matters is that you have a number that goes down as you get better. As long as "lower error = better," optimization can work.
+</Callout>
+
+In AI, we do the same thing. We show the model an input, look at what it gives back, and compare that to the right answer. The gap between them is the error. The goal of training is to make that error as small as possible.
+
 ## Smooth Functions Can Be Optimized
 
 Incremental optimization is powerful, but it only works when the function you're optimizing is **smooth** — meaning small changes produce small, predictable effects.
