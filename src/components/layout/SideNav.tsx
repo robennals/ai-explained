@@ -48,7 +48,7 @@ export function SideNav() {
   const appendixChapters = getAppendixChapters();
 
   return (
-    <nav className="w-64 shrink-0 border-r border-border overflow-y-auto py-6 pr-4 hidden lg:block">
+    <nav className="scrollbar-autohide sticky top-14 h-[calc(100vh-3.5rem)] w-64 shrink-0 border-r border-border overflow-y-auto py-6 pr-4 hidden lg:block">
       <h2 className="mb-4 px-3 text-xs font-semibold uppercase tracking-wider text-muted">
         Chapters
       </h2>
