@@ -4,9 +4,9 @@ import { useState, useMemo, useCallback } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
 import { SliderControl } from "../shared/SliderControl";
 
-// Target function: a nice wave-like curve
+// Target function: a cubic the kid CAN match exactly
 function targetFn(x: number): number {
-  return 0.5 * Math.sin(2.5 * x) + 0.3 * Math.cos(1.2 * x) + 0.2 * x;
+  return 0.2 + 0.7 * x - 0.15 * x * x - 0.25 * x * x * x;
 }
 
 // Model: polynomial y = a + b*x + c*x^2 + d*x^3
@@ -14,8 +14,8 @@ function modelFn(x: number, a: number, b: number, c: number, d: number): number 
   return a + b * x + c * x * x + d * x * x * x;
 }
 
-// Best fit coefficients (pre-computed approximate fit)
-const BEST_FIT = { a: 0.17, b: 0.72, c: -0.1, d: -0.29 };
+// Exact coefficients for the target curve
+const BEST_FIT = { a: 0.2, b: 0.7, c: -0.15, d: -0.25 };
 const X_MIN = -2;
 const X_MAX = 2;
 const SAMPLE_COUNT = 100;
