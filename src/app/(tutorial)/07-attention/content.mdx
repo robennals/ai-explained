@@ -4,13 +4,25 @@
 In the last chapter, we saw that predicting the next word requires understanding — but our models could only look at a fixed window of recent words. What if the model could *choose* which earlier words to focus on? That idea, called attention, is the breakthrough that makes modern AI work. And it's built entirely from things you already know.
 </Lead>
 
-## The Cocktail Party
+## Some Words Need Other Words
 
-Imagine you're at a crowded party. Dozens of people are talking at once — a wall of sound. But then someone across the room says your name, and suddenly your brain snaps to attention. You weren't processing all those conversations equally. You were *attending* to what's relevant and filtering out the rest.
+Read this sentence: "The dog chased the cat because **it** was angry."
 
-Your brain is constantly doing this: choosing what to focus on, based on what matters right now. When you read the sentence "The dog chased the ball because **it** was round," your brain automatically knows "it" refers to "the ball" — not "the dog." You attend to "ball" because that's the word that helps you understand "it" in this context.
+What does "it" refer to? The dog or the cat? You probably said the dog — dogs chase things because *they're* angry, not the thing being chased. But notice what you just did: to understand one word ("it"), you had to look back at a *specific* earlier word ("dog") and use common-sense reasoning to pick it over another candidate ("cat").
 
-Our next-word predictor needs to do the same thing. Instead of blindly looking at the last few words, it needs to *choose* which earlier words to pay attention to. Let's build up this idea step by step.
+This is something our fixed-window model from the last chapter can't do. It sees the last few words — maybe "because it was" — and has no way to reach back to "dog" at the start of the sentence. It doesn't get to *choose* which earlier words matter.
+
+But for a human reader, this kind of selective looking-back happens constantly. Let's see just how much of language depends on it.
+
+<WhyAttentionMattersWidget />
+
+<TryIt>
+Click the underlined words in each sentence. Notice how different words need different kinds of context: pronouns need their referents, ambiguous words need disambiguating clues, verbs need their subjects even when separated by long clauses. Flip through all five examples — each demonstrates a different reason why "looking back selectively" is essential.
+</TryIt>
+
+Every one of these examples requires the same ability: given a word, *choose* which other words in the sentence are relevant to understanding it. Not the nearest words. Not a fixed window. The *right* words, wherever they happen to be.
+
+This is what **attention** does. It gives the model the ability to look at every word that came before and decide which ones matter for the word it's currently processing. Let's build up to how it works, step by step.
 
 ## A Toy Problem: Pattern Attention
 

@@ -2,6 +2,7 @@ import { ChapterNav } from "@/components/layout/ChapterNav";
 import { getAdjacentChapters } from "@/lib/curriculum";
 import Content from "./content.mdx";
 import {
+  WhyAttentionMattersWidget,
   PatternAttentionWidget,
   AttentionStepThroughWidget,
   MultiHeadWidget,
@@ -23,6 +24,7 @@ export default function Chapter07() {
       <div className="prose prose-lg max-w-none">
         <Content
           components={{
+            WhyAttentionMattersWidget,
             PatternAttentionWidget,
             AttentionStepThroughWidget,
             MultiHeadWidget,

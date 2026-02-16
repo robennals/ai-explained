@@ -3,6 +3,14 @@
 import dynamic from "next/dynamic";
 import { Suspense } from "react";
 
+const WhyAttentionMatters = dynamic(
+  () =>
+    import("@/components/widgets/attention/WhyAttentionMatters").then(
+      (m) => m.WhyAttentionMatters
+    ),
+  { ssr: false }
+);
+
 const PatternAttention = dynamic(
   () =>
     import("@/components/widgets/attention/PatternAttention").then(
@@ -54,6 +62,14 @@ function WidgetSlot({ children }: { children: React.ReactNode }) {
     >
       {children}
     </Suspense>
+  );
+}
+
+export function WhyAttentionMattersWidget() {
+  return (
+    <WidgetSlot>
+      <WhyAttentionMatters />
+    </WidgetSlot>
   );
 }
 
