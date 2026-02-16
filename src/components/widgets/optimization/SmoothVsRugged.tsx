@@ -273,6 +273,36 @@ export function SmoothVsRugged() {
 
   const maxY = 0.35;
 
+  const startRolling = useCallback((
+    fn: (x: number) => number,
+    startX: number,
+    setter: React.Dispatch<React.SetStateAction<PanelData>>,
+    timerRef: React.MutableRefObject<ReturnType<typeof setInterval> | null>,
+  ) => {
+    let x = startX;
+    let stepCount = 0;
+
+    timerRef.current = setInterval(() => {
+      const dir = downhillDir(fn, x);
+      if (dir === 0) {
+        setter(prev => ({ ...prev, settled: true, running: false }));
+        if (timerRef.current) clearInterval(timerRef.current);
+        return;
+      }
+
+      x = Math.max(0.01, Math.min(0.99, x + dir * PIXEL_STEP));
+      stepCount++;
+
+      setter(prev => ({
+        ...prev,
+        ballX: x,
+        trail: [...prev.trail, x],
+        steps: stepCount,
+        loss: fn(x),
+      }));
+    }, FRAME_DELAY);
+  }, []);
+
   const dropBall = useCallback((
     fn: (x: number) => number,
     setter: React.Dispatch<React.SetStateAction<PanelData>>,
@@ -338,37 +368,7 @@ export function SmoothVsRugged() {
         ballSvgY: svgY,
       }));
     }, FRAME_DELAY);
-  }, [maxY]);
-
-  const startRolling = useCallback((
-    fn: (x: number) => number,
-    startX: number,
-    setter: React.Dispatch<React.SetStateAction<PanelData>>,
-    timerRef: React.MutableRefObject<ReturnType<typeof setInterval> | null>,
-  ) => {
-    let x = startX;
-    let stepCount = 0;
-
-    timerRef.current = setInterval(() => {
-      const dir = downhillDir(fn, x);
-      if (dir === 0) {
-        setter(prev => ({ ...prev, settled: true, running: false }));
-        if (timerRef.current) clearInterval(timerRef.current);
-        return;
-      }
-
-      x = Math.max(0.01, Math.min(0.99, x + dir * PIXEL_STEP));
-      stepCount++;
-
-      setter(prev => ({
-        ...prev,
-        ballX: x,
-        trail: [...prev.trail, x],
-        steps: stepCount,
-        loss: fn(x),
-      }));
-    }, FRAME_DELAY);
-  }, []);
+  }, [maxY, startRolling]);
 
   return (
     <WidgetContainer

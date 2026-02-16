@@ -180,8 +180,8 @@ export function ToyValues() {
   // Compute arrows for selected token
   useEffect(() => {
     if (!hasSelection || !selWeights || !rowRef.current) {
-      setArrows([]);
-      return;
+      const raf = requestAnimationFrame(() => setArrows([]));
+      return () => cancelAnimationFrame(raf);
     }
 
     const raf = requestAnimationFrame(() => {

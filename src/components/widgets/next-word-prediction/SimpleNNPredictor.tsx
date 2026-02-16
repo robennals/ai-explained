@@ -316,7 +316,7 @@ export function SimpleNNPredictor() {
 
     const pieces = tok.encode(genPrompt);
     const ids = pieces.map((p) => p.id);
-    let currentIds = [...ids];
+    const currentIds = [...ids];
     let currentText = genPrompt;
     let step = 0;
     const maxSteps = 40;

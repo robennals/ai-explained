@@ -98,7 +98,6 @@ interface Preset {
   r2: [number, number];
 }
 
-const C45 = Math.SQRT2 / 2;
 const PRESETS: Preset[] = [
   { label: "Identity", r1: [1, 0], r2: [0, 1] },
   { label: "Rotate 90\u00b0", r1: [0, -1], r2: [1, 0] },
