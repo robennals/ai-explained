@@ -9,18 +9,18 @@ Tracks which PyTorch/Python concepts each notebook uses before they're formally 
 
 ## Forward references by notebook
 
-### 01-computation.ipynb
+### computation.ipynb
 
 No forward references. Only uses `torch.tensor`, basic arithmetic, and matplotlib.
 
-### 02-optimization.ipynb
+### optimization.ipynb
 
 | Concept | Where explained | Notebook explanation |
 |---------|----------------|---------------------|
 | `requires_grad` / autograd | Chapter 3 (backpropagation) | Described as "PyTorch doing the calculus for you" |
 | `.backward()` | Chapter 3 | Explained as "compute the gradient automatically" |
 
-### 03-neurons.ipynb
+### neurons.ipynb
 
 | Concept | Where explained | Notebook explanation |
 |---------|----------------|---------------------|
@@ -28,7 +28,7 @@ No forward references. Only uses `torch.tensor`, basic arithmetic, and matplotli
 | `nn.BCELoss` | Chapter 6 (loss functions) | Described as "loss function for yes/no problems" |
 | `torch.optim.SGD` | Chapter 2 (gradient descent) | Described as "does the step-downhill part automatically" |
 
-### 04-embeddings.ipynb
+### embeddings.ipynb
 
 | Concept | Where explained | Notebook explanation |
 |---------|----------------|---------------------|
@@ -37,7 +37,7 @@ No forward references. Only uses `torch.tensor`, basic arithmetic, and matplotli
 | External dependency: `tiktoken` | N/A | Install instruction provided |
 | External download: GloVe (~66MB) | N/A | Download automated in notebook |
 
-### 05-matrix-math.ipynb
+### matrix-math.ipynb
 
 | Concept | Where explained | Notebook explanation |
 |---------|----------------|---------------------|

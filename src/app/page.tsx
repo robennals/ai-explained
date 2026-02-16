@@ -32,7 +32,7 @@ export default function HomePage() {
           </p>
         </div>
         <Link
-          href="/01-computation"
+          href="/computation"
           className="mt-8 inline-block rounded-lg bg-accent px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-accent-dark"
         >
           Start Learning

@@ -14,7 +14,7 @@ export const metadata = {
 };
 
 export default function Chapter08() {
-  const { prev, next } = getAdjacentChapters("08-transformers");
+  const { prev, next } = getAdjacentChapters("transformers");
 
   return (
     <article>

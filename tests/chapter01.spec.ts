@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 
 test.describe("Chapter 1: What Is Computation?", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/01-computation");
+    await page.goto("/computation");
   });
 
   test("renders chapter title and prose content", async ({ page }) => {
@@ -18,7 +18,7 @@ test.describe("Chapter 1: What Is Computation?", () => {
 
   test("sidebar shows chapters on wide viewport", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
-    await page.goto("/01-computation");
+    await page.goto("/computation");
     // The sidebar nav has a heading "Chapters" and a list of chapter links
     const sidebar = page.locator('nav.w-64');
     await expect(sidebar).toBeVisible();
@@ -27,7 +27,7 @@ test.describe("Chapter 1: What Is Computation?", () => {
 
   test("chapter navigation has link to next chapter", async ({ page }) => {
     // The chapter nav at the bottom has a "Next" link to ch2
-    const nextLink = page.locator('a[href="/02-neurons"]').last();
+    const nextLink = page.locator('a[href="/neurons"]').last();
     await nextLink.scrollIntoViewIfNeeded();
     await expect(nextLink).toBeVisible();
     await expect(nextLink).toContainText("Neurons and Perceptrons");

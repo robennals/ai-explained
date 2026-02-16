@@ -19,7 +19,7 @@ export const metadata = {
 };
 
 export default function Chapter04() {
-  const { prev, next } = getAdjacentChapters("04-embeddings");
+  const { prev, next } = getAdjacentChapters("embeddings");
 
   return (
     <article>

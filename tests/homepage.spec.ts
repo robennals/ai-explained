@@ -17,7 +17,7 @@ test.describe("Homepage", () => {
     await page.goto("/");
     const startButton = page.getByRole("link", { name: "Start Learning" });
     await expect(startButton).toBeVisible();
-    await expect(startButton).toHaveAttribute("href", "/01-computation");
+    await expect(startButton).toHaveAttribute("href", "/computation");
   });
 
   test("chapter cards link to correct pages", async ({ page }) => {
@@ -25,6 +25,6 @@ test.describe("Homepage", () => {
     const firstChapter = page.getByRole("link", {
       name: /What Is Computation/,
     });
-    await expect(firstChapter).toHaveAttribute("href", "/01-computation");
+    await expect(firstChapter).toHaveAttribute("href", "/computation");
   });
 });

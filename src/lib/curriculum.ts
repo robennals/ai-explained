@@ -12,7 +12,7 @@ export interface Chapter {
 export const chapters: Chapter[] = [
   {
     id: 1,
-    slug: "01-computation",
+    slug: "computation",
     title: "Everything Is Numbers",
     subtitle: "The shape of the AI problem",
     prerequisites: [],
@@ -22,7 +22,7 @@ export const chapters: Chapter[] = [
   },
   {
     id: 2,
-    slug: "02-optimization",
+    slug: "optimization",
     title: "The Power of Incremental Improvement",
     subtitle: "Why reliable tiny improvements beat brilliant design",
     prerequisites: [1],
@@ -32,7 +32,7 @@ export const chapters: Chapter[] = [
   },
   {
     id: 3,
-    slug: "03-neurons",
+    slug: "neurons",
     title: "Neural Networks",
     subtitle: "The building block that can compute anything",
     prerequisites: [2],
@@ -42,7 +42,7 @@ export const chapters: Chapter[] = [
   },
   {
     id: 4,
-    slug: "04-embeddings",
+    slug: "embeddings",
     title: "Embeddings and Vector Spaces",
     subtitle: "How AI turns words into math",
     prerequisites: [3],
@@ -52,7 +52,7 @@ export const chapters: Chapter[] = [
   },
   {
     id: 5,
-    slug: "05-matrix-math",
+    slug: "matrix-math",
     title: "Matrix Math and Linear Transformations",
     subtitle: "Neural networks as geometry",
     prerequisites: [3],
@@ -62,7 +62,7 @@ export const chapters: Chapter[] = [
   },
   {
     id: 6,
-    slug: "06-next-word-prediction",
+    slug: "next-word-prediction",
     title: "Predicting the Next Word",
     subtitle: "Why prediction requires understanding",
     prerequisites: [4, 5],
@@ -72,7 +72,7 @@ export const chapters: Chapter[] = [
   },
   {
     id: 7,
-    slug: "07-attention",
+    slug: "attention",
     title: "Attention",
     subtitle: "Letting words choose what to look at",
     prerequisites: [6],
@@ -81,7 +81,7 @@ export const chapters: Chapter[] = [
   },
   {
     id: 8,
-    slug: "08-transformers",
+    slug: "transformers",
     title: "Transformers",
     subtitle: "The architecture that changed everything",
     prerequisites: [7],
@@ -90,7 +90,7 @@ export const chapters: Chapter[] = [
   },
   {
     id: 9,
-    slug: "09-transfer-learning",
+    slug: "transfer-learning",
     title: "Transfer Learning",
     subtitle: "Train once, use everywhere",
     prerequisites: [8],
@@ -99,7 +99,7 @@ export const chapters: Chapter[] = [
   },
   {
     id: 11,
-    slug: "10-distillation",
+    slug: "distillation",
     title: "Distillation",
     subtitle: "Big model teaches small model",
     prerequisites: [10],
@@ -108,7 +108,7 @@ export const chapters: Chapter[] = [
   },
   {
     id: 12,
-    slug: "11-mixture-of-experts",
+    slug: "mixture-of-experts",
     title: "Mixture of Experts",
     subtitle: "Not every neuron fires for every thought",
     prerequisites: [8],
@@ -117,7 +117,7 @@ export const chapters: Chapter[] = [
   },
   {
     id: 13,
-    slug: "12-thinking-step-by-step",
+    slug: "thinking-step-by-step",
     title: "Thinking Step by Step",
     subtitle: "How AI learned to reason",
     prerequisites: [9],
@@ -126,7 +126,7 @@ export const chapters: Chapter[] = [
   },
   {
     id: 14,
-    slug: "13-scaling-emergence",
+    slug: "scaling-emergence",
     title: "Scaling and Emergence",
     subtitle: "Bigger models, surprising abilities",
     prerequisites: [10],
@@ -135,7 +135,7 @@ export const chapters: Chapter[] = [
   },
   {
     id: 15,
-    slug: "14-alignment",
+    slug: "alignment",
     title: "Teaching AI Right from Wrong",
     subtitle: "RLHF, Goodhart's Law, and the alignment problem",
     prerequisites: [9],
@@ -144,7 +144,7 @@ export const chapters: Chapter[] = [
   },
   {
     id: 16,
-    slug: "15-image-generation",
+    slug: "image-generation",
     title: "Creating Images from Noise",
     subtitle: "Diffusion models and latent space",
     prerequisites: [6, 7],

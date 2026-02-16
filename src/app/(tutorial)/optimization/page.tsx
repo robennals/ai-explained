@@ -15,7 +15,7 @@ export const metadata = {
 };
 
 export default function Chapter02() {
-  const { prev, next } = getAdjacentChapters("02-optimization");
+  const { prev, next } = getAdjacentChapters("optimization");
 
   return (
     <article>
