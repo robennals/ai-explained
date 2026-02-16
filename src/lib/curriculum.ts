@@ -34,10 +34,10 @@ export const chapters: Chapter[] = [
     id: 3,
     slug: "neurons",
     title: "Neural Networks",
-    subtitle: "The building block that can compute anything",
+    subtitle: "Simple building blocks, stacked into intelligence",
     prerequisites: [2],
     description:
-      "A neuron is a smooth logic gate. Stack them with nonlinear activations and they can compute anything — without activation, depth is an illusion.",
+      "A neuron is a smooth logic gate. Stack them in layers and they can compute anything — and backpropagation lets you train all the weights at once.",
     ready: true,
   },
   {

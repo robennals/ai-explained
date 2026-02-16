@@ -27,6 +27,14 @@ const NeuronScaleComparison = dynamic(
   { ssr: false }
 );
 
+const NeuronFreePlay = dynamic(
+  () =>
+    import("@/components/widgets/neurons/NeuronFreePlay").then(
+      (m) => m.NeuronFreePlay
+    ),
+  { ssr: false }
+);
+
 const NeuronPlayground = dynamic(
   () =>
     import("@/components/widgets/neurons/NeuronPlayground").then(
@@ -83,6 +91,38 @@ const SigmoidZoom = dynamic(
   { ssr: false }
 );
 
+const LogicGatePlayground = dynamic(
+  () =>
+    import("@/components/widgets/neurons/LogicGatePlayground").then(
+      (m) => m.LogicGatePlayground
+    ),
+  { ssr: false }
+);
+
+const TwoNeuronXOR = dynamic(
+  () =>
+    import("@/components/widgets/neurons/TwoNeuronXOR").then(
+      (m) => m.TwoNeuronXOR
+    ),
+  { ssr: false }
+);
+
+const GateCircuitDiagram = dynamic(
+  () =>
+    import("@/components/widgets/neurons/GateCircuitDiagram").then(
+      (m) => m.GateCircuitDiagram
+    ),
+  { ssr: false }
+);
+
+const DeepNetworkPlayground = dynamic(
+  () =>
+    import("@/components/widgets/neurons/DeepNetworkPlayground").then(
+      (m) => m.DeepNetworkPlayground
+    ),
+  { ssr: false }
+);
+
 function WidgetSlot({ children }: { children: React.ReactNode }) {
   return (
     <Suspense
@@ -117,6 +157,14 @@ export function NeuronScaleComparisonWidget() {
   return (
     <WidgetSlot>
       <NeuronScaleComparison />
+    </WidgetSlot>
+  );
+}
+
+export function NeuronFreePlayWidget() {
+  return (
+    <WidgetSlot>
+      <NeuronFreePlay />
     </WidgetSlot>
   );
 }
@@ -173,6 +221,38 @@ export function SigmoidZoomWidget() {
   return (
     <WidgetSlot>
       <SigmoidZoom />
+    </WidgetSlot>
+  );
+}
+
+export function LogicGatePlaygroundWidget() {
+  return (
+    <WidgetSlot>
+      <LogicGatePlayground />
+    </WidgetSlot>
+  );
+}
+
+export function TwoNeuronXORWidget() {
+  return (
+    <WidgetSlot>
+      <TwoNeuronXOR />
+    </WidgetSlot>
+  );
+}
+
+export function GateCircuitDiagramWidget() {
+  return (
+    <WidgetSlot>
+      <GateCircuitDiagram />
+    </WidgetSlot>
+  );
+}
+
+export function DeepNetworkPlaygroundWidget() {
+  return (
+    <WidgetSlot>
+      <DeepNetworkPlayground />
     </WidgetSlot>
   );
 }

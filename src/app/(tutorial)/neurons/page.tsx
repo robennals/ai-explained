@@ -5,19 +5,21 @@ import {
   NetworkOverviewWidget,
   NeuronDiagramWidget,
   NeuronScaleComparisonWidget,
+  NeuronFreePlayWidget,
   NeuronPlaygroundWidget,
-  NeuronGeometryWidget,
-  TwoLayerPlaygroundWidget,
-  NetworkTrainerWidget,
   SharpnessExplorerWidget,
   SigmoidExplorerWidget,
   SigmoidZoomWidget,
+  LogicGatePlaygroundWidget,
+  GateCircuitDiagramWidget,
+  TwoNeuronXORWidget,
+  DeepNetworkPlaygroundWidget,
 } from "./widgets";
 
 export const metadata = {
   title: "Neural Networks — Learn AI by Messing About",
   description:
-    "Neural networks are remarkably simple: just neurons stacked in layers. The hard part isn't the architecture — it's finding the right weights.",
+    "A neuron is a smooth logic gate. Stack them in layers and they can compute anything — and backpropagation lets you train all the weights at once.",
 };
 
 export default function Chapter03() {
@@ -31,13 +33,15 @@ export default function Chapter03() {
             NetworkOverviewWidget,
             NeuronDiagramWidget,
             NeuronScaleComparisonWidget,
+            NeuronFreePlayWidget,
             NeuronPlaygroundWidget,
-            NeuronGeometryWidget,
-            TwoLayerPlaygroundWidget,
-            NetworkTrainerWidget,
             SharpnessExplorerWidget,
             SigmoidExplorerWidget,
             SigmoidZoomWidget,
+            LogicGatePlaygroundWidget,
+            GateCircuitDiagramWidget,
+            TwoNeuronXORWidget,
+            DeepNetworkPlaygroundWidget,
           }}
         />
       </div>

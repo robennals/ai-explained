@@ -17,7 +17,6 @@ function outputLabel(v: number): string {
 }
 
 function outputColor(v: number): string {
-  // Red (false) → grey (uncertain) → green (true)
   if (v <= 0.5) {
     const t = v / 0.5;
     const r = Math.round(239 + (160 - 239) * t);
@@ -43,6 +42,8 @@ const INPUT_COMBOS: [number, number][] = [
 type GateName = "AND" | "OR" | "NOT (A)" | "NAND";
 type ChallengeName = GateName | "XOR";
 
+const CHALLENGE_NAMES: ChallengeName[] = ["AND", "OR", "NOT (A)", "NAND", "XOR"];
+
 const GATE_CHECKS: Record<GateName, number[]> = {
   AND: [0, 0, 0, 1],
   OR: [0, 1, 1, 1],
@@ -58,44 +59,6 @@ const GATE_SOLUTIONS: Record<GateName, { w1: number; w2: number; bias: number }>
   "NOT (A)": { w1: -10, w2: 0, bias: 5 },
   NAND: { w1: -10, w2: -10, bias: 15 },
 };
-
-/** Binary cross-entropy loss for a single sample */
-function bceLoss(output: number, target: number): number {
-  const eps = 1e-7;
-  const o = Math.max(eps, Math.min(1 - eps, output));
-  return -(target * Math.log(o) + (1 - target) * Math.log(1 - o));
-}
-
-function computeTotalLoss(w1: number, w2: number, bias: number, targets: number[]): number {
-  let total = 0;
-  for (let i = 0; i < 4; i++) {
-    const [a, b] = INPUT_COMBOS[i];
-    const out = sigmoid(w1 * a + w2 * b + bias);
-    total += bceLoss(out, targets[i]);
-  }
-  return total;
-}
-
-function computeGradients(
-  w1: number,
-  w2: number,
-  bias: number,
-  targets: number[]
-): { dW1: number; dW2: number; dBias: number } {
-  let dW1 = 0,
-    dW2 = 0,
-    dBias = 0;
-  for (let i = 0; i < 4; i++) {
-    const [a, b] = INPUT_COMBOS[i];
-    const z = w1 * a + w2 * b + bias;
-    const out = sigmoid(z);
-    const dLdz = out - targets[i];
-    dW1 += dLdz * a;
-    dW2 += dLdz * b;
-    dBias += dLdz;
-  }
-  return { dW1, dW2, dBias };
-}
 
 // Layout constants
 const W = 680;
@@ -200,11 +163,11 @@ export function NeuronPlayground() {
   const [w1, setW1] = useState(0);
   const [w2, setW2] = useState(0);
   const [bias, setBias] = useState(0);
-  const [activeChallenge, setActiveChallenge] = useState<ChallengeName | null>(null);
+  const [activeChallenge, setActiveChallenge] = useState<ChallengeName>("AND");
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [xorFailed, setXorFailed] = useState(false);
   const animRef = useRef<number>(0);
-  const stateRef = useRef({ w1: 0, w2: 0, bias: 0, step: 0 });
+  const animStartRef = useRef({ w1: 0, w2: 0, bias: 0 });
 
   // Cleanup animation on unmount
   useEffect(() => {
@@ -219,7 +182,7 @@ export function NeuronPlayground() {
     setW1(0);
     setW2(0);
     setBias(0);
-    setActiveChallenge(null);
+    setActiveChallenge("AND");
     setIsOptimizing(false);
     setXorFailed(false);
     if (animRef.current) cancelAnimationFrame(animRef.current);
@@ -231,8 +194,7 @@ export function NeuronPlayground() {
   const prodB = w2 * inputB;
 
   // Get targets for the active challenge
-  const challengeTargets: number[] | null = useMemo(() => {
-    if (!activeChallenge) return null;
+  const challengeTargets: number[] = useMemo(() => {
     if (activeChallenge === "XOR") return XOR_TARGETS;
     return GATE_CHECKS[activeChallenge];
   }, [activeChallenge]);
@@ -243,12 +205,10 @@ export function NeuronPlayground() {
   const bStart = { x: IN_X + 22, y: IN_B_Y };
   const bEnd = { x: SUM_X - 28, y: SUM_Y };
 
-  // Point on arrow A where the weight slider attaches
   const waX = 155;
   const waT = (waX - aStart.x) / (aEnd.x - aStart.x);
   const waY = aStart.y + waT * (aEnd.y - aStart.y);
 
-  // Point on arrow B where the weight slider attaches
   const wbX = 155;
   const wbT = (wbX - bStart.x) / (bEnd.x - bStart.x);
   const wbY = bStart.y + wbT * (bEnd.y - bStart.y);
@@ -307,67 +267,114 @@ export function NeuronPlayground() {
     if (animRef.current) cancelAnimationFrame(animRef.current);
   }, []);
 
-  const showSolution = useCallback((gate: GateName) => {
-    const { w1: gw1, w2: gw2, bias: gb } = GATE_SOLUTIONS[gate];
-    setW1(gw1);
-    setW2(gw2);
-    setBias(gb);
-  }, []);
-
+  // Smooth animation to known-good solution (or wiggle for XOR)
   const startOptimize = useCallback(() => {
-    if (!challengeTargets) return;
     if (isOptimizing) {
       setIsOptimizing(false);
       if (animRef.current) cancelAnimationFrame(animRef.current);
       return;
     }
+
+    const isXor = activeChallenge === "XOR";
     setIsOptimizing(true);
     setXorFailed(false);
-    stateRef.current = { w1, w2, bias, step: 0 };
 
-    const targets = challengeTargets;
-    const isXor = activeChallenge === "XOR";
-    const maxSteps = isXor ? 200 : 500;
+    // Store starting values
+    const startW1 = w1;
+    const startW2 = w2;
+    const startBias = bias;
+    animStartRef.current = { w1: startW1, w2: startW2, bias: startBias };
 
-    const animate = () => {
-      const s = stateRef.current;
-      const lr = 2;
+    if (isXor) {
+      // For XOR: wiggle around trying to find a solution, then fail
+      let step = 0;
+      const maxSteps = 120;
+      const animate = () => {
+        step++;
+        // Jitter weights around randomly, simulating futile search
+        const t = step / maxSteps;
+        const jitter = Math.max(0, 1 - t) * 2;
+        setW1(startW1 + Math.sin(step * 0.3) * jitter * 5);
+        setW2(startW2 + Math.cos(step * 0.4) * jitter * 5);
+        setBias(startBias + Math.sin(step * 0.5) * jitter * 3);
 
-      const grads = computeGradients(s.w1, s.w2, s.bias, targets);
-      s.w1 = Math.max(-15, Math.min(15, s.w1 - lr * grads.dW1));
-      s.w2 = Math.max(-15, Math.min(15, s.w2 - lr * grads.dW2));
-      s.bias = Math.max(-20, Math.min(20, s.bias - lr * grads.dBias));
-      s.step++;
-
-      setW1(s.w1);
-      setW2(s.w2);
-      setBias(s.bias);
-
-      const loss = computeTotalLoss(s.w1, s.w2, s.bias, targets);
-      if (!isXor && loss < 0.2) {
-        setIsOptimizing(false);
-        return;
-      }
-      if (s.step >= maxSteps) {
-        setIsOptimizing(false);
-        if (isXor) setXorFailed(true);
-        return;
-      }
+        if (step >= maxSteps) {
+          // Snap back and show failure
+          setW1(startW1);
+          setW2(startW2);
+          setBias(startBias);
+          setIsOptimizing(false);
+          setXorFailed(true);
+          return;
+        }
+        animRef.current = requestAnimationFrame(animate);
+      };
       animRef.current = requestAnimationFrame(animate);
-    };
+    } else {
+      // Smoothly animate to known-good solution
+      const target = GATE_SOLUTIONS[activeChallenge as GateName];
+      const duration = 60; // frames
+      let step = 0;
 
-    animRef.current = requestAnimationFrame(animate);
-  }, [isOptimizing, w1, w2, bias, challengeTargets, activeChallenge]);
+      const animate = () => {
+        step++;
+        // Ease-out cubic
+        const t = Math.min(1, step / duration);
+        const ease = 1 - Math.pow(1 - t, 3);
+
+        setW1(startW1 + (target.w1 - startW1) * ease);
+        setW2(startW2 + (target.w2 - startW2) * ease);
+        setBias(startBias + (target.bias - startBias) * ease);
+
+        if (t >= 1) {
+          setIsOptimizing(false);
+          return;
+        }
+        animRef.current = requestAnimationFrame(animate);
+      };
+      animRef.current = requestAnimationFrame(animate);
+    }
+  }, [isOptimizing, w1, w2, bias, activeChallenge]);
 
   return (
     <WidgetContainer
-      title="Neuron Playground"
-      description="Drag the sliders to adjust inputs, weights, and bias."
+      title="Neurons as Smooth Logic"
+      description="Can a single neuron compute logic gates? Try each challenge."
       onReset={reset}
     >
-      <div className="mb-2 text-center font-mono text-sm text-foreground">
-        output = sigmoid(weight<sub>A</sub> × input<sub>A</sub> + weight<sub>B</sub> × input<sub>B</sub> + bias)
+      {/* Challenge tabs at top */}
+      <div className="flex gap-1 mb-4 justify-center flex-wrap">
+        {CHALLENGE_NAMES.map((name) => {
+          const isXor = name === "XOR";
+          const solved = !isXor && gatesSolved[name];
+          const active = activeChallenge === name;
+          return (
+            <button
+              key={name}
+              onClick={() => activateChallenge(name)}
+              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors cursor-pointer ${
+                active
+                  ? isXor
+                    ? "bg-error text-white"
+                    : "bg-accent text-white"
+                  : solved
+                  ? "bg-success/10 text-success"
+                  : isXor
+                  ? "bg-error/10 text-error hover:bg-error/20"
+                  : "bg-foreground/[0.05] text-muted hover:text-foreground"
+              }`}
+            >
+              {solved ? "\u2713 " : ""}
+              {name}
+            </button>
+          );
+        })}
       </div>
+
+      <div className="mb-2 text-center font-mono text-sm text-foreground">
+        output = sigmoid(weight<sub>A</sub> &times; input<sub>A</sub> + weight<sub>B</sub> &times; input<sub>B</sub> + bias)
+      </div>
+
       {/* Interactive neuron diagram */}
       <svg
         viewBox={`0 0 ${W} ${H}`}
@@ -474,7 +481,6 @@ export function NeuronPlayground() {
           strokeWidth="1.5"
           markerEnd="url(#np-arrow)"
         />
-        {/* Dotted line from arrow down to weight slider */}
         <line
           x1={waX}
           y1={waY}
@@ -496,7 +502,6 @@ export function NeuronPlayground() {
           interpret={interpretWeight}
           width={90}
         />
-        {/* Product label on the arrow near the sum end */}
         <text
           x={230}
           y={aStart.y + 0.82 * (aEnd.y - aStart.y) - 8}
@@ -516,7 +521,6 @@ export function NeuronPlayground() {
           strokeWidth="1.5"
           markerEnd="url(#np-arrow)"
         />
-        {/* Dotted line from arrow down to weight slider */}
         <line
           x1={wbX}
           y1={wbY}
@@ -538,7 +542,6 @@ export function NeuronPlayground() {
           interpret={interpretWeight}
           width={90}
         />
-        {/* Product label on the arrow near the sum end */}
         <text
           x={230}
           y={bStart.y + 0.82 * (bEnd.y - bStart.y) + 14}
@@ -628,9 +631,7 @@ export function NeuronPlayground() {
         >
           Activation
         </text>
-        {/* Sigmoid curve */}
         <path d={sigmoidPath} fill="none" stroke="#10b981" strokeWidth="2" />
-        {/* Operating point crosshairs */}
         <line
           x1={opSx}
           y1={pB}
@@ -696,8 +697,6 @@ export function NeuronPlayground() {
         >
           {output.toFixed(2)}
         </text>
-
-        {/* Human language label below output */}
         <text
           x={OUT_X}
           y={OUT_Y + 40}
@@ -708,7 +707,7 @@ export function NeuronPlayground() {
         </text>
       </svg>
 
-      {/* Truth table + gate challenges below */}
+      {/* Truth table + optimize button below */}
       <div className="mt-4 flex flex-col gap-4 lg:flex-row">
         {/* Truth table */}
         <div className="flex-1">
@@ -728,30 +727,19 @@ export function NeuronPlayground() {
                   <th className="px-2 py-1.5 text-left font-medium text-muted">
                     Output
                   </th>
-                  {challengeTargets && (
-                    <th className="px-2 py-1.5 text-left font-medium text-muted">
-                      Target
-                    </th>
-                  )}
-                  {challengeTargets && (
-                    <th className="px-2 py-1.5 text-center font-medium text-muted">
-                    </th>
-                  )}
-                  {!challengeTargets && (
-                    <th className="px-2 py-1.5 text-left font-medium text-muted">
-                      Meaning
-                    </th>
-                  )}
+                  <th className="px-2 py-1.5 text-left font-medium text-muted">
+                    Target
+                  </th>
+                  <th className="px-2 py-1.5 text-center font-medium text-muted">
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {truthTable.map(({ a, b, output: out }, i) => {
-                  const isActive =
-                    inputA === a && inputB === b;
-                  const target = challengeTargets ? challengeTargets[i] : null;
-                  const correct = target !== null
-                    ? (target === 1 ? out > 0.8 : out < 0.2)
-                    : null;
+                  const isActive = inputA === a && inputB === b;
+                  const target = challengeTargets[i];
+                  const correct =
+                    target === 1 ? out > 0.8 : out < 0.2;
                   return (
                     <tr
                       key={i}
@@ -775,30 +763,21 @@ export function NeuronPlayground() {
                           {out.toFixed(2)}
                         </span>
                       </td>
-                      {target !== null && (
-                        <td className="px-2 py-1.5">
-                          <span
-                            className="inline-flex h-5 min-w-[2rem] items-center justify-center rounded text-[10px] font-bold text-white px-1"
-                            style={{ background: outputColor(target) }}
-                          >
-                            {target}
-                          </span>
-                        </td>
-                      )}
-                      {target !== null && (
-                        <td className="px-2 py-1.5 text-center">
-                          {correct ? (
-                            <span className="text-success font-bold">&#10003;</span>
-                          ) : (
-                            <span className="text-error font-bold">&#10007;</span>
-                          )}
-                        </td>
-                      )}
-                      {target === null && (
-                        <td className="px-2 py-1.5 text-muted text-[10px]">
-                          {outputLabel(out)}
-                        </td>
-                      )}
+                      <td className="px-2 py-1.5">
+                        <span
+                          className="inline-flex h-5 min-w-[2rem] items-center justify-center rounded text-[10px] font-bold text-white px-1"
+                          style={{ background: outputColor(target) }}
+                        >
+                          {target}
+                        </span>
+                      </td>
+                      <td className="px-2 py-1.5 text-center">
+                        {correct ? (
+                          <span className="text-success font-bold">&#10003;</span>
+                        ) : (
+                          <span className="text-error font-bold">&#10007;</span>
+                        )}
+                      </td>
                     </tr>
                   );
                 })}
@@ -807,93 +786,26 @@ export function NeuronPlayground() {
           </div>
         </div>
 
-        {/* Gate challenges */}
-        <div className="lg:w-64">
-          <div className="text-xs font-semibold text-foreground mb-2">
-            Challenges
-          </div>
-          <div className="text-[10px] text-muted mb-2">
-            Click a gate to see its target outputs. Can you find the right weights?
-          </div>
-          <div className="flex flex-col gap-1.5">
-            {(Object.keys(GATE_CHECKS) as GateName[]).map((gate) => (
-              <div
-                key={gate}
-                className={`flex items-center gap-1 rounded-md transition-colors ${
-                  gatesSolved[gate]
-                    ? "bg-success/10"
-                    : activeChallenge === gate
-                    ? "bg-accent/10"
-                    : ""
-                }`}
-              >
-                <span
-                  className={`flex-1 px-3 py-1.5 text-xs font-medium cursor-pointer transition-colors ${
-                    gatesSolved[gate]
-                      ? "text-success"
-                      : activeChallenge === gate
-                      ? "text-accent"
-                      : "text-muted hover:text-foreground"
-                  }`}
-                  onClick={() => activateChallenge(gate)}
-                >
-                  {gatesSolved[gate] ? "✓ " : activeChallenge === gate ? "▸ " : "○ "}
-                  {gate}
-                </span>
-                {activeChallenge === gate && !gatesSolved[gate] && (
-                  <span
-                    className="px-2 py-1.5 text-[10px] font-medium text-muted cursor-pointer hover:text-foreground"
-                    onClick={() => showSolution(gate)}
-                  >
-                    Show
-                  </span>
-                )}
-              </div>
-            ))}
-            <div
-              className={`flex items-center gap-1 rounded-md transition-colors cursor-pointer ${
-                activeChallenge === "XOR"
-                  ? "bg-error/10"
-                  : ""
-              }`}
-              onClick={() => activateChallenge("XOR")}
-            >
-              <span
-                className={`flex-1 px-3 py-1.5 text-xs font-medium ${
-                  activeChallenge === "XOR"
-                    ? "text-error"
-                    : "text-error/60 hover:text-error"
-                }`}
-              >
-                {activeChallenge === "XOR" ? "▸ " : "○ "}
-                XOR
-              </span>
+        {/* Optimize section */}
+        <div className="lg:w-48 flex flex-col gap-2 justify-center">
+          <button
+            onClick={startOptimize}
+            className={`w-full px-3 py-2 text-xs font-medium rounded-md transition-colors cursor-pointer ${
+              isOptimizing
+                ? "bg-error text-white hover:bg-error/80"
+                : "bg-accent text-white hover:bg-accent/80"
+            }`}
+          >
+            {isOptimizing ? "Stop" : "Optimize"}
+          </button>
+          {xorFailed && (
+            <div className="text-[11px] font-medium text-error text-center">
+              Can&apos;t solve it with one neuron!
             </div>
-          </div>
-
-          {/* Optimize button when a challenge is active */}
-          {activeChallenge && (
-            <div className="mt-3 flex flex-col gap-2">
-              <button
-                onClick={startOptimize}
-                className={`w-full px-3 py-2 text-xs font-medium rounded-md transition-colors ${
-                  isOptimizing
-                    ? "bg-error text-white hover:bg-error/80"
-                    : "bg-accent text-white hover:bg-accent/80"
-                }`}
-              >
-                {isOptimizing ? "Stop" : "Optimize"}
-              </button>
-              {xorFailed && (
-                <div className="text-[11px] font-medium text-error text-center">
-                  Can&apos;t solve it with one neuron!
-                </div>
-              )}
-              {!xorFailed && activeChallenge !== "XOR" && gatesSolved[activeChallenge] && (
-                <div className="text-[11px] font-medium text-success text-center">
-                  Solved!
-                </div>
-              )}
+          )}
+          {!xorFailed && activeChallenge !== "XOR" && gatesSolved[activeChallenge] && (
+            <div className="text-[11px] font-medium text-success text-center">
+              Solved!
             </div>
           )}
         </div>
