@@ -36,11 +36,9 @@ You might think of a text message as letters, a photo as colors, a song as sound
 
 Try it yourself:
 
-<NumbersEverywhereWidget />
-
-<TryIt>
+<NumbersEverywhereWidget>
 In the Text tab, type your name and watch each letter turn into a number. In the Color tab, try to make your favorite color using just three sliders. In the Image tab, paint something and notice: the computer only sees numbers. In the Sound tab, click a preset like "aaah" or "eeee" and press Play — you'll hear a synthesized vowel, and see the raw numbers that represent it.
-</TryIt>
+</NumbersEverywhereWidget>
 
 <KeyInsight>
 **Everything a computer works with — text, images, colors, sound, video — is just lists of numbers.** This means every kind of "thinking" a computer does is really just *turning one list of numbers into another*.
@@ -57,11 +55,9 @@ Once you see that everything is numbers, something clicks: every kind of "intell
 
 Every single one of these is the same shape: **numbers in, numbers out**.
 
-<FunctionMachineWidget />
-
-<TryIt>
+<FunctionMachineWidget>
 Click through the different tasks. Notice that despite doing wildly different things — recognizing images, translating text, answering questions, generating art — they all have the same shape: a list of numbers goes in, a list of numbers comes out. The only difference is what the function *does*.
-</TryIt>
+</FunctionMachineWidget>
 
 So all of AI reduces to one problem: **find the right function**.
 
@@ -79,11 +75,9 @@ Let's make this concrete. Below is a model with just 4 parameters (a, b, c, d) t
 
 There's a target curve (the blue one) — that's the function we *want*. Your job: adjust the four knobs to make the red curve match the blue one.
 
-<ParameterPlaygroundWidget />
-
-<TryIt>
+<ParameterPlaygroundWidget>
 Try to match the target curve by adjusting the sliders. Pay attention to how each parameter affects the shape. Then hit "Reveal best fit" to see the answer. Notice: even with just 4 parameters, it's surprisingly hard to find the right values by hand.
-</TryIt>
+</ParameterPlaygroundWidget>
 
 <KeyInsight>
 **A model is a machine with adjustable knobs.** Different knob settings compute different functions. Finding the right function means finding the right knob settings. With just 4 knobs, hand-tuning is already frustrating. Real AI models have *billions* of knobs. We're going to need a way to tune them automatically.
@@ -107,11 +101,9 @@ In theory, this works! Every function over finite inputs can be represented as a
 
 Let's see how big that table would need to be:
 
-<LookupTableExplosionWidget />
-
-<TryIt>
+<LookupTableExplosionWidget>
 Start with a tiny 2&times;2 black-and-white image — only 16 entries, totally manageable. Now step up to a 4&times;4 image. Then switch to grayscale. Then try a 28&times;28 image (the size used in a classic AI benchmark). Watch the number of entries blow past the atoms in the universe. Try the Text and Sound tabs too — a single tweet in Unicode already requires an incomprehensibly large table.
-</TryIt>
+</LookupTableExplosionWidget>
 
 The lookup table approach fails spectacularly. Even for a tiny 8×8 grayscale image — smaller than the smallest image used in real AI — the number of possible inputs is 256⁶⁴, a number with over 150 digits. That already dwarfs the number of atoms in the observable universe. And a real photo has *millions* of pixels. You could never build a table that big. You could never even *count* that high.
 

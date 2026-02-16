@@ -49,7 +49,7 @@ export function SharpnessExplorer() {
           <input
             type="range"
             min={0.2}
-            max={20}
+            max={50}
             step={0.1}
             value={sharpness}
             onChange={(e) => setSharpness(parseFloat(e.target.value))}

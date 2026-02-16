@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { Suspense } from "react";
+import { TryItProvider } from "@/components/widgets/shared/WidgetContainer";
 
 const OptimizationGame = dynamic(
   () =>
@@ -35,7 +36,7 @@ const GradientVisualization = dynamic(
   { ssr: false }
 );
 
-function WidgetSlot({ children }: { children: React.ReactNode }) {
+function WidgetSlot({ children, tryIt, label }: { children: React.ReactNode; tryIt?: React.ReactNode; label?: string }) {
   return (
     <Suspense
       fallback={
@@ -44,38 +45,40 @@ function WidgetSlot({ children }: { children: React.ReactNode }) {
         </div>
       }
     >
-      {children}
+      <TryItProvider content={tryIt} label={label}>
+        {children}
+      </TryItProvider>
     </Suspense>
   );
 }
 
-export function OptimizationGameWidget() {
+export function OptimizationGameWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children}>
       <OptimizationGame />
     </WidgetSlot>
   );
 }
 
-export function SmoothVsRuggedWidget() {
+export function SmoothVsRuggedWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children}>
       <SmoothVsRugged />
     </WidgetSlot>
   );
 }
 
-export function ModelComparisonWidget() {
+export function ModelComparisonWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children}>
       <ModelComparison />
     </WidgetSlot>
   );
 }
 
-export function GradientVisualizationWidget() {
+export function GradientVisualizationWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children}>
       <GradientVisualization />
     </WidgetSlot>
   );

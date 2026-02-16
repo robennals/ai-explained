@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { Suspense } from "react";
+import { TryItProvider } from "@/components/widgets/shared/WidgetContainer";
 
 const NetworkOverview = dynamic(
   () =>
@@ -123,7 +124,7 @@ const DeepNetworkPlayground = dynamic(
   { ssr: false }
 );
 
-function WidgetSlot({ children }: { children: React.ReactNode }) {
+function WidgetSlot({ children, tryIt, label }: { children: React.ReactNode; tryIt?: React.ReactNode; label?: string }) {
   return (
     <Suspense
       fallback={
@@ -132,126 +133,128 @@ function WidgetSlot({ children }: { children: React.ReactNode }) {
         </div>
       }
     >
-      {children}
+      <TryItProvider content={tryIt} label={label}>
+        {children}
+      </TryItProvider>
     </Suspense>
   );
 }
 
-export function NetworkOverviewWidget() {
+export function NetworkOverviewWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children}>
       <NetworkOverview />
     </WidgetSlot>
   );
 }
 
-export function NeuronDiagramWidget() {
+export function NeuronDiagramWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children}>
       <NeuronDiagram />
     </WidgetSlot>
   );
 }
 
-export function NeuronScaleComparisonWidget() {
+export function NeuronScaleComparisonWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children}>
       <NeuronScaleComparison />
     </WidgetSlot>
   );
 }
 
-export function NeuronFreePlayWidget() {
+export function NeuronFreePlayWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children}>
       <NeuronFreePlay />
     </WidgetSlot>
   );
 }
 
-export function NeuronPlaygroundWidget() {
+export function NeuronPlaygroundWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children}>
       <NeuronPlayground />
     </WidgetSlot>
   );
 }
 
-export function NeuronGeometryWidget() {
+export function NeuronGeometryWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children}>
       <NeuronGeometry />
     </WidgetSlot>
   );
 }
 
-export function TwoLayerPlaygroundWidget() {
+export function TwoLayerPlaygroundWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children}>
       <TwoLayerPlayground />
     </WidgetSlot>
   );
 }
 
-export function NetworkTrainerWidget() {
+export function NetworkTrainerWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children}>
       <NetworkTrainer />
     </WidgetSlot>
   );
 }
 
-export function SharpnessExplorerWidget() {
+export function SharpnessExplorerWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children}>
       <SharpnessExplorer />
     </WidgetSlot>
   );
 }
 
-export function SigmoidExplorerWidget() {
+export function SigmoidExplorerWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children}>
       <SigmoidExplorer />
     </WidgetSlot>
   );
 }
 
-export function SigmoidZoomWidget() {
+export function SigmoidZoomWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children}>
       <SigmoidZoom />
     </WidgetSlot>
   );
 }
 
-export function LogicGatePlaygroundWidget() {
+export function LogicGatePlaygroundWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children}>
       <LogicGatePlayground />
     </WidgetSlot>
   );
 }
 
-export function TwoNeuronXORWidget() {
+export function TwoNeuronXORWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children}>
       <TwoNeuronXOR />
     </WidgetSlot>
   );
 }
 
-export function GateCircuitDiagramWidget() {
+export function GateCircuitDiagramWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children}>
       <GateCircuitDiagram />
     </WidgetSlot>
   );
 }
 
-export function DeepNetworkPlaygroundWidget() {
+export function DeepNetworkPlaygroundWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children}>
       <DeepNetworkPlayground />
     </WidgetSlot>
   );

@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { Suspense } from "react";
+import { TryItProvider } from "@/components/widgets/shared/WidgetContainer";
 
 const ToyTransformer = dynamic(
   () =>
@@ -27,7 +28,7 @@ const StoryGenerator = dynamic(
   { ssr: false }
 );
 
-function WidgetSlot({ children }: { children: React.ReactNode }) {
+function WidgetSlot({ children, tryIt, label }: { children: React.ReactNode; tryIt?: React.ReactNode; label?: string }) {
   return (
     <Suspense
       fallback={
@@ -36,30 +37,32 @@ function WidgetSlot({ children }: { children: React.ReactNode }) {
         </div>
       }
     >
-      {children}
+      <TryItProvider content={tryIt} label={label}>
+        {children}
+      </TryItProvider>
     </Suspense>
   );
 }
 
-export function ToyTransformerWidget() {
+export function ToyTransformerWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children} label="Explore it">
       <ToyTransformer />
     </WidgetSlot>
   );
 }
 
-export function StoryTransformerWidget() {
+export function StoryTransformerWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children}>
       <StoryTransformer />
     </WidgetSlot>
   );
 }
 
-export function StoryGeneratorWidget() {
+export function StoryGeneratorWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children}>
       <StoryGenerator />
     </WidgetSlot>
   );

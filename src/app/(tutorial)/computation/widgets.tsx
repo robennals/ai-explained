@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { Suspense } from "react";
+import { TryItProvider } from "@/components/widgets/shared/WidgetContainer";
 
 const NumbersEverywhere = dynamic(
   () =>
@@ -35,7 +36,7 @@ const LookupTableExplosion = dynamic(
   { ssr: false }
 );
 
-function WidgetSlot({ children }: { children: React.ReactNode }) {
+function WidgetSlot({ children, tryIt, label }: { children: React.ReactNode; tryIt?: React.ReactNode; label?: string }) {
   return (
     <Suspense
       fallback={
@@ -44,38 +45,40 @@ function WidgetSlot({ children }: { children: React.ReactNode }) {
         </div>
       }
     >
-      {children}
+      <TryItProvider content={tryIt} label={label}>
+        {children}
+      </TryItProvider>
     </Suspense>
   );
 }
 
-export function NumbersEverywhereWidget() {
+export function NumbersEverywhereWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children}>
       <NumbersEverywhere />
     </WidgetSlot>
   );
 }
 
-export function FunctionMachineWidget() {
+export function FunctionMachineWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children} label="Explore it">
       <FunctionMachine />
     </WidgetSlot>
   );
 }
 
-export function ParameterPlaygroundWidget() {
+export function ParameterPlaygroundWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children}>
       <ParameterPlayground />
     </WidgetSlot>
   );
 }
 
-export function LookupTableExplosionWidget() {
+export function LookupTableExplosionWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children} label="Explore it">
       <LookupTableExplosion />
     </WidgetSlot>
   );

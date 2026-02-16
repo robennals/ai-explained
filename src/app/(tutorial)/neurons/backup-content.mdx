@@ -11,11 +11,9 @@ AND is easy: draw a line that puts (1,1) on one side and everything else on the 
 
 This is called **linear separability**: a problem is linearly separable if you can solve it with a single straight line (or, in higher dimensions, a flat surface). AND and OR are linearly separable. XOR is not.
 
-<DecisionBoundaryExplorerWidget />
-
-<TryIt>
+<DecisionBoundaryExplorerWidget>
 Drag the line to solve AND — isolate the (1,1) corner from everything else. Then solve OR. Then try XOR: put (0,1) and (1,0) together while keeping (0,0) and (1,1) apart. No matter how you rotate or shift the line, you can't get all four right. Scroll to rotate, drag to move. XOR is fundamentally not a straight-line problem.
-</TryIt>
+</DecisionBoundaryExplorerWidget>
 
 <Callout type="info" title="The XOR Crisis">
 In 1969, Minsky and Papert published *Perceptrons*, proving that single-layer networks can't solve XOR. This was taken as proof that neural networks were a dead end. It killed most neural network research for over a decade — the "AI winter." The fix was always sitting there, obvious in hindsight: use more than one layer.
@@ -36,11 +34,9 @@ That's XOR. Three neurons, two layers — problem solved.
 
 This is the fundamental insight about depth: **each layer transforms the data into a new representation where the next layer's job is easier.** The hidden layer doesn't solve the problem directly. It reshapes it into a problem that a single line *can* solve.
 
-<XORBreakthroughWidget />
-
-<TryIt>
+<XORBreakthroughWidget>
 Switch from 1 layer to 2 layers. Watch the right panel — it shows what the hidden layer "sees." The four input points have been *moved*: in this new space, the two XOR-true cases are on one side and the two XOR-false cases are on the other. The hidden layer transformed an impossible problem into an easy one.
-</TryIt>
+</XORBreakthroughWidget>
 
 <KeyInsight>
 **Depth transforms problems.** A single neuron draws one line. A hidden layer transforms the entire input space — stretching, folding, rearranging the points — so that what was previously inseparable becomes separable. Each layer makes the next layer's job easier. This is why neural networks are built in layers.
@@ -60,11 +56,9 @@ It's like multiplying a number by 3, then by 5, then by 2. You could have just m
 
 The activation function *breaks* this. Because it bends the curve — it's not a straight line — two layers with activation are genuinely more powerful than one. This nonlinearity is what makes depth meaningful. Remove it, and no matter how elaborate your architecture looks, you're still stuck with a single straight line.
 
-<LinearCollapseDemoWidget />
-
-<TryIt>
+<LinearCollapseDemoWidget>
 Turn off the activation function and set depth to 5 layers. Hit Train. No matter how long it runs, the boundary stays straight — five layers of nothing is still nothing. Now turn activation back on, keep 5 layers, hit Train. Watch the boundary bend and curve around the data. The activation function isn't decoration. It's the entire reason depth works.
-</TryIt>
+</LinearCollapseDemoWidget>
 
 <KeyInsight>
 **Without activation functions, depth is an illusion.** A stack of linear layers always collapses to a single linear layer — the decision boundary is a straight line no matter how deep you go. The nonlinear activation function is what makes each layer *genuinely add* to the network's expressive power.
@@ -78,11 +72,9 @@ The answer, surprisingly, is: **anything**. This is the **universal approximatio
 
 Let's see this in action. Below, you can place points on a canvas — blue and orange — and watch a neural network learn to classify them in real time. Draw any pattern you like: a circle inside a ring, a zigzag, a smiley face. Then see how the architecture affects what the network can learn.
 
-<NeuralNetworkTrainerWidget />
-
-<TryIt>
+<NeuralNetworkTrainerWidget>
 Load the "circle" preset — blue points surrounded by orange. With 1 layer, the boundary can't wrap around the circle. Switch to 2 layers and watch it learn the ring shape. Now try "spirals" — that's the classic hard problem. You'll need at least 3 layers and more neurons. Try drawing your own pattern and experimenting with the architecture controls.
-</TryIt>
+</NeuralNetworkTrainerWidget>
 
 <Callout type="info" title="Regression vs. Classification">
 The point-classification mode above predicts *categories* — blue or orange. That's **classification**. But the same neural network architecture can also predict *numbers* — how high is a curve at this point? That's **regression**. Same architecture, same training algorithm. The only difference is how you interpret the output.
@@ -100,11 +92,10 @@ Sigmoid has flat regions near 0 and 1 — once you're deep in the flat part, the
 
 **Swish** — `x x sigmoid(x)` — is a modern compromise that avoids dead neurons while keeping signal flowing.
 
-<ActivationFunctionExplorerWidget />
-
-<TryIt>
+<ActivationFunctionExplorerWidget>
 Set depth to 8 layers with sigmoid. Hit Train and watch the gradient heatmap — the early layers (top rows) are dark, meaning the learning signal has faded to nearly zero. They're barely learning. Switch to ReLU: the signal flows better. Switch to Swish: signals flow *and* fewer neurons die. This is why modern networks rarely use sigmoid as their activation.
-</TryIt>
+
+</ActivationFunctionExplorerWidget>
 
 {/* ================================================================ */}
 {/* Sections below were moved from main content.mdx during the      */}
@@ -115,21 +106,17 @@ Set depth to 8 layers with sigmoid. Hit Train and watch the gradient heatmap —
 
 Instead of truth tables, think about *space*. A neuron takes two inputs — call them A and B. Every possible combination of A and B is a point in a 2D square. The neuron's output assigns a color to each point: green for high, red for low. What does that map look like?
 
-<NeuronGeometryWidget />
-
-<TryIt>
+<NeuronGeometryWidget>
 Click anywhere on the colored map (called a heatmap) to probe that point. Try the challenges and watch the colored regions shift. Hit Optimize on AND or OR and watch the boundary snap into place. Then try XOR — no matter what the optimizer does, the boundary stays a straight line, and it can't separate the diagonal corners.
-</TryIt>
+</NeuronGeometryWidget>
 
 The key insight is geometric: a single neuron draws a **straight line** through input space. Everything on one side is green (high), everything on the other side is red (low). By adjusting the weights and bias, you can tilt and shift this line — but you can't bend it. AND, OR, and NOT are all separable by a single line. XOR is not: the "true" corners (0,1) and (1,0) sit on opposite diagonals, and no single line can separate them from the "false" corners.
 
 What if we add a second layer? Two hidden neurons each draw their own line. The output neuron combines them. Two lines can carve out a region that one line never could.
 
-<TwoLayerPlaygroundWidget />
-
-<TryIt>
+<TwoLayerPlaygroundWidget>
 Select XOR and click Optimize — watch two straight boundaries combine to separate the diagonal corners. Try the other solvable challenges (Vertical Band, Horizontal Band, Wedge) to see different two-line combinations. Then try Checkerboard or Center Only — even the optimizer can't solve these with just two hidden neurons.
-</TryIt>
+</TwoLayerPlaygroundWidget>
 
 <Callout type="info" title="When Training Gets Stuck">
 Sometimes the optimizer fails on a problem it should be able to solve. This happens when the random starting weights land in a flat region of the loss landscape — the gradients are too small for the optimizer to find its way out. The fix is simple: randomize the weights and try again. A different starting point often works on the first retry. We'll explore why this happens and how real systems handle it in later chapters.
@@ -151,11 +138,9 @@ The algorithm that computes all these gradients at once is called **backpropagat
 
 Let's see this in action. The widget below lets you build networks of different sizes and train them on various patterns. The challenge: what's the smallest network that can solve each one?
 
-<NetworkTrainerWidget />
-
-<TryIt>
+<NetworkTrainerWidget>
 Load a preset pattern and hit Train. Can you find the **smallest** network that solves each one? Try XOR with 1 layer — it fails. Switch to 2 layers and it works. The Circle needs more neurons per layer. Spirals need multiple layers and many neurons. You can also draw your own patterns: click to place green dots, shift-click or right-click for red, then train to see if the network can learn your pattern. Use "Reset Network" to re-randomize weights without losing your dots, or "Show Optimal" to see the smallest network that works.
-</TryIt>
+</NetworkTrainerWidget>
 
 <KeyInsight>
 **Backpropagation makes deep networks trainable.** The training signal flows backward from the output through every layer, telling each weight which way to adjust. Combined with the smoothness of neurons, this means you can optimize networks with millions of weights — which is how modern AI works.

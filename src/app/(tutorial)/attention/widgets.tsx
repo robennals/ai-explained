@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { Suspense } from "react";
+import { TryItProvider } from "@/components/widgets/shared/WidgetContainer";
 
 const WhyAttentionMatters = dynamic(
   () =>
@@ -99,7 +100,7 @@ const RotationPosition = dynamic(
   { ssr: false }
 );
 
-function WidgetSlot({ children }: { children: React.ReactNode }) {
+function WidgetSlot({ children, tryIt, label }: { children: React.ReactNode; tryIt?: React.ReactNode; label?: string }) {
   return (
     <Suspense
       fallback={
@@ -108,102 +109,104 @@ function WidgetSlot({ children }: { children: React.ReactNode }) {
         </div>
       }
     >
-      {children}
+      <TryItProvider content={tryIt} label={label}>
+        {children}
+      </TryItProvider>
     </Suspense>
   );
 }
 
-export function WhyAttentionMattersWidget() {
+export function WhyAttentionMattersWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children} label="Explore it">
       <WhyAttentionMatters />
     </WidgetSlot>
   );
 }
 
-export function ToyVocabTableWidget() {
+export function ToyVocabTableWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children}>
       <ToyVocabTable />
     </WidgetSlot>
   );
 }
 
-export function SoftmaxExplorerWidget() {
+export function SoftmaxExplorerWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children} label="Explore it">
       <SoftmaxExplorer />
     </WidgetSlot>
   );
 }
 
-export function ToyAttentionWidget() {
+export function ToyAttentionWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children} label="Explore it">
       <ToyAttention />
     </WidgetSlot>
   );
 }
 
-export function ToyValuesWidget() {
+export function ToyValuesWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children}>
       <ToyValues />
     </WidgetSlot>
   );
 }
 
-export function AttentionPlaygroundWidget() {
+export function AttentionPlaygroundWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children}>
       <AttentionPlayground />
     </WidgetSlot>
   );
 }
 
-export function PatternAttentionWidget() {
+export function PatternAttentionWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children}>
       <PatternAttention />
     </WidgetSlot>
   );
 }
 
-export function AttentionStepThroughWidget() {
+export function AttentionStepThroughWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children}>
       <AttentionStepThrough />
     </WidgetSlot>
   );
 }
 
-export function MultiHeadWidget() {
+export function MultiHeadWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children}>
       <MultiHead />
     </WidgetSlot>
   );
 }
 
-export function BertAttentionWidget() {
+export function BertAttentionWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children} label="Explore it">
       <BertAttention />
     </WidgetSlot>
   );
 }
 
-export function RoPEToyTokensWidget() {
+export function RoPEToyTokensWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children}>
       <RoPEToyTokens />
     </WidgetSlot>
   );
 }
 
-export function RotationPositionWidget() {
+export function RotationPositionWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot>
+    <WidgetSlot tryIt={children}>
       <RotationPosition />
     </WidgetSlot>
   );

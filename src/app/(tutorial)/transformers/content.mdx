@@ -41,11 +41,9 @@ That's the whole transformer: **embed → (attend → feed-forward) × N layers 
 
 Let's watch data flow through an actual (tiny) transformer. This one has just 1 layer and works on colored symbols instead of words — small enough to see every computation.
 
-<ToyTransformerWidget />
-
-<TryIt>
+<ToyTransformerWidget>
 Step through each stage: input → embeddings → attention → feed-forward → output. Watch how the embedding vectors flow through the network. Try different examples and see how the attention pattern changes. The model has learned that the most frequent color in the sequence predicts the next symbol's color.
-</TryIt>
+</ToyTransformerWidget>
 
 Even this toy transformer follows the same pattern as the real ones: embed the input, run attention to gather context, process with a feed-forward network, and produce output scores. The only difference is scale — a real transformer has bigger embeddings, more layers, more heads, and a vocabulary of words instead of colored shapes.
 
@@ -55,11 +53,9 @@ Same architecture, trained on children's stories instead of symbol patterns. Now
 
 Watch what happens when it predicts the next word of real text:
 
-<StoryTransformerWidget />
-
-<TryIt>
+<StoryTransformerWidget>
 Start with one of the preset prompts and click predictions to extend the story. Notice how the predictions make sense — after "Once upon a time there was a little," it predicts "girl," "boy," "dog." These are reasonable! The model has never been told what a story is — it learned narrative structure purely from predicting next words.
-</TryIt>
+</StoryTransformerWidget>
 
 Think about what the model had to learn to make these predictions:
 
@@ -81,11 +77,9 @@ If you can predict the next word, you can *write*. The recipe is simple:
 
 This loop — predict, append, repeat — is called **auto-regressive generation**. It's exactly how ChatGPT, Claude, and every large language model generates text.
 
-<StoryGeneratorWidget />
-
-<TryIt>
+<StoryGeneratorWidget>
 Pick a prompt and hit Generate. Watch the story appear word by word — this is auto-regressive generation in action. Now try the temperature slider: at 0, the model always picks the highest-probability word (safe but boring). Crank it up and the model takes more risks — the stories get creative, then weird, then wild. This is the same temperature control that real chatbots use.
-</TryIt>
+</StoryGeneratorWidget>
 
 **Temperature** controls randomness. At temperature 0, the model always picks the single most likely word — the result is predictable and repetitive. At high temperature, it samples more evenly from all possibilities — the result is creative but can veer into nonsense. The sweet spot is somewhere in the middle, and finding it is more art than science.
 
