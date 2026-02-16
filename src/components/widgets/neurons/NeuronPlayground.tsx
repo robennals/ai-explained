@@ -40,9 +40,9 @@ const INPUT_COMBOS: [number, number][] = [
 ];
 
 type GateName = "AND" | "OR" | "NOT (A)" | "NAND";
-type ChallengeName = GateName | "XOR";
+type ActiveGate = GateName | "Custom";
 
-const CHALLENGE_NAMES: ChallengeName[] = ["AND", "OR", "NOT (A)", "NAND", "XOR"];
+const GATE_NAMES: GateName[] = ["AND", "OR", "NOT (A)", "NAND"];
 
 const GATE_CHECKS: Record<GateName, number[]> = {
   AND: [0, 0, 0, 1],
@@ -50,8 +50,6 @@ const GATE_CHECKS: Record<GateName, number[]> = {
   "NOT (A)": [1, 1, 0, 0],
   NAND: [1, 1, 1, 0],
 };
-
-const XOR_TARGETS = [0, 1, 1, 0];
 
 const GATE_SOLUTIONS: Record<GateName, { w1: number; w2: number; bias: number }> = {
   AND: { w1: 10, w2: 10, bias: -15 },
@@ -163,11 +161,9 @@ export function NeuronPlayground() {
   const [w1, setW1] = useState(0);
   const [w2, setW2] = useState(0);
   const [bias, setBias] = useState(0);
-  const [activeChallenge, setActiveChallenge] = useState<ChallengeName>("AND");
-  const [isOptimizing, setIsOptimizing] = useState(false);
-  const [xorFailed, setXorFailed] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [animatingTo, setAnimatingTo] = useState<GateName | null>(null);
   const animRef = useRef<number>(0);
-  const animStartRef = useRef({ w1: 0, w2: 0, bias: 0 });
 
   // Cleanup animation on unmount
   useEffect(() => {
@@ -182,9 +178,8 @@ export function NeuronPlayground() {
     setW1(0);
     setW2(0);
     setBias(0);
-    setActiveChallenge("AND");
-    setIsOptimizing(false);
-    setXorFailed(false);
+    setIsAnimating(false);
+    setAnimatingTo(null);
     if (animRef.current) cancelAnimationFrame(animRef.current);
   }, []);
 
@@ -192,12 +187,6 @@ export function NeuronPlayground() {
   const output = sigmoid(weightedSum);
   const prodA = w1 * inputA;
   const prodB = w2 * inputB;
-
-  // Get targets for the active challenge
-  const challengeTargets: number[] = useMemo(() => {
-    if (activeChallenge === "XOR") return XOR_TARGETS;
-    return GATE_CHECKS[activeChallenge];
-  }, [activeChallenge]);
 
   // Arrow endpoints
   const aStart = { x: IN_X + 22, y: IN_A_Y };
@@ -249,122 +238,76 @@ export function NeuronPlayground() {
     [w1, w2, bias]
   );
 
-  const gatesSolved = useMemo(() => {
-    const solved: Record<string, boolean> = {};
-    for (const [name, expected] of Object.entries(GATE_CHECKS)) {
-      solved[name] = expected.every((exp, i) => {
+  // Derive the matched gate purely from the truth table
+  const matchedGate: ActiveGate = useMemo(() => {
+    for (const name of GATE_NAMES) {
+      const expected = GATE_CHECKS[name];
+      const matches = expected.every((exp, i) => {
         const out = truthTable[i].output;
         return exp === 1 ? out > 0.8 : out < 0.2;
       });
+      if (matches) return name;
     }
-    return solved;
+    return "Custom";
   }, [truthTable]);
 
-  const activateChallenge = useCallback((name: ChallengeName) => {
-    setActiveChallenge(name);
-    setIsOptimizing(false);
-    setXorFailed(false);
+  // Targets to show in truth table: use animatingTo during animation, matchedGate otherwise
+  const displayedGate: ActiveGate = animatingTo ?? matchedGate;
+  const gateTargets: number[] | null = displayedGate === "Custom" ? null : GATE_CHECKS[displayedGate];
+
+  // Animate weights to a gate's solution
+  const selectGate = useCallback((name: GateName) => {
     if (animRef.current) cancelAnimationFrame(animRef.current);
-  }, []);
+    setAnimatingTo(name);
 
-  // Smooth animation to known-good solution (or wiggle for XOR)
-  const startOptimize = useCallback(() => {
-    if (isOptimizing) {
-      setIsOptimizing(false);
-      if (animRef.current) cancelAnimationFrame(animRef.current);
-      return;
-    }
-
-    const isXor = activeChallenge === "XOR";
-    setIsOptimizing(true);
-    setXorFailed(false);
-
-    // Store starting values
     const startW1 = w1;
     const startW2 = w2;
     const startBias = bias;
-    animStartRef.current = { w1: startW1, w2: startW2, bias: startBias };
+    const target = GATE_SOLUTIONS[name];
+    const duration = 60; // frames
+    let step = 0;
+    setIsAnimating(true);
 
-    if (isXor) {
-      // For XOR: wiggle around trying to find a solution, then fail
-      let step = 0;
-      const maxSteps = 120;
-      const animate = () => {
-        step++;
-        // Jitter weights around randomly, simulating futile search
-        const t = step / maxSteps;
-        const jitter = Math.max(0, 1 - t) * 2;
-        setW1(startW1 + Math.sin(step * 0.3) * jitter * 5);
-        setW2(startW2 + Math.cos(step * 0.4) * jitter * 5);
-        setBias(startBias + Math.sin(step * 0.5) * jitter * 3);
+    const animate = () => {
+      step++;
+      const t = Math.min(1, step / duration);
+      const ease = 1 - Math.pow(1 - t, 3);
 
-        if (step >= maxSteps) {
-          // Snap back and show failure
-          setW1(startW1);
-          setW2(startW2);
-          setBias(startBias);
-          setIsOptimizing(false);
-          setXorFailed(true);
-          return;
-        }
-        animRef.current = requestAnimationFrame(animate);
-      };
+      setW1(startW1 + (target.w1 - startW1) * ease);
+      setW2(startW2 + (target.w2 - startW2) * ease);
+      setBias(startBias + (target.bias - startBias) * ease);
+
+      if (t >= 1) {
+        setIsAnimating(false);
+        setAnimatingTo(null);
+        return;
+      }
       animRef.current = requestAnimationFrame(animate);
-    } else {
-      // Smoothly animate to known-good solution
-      const target = GATE_SOLUTIONS[activeChallenge as GateName];
-      const duration = 60; // frames
-      let step = 0;
-
-      const animate = () => {
-        step++;
-        // Ease-out cubic
-        const t = Math.min(1, step / duration);
-        const ease = 1 - Math.pow(1 - t, 3);
-
-        setW1(startW1 + (target.w1 - startW1) * ease);
-        setW2(startW2 + (target.w2 - startW2) * ease);
-        setBias(startBias + (target.bias - startBias) * ease);
-
-        if (t >= 1) {
-          setIsOptimizing(false);
-          return;
-        }
-        animRef.current = requestAnimationFrame(animate);
-      };
-      animRef.current = requestAnimationFrame(animate);
-    }
-  }, [isOptimizing, w1, w2, bias, activeChallenge]);
+    };
+    animRef.current = requestAnimationFrame(animate);
+  }, [w1, w2, bias]);
 
   return (
     <WidgetContainer
       title="Neurons as Smooth Logic"
-      description="Can a single neuron compute logic gates? Try each challenge."
+      description="Click each gate to see a neuron smoothly shift its weights to compute it."
       onReset={reset}
     >
-      {/* Challenge tabs at top */}
+      {/* Gate tabs at top */}
       <div className="flex gap-1 mb-4 justify-center flex-wrap">
-        {CHALLENGE_NAMES.map((name) => {
-          const isXor = name === "XOR";
-          const solved = !isXor && gatesSolved[name];
-          const active = activeChallenge === name;
+        {GATE_NAMES.map((name) => {
+          const active = animatingTo ? animatingTo === name : matchedGate === name;
           return (
             <button
               key={name}
-              onClick={() => activateChallenge(name)}
+              onClick={() => selectGate(name)}
+              disabled={false}
               className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors cursor-pointer ${
                 active
-                  ? isXor
-                    ? "bg-error text-white"
-                    : "bg-accent text-white"
-                  : solved
-                  ? "bg-success/10 text-success"
-                  : isXor
-                  ? "bg-error/10 text-error hover:bg-error/20"
+                  ? "bg-accent text-white"
                   : "bg-foreground/[0.05] text-muted hover:text-foreground"
               }`}
             >
-              {solved ? "\u2713 " : ""}
               {name}
             </button>
           );
@@ -707,107 +650,92 @@ export function NeuronPlayground() {
         </text>
       </svg>
 
-      {/* Truth table + optimize button below */}
-      <div className="mt-4 flex flex-col gap-4 lg:flex-row">
-        {/* Truth table */}
-        <div className="flex-1">
-          <div className="text-xs font-semibold text-foreground mb-2">
-            Input Combinations
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="px-2 py-1.5 text-left font-medium text-muted">
-                    A
-                  </th>
-                  <th className="px-2 py-1.5 text-left font-medium text-muted">
-                    B
-                  </th>
-                  <th className="px-2 py-1.5 text-left font-medium text-muted">
-                    Output
-                  </th>
-                  <th className="px-2 py-1.5 text-left font-medium text-muted">
-                    Target
-                  </th>
-                  <th className="px-2 py-1.5 text-center font-medium text-muted">
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {truthTable.map(({ a, b, output: out }, i) => {
-                  const isActive = inputA === a && inputB === b;
-                  const target = challengeTargets[i];
-                  const correct =
-                    target === 1 ? out > 0.8 : out < 0.2;
-                  return (
-                    <tr
-                      key={i}
-                      className={`border-b border-border/50 cursor-pointer transition-colors ${
-                        isActive
-                          ? "bg-accent/10"
-                          : "hover:bg-foreground/5"
-                      }`}
-                      onClick={() => {
-                        setInputA(a);
-                        setInputB(b);
-                      }}
-                    >
-                      <td className="px-2 py-1.5 font-mono">{a}</td>
-                      <td className="px-2 py-1.5 font-mono">{b}</td>
-                      <td className="px-2 py-1.5">
-                        <span
-                          className="inline-flex h-5 min-w-[2rem] items-center justify-center rounded text-[10px] font-bold text-white px-1"
-                          style={{ background: outputColor(out) }}
-                        >
-                          {out.toFixed(2)}
-                        </span>
-                      </td>
-                      <td className="px-2 py-1.5">
-                        <span
-                          className="inline-flex h-5 min-w-[2rem] items-center justify-center rounded text-[10px] font-bold text-white px-1"
-                          style={{ background: outputColor(target) }}
-                        >
-                          {target}
-                        </span>
-                      </td>
-                      <td className="px-2 py-1.5 text-center">
-                        {correct ? (
-                          <span className="text-success font-bold">&#10003;</span>
-                        ) : (
-                          <span className="text-error font-bold">&#10007;</span>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+      {/* Truth table */}
+      <div className="mt-4">
+        <div className="text-xs font-semibold text-foreground mb-2">
+          Input Combinations
         </div>
-
-        {/* Optimize section */}
-        <div className="lg:w-48 flex flex-col gap-2 justify-center">
-          <button
-            onClick={startOptimize}
-            className={`w-full px-3 py-2 text-xs font-medium rounded-md transition-colors cursor-pointer ${
-              isOptimizing
-                ? "bg-error text-white hover:bg-error/80"
-                : "bg-accent text-white hover:bg-accent/80"
-            }`}
-          >
-            {isOptimizing ? "Stop" : "Optimize"}
-          </button>
-          {xorFailed && (
-            <div className="text-[11px] font-medium text-error text-center">
-              Can&apos;t solve it with one neuron!
-            </div>
-          )}
-          {!xorFailed && activeChallenge !== "XOR" && gatesSolved[activeChallenge] && (
-            <div className="text-[11px] font-medium text-success text-center">
-              Solved!
-            </div>
-          )}
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="border-b border-border">
+                <th className="px-2 py-1.5 text-left font-medium text-muted">
+                  A
+                </th>
+                <th className="px-2 py-1.5 text-left font-medium text-muted">
+                  B
+                </th>
+                <th className="px-2 py-1.5 text-left font-medium text-muted">
+                  Output
+                </th>
+                {gateTargets && (
+                  <>
+                    <th className="px-2 py-1.5 text-left font-medium text-muted">
+                      Target
+                    </th>
+                    <th className="px-2 py-1.5 text-center font-medium text-muted">
+                    </th>
+                  </>
+                )}
+              </tr>
+            </thead>
+            <tbody>
+              {truthTable.map(({ a, b, output: out }, i) => {
+                const isActive = inputA === a && inputB === b;
+                const target = gateTargets ? gateTargets[i] : null;
+                const correct =
+                  target !== null
+                    ? target === 1
+                      ? out > 0.8
+                      : out < 0.2
+                    : false;
+                return (
+                  <tr
+                    key={i}
+                    className={`border-b border-border/50 cursor-pointer transition-colors ${
+                      isActive
+                        ? "bg-accent/10"
+                        : "hover:bg-foreground/5"
+                    }`}
+                    onClick={() => {
+                      setInputA(a);
+                      setInputB(b);
+                    }}
+                  >
+                    <td className="px-2 py-1.5 font-mono">{a}</td>
+                    <td className="px-2 py-1.5 font-mono">{b}</td>
+                    <td className="px-2 py-1.5">
+                      <span
+                        className="inline-flex h-5 min-w-[2rem] items-center justify-center rounded text-[10px] font-bold text-white px-1"
+                        style={{ background: outputColor(out) }}
+                      >
+                        {out.toFixed(2)}
+                      </span>
+                    </td>
+                    {target !== null && (
+                      <>
+                        <td className="px-2 py-1.5">
+                          <span
+                            className="inline-flex h-5 min-w-[2rem] items-center justify-center rounded text-[10px] font-bold text-white px-1"
+                            style={{ background: outputColor(target) }}
+                          >
+                            {target}
+                          </span>
+                        </td>
+                        <td className="px-2 py-1.5 text-center">
+                          {correct ? (
+                            <span className="text-success font-bold">&#10003;</span>
+                          ) : (
+                            <span className="text-error font-bold">&#10007;</span>
+                          )}
+                        </td>
+                      </>
+                    )}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       </div>
     </WidgetContainer>
