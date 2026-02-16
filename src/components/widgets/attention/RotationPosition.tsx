@@ -46,16 +46,35 @@ export function RotationPosition() {
   const dotProduct = Math.cos(gap * RAD_PER_POS);
 
   // SVG config
-  const size = 280;
+  const size = 300;
   const cx = size / 2;
   const cy = size / 2;
-  const radius = 100;
+  const radius = 110;
 
   // Convert to SVG coordinates (y-axis flipped)
   const aEndX = cx + vecA[0] * radius;
   const aEndY = cy - vecA[1] * radius;
   const bEndX = cx + vecB[0] * radius;
   const bEndY = cy - vecB[1] * radius;
+
+  // Projection of B onto A: proj = (A·B / A·A) * A
+  // Since both are unit vectors, proj = cos(angle_between) * A_unit
+  const projScalar = dotProduct; // cos(angle between) since both are unit vectors
+  const projX = cx + vecA[0] * projScalar * radius;
+  const projY = cy - vecA[1] * projScalar * radius;
+
+  // Right-angle mark at projection point
+  const markSize = 8;
+  // Perpendicular direction to A (rotated 90°)
+  const perpX = -vecA[1];
+  const perpY = vecA[0];
+  // Right-angle mark corners
+  const mark1X = projX + vecA[0] * markSize;
+  const mark1Y = projY - vecA[1] * markSize;
+  const mark2X = projX + vecA[0] * markSize + perpX * markSize;
+  const mark2Y = projY - vecA[1] * markSize - perpY * markSize;
+  const mark3X = projX + perpX * markSize;
+  const mark3Y = projY - perpY * markSize;
 
   // Arc path for the angle between vectors
   const arcRadius = 40;
@@ -101,14 +120,14 @@ export function RotationPosition() {
   return (
     <WidgetContainer
       title="Rotary Position Encoding"
-      description="Rotate embedding vectors by their position and see how dot products capture relative distance"
+      description="Rotate query and key vectors by position — the dot product captures relative distance"
       onReset={handleReset}
     >
       <div className="flex flex-col gap-4">
         {/* Sliders */}
         <div className="flex flex-col gap-2">
           <SliderControl
-            label="Position A"
+            label="Query position"
             value={posA}
             min={1}
             max={20}
@@ -117,7 +136,7 @@ export function RotationPosition() {
             formatValue={(v) => String(v)}
           />
           <SliderControl
-            label="Position B"
+            label="Key position"
             value={posB}
             min={1}
             max={20}
@@ -166,6 +185,42 @@ export function RotationPosition() {
               opacity={0.1}
             />
 
+            {/* Projection line from B tip perpendicular to A */}
+            {gap > 0 && (
+              <>
+                <line
+                  x1={bEndX}
+                  y1={bEndY}
+                  x2={projX}
+                  y2={projY}
+                  stroke="#f59e0b"
+                  strokeWidth={1.5}
+                  strokeDasharray="4 3"
+                  opacity={0.6}
+                />
+                {/* Projection point on A */}
+                <circle cx={projX} cy={projY} r={3} fill="#f59e0b" opacity={0.7} />
+                {/* Right-angle mark */}
+                <polyline
+                  points={`${mark1X},${mark1Y} ${mark2X},${mark2Y} ${mark3X},${mark3Y}`}
+                  fill="none"
+                  stroke="#f59e0b"
+                  strokeWidth={1}
+                  opacity={0.5}
+                />
+                {/* Projection segment on A (from origin to projection) — shows dot product magnitude */}
+                <line
+                  x1={cx}
+                  y1={cy}
+                  x2={projX}
+                  y2={projY}
+                  stroke="#f59e0b"
+                  strokeWidth={3}
+                  opacity={0.25}
+                />
+              </>
+            )}
+
             {/* Arc between vectors */}
             {gap > 0 && (
               <path
@@ -204,19 +259,9 @@ export function RotationPosition() {
               </text>
             )}
 
-            {/* Vector A */}
-            <line
-              x1={cx}
-              y1={cy}
-              x2={aEndX}
-              y2={aEndY}
-              stroke="#3b82f6"
-              strokeWidth={2.5}
-              markerEnd="url(#arrowA)"
-            />
             <defs>
               <marker
-                id="arrowA"
+                id="arrowQ"
                 viewBox="0 0 10 10"
                 refX="10"
                 refY="5"
@@ -227,7 +272,7 @@ export function RotationPosition() {
                 <path d="M 0 0 L 10 5 L 0 10 z" fill="#3b82f6" />
               </marker>
               <marker
-                id="arrowB"
+                id="arrowK"
                 viewBox="0 0 10 10"
                 refX="10"
                 refY="5"
@@ -238,19 +283,30 @@ export function RotationPosition() {
                 <path d="M 0 0 L 10 5 L 0 10 z" fill="#10b981" />
               </marker>
             </defs>
+
+            {/* Vector A (Query) */}
+            <line
+              x1={cx}
+              y1={cy}
+              x2={aEndX}
+              y2={aEndY}
+              stroke="#3b82f6"
+              strokeWidth={2.5}
+              markerEnd="url(#arrowQ)"
+            />
             <circle cx={aEndX} cy={aEndY} r={4} fill="#3b82f6" />
             <text
               x={aEndX + (vecA[0] > 0 ? 10 : -10)}
               y={aEndY + (vecA[1] > 0 ? -8 : 12)}
               textAnchor={vecA[0] > 0 ? "start" : "end"}
-              fontSize={12}
+              fontSize={11}
               fontWeight="bold"
               fill="#3b82f6"
             >
-              A ({posA})
+              Query (pos {posA})
             </text>
 
-            {/* Vector B */}
+            {/* Vector B (Key) */}
             <line
               x1={cx}
               y1={cy}
@@ -258,22 +314,37 @@ export function RotationPosition() {
               y2={bEndY}
               stroke="#10b981"
               strokeWidth={2.5}
-              markerEnd="url(#arrowB)"
+              markerEnd="url(#arrowK)"
             />
             <circle cx={bEndX} cy={bEndY} r={4} fill="#10b981" />
             <text
               x={bEndX + (vecB[0] > 0 ? 10 : -10)}
               y={bEndY + (vecB[1] > 0 ? -8 : 12)}
               textAnchor={vecB[0] > 0 ? "start" : "end"}
-              fontSize={12}
+              fontSize={11}
               fontWeight="bold"
               fill="#10b981"
             >
-              B ({posB})
+              Key (pos {posB})
             </text>
 
             {/* Origin dot */}
             <circle cx={cx} cy={cy} r={3} fill="currentColor" opacity={0.3} />
+
+            {/* Projection label */}
+            {gap > 0 && projScalar > 0.1 && (
+              <text
+                x={(cx + projX) / 2 + perpX * 12}
+                y={(cy + projY) / 2 - perpY * 12}
+                textAnchor="middle"
+                dominantBaseline="middle"
+                fontSize={10}
+                fill="#f59e0b"
+                opacity={0.8}
+              >
+                dot = {dotProduct.toFixed(2)}
+              </text>
+            )}
           </svg>
         </div>
 
@@ -281,7 +352,7 @@ export function RotationPosition() {
         <div className="flex justify-center gap-6">
           <div className="flex flex-col items-center">
             <span className="text-[10px] font-medium uppercase tracking-wider text-muted">
-              Gap |B - A|
+              Gap |K - Q|
             </span>
             <span className="font-mono text-lg font-bold text-foreground">
               {gap}
@@ -317,7 +388,7 @@ export function RotationPosition() {
             onClick={handleDiffGap}
             className="rounded-full border border-border px-4 py-1.5 text-xs font-medium text-muted transition-colors hover:text-foreground"
           >
-            Same position A, different gaps
+            Same query pos, different gaps
           </button>
         </div>
 
@@ -330,8 +401,8 @@ export function RotationPosition() {
             <table className="w-full text-left font-mono text-xs">
               <thead>
                 <tr className="text-[10px] text-muted">
-                  <th className="pb-1 pr-2">A</th>
-                  <th className="pb-1 pr-2">B</th>
+                  <th className="pb-1 pr-2">Q</th>
+                  <th className="pb-1 pr-2">K</th>
                   <th className="pb-1 pr-2">Gap</th>
                   <th className="pb-1">Dot</th>
                 </tr>
@@ -358,8 +429,8 @@ export function RotationPosition() {
             <table className="w-full text-left font-mono text-xs">
               <thead>
                 <tr className="text-[10px] text-muted">
-                  <th className="pb-1 pr-2">A</th>
-                  <th className="pb-1 pr-2">B</th>
+                  <th className="pb-1 pr-2">Q</th>
+                  <th className="pb-1 pr-2">K</th>
                   <th className="pb-1 pr-2">Gap</th>
                   <th className="pb-1">Dot</th>
                 </tr>
@@ -382,11 +453,9 @@ export function RotationPosition() {
 
         {/* Key insight */}
         <div className="rounded-lg border border-border bg-surface px-4 py-3 text-sm text-foreground">
-          Try different absolute positions but keep the gap the same — the dot
-          product stays the same! The dot product only depends on{" "}
-          <strong>relative distance</strong>, not absolute position. This is
-          exactly what we want: &quot;the word 3 positions ago&quot; matters more
-          than &quot;the word at position 7.&quot;
+          The dashed line shows the <strong>projection</strong> of the key onto
+          the query — its length <em>is</em> the dot product. Same gap → same
+          projection length → same dot product, regardless of absolute position.
         </div>
       </div>
     </WidgetContainer>

@@ -12,8 +12,7 @@ import {
   PatternAttentionWidget,
   AttentionStepThroughWidget,
   MultiHeadWidget,
-  PositionApproachesWidget,
-  PositionScrambleWidget,
+  RoPEToyTokensWidget,
   RotationPositionWidget,
 } from "./widgets";
 
@@ -41,8 +40,7 @@ export default function Chapter07() {
             PatternAttentionWidget,
             AttentionStepThroughWidget,
             MultiHeadWidget,
-            PositionApproachesWidget,
-            PositionScrambleWidget,
+            RoPEToyTokensWidget,
             RotationPositionWidget,
           }}
         />

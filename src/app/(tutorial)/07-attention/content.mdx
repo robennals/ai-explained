@@ -65,67 +65,73 @@ Think of softmax as a competition: each score is a voice in a crowd, and what ma
 Start with "All equal" — everyone gets 25%. Then try "Moderate, rest silent" — A isn't very loud, but it wins by default because nobody else is saying anything. Now click "Moderate meets loud" — B comes in much higher and completely drowns out A. That's the key dynamic: softmax is about *relative* loudness. Then try making all scores large but equal (like 8, 8, 8, 8) — still 25% each! It's the gaps that matter, not the magnitudes.
 </TryIt>
 
-## Attention Is Order-Blind
+## But Wait — Where Are the Words?
 
-Now here's something that might surprise you. Let's take a sentence and scramble the word order:
+There's a problem hiding in our attention mechanism. Look back at how we computed attention scores: we took the dot product of each query with each key. But those queries and keys come from embeddings — and embeddings don't encode *position*. The word "cat" has the same embedding whether it's the first word or the last word. Our attention mechanism has no idea *where* words are in the sentence — it only knows *what* they are.
 
-<PositionScrambleWidget />
+This means "dog bla cat it" and "cat bla dog it" would give "it" identical attention scores for both nouns. The model can't tell which noun is closer. That's a serious problem — in real language, nearby words are usually more relevant than distant ones.
 
-<TryIt>
-Click "Scramble!" and look at the attention heatmap. The scores between words don't change! "Cat" and "dog" have the same attention score regardless of their positions. Try scrambling multiple times — the matrix values stay identical. This is a real problem.
-</TryIt>
+<Callout>
+**Why not just encode per-pair distances?** The obvious fix is to add a distance correction: "these two words are 3 apart, those are 7 apart." But attention computes scores via a single matrix multiply: Q × K^T. Distance is a property of *pairs* — there are N² distances for N tokens. You'd need a separate N×N correction table on top of the attention scores, breaking the clean matrix multiply that makes attention fast. We need something more elegant.
+</Callout>
 
-Wait — the attention scores are *exactly the same* whether the sentence is "The cat chased the dog" or "dog the chased cat The"? That can't be right. Those sentences mean completely different things!
-
-The problem is that attention only looks at embeddings, and embeddings don't encode position. The word "cat" has the same embedding whether it's the first word or the last word. Attention has no idea *where* words are in the sentence — it only knows *what* they are.
-
-We need to give the model information about word order. But how?
-
-## Why Not Just Tell It the Distance?
-
-Here's the obvious idea: just add a number to each token's embedding saying what position it's at. Position 1, position 2, position 3. Simple, right?
-
-The trouble is: what matters in language is almost always *relative* position, not *absolute* position. "The word three positions before me" is meaningful; "the word at position 7" is not — it depends on where the sentence started. And what happens at position 10,001, a position the model has never encountered in training?
-
-OK, so what about encoding the *distance* between pairs of tokens directly? After all, that's what we actually care about. The problem is structural. Attention computes a query and key for each individual token, then takes the dot product of every pair. That's a beautiful, efficient matrix multiplication: Q × K^T. But distance is a property of *pairs* of tokens — there are N² distances for N tokens. To inject per-pair distance information, you'd have to modify each of the N² dot products individually, which breaks the elegant matrix multiply. You'd be adding an entirely separate N×N table of corrections on top of the attention scores.
-
-It turns out there are several clever ways to solve this problem. Different frontier models use different approaches, and each makes a different engineering tradeoff.
-
-<PositionApproachesWidget />
-
-<TryIt>
-Click through all four approaches. Notice that they differ in *where* they inject position information: some modify the embeddings before attention happens, while others adjust the attention scores after the dot product. Pay particular attention to RoPE — it's the most widely used approach today.
-</TryIt>
-
-The first two approaches — learned absolute and sinusoidal — add position information directly to the token embeddings before attention even runs. This is simple but crude: the model can't easily separate "what this word means" from "where this word is."
-
-ALiBi takes the opposite approach: leave the embeddings alone, and just penalize attention scores based on distance. Far-apart words get lower scores. This is elegant and generalizes well to longer sequences, but it's a blunt instrument — the penalty is the same regardless of content.
-
-The most popular approach today — used by Llama, Mistral, Gemma, Qwen, DeepSeek, and most other frontier models — is **RoPE** (Rotary Position Encoding). It's more subtle than the others, and it's worth understanding in detail.
+The solution used by nearly every frontier model today — Llama, Mistral, Gemma, Qwen, DeepSeek — is called **RoPE** (Rotary Position Encoding). It's a beautiful trick that encodes position *inside* the dot product itself, with no extra parameters and no separate correction table.
 
 ## The Rotation Trick
 
-Here's the clever insight — a callback to Chapter 5 on matrix transformations.
+### How Rotation Encodes Distance
 
-Instead of *adding* a position number to each embedding, we **rotate** each word's query and key vectors by an angle that depends on position. Word at position 1 gets rotated a little. Word at position 5 gets rotated more. Word at position 100 gets rotated a lot more.
+Here's the idea — a callback to Chapter 5 on matrix transformations. Instead of *adding* a position number to each embedding, we **rotate** each word's query and key vectors by an angle that depends on position. Word at position 1 gets rotated a little. Word at position 5 gets rotated more. Word at position 100 gets rotated a lot more.
 
-Why does this work? Remember from Chapter 5 that the dot product of two vectors depends on the angle between them. When we rotate two vectors by different amounts, the dot product depends on the *difference* in their rotation angles — which is exactly the *relative distance* between the words!
+Why does this work? Remember from Chapter 5 that the dot product of two vectors depends on the angle between them. When we rotate two vectors by different amounts, the dot product depends on the *difference* in their rotation angles — which is exactly the *relative distance* between the words.
 
 Two words that are 3 positions apart always have the same angular difference, whether they're at positions 1 & 4, or positions 50 & 53. The dot product automatically captures relative distance.
 
 <RotationPositionWidget />
 
 <TryIt>
-Move the position sliders around. Keep the gap the same (say, 3) but change the absolute positions — the dot product stays the same! Now change the gap — the dot product changes. Click "Same gap, different positions" to see this clearly. The rotation trick encodes relative position into the dot product for free.
+Move the position sliders around. Keep the gap the same (say, 3) but change the absolute positions — the dot product stays the same! Now change the gap — the dot product changes. The dashed projection line shows this visually: its length *is* the dot product. Click "Same gap, different positions" to see the projection stay constant.
 </TryIt>
 
-Think of it like a merry-go-round. You and a friend are both riding it. No matter where the merry-go-round is in its spin, you can always tell how far apart you are by looking across. Your *relative* position is what matters, and it's encoded in the angle between you.
+### RoPE with Our Toy Tokens
+
+Let's see this work with our familiar toy vocabulary. Below, "it" is trying to figure out which noun to attend to. Both nouns have identical keys — so without position information, they get *equal* attention scores. But watch what happens when you turn on rotation:
+
+<RoPEToyTokensWidget />
+
+<TryIt>
+Start with the rotation speed at 0° — both nouns get identical scores. Now slowly drag it up. The closer noun starts winning because its key is rotated to a more similar angle to "it"'s query. Try different sentences to see the effect with different word orders. This is the core insight of RoPE: rotation breaks the tie between otherwise-identical tokens based on distance.
+</TryIt>
+
+### Does Rotation Tell Us Direction?
+
+You might notice something: cos(θ) = cos(-θ). The dot product between two rotated vectors is the same whether word A is 3 positions *before* or 3 positions *after* word B. Rotation encodes *distance* but not *direction*.
+
+This turns out to be fine. Language models already have a mechanism for direction: **causal masking**. During generation, each token can only attend to tokens that came *before* it — future positions are masked to -∞ before softmax, so they get zero attention weight. RoPE handles "how far apart," and causal masking handles "which direction."
+
+### What About Wrap-Around?
+
+With a single rotation frequency, there's an obvious problem: if we rotate by 15° per position, then position 1 and position 25 look identical (both are at 15° and 375° = 15°). After a full 360° revolution, positions start repeating!
+
+The solution is to use **multiple rotation speeds** across different pairs of embedding dimensions. Some dimension pairs rotate fast (capturing fine-grained local patterns), others rotate slowly (capturing long-range dependencies). Think of it like a clock: the second hand, minute hand, and hour hand all rotate at different speeds. Any two times of day produce a *unique combination* of hand positions, even though each individual hand wraps around. Similarly, no two token positions share the same rotation pattern across all dimension pairs.
+
+### Doesn't Rotation Destroy the Content?
+
+A natural worry: if we're rotating the embedding vectors, aren't we scrambling the information about *what* the word is?
+
+No — and this is key. Rotation preserves the *length* of a vector; it only changes its *direction*. The word's identity (encoded in the vector's magnitude and the relationships between dimensions) survives the rotation intact. Position information is layered on top, not mixed in.
 
 <KeyInsight>
-By rotating query and key vectors based on position, the dot product automatically captures *relative distance* between words. The model doesn't need to know "I'm at position 5" — it naturally learns that "3 positions apart" always looks the same in the attention scores. And because the rotation is applied to Q and K *before* the dot product, it slots perfectly into the existing matrix multiplication — **no extra computation needed.**
+The dot product of two vectors equals |A| · |B| · cos(θ). Content lives in the magnitudes |A| and |B| — how "noun-like" or "filler-like" a token is. Position lives in the angle θ between them. Rotation changes the angle without touching the magnitudes, so **content and position information stay cleanly separated.**
 </KeyInsight>
 
-This is why RoPE has become the dominant approach. It adds no parameters, works for any sequence length, and the relative position information shows up exactly where we need it — in the dot products that attention already computes. It's the rare engineering solution that is both more elegant *and* more effective than the alternatives.
+### Scaling to Huge Context Windows
+
+RoPE's base rotation speed is controlled by a parameter θ_base, typically 10,000. This means the slowest-rotating dimension pair completes one full revolution over roughly 10,000 positions. Beyond that, positions start to become ambiguous — similar to how a 12-hour clock can't distinguish AM from PM.
+
+To support longer contexts, techniques like **YaRN** and **NTK-aware scaling** stretch the rotation frequencies so that the slow pairs rotate even more slowly. It's like adding an even slower "day hand" to the clock — now you can tell apart any two times across an entire day, not just within 12 hours.
+
+This isn't free: stretching frequencies spreads out the angular resolution, so the model needs fine-tuning to adapt. But it works remarkably well in practice. This is how Llama 3.1 handles 128K tokens and how Gemini extends to over a million.
 
 ## Multiple Heads: Looking for Different Things
 

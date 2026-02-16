@@ -83,18 +83,10 @@ const MultiHead = dynamic(
   { ssr: false }
 );
 
-const PositionApproaches = dynamic(
+const RoPEToyTokens = dynamic(
   () =>
-    import("@/components/widgets/attention/PositionApproaches").then(
-      (m) => m.PositionApproaches
-    ),
-  { ssr: false }
-);
-
-const PositionScramble = dynamic(
-  () =>
-    import("@/components/widgets/attention/PositionScramble").then(
-      (m) => m.PositionScramble
+    import("@/components/widgets/attention/RoPEToyTokens").then(
+      (m) => m.RoPEToyTokens
     ),
   { ssr: false }
 );
@@ -201,18 +193,10 @@ export function BertAttentionWidget() {
   );
 }
 
-export function PositionApproachesWidget() {
+export function RoPEToyTokensWidget() {
   return (
     <WidgetSlot>
-      <PositionApproaches />
-    </WidgetSlot>
-  );
-}
-
-export function PositionScrambleWidget() {
-  return (
-    <WidgetSlot>
-      <PositionScramble />
+      <RoPEToyTokens />
     </WidgetSlot>
   );
 }
