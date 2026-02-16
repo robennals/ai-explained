@@ -39,11 +39,7 @@ Our keys and queries are just two numbers. The first number represents "noun-nes
 
 The interesting one is **it**: its key is [0, 0] — it doesn't advertise itself as anything — but its query is [3, 0] — "I'm looking for a noun." We'll see why this matters in a moment.
 
-To measure how well a query matches a key, we use the **dot product** from Chapter 5 — multiply corresponding numbers and add them up. A high dot product means a good match. Then we run the scores through **softmax**, which turns them into percentages that add up to 100%.
-
-<Callout>
-**Softmax** is the function that turns raw dot-product scores into attention weights. It takes a list of numbers and converts them into percentages that add up to 1 (or equivalently, 100%). Bigger scores get disproportionately more weight — softmax amplifies the differences, so the model focuses sharply on the most relevant words rather than spreading attention evenly. It's used throughout deep learning whenever you need to turn scores into a probability distribution.
-</Callout>
+To measure how well a query matches a key, we use the **dot product** from Chapter 5 — multiply corresponding numbers and add them up. A high dot product means a good match. Then we run the scores through a function called **softmax** (we'll explore how it works in the next section) that converts them into attention weights — positive numbers that add up to 100%.
 
 <ToyAttentionWidget />
 
@@ -53,7 +49,21 @@ Click each token to see its attention computed step by step. Start with "it" —
 
 Notice something crucial about **it**: its key is [0, 0] — it doesn't advertise itself as anything — but its query is [3, 0] — "I'm looking for a noun." *What you are* isn't the same as *what you're looking for.* This is why we need separate queries and keys — a pronoun needs to find nouns without being mistaken for one itself.
 
-## Values: What You Actually Take Away
+## Softmax: Who's Shouting Loudest?
+
+The toy example uses **softmax** to turn raw dot-product scores into attention weights. What does this function actually do, and why do we need it?
+
+The dot products give us raw scores — but they can be any numbers: large, small, negative, zero. We need to convert them into weights that are all positive and add up to 100%, so we can use them to blend information. Softmax does this using exponentials: e raised to the power of each score. Since e^x is always positive, every weight is guaranteed to be positive. Then we divide by the total so everything sums to 1.
+
+But softmax does something more interesting than just normalizing. Think of it as a competition: each score is a voice in a crowd, and what matters is **who's shouting loudest relative to everyone else**. If one score is moderately high and the others are near zero, it wins by default — even without being very confident. But if another score comes along much higher, it drowns out the moderate one and takes nearly all the weight. The *absolute* values matter less than the *gaps* between them.
+
+<SoftmaxExplorerWidget />
+
+<TryIt>
+Start with "All equal" — everyone gets 25%. Then try "One clear winner" — A at 9 dominates completely. Now try "Close race" — the scores are close together, so weight is spread around. Drag slider A up slowly from 3 and watch it gradually take over. Then try making all scores large but equal (like 8, 8, 8, 8) — still 25% each! It's the differences that matter, not the magnitudes.
+</TryIt>
+
+## Values: Building New Representations
 
 So far, attention tells us *where to look*. But we also need to know *what information to extract*. When "it" attends to "dog," what does it actually receive?
 
@@ -65,8 +75,23 @@ Each word has a third vector called a **value** — this represents the informat
 
 The query and key determine *how much* attention to pay. The value is *what information* gets passed along. The output for each word is a weighted average of all the values, where the weights come from the attention scores.
 
+Let's extend our toy example. We'll give each token a two-dimensional value vector that encodes its identity — a one-hot encoding of "which noun am I?":
+
+- **cat**: V = [1, 0] — "I'm a cat"
+- **dog**: V = [0, 1] — "I'm a dog"
+- **bla**: V = [0, 0] — "I'm nothing interesting"
+- **it**: V = [0, 0] — "I don't know what I am yet"
+
+Now watch what happens when we run attention. Every token gets a new output — a weighted blend of all the values. The crucial insight: attention doesn't just *read* tokens — it **generates a new representation for every token**. After one pass of attention, "it" is no longer a generic pronoun with V = [0, 0] — its new representation carries the identity of whatever noun it found.
+
+<ToyValuesWidget />
+
+<TryIt>
+All four outputs are shown at once — this is what the attention layer produces. Click **it** to see how its output absorbed the noun's identity: in "cat bla bla it," the output is nearly [1.00, 0.00] — cat's value. Switch sentences and watch the output change to match whichever noun is present. Then click **cat** or **bla** to see what happens to tokens that mostly attend to themselves.
+</TryIt>
+
 <KeyInsight>
-Attention is just three steps we already understand: (1) each word gets a query, key, and value vector, (2) queries and keys are compared with dot products (Chapter 5) and passed through softmax to compute attention weights, and (3) values are blended together using those weights. **No new math — just a clever wiring of familiar pieces.**
+Attention generates a **new representation** for every token by blending values from across the sentence. The original token "it" carries no information about which noun it refers to — but after attention, its output vector *encodes that noun's identity*. This is how context flows through the model: each layer of attention enriches every token with information from the tokens around it.
 </KeyInsight>
 
 ## Attention Is Order-Blind

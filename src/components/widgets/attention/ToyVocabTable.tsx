@@ -57,15 +57,15 @@ export function ToyVocabTable() {
                 <span className={`font-bold ${tok.color}`}>{tok.label}</span>
               </td>
               <td className="px-3 py-2.5">
-                <code className="rounded bg-foreground/5 px-1.5 py-0.5 font-mono text-xs">
+                <span className="rounded bg-foreground/5 px-1.5 py-0.5 font-mono text-xs">
                   {tok.key}
-                </code>
+                </span>
                 <span className="ml-2 text-muted">{tok.advertises}</span>
               </td>
               <td className="px-3 py-2.5">
-                <code className="rounded bg-foreground/5 px-1.5 py-0.5 font-mono text-xs">
+                <span className="rounded bg-foreground/5 px-1.5 py-0.5 font-mono text-xs">
                   {tok.query}
-                </code>
+                </span>
                 <span className="ml-2 text-muted">{tok.looksFor}</span>
               </td>
             </tr>

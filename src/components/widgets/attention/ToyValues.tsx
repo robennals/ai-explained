@@ -11,7 +11,8 @@ interface Token {
   label: string;
   key: [number, number];
   query: [number, number];
-  color: string; // tailwind text color class
+  value: [number, number];
+  color: string;
 }
 
 interface Sentence {
@@ -19,31 +20,22 @@ interface Sentence {
   tokens: Token[];
 }
 
-// Scaled one-hot vectors: dimension 0 = "noun", dimension 1 = "filler"
-const S = 3; // scale factor — makes softmax decisive
+const S = 3;
 
 const CAT: Token = {
-  label: "cat",
-  key: [S, 0],
-  query: [S, 0],
+  label: "cat", key: [S, 0], query: [S, 0], value: [1, 0],
   color: "text-amber-600 dark:text-amber-400",
 };
 const DOG: Token = {
-  label: "dog",
-  key: [S, 0],
-  query: [S, 0],
+  label: "dog", key: [S, 0], query: [S, 0], value: [0, 1],
   color: "text-blue-600 dark:text-blue-400",
 };
 const BLA: Token = {
-  label: "bla",
-  key: [0, S],
-  query: [0, S],
+  label: "bla", key: [0, S], query: [0, S], value: [0, 0],
   color: "text-foreground/40",
 };
 const IT: Token = {
-  label: "it",
-  key: [0, 0],
-  query: [S, 0],
+  label: "it", key: [0, 0], query: [S, 0], value: [0, 0],
   color: "text-purple-600 dark:text-purple-400",
 };
 
@@ -54,7 +46,7 @@ const SENTENCES: Sentence[] = [
 ];
 
 /* ------------------------------------------------------------------ */
-/*  Math helpers                                                      */
+/*  Math                                                              */
 /* ------------------------------------------------------------------ */
 
 function dot(a: [number, number], b: [number, number]): number {
@@ -68,12 +60,46 @@ function softmax(scores: number[]): number[] {
   return exps.map((e) => e / sum);
 }
 
+function weightedSum(weights: number[], values: [number, number][]): [number, number] {
+  let x = 0, y = 0;
+  for (let i = 0; i < weights.length; i++) {
+    x += weights[i] * values[i][0];
+    y += weights[i] * values[i][1];
+  }
+  return [x, y];
+}
+
+/** Pre-compute all attention outputs for a sentence */
+function computeAllOutputs(tokens: Token[]) {
+  return tokens.map((tok) => {
+    const scores = tokens.map((t) => dot(tok.query, t.key));
+    const weights = softmax(scores);
+    const output = weightedSum(weights, tokens.map((t) => t.value));
+    return { weights, output };
+  });
+}
+
 /* ------------------------------------------------------------------ */
-/*  Formatting helpers                                                */
+/*  Formatting                                                        */
 /* ------------------------------------------------------------------ */
 
 function vec(v: [number, number]): string {
   return `[${v[0]}, ${v[1]}]`;
+}
+
+function vecF(v: [number, number]): string {
+  return `[${v[0].toFixed(2)}, ${v[1].toFixed(2)}]`;
+}
+
+/** Human-readable label for a value vector: [1,0]→"cat", [0,1]→"dog", [0,0]→"–" */
+function valueLabel(v: [number, number]): string {
+  if (v[0] >= 0.7 && v[1] < 0.3) return "cat";
+  if (v[1] >= 0.7 && v[0] < 0.3) return "dog";
+  if (v[0] < 0.1 && v[1] < 0.1) return "–";
+  // mixed
+  const catPct = Math.round(v[0] * 100);
+  const dogPct = Math.round(v[1] * 100);
+  return `${catPct}% cat, ${dogPct}% dog`;
 }
 
 function pct(n: number): string {
@@ -83,7 +109,7 @@ function pct(n: number): string {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Arrow helpers                                                     */
+/*  Arrow drawing                                                     */
 /* ------------------------------------------------------------------ */
 
 const HIGHLIGHT_HUE = 240;
@@ -107,19 +133,36 @@ interface Arrow {
 }
 
 /* ------------------------------------------------------------------ */
+/*  Describe output for a token                                       */
+/* ------------------------------------------------------------------ */
+
+function describeOutput(tok: Token, output: [number, number]): string {
+  if (tok.label === "it") {
+    if (output[0] > 0.7) return "\"it\" absorbed cat's identity — it now represents the noun it found.";
+    if (output[1] > 0.7) return "\"it\" absorbed dog's identity — it now represents the noun it found.";
+    return "\"it\" got a mix of values.";
+  }
+  if (tok.label === "cat" || tok.label === "dog") {
+    return `"${tok.label}" mostly attended to itself, so its output is close to its own value.`;
+  }
+  return `"${tok.label}" attended to other filler, contributing nothing useful.`;
+}
+
+/* ------------------------------------------------------------------ */
 /*  Component                                                         */
 /* ------------------------------------------------------------------ */
 
-export function ToyAttention() {
+export function ToyValues() {
   const [sentIdx, setSentIdx] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   const [arrows, setArrows] = useState<Arrow[]>([]);
 
   const rowRef = useRef<HTMLDivElement>(null);
-  const cardRefs = useRef<Map<number, HTMLButtonElement>>(new Map());
+  const cardRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
   const sentence = SENTENCES[sentIdx];
   const tokens = sentence.tokens;
+  const allResults = computeAllOutputs(tokens);
 
   const handleReset = useCallback(() => {
     setSentIdx(0);
@@ -131,16 +174,12 @@ export function ToyAttention() {
     setSelected(null);
   };
 
-  // Compute attention for selected token
-  const scores = selected !== null
-    ? tokens.map((t) => dot(tokens[selected].query, t.key))
-    : null;
-  const weights = scores ? softmax(scores) : null;
   const hasSelection = selected !== null;
+  const selWeights = hasSelection ? allResults[selected].weights : null;
 
-  // Measure card positions and compute arrows
+  // Compute arrows for selected token
   useEffect(() => {
-    if (!hasSelection || !weights || !rowRef.current) {
+    if (!hasSelection || !selWeights || !rowRef.current) {
       setArrows([]);
       return;
     }
@@ -159,14 +198,13 @@ export function ToyAttention() {
       const newArrows: Arrow[] = [];
       for (let i = 0; i < tokens.length; i++) {
         if (i === selected) continue;
-        const w = weights![i];
+        const w = selWeights![i];
         if (w < 0.01) continue;
         const toEl = cardRefs.current.get(i);
         if (!toEl) continue;
         const toRect = toEl.getBoundingClientRect();
         newArrows.push({
-          fromX,
-          fromY,
+          fromX, fromY,
           toX: toRect.left + toRect.width / 2 - rowRect.left,
           toY: toRect.top - rowRect.top,
           weight: w,
@@ -176,14 +214,14 @@ export function ToyAttention() {
     });
 
     return () => cancelAnimationFrame(raf);
-  }, [hasSelection, selected, weights, sentIdx, tokens]);
+  }, [hasSelection, selected, selWeights, sentIdx, tokens]);
 
   const arcPad = 50;
 
   return (
     <WidgetContainer
-      title="Toy Attention"
-      description="Click a token to see what it attends to — every number is visible."
+      title="Values: What Each Token Receives"
+      description="Each token's output is a weighted blend of all the values. Click a token to see why it got its output."
       onReset={handleReset}
     >
       <div className="flex flex-col gap-5">
@@ -204,9 +242,9 @@ export function ToyAttention() {
           ))}
         </div>
 
-        {/* Token row with arrow overlay */}
+        {/* Token cards with arrows */}
         <div className="relative" ref={rowRef}>
-          {/* SVG overlay for curved arrows */}
+          {/* SVG arrows */}
           {arrows.length > 0 && (
             <svg
               className="pointer-events-none absolute inset-0 h-full w-full overflow-visible"
@@ -214,7 +252,7 @@ export function ToyAttention() {
             >
               <defs>
                 <marker
-                  id="toy-arrowhead"
+                  id="val-arrowhead"
                   markerWidth="6"
                   markerHeight="5"
                   refX="5"
@@ -240,7 +278,7 @@ export function ToyAttention() {
                     fill="none"
                     stroke={weightToStroke(a.weight)}
                     strokeWidth={strokeWidth}
-                    markerEnd="url(#toy-arrowhead)"
+                    markerEnd="url(#val-arrowhead)"
                     className="transition-all duration-300"
                   />
                 );
@@ -248,56 +286,84 @@ export function ToyAttention() {
             </svg>
           )}
 
-          {/* Token cards */}
+          {/* Cards showing input value → output */}
           <div className="flex justify-center gap-3" style={{ paddingTop: `${arcPad + 8}px` }}>
             {tokens.map((tok, i) => {
               const isSelected = selected === i;
-              const weight = weights?.[i];
-              const isTarget = weight != null && weight > 0.01 && !isSelected;
+              const result = allResults[i];
+              const attnWeight = selWeights?.[i];
+              const isTarget = hasSelection && !isSelected && attnWeight != null && attnWeight > 0.01;
 
               return (
                 <div key={`${sentIdx}-${i}`} className="flex flex-col items-center">
-                  <button
+                  <div
                     ref={(el) => {
                       if (el) cardRefs.current.set(i, el);
                       else cardRefs.current.delete(i);
                     }}
+                    role="button"
+                    tabIndex={0}
                     onClick={() => setSelected(isSelected ? null : i)}
-                    className={`flex flex-col items-center gap-1 rounded-lg border-2 px-4 py-3 transition-all ${
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setSelected(isSelected ? null : i);
+                      }
+                    }}
+                    className={`flex cursor-pointer flex-col items-center gap-2 rounded-lg border-2 px-4 py-3 transition-all ${
                       isSelected
                         ? "ring-2 ring-accent ring-offset-2 border-border bg-surface"
                         : "border-border bg-surface hover:border-foreground/20"
                     }`}
                   >
+                    {/* Token name */}
                     <span className={`text-lg font-bold ${tok.color}`}>
                       {tok.label}
                     </span>
-                    <span className="font-mono text-[10px] text-muted">
-                      K={vec(tok.key)}
-                    </span>
-                    <span className="font-mono text-[10px] text-muted">
-                      Q={vec(tok.query)}
-                    </span>
-                  </button>
-                  {/* Percentage pill — highlighted for attended tokens */}
+
+                    {/* Input value with label */}
+                    <div className="flex flex-col items-center">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] text-muted">V</span>
+                        <span className="font-mono text-[11px] text-muted">
+                          {vec(tok.value)}
+                        </span>
+                      </div>
+                      <span className="text-[10px] italic text-muted">
+                        {valueLabel(tok.value)}
+                      </span>
+                    </div>
+
+                    {/* Arrow down */}
+                    <span className="text-muted">↓</span>
+
+                    {/* Output value with label */}
+                    <div className="flex flex-col items-center">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">out</span>
+                        <span className="rounded bg-emerald-100 px-1.5 py-0.5 font-mono text-[11px] font-bold text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
+                          {vecF(result.output)}
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-semibold italic text-emerald-600 dark:text-emerald-400">
+                        {valueLabel(result.output)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Attention weight pill (when another token is selected) */}
                   <span className="mt-1.5 flex h-6 items-center">
-                    {weight != null ? (
-                      isTarget ? (
-                        <span
-                          className="rounded-full px-2 py-0.5 font-mono text-xs font-bold text-white transition-all duration-200"
-                          style={{ backgroundColor: weightToPill(weight) }}
-                        >
-                          {pct(weight)}
-                        </span>
-                      ) : (
-                        <span
-                          className={`font-mono text-xs font-bold ${
-                            isSelected ? "text-accent" : "text-muted"
-                          }`}
-                        >
-                          {pct(weight)}
-                        </span>
-                      )
+                    {isTarget && attnWeight != null ? (
+                      <span
+                        className="rounded-full px-2 py-0.5 font-mono text-xs font-bold text-white transition-all duration-200"
+                        style={{ backgroundColor: weightToPill(attnWeight) }}
+                      >
+                        {pct(attnWeight)}
+                      </span>
+                    ) : isSelected && selWeights ? (
+                      <span className="font-mono text-xs font-bold text-accent">
+                        {pct(selWeights[i])}
+                      </span>
                     ) : null}
                   </span>
                 </div>
@@ -306,78 +372,55 @@ export function ToyAttention() {
           </div>
         </div>
 
-        {/* Computation detail */}
-        {selected !== null && scores && weights ? (
+        {/* Explanation for selected token */}
+        {selected !== null ? (
           <div className="rounded-lg border border-border bg-surface">
-            {/* Step 1: Dot products */}
+            {/* Weighted sum breakdown */}
             <div className="border-b border-border px-4 py-3">
               <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">
-                Step 1: Dot products — <span className={tokens[selected].color}>{tokens[selected].label}</span>&apos;s query vs each key
+                How <span className={tokens[selected].color}>{tokens[selected].label}</span>&apos;s output is computed
               </div>
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-1">
                 {tokens.map((tok, i) => {
-                  const q = tokens[selected].query;
-                  const k = tok.key;
+                  const w = allResults[selected].weights[i];
                   return (
-                    <div key={i} className="font-mono text-sm">
-                      <span className={tokens[selected].color}>
-                        {vec(q)}
+                    <div key={i} className={`font-mono text-sm ${w < 0.01 ? "text-muted/40" : ""}`}>
+                      <span className={w > 0.3 ? "font-bold" : "text-muted"}>
+                        {pct(w)}
                       </span>
-                      {" · "}
-                      <span className={tok.color}>{vec(k)}</span>
-                      {" = "}
-                      <span className="text-muted">
-                        {q[0]}×{k[0]} + {q[1]}×{k[1]}
-                      </span>
-                      {" = "}
-                      <span className="font-bold">{scores[i]}</span>
+                      {" × "}
+                      <span className={tok.color}>{tok.label}</span>
+                      &apos;s value{" "}
+                      <span className="text-muted">{vec(tok.value)}</span>
+                      {w > 0.3 && (
+                        <span className="ml-1 text-emerald-600 dark:text-emerald-400">
+                          → contributes [{(w * tok.value[0]).toFixed(2)}, {(w * tok.value[1]).toFixed(2)}]
+                        </span>
+                      )}
                     </div>
                   );
                 })}
               </div>
             </div>
 
-            {/* Step 2: Softmax */}
+            {/* Result + explanation */}
             <div className="px-4 py-3">
-              <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">
-                Step 2: Softmax — turn scores into percentages
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="font-mono text-sm">
-                  softmax([{scores.join(", ")}])
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-semibold uppercase tracking-wide text-muted">Output:</span>
+                <span className="rounded bg-emerald-100 px-2.5 py-1 font-mono text-sm font-bold text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">
+                  {vecF(allResults[selected].output)}
                 </span>
-                <span className="text-muted">=</span>
-                <div className="flex gap-2">
-                  {weights.map((w, i) => (
-                    <span
-                      key={i}
-                      className={`rounded px-2 py-0.5 font-mono text-sm font-bold ${
-                        w > 0.5
-                          ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300"
-                          : "text-muted"
-                      }`}
-                    >
-                      {pct(w)}
-                    </span>
-                  ))}
-                </div>
+              </div>
+              <div className="mt-2 text-sm text-foreground/80">
+                {describeOutput(tokens[selected], allResults[selected].output)}
               </div>
             </div>
           </div>
         ) : (
           <div className="rounded-lg border border-border bg-foreground/[0.02] px-4 py-3 text-center text-sm text-muted">
-            Click a token to see how attention is computed step by step.
-          </div>
-        )}
-
-        {/* Explanation for "it" */}
-        {selected !== null && tokens[selected].label === "it" && (
-          <div className="rounded-lg border border-accent/30 bg-accent/5 px-4 py-3 text-sm text-foreground">
-            Notice: <strong className="text-purple-600 dark:text-purple-400">it</strong> has
-            Q={vec(IT.query)} but K={vec(IT.key)}. Its query says
-            &ldquo;I&apos;m looking for a noun&rdquo; while its key advertises nothing — it
-            doesn&apos;t want other tokens to attend to it. This is why Q and K need to be
-            separate — <em>what you&apos;re looking for</em> isn&apos;t always <em>what you are</em>.
+            Every token now has an output — the result of blending all values using attention weights.
+            Click any token to see why it got its output.
+            Try <span className="font-bold text-purple-600 dark:text-purple-400">it</span> — watch it absorb the noun&apos;s identity.
           </div>
         )}
       </div>

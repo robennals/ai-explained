@@ -19,10 +19,26 @@ const ToyVocabTable = dynamic(
   { ssr: false }
 );
 
+const SoftmaxExplorer = dynamic(
+  () =>
+    import("@/components/widgets/attention/SoftmaxExplorer").then(
+      (m) => m.SoftmaxExplorer
+    ),
+  { ssr: false }
+);
+
 const ToyAttention = dynamic(
   () =>
     import("@/components/widgets/attention/ToyAttention").then(
       (m) => m.ToyAttention
+    ),
+  { ssr: false }
+);
+
+const ToyValues = dynamic(
+  () =>
+    import("@/components/widgets/attention/ToyValues").then(
+      (m) => m.ToyValues
     ),
   { ssr: false }
 );
@@ -121,10 +137,26 @@ export function ToyVocabTableWidget() {
   );
 }
 
+export function SoftmaxExplorerWidget() {
+  return (
+    <WidgetSlot>
+      <SoftmaxExplorer />
+    </WidgetSlot>
+  );
+}
+
 export function ToyAttentionWidget() {
   return (
     <WidgetSlot>
       <ToyAttention />
+    </WidgetSlot>
+  );
+}
+
+export function ToyValuesWidget() {
+  return (
+    <WidgetSlot>
+      <ToyValues />
     </WidgetSlot>
   );
 }

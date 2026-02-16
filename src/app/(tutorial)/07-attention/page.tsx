@@ -4,7 +4,9 @@ import Content from "./content.mdx";
 import {
   WhyAttentionMattersWidget,
   ToyVocabTableWidget,
+  SoftmaxExplorerWidget,
   ToyAttentionWidget,
+  ToyValuesWidget,
   AttentionPlaygroundWidget,
   BertAttentionWidget,
   PatternAttentionWidget,
@@ -31,7 +33,9 @@ export default function Chapter07() {
           components={{
             WhyAttentionMattersWidget,
             ToyVocabTableWidget,
+            SoftmaxExplorerWidget,
             ToyAttentionWidget,
+            ToyValuesWidget,
             AttentionPlaygroundWidget,
             BertAttentionWidget,
             PatternAttentionWidget,
