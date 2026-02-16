@@ -56,8 +56,10 @@ The key property for neural networks: when you change a weight by a small amount
 But you can make the sigmoid *sharper* or *smoother* by scaling the weights. Multiply all the weights and bias by a large number and the S-curve steepens toward a hard step. Scale them down and it flattens into a gentle slope. The boundary stays in the same place — only the sharpness changes.
 
 <SharpnessExplorerWidget>
-Drag the sharpness slider all the way up. The curve snaps almost like a light switch — 0 or 1, nothing in between. Now drag it down. The curve becomes a gentle slope. Very sharp neurons act like logic gates, but they're harder to train because the gradient nearly vanishes on the flat parts.
+Drag the sharpness slider all the way up. The curve snaps almost like a light switch — 0 or 1, nothing in between. Now drag it down. The curve becomes a gentle slope.
 </SharpnessExplorerWidget>
+
+There's a catch, though. Very sharp neurons are harder to train. Remember from Chapter 2: optimization works by measuring how a small change in a weight affects the output. On the flat parts of a sharp sigmoid, the output barely changes at all — the slope is nearly zero. The optimizer gets stuck because it can't tell which direction to move. This is why real networks use techniques called **regularization** — rules that gently discourage any weight from getting too large — to keep neurons smooth and trainable. We'll cover regularization in a later chapter.
 
 ## Logic Gates
 
@@ -73,11 +75,11 @@ These simple operations are the basis for every digital computer. Inside every c
 Click the inputs to toggle them between 0 and 1. Switch between AND, OR, and NOT with the tabs. Click the truth table rows to jump to that input combination.
 </LogicGatePlaygroundWidget>
 
-Wire enough gates together and you can build circuits that do real computation. The circuit below uses just 10 gates to add two 2-bit numbers — it can compute 3 + 2 = 5, for example. Each "full adder" block handles one digit of the addition, and the carry output of one feeds into the next, just like carrying in long addition by hand.
+Wire enough gates together and you can build circuits that do real computation — like the one below, which uses just 10 gates to add two small numbers.
 
 <GateCircuitDiagramWidget />
 
-This is a tiny circuit, but the principle scales. Real computer chips assemble **billions** of gates on a single chip. That's enough to be a **universal computer**: a machine that can compute anything that can be computed, given enough time and memory. Your phone, your laptop, every digital device works this way — just gates, wired together.
+This is a tiny circuit, but the principle scales. Real computer chips assemble **billions** of gates on a single chip — enough to compute anything. Your phone, your laptop, every digital device works this way.
 
 But logic gates have a problem. Their outputs snap between 0 and 1 with nothing in between. There's no smooth gradient to follow, which means you can't train a network of logic gates using the optimization techniques from Chapter 2. You can't ask "how should I adjust this gate to make the answer a *little* more correct?" — it's all or nothing.
 

@@ -108,6 +108,7 @@ export function DeepNetworkPlayground() {
   );
   const [inputs, setInputs] = useState<number[]>([0.5, 0.5]);
   const [selected, setSelected] = useState<SelectedNeuron | null>(null);
+  const [selectedInput, setSelectedInput] = useState<number | null>(null);
 
   // Recompute weights when architecture changes
   const rebuildNetwork = useCallback(
@@ -119,6 +120,7 @@ export function DeepNetworkPlayground() {
       setWeights(initWeights(ni, nl, npl, no));
       setInputs(Array(ni).fill(0.5));
       setSelected(null);
+      setSelectedInput(null);
     },
     []
   );
@@ -168,11 +170,11 @@ export function DeepNetworkPlayground() {
     []
   );
 
-  const toggleInput = useCallback(
-    (idx: number) => {
+  const setInputValue = useCallback(
+    (idx: number, value: number) => {
       setInputs((prev) => {
         const next = [...prev];
-        next[idx] = next[idx] > 0.5 ? 0 : 1;
+        next[idx] = value;
         return next;
       });
     },
@@ -284,22 +286,24 @@ export function DeepNetworkPlayground() {
             const pos = getNodePos(lIdx, n, size);
             const val = activations[lIdx]?.[n] ?? 0.5;
             const isInput = lIdx === 0;
-            const isSelected =
+            const isNeuronSelected =
               selected &&
               selected.layer === lIdx - 1 &&
               selected.index === n;
-            // For hidden/output layers, layer index in weights is lIdx - 1
-            const canSelect = !isInput;
+            const isInputSelected = isInput && selectedInput === n;
+            const isAnySelected = isNeuronSelected || isInputSelected;
 
             nodes.push(
               <g
                 key={`${lIdx}-${n}`}
-                className={canSelect || isInput ? "cursor-pointer" : ""}
+                className="cursor-pointer"
                 onClick={() => {
                   if (isInput) {
-                    toggleInput(n);
+                    setSelectedInput(n);
+                    setSelected(null);
                   } else {
                     setSelected({ layer: lIdx - 1, index: n });
+                    setSelectedInput(null);
                   }
                 }}
               >
@@ -309,7 +313,7 @@ export function DeepNetworkPlayground() {
                   r={NODE_R}
                   fill={isInput ? (val > 0.5 ? "#dbeafe" : "#f9fafb") : outputColor(val)}
                   stroke={
-                    isSelected
+                    isAnySelected
                       ? "#3b82f6"
                       : isInput
                       ? val > 0.5
@@ -317,7 +321,7 @@ export function DeepNetworkPlayground() {
                         : "#d1d5db"
                       : outputColor(val)
                   }
-                  strokeWidth={isSelected ? 2.5 : 1.5}
+                  strokeWidth={isAnySelected ? 2.5 : 1.5}
                 />
                 <text
                   x={pos.x}
@@ -431,9 +435,36 @@ export function DeepNetworkPlayground() {
         </div>
       )}
 
-      {!selected && (
+      {selectedInput !== null && (
+        <div className="mt-3 p-3 rounded-lg bg-foreground/[0.03] border border-border">
+          <div className="text-xs font-semibold text-foreground mb-2">
+            Input {selectedInput + 1}
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] text-muted w-16 shrink-0">
+              value
+            </span>
+            <input
+              type="range"
+              min={0}
+              max={1}
+              step={0.01}
+              value={inputs[selectedInput]}
+              onChange={(e) =>
+                setInputValue(selectedInput, parseFloat(e.target.value))
+              }
+              className="flex-1 h-1.5 accent-accent"
+            />
+            <span className="text-[10px] font-mono font-bold text-foreground w-10 text-right">
+              {inputs[selectedInput].toFixed(2)}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {!selected && selectedInput === null && (
         <div className="mt-3 text-center text-[11px] text-muted">
-          Click any neuron to see and adjust its weights
+          Click any neuron or input to see and adjust its values
         </div>
       )}
     </WidgetContainer>
