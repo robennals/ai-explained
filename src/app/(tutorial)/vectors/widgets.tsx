@@ -1,0 +1,198 @@
+"use client";
+
+import dynamic from "next/dynamic";
+import { Suspense } from "react";
+import { TryItProvider } from "@/components/widgets/shared/WidgetContainer";
+
+const VectorExamples = dynamic(
+  () =>
+    import("@/components/widgets/vectors/VectorExamples").then(
+      (m) => m.VectorExamples
+    ),
+  { ssr: false }
+);
+
+const AnimalPropertyExplorer = dynamic(
+  () =>
+    import("@/components/widgets/vectors/AnimalPropertyExplorer").then(
+      (m) => m.AnimalPropertyExplorer
+    ),
+  { ssr: false }
+);
+
+const Vector1DExplorer = dynamic(
+  () =>
+    import("@/components/widgets/vectors/Vector1DExplorer").then(
+      (m) => m.Vector1DExplorer
+    ),
+  { ssr: false }
+);
+
+const Vector2DExplorer = dynamic(
+  () =>
+    import("@/components/widgets/vectors/Vector2DExplorer").then(
+      (m) => m.Vector2DExplorer
+    ),
+  { ssr: false }
+);
+
+const Vector3DExplorer = dynamic(
+  () =>
+    import("@/components/widgets/vectors/Vector3DExplorer").then(
+      (m) => m.Vector3DExplorer
+    ),
+  { ssr: false }
+);
+
+const DirectionMagnitudeExplorer = dynamic(
+  () =>
+    import("@/components/widgets/vectors/DirectionMagnitudeExplorer").then(
+      (m) => m.DirectionMagnitudeExplorer
+    ),
+  { ssr: false }
+);
+
+const DotProductExplorer = dynamic(
+  () =>
+    import("@/components/widgets/vectors/DotProductExplorer").then(
+      (m) => m.DotProductExplorer
+    ),
+  { ssr: false }
+);
+
+const NeuronDotProduct = dynamic(
+  () =>
+    import("@/components/widgets/vectors/NeuronDotProduct").then(
+      (m) => m.NeuronDotProduct
+    ),
+  { ssr: false }
+);
+
+// Reused from neurons chapter
+const DecisionBoundaryExplorer = dynamic(
+  () =>
+    import("@/components/widgets/neurons/DecisionBoundaryExplorer").then(
+      (m) => m.DecisionBoundaryExplorer
+    ),
+  { ssr: false }
+);
+
+const XORBreakthrough = dynamic(
+  () =>
+    import("@/components/widgets/neurons/XORBreakthrough").then(
+      (m) => m.XORBreakthrough
+    ),
+  { ssr: false }
+);
+
+const LinearCollapseDemo = dynamic(
+  () =>
+    import("@/components/widgets/neurons/LinearCollapseDemo").then(
+      (m) => m.LinearCollapseDemo
+    ),
+  { ssr: false }
+);
+
+function WidgetSlot({ children, tryIt, label }: { children: React.ReactNode; tryIt?: React.ReactNode; label?: string }) {
+  return (
+    <Suspense
+      fallback={
+        <div className="my-8 flex items-center justify-center rounded-xl border border-dashed border-border p-12 text-sm text-muted">
+          Loading widget...
+        </div>
+      }
+    >
+      <TryItProvider content={tryIt} label={label}>
+        {children}
+      </TryItProvider>
+    </Suspense>
+  );
+}
+
+export function VectorExamplesWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <VectorExamples />
+    </WidgetSlot>
+  );
+}
+
+export function AnimalPropertyExplorerWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <AnimalPropertyExplorer />
+    </WidgetSlot>
+  );
+}
+
+export function Vector1DExplorerWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <Vector1DExplorer />
+    </WidgetSlot>
+  );
+}
+
+export function Vector2DExplorerWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <Vector2DExplorer />
+    </WidgetSlot>
+  );
+}
+
+export function Vector3DExplorerWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <Vector3DExplorer />
+    </WidgetSlot>
+  );
+}
+
+export function DirectionMagnitudeExplorerWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <DirectionMagnitudeExplorer />
+    </WidgetSlot>
+  );
+}
+
+export function DotProductExplorerWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <DotProductExplorer />
+    </WidgetSlot>
+  );
+}
+
+export function NeuronDotProductWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <NeuronDotProduct />
+    </WidgetSlot>
+  );
+}
+
+export function DecisionBoundaryExplorerWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <DecisionBoundaryExplorer />
+    </WidgetSlot>
+  );
+}
+
+export function XORBreakthroughWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <XORBreakthrough />
+    </WidgetSlot>
+  );
+}
+
+export function LinearCollapseDemoWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <LinearCollapseDemo />
+    </WidgetSlot>
+  );
+}
