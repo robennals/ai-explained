@@ -7,13 +7,13 @@ But this simple idea turns out to be the key to understanding what neurons actua
 
 ## A List of Numbers
 
-You already use vectors every day. Your GPS location is two numbers: (latitude, longitude). An RGB color is three numbers: (red, green, blue). A velocity is two numbers: (east/west speed, north/south speed). An RPG character might have stats like (health, strength, speed). Each of these is a vector — a list of numbers where each slot means something specific.
+You already use vectors every day. Your location on the planet is two numbers: (latitude, longitude). A color is three numbers: (red, green, blue). A velocity is two numbers: (east/west speed, north/south speed). Your character in a role-playing game might have stats like (health, strength, speed). Each of these is a vector — a list of numbers where each slot means something specific.
 
 <VectorExamplesWidget>
 Toggle between examples. Notice how each vector has a different number of slots (dimensions), and each slot measures something different. Change the sliders and watch the visual update — the numbers *are* the thing they describe. The velocity example is interesting: its two numbers naturally define a direction and a speed.
 </VectorExamplesWidget>
 
-The key idea: a vector is a compact way to describe something as a list of measurements. The number of measurements is the vector's **dimension** — a GPS coordinate is 2-dimensional, an RGB color is 3-dimensional.
+The key idea: a vector is a compact way to describe something as a list of measurements. The number of measurements is the vector's **dimension** — a location is 2-dimensional, a color is 3-dimensional.
 
 ## Describing Animals with Vectors
 
@@ -25,56 +25,58 @@ Click two different animals to compare their vectors side by side. Bear and dog 
 
 Notice something important: the vector captures what we *chose* to measure. If we'd picked different properties — "can it fly?", "does it live in water?" — the same animals would get different vectors, and different animals would seem similar. **The choice of dimensions determines what the vector can distinguish.**
 
-## One Dimension
+## Visualizing Vectors
 
-With just one number, each animal is a point on a line. Let's place them by a single property.
+Our animal vectors have six dimensions: big, scary, hairy, cuddly, fast, and fat. Six-dimensional spaces are hard to picture, but we're used to visualizing vectors in lower dimensions — so let's build up from one dimension and see how each new one helps.
+
+With just **one** number, each animal is a point on a line.
 
 <Vector1DExplorerWidget>
-Switch between properties. On "Big," elephant and bear are far apart from mouse and rabbit — but cat and eagle end up right next to each other despite being nothing alike. On "Scary," shark and bear are neighbors even though one lives in the ocean and the other in a forest. One dimension captures one thing but conflates everything else.
+Switch between properties. On "Big," elephant and bear are far apart from mouse and rabbit — but cat and eagle end up right next to each other despite being nothing alike. One dimension captures one thing but conflates everything else.
 </Vector1DExplorerWidget>
 
-## Two Dimensions
-
-With two numbers, each animal is a point on a plane. Now we can capture two properties at once.
+With **two** numbers, each animal is a point on a plane.
 
 <Vector2DExplorerWidget>
-Start with Big x Scary. Bear is big AND scary — upper right. Rabbit is small AND not scary — lower left. Shark and bear are both scary but you can tell them apart by which *kind* of scary. Try switching axes — every combination reveals different clusters. Notice how animals that were stuck together in 1D get pulled apart in 2D.
+Start with Big x Scary. Bear is big AND scary — upper right. Rabbit is small AND not scary — lower left. Try switching axes — every combination reveals different clusters. Notice how animals that were stuck together in 1D get pulled apart in 2D.
 </Vector2DExplorerWidget>
 
-Two dimensions are much more expressive than one. With two numbers, we can distinguish things that a single number couldn't separate.
-
-## Three Dimensions
-
-With three numbers, each animal is a point in 3D space.
+With **three** numbers, each animal is a point in 3D space.
 
 <Vector3DExplorerWidget>
 Drag to rotate the view. Try Big x Scary x Cuddly — bear and shark overlap on big and scary, but adding cuddly pulls them apart because bear is cuddly and shark definitely isn't. Each new dimension lets you distinguish things that were previously mixed together.
 </Vector3DExplorerWidget>
 
-Three dimensions is the most we can directly visualize. But our animal vectors have *six* properties — they really live in 6D space. We can't draw that, but the geometric intuition still works: **nearby points are similar, far-apart points are different, and adding more dimensions lets you make finer distinctions.** This intuition will carry us through the rest of AI.
+Three dimensions is the most we can directly visualize, but higher-dimensional vectors — like our six-dimensional animal vectors — are really just more of the same. Each new dimension is another axis, another way to pull apart things that looked the same in fewer dimensions. We just don't have an easy way to visualize them other than as lists of numbers. But the geometric intuition still holds: **nearby points are similar, far-apart points are different, and more dimensions mean finer distinctions.**
 
-## Direction and Magnitude
+## Direction and Length
 
 There's another way to think about a vector besides "a list of numbers." Any vector can be split into two parts:
 
-- **Direction**: which way it points (the **unit vector** — a vector of length 1)
-- **Magnitude**: how long it is
+- **Direction**: which way it points
+- **Length**: how long it is
 
-Think of velocity: the direction tells you *where* you're heading, and the magnitude tells you *how fast*. Or think of color intensity: the direction gives you the *hue*, and the magnitude gives you the *brightness*.
+Think of velocity: the direction tells you *where* you're heading, and the length tells you *how fast*.
+
+The way we represent direction as a vector is with a **unit vector** — a vector of length 1 that points in that direction. Any vector equals its unit vector times its length.
 
 <DirectionMagnitudeExplorerWidget>
-In free-drag mode, drag the arrow anywhere. In Direction + Magnitude mode, the direction is locked to the unit circle and you control the magnitude separately with the slider. Notice how the dashed unit vector always points the same way as the full vector — it's the vector's "pure direction" with the length stripped away.
+All three sets of sliders control the same vector — try any of them and watch the others update. Direction + Length controls the angle and length. Unit Vector + Length shows the unit vector (always length 1 on the grid — notice its tip stays on the dashed circle) scaled by the length. Raw Vector lets you set x and y directly.
 </DirectionMagnitudeExplorerWidget>
 
-This decomposition — direction times magnitude — will matter a lot in a moment, when we look at what the dot product really means.
+This decomposition — direction times length — will matter a lot in a moment, when we look at what the dot product really means.
 
 ## The Dot Product
 
-The **dot product** is the single most important vector operation in AI. It takes two vectors and produces a single number. There are two ways to compute it, and they always give the same answer.
+The **dot product** is the single most important vector operation in AI. It's a way of multiplying two vectors together to get a single number. That number tells you two things at once: how big the vectors are, and how much they point in the same direction. 
 
-**Way 1 — multiply the parts and add:** Multiply each pair of corresponding numbers, then add the results. For vectors (a₁, a₂) and (b₁, b₂): dot product = a₁ × b₁ + a₂ × b₂.
+For regular numbers (one-dimensional vectors), the dot product is just ordinary multiplication: 3 · 5 = 15. The dot product extends this idea to vectors with more dimensions.
 
-**Way 2 — projection:** Multiply the magnitudes of both vectors by the cosine of the angle between them: |a| × |b| × cos(θ).
+There are two ways to compute the dot product, and they always give the same answer.
+
+**Way 1 — multiply the parts and add:** Multiply each pair of corresponding numbers, then add the results. For vectors (a₁, a₂) and (b₁, b₂): dot product = (a₁ × b₁) + (a₂ × b₂).
+
+**Way 2 — projection:** Multiply the lengths of the two vectors, and then multiply that by how much the two vectors point in the same direction (measured using a function called `cosine`).
 
 <DotProductExplorerWidget>
 Drag the arrow tips. In Component view, watch the individual products and their sum. Switch to Projection view to see the angle and the shadow of one vector onto the other. Rotate one vector around — when they point the same way, the dot product is large and positive. When perpendicular, it's zero. When opposite, it's negative. Both views always show the same number.
@@ -82,7 +84,7 @@ Drag the arrow tips. In Component view, watch the individual products and their 
 
 The dot product measures **how much two vectors agree**. This is why it appears everywhere in AI: whenever a network needs to ask "how similar are these two things?", the answer is a dot product.
 
-When both vectors are unit vectors (length 1), the dot product simplifies to just cos(θ) — pure directional agreement with no magnitude involved. This is called **cosine similarity**, and we'll see it again when we get to embeddings.
+When both vectors are unit vectors (length 1), the dot product simplifies to just the cosine — pure directional agreement with length factored out. This is called **cosine similarity**, and we'll see it again when we get to embeddings.
 
 <KeyInsight>
 **The dot product measures alignment.** Same direction → large positive. Perpendicular → zero. Opposite → large negative. This single operation is the foundation of how neural networks process information.
@@ -92,14 +94,16 @@ When both vectors are unit vectors (length 1), the dot product simplifies to jus
 
 Here's the connection that ties everything together. Remember from the previous chapter that a neuron computes a **weighted sum** of its inputs, adds a bias, then applies the sigmoid:
 
-output = sigmoid(w₁ × x₁ + w₂ × x₂ + bias)
+output = sigmoid(w₁ × x₁ + w₂ × x₂ + … + wₙ × xₙ + bias)
 
-That weighted sum — w₁ × x₁ + w₂ × x₂ — is a dot product. The neuron has a **weight vector** (w₁, w₂) and receives an **input vector** (x₁, x₂), and it computes their dot product.
+That weighted sum is a dot product. The neuron has a **weight vector** w = (w₁, w₂, …, wₙ) and receives an **input vector** x = (x₁, x₂, …, xₙ), and it computes their dot product. We can write the whole thing as:
+
+output = sigmoid(w · x + bias)
 
 What does this mean? The neuron is asking: **"how much does this input point in the direction of my weights?"** When the input vector aligns with the weight vector, the dot product is large, the sigmoid outputs close to 1, and the neuron fires strongly. When they're perpendicular, the dot product is near zero. When they point in opposite directions, the neuron stays quiet.
 
 <NeuronDotProductWidget>
-Adjust the weight and input vectors. Watch the angle between them — when the vectors align (small angle), the output is high. When they're perpendicular (90°), the output depends mostly on the bias. When they oppose each other (large angle), the output drops. Try making the bias very negative — now the vectors need to be *very* well aligned for the neuron to fire. The neuron is a direction detector.
+Drag the weight and input vectors. Watch the angle between them — when the vectors align (small angle), the output is high. When they're perpendicular (90°), the output depends mostly on the bias. When they oppose each other (large angle), the output drops. Try making the bias very negative — now the vectors need to be *very* well aligned for the neuron to fire. This visualization shows two dimensions, but real neurons have weight and input vectors with hundreds or thousands of dimensions — the same geometric intuition applies.
 </NeuronDotProductWidget>
 
 <KeyInsight>

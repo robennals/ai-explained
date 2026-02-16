@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useMemo } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
 import { SliderControl } from "../shared/SliderControl";
 
@@ -11,6 +11,28 @@ const SCALE = 90;
 
 function sigmoid(x: number): number {
   return 1 / (1 + Math.exp(-x));
+}
+
+function outputColor(v: number): string {
+  if (v <= 0.5) {
+    const t = v / 0.5;
+    const r = Math.round(239 + (160 - 239) * t);
+    const g = Math.round(68 + (160 - 68) * t);
+    const b = Math.round(68 + (160 - 68) * t);
+    return `rgb(${r},${g},${b})`;
+  } else {
+    const t = (v - 0.5) / 0.5;
+    const r = Math.round(160 + (16 - 160) * t);
+    const g = Math.round(160 + (185 - 160) * t);
+    const b = Math.round(160 + (160 - 160) * t);
+    return `rgb(${r},${g},${b})`;
+  }
+}
+
+// Fixed-width number: always 5 chars (e.g. " 0.70", "-1.23")
+function fmt(n: number): string {
+  const s = n.toFixed(2);
+  return s.length < 5 ? " " + s : s;
 }
 
 function Arrow({
@@ -44,18 +66,59 @@ function toSvg(x: number, y: number): [number, number] {
   return [CX + x * SCALE, CY - y * SCALE];
 }
 
+function fromSvg(sx: number, sy: number, rect: DOMRect): [number, number] {
+  const svgX = ((sx - rect.left) / rect.width) * SVG_SIZE;
+  const svgY = ((sy - rect.top) / rect.height) * SVG_SIZE;
+  return [(svgX - CX) / SCALE, -(svgY - CY) / SCALE];
+}
+
 export function NeuronDotProduct() {
   const [w1, setW1] = useState(0.8);
   const [w2, setW2] = useState(0.6);
   const [x1, setX1] = useState(0.9);
   const [x2, setX2] = useState(0.4);
   const [bias, setBias] = useState(-0.5);
+  const svgRef = useRef<SVGSVGElement>(null);
+  const dragTarget = useRef<"w" | "x" | null>(null);
 
   const handleReset = useCallback(() => {
     setW1(0.8); setW2(0.6);
     setX1(0.9); setX2(0.4);
     setBias(-0.5);
   }, []);
+
+  const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    const svg = svgRef.current!;
+    const rect = svg.getBoundingClientRect();
+    const [wx, wy] = fromSvg(e.clientX, e.clientY, rect);
+    // Find closest vector tip
+    const dW = Math.hypot(wx - w1, wy - w2);
+    const dX = Math.hypot(wx - x1, wy - x2);
+    dragTarget.current = dW < dX ? "w" : "x";
+    (e.target as Element).setPointerCapture(e.pointerId);
+    // Apply immediately
+    const clamp = (v: number) => Math.max(-1.5, Math.min(1.5, v));
+    if (dragTarget.current === "w") {
+      setW1(clamp(wx)); setW2(clamp(wy));
+    } else {
+      setX1(clamp(wx)); setX2(clamp(wy));
+    }
+  }, [w1, w2, x1, x2]);
+
+  const handlePointerMove = useCallback((e: React.PointerEvent) => {
+    if (!dragTarget.current) return;
+    const svg = svgRef.current!;
+    const rect = svg.getBoundingClientRect();
+    const [wx, wy] = fromSvg(e.clientX, e.clientY, rect);
+    const clamp = (v: number) => Math.max(-1.5, Math.min(1.5, v));
+    if (dragTarget.current === "w") {
+      setW1(clamp(wx)); setW2(clamp(wy));
+    } else {
+      setX1(clamp(wx)); setX2(clamp(wy));
+    }
+  }, []);
+
+  const handlePointerUp = useCallback(() => { dragTarget.current = null; }, []);
 
   const dot = w1 * x1 + w2 * x2;
   const preActivation = dot + bias;
@@ -71,8 +134,54 @@ export function NeuronDotProduct() {
   const [wsx, wsy] = toSvg(w1, w2);
   const [xsx, xsy] = toSvg(x1, x2);
 
-  // Output color: green when high, red when low
-  const outColor = `hsl(${output * 120}, 70%, 45%)`;
+  const outColor = outputColor(output);
+
+  // Neuron diagram layout
+  const ND_W = 580;
+  const ND_H = 200;
+  const ND_IN_X = 45;
+  const ND_SUM_X = 200;
+  const ND_SUM_Y = 100;
+  const ND_ACT_X = 360;
+  const ND_ACT_Y = 100;
+  const ND_ACT_W = 100;
+  const ND_ACT_H = 70;
+  const ND_OUT_X = 520;
+  const ND_OUT_Y = 100;
+
+  // Sigmoid curve for diagram
+  const sigmoidPath = useMemo(() => {
+    const pts: string[] = [];
+    const pL = ND_ACT_X - ND_ACT_W / 2 + 8;
+    const pR = ND_ACT_X + ND_ACT_W / 2 - 8;
+    const pT = ND_ACT_Y - ND_ACT_H / 2 + 8;
+    const pB = ND_ACT_Y + ND_ACT_H / 2 - 8;
+    for (let i = 0; i <= 100; i++) {
+      const xv = -10 + 20 * (i / 100);
+      const yv = sigmoid(xv);
+      pts.push(
+        `${i === 0 ? "M" : "L"}${(pL + (i / 100) * (pR - pL)).toFixed(1)},${(pB - yv * (pB - pT)).toFixed(1)}`
+      );
+    }
+    return pts.join(" ");
+  }, []);
+
+  // Operating point on sigmoid curve
+  const opFrac = Math.max(0, Math.min(1, (preActivation + 10) / 20));
+  const ndPL = ND_ACT_X - ND_ACT_W / 2 + 8;
+  const ndPR = ND_ACT_X + ND_ACT_W / 2 - 8;
+  const ndPT = ND_ACT_Y - ND_ACT_H / 2 + 8;
+  const ndPB = ND_ACT_Y + ND_ACT_H / 2 - 8;
+  const opSx = ndPL + opFrac * (ndPR - ndPL);
+  const opSy = ndPB - output * (ndPB - ndPT);
+
+  // Input nodes for diagram
+  const inputNodes = [
+    { label: "x₁", y: 30 },
+    { label: "x₂", y: 72 },
+    { label: null, y: 110 }, // ellipsis
+    { label: "xₙ", y: 148 },
+  ];
 
   return (
     <WidgetContainer
@@ -80,9 +189,78 @@ export function NeuronDotProduct() {
       description="The weighted sum is the dot product of inputs and weights"
       onReset={handleReset}
     >
-      <div className="grid gap-5 lg:grid-cols-[1fr_auto_auto]">
+      {/* Neuron diagram matching NeuronFreePlay / NeuronDiagram style */}
+      <svg viewBox={`0 0 ${ND_W} ${ND_H}`} className="w-full mb-4" aria-label="Neuron as dot product diagram">
+        <defs>
+          <marker id="ndp-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#9ca3af" />
+          </marker>
+        </defs>
+
+        {/* Input nodes */}
+        {inputNodes.map((node, i) => {
+          if (!node.label) {
+            return (
+              <text key={i} x={ND_IN_X} y={node.y + 5} textAnchor="middle" className="fill-muted text-[16px]">⋮</text>
+            );
+          }
+          const wLabel = i === 0 ? "w₁" : i === 1 ? "w₂" : "wₙ";
+          const midX = (ND_IN_X + 16 + ND_SUM_X - 26) / 2;
+          const midY = (node.y + ND_SUM_Y) / 2;
+          return (
+            <g key={i}>
+              <circle cx={ND_IN_X} cy={node.y} r={16} fill="#f0f4ff" stroke="#3b82f6" strokeWidth="1.5" />
+              <text x={ND_IN_X} y={node.y + 4} textAnchor="middle" className="fill-accent text-[11px] font-medium">{node.label}</text>
+              <line x1={ND_IN_X + 16} y1={node.y} x2={ND_SUM_X - 26} y2={ND_SUM_Y} stroke="#9ca3af" strokeWidth="1.2" markerEnd="url(#ndp-arrow)" />
+              <text x={midX} y={midY - 5} textAnchor="middle" className="fill-muted text-[8px] font-mono">{wLabel}</text>
+            </g>
+          );
+        })}
+
+        {/* Sum node — shows w · x */}
+        <circle cx={ND_SUM_X} cy={ND_SUM_Y} r={24} fill="#fef9ee" stroke="#f59e0b" strokeWidth="1.5" />
+        <text x={ND_SUM_X} y={ND_SUM_Y - 3} textAnchor="middle" className="fill-foreground text-[10px] font-semibold">w · x</text>
+        <text x={ND_SUM_X} y={ND_SUM_Y + 10} textAnchor="middle" className="fill-foreground text-[10px] font-semibold">+ bias</text>
+
+        {/* Bias arrow */}
+        <line x1={ND_SUM_X} y1={ND_SUM_Y + 38} x2={ND_SUM_X} y2={ND_SUM_Y + 26} stroke="#9ca3af" strokeWidth="1" strokeDasharray="3,2" markerEnd="url(#ndp-arrow)" />
+        <text x={ND_SUM_X} y={ND_SUM_Y + 50} textAnchor="middle" className="fill-muted text-[9px]">bias = {bias.toFixed(1)}</text>
+
+        {/* Sum value */}
+        <text x={ND_SUM_X} y={ND_SUM_Y - 30} textAnchor="middle" className="fill-warning text-[11px] font-bold font-mono">{preActivation.toFixed(2)}</text>
+
+        {/* Arrow sum → activation */}
+        <line x1={ND_SUM_X + 26} y1={ND_SUM_Y} x2={ND_ACT_X - ND_ACT_W / 2 - 4} y2={ND_ACT_Y} stroke="#9ca3af" strokeWidth="1.5" markerEnd="url(#ndp-arrow)" />
+
+        {/* Activation function box */}
+        <rect x={ND_ACT_X - ND_ACT_W / 2} y={ND_ACT_Y - ND_ACT_H / 2} width={ND_ACT_W} height={ND_ACT_H} rx={8} fill="#f0fdf4" stroke="#10b981" strokeWidth="1.5" />
+        <text x={ND_ACT_X} y={ND_ACT_Y - ND_ACT_H / 2 - 6} textAnchor="middle" className="fill-success text-[8px] font-semibold uppercase tracking-wider">Activation</text>
+        {/* Sigmoid curve */}
+        <path d={sigmoidPath} fill="none" stroke="#10b981" strokeWidth="2" />
+        {/* Operating point */}
+        <line x1={opSx} y1={ndPB} x2={opSx} y2={opSy} stroke="#f59e0b" strokeWidth="1" strokeDasharray="2,2" opacity={0.6} />
+        <line x1={ndPL} y1={opSy} x2={opSx} y2={opSy} stroke="#f59e0b" strokeWidth="1" strokeDasharray="2,2" opacity={0.6} />
+        <circle cx={opSx} cy={opSy} r={5} fill="#f59e0b" stroke="white" strokeWidth="1.5" />
+
+        {/* Arrow activation → output */}
+        <line x1={ND_ACT_X + ND_ACT_W / 2 + 2} y1={ND_ACT_Y} x2={ND_OUT_X - 22} y2={ND_OUT_Y} stroke="#9ca3af" strokeWidth="1.5" markerEnd="url(#ndp-arrow)" />
+
+        {/* Output node */}
+        <text x={ND_OUT_X} y={ND_OUT_Y - 26} textAnchor="middle" className="fill-foreground text-[11px] font-bold">Output</text>
+        <circle cx={ND_OUT_X} cy={ND_OUT_Y} r={20} fill={outColor} stroke={outColor} strokeWidth="2" />
+        <text x={ND_OUT_X} y={ND_OUT_Y + 5} textAnchor="middle" className="fill-white text-[13px] font-bold font-mono">{output.toFixed(2)}</text>
+      </svg>
+
+      <div className="grid gap-5 lg:grid-cols-[1fr_auto]">
         {/* Vector diagram */}
-        <svg viewBox={`0 0 ${SVG_SIZE} ${SVG_SIZE}`} className="mx-auto w-full max-w-[320px]">
+        <svg
+          ref={svgRef}
+          viewBox={`0 0 ${SVG_SIZE} ${SVG_SIZE}`}
+          className="mx-auto w-full max-w-[320px] cursor-crosshair touch-none"
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+        >
           {/* Grid */}
           {[-1, 0, 1].map((t) => (
             <g key={t}>
@@ -94,69 +272,70 @@ export function NeuronDotProduct() {
           <line x1={CX} y1={0} x2={CX} y2={SVG_SIZE} stroke="currentColor" strokeOpacity={0.12} />
 
           {/* Angle arc */}
-          {magW > 0.05 && magX > 0.05 && (
-            <>
-              <path
-                d={describeArc(
-                  CX, CY, 22,
-                  Math.atan2(-x2, x1),
-                  Math.atan2(-w2, w1)
-                )}
-                fill="none" stroke="#94a3b8" strokeWidth={1.5}
-              />
-              <text
-                x={CX + 32 * Math.cos(Math.atan2(-(x2 + w2) / 2, (x1 + w1) / 2))}
-                y={CY + 32 * Math.sin(Math.atan2(-(x2 + w2) / 2, (x1 + w1) / 2))}
-                fontSize={10} fill="#94a3b8" textAnchor="middle"
-              >
-                {thetaDeg.toFixed(0)}°
-              </text>
-            </>
-          )}
+          {magW > 0.05 && magX > 0.05 && (() => {
+            const aW = Math.atan2(-w2, w1);
+            const aX = Math.atan2(-x2, x1);
+            let diff = aW - aX;
+            if (diff > Math.PI) diff -= 2 * Math.PI;
+            if (diff < -Math.PI) diff += 2 * Math.PI;
+            const endAngle = aX + diff;
+            const r = 22;
+            const sx = CX + r * Math.cos(aX);
+            const sy = CY + r * Math.sin(aX);
+            const ex = CX + r * Math.cos(endAngle);
+            const ey = CY + r * Math.sin(endAngle);
+            const large = Math.abs(diff) > Math.PI ? 1 : 0;
+            const sweep = diff > 0 ? 1 : 0;
+            const midAngle = aX + diff / 2;
+            const lr = 34;
+            const lx = CX + lr * Math.cos(midAngle);
+            const ly = CY + lr * Math.sin(midAngle);
+            return (
+              <>
+                <path
+                  d={`M ${sx} ${sy} A ${r} ${r} 0 ${large} ${sweep} ${ex} ${ey}`}
+                  fill="none" stroke="#94a3b8" strokeWidth={1.5}
+                />
+                <text x={lx} y={ly} fontSize={10} fill="#94a3b8" textAnchor="middle" dominantBaseline="central">
+                  {thetaDeg.toFixed(0)}°
+                </text>
+              </>
+            );
+          })()}
 
           {/* Weight vector */}
           <Arrow fx={CX} fy={CY} tx={wsx} ty={wsy} color="#f59e0b" width={2.5} label="w" />
           {/* Input vector */}
           <Arrow fx={CX} fy={CY} tx={xsx} ty={xsy} color="#3b82f6" width={2.5} label="x" />
 
-          {/* Output indicator */}
-          <circle cx={SVG_SIZE - 25} cy={25} r={16} fill={outColor} />
-          <text x={SVG_SIZE - 25} y={29} textAnchor="middle" fontSize={11} fill="white" fontWeight={700}>
-            {output.toFixed(2)}
-          </text>
+          {/* Drag handles */}
+          <circle cx={wsx} cy={wsy} r={8} fill="#f59e0b" fillOpacity={0.2} className="cursor-grab" />
+          <circle cx={xsx} cy={xsy} r={8} fill="#3b82f6" fillOpacity={0.2} className="cursor-grab" />
         </svg>
 
-        {/* Sliders */}
-        <div className="space-y-3 min-w-[180px]">
-          <div className="text-[10px] font-bold uppercase tracking-widest text-amber-500">Weights</div>
-          <SliderControl label="w₁" value={w1} min={-1.5} max={1.5} step={0.05} onChange={setW1} />
-          <SliderControl label="w₂" value={w2} min={-1.5} max={1.5} step={0.05} onChange={setW2} />
-          <div className="mt-3 text-[10px] font-bold uppercase tracking-widest text-blue-500">Inputs</div>
-          <SliderControl label="x₁" value={x1} min={-1.5} max={1.5} step={0.05} onChange={setX1} />
-          <SliderControl label="x₂" value={x2} min={-1.5} max={1.5} step={0.05} onChange={setX2} />
-          <div className="mt-3 text-[10px] font-bold uppercase tracking-widest text-muted">Bias</div>
-          <SliderControl label="bias" value={bias} min={-3} max={3} step={0.1} onChange={setBias} />
-        </div>
-
-        {/* Computation breakdown */}
-        <div className="min-w-[160px]">
-          <div className="rounded-lg bg-foreground/[0.03] p-3 space-y-1.5">
+        {/* Bias slider + Computation breakdown */}
+        <div className="min-w-[170px] space-y-4">
+          <div className="space-y-2">
+            <div className="text-[10px] font-bold uppercase tracking-widest text-muted">Bias</div>
+            <SliderControl label="bias" value={bias} min={-3} max={3} step={0.1} onChange={setBias} />
+          </div>
+          <div className="rounded-lg bg-foreground/[0.03] p-3 space-y-1.5" style={{ fontVariantNumeric: "tabular-nums" }}>
             <div className="text-[10px] font-bold uppercase tracking-widest text-muted">Computation</div>
-            <div className="font-mono text-xs">
-              <span className="text-amber-500">w</span> . <span className="text-blue-500">x</span> = {w1.toFixed(2)}x{x1.toFixed(2)} + {w2.toFixed(2)}x{x2.toFixed(2)}
+            <div className="font-mono text-xs whitespace-pre">
+              <span className="text-amber-500">w</span> · <span className="text-blue-500">x</span> = ({fmt(w1)}×{fmt(x1)}) + ({fmt(w2)}×{fmt(x2)})
             </div>
-            <div className="font-mono text-xs text-accent">
-              = {dot.toFixed(3)}
+            <div className="font-mono text-xs text-accent whitespace-pre">
+              {"    "}= {fmt(dot)}
             </div>
-            <div className="mt-1.5 font-mono text-xs">
-              + bias ({bias.toFixed(1)}) = {preActivation.toFixed(3)}
+            <div className="mt-1.5 font-mono text-xs whitespace-pre">
+              + bias ({fmt(bias)}) = {fmt(preActivation)}
             </div>
-            <div className="mt-1.5 border-t border-foreground/10 pt-1.5 font-mono text-xs">
-              sigmoid({preActivation.toFixed(2)}) = <span className="font-bold" style={{ color: outColor }}>{output.toFixed(3)}</span>
+            <div className="mt-1.5 border-t border-foreground/10 pt-1.5 font-mono text-xs whitespace-pre">
+              sigmoid({fmt(preActivation)}) = <span className="font-bold" style={{ color: outColor }}>{output.toFixed(3)}</span>
             </div>
           </div>
 
-          <div className="mt-3 rounded-lg bg-foreground/[0.03] p-3 space-y-1">
+          <div className="rounded-lg bg-foreground/[0.03] p-3 space-y-1" style={{ fontVariantNumeric: "tabular-nums" }}>
             <div className="text-[10px] font-bold uppercase tracking-widest text-muted">Alignment</div>
             <div className="font-mono text-xs">angle = {thetaDeg.toFixed(0)}°</div>
             <div className="text-xs text-muted mt-1">
@@ -173,18 +352,4 @@ export function NeuronDotProduct() {
       </div>
     </WidgetContainer>
   );
-}
-
-function describeArc(cx: number, cy: number, r: number, a1: number, a2: number): string {
-  let diff = a2 - a1;
-  if (diff > Math.PI) diff -= 2 * Math.PI;
-  if (diff < -Math.PI) diff += 2 * Math.PI;
-  const end = a1 + diff;
-  const x1 = cx + r * Math.cos(a1);
-  const y1 = cy + r * Math.sin(a1);
-  const x2 = cx + r * Math.cos(end);
-  const y2 = cy + r * Math.sin(end);
-  const large = Math.abs(diff) > Math.PI ? 1 : 0;
-  const sweep = diff > 0 ? 1 : 0;
-  return `M ${x1} ${y1} A ${r} ${r} 0 ${large} ${sweep} ${x2} ${y2}`;
 }

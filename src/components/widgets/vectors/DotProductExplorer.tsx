@@ -226,10 +226,10 @@ export function DotProductExplorer() {
           ) : (
             <div className="rounded-lg bg-foreground/[0.03] p-3 space-y-1">
               <div className="text-[10px] font-bold uppercase tracking-widest text-muted">Projection view</div>
-              <div className="font-mono text-xs">|a| = {magA.toFixed(2)}</div>
-              <div className="font-mono text-xs">|b| = {magB.toFixed(2)}</div>
+              <div className="font-mono text-xs">length a = {magA.toFixed(2)}</div>
+              <div className="font-mono text-xs">length b = {magB.toFixed(2)}</div>
               <div className="font-mono text-xs">angle = {thetaDeg.toFixed(1)}°</div>
-              <div className="font-mono text-xs">cos(angle) = {cosTheta.toFixed(3)}</div>
+              <div className="font-mono text-xs">cosine(angle) = {cosTheta.toFixed(3)}</div>
               <div className="mt-1 border-t border-foreground/10 pt-1 font-mono text-sm font-bold" style={{ color: dotColor }}>
                 {magA.toFixed(2)} x {magB.toFixed(2)} x {cosTheta.toFixed(2)} = {dotProduct.toFixed(3)}
               </div>
