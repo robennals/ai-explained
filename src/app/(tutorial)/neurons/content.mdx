@@ -75,11 +75,11 @@ These simple operations are the basis for every digital computer. Inside every c
 Click the inputs to toggle them between 0 and 1. Switch between AND, OR, and NOT with the tabs. Click the truth table rows to jump to that input combination.
 </LogicGatePlaygroundWidget>
 
-Wire enough gates together and you can build circuits that do real computation — like the one below, which uses just 10 gates to add two small numbers.
+Wire enough gates together and you can build circuits that do real computation.
 
 <GateCircuitDiagramWidget />
 
-This is a tiny circuit, but the principle scales. Real computer chips assemble **billions** of gates on a single chip — enough to compute anything. Your phone, your laptop, every digital device works this way.
+Real computer chips assemble **billions** of gates on a single chip — enough to compute anything. Your phone, your laptop, every digital device works this way.
 
 But logic gates have a problem. Their outputs snap between 0 and 1 with nothing in between. There's no smooth gradient to follow, which means you can't train a network of logic gates using the optimization techniques from Chapter 2. You can't ask "how should I adjust this gate to make the answer a *little* more correct?" — it's all or nothing.
 
@@ -127,14 +127,14 @@ If two neurons can solve XOR, what happens when we keep adding more? Each neuron
 The widget below lets you build networks of different sizes and explore them by hand. Try adjusting the architecture and clicking neurons to poke at their weights.
 
 <DeepNetworkPlaygroundWidget>
-Build a network with 4 inputs, 3 hidden layers of 5 neurons each, and 1 output. Click around and try sliding the weights. Can you make the output go to 1? To 0? Now imagine trying to set all those weights by hand to do something useful — like recognizing a digit or translating a sentence. That's hundreds of weights, and they all interact with each other.
+Use the sliders to build a network with 4 inputs, 3 hidden layers of 5 neurons each, and 1 output. Click any neuron to select it — you'll see sliders for its weights. Click an input node to adjust its value. Try to make the output go to 1, then to 0. Now imagine setting hundreds of weights by hand to do something useful — that's why we need training.
 </DeepNetworkPlaygroundWidget>
 
 The point is: this would be *impossible* to do by hand for anything interesting. That's why we need to find values by training on real data, which we'll learn about in later chapters.
 
 But here's why it works in principle. Every weight in the network contributes to the final output. If it contributes to the output, we can measure how changing it affects the error. And if we can measure that, we can use the optimization from Chapter 2 on **every weight at once**. The algorithm that does this is called **backpropagation** — it flows the error signal backward through every layer so each weight gets a nudge in the right direction.
 
-How big do real networks get? GPT-3 has 96 layers. GPT-4 likely has even more. Even AI models that run on your smartphone have 20+ layers. The architecture is simple — the same building block repeated millions of times. The magic is in finding the right weights.
+How big do real networks get? GPT-3 has 96 layers. GPT-5 likely has even more. Even AI models that run on your smartphone have 20+ layers. The architecture is simple — the same building block repeated millions of times. The magic is in finding the right weights.
 
 <KeyInsight>
 **Stacking neurons in layers lets you compute anything.** Each layer combines the previous layer's outputs into something more complex. Backpropagation lets you train all the weights at once by flowing the error signal backward through every layer. A network with ten thousand weights is no harder to train *in principle* than one with ten — it just takes more computation.

@@ -109,6 +109,7 @@ export function DeepNetworkPlayground() {
   const [inputs, setInputs] = useState<number[]>([0.5, 0.5]);
   const [selected, setSelected] = useState<SelectedNeuron | null>(null);
   const [selectedInput, setSelectedInput] = useState<number | null>(null);
+  const [activeWeight, setActiveWeight] = useState<number | null>(null); // index of weight being dragged
 
   // Recompute weights when architecture changes
   const rebuildNetwork = useCallback(
@@ -233,50 +234,86 @@ export function DeepNetworkPlayground() {
 
       {/* Network diagram */}
       <svg viewBox={`0 0 ${svgW} ${svgH}`} className="w-full">
-        <defs>
-          <marker
-            id="dn-arrow"
-            viewBox="0 0 10 10"
-            refX="9"
-            refY="5"
-            markerWidth="3"
-            markerHeight="3"
-            orient="auto-start-reverse"
-          >
-            <path d="M 0 0 L 10 5 L 0 10 z" fill="#d1d5db" />
-          </marker>
-        </defs>
+        {/* Connections — rendered in 3 passes: normal, highlighted, active badge */}
+        {(() => {
+          const normalLines: React.ReactNode[] = [];
+          const boldLines: React.ReactNode[] = [];
+          const badges: React.ReactNode[] = [];
 
-        {/* Connections */}
-        {layerSizes.slice(0, -1).map((fromSize, lIdx) => {
-          const toSize = layerSizes[lIdx + 1];
-          const visFrom = Math.min(fromSize, MAX_VISIBLE_NEURONS);
-          const visTo = Math.min(toSize, MAX_VISIBLE_NEURONS);
-          const isSelectedLayer =
-            selected && selected.layer === lIdx;
-          const lines: React.ReactNode[] = [];
-          for (let f = 0; f < visFrom; f++) {
-            for (let t = 0; t < visTo; t++) {
-              const from = getNodePos(lIdx, f, fromSize);
-              const to = getNodePos(lIdx + 1, t, toSize);
-              const bold =
-                isSelectedLayer && t === selected!.index;
-              lines.push(
-                <line
-                  key={`${lIdx}-${f}-${t}`}
-                  x1={from.x + NODE_R}
-                  y1={from.y}
-                  x2={to.x - NODE_R}
-                  y2={to.y}
-                  stroke={bold ? "#3b82f6" : "#e5e7eb"}
-                  strokeWidth={bold ? 1.5 : 0.5}
-                  markerEnd="url(#dn-arrow)"
-                />
-              );
+          layerSizes.slice(0, -1).forEach((fromSize, lIdx) => {
+            const toSize = layerSizes[lIdx + 1];
+            const visFrom = Math.min(fromSize, MAX_VISIBLE_NEURONS);
+            const visTo = Math.min(toSize, MAX_VISIBLE_NEURONS);
+            const isInputLayer = selected && selected.layer === lIdx;
+            const isOutputLayer = selected && selected.layer === lIdx - 1;
+            const isSelectedInputLayer = selectedInput !== null && lIdx === 0;
+
+            for (let f = 0; f < visFrom; f++) {
+              for (let t = 0; t < visTo; t++) {
+                const from = getNodePos(lIdx, f, fromSize);
+                const to = getNodePos(lIdx + 1, t, toSize);
+                const isIncoming = isInputLayer && t === selected!.index;
+                const isOutgoing = isOutputLayer && f === selected!.index;
+                const isInputConn = isSelectedInputLayer && f === selectedInput;
+                const bold = isIncoming || isOutgoing || isInputConn;
+                const isActive = isIncoming && activeWeight !== null && f === activeWeight;
+                const x1 = from.x + NODE_R;
+                const y1 = from.y;
+                const x2 = to.x - NODE_R;
+                const y2 = to.y;
+                const key = `${lIdx}-${f}-${t}`;
+
+                if (bold) {
+                  boldLines.push(
+                    <line
+                      key={key}
+                      x1={x1} y1={y1} x2={x2} y2={y2}
+                      stroke={isActive ? "#2563eb" : "#3b82f6"}
+                      strokeWidth={isActive ? 2.5 : 1.5}
+                    />
+                  );
+                  if (isActive && selected) {
+                    const midX = (x1 + x2) / 2;
+                    const midY = (y1 + y2) / 2;
+                    const w = weights[selected.layer][selected.index][f];
+                    badges.push(
+                      <g key={`badge-${key}`}>
+                        <rect
+                          x={midX - 16} y={midY - 10}
+                          width={32} height={14} rx={3}
+                          fill="#2563eb"
+                        />
+                        <text
+                          x={midX} y={midY + 1}
+                          textAnchor="middle"
+                          className="fill-white text-[8px] font-bold font-mono pointer-events-none select-none"
+                        >
+                          {w.toFixed(1)}
+                        </text>
+                      </g>
+                    );
+                  }
+                } else {
+                  normalLines.push(
+                    <line
+                      key={key}
+                      x1={x1} y1={y1} x2={x2} y2={y2}
+                      stroke="#e5e7eb" strokeWidth="0.5"
+                    />
+                  );
+                }
+              }
             }
-          }
-          return lines;
-        })}
+          });
+
+          return (
+            <>
+              {normalLines}
+              {boldLines}
+              {badges}
+            </>
+          );
+        })()}
 
         {/* Nodes */}
         {layerSizes.map((size, lIdx) => {
@@ -301,9 +338,11 @@ export function DeepNetworkPlayground() {
                   if (isInput) {
                     setSelectedInput(n);
                     setSelected(null);
+                    setActiveWeight(null);
                   } else {
                     setSelected({ layer: lIdx - 1, index: n });
                     setSelectedInput(null);
+                    setActiveWeight(null);
                   }
                 }}
               >
@@ -400,6 +439,9 @@ export function DeepNetworkPlayground() {
                       parseFloat(e.target.value)
                     )
                   }
+                  onPointerDown={() => setActiveWeight(i)}
+                  onPointerUp={() => setActiveWeight(null)}
+                  onPointerLeave={() => setActiveWeight(null)}
                   className="flex-1 h-1.5 accent-accent"
                 />
                 <span className="text-[10px] font-mono font-bold text-foreground w-10 text-right">
