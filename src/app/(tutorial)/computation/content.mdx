@@ -1,0 +1,136 @@
+# Everything Is Numbers
+
+<Lead>
+AI can write poetry, recognize faces, generate art, and hold conversations. It's not magic — it's math. But what kind of math? This chapter will show you the shape of the problem.
+</Lead>
+
+## What Can AI Do?
+
+AI can do things that would have seemed like science fiction a few years ago. It can look at a photo and describe what's in it. It can translate between hundreds of languages. It can write essays, debug code, explain quantum physics to a five-year-old. It can generate photorealistic images from a sentence like "a cat wearing a tiny hat on the moon." It can hold a conversation that feels genuinely intelligent.
+
+And all of these — every single one — work the same way under the hood.
+
+This tutorial is going to teach you how. Not at a hand-wavy, "it's like a brain" level — actually how, with enough detail that you could build one yourself. By the end, you won't just vaguely "get" AI. You'll deeply understand how these systems work, why they work, and what it would take to make one from scratch.
+
+But we have to start at the beginning. And the beginning is a surprisingly simple idea that, once you really absorb it, makes everything else click:
+
+**Here's the big picture:**
+- **Everything an AI works with is just numbers** — every word, image, and sound.
+- **An AI is a function numbers into numbers** - words to words, words to images, etc.
+- **The function itself is made of numbers** — billions of adjustable values called *parameters*.
+- **Traning an AI is the art of finding the right values for those numbers**.
+
+That's the whole game. The rest is details. Let's unpack it.
+
+## Everything Is Numbers
+
+You might think of a text message as letters, a photo as colors, a song as sound. But inside a computer, all of them are the same thing: **lists of numbers**.
+
+**Text** is numbers. Every character has a number assigned to it (that's what Unicode is). The letter "H" is 72. The letter "e" is 101. Your text message is a sequence of numbers.
+
+**Images** are numbers. Every pixel is described by three numbers — how much Red, Green, and Blue light to mix. A photo is just a giant grid of these number-triplets.
+
+**Colors** are numbers. Every color you've ever seen can be described by just three numbers. Adjust those three numbers, and you get a completely different color.
+
+**Sound** is numbers. A microphone samples the air pressure thousands of times per second. Each sample is a number. A three-minute song is about 8 million numbers.
+
+Try it yourself:
+
+<NumbersEverywhereWidget />
+
+<TryIt>
+In the Text tab, type your name and watch each letter turn into a number. In the Color tab, try to make your favorite color using just three sliders. In the Image tab, paint something and notice: the computer only sees numbers. In the Sound tab, click a preset like "aaah" or "eeee" and press Play — you'll hear a synthesized vowel, and see the raw numbers that represent it.
+</TryIt>
+
+<KeyInsight>
+**Everything a computer works with — text, images, colors, sound, video — is just lists of numbers.** This means every kind of "thinking" a computer does is really just *turning one list of numbers into another*.
+</KeyInsight>
+
+## Thinking Is a Function
+
+Once you see that everything is numbers, something clicks: every kind of "intelligent" behavior is really just a **function** — something that takes numbers in and puts numbers out.
+
+- **"Is this a cat?"** = a function that takes pixel values and outputs a number representing how sure it is
+- **"Translate to French"** = a function that takes English character codes and outputs French character codes
+- **"Write a poem about rain"** = a function that takes prompt characters and outputs poem characters
+- **"Generate an image of a sunset"** = a function that takes text and outputs pixel values
+
+Every single one of these is the same shape: **numbers in, numbers out**.
+
+<FunctionMachineWidget />
+
+<TryIt>
+Click through the different tasks. Notice that despite doing wildly different things — recognizing images, translating text, answering questions, generating art — they all have the same shape: a list of numbers goes in, a list of numbers comes out. The only difference is what the function *does*.
+</TryIt>
+
+So all of AI reduces to one problem: **find the right function**.
+
+If we could find the function that maps photo-pixels to the word "cat," we'd have image recognition. If we could find the function that maps English to French, we'd have translation. If we could find the function that maps prompts to good answers, we'd have a chatbot.
+
+But how do you "find" a function?
+
+## Machines with Knobs
+
+Here's the idea: you build a **model** — a machine with adjustable knobs (called **parameters**). Different knob settings make the machine compute different functions. The challenge is finding the right settings.
+
+Let's make this concrete. Below is a model with just 4 parameters (a, b, c, d) that computes:
+
+**y = a + b·x + c·x² + d·x³**
+
+There's a target curve (the blue one) — that's the function we *want*. Your job: adjust the four knobs to make the red curve match the blue one.
+
+<ParameterPlaygroundWidget />
+
+<TryIt>
+Try to match the target curve by adjusting the sliders. Pay attention to how each parameter affects the shape. Then hit "Reveal best fit" to see the answer. Notice: even with just 4 parameters, it's surprisingly hard to find the right values by hand.
+</TryIt>
+
+<KeyInsight>
+**A model is a machine with adjustable knobs.** Different knob settings compute different functions. Finding the right function means finding the right knob settings. With just 4 knobs, hand-tuning is already frustrating. Real AI models have *billions* of knobs. We're going to need a way to tune them automatically.
+</KeyInsight>
+
+## Can a Machine Compute Anything?
+
+Before we go further, here's a question worth asking: are there limits to what functions a machine can compute?
+
+Here's a wild fact: back in 1936, two mathematicians — Alan Turing and Alonzo Church — independently arrived at a remarkable idea, working completely independently: that you can build a machine capable of computing **any function that can be computed at all**. Not just arithmetic — *anything*. This idea is called the **Church-Turing thesis** — and while it can't be formally proven, no one has ever found a counterexample.
+
+This means that, in principle, if "thinking" is computation (turning numbers into numbers), then a computer can do anything a human mind can do. The question isn't *whether* the right function exists — it's whether we can *find* it.
+
+## The Lazy Solution: A Giant Lookup Table
+
+Here's a thought experiment. Forget about clever math. What if we just made a giant table? For every possible input, store the correct output.
+
+Want image recognition? Make a table with one row for every possible image, and in each row, write what's in the image. Want translation? A row for every possible English sentence, paired with its French translation.
+
+In theory, this works! Every function over finite inputs can be represented as a lookup table. Problem solved... right?
+
+Let's see how big that table would need to be:
+
+<LookupTableExplosionWidget />
+
+<TryIt>
+Start with a tiny 2&times;2 black-and-white image — only 16 entries, totally manageable. Now step up to a 4&times;4 image. Then switch to grayscale. Then try a 28&times;28 image (the size used in a classic AI benchmark). Watch the number of entries blow past the atoms in the universe. Try the Text and Sound tabs too — a single tweet in Unicode already requires an incomprehensibly large table.
+</TryIt>
+
+The lookup table approach fails spectacularly. Even for a tiny 8×8 grayscale image — smaller than the smallest image used in real AI — the number of possible inputs is 256⁶⁴, a number with over 150 digits. That already dwarfs the number of atoms in the observable universe. And a real photo has *millions* of pixels. You could never build a table that big. You could never even *count* that high.
+
+## The Real Challenge
+
+So here's where we are:
+
+1. **Everything is numbers** — text, images, sound, all of it
+2. **Thinking is a function** — every intelligent task is numbers-in, numbers-out
+3. **Models are machines with knobs** — different settings compute different functions
+4. **The right function exists** — at least, the Church-Turing thesis says so
+5. **Brute force is impossible** — a lookup table would be bigger than the universe
+
+We need models that **compress** — that capture the right pattern with far fewer parameters than a lookup table would need entries. And we need a way to **find** the right parameter values automatically, not by hand.
+
+That process — automatically finding the right knob settings — is called **learning**. And that's what the rest of this tutorial is about.
+
+In the next chapter, we'll discover the surprising answer: you don't need to design the solution — you just need a way to make **reliable tiny improvements**, and then make a lot of them very fast. We'll see how the same algorithm behind biological evolution, A/B testing, and the scientific method can automatically find the right parameter values. The secret is **incremental optimization** — and it's the engine that powers all of AI.
+
+<TryItInPyTorch notebook="computation">
+Encode text, images, and sound as PyTorch tensors, visualize a parameterized function with different knob settings, and calculate why lookup tables are impossibly large.
+</TryItInPyTorch>

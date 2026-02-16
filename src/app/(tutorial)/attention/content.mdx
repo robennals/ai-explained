@@ -1,0 +1,175 @@
+# Attention
+
+<Lead>
+In the last chapter, we saw that predicting the next word requires understanding — but our models could only look at a fixed window of recent words. What if the model could *choose* which earlier words to focus on? That idea, called attention, is the breakthrough that makes modern AI work. And it's built entirely from things you already know.
+</Lead>
+
+## Some Words Need Other Words
+
+Read this sentence: "The dog chased the cat because **it** was angry."
+
+What does "it" refer to? The dog or the cat? You probably said the dog — dogs chase things because *they're* angry, not the thing being chased. But notice what you just did: to understand one word ("it"), you had to look back at a *specific* earlier word ("dog") and use common-sense reasoning to pick it over another candidate ("cat").
+
+This is something our fixed-window model from the last chapter can't do. It sees the last few words — maybe "because it was" — and has no way to reach back to "dog" at the start of the sentence. It doesn't get to *choose* which earlier words matter.
+
+But for a human reader, this kind of selective looking-back happens constantly. Let's see just how much of language depends on it.
+
+<WhyAttentionMattersWidget />
+
+<TryIt>
+Click the underlined words in each sentence. Notice how different words need different kinds of context: pronouns need their referents, ambiguous words need disambiguating clues, verbs need their subjects even when separated by long clauses. Flip through all five examples — each demonstrates a different reason why "looking back selectively" is essential.
+</TryIt>
+
+Every one of these examples requires the same ability: given a word, *choose* which other words in the sentence are relevant to understanding it. Not the nearest words. Not a fixed window. The *right* words, wherever they happen to be.
+
+This is what **attention** does. It gives the model the ability to look at every word that came before and decide which ones matter for the word it's currently processing. Let's build up to how it works, step by step.
+
+## Building Attention from Scratch
+
+So how do we actually build a mechanism that does this? We need each word to be able to "ask a question" and find the other words that answer it. Let's start with the simplest possible example.
+
+Imagine a tiny vocabulary of just four tokens: **cat**, **dog**, **bla** (filler), and **it** (a pronoun). Our goal is to work out what noun **it** is refering to in any given sentence.
+
+Each token gets two vectors:
+
+- A **key** — a short vector that advertises *what this token is*
+- A **query** — a short vector that describes *what this token is looking for*
+
+Our keys and queries are just two numbers. The first number represents "noun-ness" and the second represents "filler-ness":
+
+<ToyVocabTableWidget />
+
+The interesting one is **it**: its key is [0, 0] — it doesn't advertise itself as anything — but its query is [3, 0] — "I'm looking for a noun." We'll see why this matters in a moment.
+
+To measure how well a query matches a key, we use the **dot product** from Chapter 5 — multiply corresponding numbers and add them up. A high dot product means a good match. Then we run the scores through a function called **softmax** (we'll explore how it works in the next section) that converts them into attention weights — positive numbers that add up to 100%.
+
+<ToyAttentionWidget />
+
+<TryIt>
+Click each token to see its attention computed step by step. Start with "it" — watch how its query [3, 0] matches the noun's key [3, 0] (dot product = 9) but not the filler's key [0, 3] (dot product = 0). Then switch sentences — the noun moves to a different position, but "it" still finds it. That's the power of content-based attention.
+</TryIt>
+
+Notice something crucial about **it**: its key is [0, 0] — it doesn't advertise itself as anything — but its query is [3, 0] — "I'm looking for a noun." *What you are* isn't the same as *what you're looking for.* This is why we need separate queries and keys — a pronoun needs to find nouns without being mistaken for one itself.
+
+## Softmax: Who's Shouting Loudest?
+
+The toy example uses **softmax** to turn raw dot-product scores into attention weights. What does this function actually do, and why do we need it?
+
+The dot products give us raw scores — but they can be any numbers: large, small, negative, zero. We need to convert them into weights that are all positive and add up to 100%, so we can use them to blend information. Softmax does exactly this. (Under the hood it uses exponentials, but you don't need to understand the formula to understand what it does.)
+
+Think of softmax as a competition: each score is a voice in a crowd, and what matters is **who's shouting loudest relative to everyone else**. If one score is moderately high and the others are near zero, it wins by default — even without being very confident. But if another score comes along much higher, it drowns out the moderate one and takes nearly all the weight. The *absolute* values matter less than the *gaps* between them.
+
+<SoftmaxExplorerWidget />
+
+<TryIt>
+Start with "All equal" — everyone gets 25%. Then try "Moderate, rest silent" — A isn't very loud, but it wins by default because nobody else is saying anything. Now click "Moderate meets loud" — B comes in much higher and completely drowns out A. That's the key dynamic: softmax is about *relative* loudness. Then try making all scores large but equal (like 8, 8, 8, 8) — still 25% each! It's the gaps that matter, not the magnitudes.
+</TryIt>
+
+## But Wait — Where Are the Words?
+
+There's a problem hiding in our attention mechanism. Look back at how we computed attention scores: we took the dot product of each query with each key. But those queries and keys come from embeddings — and embeddings don't encode *position*. The word "cat" has the same embedding whether it's the first word or the last word. Our attention mechanism has no idea *where* words are in the sentence — it only knows *what* they are.
+
+This means "dog bla cat it" and "cat bla dog it" would give "it" identical attention scores for both nouns. The model can't tell which noun is closer. That's a serious problem — in real language, nearby words are usually more relevant than distant ones.
+
+<Callout>
+**Why not just encode per-pair distances?** The obvious fix is to add a distance correction: "these two words are 3 apart, those are 7 apart." But attention computes scores via a single matrix multiply: Q × K^T. Distance is a property of *pairs* — there are N² distances for N tokens. You'd need a separate N×N correction table on top of the attention scores, breaking the clean matrix multiply that makes attention fast. We need something more elegant.
+</Callout>
+
+The solution used by nearly every frontier model today — Llama, Mistral, Gemma, Qwen, DeepSeek — is called **RoPE** (Rotary Position Encoding). It's a beautiful trick that encodes position *inside* the dot product itself, with no extra parameters and no separate correction table.
+
+## The Rotation Trick
+
+### How Rotation Encodes Distance
+
+Here's the idea — a callback to Chapter 5 on matrix transformations. Instead of *adding* a position number to each embedding, we **rotate** each word's query and key vectors by an angle that depends on position. Word at position 1 gets rotated a little. Word at position 5 gets rotated more. Word at position 100 gets rotated a lot more.
+
+Why does this work? Remember from Chapter 5 that the dot product of two vectors depends on the angle between them. When we rotate two vectors by different amounts, the dot product depends on the *difference* in their rotation angles — which is exactly the *relative distance* between the words.
+
+Two words that are 3 positions apart always have the same angular difference, whether they're at positions 1 & 4, or positions 50 & 53. The dot product automatically captures relative distance.
+
+<RotationPositionWidget />
+
+<TryIt>
+Move the position sliders around. Keep the gap the same (say, 3) but change the absolute positions — the dot product stays the same! Now change the gap — the dot product changes. The dashed projection line shows this visually: its length *is* the dot product. Click "Same gap, different positions" to see the projection stay constant.
+</TryIt>
+
+### RoPE with Our Toy Tokens
+
+Let's see this work with our familiar toy vocabulary. Below, "it" is trying to figure out which noun to attend to. Both nouns have identical keys — so without position information, they get *equal* attention scores. But watch what happens when you turn on rotation:
+
+<RoPEToyTokensWidget />
+
+<TryIt>
+Start with the rotation speed at 0° — both nouns get identical scores. Now slowly drag it up. The closer noun starts winning because its key is rotated to a more similar angle to "it"'s query. Try different sentences to see the effect with different word orders. This is the core insight of RoPE: rotation breaks the tie between otherwise-identical tokens based on distance.
+</TryIt>
+
+### Does Rotation Tell Us Direction?
+
+You might notice something: cos(θ) = cos(-θ). The dot product between two rotated vectors is the same whether word A is 3 positions *before* or 3 positions *after* word B. Rotation encodes *distance* but not *direction*.
+
+This turns out to be fine. Language models already have a mechanism for direction: **causal masking**. During generation, each token can only attend to tokens that came *before* it — future positions are masked to -∞ before softmax, so they get zero attention weight. RoPE handles "how far apart," and causal masking handles "which direction."
+
+### What About Wrap-Around?
+
+With a single rotation frequency, there's an obvious problem: if we rotate by 15° per position, then position 1 and position 25 look identical (both are at 15° and 375° = 15°). After a full 360° revolution, positions start repeating!
+
+The solution is to use **multiple rotation speeds** across different pairs of embedding dimensions. Some dimension pairs rotate fast (capturing fine-grained local patterns), others rotate slowly (capturing long-range dependencies). Think of it like a clock: the second hand, minute hand, and hour hand all rotate at different speeds. Any two times of day produce a *unique combination* of hand positions, even though each individual hand wraps around. Similarly, no two token positions share the same rotation pattern across all dimension pairs.
+
+### Doesn't Rotation Destroy the Content?
+
+A natural worry: if we're rotating the embedding vectors, aren't we scrambling the information about *what* the word is?
+
+No — and this is key. Rotation preserves the *length* of a vector; it only changes its *direction*. The word's identity (encoded in the vector's magnitude and the relationships between dimensions) survives the rotation intact. Position information is layered on top, not mixed in.
+
+<KeyInsight>
+The dot product of two vectors equals |A| · |B| · cos(θ). Content lives in the magnitudes |A| and |B| — how "noun-like" or "filler-like" a token is. Position lives in the angle θ between them. Rotation changes the angle without touching the magnitudes, so **content and position information stay cleanly separated.**
+</KeyInsight>
+
+### Scaling to Huge Context Windows
+
+RoPE's base rotation speed is controlled by a parameter θ_base, typically 10,000. This means the slowest-rotating dimension pair completes one full revolution over roughly 10,000 positions. Beyond that, positions start to become ambiguous — similar to how a 12-hour clock can't distinguish AM from PM.
+
+To support longer contexts, techniques like **YaRN** and **NTK-aware scaling** stretch the rotation frequencies so that the slow pairs rotate even more slowly. It's like adding an even slower "day hand" to the clock — now you can tell apart any two times across an entire day, not just within 12 hours.
+
+This isn't free: stretching frequencies spreads out the angular resolution, so the model needs fine-tuning to adapt. But it works remarkably well in practice. This is how Llama 3.1 handles 128K tokens and how Gemini extends to over a million.
+
+## Multiple Heads: Looking for Different Things
+
+So far we've built one attention mechanism — one set of Q, K, and V weights that asks one kind of question. But understanding a sentence requires many kinds of questions at once: What does this pronoun refer to? What's the nearest noun? What's the subject of this verb? What clause does this word belong to?
+
+Some of these questions — like "what's the nearest noun?" — depend on knowing word positions. That's why we needed positional encoding first. Now that the model knows both *what* words are and *where* they are, different attention heads can specialize in different patterns.
+
+Attention models use **multiple attention heads** — each with its own Q, K, and V weights, each learning to look for different kinds of relationships. They all run in parallel on the same input, and their outputs get combined.
+
+This isn't a theoretical idea — we can see it happening inside a real model. Below are attention weights from **BERT**, a well-known language model with 12 layers of 12 heads each (that's 144 attention heads total). We've picked four heads that learned strikingly different patterns:
+
+<BertAttentionWidget />
+
+<TryIt>
+Switch between the four heads and click words to see their attention. Start with "Self / pronoun" and click "it" in the first sentence — watch it split attention between "dog" and "cat." Then switch to "Next word" — every word rigidly attends to the one after it. Try "Previous word" — the mirror image. Finally, "Broad context" shows wider structural connections. These are real attention weights from a real model — each head genuinely learned a different job.
+</TryIt>
+
+Each head is a specialist. The "Next word" and "Previous word" heads build a chain of local context — they only work because the model has positional encoding telling it where each word sits. The "Self / pronoun" head resolves references and links related concepts. The "Broad context" head captures sentence structure. No one told these heads what to specialize in — they discovered their roles through training, because different kinds of attention are all useful for predicting language.
+
+<KeyInsight>
+Multiple attention heads let the model ask many different questions in parallel. Each head has its own Q, K, and V weights, so each learns to attend to a different kind of relationship — position, pronouns, grammar, structure, semantics. **The model doesn't need to choose one kind of attention; it gets all of them at once.**
+</KeyInsight>
+
+## What We've Built
+
+Let's take stock. Attention is:
+
+1. **Query, Key, Value** — Each word gets three representations, learned from embeddings
+2. **Dot products** — Measure how relevant each word is to each other word
+3. **Softmax** — Turn relevance scores into percentages
+4. **Weighted sum** — Blend values according to attention percentages
+5. **Rotary positions** — Rotate embeddings so dot products automatically capture word distance
+6. **Multiple heads** — Run several attention patterns in parallel, each specializing in different relationships
+
+Every piece is something we already understood from earlier chapters. Attention is just a clever *wiring* of familiar operations.
+
+In the next chapter, we'll wire attention together with feed-forward neural networks to build the **transformer** — the architecture behind ChatGPT, Claude, and every modern language model. And we'll see what happens when you train it to do that simple task from Chapter 6: predict the next word.
+
+<TryItInPyTorch notebook="attention">
+Compute dot-product attention from scratch, build query/key/value projections, visualize attention heatmaps on real sentences, implement multi-head attention, see how scrambled word order doesn't change attention scores, and build rotary position embeddings that encode relative distance.
+</TryItInPyTorch>

@@ -1,0 +1,148 @@
+# Matrix Math and Linear Transformations
+
+<Lead>
+What does a neural network actually *do* to your data as it passes through each
+layer? It multiplies and adds — and that operation has a name: matrix
+multiplication. It also has a beautiful geometric meaning. Each layer is a
+transformation of space itself.
+</Lead>
+
+## Starting Simple: One Dimension
+
+Before we tackle the full complexity of matrices, let's start with the simplest possible case: one dimension.
+
+In one dimension, a "matrix" is just a single number. You multiply every input by that number. Multiply by 2, and everything stretches away from zero. Multiply by 0.5, and everything contracts toward zero. Multiply by &minus;1, and everything flips to the other side.
+
+<Transform1DWidget />
+
+<TryIt>
+Drag the slider to different values. What happens when you multiply by 0? By &minus;1? By a number between 0 and 1? Notice that zero itself never moves, no matter what you multiply by — it's a **fixed point** of every linear transformation.
+</TryIt>
+
+Here's a simple but important idea: in 1D, the number "1" is a **basis vector** — think of it as a building block arrow that you stretch or shrink to reach any other number. Every other number is just some multiple of 1. When you multiply by 2, you're saying "take the basis vector 1, and stretch it to 2." That single number tells you where the basis vector lands after the transformation, and *everything else follows automatically*.
+
+In 1D, there's not much a "matrix" can do: stretch, shrink, flip, or collapse to a point. One number, one effect. Let's add a dimension.
+
+## Two Dimensions: Where It Gets Interesting
+
+In 1D we had one basis vector (one building block arrow). In 2D we have **two**: one pointing right along the x-axis, and one pointing up along the y-axis. Every point in 2D is some combination of "go right" and "go up" — it's built from those two building blocks.
+
+A 2&times;2 matrix tells you where each basis vector lands. That takes **four numbers**, arranged in a grid:
+
+<div className="my-6 flex justify-center">
+<div className="inline-block rounded-lg border border-border bg-surface px-6 py-3 font-mono text-lg">
+<div className="flex items-center gap-1"><span className="text-xl text-muted">[</span> <span className="w-8 text-center" style={{color: "#ef4444"}}>a</span> <span className="w-8 text-center" style={{color: "#22c55e"}}>b</span> <span className="text-xl text-muted">]</span></div>
+<div className="flex items-center gap-1"><span className="text-xl text-muted">[</span> <span className="w-8 text-center" style={{color: "#ef4444"}}>c</span> <span className="w-8 text-center" style={{color: "#22c55e"}}>d</span> <span className="text-xl text-muted">]</span></div>
+</div>
+</div>
+
+The <span style={{color: "#ef4444"}}>first column</span> (a, c) tells you where the x-axis basis vector ends up. The <span style={{color: "#22c55e"}}>second column</span> (b, d) tells you where the y-axis basis vector ends up. Everything else — every single point in the entire plane — just follows along.
+
+Four numbers. That's it. But watch what they can do:
+
+<Transform2DWidget />
+
+<TryIt>
+Switch to the **Cat** and try the presets. Hit **Rotate 90&deg;** — the cat spins a quarter turn. **Shear** — the cat leans over like it's dodging something. **Reflect** — mirror-image cat! **Collapse** — the cat gets squished into a line (poor cat). Now switch to the **Mona Lisa** and try **Rotate 45&deg;** — can you tell she's tilted? Try making your own transformation: can you make the Mona Lisa twice as wide but the same height? (Hint: drag *a* to 2 — you're stretching the x-axis basis vector to twice its length.)
+</TryIt>
+
+<KeyInsight>
+A 2&times;2 matrix is completely defined by four numbers. Those four numbers control every possible 2D linear transformation: rotation, scaling, shearing, reflection, and collapse. The first column tells you where the x-axis basis vector goes. The second tells you where the y-axis basis vector goes. Everything else follows.
+</KeyInsight>
+
+## Another Way to See It: New Axes
+
+Don't worry if this section doesn't fully click right away — the main point is that there are two useful ways to read what a matrix does.
+
+There's a powerful second way to read a matrix. Instead of thinking "where do the old basis vectors end up?" (the columns), think about the **rows**: each row defines a new basis vector in terms of the old ones.
+
+The <span style={{color: "#ef4444"}}>first row</span> says: "my new x-axis is made of this much old-x and this much old-y." The <span style={{color: "#22c55e"}}>second row</span> does the same for the new y-axis. You're defining a new coordinate system by pointing arrows in the old space and saying "measure along *these* directions instead."
+
+The left panel below shows the original image with the new axes drawn on top. The faint colored grid lines show where integer values of each new coordinate fall. The right panel shows the result of re-measuring the image using those new axes.
+
+<BasisVectorViewWidget />
+
+<TryIt>
+Start with **Identity** — the new axes match the old ones, so nothing changes. Now hit **Rotate 90&deg;** — the red arrow (new x-axis) now points down and the green arrow (new y-axis) points right. The cat rotates because we're measuring along different directions. Try **Shear** — the red arrow tilts, mixing in some old-y into the new x-measurement, and the cat leans. Try **Collapse** — the green arrow shrinks to nothing, destroying the y-measurement entirely.
+
+Notice how the faint grid lines on the left are perpendicular to the arrows — they mark where each new coordinate equals 0, 1, 2, etc. The arrow tells you *which direction* you're measuring along.
+</TryIt>
+
+This dual interpretation — "where do old axes land?" (columns) vs. "what are my new measurement directions?" (rows) — is the same math read two ways. Both are useful. In neural networks, the row view is especially natural: each output neuron computes a **dot product** (multiply matching pairs of numbers together and add them up) with one row of the weight matrix, measuring how much the input aligns with that row's direction.
+
+## Changing Dimensions
+
+So far our matrices have been square — 2&times;2 matrices mapping 2D to 2D. But matrices don't have to be square. A **1&times;2 matrix** takes a 2D point and produces a single number. It *projects* two dimensions down to one.
+
+This is dimension reduction — and it's everywhere in neural networks. A layer with 768 inputs and 64 outputs is a 64&times;768 matrix. It takes a high-dimensional representation and squishes it down to a smaller one, keeping (hopefully) the important information and discarding the rest.
+
+Below, you can see 2D points being projected onto a line. Each colored point has a letter so you can track where it lands. Rotate the line and watch the points slide along it.
+
+<DimensionProjectionWidget />
+
+<TryIt>
+Start with the **Arrow** shape. At **0&deg;** (horizontal line), you're only keeping each point's x-coordinate — the arrow gets squished onto the x-axis. Switch to **90&deg;** (vertical) and you keep only the y-coordinate. Now try **45&deg;** — you get a mix of both.
+
+Notice how some directions preserve the shape's structure better than others. At 0&deg;, points B and C land in almost the same spot — they're "confused." At 45&deg;, all the points spread out more evenly. Finding the direction that preserves the most information is a key idea in data science.
+</TryIt>
+
+When the matrix has **more rows than columns**, it does the opposite — it *embeds* a lower dimension into a higher one. A 768&times;1 matrix takes a single number and places it into a 768-dimensional space. Neural networks do both: expanding dimensions to create richer representations, then compressing them back down.
+
+## The Neural Network Connection
+
+Here's the punchline of this chapter. A single layer in a neural network does three things in sequence:
+
+1. **Matrix multiply**: multiply the inputs by a weight matrix (rotate and stretch the space)
+2. **Add bias**: shift everything by a fixed offset (translate the space)
+3. **Apply activation function**: bend the space non-linearly (e.g., clip all negative values to zero (an operation called **ReLU** — a fancy name for a simple idea))
+
+The matrix part is everything we've been exploring. The bias is a simple shift — it moves the origin. And the activation function is the crucial non-linear ingredient that lets neural networks learn things that pure matrices can't.
+
+Without activation functions, stacking layers would be pointless: a matrix times a matrix is just another matrix. Two rotations compose into one rotation. But add a non-linear bend between each layer, and suddenly you can build arbitrarily complex transformations.
+
+<NeuronVsMatrixWidget />
+
+<TryIt>
+Adjust the weight sliders and watch both views update at the same time. The neuron diagram on the left and the geometric view on the right are showing the **exact same math** — just drawn differently! Try **Rotate 90&deg;** — the neuron weights become [0, &minus;1, 1, 0] and the colored dots spin a quarter turn. Try **Collapse to line** — one output neuron goes dead and the dots all squish onto a single line.
+</TryIt>
+
+This dual interpretation is profound:
+
+- In the **neuron view**, we think: *"Each output computes a weighted sum of inputs."*
+- In the **matrix view**, we think: *"The layer rotates and stretches the input space."*
+
+Both are true simultaneously. They're just two ways of seeing the same math.
+
+<KeyInsight>
+A neural network layer and a matrix transformation are the same thing, drawn differently. When we train a neural network, we're learning the right matrix at each layer — the right geometric transformation to apply to the data. Real neural networks work in hundreds or thousands of dimensions — a single layer in a typical language model transforms a 768-dimensional space, with over half a million matrix entries — but the math is identical to our 2D examples. Just... bigger.
+</KeyInsight>
+
+## But Wait — We Forgot the Activation Function
+
+In the previous section, we said a neural network layer is a matrix multiplication. That's almost true — but we left out two ingredients. After the matrix transforms the space, the network adds a **bias** (a fixed shift) and then applies an **activation function** to every output value.
+
+Once again we'll be using the **sigmoid** activation function, which squashes every value into the range 0 to 1. The bias shifts the data before the sigmoid acts on it, controlling *where* in the sigmoid's curve each value lands. What do these extra steps look like geometrically? A matrix transformation preserves straight lines — it can rotate, stretch, and shear, but a straight line always stays straight. The sigmoid breaks that rule. It *warps* the space, bending straight edges into curves and crushing everything into a small box.
+
+<ActivationEffectWidget />
+
+<TryIt>
+Start with **Identity** — the arrow looks normal because sigmoid undoes itself when the matrix doesn't change anything. Now try **Stretch 3&times;** — the arrow warps and squashes because the sigmoid clips values far from zero, bending straight edges into curves. **Spin &amp; grow** — a big rotation gets warped into a blob. **Shift up** keeps the matrix at identity but adds a positive bias to the y-output, pushing everything toward the top of the sigmoid's range. **Funhouse** combines skewed weights with uneven biases for an asymmetric distortion. Try switching to **Cat** or **Mona Lisa** to see the warping effect on a real image.
+</TryIt>
+
+This is why activation functions matter so much. Without them, every layer would just be another matrix — and stacking matrices just gives you one big matrix. With activation functions bending the space between each layer, the network can fold and warp its input into shapes that no single matrix could produce.
+
+## Training Is Geometry
+
+When you train a neural network, you're searching for the right sequence of geometric transformations. Each layer rotates, stretches, and (with activation functions) bends the input space, gradually reshaping it until the data is arranged in a way that makes the answer obvious.
+
+Imagine data points from two classes tangled together in a spiral. No single straight line can separate them. But a matrix transformation can stretch and rotate the spiral, and an activation function can fold it. Stack enough of these transform-and-fold operations, and you can untangle any pattern into neatly separated clusters.
+
+That's what training discovers: the right sequence of rotations, stretches, and folds to make the problem simple.
+
+## What's Next
+
+We've seen that every neural network layer is a matrix transformation — a geometric reshaping of space. But how does the network actually *find* the right matrices? In future chapters, we'll see how gradient descent rolls downhill through a landscape with millions of dimensions, automatically discovering the transformations that untangle data.
+
+<TryItInPyTorch notebook="matrix-math">
+Apply rotation, stretch, and shear matrices to shapes, prove that nn.Linear is just matrix multiplication, compare ReLU and sigmoid, and see why activation functions prevent layers from collapsing.
+</TryItInPyTorch>
