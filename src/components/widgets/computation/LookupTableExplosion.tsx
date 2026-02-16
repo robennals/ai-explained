@@ -116,7 +116,6 @@ export function LookupTableExplosion() {
   const [inputType, setInputType] = useState<InputType>("image");
   const [sizeIdx, setSizeIdx] = useState(0);
   const [depthIdx, setDepthIdx] = useState(0);
-
   const config = INPUT_CONFIGS[inputType];
   const size = config.sizes[sizeIdx];
   const depth = config.depths[depthIdx];

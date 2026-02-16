@@ -99,3 +99,37 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-muted);
 }
+
+/* Gentle pulse hint for clickable elements that haven't been interacted with */
+@keyframes gentle-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+  50% { box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.25); }
+}
+
+.pulse-hint {
+  animation: gentle-pulse 2s ease-in-out infinite;
+}
+
+/* Auto-hiding scrollbar: invisible until hovered */
+.scrollbar-autohide::-webkit-scrollbar-thumb {
+  background: transparent;
+  transition: background 0.2s;
+}
+
+.scrollbar-autohide:hover::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+}
+
+.scrollbar-autohide:hover::-webkit-scrollbar-thumb:hover {
+  background: var(--color-muted);
+}
+
+/* Firefox */
+.scrollbar-autohide {
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.2s;
+}
+
+.scrollbar-autohide:hover {
+  scrollbar-color: var(--color-border) transparent;
+}

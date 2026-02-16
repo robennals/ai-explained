@@ -49,6 +49,29 @@ function project(x: number, y: number, z: number, rotY: number, rotX: number): [
   return [CX + rx * SCALE, CY - ry * SCALE, rz2];
 }
 
+function PropTabs({ label, value, onChange, color }: { label: string; value: Property; onChange: (p: Property) => void; color: string }) {
+  return (
+    <div>
+      <div className="mb-1.5 text-[10px] font-bold uppercase tracking-widest" style={{ color }}>{label}</div>
+      <div className="flex flex-wrap gap-1.5">
+        {PROPERTIES.map((p) => (
+          <button
+            key={p}
+            onClick={() => onChange(p)}
+            className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-colors ${
+              value === p
+                ? "bg-accent text-white"
+                : "bg-foreground/5 text-muted hover:bg-foreground/10"
+            }`}
+          >
+            {p.charAt(0).toUpperCase() + p.slice(1)}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function Vector3DExplorer() {
   const [xProp, setXProp] = useState<Property>("big");
   const [yProp, setYProp] = useState<Property>("scary");
@@ -98,29 +121,6 @@ export function Vector3DExplorer() {
     const [sx, sy, sz] = project(a[xProp], a[yProp], a[zProp], rotY, rotX);
     return { ...a, sx, sy, sz };
   }).sort((a, b) => a.sz - b.sz); // draw back-to-front
-
-  function PropTabs({ label, value, onChange, color }: { label: string; value: Property; onChange: (p: Property) => void; color: string }) {
-    return (
-      <div>
-        <div className="mb-1.5 text-[10px] font-bold uppercase tracking-widest" style={{ color }}>{label}</div>
-        <div className="flex flex-wrap gap-1.5">
-          {PROPERTIES.map((p) => (
-            <button
-              key={p}
-              onClick={() => onChange(p)}
-              className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-colors ${
-                value === p
-                  ? "bg-accent text-white"
-                  : "bg-foreground/5 text-muted hover:bg-foreground/10"
-              }`}
-            >
-              {p.charAt(0).toUpperCase() + p.slice(1)}
-            </button>
-          ))}
-        </div>
-      </div>
-    );
-  }
 
   return (
     <WidgetContainer
