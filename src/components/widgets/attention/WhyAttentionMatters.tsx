@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
 
 /* ------------------------------------------------------------------ */
@@ -124,24 +124,76 @@ const SENTENCES: SentenceExample[] = [
 /** Accent hue for highlights (indigo-ish) */
 const HIGHLIGHT_HUE = 240;
 
-function weightToColor(w: number): string {
-  // Higher weight → more saturated, more opaque indigo
-  const alpha = 0.15 + w * 0.65;
-  return `hsla(${HIGHLIGHT_HUE}, 80%, 60%, ${alpha})`;
-}
-
 function weightToBorder(w: number): string {
   const alpha = 0.3 + w * 0.7;
   return `hsla(${HIGHLIGHT_HUE}, 80%, 50%, ${alpha})`;
 }
 
+function weightToStroke(w: number): string {
+  const alpha = 0.25 + w * 0.6;
+  return `hsla(${HIGHLIGHT_HUE}, 75%, 55%, ${alpha})`;
+}
+
+interface Arrow {
+  fromX: number;
+  fromY: number;
+  toX: number;
+  toY: number;
+  weight: number;
+}
+
 export function WhyAttentionMatters() {
   const [sentenceIdx, setSentenceIdx] = useState(0);
   const [selectedWord, setSelectedWord] = useState<number | null>(null);
+  const [arrows, setArrows] = useState<Arrow[]>([]);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const wordRefs = useRef<Map<number, HTMLSpanElement>>(new Map());
 
   const sentence = SENTENCES[sentenceIdx];
   const currentTarget =
     selectedWord !== null ? sentence.targets[selectedWord] : null;
+
+  const hasSelection = selectedWord !== null && currentTarget !== null;
+
+  // Measure word positions and compute arrows after layout settles
+  useEffect(() => {
+    if (!hasSelection || !containerRef.current) {
+      setArrows([]);
+      return;
+    }
+
+    // Wait a frame so the padding-top change has been applied
+    const raf = requestAnimationFrame(() => {
+      const container = containerRef.current;
+      if (!container) return;
+      const containerRect = container.getBoundingClientRect();
+      const fromEl = wordRefs.current.get(selectedWord!);
+      if (!fromEl) { setArrows([]); return; }
+
+      const fromRect = fromEl.getBoundingClientRect();
+      const fromX = fromRect.left + fromRect.width / 2 - containerRect.left;
+      const fromY = fromRect.top - containerRect.top;
+
+      const newArrows: Arrow[] = [];
+      for (const [idxStr, weight] of Object.entries(currentTarget!.weights)) {
+        const idx = Number(idxStr);
+        const toEl = wordRefs.current.get(idx);
+        if (!toEl) continue;
+        const toRect = toEl.getBoundingClientRect();
+        newArrows.push({
+          fromX,
+          fromY,
+          toX: toRect.left + toRect.width / 2 - containerRect.left,
+          toY: toRect.top - containerRect.top,
+          weight,
+        });
+      }
+      setArrows(newArrows);
+    });
+
+    return () => cancelAnimationFrame(raf);
+  }, [hasSelection, selectedWord, currentTarget, sentenceIdx]);
 
   const handleReset = useCallback(() => {
     setSentenceIdx(0);
@@ -154,6 +206,9 @@ export function WhyAttentionMatters() {
   };
 
   const isClickable = (wordIdx: number) => wordIdx in sentence.targets;
+
+  // SVG padding above words for arcs
+  const arcPad = 60;
 
   return (
     <WidgetContainer
@@ -179,57 +234,106 @@ export function WhyAttentionMatters() {
           ))}
         </div>
 
-        {/* Word display */}
-        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-3 rounded-lg border border-border bg-surface px-5 py-4 text-lg leading-relaxed">
-          {sentence.words.map((word, i) => {
-            const clickable = isClickable(i);
-            const isSelected = selectedWord === i;
-            const weight = currentTarget?.weights[i] ?? 0;
-            const isSource = currentTarget != null && weight > 0;
+        {/* Word display with arrow overlay */}
+        <div className="relative rounded-lg border border-border bg-surface" ref={containerRef}>
+          {/* SVG overlay for curved arrows */}
+          {hasSelection && arrows.length > 0 && (
+            <svg
+              className="pointer-events-none absolute inset-0 h-full w-full overflow-visible"
+              style={{ zIndex: 10 }}
+            >
+              <defs>
+                <marker
+                  id="arrowhead"
+                  markerWidth="6"
+                  markerHeight="5"
+                  refX="5"
+                  refY="2.5"
+                  orient="auto"
+                >
+                  <polygon
+                    points="0 0, 6 2.5, 0 5"
+                    fill={`hsla(${HIGHLIGHT_HUE}, 75%, 55%, 0.7)`}
+                  />
+                </marker>
+              </defs>
+              {arrows.map((a, i) => {
+                // Arc height based on horizontal distance
+                const dx = Math.abs(a.toX - a.fromX);
+                const arcHeight = Math.min(arcPad + dx * 0.15, 100);
+                // Control point is above midpoint
+                const midX = (a.fromX + a.toX) / 2;
+                const midY = Math.min(a.fromY, a.toY) - arcHeight;
+                const strokeWidth = 1.5 + a.weight * 1.5;
+                return (
+                  <path
+                    key={i}
+                    d={`M ${a.fromX} ${a.fromY} Q ${midX} ${midY} ${a.toX} ${a.toY}`}
+                    fill="none"
+                    stroke={weightToStroke(a.weight)}
+                    strokeWidth={strokeWidth}
+                    markerEnd="url(#arrowhead)"
+                    className="transition-all duration-300"
+                  />
+                );
+              })}
+            </svg>
+          )}
 
-            return (
-              <span
-                key={`${sentenceIdx}-${i}`}
-                role={clickable ? "button" : undefined}
-                tabIndex={clickable ? 0 : undefined}
-                onClick={clickable ? () => setSelectedWord(isSelected ? null : i) : undefined}
-                onKeyDown={
-                  clickable
-                    ? (e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
-                          setSelectedWord(isSelected ? null : i);
-                        }
-                      }
-                    : undefined
-                }
-                className={`relative inline-block rounded px-1 py-0.5 transition-all duration-200 ${
-                  clickable
-                    ? "cursor-pointer font-semibold text-accent underline decoration-accent/40 decoration-2 underline-offset-4 hover:decoration-accent/70"
-                    : ""
-                } ${isSelected ? "ring-2 ring-accent ring-offset-1 ring-offset-surface" : ""}`}
-                style={
-                  isSource
-                    ? {
-                        backgroundColor: weightToColor(weight),
-                        borderBottom: `3px solid ${weightToBorder(weight)}`,
-                        borderRadius: 4,
-                      }
-                    : undefined
-                }
-              >
-                {word}
-                {isSource && (
+          {/* Words */}
+          <div className="flex flex-wrap gap-x-1 gap-y-0 px-5 py-4 text-lg" style={{ paddingTop: `${arcPad + 16}px` }}>
+            {sentence.words.map((word, i) => {
+              const clickable = isClickable(i);
+              const isSelected = selectedWord === i;
+              const weight = currentTarget?.weights[i] ?? 0;
+              const isSource = currentTarget != null && weight > 0;
+
+              return (
+                <span
+                  key={`${sentenceIdx}-${i}`}
+                  className="inline-flex flex-col items-center"
+                >
                   <span
-                    className="absolute -top-5 left-1/2 -translate-x-1/2 font-mono text-[10px] font-bold"
-                    style={{ color: weightToBorder(weight) }}
+                    ref={(el) => {
+                      if (el) wordRefs.current.set(i, el);
+                      else wordRefs.current.delete(i);
+                    }}
+                    role={clickable ? "button" : undefined}
+                    tabIndex={clickable ? 0 : undefined}
+                    onClick={clickable ? () => setSelectedWord(isSelected ? null : i) : undefined}
+                    onKeyDown={
+                      clickable
+                        ? (e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              setSelectedWord(isSelected ? null : i);
+                            }
+                          }
+                        : undefined
+                    }
+                    className={`inline-block rounded px-1 py-0.5 transition-all duration-200 ${
+                      clickable
+                        ? "cursor-pointer font-semibold text-accent underline decoration-accent/40 decoration-2 underline-offset-4 hover:decoration-accent/70"
+                        : ""
+                    } ${isSelected ? "ring-2 ring-accent ring-offset-1 ring-offset-surface" : ""}`}
                   >
-                    {Math.round(weight * 100)}%
+                    {word}
                   </span>
-                )}
-              </span>
-            );
-          })}
+                  {/* Fixed-height slot for percentage pill — always present to prevent shifting */}
+                  <span className="flex h-5 items-center">
+                    {isSource ? (
+                      <span
+                        className="rounded-full px-1.5 py-0.5 font-mono text-[10px] font-bold text-white transition-all duration-200"
+                        style={{ backgroundColor: weightToBorder(weight) }}
+                      >
+                        {Math.round(weight * 100)}%
+                      </span>
+                    ) : null}
+                  </span>
+                </span>
+              );
+            })}
+          </div>
         </div>
 
         {/* Explanation */}

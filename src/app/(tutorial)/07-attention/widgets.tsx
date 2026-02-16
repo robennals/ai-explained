@@ -11,6 +11,38 @@ const WhyAttentionMatters = dynamic(
   { ssr: false }
 );
 
+const ToyVocabTable = dynamic(
+  () =>
+    import("@/components/widgets/attention/ToyVocabTable").then(
+      (m) => m.ToyVocabTable
+    ),
+  { ssr: false }
+);
+
+const ToyAttention = dynamic(
+  () =>
+    import("@/components/widgets/attention/ToyAttention").then(
+      (m) => m.ToyAttention
+    ),
+  { ssr: false }
+);
+
+const AttentionPlayground = dynamic(
+  () =>
+    import("@/components/widgets/attention/AttentionPlayground").then(
+      (m) => m.AttentionPlayground
+    ),
+  { ssr: false }
+);
+
+const BertAttention = dynamic(
+  () =>
+    import("@/components/widgets/attention/BertAttention").then(
+      (m) => m.BertAttention
+    ),
+  { ssr: false }
+);
+
 const PatternAttention = dynamic(
   () =>
     import("@/components/widgets/attention/PatternAttention").then(
@@ -31,6 +63,14 @@ const MultiHead = dynamic(
   () =>
     import("@/components/widgets/attention/MultiHead").then(
       (m) => m.MultiHead
+    ),
+  { ssr: false }
+);
+
+const PositionApproaches = dynamic(
+  () =>
+    import("@/components/widgets/attention/PositionApproaches").then(
+      (m) => m.PositionApproaches
     ),
   { ssr: false }
 );
@@ -73,6 +113,30 @@ export function WhyAttentionMattersWidget() {
   );
 }
 
+export function ToyVocabTableWidget() {
+  return (
+    <WidgetSlot>
+      <ToyVocabTable />
+    </WidgetSlot>
+  );
+}
+
+export function ToyAttentionWidget() {
+  return (
+    <WidgetSlot>
+      <ToyAttention />
+    </WidgetSlot>
+  );
+}
+
+export function AttentionPlaygroundWidget() {
+  return (
+    <WidgetSlot>
+      <AttentionPlayground />
+    </WidgetSlot>
+  );
+}
+
 export function PatternAttentionWidget() {
   return (
     <WidgetSlot>
@@ -93,6 +157,22 @@ export function MultiHeadWidget() {
   return (
     <WidgetSlot>
       <MultiHead />
+    </WidgetSlot>
+  );
+}
+
+export function BertAttentionWidget() {
+  return (
+    <WidgetSlot>
+      <BertAttention />
+    </WidgetSlot>
+  );
+}
+
+export function PositionApproachesWidget() {
+  return (
+    <WidgetSlot>
+      <PositionApproaches />
     </WidgetSlot>
   );
 }

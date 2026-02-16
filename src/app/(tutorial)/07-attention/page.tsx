@@ -3,9 +3,14 @@ import { getAdjacentChapters } from "@/lib/curriculum";
 import Content from "./content.mdx";
 import {
   WhyAttentionMattersWidget,
+  ToyVocabTableWidget,
+  ToyAttentionWidget,
+  AttentionPlaygroundWidget,
+  BertAttentionWidget,
   PatternAttentionWidget,
   AttentionStepThroughWidget,
   MultiHeadWidget,
+  PositionApproachesWidget,
   PositionScrambleWidget,
   RotationPositionWidget,
 } from "./widgets";
@@ -25,9 +30,14 @@ export default function Chapter07() {
         <Content
           components={{
             WhyAttentionMattersWidget,
+            ToyVocabTableWidget,
+            ToyAttentionWidget,
+            AttentionPlaygroundWidget,
+            BertAttentionWidget,
             PatternAttentionWidget,
             AttentionStepThroughWidget,
             MultiHeadWidget,
+            PositionApproachesWidget,
             PositionScrambleWidget,
             RotationPositionWidget,
           }}
