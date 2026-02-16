@@ -20,10 +20,26 @@ const ErrorMeasurement = dynamic(
   { ssr: false }
 );
 
+const SmoothRealWorld = dynamic(
+  () =>
+    import("@/components/widgets/optimization/SmoothRealWorld").then(
+      (m) => m.SmoothRealWorld
+    ),
+  { ssr: false }
+);
+
 const SmoothVsRugged = dynamic(
   () =>
     import("@/components/widgets/optimization/SmoothVsRugged").then(
       (m) => m.SmoothVsRugged
+    ),
+  { ssr: false }
+);
+
+const GradientRealWorld = dynamic(
+  () =>
+    import("@/components/widgets/optimization/GradientRealWorld").then(
+      (m) => m.GradientRealWorld
     ),
   { ssr: false }
 );
@@ -76,10 +92,26 @@ export function ErrorMeasurementWidget({ children }: { children?: React.ReactNod
   );
 }
 
+export function SmoothRealWorldWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <SmoothRealWorld />
+    </WidgetSlot>
+  );
+}
+
 export function SmoothVsRuggedWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children}>
       <SmoothVsRugged />
+    </WidgetSlot>
+  );
+}
+
+export function GradientRealWorldWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <GradientRealWorld />
     </WidgetSlot>
   );
 }

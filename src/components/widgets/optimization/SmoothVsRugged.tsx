@@ -19,14 +19,13 @@ function smoothFn(x: number): number {
   return (x - 0.5) * (x - 0.5);
 }
 
-// Step function: 16 random heights in the same range as smooth (0 to 0.25)
-const STEP_HEIGHTS = [
-  0.18, 0.07, 0.23, 0.12, 0.03, 0.21, 0.09, 0.16,
-  0.24, 0.05, 0.19, 0.01, 0.14, 0.22, 0.08, 0.11,
-];
+// Step function: same bowl shape as smooth, but quantized into big steps
+const N_STEPS = 8;
 function stepFn(x: number): number {
-  const idx = Math.min(Math.floor(x * STEP_HEIGHTS.length), STEP_HEIGHTS.length - 1);
-  return STEP_HEIGHTS[idx];
+  // Quantize x to the center of each step
+  const idx = Math.min(Math.floor(x * N_STEPS), N_STEPS - 1);
+  const centerX = (idx + 0.5) / N_STEPS;
+  return smoothFn(centerX);
 }
 
 // Which direction is downhill? Returns -1, 0, or +1
@@ -230,8 +229,8 @@ function LandscapePanel({
         )}
       </svg>
 
-      {/* Stats */}
-      <div className="flex items-center gap-3 text-xs text-muted">
+      {/* Stats — fixed height to prevent layout jump */}
+      <div className="flex h-5 items-center gap-3 text-xs text-muted">
         {steps > 0 && (
           <span>
             Steps: <span className="font-mono font-bold text-foreground">{steps}</span>

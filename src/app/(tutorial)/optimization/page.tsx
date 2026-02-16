@@ -4,7 +4,9 @@ import Content from "./content.mdx";
 import {
   OptimizationGameWidget,
   ErrorMeasurementWidget,
+  SmoothRealWorldWidget,
   SmoothVsRuggedWidget,
+  GradientRealWorldWidget,
   Gradient2DCurveWidget,
   Gradient3DSurfaceWidget,
 } from "./widgets";
@@ -25,7 +27,9 @@ export default function Chapter02() {
           components={{
             OptimizationGameWidget,
             ErrorMeasurementWidget,
+            SmoothRealWorldWidget,
             SmoothVsRuggedWidget,
+            GradientRealWorldWidget,
             Gradient2DCurveWidget,
             Gradient3DSurfaceWidget,
           }}
