@@ -108,7 +108,13 @@ Here's the connection that ties everything together. Remember from the previous 
 where **w** = (w₁, w₂, …, wₙ) is the weight vector and **x** = (x₁, x₂, …, xₙ) is the input vector.
 </Callout>
 
-The weight vector's direction says *what kind of input* the neuron is looking for. Its magnitude says *how interested* it is — bigger weights mean a stronger response. The input vector's direction says *what kind of thing* arrived, and its magnitude says *how much*. The dot product combines all of this: when a large input matches what the neuron cares strongly about, the result is big, the sigmoid outputs close to 1, and the neuron fires. When the input is unrelated (perpendicular), the dot product is near zero. When it's the opposite of what the neuron wants, it stays quiet.
+The neuron is asking **"how much does this input point in the direction of what I'm looking for?"**. 
+
+* **The direction** of the weight vector determines what the neuron is looking for. 
+* **The magnitude** of the weight vector determines how much the neuron needs to see in order to get excited. 
+* **The bias** determines how excited it is it hasn't seen anything at all.  
+
+This is all a bit brain bending, but makes more sense if you play with it.
 
 <NeuronDotProductWidget>
 Drag the weight and input vectors. Watch the angle between them — when the vectors align (small angle), the output is high. When they're perpendicular (90°), the output depends mostly on the bias. When they oppose each other (large angle), the output drops. Try making the bias very negative — now the vectors need to be *very* well aligned for the neuron to fire. This visualization shows two dimensions, but real neurons have weight and input vectors with hundreds or thousands of dimensions — the same geometric intuition applies.
