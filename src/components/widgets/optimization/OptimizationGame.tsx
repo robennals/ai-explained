@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
+import { WidgetTabs } from "../shared/WidgetTabs";
 
 const SVG_WIDTH = 500;
 const SVG_HEIGHT = 280;
@@ -53,6 +54,11 @@ function signalRadius(t: number, isLatest: boolean): number {
   const base = 3 + t * 7; // 3px far, 10px close
   return isLatest ? base + 1 : base;
 }
+
+const GAME_TABS: { id: "blind" | "signal"; label: string }[] = [
+  { id: "blind", label: "Blind (no signal)" },
+  { id: "signal", label: "With signal" },
+];
 
 export function OptimizationGame() {
   const [target, setTarget] = useState(() => randomTarget());
@@ -120,42 +126,23 @@ export function OptimizationGame() {
       description="Find a hidden target — compare searching with no signal vs. an incremental signal"
       onReset={reset}
     >
-      {/* Mode tabs + action buttons */}
-      <div className="mb-3 flex items-center gap-2">
+      {/* Mode tabs */}
+      <WidgetTabs tabs={GAME_TABS} activeTab={mode} onTabChange={switchMode} />
+
+      {/* Action buttons */}
+      <div className="mb-3 flex justify-end gap-2">
         <button
-          onClick={() => switchMode("blind")}
-          className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-            mode === "blind"
-              ? "bg-accent text-white"
-              : "bg-surface text-muted hover:text-foreground"
-          }`}
+          onClick={() => setRevealed(true)}
+          className="rounded-md bg-accent/10 px-3 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-accent/20"
         >
-          Blind (no signal)
+          Reveal target
         </button>
         <button
-          onClick={() => switchMode("signal")}
-          className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-            mode === "signal"
-              ? "bg-accent text-white"
-              : "bg-surface text-muted hover:text-foreground"
-          }`}
+          onClick={reset}
+          className="rounded-md bg-surface px-3 py-1.5 text-xs font-medium text-muted transition-colors hover:text-foreground"
         >
-          With signal
+          New game
         </button>
-        <div className="ml-auto flex gap-2">
-          <button
-            onClick={() => setRevealed(true)}
-            className="rounded-md bg-accent/10 px-3 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-accent/20"
-          >
-            Reveal target
-          </button>
-          <button
-            onClick={reset}
-            className="rounded-md bg-surface px-3 py-1.5 text-xs font-medium text-muted transition-colors hover:text-foreground"
-          >
-            New game
-          </button>
-        </div>
       </div>
 
       {/* Stats bar */}

@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
+import { WidgetTabs } from "../shared/WidgetTabs";
 
 interface Example {
   id: string;
@@ -42,17 +43,24 @@ const EXAMPLES: Example[] = [
   },
 ];
 
+type ExampleId = "runner" | "writer" | "chef" | "teacher";
+
+const GRADIENT_TABS: { id: ExampleId; label: string }[] = EXAMPLES.map((e) => ({
+  id: e.id as ExampleId,
+  label: e.label,
+}));
+
 const ERROR_COLOR = "#ef4444";
 const GRADIENT_COLOR = "#3b82f6";
 
 export function GradientRealWorld() {
-  const [selectedIdx, setSelectedIdx] = useState(0);
+  const [selectedId, setSelectedId] = useState<ExampleId>("runner");
 
   const reset = useCallback(() => {
-    setSelectedIdx(0);
+    setSelectedId("runner");
   }, []);
 
-  const ex = EXAMPLES[selectedIdx];
+  const ex = EXAMPLES.find((e) => e.id === selectedId)!;
 
   return (
     <WidgetContainer
@@ -60,22 +68,7 @@ export function GradientRealWorld() {
       description="Knowing the error is good — knowing which direction to change is much better"
       onReset={reset}
     >
-      {/* Tabs */}
-      <div className="mb-4 flex flex-wrap items-center gap-2">
-        {EXAMPLES.map((e, i) => (
-          <button
-            key={e.id}
-            onClick={() => setSelectedIdx(i)}
-            className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
-              i === selectedIdx
-                ? "bg-accent text-white"
-                : "bg-surface text-muted hover:text-foreground"
-            }`}
-          >
-            {e.label}
-          </button>
-        ))}
-      </div>
+      <WidgetTabs tabs={GRADIENT_TABS} activeTab={selectedId} onTabChange={setSelectedId} />
 
       <div className="space-y-3">
         {/* Error only */}

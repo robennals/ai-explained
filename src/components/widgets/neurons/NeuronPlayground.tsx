@@ -44,6 +44,7 @@ type ActiveGate = GateName | "Custom";
 
 const GATE_NAMES: GateName[] = ["AND", "OR", "NOT (A)", "NAND"];
 
+
 const GATE_CHECKS: Record<GateName, number[]> = {
   AND: [0, 0, 0, 1],
   OR: [0, 1, 1, 1],
@@ -293,7 +294,7 @@ export function NeuronPlayground() {
       description="Click each gate to see a neuron smoothly shift its weights to compute it."
       onReset={reset}
     >
-      {/* Gate tabs at top */}
+      {/* Gate selector */}
       <div className="flex gap-1 mb-4 justify-center flex-wrap">
         {GATE_NAMES.map((name) => {
           const active = animatingTo ? animatingTo === name : matchedGate === name;
@@ -301,7 +302,6 @@ export function NeuronPlayground() {
             <button
               key={name}
               onClick={() => selectGate(name)}
-              disabled={false}
               className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors cursor-pointer ${
                 active
                   ? "bg-accent text-white"

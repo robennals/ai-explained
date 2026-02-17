@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
+import { WidgetTabs } from "../shared/WidgetTabs";
 import { SliderControl } from "../shared/SliderControl";
 
 type Tab = "text" | "image" | "color" | "sound";
@@ -693,54 +694,22 @@ function SoundTab() {
   );
 }
 
+const TABS: { id: Tab; label: string }[] = [
+  { id: "text", label: "Text" },
+  { id: "image", label: "Image" },
+  { id: "color", label: "Color" },
+  { id: "sound", label: "Sound" },
+];
+
 export function NumbersEverywhere() {
   const [activeTab, setActiveTab] = useState<Tab>("text");
-  const [hasInteracted, setHasInteracted] = useState(false);
-  const [pulseIdx, setPulseIdx] = useState(1); // start pulsing the second tab (first non-active)
-
-  // Cycle the pulse through non-active tabs one at a time
-  useEffect(() => {
-    if (hasInteracted) return;
-    const id = setInterval(() => {
-      setPulseIdx((prev) => {
-        // Cycle through 1, 2, 3 (skipping 0 which is active by default)
-        const next = prev >= 3 ? 1 : prev + 1;
-        return next;
-      });
-    }, 2000);
-    return () => clearInterval(id);
-  }, [hasInteracted]);
-
-  const tabs: { id: Tab; label: string }[] = [
-    { id: "text", label: "Text" },
-    { id: "image", label: "Image" },
-    { id: "color", label: "Color" },
-    { id: "sound", label: "Sound" },
-  ];
 
   return (
     <WidgetContainer
       title="Numbers Everywhere"
       description="Everything a computer works with is just numbers"
     >
-      <div className="mb-4 flex flex-wrap gap-2">
-        {tabs.map((tab, i) => (
-          <button
-            key={tab.id}
-            onClick={() => {
-              setActiveTab(tab.id);
-              setHasInteracted(true);
-            }}
-            className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-              activeTab === tab.id
-                ? "bg-accent text-white"
-                : `bg-surface text-muted hover:text-foreground${!hasInteracted && i === pulseIdx ? " pulse-hint" : ""}`
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      <WidgetTabs tabs={TABS} activeTab={activeTab} onTabChange={setActiveTab} />
       {activeTab === "text" && <TextTab />}
       {activeTab === "image" && <ImageTab />}
       {activeTab === "color" && <ColorTab />}

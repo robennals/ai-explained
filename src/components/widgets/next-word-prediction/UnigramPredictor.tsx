@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
+import { WidgetTabs } from "../shared/WidgetTabs";
 
 const TOP_WORDS = [
   { word: "the", pct: 7.0 },
@@ -28,6 +29,11 @@ const SENTENCES = [
 ];
 
 type Mode = "predict" | "generate";
+
+const UNIGRAM_TABS: { id: Mode; label: string }[] = [
+  { id: "predict", label: "Predict" },
+  { id: "generate", label: "Generate" },
+];
 
 export function UnigramPredictor() {
   const [mode, setMode] = useState<Mode>("predict");
@@ -130,21 +136,7 @@ export function UnigramPredictor() {
       </div>
 
       {/* Mode tabs */}
-      <div className="mb-4 flex gap-1 rounded-lg bg-surface p-1">
-        {(["predict", "generate"] as Mode[]).map((m) => (
-          <button
-            key={m}
-            onClick={() => setMode(m)}
-            className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium capitalize transition-colors ${
-              mode === m
-                ? "bg-accent text-white shadow-sm"
-                : "text-muted hover:text-foreground"
-            }`}
-          >
-            {m}
-          </button>
-        ))}
-      </div>
+      <WidgetTabs tabs={UNIGRAM_TABS} activeTab={mode} onTabChange={setMode} />
 
       {mode === "predict" ? (
         <div className="space-y-3">

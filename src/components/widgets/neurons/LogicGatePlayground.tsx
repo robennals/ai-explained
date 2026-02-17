@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useMemo } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
+import { WidgetTabs } from "../shared/WidgetTabs";
 
 type GateType = "AND" | "OR" | "NOT";
 
@@ -35,6 +36,12 @@ const GATE_H = 50;
 const OUT_X = 440;
 const OUT_Y = 110;
 const NODE_R = 24;
+
+const GATE_TABS: { id: GateType; label: string }[] = [
+  { id: "AND", label: "AND" },
+  { id: "OR", label: "OR" },
+  { id: "NOT", label: "NOT" },
+];
 
 export function LogicGatePlayground() {
   const [gate, setGate] = useState<GateType>("AND");
@@ -71,22 +78,7 @@ export function LogicGatePlayground() {
       description="Click the inputs to toggle them. Switch between gates with the tabs."
       onReset={reset}
     >
-      {/* Gate selector tabs */}
-      <div className="mb-4 flex items-center gap-2 justify-center">
-        {(["AND", "OR", "NOT"] as GateType[]).map((g) => (
-          <button
-            key={g}
-            onClick={() => setGate(g)}
-            className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-              gate === g
-                ? "bg-accent text-white"
-                : "bg-surface text-muted hover:text-foreground"
-            }`}
-          >
-            {g}
-          </button>
-        ))}
-      </div>
+      <WidgetTabs tabs={GATE_TABS} activeTab={gate} onTabChange={setGate} />
 
       <div className="text-center text-xs text-muted mb-3">
         {GATE_DESCRIPTIONS[gate]}

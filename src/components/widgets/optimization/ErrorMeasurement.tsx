@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
+import { WidgetTabs } from "../shared/WidgetTabs";
 
 interface Example {
   id: string;
@@ -98,13 +99,20 @@ function starPath(outerR: number, innerR: number): string {
   return `M${pts.join("L")}Z`;
 }
 
+type ExampleId = "exam" | "race" | "restaurant";
+
+const ERROR_TABS: { id: ExampleId; label: string }[] = EXAMPLES.map((e) => ({
+  id: e.id as ExampleId,
+  label: e.label,
+}));
+
 export function ErrorMeasurement() {
-  const [exampleIdx, setExampleIdx] = useState(0);
+  const [selectedId, setSelectedId] = useState<ExampleId>("exam");
   const [values, setValues] = useState<Record<string, number>>(
     Object.fromEntries(EXAMPLES.map((e) => [e.id, e.current]))
   );
 
-  const ex = EXAMPLES[exampleIdx];
+  const ex = EXAMPLES.find((e) => e.id === selectedId)!;
   const value = values[ex.id];
   const error = ex.higherIsBetter
     ? ex.perfect - value
@@ -112,7 +120,7 @@ export function ErrorMeasurement() {
 
   const reset = useCallback(() => {
     setValues(Object.fromEntries(EXAMPLES.map((e) => [e.id, e.current])));
-    setExampleIdx(0);
+    setSelectedId("exam");
   }, []);
 
   // Normalized positions on the bar (0 to 1)
@@ -140,21 +148,7 @@ export function ErrorMeasurement() {
       onReset={reset}
     >
       {/* Example tabs */}
-      <div className="mb-3 flex items-center gap-2">
-        {EXAMPLES.map((e, i) => (
-          <button
-            key={e.id}
-            onClick={() => setExampleIdx(i)}
-            className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-              i === exampleIdx
-                ? "bg-accent text-white"
-                : "bg-surface text-muted hover:text-foreground"
-            }`}
-          >
-            {e.label}
-          </button>
-        ))}
-      </div>
+      <WidgetTabs tabs={ERROR_TABS} activeTab={selectedId} onTabChange={setSelectedId} />
 
       <svg
         viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}

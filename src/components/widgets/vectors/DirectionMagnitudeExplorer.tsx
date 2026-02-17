@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
+import { WidgetTabs } from "../shared/WidgetTabs";
 import { SliderControl } from "../shared/SliderControl";
 
 const SVG_SIZE = 320;
@@ -43,6 +44,11 @@ function Arrow({
     </g>
   );
 }
+
+const DIR_TABS: { id: "free" | "constrained"; label: string }[] = [
+  { id: "free", label: "Free drag" },
+  { id: "constrained", label: "Direction + Magnitude" },
+];
 
 export function DirectionMagnitudeExplorer() {
   const [angle, setAngle] = useState(0.7); // radians
@@ -107,19 +113,7 @@ export function DirectionMagnitudeExplorer() {
       onReset={handleReset}
     >
       {/* Mode tabs */}
-      <div className="mb-4 flex gap-2">
-        {(["free", "constrained"] as const).map((m) => (
-          <button
-            key={m}
-            onClick={() => setMode(m)}
-            className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-              mode === m ? "bg-accent text-white" : "bg-foreground/5 text-muted hover:bg-foreground/10"
-            }`}
-          >
-            {m === "free" ? "Free drag" : "Direction + Magnitude"}
-          </button>
-        ))}
-      </div>
+      <WidgetTabs tabs={DIR_TABS} activeTab={mode} onTabChange={setMode} />
 
       <div className="grid gap-4 sm:grid-cols-[1fr_auto]">
         <svg
