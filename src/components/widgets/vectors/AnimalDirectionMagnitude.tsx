@@ -33,12 +33,6 @@ interface ExampleItem {
   y: number;
 }
 
-function animalMagnitude(count: number, item: ExampleItem): string {
-  if (count < 1) return `a baby ${item.emoji}`;
-  if (count === 1) return `${count} ${item.emoji}`;
-  return `${count} ${item.emoji}`;
-}
-
 function velocityMagnitude(count: number): string {
   const v = Math.round(count * 10) / 10;
   return `${v < 1 ? v.toFixed(1) : v} mph`;
@@ -53,32 +47,6 @@ function brightnessName(count: number): string {
 
 
 const EXAMPLES: Example[] = [
-  {
-    id: "animals",
-    label: "Animals",
-    directionLabel: "What kind of animal",
-    magnitudeLabel: "How many",
-    magnitudeNoun: "animals",
-    xAxisLabel: "Big",
-    yAxisLabel: "Fast",
-    sliderMin: 1,
-    sliderStep: 1,
-    formatMagnitude: animalMagnitude,
-    vectorLabel: (count, item) => {
-      const name = count !== 1 && item.plural ? item.plural : count !== 1 ? item.name.toLowerCase() + "s" : item.name.toLowerCase();
-      return `${count} ${name}`;
-    },
-    items: [
-      { name: "Bear", emoji: "🐻", x: 0.85, y: 0.50 },
-      { name: "Rabbit", emoji: "🐰", x: 0.10, y: 0.60 },
-      { name: "Shark", emoji: "🦈", x: 0.75, y: 0.70 },
-      { name: "Mouse", plural: "mice", emoji: "🐭", x: 0.05, y: 0.50 },
-      { name: "Eagle", emoji: "🦅", x: 0.40, y: 0.95 },
-      { name: "Elephant", emoji: "🐘", x: 0.98, y: 0.30 },
-      { name: "Cat", emoji: "🐱", x: 0.15, y: 0.65 },
-      { name: "Dog", emoji: "🐕", x: 0.40, y: 0.60 },
-    ],
-  },
   {
     id: "velocity",
     label: "Velocity",

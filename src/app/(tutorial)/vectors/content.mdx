@@ -56,17 +56,13 @@ So far we've represented vectors as lists of numbers, but there's another useful
 - **Direction** = *what kind of thing is this?*
 - **Magnitude** = *how much of this thing?*
 
-Back to animals: if you're worried about bears, you care about both "is this like a bear?" (direction) and "how many are there?" (magnitude). One bear is worrying; five hundred bears is terrifying. The *kind* of danger is the same — it's the *amount* that changes.
+Think about velocity: a car heading north-east at 60 mph. The direction tells you *where* it's going. The magnitude tells you *how fast*. Or think about colored light: the direction tells you the hue (red, blue, purple), and the magnitude tells you how bright it is.
 
 In 2D we could use an angle for direction, but that breaks down in higher dimensions. Instead we use a **unit vector** — a vector that points in the same direction but has length 1. Any vector equals its unit vector (the direction) times its length (the magnitude).
 
 <AnimalDirectionMagnitudeWidget>
-Pick an item and drag the slider to change the magnitude. The dashed arrow is the unit vector — it sits on the arc where all unit-length vectors live. The faded arrow shows the full vector scaled by the count. Try switching between Animals, Velocity, and Color to see how "direction = what kind, magnitude = how much" applies everywhere.
+Pick an example and drag the slider to change the magnitude. The dashed arrow is the unit vector — it sits on the arc where all unit-length vectors live. The solid arrow shows the full vector scaled by the amount. Try switching between Velocity and Color to see how "direction = what kind, magnitude = how much" applies everywhere.
 </AnimalDirectionMagnitudeWidget>
-
-<Callout>
-Two dimensions aren't really enough to distinguish these animals well — bear and shark end up pointing in similar directions. With all six properties the differences are much clearer, but we can't easily draw a six-dimensional plot. This is a recurring tradeoff: more dimensions capture reality better, but we're stuck visualizing two or three at a time.
-</Callout>
 
 This decomposition — direction times magnitude — will matter a lot in a moment, when we look at what the dot product really means.
 
@@ -78,8 +74,10 @@ The **dot product** is the single most important vector operation in AI. It take
 
 The **cosine** measures direction similarity: 1 for identical directions, 0 for perpendicular, -1 for opposite. So if two vectors point the same way, the dot product is just their lengths multiplied together. If they're completely unrelated (perpendicular), it's zero — no matter how big they are. If they point in opposite directions, it's negative.
 
+Often we work with vectors that are constrained to have length 1 — **unit vectors**. When both vectors are unit vectors, the lengths are just 1, so the dot product becomes pure directional similarity — just the cosine. This is called **cosine similarity**, and we'll see it again when we get to embeddings. 
+
 <DotProductAnalogiesWidget>
-Try the Animals tab: pick "Bear detector" and compare 3 bears vs 100 rabbits. Lots of rabbits, but they don't point in the bear direction — the dot product is low. Now try Velocity: how fast is this car going northward? Then Color: how much red gets through a red filter? The same operation answers different questions depending on what you feed it.
+Try the Animals tab: how similar is a bear to a shark? Both are unit vectors, so this is pure cosine similarity. Now try Velocity: how fast is a car going northward? Then Color: how much red gets through a red filter? The same operation answers different questions depending on what you feed it.
 </DotProductAnalogiesWidget>
 
 Remarkably, there's a completely different way to compute the dot product that gives the exact same result: **multiply each pair of corresponding numbers and add up the results.**
@@ -92,18 +90,16 @@ This always gives the same answer as the geometric formula. The geometry gives y
 Drag the arrow tips. In Component view, watch the individual products and their sum. Switch to Projection view to see the angle and the projection of one vector onto the other. Both views always show the same number.
 </DotProductExplorerWidget>
 
-When both vectors are unit vectors (length 1), the lengths are just 1, so the dot product becomes pure directional similarity — just the cosine. This is called **cosine similarity**, and we'll see it again when we get to embeddings.
-
 <KeyInsight>
 **The dot product measures alignment.** Same direction → large positive. Perpendicular → zero. Opposite → large negative. This single operation is the foundation of how neural networks process information.
 </KeyInsight>
 
 ## A Neuron Is (Mostly) a Dot Product
 
-Here's the connection that ties everything together. Remember from the previous chapter that a neuron computes a **weighted sum** of its inputs, adds a bias, then applies the sigmoid. That weighted sum is a dot product — the neuron has a **weight vector** and receives an **input vector**:
+Here's the connection that ties everything together. Remember from the previous chapter that a neuron computes a **weighted sum** of its inputs, adds a bias, then applies an activation function. That weighted sum is a dot product — the neuron has a **weight vector** and receives an **input vector**:
 
 <Callout>
-**output = sigmoid( w · x + bias )**
+**output = activation( w · x + bias )**
 
 where **w** = (w₁, w₂, …, wₙ) is the weight vector and **x** = (x₁, x₂, …, xₙ) is the input vector.
 </Callout>
@@ -121,7 +117,7 @@ Drag the weight and input vectors. Watch the angle between them — when the vec
 </NeuronDotProductWidget>
 
 <KeyInsight>
-**A neuron is a direction detector.** It computes the dot product of its input vector with its weight vector, adds a bias to shift the threshold, and squashes the result through the sigmoid. The weights define a direction in input space, and the neuron fires when the input points that way.
+**A neuron is a direction detector.** It computes the dot product of its input vector with its weight vector, adds a bias to shift the threshold, and squashes the result through an activation function. The weights define a direction in input space, and the neuron fires when the input points that way.
 </KeyInsight>
 
 ## A Neuron Draws a Line
@@ -131,7 +127,7 @@ If a neuron fires when its input aligns with its weights, what does that look li
 Plot every possible input as a point in 2D space. The neuron's weighted sum — w₁ × x₁ + w₂ × x₂ + bias — defines a straight line through this space. On one side of the line, the output is close to 1. On the other side, close to 0. The line itself is the **decision boundary** — where the neuron is exactly 50/50.
 
 <DecisionBoundaryExplorerWidget>
-Drag the line to solve AND — isolate the (1,1) corner. Then solve OR — isolate (0,0) on the other side. Both are easy. Now try XOR: put (0,1) and (1,0) together while keeping (0,0) and (1,1) apart. No matter how you rotate or shift the line, you can't get all four right. XOR is not a straight-line problem.
+Click AND to see how the weight vector and bias draw a line that isolates the (1,1) corner. Click OR to see the line shift. Drag the weight vector or adjust the bias to see how they move the boundary. The blue input vector shows the output at any position — notice it always matches the heatmap. Now try XOR: no matter how you move the line, you can't get all four corners right.
 </DecisionBoundaryExplorerWidget>
 
 This is called **linear separability**: a problem is linearly separable if you can solve it with a single straight line (or, in higher dimensions, a flat surface). AND and OR are linearly separable. XOR is not — the "true" corners sit on opposite diagonals, and no single straight line can separate them from the "false" corners.
