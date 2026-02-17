@@ -8,7 +8,6 @@ import {
   SmoothVsRuggedWidget,
   GradientRealWorldWidget,
   Gradient2DCurveWidget,
-  Gradient3DSurfaceWidget,
 } from "./widgets";
 
 export const metadata = {
@@ -31,7 +30,6 @@ export default function Chapter02() {
             SmoothVsRuggedWidget,
             GradientRealWorldWidget,
             Gradient2DCurveWidget,
-            Gradient3DSurfaceWidget,
           }}
         />
       </div>

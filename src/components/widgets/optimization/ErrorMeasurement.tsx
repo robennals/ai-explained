@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
 import { WidgetTabs } from "../shared/WidgetTabs";
 
@@ -73,7 +73,7 @@ const EXAMPLES: Example[] = [
     sliderMax: 5,
     step: 0.1,
     format: (v) => `${v.toFixed(1)} ★`,
-    errorLabel: "stars from perfect",
+    errorLabel: "(the gap to a perfect 5 ★)",
     barStyle: "green-red",
     showStars: true,
     starCount: 5,
@@ -111,6 +111,8 @@ export function ErrorMeasurement() {
   const [values, setValues] = useState<Record<string, number>>(
     Object.fromEntries(EXAMPLES.map((e) => [e.id, e.current]))
   );
+  const [dragging, setDragging] = useState(false);
+  const svgRef = useRef<SVGSVGElement>(null);
 
   const ex = EXAMPLES.find((e) => e.id === selectedId)!;
   const value = values[ex.id];
@@ -121,6 +123,40 @@ export function ErrorMeasurement() {
   const reset = useCallback(() => {
     setValues(Object.fromEntries(EXAMPLES.map((e) => [e.id, e.current])));
     setSelectedId("exam");
+  }, []);
+
+  // Convert SVG x-coordinate to a value for the current example
+  const svgXToValue = useCallback((clientX: number) => {
+    const svg = svgRef.current;
+    if (!svg) return null;
+    const rect = svg.getBoundingClientRect();
+    const svgX = ((clientX - rect.left) / rect.width) * SVG_WIDTH;
+    const frac = Math.max(0, Math.min(1, (svgX - BAR_X) / BAR_WIDTH));
+    const raw = ex.sliderMin + frac * (ex.sliderMax - ex.sliderMin);
+    // Snap to step
+    return Math.round(raw / ex.step) * ex.step;
+  }, [ex]);
+
+  const handlePointerDown = useCallback((e: React.PointerEvent<SVGSVGElement>) => {
+    e.preventDefault();
+    (e.target as Element).setPointerCapture?.(e.pointerId);
+    setDragging(true);
+    const v = svgXToValue(e.clientX);
+    if (v !== null) {
+      setValues((prev) => ({ ...prev, [ex.id]: Math.max(ex.sliderMin, Math.min(ex.sliderMax, v)) }));
+    }
+  }, [svgXToValue, ex]);
+
+  const handlePointerMove = useCallback((e: React.PointerEvent<SVGSVGElement>) => {
+    if (!dragging) return;
+    const v = svgXToValue(e.clientX);
+    if (v !== null) {
+      setValues((prev) => ({ ...prev, [ex.id]: Math.max(ex.sliderMin, Math.min(ex.sliderMax, v)) }));
+    }
+  }, [dragging, svgXToValue, ex]);
+
+  const handlePointerUp = useCallback(() => {
+    setDragging(false);
   }, []);
 
   // Normalized positions on the bar (0 to 1)
@@ -136,10 +172,16 @@ export function ErrorMeasurement() {
   const errorWidth = Math.abs(valueBarX - perfectBarX);
 
   // For green-red style: "good" region is from bar start to value (higherIsBetter)
-  // or from value to bar end (lowerIsBetter — but we don't have that combo with green-red)
   const goodWidth = ex.higherIsBetter
     ? Math.max(0, valueFrac * BAR_WIDTH)
     : 0;
+
+  // Error label positioning — right-justify for higher-is-better (error on right side),
+  // left-justify for lower-is-better (error on left side)
+  const errorLabelX = ex.higherIsBetter
+    ? Math.min(SVG_WIDTH - 10, errorLeft + errorWidth)
+    : Math.max(10, errorLeft);
+  const errorAnchor = ex.higherIsBetter ? "end" : "start";
 
   return (
     <WidgetContainer
@@ -151,9 +193,14 @@ export function ErrorMeasurement() {
       <WidgetTabs tabs={ERROR_TABS} activeTab={selectedId} onTabChange={setSelectedId} />
 
       <svg
+        ref={svgRef}
         viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}
-        className="w-full"
+        className="w-full cursor-ew-resize touch-none"
         preserveAspectRatio="xMidYMid meet"
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerLeave={handlePointerUp}
       >
         {/* Bar background */}
         <rect
@@ -174,7 +221,7 @@ export function ErrorMeasurement() {
         )}
 
         {/* Red error region */}
-        {errorWidth > 1 && (
+        {errorWidth > 0.5 && (
           <rect
             x={ex.barStyle === "red-only" ? BAR_X : errorLeft}
             y={BAR_Y}
@@ -201,7 +248,6 @@ export function ErrorMeasurement() {
             let fillColor = MUTED_COLOR;
             let fillOpacity = 0.15;
             if (filled) {
-              // Is this star in the "good" zone or error zone?
               fillColor = starValue <= ex.perfect ? GOOD_COLOR : ERROR_COLOR;
               fillOpacity = 0.7;
             } else if (partial) {
@@ -254,30 +300,25 @@ export function ErrorMeasurement() {
           {ex.thing}: {ex.format(value)}
         </text>
 
-        {/* Error bracket and label */}
-        {errorWidth > 4 && (() => {
-          const errorCenterX = errorLeft + errorWidth / 2;
-          // Pin to left or right when near edges
-          const pinLeft = errorCenterX < SVG_WIDTH / 2;
-          const errorAnchor = pinLeft ? "start" : "end";
-          const errorLabelX = pinLeft ? Math.max(10, errorLeft + 2) : Math.min(SVG_WIDTH - 10, errorLeft + errorWidth - 2);
-          return (
-            <g>
-              {/* Bracket lines */}
-              <line x1={errorLeft + 2} y1={ERROR_Y} x2={errorLeft + errorWidth - 2} y2={ERROR_Y} stroke={ERROR_COLOR} strokeWidth="1.5" />
-              <line x1={errorLeft + 2} y1={ERROR_Y - 4} x2={errorLeft + 2} y2={ERROR_Y + 4} stroke={ERROR_COLOR} strokeWidth="1.5" />
-              <line x1={errorLeft + errorWidth - 2} y1={ERROR_Y - 4} x2={errorLeft + errorWidth - 2} y2={ERROR_Y + 4} stroke={ERROR_COLOR} strokeWidth="1.5" />
-              {/* Error label */}
-              <text
-                x={errorLabelX}
-                y={ERROR_Y + 16}
-                textAnchor={errorAnchor} fontSize="11" fontWeight="700" fill={ERROR_COLOR}
-              >
-                error: {Math.abs(error).toFixed(ex.step < 1 ? 1 : 0)} {ex.errorLabel}
-              </text>
-            </g>
-          );
-        })()}
+        {/* Error bracket and label — always shown */}
+        <g>
+          {/* Bracket lines (only if there's visible width) */}
+          {errorWidth > 2 && (
+            <>
+              <line x1={errorLeft + 1} y1={ERROR_Y} x2={errorLeft + errorWidth - 1} y2={ERROR_Y} stroke={ERROR_COLOR} strokeWidth="1.5" />
+              <line x1={errorLeft + 1} y1={ERROR_Y - 4} x2={errorLeft + 1} y2={ERROR_Y + 4} stroke={ERROR_COLOR} strokeWidth="1.5" />
+              <line x1={errorLeft + errorWidth - 1} y1={ERROR_Y - 4} x2={errorLeft + errorWidth - 1} y2={ERROR_Y + 4} stroke={ERROR_COLOR} strokeWidth="1.5" />
+            </>
+          )}
+          {/* Error label — always visible */}
+          <text
+            x={errorLabelX}
+            y={ERROR_Y + 16}
+            textAnchor={errorAnchor} fontSize="11" fontWeight="700" fill={ERROR_COLOR}
+          >
+            error: {Math.abs(error).toFixed(ex.step < 1 ? 1 : 0)} {ex.errorLabel}
+          </text>
+        </g>
       </svg>
 
       {/* Slider to adjust value */}

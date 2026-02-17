@@ -52,14 +52,6 @@ const Gradient2DCurve = dynamic(
   { ssr: false }
 );
 
-const Gradient3DSurface = dynamic(
-  () =>
-    import("@/components/widgets/optimization/Gradient3DSurface").then(
-      (m) => m.Gradient3DSurface
-    ),
-  { ssr: false }
-);
-
 function WidgetSlot({ children, tryIt, label }: { children: React.ReactNode; tryIt?: React.ReactNode; label?: string }) {
   return (
     <Suspense
@@ -124,10 +116,3 @@ export function Gradient2DCurveWidget({ children }: { children?: React.ReactNode
   );
 }
 
-export function Gradient3DSurfaceWidget({ children }: { children?: React.ReactNode }) {
-  return (
-    <WidgetSlot tryIt={children}>
-      <Gradient3DSurface />
-    </WidgetSlot>
-  );
-}

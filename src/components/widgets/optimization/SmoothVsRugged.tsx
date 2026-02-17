@@ -20,12 +20,20 @@ function smoothFn(x: number): number {
 }
 
 // Step function: same bowl shape as smooth, but quantized into big steps
+// Offset so the lowest step hits exactly zero
 const N_STEPS = 8;
+const STEP_MIN = (() => {
+  let min = Infinity;
+  for (let i = 0; i < N_STEPS; i++) {
+    const cx = (i + 0.5) / N_STEPS;
+    min = Math.min(min, smoothFn(cx));
+  }
+  return min;
+})();
 function stepFn(x: number): number {
-  // Quantize x to the center of each step
   const idx = Math.min(Math.floor(x * N_STEPS), N_STEPS - 1);
   const centerX = (idx + 0.5) / N_STEPS;
-  return smoothFn(centerX);
+  return smoothFn(centerX) - STEP_MIN;
 }
 
 // Which direction is downhill? Returns -1, 0, or +1

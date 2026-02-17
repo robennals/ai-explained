@@ -181,16 +181,44 @@ export function OptimizationGame() {
 
       {/* Color spectrum legend — signal mode only */}
       {!isBlind && (
-        <div className="mb-3 flex items-center gap-2">
+        <div className="mb-7 flex items-center gap-2">
           <span className="text-[10px] font-medium text-muted whitespace-nowrap">Far</span>
-          <div
-            className="h-3 flex-1 rounded-full"
-            style={{
-              background: `linear-gradient(to right, ${
-                Array.from({ length: 11 }, (_, i) => signalColor(i / 10)).join(", ")
-              })`,
-            }}
-          />
+          <div className="relative h-3 flex-1">
+            <div
+              className="h-full w-full rounded-full"
+              style={{
+                background: `linear-gradient(to right, ${
+                  Array.from({ length: 11 }, (_, i) => signalColor(i / 10)).join(", ")
+                })`,
+              }}
+            />
+            {/* Marker showing where last guess falls on the spectrum */}
+            {lastGuess && !found && (() => {
+              const t = closeness(lastGuess.distance);
+              return (
+                <div
+                  className="absolute top-full mt-0.5 flex flex-col items-center"
+                  style={{ left: `${t * 100}%`, transform: "translateX(-50%)" }}
+                >
+                  <div
+                    className="h-0 w-0"
+                    style={{
+                      borderLeft: "5px solid transparent",
+                      borderRight: "5px solid transparent",
+                      borderBottom: `6px solid ${signalColor(t)}`,
+                      transform: "rotate(180deg)",
+                    }}
+                  />
+                  <span
+                    className="mt-0.5 text-[9px] font-bold"
+                    style={{ color: signalColor(t) }}
+                  >
+                    you
+                  </span>
+                </div>
+              );
+            })()}
+          </div>
           <span className="text-[10px] font-medium text-muted whitespace-nowrap">Close</span>
         </div>
       )}

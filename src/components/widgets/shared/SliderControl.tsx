@@ -3,7 +3,7 @@
 import * as Slider from "@radix-ui/react-slider";
 
 interface SliderControlProps {
-  label: string;
+  label: React.ReactNode;
   value: number;
   min: number;
   max: number;
