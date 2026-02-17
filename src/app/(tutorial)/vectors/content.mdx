@@ -49,22 +49,22 @@ Drag to rotate the view. Try Big x Scary x Cuddly — bear and shark overlap on 
 
 Three dimensions is the most we can directly visualize, but higher-dimensional vectors — like our six-dimensional animal vectors — are really just more of the same. Each new dimension is another axis, another way to pull apart things that looked the same in fewer dimensions. We just don't have an easy way to visualize them other than as lists of numbers. But the geometric intuition still holds: **nearby points are similar, far-apart points are different, and more dimensions mean finer distinctions.**
 
-## Direction and Length
+## Direction and Magnitude
 
-There's another way to think about a vector besides "a list of numbers." Any vector can be split into two parts:
+So far we've represented vectors as lists of numbers, but there's another useful way to think about them: as **direction** plus **magnitude**.
 
-- **Direction**: which way it points
-- **Length**: how long it is
+- **Direction** = *what kind of thing is this?*
+- **Magnitude** = *how much of this thing?*
 
-Think of velocity: the direction tells you *where* you're heading, and the length tells you *how fast*.
+Back to animals: if you're worried about bears, you care about both "is this a bear?" (direction) and "how many are there?" (magnitude). One bear is worrying; a hundred bears is terrifying. The *kind* of danger is the same — it's the *amount* that changes.
 
-The way we represent direction as a vector is with a **unit vector** — a vector of length 1 that points in that direction. Any vector equals its unit vector times its length.
+In 2D we could use an angle for direction, but that breaks down in higher dimensions. Instead we use a **unit vector** — a vector that points in the same direction but has length 1. Any vector equals its unit vector (the direction) times its length (the magnitude).
 
-<DirectionMagnitudeExplorerWidget>
-All three sets of sliders control the same vector — try any of them and watch the others update. Direction + Length controls the angle and length. Unit Vector + Length shows the unit vector (always length 1 on the grid — notice its tip stays on the dashed circle) scaled by the length. Raw Vector lets you set x and y directly.
-</DirectionMagnitudeExplorerWidget>
+<AnimalDirectionMagnitudeWidget>
+Pick an item and drag the slider to change the magnitude. The dashed arrow is the unit vector — it sits on the arc where all unit-length vectors live. The faded arrow shows the full vector scaled by the count. Try switching between Animals, Speed, and Colors to see how "direction = what kind, magnitude = how much" applies everywhere.
+</AnimalDirectionMagnitudeWidget>
 
-This decomposition — direction times length — will matter a lot in a moment, when we look at what the dot product really means.
+This decomposition — direction times magnitude — will matter a lot in a moment, when we look at what the dot product really means.
 
 ## The Dot Product
 

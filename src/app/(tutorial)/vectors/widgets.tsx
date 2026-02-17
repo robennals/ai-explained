@@ -44,10 +44,10 @@ const Vector3DExplorer = dynamic(
   { ssr: false }
 );
 
-const DirectionMagnitudeExplorer = dynamic(
+const AnimalDirectionMagnitude = dynamic(
   () =>
-    import("@/components/widgets/vectors/DirectionMagnitudeExplorer").then(
-      (m) => m.DirectionMagnitudeExplorer
+    import("@/components/widgets/vectors/AnimalDirectionMagnitude").then(
+      (m) => m.AnimalDirectionMagnitude
     ),
   { ssr: false }
 );
@@ -149,10 +149,10 @@ export function Vector3DExplorerWidget({ children }: { children?: React.ReactNod
   );
 }
 
-export function DirectionMagnitudeExplorerWidget({ children }: { children?: React.ReactNode }) {
+export function AnimalDirectionMagnitudeWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children}>
-      <DirectionMagnitudeExplorer />
+      <AnimalDirectionMagnitude />
     </WidgetSlot>
   );
 }
