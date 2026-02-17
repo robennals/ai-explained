@@ -7,6 +7,10 @@ function sigmoid(x: number): number {
   return 1 / (1 + Math.exp(-x));
 }
 
+function isApproxSigmoid(v: number): boolean {
+  return (v > 0 && v < 0.005) || (v > 0.995 && v < 1);
+}
+
 const W = 480;
 const PAD_L = 44;
 const PAD_R = 56;
@@ -275,7 +279,7 @@ export function SigmoidExplorer() {
             y={dotY + 19}
             className="fill-muted text-[9px]"
           >
-            output
+            {isApproxSigmoid(output) ? "≈ output" : "output"}
           </text>
 
           {/* ── SVG slider track, perfectly aligned with x-axis ── */}

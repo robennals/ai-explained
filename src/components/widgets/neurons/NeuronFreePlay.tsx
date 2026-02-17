@@ -7,6 +7,10 @@ function sigmoid(x: number): number {
   return 1 / (1 + Math.exp(-x));
 }
 
+function isApproxSigmoid(v: number): boolean {
+  return (v > 0 && v < 0.005) || (v > 0.995 && v < 1);
+}
+
 function outputColor(v: number): string {
   if (v <= 0.5) {
     const t = v / 0.5;
@@ -483,6 +487,16 @@ export function NeuronFreePlay() {
         >
           {output.toFixed(2)}
         </text>
+        {isApproxSigmoid(output) && (
+          <text
+            x={OUT_X}
+            y={OUT_Y + 18}
+            textAnchor="middle"
+            className="fill-white/70 text-[8px] pointer-events-none select-none"
+          >
+            approx
+          </text>
+        )}
       </svg>
     </WidgetContainer>
   );

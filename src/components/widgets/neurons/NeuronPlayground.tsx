@@ -8,6 +8,10 @@ function sigmoid(x: number): number {
   return 1 / (1 + Math.exp(-x));
 }
 
+function isApproxSigmoid(v: number): boolean {
+  return (v > 0 && v < 0.005) || (v > 0.995 && v < 1);
+}
+
 function outputLabel(v: number): string {
   if (v >= 0.9) return "Definitely true";
   if (v >= 0.65) return "Probably true";
@@ -640,6 +644,16 @@ export function NeuronPlayground() {
         >
           {output.toFixed(2)}
         </text>
+        {isApproxSigmoid(output) && (
+          <text
+            x={OUT_X}
+            y={OUT_Y + 18}
+            textAnchor="middle"
+            className="fill-white/70 text-[8px] pointer-events-none select-none"
+          >
+            approx
+          </text>
+        )}
         <text
           x={OUT_X}
           y={OUT_Y + 40}
@@ -705,12 +719,17 @@ export function NeuronPlayground() {
                     <td className="px-2 py-1.5 font-mono">{a}</td>
                     <td className="px-2 py-1.5 font-mono">{b}</td>
                     <td className="px-2 py-1.5">
-                      <span
-                        className="inline-flex h-5 min-w-[2rem] items-center justify-center rounded text-[10px] font-bold text-white px-1"
-                        style={{ background: outputColor(out) }}
-                      >
-                        {out.toFixed(2)}
-                      </span>
+                      <div className="flex flex-col items-start">
+                        <span
+                          className="inline-flex h-5 min-w-[2rem] items-center justify-center rounded text-[10px] font-bold text-white px-1"
+                          style={{ background: outputColor(out) }}
+                        >
+                          {out.toFixed(2)}
+                        </span>
+                        <span className="text-[8px] text-muted h-3 leading-3">
+                          {isApproxSigmoid(out) ? "approx" : ""}
+                        </span>
+                      </div>
                     </td>
                     {target !== null && (
                       <>

@@ -10,25 +10,22 @@ const H = 180;
 const GW = 34;
 const GH = 18;
 
-const GATE_TYPES = ["AND", "OR", "XOR", "NOT"] as const;
+const GATE_TYPES = ["AND", "OR", "NOT"] as const;
 type GateType = (typeof GATE_TYPES)[number];
 
 const FILL: Record<string, string> = {
   AND: "#f0fdf4",
   OR: "#f0f4ff",
-  XOR: "#fef9ee",
   NOT: "#fef2f2",
 };
 const STROKE: Record<string, string> = {
   AND: "#10b981",
   OR: "#3b82f6",
-  XOR: "#f59e0b",
   NOT: "#ef4444",
 };
 const TEXT_CLS: Record<string, string> = {
   AND: "fill-success",
   OR: "fill-accent",
-  XOR: "fill-warning",
   NOT: "fill-error",
 };
 
