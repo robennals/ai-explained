@@ -68,23 +68,27 @@ This decomposition — direction times magnitude — will matter a lot in a mome
 
 ## The Dot Product
 
-The **dot product** is the single most important vector operation in AI. It takes two vectors and produces a single number. The recipe: multiply their lengths, then multiply by how similar their directions are.
+The **dot product** is the single most important vector operation in AI. It takes two vectors and produces a single number:
 
 **a · b = length(a) × length(b) × cosine(angle between them)**
 
-The **cosine** measures direction similarity: 1 for identical directions, 0 for perpendicular, -1 for opposite. So if two vectors point the same way, the dot product is just their lengths multiplied together. If they're completely unrelated (perpendicular), it's zero — no matter how big they are. If they point in opposite directions, it's negative.
+The cosine measures direction similarity: 1 for identical directions, 0 for perpendicular, −1 for opposite. The dot product combines this with the lengths of both vectors — but depending on the situation, different parts of that formula matter most.
 
-Often we work with vectors that are constrained to have length 1 — **unit vectors**. When both vectors are unit vectors, the lengths are just 1, so the dot product becomes pure directional similarity — just the cosine. This is called **cosine similarity**, and we'll see it again when we get to embeddings. 
+<DotProductTypesWidget>
+Start with Similarity: both vectors are unit length, so the dot product is pure cosine — just direction comparison. Move to Projection: now a can be any length, so the dot product measures how much of a points along b. Finally, Full Dot Product: both vectors are free, and you see the complete formula at work. Drag the vectors to build intuition for each case.
+</DotProductTypesWidget>
+
+These three cases show up everywhere. When comparing unit vectors (like our animal vectors), the dot product is **cosine similarity**. When one vector is a unit direction, it's a **projection** — how far does this thing extend in that direction? And the full dot product scales the projection by the second vector's length.
+
+There's also a completely different way to compute the dot product that gives the exact same result: **multiply each pair of corresponding numbers and add up the results.**
+
+**a · b = (a₁×b₁) + (a₂×b₂) + … + (aₙ×bₙ)**
+
+The geometry gives you the intuition; the computation is just multiply-and-add. Here's what that looks like in practice:
 
 <DotProductAnalogiesWidget>
 Try the Animals tab: how similar is a bear to a shark? Both are unit vectors, so this is pure cosine similarity. Now try Velocity: how fast is a car going northward? Then Color: how much red gets through a red filter? The same operation answers different questions depending on what you feed it.
 </DotProductAnalogiesWidget>
-
-Remarkably, there's a completely different way to compute the dot product that gives the exact same result: **multiply each pair of corresponding numbers and add up the results.**
-
-**a · b = (a₁×b₁) + (a₂×b₂) + … + (aₙ×bₙ)**
-
-This always gives the same answer as the geometric formula. The geometry gives you the intuition; the computation is just multiply-and-add.
 
 <KeyInsight>
 **The dot product measures alignment.** Same direction → large positive. Perpendicular → zero. Opposite → large negative. This single operation is the foundation of how neural networks process information.
