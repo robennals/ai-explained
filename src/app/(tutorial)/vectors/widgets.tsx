@@ -60,6 +60,14 @@ const DotProductExplorer = dynamic(
   { ssr: false }
 );
 
+const DotProductAnalogies = dynamic(
+  () =>
+    import("@/components/widgets/vectors/DotProductAnalogies").then(
+      (m) => m.DotProductAnalogies
+    ),
+  { ssr: false }
+);
+
 const NeuronDotProduct = dynamic(
   () =>
     import("@/components/widgets/vectors/NeuronDotProduct").then(
@@ -161,6 +169,14 @@ export function DotProductExplorerWidget({ children }: { children?: React.ReactN
   return (
     <WidgetSlot tryIt={children}>
       <DotProductExplorer />
+    </WidgetSlot>
+  );
+}
+
+export function DotProductAnalogiesWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <DotProductAnalogies />
     </WidgetSlot>
   );
 }

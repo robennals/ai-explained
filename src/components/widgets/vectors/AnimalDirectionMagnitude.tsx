@@ -21,6 +21,8 @@ interface Example {
   formatMagnitude: (count: number, item: ExampleItem) => string;
   /** Short label for the SVG next to the vector tip, e.g. "3 bears" */
   vectorLabel: (count: number, item: ExampleItem) => string;
+  /** If true, origin is centered and axes extend to negative values */
+  centered?: boolean;
 }
 
 interface ExampleItem {
@@ -58,7 +60,7 @@ const EXAMPLES: Example[] = [
     magnitudeLabel: "How many",
     magnitudeNoun: "animals",
     xAxisLabel: "Big",
-    yAxisLabel: "Scary",
+    yAxisLabel: "Fast",
     sliderMin: 1,
     sliderStep: 1,
     formatMagnitude: animalMagnitude,
@@ -67,14 +69,14 @@ const EXAMPLES: Example[] = [
       return `${count} ${name}`;
     },
     items: [
-      { name: "Bear", emoji: "🐻", x: 0.85, y: 0.90 },
-      { name: "Rabbit", emoji: "🐰", x: 0.10, y: 0.05 },
-      { name: "Shark", emoji: "🦈", x: 0.75, y: 0.95 },
-      { name: "Mouse", plural: "mice", emoji: "🐭", x: 0.05, y: 0.10 },
-      { name: "Eagle", emoji: "🦅", x: 0.40, y: 0.50 },
-      { name: "Elephant", emoji: "🐘", x: 0.98, y: 0.40 },
-      { name: "Cat", emoji: "🐱", x: 0.15, y: 0.15 },
-      { name: "Dog", emoji: "🐕", x: 0.40, y: 0.25 },
+      { name: "Bear", emoji: "🐻", x: 0.85, y: 0.50 },
+      { name: "Rabbit", emoji: "🐰", x: 0.10, y: 0.60 },
+      { name: "Shark", emoji: "🦈", x: 0.75, y: 0.70 },
+      { name: "Mouse", plural: "mice", emoji: "🐭", x: 0.05, y: 0.50 },
+      { name: "Eagle", emoji: "🦅", x: 0.40, y: 0.95 },
+      { name: "Elephant", emoji: "🐘", x: 0.98, y: 0.30 },
+      { name: "Cat", emoji: "🐱", x: 0.15, y: 0.65 },
+      { name: "Dog", emoji: "🐕", x: 0.40, y: 0.60 },
     ],
   },
   {
@@ -85,6 +87,7 @@ const EXAMPLES: Example[] = [
     magnitudeNoun: "speed",
     xAxisLabel: "East",
     yAxisLabel: "North",
+    centered: true,
     sliderMin: 0.1,
     sliderStep: 0.1,
     formatMagnitude: velocityMagnitude,
@@ -96,8 +99,8 @@ const EXAMPLES: Example[] = [
       { name: "North-East", emoji: "↗️", x: 0.70, y: 0.70 },
       { name: "East", emoji: "➡️", x: 1.00, y: 0.00 },
       { name: "North", emoji: "⬆️", x: 0.00, y: 1.00 },
-      { name: "Mostly East", emoji: "↗️", x: 0.90, y: 0.30 },
-      { name: "Mostly North", emoji: "⬆️", x: 0.30, y: 0.90 },
+      { name: "North-West", emoji: "↖️", x: -0.70, y: 0.70 },
+      { name: "South-East", emoji: "↘️", x: 0.70, y: -0.70 },
     ],
   },
   {
@@ -123,20 +126,9 @@ const EXAMPLES: Example[] = [
 ];
 
 // --- Coordinate system ---
-// Plot shows 0..MAX_UNITS on each axis. Grid lines at each integer.
-// Unit vector (length 1) reaches the first grid line.
 const MAX_UNITS = 4;
 const SVG_SIZE = 350;
 const PAD = 45;
-const PLOT = SVG_SIZE - 2 * PAD; // pixel size of plot area
-const UNIT_PX = PLOT / MAX_UNITS; // pixels per unit
-
-function toSvgX(val: number) {
-  return PAD + val * UNIT_PX;
-}
-function toSvgY(val: number) {
-  return SVG_SIZE - PAD - val * UNIT_PX;
-}
 
 function fmt(n: number): string {
   return n.toFixed(2);
@@ -149,6 +141,23 @@ export function AnimalDirectionMagnitude() {
 
   const example = EXAMPLES[exampleIdx];
   const item = example.items[selectedItem];
+  const centered = example.centered ?? false;
+
+  // Coordinate system: for centered plots, origin in middle; otherwise bottom-left
+  const PLOT = SVG_SIZE - 2 * PAD;
+  const UNIT_PX = centered ? PLOT / (MAX_UNITS * 2) : PLOT / MAX_UNITS;
+  const originX = centered ? PAD + PLOT / 2 : PAD;
+  const originY = centered ? PAD + PLOT / 2 : SVG_SIZE - PAD;
+  const toSvgX = (v: number) => originX + v * UNIT_PX;
+  const toSvgY = (v: number) => originY - v * UNIT_PX;
+
+  // Grid ticks
+  const minTick = centered ? -MAX_UNITS : 0;
+  const maxTick = MAX_UNITS;
+  const gridTicks = Array.from(
+    { length: maxTick - minTick + 1 },
+    (_, i) => minTick + i,
+  );
 
   // Snap to the nearest step for display/math, but keep slider smooth
   const count = Math.round(rawCount / example.sliderStep) * example.sliderStep;
@@ -219,9 +228,6 @@ export function AnimalDirectionMagnitude() {
     });
   }, [exampleIdx]);
 
-  // Grid tick values: 0, 1, 2, 3, 4
-  const gridTicks = Array.from({ length: MAX_UNITS + 1 }, (_, i) => i);
-
   return (
     <WidgetContainer
       title="Direction and Magnitude"
@@ -276,20 +282,22 @@ export function AnimalDirectionMagnitude() {
         {gridTicks.map((t) => (
           <g key={t}>
             <line
-              x1={toSvgX(t)} y1={toSvgY(0)} x2={toSvgX(t)} y2={toSvgY(MAX_UNITS)}
-              stroke="currentColor" strokeOpacity={0.06}
+              x1={toSvgX(t)} y1={toSvgY(minTick)} x2={toSvgX(t)} y2={toSvgY(maxTick)}
+              stroke="currentColor" strokeOpacity={t === 0 && centered ? 0.15 : 0.06}
             />
             <line
-              x1={toSvgX(0)} y1={toSvgY(t)} x2={toSvgX(MAX_UNITS)} y2={toSvgY(t)}
-              stroke="currentColor" strokeOpacity={0.06}
+              x1={toSvgX(minTick)} y1={toSvgY(t)} x2={toSvgX(maxTick)} y2={toSvgY(t)}
+              stroke="currentColor" strokeOpacity={t === 0 && centered ? 0.15 : 0.06}
             />
             {/* X tick labels */}
-            <text x={toSvgX(t)} y={SVG_SIZE - PAD + 14} textAnchor="middle" fontSize={9} fill="currentColor" opacity={0.3}>
-              {t}
-            </text>
+            {(t !== 0 || !centered) && (
+              <text x={toSvgX(t)} y={toSvgY(minTick) + 14} textAnchor="middle" fontSize={9} fill="currentColor" opacity={0.3}>
+                {t}
+              </text>
+            )}
             {/* Y tick labels */}
-            {t > 0 && (
-              <text x={PAD - 8} y={toSvgY(t) + 3} textAnchor="end" fontSize={9} fill="currentColor" opacity={0.3}>
+            {t !== 0 && (
+              <text x={toSvgX(minTick) - 8} y={toSvgY(t) + 3} textAnchor="end" fontSize={9} fill="currentColor" opacity={0.3}>
                 {t}
               </text>
             )}
@@ -297,30 +305,34 @@ export function AnimalDirectionMagnitude() {
         ))}
 
         {/* Axes */}
-        <line x1={PAD} y1={toSvgY(0)} x2={PAD} y2={toSvgY(MAX_UNITS)} stroke="currentColor" strokeOpacity={0.2} strokeWidth={1.5} />
-        <line x1={PAD} y1={toSvgY(0)} x2={toSvgX(MAX_UNITS)} y2={toSvgY(0)} stroke="currentColor" strokeOpacity={0.2} strokeWidth={1.5} />
+        <line x1={toSvgX(minTick)} y1={toSvgY(0)} x2={toSvgX(maxTick)} y2={toSvgY(0)} stroke="currentColor" strokeOpacity={0.2} strokeWidth={1.5} />
+        <line x1={toSvgX(0)} y1={toSvgY(minTick)} x2={toSvgX(0)} y2={toSvgY(maxTick)} stroke="currentColor" strokeOpacity={0.2} strokeWidth={1.5} />
 
         {/* Axis labels */}
-        <text x={(toSvgX(0) + toSvgX(MAX_UNITS)) / 2} y={SVG_SIZE - 5} textAnchor="middle" fontSize={11} fill="currentColor" opacity={0.5} fontWeight={600}>
+        <text x={toSvgX(maxTick)} y={toSvgY(0) + 14} textAnchor="end" fontSize={11} fill="currentColor" opacity={0.5} fontWeight={600}>
           {example.xAxisLabel}
         </text>
         <text
-          x={12} y={(toSvgY(0) + toSvgY(MAX_UNITS)) / 2}
-          textAnchor="middle" fontSize={11} fill="currentColor" opacity={0.5} fontWeight={600}
-          transform={`rotate(-90, 12, ${(toSvgY(0) + toSvgY(MAX_UNITS)) / 2})`}
+          x={toSvgX(0) - 14} y={toSvgY(maxTick) + 4}
+          textAnchor="end" fontSize={11} fill="currentColor" opacity={0.5} fontWeight={600}
         >
           {example.yAxisLabel}
         </text>
 
-        {/* Unit circle arc (quarter arc, radius = 1 unit, centered at origin) */}
-        <path
-          d={`M ${toSvgX(1)} ${toSvgY(0)} A ${UNIT_PX} ${UNIT_PX} 0 0 0 ${toSvgX(0)} ${toSvgY(1)}`}
-          fill="none"
-          stroke="var(--color-accent)"
-          strokeWidth={1}
-          strokeOpacity={0.2}
-          strokeDasharray="4 3"
-        />
+        {/* Unit circle arc (radius = 1 unit, centered at origin) */}
+        {centered ? (
+          <circle
+            cx={toSvgX(0)} cy={toSvgY(0)} r={UNIT_PX}
+            fill="none" stroke="var(--color-accent)"
+            strokeWidth={1} strokeOpacity={0.2} strokeDasharray="4 3"
+          />
+        ) : (
+          <path
+            d={`M ${toSvgX(1)} ${toSvgY(0)} A ${UNIT_PX} ${UNIT_PX} 0 0 0 ${toSvgX(0)} ${toSvgY(1)}`}
+            fill="none" stroke="var(--color-accent)"
+            strokeWidth={1} strokeOpacity={0.2} strokeDasharray="4 3"
+          />
+        )}
 
         {/* Ghost dots for non-selected items on the unit arc */}
         {example.items.map((it, i) => {

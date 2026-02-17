@@ -61,46 +61,54 @@ Back to animals: if you're worried about bears, you care about both "is this a b
 In 2D we could use an angle for direction, but that breaks down in higher dimensions. Instead we use a **unit vector** — a vector that points in the same direction but has length 1. Any vector equals its unit vector (the direction) times its length (the magnitude).
 
 <AnimalDirectionMagnitudeWidget>
-Pick an item and drag the slider to change the magnitude. The dashed arrow is the unit vector — it sits on the arc where all unit-length vectors live. The faded arrow shows the full vector scaled by the count. Try switching between Animals, Speed, and Colors to see how "direction = what kind, magnitude = how much" applies everywhere.
+Pick an item and drag the slider to change the magnitude. The dashed arrow is the unit vector — it sits on the arc where all unit-length vectors live. The faded arrow shows the full vector scaled by the count. Try switching between Animals, Velocity, and Color to see how "direction = what kind, magnitude = how much" applies everywhere.
 </AnimalDirectionMagnitudeWidget>
+
+<Callout>
+Two dimensions aren't really enough to distinguish these animals well — bear and shark end up pointing in similar directions. With all six properties the differences are much clearer, but we can't easily draw a six-dimensional plot. This is a recurring tradeoff: more dimensions capture reality better, but we're stuck visualizing two or three at a time.
+</Callout>
 
 This decomposition — direction times magnitude — will matter a lot in a moment, when we look at what the dot product really means.
 
 ## The Dot Product
 
-The **dot product** is the single most important vector operation in AI. It's a way of multiplying two vectors together to get a single number. That number tells you two things at once: how big the vectors are, and how much they point in the same direction. 
+The **dot product** is the single most important vector operation in AI. It takes two vectors and produces a single number. The recipe: multiply their lengths, then multiply by how similar their directions are.
 
-For regular numbers (one-dimensional vectors), the dot product is just ordinary multiplication: 3 · 5 = 15. The dot product extends this idea to vectors with more dimensions.
+**a · b = length(a) × length(b) × cosine(angle between them)**
 
-There are two ways to compute the dot product, and they always give the same answer.
+The **cosine** measures direction similarity: 1 for identical directions, 0 for perpendicular, -1 for opposite. So if two vectors point the same way, the dot product is just their lengths multiplied together. If they're completely unrelated (perpendicular), it's zero — no matter how big they are. If they point in opposite directions, it's negative.
 
-**Way 1 — multiply the parts and add:** Multiply each pair of corresponding numbers, then add the results. For vectors (a₁, a₂) and (b₁, b₂): dot product = (a₁ × b₁) + (a₂ × b₂).
+<DotProductAnalogiesWidget>
+Pick a detector and something to measure. The green arrow shows the projection — the component of the input that goes in the detector's direction. Try the Animals tab: how much "bear" is in "3 bears"? Now Velocity: how fast is this car going northward? Then Color: how much red gets through a red filter? Notice how the same operation answers different questions depending on what you feed it.
+</DotProductAnalogiesWidget>
 
-**Way 2 — projection:** Multiply the lengths of the two vectors, and then multiply that by how much the two vectors point in the same direction (measured using a function called `cosine`).
+There's a completely different way to compute the exact same number: **multiply each pair of corresponding numbers and add up the results.**
+
+**a · b = (a₁×b₁) + (a₂×b₂) + … + (aₙ×bₙ)**
+
+This always gives the same answer as the geometric formula. The geometry gives you the intuition; the computation is just multiply-and-add.
 
 <DotProductExplorerWidget>
-Drag the arrow tips. In Component view, watch the individual products and their sum. Switch to Projection view to see the angle and the shadow of one vector onto the other. Rotate one vector around — when they point the same way, the dot product is large and positive. When perpendicular, it's zero. When opposite, it's negative. Both views always show the same number.
+Drag the arrow tips. In Component view, watch the individual products and their sum. Switch to Projection view to see the angle and the projection of one vector onto the other. Both views always show the same number.
 </DotProductExplorerWidget>
 
-The dot product measures **how much two vectors agree**. This is why it appears everywhere in AI: whenever a network needs to ask "how similar are these two things?", the answer is a dot product.
-
-When both vectors are unit vectors (length 1), the dot product simplifies to just the cosine — pure directional agreement with length factored out. This is called **cosine similarity**, and we'll see it again when we get to embeddings.
+When both vectors are unit vectors (length 1), the lengths are just 1, so the dot product becomes pure directional similarity — just the cosine. This is called **cosine similarity**, and we'll see it again when we get to embeddings.
 
 <KeyInsight>
 **The dot product measures alignment.** Same direction → large positive. Perpendicular → zero. Opposite → large negative. This single operation is the foundation of how neural networks process information.
 </KeyInsight>
 
-## A Neuron Is a Dot Product
+## A Neuron Is (Mostly) a Dot Product
 
-Here's the connection that ties everything together. Remember from the previous chapter that a neuron computes a **weighted sum** of its inputs, adds a bias, then applies the sigmoid:
+Here's the connection that ties everything together. Remember from the previous chapter that a neuron computes a **weighted sum** of its inputs, adds a bias, then applies the sigmoid. That weighted sum is a dot product — the neuron has a **weight vector** and receives an **input vector**:
 
-output = sigmoid(w₁ × x₁ + w₂ × x₂ + … + wₙ × xₙ + bias)
+<Callout>
+**output = sigmoid( w · x + bias )**
 
-That weighted sum is a dot product. The neuron has a **weight vector** w = (w₁, w₂, …, wₙ) and receives an **input vector** x = (x₁, x₂, …, xₙ), and it computes their dot product. We can write the whole thing as:
+where **w** = (w₁, w₂, …, wₙ) is the weight vector and **x** = (x₁, x₂, …, xₙ) is the input vector.
+</Callout>
 
-output = sigmoid(w · x + bias)
-
-What does this mean? The neuron is asking: **"how much does this input point in the direction of my weights?"** When the input vector aligns with the weight vector, the dot product is large, the sigmoid outputs close to 1, and the neuron fires strongly. When they're perpendicular, the dot product is near zero. When they point in opposite directions, the neuron stays quiet.
+The weight vector's direction says *what kind of input* the neuron is looking for. Its magnitude says *how interested* it is — bigger weights mean a stronger response. The input vector's direction says *what kind of thing* arrived, and its magnitude says *how much*. The dot product combines all of this: when a large input matches what the neuron cares strongly about, the result is big, the sigmoid outputs close to 1, and the neuron fires. When the input is unrelated (perpendicular), the dot product is near zero. When it's the opposite of what the neuron wants, it stays quiet.
 
 <NeuronDotProductWidget>
 Drag the weight and input vectors. Watch the angle between them — when the vectors align (small angle), the output is high. When they're perpendicular (90°), the output depends mostly on the bias. When they oppose each other (large angle), the output drops. Try making the bias very negative — now the vectors need to be *very* well aligned for the neuron to fire. This visualization shows two dimensions, but real neurons have weight and input vectors with hundreds or thousands of dimensions — the same geometric intuition applies.
