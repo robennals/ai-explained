@@ -56,7 +56,7 @@ So far we've represented vectors as lists of numbers, but there's another useful
 - **Direction** = *what kind of thing is this?*
 - **Magnitude** = *how much of this thing?*
 
-Back to animals: if you're worried about bears, you care about both "is this a bear?" (direction) and "how many are there?" (magnitude). One bear is worrying; a hundred bears is terrifying. The *kind* of danger is the same — it's the *amount* that changes.
+Back to animals: if you're worried about bears, you care about both "is this like a bear?" (direction) and "how many are there?" (magnitude). One bear is worrying; five hundred bears is terrifying. The *kind* of danger is the same — it's the *amount* that changes.
 
 In 2D we could use an angle for direction, but that breaks down in higher dimensions. Instead we use a **unit vector** — a vector that points in the same direction but has length 1. Any vector equals its unit vector (the direction) times its length (the magnitude).
 
@@ -82,7 +82,7 @@ The **cosine** measures direction similarity: 1 for identical directions, 0 for 
 Pick a detector and something to measure. The green arrow shows the projection — the component of the input that goes in the detector's direction. Try the Animals tab: how much "bear" is in "3 bears"? Now Velocity: how fast is this car going northward? Then Color: how much red gets through a red filter? Notice how the same operation answers different questions depending on what you feed it.
 </DotProductAnalogiesWidget>
 
-There's a completely different way to compute the exact same number: **multiply each pair of corresponding numbers and add up the results.**
+Remarkably, there's a completely different way to compute the dot product that gives the exact same result: **multiply each pair of corresponding numbers and add up the results.**
 
 **a · b = (a₁×b₁) + (a₂×b₂) + … + (aₙ×bₙ)**
 

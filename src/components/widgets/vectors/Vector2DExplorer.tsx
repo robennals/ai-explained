@@ -127,6 +127,7 @@ export function Vector2DExplorer() {
               className="cursor-pointer"
               style={{ transform: `translate(${x}px, ${y}px)` }}
             >
+              <line x1={toSvgX(0) - x} y1={toSvgY(0) - y} x2={0} y2={0} stroke="var(--color-accent)" strokeWidth={1.5} strokeOpacity={isHovered ? 0.5 : 0.2} />
               <circle cx={0} cy={0} r={isHovered ? 7 : 5} fill="var(--color-accent)" fillOpacity={isHovered ? 1 : 0.7} />
               <text x={0} y={-10} textAnchor="middle" fontSize={16}>
                 {animal.emoji}

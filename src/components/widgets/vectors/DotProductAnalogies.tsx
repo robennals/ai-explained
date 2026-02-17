@@ -9,6 +9,8 @@ import { WidgetTabs } from "../shared/WidgetTabs";
 interface VecItem {
   name: string;
   emoji: string;
+  /** If set, render a colored swatch instead of the emoji */
+  swatch?: string;
   x: number;
   y: number;
 }
@@ -103,16 +105,16 @@ const SCENARIOS: Scenario[] = [
     detectorLabel: "Filter",
     inputLabel: "Light",
     detectors: [
-      { name: "Red filter", emoji: "🔴", x: 1.0, y: 0.0 },
-      { name: "Blue filter", emoji: "🔵", x: 0.0, y: 1.0 },
-      { name: "Purple filter", emoji: "🟣", x: 0.6, y: 0.8 },
+      { name: "Red filter", emoji: "", swatch: "#ef4444", x: 1.0, y: 0.0 },
+      { name: "Blue filter", emoji: "", swatch: "#3b82f6", x: 0.0, y: 1.0 },
+      { name: "Purple filter", emoji: "", swatch: "#a855f7", x: 0.6, y: 0.8 },
     ],
     inputs: [
-      { name: "Bright red light", emoji: "🔴", x: 3.0, y: 0.2 },
-      { name: "Dim blue light", emoji: "🔵", x: 0.1, y: 0.8 },
-      { name: "Bright purple light", emoji: "🟣", x: 1.8, y: 2.4 },
-      { name: "Bright white light", emoji: "⬜", x: 2.5, y: 2.5 },
-      { name: "Dim pink light", emoji: "🩷", x: 0.6, y: 0.2 },
+      { name: "Bright red light", emoji: "", swatch: "#ef4444", x: 3.0, y: 0.0 },
+      { name: "Dim blue light", emoji: "", swatch: "#3b82f6", x: 0.0, y: 0.3 },
+      { name: "Bright purple light", emoji: "", swatch: "#a855f7", x: 1.8, y: 2.4 },
+      { name: "Bright white light", emoji: "", swatch: "#ffffff", x: 2.5, y: 2.5 },
+      { name: "Dim pink light", emoji: "", swatch: "#f9a8d4", x: 0.6, y: 0.2 },
     ],
     explain: (_det, _inp, _dot, proj) => {
       if (proj < 0.1) return `Almost nothing gets through — the light has almost none of that color.`;
@@ -236,7 +238,9 @@ export function DotProductAnalogies() {
                     : "bg-foreground/5 text-foreground hover:bg-foreground/10"
                 }`}
               >
-                <span>{d.emoji}</span>
+                {d.swatch
+                  ? <span className="inline-block w-3 h-3 rounded-sm border border-foreground/10" style={{ backgroundColor: d.swatch }} />
+                  : <span>{d.emoji}</span>}
                 <span>{d.name}</span>
               </button>
             ))}
@@ -255,7 +259,9 @@ export function DotProductAnalogies() {
                     : "bg-foreground/5 text-foreground hover:bg-foreground/10"
                 }`}
               >
-                <span>{inp.emoji}</span>
+                {inp.swatch
+                  ? <span className="inline-block w-3 h-3 rounded-sm border border-foreground/10" style={{ backgroundColor: inp.swatch }} />
+                  : <span>{inp.emoji}</span>}
                 <span>{inp.name}</span>
               </button>
             ))}
@@ -264,7 +270,7 @@ export function DotProductAnalogies() {
       </div>
 
       {/* SVG visualization */}
-      <svg viewBox={`0 0 ${SVG_W} ${SVG_H}`} className="mx-auto w-full max-w-[450px]">
+      <svg viewBox={`0 0 ${SVG_W} ${SVG_H}`} className="mx-auto w-full max-w-[450px]" overflow="visible">
         {/* Axes */}
         <line x1={PAD_L} y1={toY(0)} x2={SVG_W - PAD_R} y2={toY(0)} stroke="currentColor" strokeOpacity={0.15} strokeWidth={1} />
         <line x1={toX(0)} y1={PAD_T} x2={toX(0)} y2={SVG_H - PAD_B} stroke="currentColor" strokeOpacity={0.15} strokeWidth={1} />
@@ -387,9 +393,12 @@ export function DotProductAnalogies() {
           const angle = Math.atan2(ty - toY(0), tx - toX(0));
           return <Arrowhead x={tx} y={ty} angle={angle} color="var(--color-accent)" />;
         })()}
-        <text x={toX(dUnitX) + 8} y={toY(dUnitY) - 2} fontSize={9} fill="var(--color-accent)" fontWeight={600} opacity={0.8}>
-          {detector.emoji}
-        </text>
+        {detector.swatch
+          ? <rect x={toX(dUnitX) + 6} y={toY(dUnitY) - 9} width={10} height={10} rx={2} fill={detector.swatch} opacity={0.8} />
+          : <text x={toX(dUnitX) + 8} y={toY(dUnitY) - 2} fontSize={9} fill="var(--color-accent)" fontWeight={600} opacity={0.8}>
+              {detector.emoji}
+            </text>
+        }
 
         {/* Input vector (solid blue) */}
         <line
@@ -403,9 +412,17 @@ export function DotProductAnalogies() {
           const angle = Math.atan2(ty - toY(0), tx - toX(0));
           return <Arrowhead x={tx} y={ty} angle={angle} color="#3b82f6" />;
         })()}
-        <text x={toX(input.x) + 8} y={toY(input.y) - 4} fontSize={10} fill="#3b82f6" fontWeight={600}>
-          {input.emoji} {input.name}
-        </text>
+        {input.swatch
+          ? <g>
+              <rect x={toX(input.x) + 6} y={toY(input.y) - 11} width={10} height={10} rx={2} fill={input.swatch} />
+              <text x={toX(input.x) + 20} y={toY(input.y) - 2} fontSize={10} fill="#3b82f6" fontWeight={600}>
+                {input.name}
+              </text>
+            </g>
+          : <text x={toX(input.x) + 8} y={toY(input.y) - 4} fontSize={10} fill="#3b82f6" fontWeight={600}>
+              {input.emoji} {input.name}
+            </text>
+        }
 
         {/* Projection label */}
         {Math.abs(dot) > 0.1 && (
@@ -424,9 +441,14 @@ export function DotProductAnalogies() {
           <div className="font-mono text-xs text-muted">
             angle = {angleDeg}° · cosine = {cosAngle.toFixed(2)} · dot product = <span className="text-accent font-semibold">{dot.toFixed(2)}</span>
           </div>
-          <div className="text-xs text-foreground">
+          <div className="text-sm font-bold text-foreground">
             {scenario.explain(detector, input, dot, dot)}
           </div>
+          {scenario.id === "animals" && (
+            <div className="text-xs text-muted italic">
+              As before, two dimensions aren&apos;t enough to distinguish these animals well, but hopefully you get the intuition.
+            </div>
+          )}
         </div>
       </div>
     </WidgetContainer>

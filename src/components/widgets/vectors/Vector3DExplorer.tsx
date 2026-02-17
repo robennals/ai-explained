@@ -49,24 +49,30 @@ function project(x: number, y: number, z: number, rotY: number, rotX: number): [
   return [CX + rx * SCALE, CY - ry * SCALE, rz2];
 }
 
-function PropTabs({ label, value, onChange, color }: { label: string; value: Property; onChange: (p: Property) => void; color: string }) {
+function PropTabs({ label, value, onChange, color, disabled = [] }: { label: string; value: Property; onChange: (p: Property) => void; color: string; disabled?: Property[] }) {
   return (
     <div>
       <div className="mb-1.5 text-[10px] font-bold uppercase tracking-widest" style={{ color }}>{label}</div>
       <div className="flex flex-wrap gap-1.5">
-        {PROPERTIES.map((p) => (
-          <button
-            key={p}
-            onClick={() => onChange(p)}
-            className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-colors ${
-              value === p
-                ? "bg-accent text-white"
-                : "bg-foreground/5 text-muted hover:bg-foreground/10"
-            }`}
-          >
-            {p.charAt(0).toUpperCase() + p.slice(1)}
-          </button>
-        ))}
+        {PROPERTIES.map((p) => {
+          const isDisabled = disabled.includes(p);
+          return (
+            <button
+              key={p}
+              onClick={() => !isDisabled && onChange(p)}
+              disabled={isDisabled}
+              className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-colors ${
+                value === p
+                  ? "bg-accent text-white"
+                  : isDisabled
+                    ? "bg-foreground/5 text-muted/30 cursor-not-allowed"
+                    : "bg-foreground/5 text-muted hover:bg-foreground/10"
+              }`}
+            >
+              {p.charAt(0).toUpperCase() + p.slice(1)}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -110,11 +116,11 @@ export function Vector3DExplorer() {
 
   const handlePointerUp = useCallback(() => setDragging(false), []);
 
-  // Project axes
+  // Project axes — all originate from (0,0,0)
   const axes = [
-    { label: xProp, from: [0, 0.5, 0.5] as [number, number, number], to: [1, 0.5, 0.5] as [number, number, number], color: "#ef4444" },
-    { label: yProp, from: [0.5, 0, 0.5] as [number, number, number], to: [0.5, 1, 0.5] as [number, number, number], color: "#22c55e" },
-    { label: zProp, from: [0.5, 0.5, 0] as [number, number, number], to: [0.5, 0.5, 1] as [number, number, number], color: "#3b82f6" },
+    { id: "x", label: xProp, from: [0, 0, 0] as [number, number, number], to: [1, 0, 0] as [number, number, number], color: "#ef4444" },
+    { id: "y", label: yProp, from: [0, 0, 0] as [number, number, number], to: [0, 1, 0] as [number, number, number], color: "#22c55e" },
+    { id: "z", label: zProp, from: [0, 0, 0] as [number, number, number], to: [0, 0, 1] as [number, number, number], color: "#3b82f6" },
   ];
 
   const projectedAnimals = ANIMALS.map((a) => {
@@ -129,15 +135,15 @@ export function Vector3DExplorer() {
       onReset={handleReset}
     >
       <div className="mb-4 space-y-3">
-        <PropTabs label="X axis" value={xProp} onChange={(p) => setXProp(p)} color="#ef4444" />
-        <PropTabs label="Y axis" value={yProp} onChange={(p) => setYProp(p)} color="#22c55e" />
-        <PropTabs label="Z axis" value={zProp} onChange={(p) => setZProp(p)} color="#3b82f6" />
+        <PropTabs label="X axis" value={xProp} onChange={(p) => setXProp(p)} color="#ef4444" disabled={[yProp, zProp]} />
+        <PropTabs label="Y axis" value={yProp} onChange={(p) => setYProp(p)} color="#22c55e" disabled={[xProp, zProp]} />
+        <PropTabs label="Z axis" value={zProp} onChange={(p) => setZProp(p)} color="#3b82f6" disabled={[xProp, yProp]} />
       </div>
 
       <svg
         ref={svgRef}
         viewBox={`0 0 ${SIZE} ${SIZE}`}
-        className="mx-auto w-full max-w-[480px] cursor-grab active:cursor-grabbing touch-none"
+        className="mx-auto w-full max-w-[480px] cursor-grab active:cursor-grabbing touch-none select-none"
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
@@ -147,7 +153,7 @@ export function Vector3DExplorer() {
           const [fx, fy] = project(...axis.from, rotY, rotX);
           const [tx, ty] = project(...axis.to, rotY, rotX);
           return (
-            <g key={axis.label}>
+            <g key={axis.id}>
               <line x1={fx} y1={fy} x2={tx} y2={ty} stroke={axis.color} strokeWidth={1.5} strokeOpacity={0.4} />
               <text x={tx} y={ty - 6} textAnchor="middle" fontSize={10} fill={axis.color} fontWeight={600}>
                 {axis.label.charAt(0).toUpperCase() + axis.label.slice(1)}
@@ -156,15 +162,19 @@ export function Vector3DExplorer() {
           );
         })}
 
-        {/* Animals (back to front) */}
-        {projectedAnimals.map((a) => (
-          <g key={a.name}>
-            <circle cx={a.sx} cy={a.sy} r={5} fill="var(--color-accent)" fillOpacity={0.7} />
-            <text x={a.sx} y={a.sy - 8} textAnchor="middle" fontSize={14}>
-              {a.emoji}
-            </text>
-          </g>
-        ))}
+        {/* Animals (back to front) with lines from origin */}
+        {(() => {
+          const [ox, oy] = project(0, 0, 0, rotY, rotX);
+          return projectedAnimals.map((a) => (
+            <g key={a.name}>
+              <line x1={ox} y1={oy} x2={a.sx} y2={a.sy} stroke="var(--color-accent)" strokeWidth={1.5} strokeOpacity={0.2} />
+              <circle cx={a.sx} cy={a.sy} r={5} fill="var(--color-accent)" fillOpacity={0.7} />
+              <text x={a.sx} y={a.sy - 8} textAnchor="middle" fontSize={14}>
+                {a.emoji}
+              </text>
+            </g>
+          ));
+        })()}
       </svg>
 
       <p className="mt-2 text-center text-xs text-muted">

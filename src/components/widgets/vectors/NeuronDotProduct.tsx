@@ -131,8 +131,22 @@ export function NeuronDotProduct() {
   const theta = Math.acos(Math.max(-1, Math.min(1, cosTheta)));
   const thetaDeg = (theta * 180) / Math.PI;
 
+  // Unit vectors
+  const wUnitX = magW > 0 ? w1 / magW : 0;
+  const wUnitY = magW > 0 ? w2 / magW : 0;
+  const xUnitX = magX > 0 ? x1 / magX : 0;
+  const xUnitY = magX > 0 ? x2 / magX : 0;
+
+  // Projection of input onto weight direction
+  const projScalar = magW > 0 ? dot / magW : 0;
+  const projX = projScalar * wUnitX;
+  const projY = projScalar * wUnitY;
+
   const [wsx, wsy] = toSvg(w1, w2);
   const [xsx, xsy] = toSvg(x1, x2);
+  const [psx, psy] = toSvg(projX, projY);
+  const [wusx, wusy] = toSvg(wUnitX, wUnitY);
+  const [xusx, xusy] = toSvg(xUnitX, xUnitY);
 
   const outColor = outputColor(output);
 
@@ -302,6 +316,59 @@ export function NeuronDotProduct() {
               </>
             );
           })()}
+
+          {/* Unit circle arc connecting both unit vectors */}
+          {magW > 0.05 && magX > 0.05 && (() => {
+            const r = SCALE; // unit circle radius in SVG pixels
+            const aW = Math.atan2(-wUnitY, wUnitX);
+            const aX = Math.atan2(-xUnitY, xUnitX);
+            let diff = aW - aX;
+            if (diff > Math.PI) diff -= 2 * Math.PI;
+            if (diff < -Math.PI) diff += 2 * Math.PI;
+            const endAngle = aX + diff;
+            const sx = CX + r * Math.cos(aX);
+            const sy = CY + r * Math.sin(aX);
+            const ex = CX + r * Math.cos(endAngle);
+            const ey = CY + r * Math.sin(endAngle);
+            const large = Math.abs(diff) > Math.PI ? 1 : 0;
+            const sweep = diff > 0 ? 1 : 0;
+            return (
+              <path
+                d={`M ${sx} ${sy} A ${r} ${r} 0 ${large} ${sweep} ${ex} ${ey}`}
+                fill="none" stroke="currentColor" strokeOpacity={0.12}
+                strokeWidth={1} strokeDasharray="3 3"
+              />
+            );
+          })()}
+
+          {/* Dashed line from input tip to projection point */}
+          <line
+            x1={xsx} y1={xsy}
+            x2={psx} y2={psy}
+            stroke="currentColor" strokeWidth={1} strokeOpacity={0.2}
+            strokeDasharray="3 3"
+          />
+
+          {/* Projection vector (green, along weight direction) */}
+          {Math.abs(projScalar) > 0.02 && (
+            <Arrow fx={CX} fy={CY} tx={psx} ty={psy} color="#22c55e" width={3} />
+          )}
+
+          {/* Weight unit vector (dashed) */}
+          <line
+            x1={CX} y1={CY}
+            x2={wusx} y2={wusy}
+            stroke="#f59e0b" strokeWidth={1.5}
+            strokeDasharray="4 3" strokeOpacity={0.5}
+          />
+
+          {/* Input unit vector (dashed) */}
+          <line
+            x1={CX} y1={CY}
+            x2={xusx} y2={xusy}
+            stroke="#3b82f6" strokeWidth={1.5}
+            strokeDasharray="4 3" strokeOpacity={0.5}
+          />
 
           {/* Weight vector */}
           <Arrow fx={CX} fy={CY} tx={wsx} ty={wsy} color="#f59e0b" width={2.5} label="w" />
