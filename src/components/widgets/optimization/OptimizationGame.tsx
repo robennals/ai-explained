@@ -2,9 +2,10 @@
 
 import { useState, useCallback, useRef } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
+import { WidgetTabs } from "../shared/WidgetTabs";
 
 const SVG_WIDTH = 500;
-const SVG_HEIGHT = 400;
+const SVG_HEIGHT = 280;
 const CONSTRAINT_RADIUS = 60;
 const FOUND_THRESHOLD = 15;
 
@@ -53,6 +54,11 @@ function signalRadius(t: number, isLatest: boolean): number {
   const base = 3 + t * 7; // 3px far, 10px close
   return isLatest ? base + 1 : base;
 }
+
+const GAME_TABS: { id: "blind" | "signal"; label: string }[] = [
+  { id: "blind", label: "Blind (no signal)" },
+  { id: "signal", label: "With signal" },
+];
 
 export function OptimizationGame() {
   const [target, setTarget] = useState(() => randomTarget());
@@ -121,26 +127,21 @@ export function OptimizationGame() {
       onReset={reset}
     >
       {/* Mode tabs */}
-      <div className="mb-3 flex items-center gap-2">
+      <WidgetTabs tabs={GAME_TABS} activeTab={mode} onTabChange={switchMode} />
+
+      {/* Action buttons */}
+      <div className="mb-3 flex justify-end gap-2">
         <button
-          onClick={() => switchMode("blind")}
-          className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-            mode === "blind"
-              ? "bg-accent text-white"
-              : "bg-surface text-muted hover:text-foreground"
-          }`}
+          onClick={() => setRevealed(true)}
+          className="rounded-md bg-accent/10 px-3 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-accent/20"
         >
-          Blind (no signal)
+          Reveal target
         </button>
         <button
-          onClick={() => switchMode("signal")}
-          className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-            mode === "signal"
-              ? "bg-accent text-white"
-              : "bg-surface text-muted hover:text-foreground"
-          }`}
+          onClick={reset}
+          className="rounded-md bg-surface px-3 py-1.5 text-xs font-medium text-muted transition-colors hover:text-foreground"
         >
-          With signal
+          New game
         </button>
       </div>
 
@@ -180,16 +181,44 @@ export function OptimizationGame() {
 
       {/* Color spectrum legend — signal mode only */}
       {!isBlind && (
-        <div className="mb-3 flex items-center gap-2">
+        <div className="mb-7 flex items-center gap-2">
           <span className="text-[10px] font-medium text-muted whitespace-nowrap">Far</span>
-          <div
-            className="h-3 flex-1 rounded-full"
-            style={{
-              background: `linear-gradient(to right, ${
-                Array.from({ length: 11 }, (_, i) => signalColor(i / 10)).join(", ")
-              })`,
-            }}
-          />
+          <div className="relative h-3 flex-1">
+            <div
+              className="h-full w-full rounded-full"
+              style={{
+                background: `linear-gradient(to right, ${
+                  Array.from({ length: 11 }, (_, i) => signalColor(i / 10)).join(", ")
+                })`,
+              }}
+            />
+            {/* Marker showing where last guess falls on the spectrum */}
+            {lastGuess && !found && (() => {
+              const t = closeness(lastGuess.distance);
+              return (
+                <div
+                  className="absolute top-full mt-0.5 flex flex-col items-center"
+                  style={{ left: `${t * 100}%`, transform: "translateX(-50%)" }}
+                >
+                  <div
+                    className="h-0 w-0"
+                    style={{
+                      borderLeft: "5px solid transparent",
+                      borderRight: "5px solid transparent",
+                      borderBottom: `6px solid ${signalColor(t)}`,
+                      transform: "rotate(180deg)",
+                    }}
+                  />
+                  <span
+                    className="mt-0.5 text-[9px] font-bold"
+                    style={{ color: signalColor(t) }}
+                  >
+                    you
+                  </span>
+                </div>
+              );
+            })()}
+          </div>
           <span className="text-[10px] font-medium text-muted whitespace-nowrap">Close</span>
         </div>
       )}
@@ -395,21 +424,6 @@ export function OptimizationGame() {
         </p>
       )}
 
-      {/* Buttons */}
-      <div className="flex gap-2">
-        <button
-          onClick={() => setRevealed(true)}
-          className="rounded-md bg-accent/10 px-3 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-accent/20"
-        >
-          Reveal target
-        </button>
-        <button
-          onClick={reset}
-          className="rounded-md bg-surface px-3 py-1.5 text-xs font-medium text-muted transition-colors hover:text-foreground"
-        >
-          New game
-        </button>
-      </div>
     </WidgetContainer>
   );
 }

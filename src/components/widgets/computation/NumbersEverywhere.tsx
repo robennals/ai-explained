@@ -2,11 +2,12 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
+import { WidgetTabs } from "../shared/WidgetTabs";
 import { SliderControl } from "../shared/SliderControl";
 
 type Tab = "text" | "image" | "color" | "sound";
 
-const INITIAL_TEXT = "Hello";
+const INITIAL_TEXT = "Hello!";
 const GRID_SIZE = 8;
 const COLORS = [
   "#000000",
@@ -20,19 +21,19 @@ const COLORS = [
 ];
 
 function createInitialGrid(): string[][] {
-  const grid: string[][] = Array.from({ length: GRID_SIZE }, () =>
-    Array.from({ length: GRID_SIZE }, () => "#ffffff")
-  );
-  // Draw a simple smiley face
-  // Eyes
-  grid[2][2] = "#000000";
-  grid[2][5] = "#000000";
-  // Mouth
-  grid[5][2] = "#000000";
-  grid[5][5] = "#000000";
-  grid[6][3] = "#000000";
-  grid[6][4] = "#000000";
-  return grid;
+  const W = "#ffffff";
+  const K = "#000000";
+  const Y = "#eab308";
+  return [
+    [W, W, K, K, K, K, W, W],
+    [W, K, Y, Y, Y, Y, K, W],
+    [K, Y, K, Y, Y, K, Y, K],
+    [K, Y, Y, Y, Y, Y, Y, K],
+    [K, Y, K, Y, Y, K, Y, K],
+    [K, Y, Y, K, K, Y, Y, K],
+    [W, K, Y, Y, Y, Y, K, W],
+    [W, W, K, K, K, K, W, W],
+  ];
 }
 
 function hexToRgb(hex: string): [number, number, number] {
@@ -75,6 +76,14 @@ function TextTab() {
           [{text.split("").map((c) => c.charCodeAt(0)).join(", ")}]
         </p>
       )}
+      <div className="mt-4 rounded-lg border-l-4 border-accent bg-accent/5 px-4 py-3 text-sm text-muted">
+        <p className="mb-1">
+          Characters use a system called <strong className="text-foreground">Unicode</strong> that covers symbols, emoji, and every language — so the numbers are bigger than simple alphabet positions.
+        </p>
+        <p>
+          Uppercase and lowercase get different numbers (A&nbsp;=&nbsp;65, a&nbsp;=&nbsp;97) — to a computer they&apos;re as different as &quot;A&quot; and &quot;7&quot;.
+        </p>
+      </div>
     </div>
   );
 }
@@ -84,6 +93,8 @@ function ImageTab() {
   const [selectedColor, setSelectedColor] = useState("#000000");
   const [hoveredCell, setHoveredCell] = useState<[number, number] | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
+  const [flashCell, setFlashCell] = useState<string | null>(null);
+  const [highlightedCell, setHighlightedCell] = useState<string | null>(null);
 
   const paint = useCallback(
     (row: number, col: number) => {
@@ -92,6 +103,9 @@ function ImageTab() {
         next[row][col] = selectedColor;
         return next;
       });
+      const key = `${row}-${col}`;
+      setFlashCell(key);
+      setTimeout(() => setFlashCell((prev) => (prev === key ? null : prev)), 400);
     },
     [selectedColor]
   );
@@ -131,7 +145,9 @@ function ImageTab() {
               row.map((color, c) => (
                 <button
                   key={`${r}-${c}`}
-                  className="h-7 w-7 transition-opacity hover:opacity-80 sm:h-8 sm:w-8"
+                  className={`h-7 w-7 transition-all hover:opacity-80 sm:h-8 sm:w-8 ${
+                    highlightedCell === `${r}-${c}` ? "ring-2 ring-accent ring-offset-1" : ""
+                  }`}
                   style={{ backgroundColor: color }}
                   onMouseDown={() => {
                     setIsDrawing(true);
@@ -182,15 +198,32 @@ function ImageTab() {
               Hover over a pixel to see its RGB values. Click or drag to paint.
             </p>
           )}
-          <div className="mt-2 max-h-32 overflow-auto rounded border border-border bg-surface p-2 font-mono text-[10px] leading-tight text-muted">
+          <div className="mt-2 max-h-48 overflow-auto rounded border border-border bg-surface p-2">
             {grid.map((row, r) => (
-              <div key={r}>
-                {row
-                  .map((color) => {
+              <div key={r} className={`${r > 0 ? "mt-1 border-t border-border/50 pt-1" : ""}`}>
+                <span className="mr-1.5 text-[9px] font-medium text-muted/50">Row {r}</span>
+                <div className="flex flex-wrap gap-1">
+                  {row.map((color, c) => {
                     const [rv, gv, bv] = hexToRgb(color);
-                    return `(${rv},${gv},${bv})`;
-                  })
-                  .join(" ")}
+                    const isFlashing = flashCell === `${r}-${c}`;
+                    return (
+                      <span
+                        key={c}
+                        className={`inline-flex w-[5.5rem] cursor-default items-center gap-1 rounded-full border px-1.5 py-0.5 font-mono text-[10px] leading-tight text-muted transition-colors duration-300 ${
+                          isFlashing ? "border-accent/30 bg-accent/20" : "border-border bg-white hover:border-accent/40 hover:bg-accent/5"
+                        }`}
+                        onMouseEnter={() => setHighlightedCell(`${r}-${c}`)}
+                        onMouseLeave={() => setHighlightedCell(null)}
+                      >
+                        <span
+                          className="inline-block h-2.5 w-2.5 rounded-sm border border-border/50"
+                          style={{ backgroundColor: color }}
+                        />
+                        {String(rv).padStart(3,"\u2007")},{String(gv).padStart(3,"\u2007")},{String(bv).padStart(3,"\u2007")}
+                      </span>
+                    );
+                  })}
+                </div>
               </div>
             ))}
           </div>
@@ -200,12 +233,26 @@ function ImageTab() {
   );
 }
 
+type ColorMode = "rgb" | "cmy";
+
 function ColorTab() {
   const [r, setR] = useState(59);
   const [g, setG] = useState(130);
   const [b, setB] = useState(246);
+  const [mode, setMode] = useState<ColorMode>("rgb");
 
   const hex = `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
+
+  // CMY is the inverse of RGB (0–255 scale)
+  const c = 255 - r;
+  const m = 255 - g;
+  const y = 255 - b;
+
+  const setFromCmy = (cc: number, mm: number, yy: number) => {
+    setR(255 - cc);
+    setG(255 - mm);
+    setB(255 - yy);
+  };
 
   return (
     <div>
@@ -214,40 +261,107 @@ function ColorTab() {
           className="h-24 w-24 shrink-0 rounded-xl border border-border shadow-inner"
           style={{ backgroundColor: hex }}
         />
-        <div className="font-mono text-lg font-semibold text-foreground">
-          [<span className="text-red-500">{r}</span>,{" "}
-          <span className="text-green-600">{g}</span>,{" "}
-          <span className="text-blue-500">{b}</span>]
+        <div>
+          <div className="font-mono text-lg font-semibold text-foreground">
+            {mode === "rgb" ? (
+              <>
+                [<span className="text-red-500">{r}</span>,{" "}
+                <span className="text-green-600">{g}</span>,{" "}
+                <span className="text-blue-500">{b}</span>]
+              </>
+            ) : (
+              <>
+                [<span className="text-cyan-500">{c}</span>,{" "}
+                <span className="text-pink-500">{m}</span>,{" "}
+                <span className="text-yellow-500">{y}</span>]
+              </>
+            )}
+          </div>
+          <div className="mt-1 flex gap-1.5">
+            <button
+              onClick={() => setMode("rgb")}
+              className={`rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors ${
+                mode === "rgb" ? "bg-accent text-white" : "bg-surface text-muted hover:text-foreground"
+              }`}
+            >
+              Light
+            </button>
+            <button
+              onClick={() => setMode("cmy")}
+              className={`rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors ${
+                mode === "cmy" ? "bg-accent text-white" : "bg-surface text-muted hover:text-foreground"
+              }`}
+            >
+              Paint
+            </button>
+          </div>
         </div>
       </div>
-      <div className="space-y-3">
-        <SliderControl
-          label="Red"
-          value={r}
-          min={0}
-          max={255}
-          step={1}
-          onChange={setR}
-          formatValue={(v) => String(Math.round(v))}
-        />
-        <SliderControl
-          label="Green"
-          value={g}
-          min={0}
-          max={255}
-          step={1}
-          onChange={setG}
-          formatValue={(v) => String(Math.round(v))}
-        />
-        <SliderControl
-          label="Blue"
-          value={b}
-          min={0}
-          max={255}
-          step={1}
-          onChange={setB}
-          formatValue={(v) => String(Math.round(v))}
-        />
+      {mode === "rgb" ? (
+        <div className="space-y-3">
+          <SliderControl
+            label={<span className="inline-flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded-full border border-border/50" style={{ backgroundColor: "#ef4444" }} />Red</span>}
+            value={r}
+            min={0}
+            max={255}
+            step={1}
+            onChange={setR}
+            formatValue={(v) => String(Math.round(v))}
+          />
+          <SliderControl
+            label={<span className="inline-flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded-full border border-border/50" style={{ backgroundColor: "#22c55e" }} />Green</span>}
+            value={g}
+            min={0}
+            max={255}
+            step={1}
+            onChange={setG}
+            formatValue={(v) => String(Math.round(v))}
+          />
+          <SliderControl
+            label={<span className="inline-flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded-full border border-border/50" style={{ backgroundColor: "#3b82f6" }} />Blue</span>}
+            value={b}
+            min={0}
+            max={255}
+            step={1}
+            onChange={setB}
+            formatValue={(v) => String(Math.round(v))}
+          />
+        </div>
+      ) : (
+        <div className="space-y-3">
+          <SliderControl
+            label={<span className="inline-flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded-full border border-border/50" style={{ backgroundColor: "#06b6d4" }} />Cyan</span>}
+            value={c}
+            min={0}
+            max={255}
+            step={1}
+            onChange={(v) => setFromCmy(Math.round(v), m, y)}
+            formatValue={(v) => String(Math.round(v))}
+          />
+          <SliderControl
+            label={<span className="inline-flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded-full border border-border/50" style={{ backgroundColor: "#ec4899" }} />Magenta</span>}
+            value={m}
+            min={0}
+            max={255}
+            step={1}
+            onChange={(v) => setFromCmy(c, Math.round(v), y)}
+            formatValue={(v) => String(Math.round(v))}
+          />
+          <SliderControl
+            label={<span className="inline-flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded-full border border-border/50" style={{ backgroundColor: "#eab308" }} />Yellow</span>}
+            value={y}
+            min={0}
+            max={255}
+            step={1}
+            onChange={(v) => setFromCmy(c, m, Math.round(v))}
+            formatValue={(v) => String(Math.round(v))}
+          />
+        </div>
+      )}
+      <div className="mt-4 rounded-lg border-l-4 border-accent bg-accent/5 px-4 py-3 text-sm text-muted">
+        <p>
+          You may be more familiar with mixing <strong className="text-foreground">paint</strong> than mixing <strong className="text-foreground">light</strong>. They work differently: mixing red and green paint makes brown, but mixing red and green light makes yellow! Computers typically use light mixing (Red, Green, Blue) because screens emit light. Paint mixing uses Cyan, Magenta, and Yellow — sometimes called &quot;red, yellow, and blue&quot; in art class.
+        </p>
       </div>
     </div>
   );
@@ -661,36 +775,22 @@ function SoundTab() {
   );
 }
 
+const TABS: { id: Tab; label: string }[] = [
+  { id: "text", label: "Text" },
+  { id: "color", label: "Color" },
+  { id: "image", label: "Image" },
+  { id: "sound", label: "Sound" },
+];
+
 export function NumbersEverywhere() {
   const [activeTab, setActiveTab] = useState<Tab>("text");
-
-  const tabs: { id: Tab; label: string }[] = [
-    { id: "text", label: "Text" },
-    { id: "image", label: "Image" },
-    { id: "color", label: "Color" },
-    { id: "sound", label: "Sound" },
-  ];
 
   return (
     <WidgetContainer
       title="Numbers Everywhere"
       description="Everything a computer works with is just numbers"
     >
-      <div className="mb-4 flex gap-1 rounded-lg bg-surface p-1">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-              activeTab === tab.id
-                ? "bg-accent text-white shadow-sm"
-                : "text-muted hover:text-foreground"
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      <WidgetTabs tabs={TABS} activeTab={activeTab} onTabChange={setActiveTab} />
       {activeTab === "text" && <TextTab />}
       {activeTab === "image" && <ImageTab />}
       {activeTab === "color" && <ColorTab />}

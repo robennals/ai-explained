@@ -2,28 +2,31 @@
 
 import { useState, useCallback, useMemo } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
-import { SliderControl } from "../shared/SliderControl";
 
-const NEURON_W = 300;
-const NEURON_H = 180;
 const GRID_SIZE = 280;
 const GRID_CX = GRID_SIZE / 2;
 const GRID_CY = GRID_SIZE / 2;
-const GRID_SCALE = 35;
+const GRID_SCALE = 50;
 const GRID_RANGE = 3;
 
-// Input test points — an L-shape arrangement for visual clarity
-const INPUT_POINTS: [number, number, string][] = [
-  [0.3, 0.3, "#ef4444"],
-  [0.6, 0.3, "#f97316"],
-  [0.9, 0.3, "#eab308"],
-  [1.2, 0.3, "#84cc16"],
-  [0.3, 0.6, "#22c55e"],
-  [0.3, 0.9, "#06b6d4"],
-  [0.3, 1.2, "#3b82f6"],
-  [0.3, 1.5, "#8b5cf6"],
-  [0.6, 0.6, "#a855f7"],
+// Arrow points — same as DimensionProjection for continuity
+const ARROW_POINTS = [
+  { x: -1.0, y: 0.3, label: "A", color: "#ef4444" },
+  { x: 0.3, y: 0.3, label: "B", color: "#f97316" },
+  { x: 0.3, y: 0.8, label: "C", color: "#eab308" },
+  { x: 1.2, y: 0.0, label: "D", color: "#22c55e" },
+  { x: 0.3, y: -0.8, label: "E", color: "#3b82f6" },
+  { x: 0.3, y: -0.3, label: "F", color: "#8b5cf6" },
+  { x: -1.0, y: -0.3, label: "G", color: "#a855f7" },
 ];
+
+// Weight colors matching the neuron diagram and matrix
+const W_COLORS = {
+  a: "#ef4444",
+  b: "#22c55e",
+  c: "#3b82f6",
+  d: "#a855f7",
+};
 
 function gridToSVG(x: number, y: number): [number, number] {
   return [GRID_CX + x * GRID_SCALE, GRID_CY - y * GRID_SCALE];
@@ -32,138 +35,371 @@ function gridToSVG(x: number, y: number): [number, number] {
 function transformPoint(
   x: number,
   y: number,
-  w11: number,
-  w12: number,
-  w21: number,
-  w22: number
+  a: number,
+  b: number,
+  c: number,
+  d: number
 ): [number, number] {
-  return [w11 * x + w12 * y, w21 * x + w22 * y];
+  return [a * x + b * y, c * x + d * y];
 }
 
+const NEURON_W = 340;
+const NEURON_H = 150;
+
 export function NeuronVsMatrix() {
-  const [w11, setW11] = useState(1);
-  const [w12, setW12] = useState(0);
-  const [w21, setW21] = useState(0);
-  const [w22, setW22] = useState(1);
+  const [a, setA] = useState(1);
+  const [b, setB] = useState(0);
+  const [c, setC] = useState(0);
+  const [d, setD] = useState(1);
 
   const handleReset = useCallback(() => {
-    setW11(1);
-    setW12(0);
-    setW21(0);
-    setW22(1);
+    setA(1);
+    setB(0);
+    setC(0);
+    setD(1);
   }, []);
 
-  // Transformed input points
   const transformedPoints = useMemo(
     () =>
-      INPUT_POINTS.map(([x, y, color]) => {
-        const [tx, ty] = transformPoint(x, y, w11, w12, w21, w22);
-        return { x, y, tx, ty, color };
+      ARROW_POINTS.map((p) => {
+        const [tx, ty] = transformPoint(p.x, p.y, a, b, c, d);
+        return { ...p, tx, ty };
       }),
-    [w11, w12, w21, w22]
+    [a, b, c, d]
   );
 
-  // Grid lines for geometric view
   const gridLines = useMemo(() => {
-    const lines: { x1: number; y1: number; x2: number; y2: number; isAxis: boolean }[] = [];
+    const lines: {
+      x1: number;
+      y1: number;
+      x2: number;
+      y2: number;
+      isAxis: boolean;
+    }[] = [];
     for (let i = -GRID_RANGE; i <= GRID_RANGE; i++) {
-      // Vertical
-      const [vx1, vy1] = transformPoint(i, -GRID_RANGE, w11, w12, w21, w22);
-      const [vx2, vy2] = transformPoint(i, GRID_RANGE, w11, w12, w21, w22);
+      const [vx1, vy1] = transformPoint(i, -GRID_RANGE, a, b, c, d);
+      const [vx2, vy2] = transformPoint(i, GRID_RANGE, a, b, c, d);
       const [sx1, sy1] = gridToSVG(vx1, vy1);
       const [sx2, sy2] = gridToSVG(vx2, vy2);
       lines.push({ x1: sx1, y1: sy1, x2: sx2, y2: sy2, isAxis: i === 0 });
 
-      // Horizontal
-      const [hx1, hy1] = transformPoint(-GRID_RANGE, i, w11, w12, w21, w22);
-      const [hx2, hy2] = transformPoint(GRID_RANGE, i, w11, w12, w21, w22);
+      const [hx1, hy1] = transformPoint(-GRID_RANGE, i, a, b, c, d);
+      const [hx2, hy2] = transformPoint(GRID_RANGE, i, a, b, c, d);
       const [shx1, shy1] = gridToSVG(hx1, hy1);
       const [shx2, shy2] = gridToSVG(hx2, hy2);
-      lines.push({ x1: shx1, y1: shy1, x2: shx2, y2: shy2, isAxis: i === 0 });
+      lines.push({
+        x1: shx1,
+        y1: shy1,
+        x2: shx2,
+        y2: shy2,
+        isAxis: i === 0,
+      });
     }
     return lines;
-  }, [w11, w12, w21, w22]);
+  }, [a, b, c, d]);
 
-  // Weight line styling
-  const weightStyle = (w: number) => ({
-    strokeWidth: Math.max(0.5, Math.min(4, Math.abs(w) * 2)),
-    stroke: w >= 0 ? "#3b82f6" : "#ef4444",
-    opacity: Math.max(0.15, Math.min(0.9, Math.abs(w) * 0.6)),
+  const weightLineStyle = (w: number, color: string) => ({
+    strokeWidth: Math.max(1, Math.min(4, Math.abs(w) * 2.5)),
+    stroke: color,
+    opacity: Math.max(0.3, Math.min(0.9, Math.abs(w) * 0.6 + 0.2)),
   });
+
+  const sliderConfigs = [
+    { label: "a", value: a, set: setA, color: W_COLORS.a },
+    { label: "b", value: b, set: setB, color: W_COLORS.b },
+    { label: "c", value: c, set: setC, color: W_COLORS.c },
+    { label: "d", value: d, set: setD, color: W_COLORS.d },
+  ];
 
   return (
     <WidgetContainer
       title="Neurons = Matrix Multiplication"
-      description="The same weights, two views: neural network and geometric transformation"
+      description="The same four numbers, two views: neural network and geometric transformation"
       onReset={handleReset}
     >
-      <div className="flex flex-col gap-4 sm:flex-row">
-        {/* Left: Neuron diagram */}
-        <div className="flex-1">
+      {/* Top row: neuron diagram and matrix side by side */}
+      <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start sm:justify-center">
+        {/* Neuron diagram */}
+        <div className="flex-shrink-0">
           <div className="mb-1 text-center text-xs font-medium text-muted">
             Neuron View
           </div>
-          <svg viewBox={`0 0 ${NEURON_W} ${NEURON_H}`} className="w-full">
+          <svg
+            viewBox={`0 0 ${NEURON_W} ${NEURON_H}`}
+            className="w-full"
+            style={{ maxWidth: 340 }}
+          >
             {/* Input neurons */}
-            <circle cx={55} cy={55} r={20} fill="white" stroke="#6b7280" strokeWidth={1.5} />
-            <text x={55} y={59} textAnchor="middle" fontSize={13} fill="#1a1a2e" fontWeight="600">
-              x&#x2081;
+            <circle
+              cx={60}
+              cy={45}
+              r={22}
+              fill="white"
+              stroke="#6b7280"
+              strokeWidth={1.5}
+            />
+            <text
+              x={60}
+              y={41}
+              textAnchor="middle"
+              fontSize={10}
+              fill="#1a1a2e"
+            >
+              input
             </text>
-            <circle cx={55} cy={125} r={20} fill="white" stroke="#6b7280" strokeWidth={1.5} />
-            <text x={55} y={129} textAnchor="middle" fontSize={13} fill="#1a1a2e" fontWeight="600">
-              x&#x2082;
+            <text
+              x={60}
+              y={53}
+              textAnchor="middle"
+              fontSize={10}
+              fill="#1a1a2e"
+            >
+              1
+            </text>
+
+            <circle
+              cx={60}
+              cy={110}
+              r={22}
+              fill="white"
+              stroke="#6b7280"
+              strokeWidth={1.5}
+            />
+            <text
+              x={60}
+              y={106}
+              textAnchor="middle"
+              fontSize={10}
+              fill="#1a1a2e"
+            >
+              input
+            </text>
+            <text
+              x={60}
+              y={118}
+              textAnchor="middle"
+              fontSize={10}
+              fill="#1a1a2e"
+            >
+              2
             </text>
 
             {/* Output neurons */}
-            <circle cx={245} cy={55} r={20} fill="white" stroke="#6b7280" strokeWidth={1.5} />
-            <text x={245} y={59} textAnchor="middle" fontSize={13} fill="#1a1a2e" fontWeight="600">
-              y&#x2081;
+            <circle
+              cx={280}
+              cy={45}
+              r={22}
+              fill="white"
+              stroke="#6b7280"
+              strokeWidth={1.5}
+            />
+            <text
+              x={280}
+              y={41}
+              textAnchor="middle"
+              fontSize={10}
+              fill="#1a1a2e"
+            >
+              output
             </text>
-            <circle cx={245} cy={125} r={20} fill="white" stroke="#6b7280" strokeWidth={1.5} />
-            <text x={245} y={129} textAnchor="middle" fontSize={13} fill="#1a1a2e" fontWeight="600">
-              y&#x2082;
-            </text>
-
-            {/* Weight connections */}
-            {/* w11: x1 → y1 */}
-            <line x1={75} y1={50} x2={225} y2={50} {...weightStyle(w11)} />
-            <text x={150} y={42} textAnchor="middle" fontSize={10} fill="#6b7280" fontFamily="var(--font-mono)">
-              w&#x2081;&#x2081;={w11.toFixed(1)}
-            </text>
-
-            {/* w12: x2 → y1 */}
-            <line x1={75} y1={120} x2={225} y2={60} {...weightStyle(w12)} />
-            <text x={130} y={82} textAnchor="middle" fontSize={10} fill="#6b7280" fontFamily="var(--font-mono)">
-              w&#x2081;&#x2082;={w12.toFixed(1)}
-            </text>
-
-            {/* w21: x1 → y2 */}
-            <line x1={75} y1={60} x2={225} y2={120} {...weightStyle(w21)} />
-            <text x={170} y={100} textAnchor="middle" fontSize={10} fill="#6b7280" fontFamily="var(--font-mono)">
-              w&#x2082;&#x2081;={w21.toFixed(1)}
-            </text>
-
-            {/* w22: x2 → y2 */}
-            <line x1={75} y1={130} x2={225} y2={130} {...weightStyle(w22)} />
-            <text x={150} y={145} textAnchor="middle" fontSize={10} fill="#6b7280" fontFamily="var(--font-mono)">
-              w&#x2082;&#x2082;={w22.toFixed(1)}
+            <text
+              x={280}
+              y={53}
+              textAnchor="middle"
+              fontSize={10}
+              fill="#1a1a2e"
+            >
+              1
             </text>
 
-            {/* Equations */}
-            <text x={150} y={170} textAnchor="middle" fontSize={9} fill="#9ca3af" fontFamily="var(--font-mono)">
-              y&#x2081; = w&#x2081;&#x2081;x&#x2081; + w&#x2081;&#x2082;x&#x2082;
-              &nbsp;&nbsp;|&nbsp;&nbsp;
-              y&#x2082; = w&#x2082;&#x2081;x&#x2081; + w&#x2082;&#x2082;x&#x2082;
+            <circle
+              cx={280}
+              cy={110}
+              r={22}
+              fill="white"
+              stroke="#6b7280"
+              strokeWidth={1.5}
+            />
+            <text
+              x={280}
+              y={106}
+              textAnchor="middle"
+              fontSize={10}
+              fill="#1a1a2e"
+            >
+              output
+            </text>
+            <text
+              x={280}
+              y={118}
+              textAnchor="middle"
+              fontSize={10}
+              fill="#1a1a2e"
+            >
+              2
+            </text>
+
+            {/* a: input 1 → output 1 */}
+            <line
+              x1={82}
+              y1={40}
+              x2={258}
+              y2={40}
+              {...weightLineStyle(a, W_COLORS.a)}
+            />
+            <text
+              x={170}
+              y={33}
+              textAnchor="middle"
+              fontSize={13}
+              fill={W_COLORS.a}
+              fontWeight="bold"
+            >
+              a={a.toFixed(1)}
+            </text>
+
+            {/* b: input 2 → output 1 */}
+            <line
+              x1={82}
+              y1={105}
+              x2={258}
+              y2={50}
+              {...weightLineStyle(b, W_COLORS.b)}
+            />
+            <text
+              x={138}
+              y={73}
+              textAnchor="middle"
+              fontSize={13}
+              fill={W_COLORS.b}
+              fontWeight="bold"
+            >
+              b={b.toFixed(1)}
+            </text>
+
+            {/* c: input 1 → output 2 */}
+            <line
+              x1={82}
+              y1={50}
+              x2={258}
+              y2={105}
+              {...weightLineStyle(c, W_COLORS.c)}
+            />
+            <text
+              x={202}
+              y={87}
+              textAnchor="middle"
+              fontSize={13}
+              fill={W_COLORS.c}
+              fontWeight="bold"
+            >
+              c={c.toFixed(1)}
+            </text>
+
+            {/* d: input 2 → output 2 */}
+            <line
+              x1={82}
+              y1={115}
+              x2={258}
+              y2={115}
+              {...weightLineStyle(d, W_COLORS.d)}
+            />
+            <text
+              x={170}
+              y={137}
+              textAnchor="middle"
+              fontSize={13}
+              fill={W_COLORS.d}
+              fontWeight="bold"
+            >
+              d={d.toFixed(1)}
             </text>
           </svg>
         </div>
 
-        {/* Right: Geometric view */}
-        <div className="flex-1">
+        {/* Matrix display with matching colors */}
+        <div className="flex flex-col items-center justify-center self-center">
           <div className="mb-1 text-center text-xs font-medium text-muted">
-            Geometric View
+            Matrix View
           </div>
-          <svg viewBox={`0 0 ${GRID_SIZE} ${GRID_SIZE}`} className="w-full">
+          <div className="rounded-lg border border-border bg-surface px-5 py-3 font-mono text-lg">
+            <div className="flex items-center gap-1">
+              <span className="text-xl text-muted">[</span>
+              <span
+                className="w-10 text-center font-bold"
+                style={{ color: W_COLORS.a }}
+              >
+                {a.toFixed(1)}
+              </span>
+              <span
+                className="w-10 text-center font-bold"
+                style={{ color: W_COLORS.b }}
+              >
+                {b.toFixed(1)}
+              </span>
+              <span className="text-xl text-muted">]</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="text-xl text-muted">[</span>
+              <span
+                className="w-10 text-center font-bold"
+                style={{ color: W_COLORS.c }}
+              >
+                {c.toFixed(1)}
+              </span>
+              <span
+                className="w-10 text-center font-bold"
+                style={{ color: W_COLORS.d }}
+              >
+                {d.toFixed(1)}
+              </span>
+              <span className="text-xl text-muted">]</span>
+            </div>
+          </div>
+          <div className="mt-2 text-center text-xs text-muted">
+            Same numbers!
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom row: sliders (left) and geometric view (right) */}
+      <div className="mt-4 flex flex-col gap-4 sm:flex-row">
+        {/* Sliders — vertically stacked */}
+        <div className="flex flex-col gap-2 sm:w-48 sm:shrink-0 sm:self-center">
+          {sliderConfigs.map((s) => (
+            <div key={s.label} className="flex items-center gap-2">
+              <span
+                className="w-4 shrink-0 text-sm font-bold"
+                style={{ color: s.color }}
+              >
+                {s.label}
+              </span>
+              <input
+                type="range"
+                min={-2}
+                max={2}
+                step={0.1}
+                value={s.value}
+                onChange={(e) => s.set(parseFloat(e.target.value))}
+                className="h-1.5 flex-1"
+                style={{ accentColor: s.color }}
+              />
+              <span
+                className="w-8 shrink-0 text-right font-mono text-xs font-bold"
+                style={{ color: s.color }}
+              >
+                {s.value.toFixed(1)}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        {/* Geometric view with arrow */}
+        <div className="flex-1">
+          <svg
+            viewBox={`0 0 ${GRID_SIZE} ${GRID_SIZE}`}
+            className="w-full"
+          >
             <defs>
               <clipPath id="nvm-clip">
                 <rect x={0} y={0} width={GRID_SIZE} height={GRID_SIZE} />
@@ -182,8 +418,22 @@ export function NeuronVsMatrix() {
                 const [vx2, vy2] = gridToSVG(i, GRID_RANGE);
                 return (
                   <g key={i}>
-                    <line x1={hx1} y1={hy1} x2={hx2} y2={hy2} stroke="#6b7280" strokeWidth={i === 0 ? 1.5 : 0.5} />
-                    <line x1={vx1} y1={vy1} x2={vx2} y2={vy2} stroke="#6b7280" strokeWidth={i === 0 ? 1.5 : 0.5} />
+                    <line
+                      x1={hx1}
+                      y1={hy1}
+                      x2={hx2}
+                      y2={hy2}
+                      stroke="#6b7280"
+                      strokeWidth={i === 0 ? 1.5 : 0.5}
+                    />
+                    <line
+                      x1={vx1}
+                      y1={vy1}
+                      x2={vx2}
+                      y2={vy2}
+                      stroke="#6b7280"
+                      strokeWidth={i === 0 ? 1.5 : 0.5}
+                    />
                   </g>
                 );
               })}
@@ -205,37 +455,59 @@ export function NeuronVsMatrix() {
               ))}
             </g>
 
+            {/* Original arrow (faint) */}
+            <polygon
+              points={ARROW_POINTS.map((p) =>
+                gridToSVG(p.x, p.y).join(",")
+              ).join(" ")}
+              fill="rgba(107, 114, 128, 0.08)"
+              stroke="#6b7280"
+              strokeWidth={1}
+              opacity={0.4}
+            />
+
+            {/* Transformed arrow */}
+            <polygon
+              points={transformedPoints
+                .map((p) => gridToSVG(p.tx, p.ty).join(","))
+                .join(" ")}
+              fill="rgba(59, 130, 246, 0.15)"
+              stroke="#3b82f6"
+              strokeWidth={1.5}
+            />
+
             {/* Original points (faint) */}
-            {INPUT_POINTS.map(([x, y, color], i) => {
-              const [sx, sy] = gridToSVG(x, y);
+            {ARROW_POINTS.map((p) => {
+              const [sx, sy] = gridToSVG(p.x, p.y);
               return (
                 <circle
-                  key={`orig-${i}`}
+                  key={`orig-${p.label}`}
                   cx={sx}
                   cy={sy}
-                  r={3.5}
-                  fill={color}
-                  opacity={0.2}
+                  r={4}
+                  fill={p.color}
+                  opacity={0.25}
                 />
               );
             })}
 
-            {/* Transformed points */}
-            {transformedPoints.map((p, i) => {
+            {/* Transformed points with labels */}
+            {transformedPoints.map((p) => {
               const [sx, sy] = gridToSVG(p.tx, p.ty);
               return (
-                <g key={`trans-${i}`}>
-                  {/* Connection line */}
-                  <line
-                    x1={gridToSVG(p.x, p.y)[0]}
-                    y1={gridToSVG(p.x, p.y)[1]}
-                    x2={sx}
-                    y2={sy}
-                    stroke={p.color}
-                    strokeWidth={0.8}
-                    opacity={0.25}
-                  />
-                  <circle cx={sx} cy={sy} r={4.5} fill={p.color} />
+                <g key={`trans-${p.label}`}>
+                  <circle cx={sx} cy={sy} r={6} fill={p.color} />
+                  <text
+                    x={sx}
+                    y={sy + 1}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    fontSize={8}
+                    fontWeight="bold"
+                    fill="white"
+                  >
+                    {p.label}
+                  </text>
                 </g>
               );
             })}
@@ -243,73 +515,11 @@ export function NeuronVsMatrix() {
         </div>
       </div>
 
-      {/* Matrix display */}
-      <div className="my-3 flex justify-center">
-        <div className="rounded-lg border border-border bg-surface px-4 py-2 font-mono text-sm">
-          <div className="flex items-center gap-3">
-            <div>
-              <div className="flex gap-2">
-                <span className="text-muted">[</span>
-                <span className="w-10 text-center font-semibold">{w11.toFixed(1)}</span>
-                <span className="w-10 text-center font-semibold">{w12.toFixed(1)}</span>
-                <span className="text-muted">]</span>
-              </div>
-              <div className="flex gap-2">
-                <span className="text-muted">[</span>
-                <span className="w-10 text-center font-semibold">{w21.toFixed(1)}</span>
-                <span className="w-10 text-center font-semibold">{w22.toFixed(1)}</span>
-                <span className="text-muted">]</span>
-              </div>
-            </div>
-            <span className="text-muted">=</span>
-            <div className="text-xs text-muted">Weight matrix</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Weight sliders */}
-      <div className="grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2">
-        <SliderControl
-          label="w\u2081\u2081 (x\u2081\u2192y\u2081)"
-          value={w11}
-          min={-2}
-          max={2}
-          step={0.1}
-          onChange={setW11}
-          formatValue={(v) => v.toFixed(1)}
-        />
-        <SliderControl
-          label="w\u2081\u2082 (x\u2082\u2192y\u2081)"
-          value={w12}
-          min={-2}
-          max={2}
-          step={0.1}
-          onChange={setW12}
-          formatValue={(v) => v.toFixed(1)}
-        />
-        <SliderControl
-          label="w\u2082\u2081 (x\u2081\u2192y\u2082)"
-          value={w21}
-          min={-2}
-          max={2}
-          step={0.1}
-          onChange={setW21}
-          formatValue={(v) => v.toFixed(1)}
-        />
-        <SliderControl
-          label="w\u2082\u2082 (x\u2082\u2192y\u2082)"
-          value={w22}
-          min={-2}
-          max={2}
-          step={0.1}
-          onChange={setW22}
-          formatValue={(v) => v.toFixed(1)}
-        />
-      </div>
-
       {/* Preset configurations */}
       <div className="mt-4 flex flex-wrap gap-2">
-        <span className="self-center text-xs font-medium text-muted">Try:</span>
+        <span className="self-center text-xs font-medium text-muted">
+          Try:
+        </span>
         {[
           { label: "Identity", w: [1, 0, 0, 1] as const },
           { label: "Rotate 90\u00b0", w: [0, -1, 1, 0] as const },
@@ -320,10 +530,10 @@ export function NeuronVsMatrix() {
           <button
             key={preset.label}
             onClick={() => {
-              setW11(preset.w[0]);
-              setW12(preset.w[1]);
-              setW21(preset.w[2]);
-              setW22(preset.w[3]);
+              setA(preset.w[0]);
+              setB(preset.w[1]);
+              setC(preset.w[2]);
+              setD(preset.w[3]);
             }}
             className="rounded-md border border-border px-2.5 py-1.5 text-xs font-medium text-muted transition-colors hover:bg-surface hover:text-foreground"
           >

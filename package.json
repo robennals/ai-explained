@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint && bash scripts/lint-mdx-no-raw-p.sh"
+    "lint": "eslint && bash scripts/lint-mdx-no-raw-p.sh",
+    "sync-r2": "bash scripts/sync-r2.sh",
+    "sync-r2:apply": "bash scripts/sync-r2.sh --apply",
+    "test:notebooks": "jupyter nbconvert --to notebook --execute --ExecutePreprocessor.timeout=300 notebooks/*.ipynb --output-dir /tmp/notebook-test-output"
   },
   "dependencies": {
     "@mdx-js/loader": "^3.1.1",

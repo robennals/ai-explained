@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test";
 test.describe("Homepage", () => {
   test("renders title and chapter list", async ({ page }) => {
     await page.goto("/");
-    await expect(page.locator("h1")).toContainText("AI Explained");
+    await expect(page.locator("h1")).toContainText("Learn AI by Messing About");
     await expect(
       page.getByText("An interactive guide to understanding AI")
     ).toBeVisible();
@@ -17,7 +17,7 @@ test.describe("Homepage", () => {
     await page.goto("/");
     const startButton = page.getByRole("link", { name: "Start Learning" });
     await expect(startButton).toBeVisible();
-    await expect(startButton).toHaveAttribute("href", "/01-computation");
+    await expect(startButton).toHaveAttribute("href", "/computation");
   });
 
   test("chapter cards link to correct pages", async ({ page }) => {
@@ -25,6 +25,6 @@ test.describe("Homepage", () => {
     const firstChapter = page.getByRole("link", {
       name: /What Is Computation/,
     });
-    await expect(firstChapter).toHaveAttribute("href", "/01-computation");
+    await expect(firstChapter).toHaveAttribute("href", "/computation");
   });
 });

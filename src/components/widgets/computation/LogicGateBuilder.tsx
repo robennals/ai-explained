@@ -16,7 +16,7 @@ const GATE_FN: Record<GateType, (a: number, b: number) => number> = {
   NAND: (a, b) => (a && b ? 0 : 1),
   AND: (a, b) => (a && b ? 1 : 0),
   OR: (a, b) => (a || b ? 1 : 0),
-  NOT: (a, _b) => (a ? 0 : 1),
+  NOT: (a) => (a ? 0 : 1),
   XOR: (a, b) => (a !== b ? 1 : 0),
 };
 

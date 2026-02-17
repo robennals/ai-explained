@@ -1,0 +1,4 @@
+# This directory is for large downloaded files (model weights, embeddings, datasets).
+# Nothing here should be committed to git — scripts download what they need on demand.
+*
+!.gitignore

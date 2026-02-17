@@ -1,6 +1,18 @@
 "use client";
 
-import { useState, useCallback, type ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
+
+interface TryItValue {
+  content: ReactNode;
+  label: string;
+}
+
+const TryItContext = createContext<TryItValue | null>(null);
+
+export function TryItProvider({ content, label = "Try it", children }: { content: ReactNode; label?: string; children: ReactNode }) {
+  const value = content ? { content, label } : null;
+  return <TryItContext.Provider value={value}>{children}</TryItContext.Provider>;
+}
 
 interface WidgetContainerProps {
   title: string;
@@ -16,6 +28,7 @@ export function WidgetContainer({
   onReset,
 }: WidgetContainerProps) {
   const [hasError, setHasError] = useState(false);
+  const tryIt = useContext(TryItContext);
 
   const handleReset = useCallback(() => {
     setHasError(false);
@@ -61,6 +74,16 @@ export function WidgetContainer({
         )}
       </div>
       <div className="p-5">{children}</div>
+      {tryIt && (
+        <div className="border-t border-widget-border bg-success/5 px-5 py-4">
+          <p className="mb-1 text-xs font-bold uppercase tracking-widest text-success">
+            {tryIt.label}
+          </p>
+          <div className="text-sm leading-relaxed text-foreground/80 [&>p]:my-1">
+            {tryIt.content}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
