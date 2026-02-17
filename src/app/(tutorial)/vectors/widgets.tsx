@@ -52,13 +52,6 @@ const AnimalDirectionMagnitude = dynamic(
   { ssr: false }
 );
 
-const DotProductExplorer = dynamic(
-  () =>
-    import("@/components/widgets/vectors/DotProductExplorer").then(
-      (m) => m.DotProductExplorer
-    ),
-  { ssr: false }
-);
 
 const DotProductAnalogies = dynamic(
   () =>
@@ -141,13 +134,6 @@ export function AnimalDirectionMagnitudeWidget({ children }: { children?: React.
   );
 }
 
-export function DotProductExplorerWidget({ children }: { children?: React.ReactNode }) {
-  return (
-    <WidgetSlot tryIt={children}>
-      <DotProductExplorer />
-    </WidgetSlot>
-  );
-}
 
 export function DotProductAnalogiesWidget({ children }: { children?: React.ReactNode }) {
   return (

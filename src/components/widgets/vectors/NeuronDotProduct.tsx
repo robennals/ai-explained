@@ -7,7 +7,8 @@ import { SliderControl } from "../shared/SliderControl";
 const SVG_SIZE = 300;
 const CX = SVG_SIZE / 2;
 const CY = SVG_SIZE / 2;
-const SCALE = 90;
+const MAX_VAL = 5;
+const SCALE = (SVG_SIZE / 2 - 20) / MAX_VAL; // pixels per unit
 
 function sigmoid(x: number): number {
   return 1 / (1 + Math.exp(-x));
@@ -73,18 +74,18 @@ function fromSvg(sx: number, sy: number, rect: DOMRect): [number, number] {
 }
 
 export function NeuronDotProduct() {
-  const [w1, setW1] = useState(0.8);
-  const [w2, setW2] = useState(0.6);
-  const [x1, setX1] = useState(0.9);
-  const [x2, setX2] = useState(0.4);
-  const [bias, setBias] = useState(-0.5);
+  const [w1, setW1] = useState(2.5);
+  const [w2, setW2] = useState(1.8);
+  const [x1, setX1] = useState(2.0);
+  const [x2, setX2] = useState(1.0);
+  const [bias, setBias] = useState(-1.0);
   const svgRef = useRef<SVGSVGElement>(null);
   const dragTarget = useRef<"w" | "x" | null>(null);
 
   const handleReset = useCallback(() => {
-    setW1(0.8); setW2(0.6);
-    setX1(0.9); setX2(0.4);
-    setBias(-0.5);
+    setW1(2.5); setW2(1.8);
+    setX1(2.0); setX2(1.0);
+    setBias(-1.0);
   }, []);
 
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
@@ -97,7 +98,7 @@ export function NeuronDotProduct() {
     dragTarget.current = dW < dX ? "w" : "x";
     (e.target as Element).setPointerCapture(e.pointerId);
     // Apply immediately
-    const clamp = (v: number) => Math.max(-1.5, Math.min(1.5, v));
+    const clamp = (v: number) => Math.max(-MAX_VAL, Math.min(MAX_VAL, v));
     if (dragTarget.current === "w") {
       setW1(clamp(wx)); setW2(clamp(wy));
     } else {
@@ -110,7 +111,7 @@ export function NeuronDotProduct() {
     const svg = svgRef.current!;
     const rect = svg.getBoundingClientRect();
     const [wx, wy] = fromSvg(e.clientX, e.clientY, rect);
-    const clamp = (v: number) => Math.max(-1.5, Math.min(1.5, v));
+    const clamp = (v: number) => Math.max(-MAX_VAL, Math.min(MAX_VAL, v));
     if (dragTarget.current === "w") {
       setW1(clamp(wx)); setW2(clamp(wy));
     } else {
@@ -276,14 +277,12 @@ export function NeuronDotProduct() {
           onPointerUp={handlePointerUp}
         >
           {/* Grid */}
-          {[-1, 0, 1].map((t) => (
+          {Array.from({ length: MAX_VAL * 2 + 1 }, (_, i) => i - MAX_VAL).map((t) => (
             <g key={t}>
-              <line x1={CX + t * SCALE} y1={0} x2={CX + t * SCALE} y2={SVG_SIZE} stroke="currentColor" strokeOpacity={0.05} />
-              <line x1={0} y1={CY - t * SCALE} x2={SVG_SIZE} y2={CY - t * SCALE} stroke="currentColor" strokeOpacity={0.05} />
+              <line x1={CX + t * SCALE} y1={0} x2={CX + t * SCALE} y2={SVG_SIZE} stroke="currentColor" strokeOpacity={t === 0 ? 0.12 : 0.05} />
+              <line x1={0} y1={CY - t * SCALE} x2={SVG_SIZE} y2={CY - t * SCALE} stroke="currentColor" strokeOpacity={t === 0 ? 0.12 : 0.05} />
             </g>
           ))}
-          <line x1={0} y1={CY} x2={SVG_SIZE} y2={CY} stroke="currentColor" strokeOpacity={0.12} />
-          <line x1={CX} y1={0} x2={CX} y2={SVG_SIZE} stroke="currentColor" strokeOpacity={0.12} />
 
           {/* Angle arc */}
           {magW > 0.05 && magX > 0.05 && (() => {
@@ -384,7 +383,16 @@ export function NeuronDotProduct() {
         <div className="min-w-[170px] space-y-4">
           <div className="space-y-2">
             <div className="text-[10px] font-bold uppercase tracking-widest text-muted">Bias</div>
-            <SliderControl label="bias" value={bias} min={-3} max={3} step={0.1} onChange={setBias} />
+            <SliderControl label="bias" value={bias} min={-10} max={10} step={0.1} onChange={setBias} />
+          </div>
+          <div className="rounded-lg bg-foreground/[0.03] p-3 space-y-1" style={{ fontVariantNumeric: "tabular-nums" }}>
+            <div className="text-[10px] font-bold uppercase tracking-widest text-muted">Vectors</div>
+            <div className="font-mono text-xs">
+              <span className="text-amber-500">w</span> = ({fmt(w1)}, {fmt(w2)})
+            </div>
+            <div className="font-mono text-xs">
+              <span className="text-blue-500">x</span> = ({fmt(x1)}, {fmt(x2)})
+            </div>
           </div>
           <div className="rounded-lg bg-foreground/[0.03] p-3 space-y-1.5" style={{ fontVariantNumeric: "tabular-nums" }}>
             <div className="text-[10px] font-bold uppercase tracking-widest text-muted">Computation</div>

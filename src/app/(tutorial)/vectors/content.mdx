@@ -86,10 +86,6 @@ Remarkably, there's a completely different way to compute the dot product that g
 
 This always gives the same answer as the geometric formula. The geometry gives you the intuition; the computation is just multiply-and-add.
 
-<DotProductExplorerWidget>
-Drag the arrow tips. In Component view, watch the individual products and their sum. Switch to Projection view to see the angle and the projection of one vector onto the other. Both views always show the same number.
-</DotProductExplorerWidget>
-
 <KeyInsight>
 **The dot product measures alignment.** Same direction → large positive. Perpendicular → zero. Opposite → large negative. This single operation is the foundation of how neural networks process information.
 </KeyInsight>
@@ -107,8 +103,8 @@ where **w** = (w₁, w₂, …, wₙ) is the weight vector and **x** = (x₁, x�
 The neuron is asking **"how much does this input point in the direction of what I'm looking for?"**. 
 
 * **The direction** of the weight vector determines what the neuron is looking for. 
-* **The magnitude** of the weight vector determines how much the neuron needs to see in order to get excited. 
-* **The bias** determines how excited it is it hasn't seen anything at all.  
+* **The magnitude** of the weight vector determines how much of what it's looking for the neuron needs to see in order to get excited. 
+* **The bias** determines how excited it is if it hasn't seen anything at all.  
 
 This is all a bit brain bending, but makes more sense if you play with it.
 

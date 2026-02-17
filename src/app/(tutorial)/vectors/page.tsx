@@ -9,7 +9,6 @@ import {
   Vector3DExplorerWidget,
   AnimalDirectionMagnitudeWidget,
   DotProductAnalogiesWidget,
-  DotProductExplorerWidget,
   NeuronDotProductWidget,
 } from "./widgets";
 
@@ -34,7 +33,6 @@ export default function ChapterVectors() {
             Vector3DExplorerWidget,
             AnimalDirectionMagnitudeWidget,
             DotProductAnalogiesWidget,
-            DotProductExplorerWidget,
             NeuronDotProductWidget,
           }}
         />
