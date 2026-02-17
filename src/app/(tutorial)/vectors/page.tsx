@@ -11,15 +11,12 @@ import {
   DotProductAnalogiesWidget,
   DotProductExplorerWidget,
   NeuronDotProductWidget,
-  DecisionBoundaryExplorerWidget,
-  XORBreakthroughWidget,
-  LinearCollapseDemoWidget,
 } from "./widgets";
 
 export const metadata = {
   title: "Vectors — Learn AI by Messing About",
   description:
-    "A vector is just a list of numbers — but lists of numbers can describe position, color, animals, and anything else. See neurons as vector operations and discover why activation functions make depth meaningful.",
+    "A vector is just a list of numbers — but lists of numbers can describe position, color, animals, and anything else. See how the dot product measures alignment and how neurons use it to detect directions.",
 };
 
 export default function ChapterVectors() {
@@ -39,9 +36,6 @@ export default function ChapterVectors() {
             DotProductAnalogiesWidget,
             DotProductExplorerWidget,
             NeuronDotProductWidget,
-            DecisionBoundaryExplorerWidget,
-            XORBreakthroughWidget,
-            LinearCollapseDemoWidget,
           }}
         />
       </div>

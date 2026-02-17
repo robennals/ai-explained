@@ -64,6 +64,7 @@ const SCENARIOS: Scenario[] = [
       return raw.map(a => { const m = Math.sqrt(a.x*a.x+a.y*a.y); return { ...a, x: a.x/m, y: a.y/m }; });
     })(),
     explain: (_det, _inp, _dot, proj) => {
+      if (proj > 0.99) return "Identical — these animals are alike.";
       if (proj > 0.95) return "Almost identical — these animals are very alike.";
       if (proj > 0.8) return "Very similar animals.";
       if (proj > 0.5) return "Somewhat similar — they share some traits.";

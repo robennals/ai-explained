@@ -29,6 +29,8 @@ interface ExampleItem {
   name: string;
   plural?: string;
   emoji: string;
+  /** CSS color for swatch-based items (used instead of emoji when set) */
+  color?: string;
   x: number;
   y: number;
 }
@@ -45,6 +47,31 @@ function brightnessName(count: number): string {
   return "very bright";
 }
 
+
+/** Inline SVG arrow pointing in the given direction (unit vector). */
+function DirectionArrow({ x, y, size = 18, className }: { x: number; y: number; size?: number; className?: string }) {
+  const len = Math.sqrt(x * x + y * y);
+  const ux = len > 0 ? x / len : 0;
+  const uy = len > 0 ? y / len : 0;
+  const c = size / 2;
+  const r = size / 2 - 1.5; // shaft length from center
+  const tailX = c - ux * r * 0.55;
+  const tailY = c + uy * r * 0.55;
+  const tipX = c + ux * r;
+  const tipY = c - uy * r; // SVG y is flipped
+  const headLen = 5.5;
+  const angle = Math.atan2(tipY - tailY, tipX - tailX);
+  const h1x = tipX - headLen * Math.cos(angle - 0.55);
+  const h1y = tipY - headLen * Math.sin(angle - 0.55);
+  const h2x = tipX - headLen * Math.cos(angle + 0.55);
+  const h2y = tipY - headLen * Math.sin(angle + 0.55);
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className={className}>
+      <line x1={tailX} y1={tailY} x2={tipX} y2={tipY} stroke="currentColor" strokeWidth={2} strokeLinecap="round" />
+      <polyline points={`${h1x},${h1y} ${tipX},${tipY} ${h2x},${h2y}`} fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
 const EXAMPLES: Example[] = [
   {
@@ -64,11 +91,14 @@ const EXAMPLES: Example[] = [
       return `${v < 1 ? v.toFixed(1) : v} mph ${item.name.toLowerCase()}`;
     },
     items: [
-      { name: "North-East", emoji: "↗️", x: 0.70, y: 0.70 },
-      { name: "East", emoji: "➡️", x: 1.00, y: 0.00 },
-      { name: "North", emoji: "⬆️", x: 0.00, y: 1.00 },
-      { name: "North-West", emoji: "↖️", x: -0.70, y: 0.70 },
-      { name: "South-East", emoji: "↘️", x: 0.70, y: -0.70 },
+      { name: "North", emoji: "", x: 0.00, y: 1.00 },
+      { name: "NE", emoji: "", x: 0.707, y: 0.707 },
+      { name: "East", emoji: "", x: 1.00, y: 0.00 },
+      { name: "SE", emoji: "", x: 0.707, y: -0.707 },
+      { name: "South", emoji: "", x: 0.00, y: -1.00 },
+      { name: "SW", emoji: "", x: -0.707, y: -0.707 },
+      { name: "West", emoji: "", x: -1.00, y: 0.00 },
+      { name: "NW", emoji: "", x: -0.707, y: 0.707 },
     ],
   },
   {
@@ -84,11 +114,11 @@ const EXAMPLES: Example[] = [
     formatMagnitude: (count) => brightnessName(count),
     vectorLabel: (count, item) => `${brightnessName(count)} ${item.name.toLowerCase()}`,
     items: [
-      { name: "Red", emoji: "🔴", x: 0.98, y: 0.05 },
-      { name: "Blue", emoji: "🔵", x: 0.05, y: 0.98 },
-      { name: "Purple", emoji: "🟣", x: 0.60, y: 0.80 },
-      { name: "Magenta", emoji: "🩷", x: 0.85, y: 0.50 },
-      { name: "Indigo", emoji: "💙", x: 0.30, y: 0.90 },
+      { name: "Red", emoji: "", color: "#ef4444", x: 1.00, y: 0.00 },
+      { name: "Blue", emoji: "", color: "#3b82f6", x: 0.00, y: 1.00 },
+      { name: "Purple", emoji: "", color: "#8b5cf6", x: 0.60, y: 0.80 },
+      { name: "Magenta", emoji: "", color: "#ec4899", x: 0.85, y: 0.50 },
+      { name: "Indigo", emoji: "", color: "#6366f1", x: 0.30, y: 0.90 },
     ],
   },
 ];
@@ -221,11 +251,23 @@ export function AnimalDirectionMagnitude() {
                 : "bg-foreground/5 text-foreground hover:bg-foreground/10"
             }`}
           >
-            <span>{it.emoji}</span>
+            {example.id === "velocity" ? (
+              <DirectionArrow x={it.x} y={it.y} size={14} />
+            ) : it.color ? (
+              <span className="inline-block h-3 w-3 rounded-sm border border-foreground/10" style={{ backgroundColor: it.color }} />
+            ) : (
+              <span>{it.emoji}</span>
+            )}
             <span>{it.name}</span>
           </button>
         ))}
       </div>
+
+      {example.id === "color" && (
+        <div className="mb-3 text-[11px] text-muted">
+          Real color has three dimensions (red, green, blue), but we show only two here because 2D is easier to visualize.
+        </div>
+      )}
 
       {/* How many slider */}
       <div className="mb-4">
@@ -237,7 +279,9 @@ export function AnimalDirectionMagnitude() {
           step={0.01}
           onChange={setRawCount}
           onCommit={() => animateSnap(rawCount, count)}
-          formatValue={() => count < 1 ? count.toFixed(1) : String(Math.round(count * 10) / 10)}
+          formatValue={() => example.id === "color"
+            ? brightnessName(count)
+            : count < 1 ? count.toFixed(1) : String(Math.round(count * 10) / 10)}
           ticks={example.sliderStep >= 1
             ? Array.from({ length: Math.floor(sliderMax) }, (_, i) => i + 1)
             : undefined}
@@ -302,18 +346,15 @@ export function AnimalDirectionMagnitude() {
           />
         )}
 
-        {/* Ghost dots for non-selected items on the unit arc */}
-        {example.items.map((it, i) => {
+        {/* Ghost dots for non-selected items on the unit arc (color only) */}
+        {example.id !== "velocity" && example.items.map((it, i) => {
           if (i === selectedItem) return null;
           const len = Math.sqrt(it.x * it.x + it.y * it.y);
           const ux = len > 0 ? it.x / len : 0;
           const uy = len > 0 ? it.y / len : 0;
           return (
-            <g key={it.name} opacity={0.25}>
-              <circle cx={toSvgX(ux)} cy={toSvgY(uy)} r={3} fill="currentColor" />
-              <text x={toSvgX(ux)} y={toSvgY(uy) - 8} textAnchor="middle" fontSize={12}>
-                {it.emoji}
-              </text>
+            <g key={it.name} opacity={0.35}>
+              <circle cx={toSvgX(ux)} cy={toSvgY(uy)} r={4} fill={it.color ?? "currentColor"} stroke="white" strokeWidth={0.5} />
             </g>
           );
         })}
@@ -376,10 +417,15 @@ export function AnimalDirectionMagnitude() {
         })()}
 
         {/* Selected item dot on unit circle */}
-        <circle cx={toSvgX(unitX)} cy={toSvgY(unitY)} r={5} fill="var(--color-accent)" />
-        <text x={toSvgX(unitX)} y={toSvgY(unitY) - 10} textAnchor="middle" fontSize={16}>
-          {item.emoji}
-        </text>
+        <circle cx={toSvgX(unitX)} cy={toSvgY(unitY)} r={5} fill={item.color ?? "var(--color-accent)"} />
+        {item.color && (
+          <circle cx={toSvgX(unitX)} cy={toSvgY(unitY)} r={5} fill={item.color} stroke="white" strokeWidth={1} />
+        )}
+        {item.emoji && (
+          <text x={toSvgX(unitX)} y={toSvgY(unitY) - 10} textAnchor="middle" fontSize={16}>
+            {item.emoji}
+          </text>
+        )}
 
         {/* "direction" label near unit vector tip */}
         <text

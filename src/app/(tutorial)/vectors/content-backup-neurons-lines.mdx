@@ -1,0 +1,49 @@
+{/* Backup of sections removed from vectors chapter — "A Neuron Draws a Line", "Two Lines Solve XOR", "Why Activation Functions Matter" — to be covered in a later chapter. */}
+
+## A Neuron Draws a Line
+
+If a neuron fires when its input aligns with its weights, what does that look like geometrically?
+
+Plot every possible input as a point in 2D space. The neuron's weighted sum — w₁ × x₁ + w₂ × x₂ + bias — defines a straight line through this space. On one side of the line, the output is close to 1. On the other side, close to 0. The line itself is the **decision boundary** — where the neuron is exactly 50/50.
+
+<DecisionBoundaryExplorerWidget>
+Click AND to see how the weight vector and bias draw a line that isolates the (1,1) corner. Click OR to see the line shift. Drag the weight vector or adjust the bias to see how they move the boundary. The blue input vector shows the output at any position — notice it always matches the heatmap. Now try XOR: no matter how you move the line, you can't get all four corners right.
+</DecisionBoundaryExplorerWidget>
+
+This is called **linear separability**: a problem is linearly separable if you can solve it with a single straight line (or, in higher dimensions, a flat surface). AND and OR are linearly separable. XOR is not — the "true" corners sit on opposite diagonals, and no single straight line can separate them from the "false" corners.
+
+## Two Lines Solve XOR
+
+If one neuron draws one line, what happens with *two* neurons? Two lines. And two lines can carve out regions that one line never could.
+
+Each hidden neuron transforms the input into its own coordinate. In this new space, points that were on opposite corners get moved to the same side — what was inseparable becomes separable.
+
+<XORBreakthroughWidget>
+Switch from 1 layer to 2 layers. Watch the right panel — it shows what the hidden layer "sees." The four input points have been *moved*: in this new space, the two XOR-true cases are on one side and the two XOR-false cases are on the other. The hidden layer transformed an impossible problem into an easy one.
+</XORBreakthroughWidget>
+
+This is the fundamental insight about depth: **each layer transforms the data into a new representation where the next layer's job is easier.** The hidden layer doesn't solve the problem directly — it reshapes it into a problem that a single line *can* solve.
+
+<KeyInsight>
+**Depth transforms problems.** A single neuron draws one line. A hidden layer transforms the entire input space — stretching, folding, rearranging — so that what was inseparable becomes separable. Each layer makes the next layer's job easier.
+</KeyInsight>
+
+## Why Activation Functions Matter
+
+If adding layers is so powerful, why not just stack a hundred? There's a catch — and it's the most important idea in this chapter.
+
+Without the activation function, a neuron is just: output = w₁ × x₁ + w₂ × x₂ + bias. That's a **linear** function — just multiplication and addition. And here's the thing: **a linear function of a linear function is still a linear function.**
+
+Layer 1 multiplies and adds. Layer 2 multiplies and adds again. But the whole thing simplifies to one multiplication and one addition. You could collapse a hundred layers into a single layer with different numbers. No matter how deep you go, you're still drawing one straight line.
+
+It's like multiplying a number by 3, then by 5, then by 2. You could have just multiplied by 30.
+
+The activation function *breaks* this. Because it bends the curve — it's not a straight line — two layers with activation are genuinely more powerful than one. This nonlinearity is what makes depth meaningful.
+
+<LinearCollapseDemoWidget>
+Turn off the activation function and set depth to 5 layers. Hit Train. No matter how long it runs, the boundary stays a straight line — five layers of nothing is still nothing. Now turn activation back on, keep 5 layers, hit Train. Watch the boundary bend and curve around the data. The activation function is the entire reason depth works.
+</LinearCollapseDemoWidget>
+
+<KeyInsight>
+**Without activation functions, depth is an illusion.** A stack of linear layers always collapses to a single linear layer — the decision boundary is a straight line no matter how deep you go. The nonlinear activation is what makes each layer genuinely add to the network's expressive power.
+</KeyInsight>

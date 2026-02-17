@@ -76,30 +76,6 @@ const NeuronDotProduct = dynamic(
   { ssr: false }
 );
 
-// Reused from neurons chapter
-const DecisionBoundaryExplorer = dynamic(
-  () =>
-    import("@/components/widgets/neurons/DecisionBoundaryExplorer").then(
-      (m) => m.DecisionBoundaryExplorer
-    ),
-  { ssr: false }
-);
-
-const XORBreakthrough = dynamic(
-  () =>
-    import("@/components/widgets/neurons/XORBreakthrough").then(
-      (m) => m.XORBreakthrough
-    ),
-  { ssr: false }
-);
-
-const LinearCollapseDemo = dynamic(
-  () =>
-    import("@/components/widgets/neurons/LinearCollapseDemo").then(
-      (m) => m.LinearCollapseDemo
-    ),
-  { ssr: false }
-);
 
 function WidgetSlot({ children, tryIt, label }: { children: React.ReactNode; tryIt?: React.ReactNode; label?: string }) {
   return (
@@ -189,26 +165,3 @@ export function NeuronDotProductWidget({ children }: { children?: React.ReactNod
   );
 }
 
-export function DecisionBoundaryExplorerWidget({ children }: { children?: React.ReactNode }) {
-  return (
-    <WidgetSlot tryIt={children}>
-      <DecisionBoundaryExplorer />
-    </WidgetSlot>
-  );
-}
-
-export function XORBreakthroughWidget({ children }: { children?: React.ReactNode }) {
-  return (
-    <WidgetSlot tryIt={children}>
-      <XORBreakthrough />
-    </WidgetSlot>
-  );
-}
-
-export function LinearCollapseDemoWidget({ children }: { children?: React.ReactNode }) {
-  return (
-    <WidgetSlot tryIt={children}>
-      <LinearCollapseDemo />
-    </WidgetSlot>
-  );
-}
