@@ -12,6 +12,22 @@ const OptimizationGame = dynamic(
   { ssr: false }
 );
 
+const ErrorMeasurement = dynamic(
+  () =>
+    import("@/components/widgets/optimization/ErrorMeasurement").then(
+      (m) => m.ErrorMeasurement
+    ),
+  { ssr: false }
+);
+
+const SmoothRealWorld = dynamic(
+  () =>
+    import("@/components/widgets/optimization/SmoothRealWorld").then(
+      (m) => m.SmoothRealWorld
+    ),
+  { ssr: false }
+);
+
 const SmoothVsRugged = dynamic(
   () =>
     import("@/components/widgets/optimization/SmoothVsRugged").then(
@@ -20,18 +36,26 @@ const SmoothVsRugged = dynamic(
   { ssr: false }
 );
 
-const ModelComparison = dynamic(
+const GradientRealWorld = dynamic(
   () =>
-    import("@/components/widgets/optimization/ModelComparison").then(
-      (m) => m.ModelComparison
+    import("@/components/widgets/optimization/GradientRealWorld").then(
+      (m) => m.GradientRealWorld
     ),
   { ssr: false }
 );
 
-const GradientVisualization = dynamic(
+const Gradient2DCurve = dynamic(
   () =>
-    import("@/components/widgets/optimization/GradientVisualization").then(
-      (m) => m.GradientVisualization
+    import("@/components/widgets/optimization/Gradient2DCurve").then(
+      (m) => m.Gradient2DCurve
+    ),
+  { ssr: false }
+);
+
+const Gradient3DSurface = dynamic(
+  () =>
+    import("@/components/widgets/optimization/Gradient3DSurface").then(
+      (m) => m.Gradient3DSurface
     ),
   { ssr: false }
 );
@@ -60,6 +84,22 @@ export function OptimizationGameWidget({ children }: { children?: React.ReactNod
   );
 }
 
+export function ErrorMeasurementWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <ErrorMeasurement />
+    </WidgetSlot>
+  );
+}
+
+export function SmoothRealWorldWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <SmoothRealWorld />
+    </WidgetSlot>
+  );
+}
+
 export function SmoothVsRuggedWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children}>
@@ -68,18 +108,26 @@ export function SmoothVsRuggedWidget({ children }: { children?: React.ReactNode 
   );
 }
 
-export function ModelComparisonWidget({ children }: { children?: React.ReactNode }) {
+export function GradientRealWorldWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children}>
-      <ModelComparison />
+      <GradientRealWorld />
     </WidgetSlot>
   );
 }
 
-export function GradientVisualizationWidget({ children }: { children?: React.ReactNode }) {
+export function Gradient2DCurveWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children}>
-      <GradientVisualization />
+      <Gradient2DCurve />
+    </WidgetSlot>
+  );
+}
+
+export function Gradient3DSurfaceWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <Gradient3DSurface />
     </WidgetSlot>
   );
 }

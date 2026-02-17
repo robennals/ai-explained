@@ -7,6 +7,10 @@ function sigmoid(x: number): number {
   return 1 / (1 + Math.exp(-x));
 }
 
+function isApproxSigmoid(v: number): boolean {
+  return (v > 0 && v < 0.005) || (v > 0.995 && v < 1);
+}
+
 function outputColor(v: number): string {
   if (v <= 0.5) {
     const t = v / 0.5;
@@ -319,6 +323,16 @@ export function TwoNeuronXOR() {
                 >
                   {n.val.toFixed(2)}
                 </text>
+                {isApproxSigmoid(n.val) && (
+                  <text
+                    x={HID_X}
+                    y={n.y + 17}
+                    textAnchor="middle"
+                    className="fill-white/70 text-[7px] pointer-events-none select-none"
+                  >
+                    approx
+                  </text>
+                )}
               </g>
             ))}
 
@@ -351,6 +365,16 @@ export function TwoNeuronXOR() {
               >
                 {finalOut.toFixed(2)}
               </text>
+              {isApproxSigmoid(finalOut) && (
+                <text
+                  x={OUT_X}
+                  y={OUT_Y + 17}
+                  textAnchor="middle"
+                  className="fill-white/70 text-[7px] pointer-events-none select-none"
+                >
+                  approx
+                </text>
+              )}
             </g>
 
             {/* Layer labels */}
@@ -436,28 +460,43 @@ export function TwoNeuronXOR() {
                       <td className="px-1.5 py-1.5 font-mono">{row.a}</td>
                       <td className="px-1.5 py-1.5 font-mono">{row.b}</td>
                       <td className="px-1.5 py-1.5">
-                        <span
-                          className="inline-flex h-5 min-w-[2rem] items-center justify-center rounded text-[10px] font-bold text-white px-1"
-                          style={{ background: outputColor(row.h1) }}
-                        >
-                          {row.h1.toFixed(2)}
-                        </span>
+                        <div className="flex flex-col items-start">
+                          <span
+                            className="inline-flex h-5 min-w-[2rem] items-center justify-center rounded text-[10px] font-bold text-white px-1"
+                            style={{ background: outputColor(row.h1) }}
+                          >
+                            {row.h1.toFixed(2)}
+                          </span>
+                          <span className="text-[8px] text-muted h-3 leading-3">
+                            {isApproxSigmoid(row.h1) ? "approx" : ""}
+                          </span>
+                        </div>
                       </td>
                       <td className="px-1.5 py-1.5">
-                        <span
-                          className="inline-flex h-5 min-w-[2rem] items-center justify-center rounded text-[10px] font-bold text-white px-1"
-                          style={{ background: outputColor(row.h2) }}
-                        >
-                          {row.h2.toFixed(2)}
-                        </span>
+                        <div className="flex flex-col items-start">
+                          <span
+                            className="inline-flex h-5 min-w-[2rem] items-center justify-center rounded text-[10px] font-bold text-white px-1"
+                            style={{ background: outputColor(row.h2) }}
+                          >
+                            {row.h2.toFixed(2)}
+                          </span>
+                          <span className="text-[8px] text-muted h-3 leading-3">
+                            {isApproxSigmoid(row.h2) ? "approx" : ""}
+                          </span>
+                        </div>
                       </td>
                       <td className="px-1.5 py-1.5">
-                        <span
-                          className="inline-flex h-5 min-w-[2rem] items-center justify-center rounded text-[10px] font-bold text-white px-1"
-                          style={{ background: outputColor(row.out) }}
-                        >
-                          {row.out.toFixed(2)}
-                        </span>
+                        <div className="flex flex-col items-start">
+                          <span
+                            className="inline-flex h-5 min-w-[2rem] items-center justify-center rounded text-[10px] font-bold text-white px-1"
+                            style={{ background: outputColor(row.out) }}
+                          >
+                            {row.out.toFixed(2)}
+                          </span>
+                          <span className="text-[8px] text-muted h-3 leading-3">
+                            {isApproxSigmoid(row.out) ? "approx" : ""}
+                          </span>
+                        </div>
                       </td>
                       <td className="px-1.5 py-1.5">
                         <span

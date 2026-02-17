@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
+import { WidgetTabs } from "../shared/WidgetTabs";
 
 const SVG_SIZE = 340;
 const CX = SVG_SIZE / 2;
@@ -47,6 +48,11 @@ function fromSvg(sx: number, sy: number, rect: DOMRect, svgSize: number): [numbe
   const svgY = ((sy - rect.top) / rect.height) * svgSize;
   return [(svgX - CX) / SCALE, -(svgY - CY) / SCALE];
 }
+
+const DOT_TABS: { id: "components" | "projection"; label: string }[] = [
+  { id: "components", label: "Component view" },
+  { id: "projection", label: "Projection view" },
+];
 
 export function DotProductExplorer() {
   const [a, setA] = useState<[number, number]>([1.2, 0.8]);
@@ -119,19 +125,7 @@ export function DotProductExplorer() {
       onReset={handleReset}
     >
       {/* View toggle */}
-      <div className="mb-4 flex gap-2">
-        {(["components", "projection"] as const).map((v) => (
-          <button
-            key={v}
-            onClick={() => setView(v)}
-            className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-              view === v ? "bg-accent text-white" : "bg-foreground/5 text-muted hover:bg-foreground/10"
-            }`}
-          >
-            {v === "components" ? "Component view" : "Projection view"}
-          </button>
-        ))}
-      </div>
+      <WidgetTabs tabs={DOT_TABS} activeTab={view} onTabChange={setView} />
 
       <div className="grid gap-4 sm:grid-cols-[1fr_auto]">
         <svg

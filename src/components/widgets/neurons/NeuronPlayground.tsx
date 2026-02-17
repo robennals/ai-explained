@@ -8,6 +8,10 @@ function sigmoid(x: number): number {
   return 1 / (1 + Math.exp(-x));
 }
 
+function isApproxSigmoid(v: number): boolean {
+  return (v > 0 && v < 0.005) || (v > 0.995 && v < 1);
+}
+
 function outputLabel(v: number): string {
   if (v >= 0.9) return "Definitely true";
   if (v >= 0.65) return "Probably true";
@@ -43,6 +47,7 @@ type GateName = "AND" | "OR" | "NOT (A)" | "NAND";
 type ActiveGate = GateName | "Custom";
 
 const GATE_NAMES: GateName[] = ["AND", "OR", "NOT (A)", "NAND"];
+
 
 const GATE_CHECKS: Record<GateName, number[]> = {
   AND: [0, 0, 0, 1],
@@ -161,7 +166,7 @@ export function NeuronPlayground() {
   const [w1, setW1] = useState(0);
   const [w2, setW2] = useState(0);
   const [bias, setBias] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(false);
+  const [, setIsAnimating] = useState(false);
   const [animatingTo, setAnimatingTo] = useState<GateName | null>(null);
   const animRef = useRef<number>(0);
 
@@ -293,7 +298,7 @@ export function NeuronPlayground() {
       description="Click each gate to see a neuron smoothly shift its weights to compute it."
       onReset={reset}
     >
-      {/* Gate tabs at top */}
+      {/* Gate selector */}
       <div className="flex gap-1 mb-4 justify-center flex-wrap">
         {GATE_NAMES.map((name) => {
           const active = animatingTo ? animatingTo === name : matchedGate === name;
@@ -301,7 +306,6 @@ export function NeuronPlayground() {
             <button
               key={name}
               onClick={() => selectGate(name)}
-              disabled={false}
               className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors cursor-pointer ${
                 active
                   ? "bg-accent text-white"
@@ -640,6 +644,16 @@ export function NeuronPlayground() {
         >
           {output.toFixed(2)}
         </text>
+        {isApproxSigmoid(output) && (
+          <text
+            x={OUT_X}
+            y={OUT_Y + 18}
+            textAnchor="middle"
+            className="fill-white/70 text-[8px] pointer-events-none select-none"
+          >
+            approx
+          </text>
+        )}
         <text
           x={OUT_X}
           y={OUT_Y + 40}
@@ -705,12 +719,17 @@ export function NeuronPlayground() {
                     <td className="px-2 py-1.5 font-mono">{a}</td>
                     <td className="px-2 py-1.5 font-mono">{b}</td>
                     <td className="px-2 py-1.5">
-                      <span
-                        className="inline-flex h-5 min-w-[2rem] items-center justify-center rounded text-[10px] font-bold text-white px-1"
-                        style={{ background: outputColor(out) }}
-                      >
-                        {out.toFixed(2)}
-                      </span>
+                      <div className="flex flex-col items-start">
+                        <span
+                          className="inline-flex h-5 min-w-[2rem] items-center justify-center rounded text-[10px] font-bold text-white px-1"
+                          style={{ background: outputColor(out) }}
+                        >
+                          {out.toFixed(2)}
+                        </span>
+                        <span className="text-[8px] text-muted h-3 leading-3">
+                          {isApproxSigmoid(out) ? "approx" : ""}
+                        </span>
+                      </div>
                     </td>
                     {target !== null && (
                       <>

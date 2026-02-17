@@ -416,6 +416,7 @@ function ImagePanel({
   const [imgLoaded, setImgLoaded] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reset loading state when src changes
     setImgLoaded(false);
     imgRef.current = null;
     const img = new Image();

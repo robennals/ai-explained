@@ -3,15 +3,18 @@ import { getAdjacentChapters } from "@/lib/curriculum";
 import Content from "./content.mdx";
 import {
   OptimizationGameWidget,
+  ErrorMeasurementWidget,
+  SmoothRealWorldWidget,
   SmoothVsRuggedWidget,
-  ModelComparisonWidget,
-  GradientVisualizationWidget,
+  GradientRealWorldWidget,
+  Gradient2DCurveWidget,
+  Gradient3DSurfaceWidget,
 } from "./widgets";
 
 export const metadata = {
   title: "The Power of Incremental Improvement — Learn AI by Messing About",
   description:
-    "Evolution, A/B testing, and gradient descent are all the same algorithm. Reliable tiny improvements, repeated billions of times.",
+    "Evolution, the scientific method, and gradient descent are all the same algorithm. Reliable tiny improvements, repeated billions of times.",
 };
 
 export default function Chapter02() {
@@ -23,9 +26,12 @@ export default function Chapter02() {
         <Content
           components={{
             OptimizationGameWidget,
+            ErrorMeasurementWidget,
+            SmoothRealWorldWidget,
             SmoothVsRuggedWidget,
-            ModelComparisonWidget,
-            GradientVisualizationWidget,
+            GradientRealWorldWidget,
+            Gradient2DCurveWidget,
+            Gradient3DSurfaceWidget,
           }}
         />
       </div>

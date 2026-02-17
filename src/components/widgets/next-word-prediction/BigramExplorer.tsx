@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
+import { WidgetTabs } from "../shared/WidgetTabs";
 import { SliderControl } from "../shared/SliderControl";
 
 // Fully closed bigram dictionary: every word that appears as a prediction
@@ -766,6 +767,11 @@ function temperatureSample(
 
 type Mode = "explore" | "generate";
 
+const BIGRAM_TABS: { id: Mode; label: string }[] = [
+  { id: "explore", label: "Explore" },
+  { id: "generate", label: "Generate" },
+];
+
 export function BigramExplorer() {
   const [mode, setMode] = useState<Mode>("explore");
   const [selectedWord, setSelectedWord] = useState("the");
@@ -841,21 +847,7 @@ export function BigramExplorer() {
       onReset={resetState}
     >
       {/* Mode tabs */}
-      <div className="mb-4 flex gap-1 rounded-lg bg-surface p-1">
-        {(["explore", "generate"] as Mode[]).map((m) => (
-          <button
-            key={m}
-            onClick={() => setMode(m)}
-            className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium capitalize transition-colors ${
-              mode === m
-                ? "bg-accent text-white shadow-sm"
-                : "text-muted hover:text-foreground"
-            }`}
-          >
-            {m}
-          </button>
-        ))}
-      </div>
+      <WidgetTabs tabs={BIGRAM_TABS} activeTab={mode} onTabChange={setMode} />
 
       {mode === "explore" ? (
         <div className="space-y-4">

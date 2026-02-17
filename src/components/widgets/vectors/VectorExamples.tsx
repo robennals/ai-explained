@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
+import { WidgetTabs } from "../shared/WidgetTabs";
 import { SliderControl } from "../shared/SliderControl";
 
 interface Example {
@@ -286,8 +287,15 @@ const EXAMPLES: Example[] = [
   },
 ];
 
+type ExampleId = "position" | "color" | "velocity" | "character";
+
+const VECTOR_TABS: { id: ExampleId; label: string }[] = EXAMPLES.map((e) => ({
+  id: e.id as ExampleId,
+  label: e.label,
+}));
+
 export function VectorExamples() {
-  const [selectedId, setSelectedId] = useState("position");
+  const [selectedId, setSelectedId] = useState<ExampleId>("position");
   const example = EXAMPLES.find((e) => e.id === selectedId)!;
   const [values, setValues] = useState<Record<string, number[]>>(
     Object.fromEntries(EXAMPLES.map((e) => [e.id, e.dimensions.map((d) => d.initial)]))
@@ -318,22 +326,7 @@ export function VectorExamples() {
       description="A vector is just a list of numbers that describes something"
       onReset={handleReset}
     >
-      {/* Example selector tabs */}
-      <div className="mb-5 flex flex-wrap gap-2">
-        {EXAMPLES.map((e) => (
-          <button
-            key={e.id}
-            onClick={() => setSelectedId(e.id)}
-            className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-              selectedId === e.id
-                ? "bg-accent text-white"
-                : "bg-foreground/5 text-muted hover:bg-foreground/10"
-            }`}
-          >
-            {e.label}
-          </button>
-        ))}
-      </div>
+      <WidgetTabs tabs={VECTOR_TABS} activeTab={selectedId} onTabChange={setSelectedId} />
 
       <div className="grid gap-6 sm:grid-cols-2">
         {/* Visual preview */}

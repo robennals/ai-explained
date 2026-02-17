@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
+import { WidgetTabs } from "../shared/WidgetTabs";
 import { SliderControl } from "../shared/SliderControl";
 
 const SVG_SIZE = 320;
@@ -50,6 +51,12 @@ function fmt(n: number): string {
 }
 
 type Mode = "dir-mag" | "unit-mag" | "raw";
+
+const MODE_TABS: { id: Mode; label: string }[] = [
+  { id: "dir-mag", label: "Direction + Length" },
+  { id: "unit-mag", label: "Unit Vector + Length" },
+  { id: "raw", label: "Raw Vector" },
+];
 
 export function DirectionMagnitudeExplorer() {
   const [angle, setAngle] = useState(0.7); // radians
@@ -127,12 +134,6 @@ export function DirectionMagnitudeExplorer() {
 
   const angleDeg = ((angle * 180) / Math.PI + 360) % 360;
 
-  const modes: { id: Mode; label: string }[] = [
-    { id: "dir-mag", label: "Direction + Length" },
-    { id: "unit-mag", label: "Unit Vector + Length" },
-    { id: "raw", label: "Raw Vector" },
-  ];
-
   return (
     <WidgetContainer
       title="Direction and Length"
@@ -140,19 +141,7 @@ export function DirectionMagnitudeExplorer() {
       onReset={handleReset}
     >
       {/* Mode tabs */}
-      <div className="mb-4 flex flex-wrap gap-2">
-        {modes.map((m) => (
-          <button
-            key={m.id}
-            onClick={() => setMode(m.id)}
-            className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-              mode === m.id ? "bg-accent text-white" : "bg-foreground/5 text-muted hover:bg-foreground/10"
-            }`}
-          >
-            {m.label}
-          </button>
-        ))}
-      </div>
+      <WidgetTabs tabs={MODE_TABS} activeTab={mode} onTabChange={setMode} />
 
       <div className="grid gap-4 sm:grid-cols-[1fr_auto]">
         <svg

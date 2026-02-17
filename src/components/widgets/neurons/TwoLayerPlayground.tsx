@@ -147,12 +147,7 @@ function forward2Layer(
   return { h1, h2, out };
 }
 
-// Binary cross-entropy loss for a single sample
-function bceLoss(output: number, target: number): number {
-  const eps = 1e-7;
-  const o = Math.max(eps, Math.min(1 - eps, output));
-  return -(target * Math.log(o) + (1 - target) * Math.log(1 - o));
-}
+
 
 const CANVAS_SIZE = 280;
 

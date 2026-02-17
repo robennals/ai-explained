@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
+import { WidgetTabs } from "../shared/WidgetTabs";
 import { SliderControl } from "../shared/SliderControl";
 import { loadTinyStoriesTokenizer } from "../embeddings/bpeTokenizer";
 import type { EncodedPiece } from "../embeddings/bpeTokenizer";
@@ -243,6 +244,11 @@ function appendToken(text: string, token: string): string {
 
 type Tab = "explore" | "generate";
 
+const NN_TABS: { id: Tab; label: string }[] = [
+  { id: "explore", label: "Explore" },
+  { id: "generate", label: "Generate" },
+];
+
 export function SimpleNNPredictor() {
   const [tab, setTab] = useState<Tab>("explore");
   const [text, setText] = useState("once upon a");
@@ -316,7 +322,7 @@ export function SimpleNNPredictor() {
 
     const pieces = tok.encode(genPrompt);
     const ids = pieces.map((p) => p.id);
-    let currentIds = [...ids];
+    const currentIds = [...ids];
     let currentText = genPrompt;
     let step = 0;
     const maxSteps = 40;
@@ -377,28 +383,17 @@ export function SimpleNNPredictor() {
       onReset={resetState}
     >
       {/* Tab switcher */}
-      <div className="mb-4 flex gap-1 rounded-lg bg-surface p-1">
-        <button
-          onClick={() => setTab("explore")}
-          className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-            tab === "explore"
-              ? "bg-white text-foreground shadow-sm"
-              : "text-muted hover:text-foreground"
-          }`}
-        >
-          Explore
-        </button>
-        <button
-          onClick={() => { setTab("generate"); cancelRef.current = true; setGenerating(false); }}
-          className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-            tab === "generate"
-              ? "bg-white text-foreground shadow-sm"
-              : "text-muted hover:text-foreground"
-          }`}
-        >
-          Generate
-        </button>
-      </div>
+      <WidgetTabs
+        tabs={NN_TABS}
+        activeTab={tab}
+        onTabChange={(t) => {
+          setTab(t);
+          if (t === "generate") {
+            cancelRef.current = true;
+            setGenerating(false);
+          }
+        }}
+      />
 
       {loading ? (
         <div className="flex items-center justify-center gap-2 py-12 text-sm text-muted">

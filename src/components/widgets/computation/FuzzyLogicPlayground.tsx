@@ -3,7 +3,6 @@
 import { useState, useCallback } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
 import { SliderControl } from "../shared/SliderControl";
-import { SelectControl } from "../shared/SelectControl";
 
 type FuzzyOp = "AND" | "OR" | "NOT" | "NAND" | "custom";
 
@@ -78,15 +77,6 @@ export function FuzzyLogicPlayground() {
     value: fuzzyCompute(op, a, b),
   }));
 
-  // Challenges
-  const andResult = fuzzyCompute("AND", a, b);
-  const orResult = fuzzyCompute("OR", a, b);
-  const majorityVote =
-    a > 0.5 && b > 0.5
-      ? andResult > 0.5
-      : a > 0.5 || b > 0.5
-        ? orResult > 0.5
-        : false;
 
   const handleReset = useCallback(() => {
     setA(0.7);

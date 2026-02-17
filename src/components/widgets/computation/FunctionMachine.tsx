@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
+import { WidgetTabs } from "../shared/WidgetTabs";
 
 interface Example {
   id: string;
@@ -89,29 +90,23 @@ function Arrow() {
   );
 }
 
+type ExampleId = "recognize" | "translate" | "answer" | "generate";
+
+const FUNCTION_TABS: { id: ExampleId; label: string }[] = EXAMPLES.map((ex) => ({
+  id: ex.id as ExampleId,
+  label: ex.label,
+}));
+
 export function FunctionMachine() {
-  const [selected, setSelected] = useState(EXAMPLES[0]);
+  const [selectedId, setSelectedId] = useState<ExampleId>("recognize");
+  const selected = EXAMPLES.find((ex) => ex.id === selectedId)!;
 
   return (
     <WidgetContainer
       title="The Function Machine"
       description="Every kind of 'thinking' is turning one array of numbers into another"
     >
-      <div className="mb-4 flex flex-wrap gap-2">
-        {EXAMPLES.map((ex) => (
-          <button
-            key={ex.id}
-            onClick={() => setSelected(ex)}
-            className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-              selected.id === ex.id
-                ? "bg-accent text-white"
-                : "bg-surface text-muted hover:text-foreground"
-            }`}
-          >
-            {ex.label}
-          </button>
-        ))}
-      </div>
+      <WidgetTabs tabs={FUNCTION_TABS} activeTab={selectedId} onTabChange={setSelectedId} />
 
       <div className="flex flex-col items-center gap-3 sm:flex-row sm:gap-2">
         {/* Input */}

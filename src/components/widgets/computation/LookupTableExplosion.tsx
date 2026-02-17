@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useCallback } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
+import { WidgetTabs } from "../shared/WidgetTabs";
 
 type InputType = "image" | "text" | "sound";
 
@@ -112,11 +113,16 @@ function formatBigNumber(count: number, values: number): { mantissa: string; exp
   return { mantissa: mantissa.toFixed(2), exponent };
 }
 
+const INPUT_TYPE_TABS: { id: InputType; label: string }[] = [
+  { id: "image", label: "Image" },
+  { id: "text", label: "Text" },
+  { id: "sound", label: "Sound" },
+];
+
 export function LookupTableExplosion() {
   const [inputType, setInputType] = useState<InputType>("image");
   const [sizeIdx, setSizeIdx] = useState(0);
   const [depthIdx, setDepthIdx] = useState(0);
-
   const config = INPUT_CONFIGS[inputType];
   const size = config.sizes[sizeIdx];
   const depth = config.depths[depthIdx];
@@ -146,21 +152,11 @@ export function LookupTableExplosion() {
       onReset={resetState}
     >
       {/* Type selector */}
-      <div className="mb-4 flex gap-1 rounded-lg bg-surface p-1">
-        {(Object.keys(INPUT_CONFIGS) as InputType[]).map((type) => (
-          <button
-            key={type}
-            onClick={() => switchType(type)}
-            className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-              inputType === type
-                ? "bg-accent text-white shadow-sm"
-                : "text-muted hover:text-foreground"
-            }`}
-          >
-            {INPUT_CONFIGS[type].label}
-          </button>
-        ))}
-      </div>
+      <WidgetTabs
+        tabs={INPUT_TYPE_TABS}
+        activeTab={inputType}
+        onTabChange={switchType}
+      />
 
       {/* Size selector */}
       <div className="mb-3">

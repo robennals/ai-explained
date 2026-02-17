@@ -157,8 +157,8 @@ export function ToyAttention() {
   // Measure card positions and compute arrows
   useEffect(() => {
     if (!hasSelection || !weights || !rowRef.current) {
-      setArrows([]);
-      return;
+      const raf = requestAnimationFrame(() => setArrows([]));
+      return () => cancelAnimationFrame(raf);
     }
 
     const raf = requestAnimationFrame(() => {
