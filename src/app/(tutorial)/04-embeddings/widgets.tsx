@@ -3,22 +3,6 @@
 import dynamic from "next/dynamic";
 import { Suspense } from "react";
 
-const WordNumberLine = dynamic(
-  () =>
-    import("@/components/widgets/embeddings/WordNumberLine").then(
-      (m) => m.WordNumberLine
-    ),
-  { ssr: false }
-);
-
-const CombinedNumberLine = dynamic(
-  () =>
-    import("@/components/widgets/embeddings/CombinedNumberLine").then(
-      (m) => m.CombinedNumberLine
-    ),
-  { ssr: false }
-);
-
 const Simple2DScatter = dynamic(
   () =>
     import("@/components/widgets/embeddings/Simple2DScatter").then(
@@ -70,22 +54,6 @@ function WidgetSlot({ children }: { children: React.ReactNode }) {
     >
       {children}
     </Suspense>
-  );
-}
-
-export function WordNumberLineWidget() {
-  return (
-    <WidgetSlot>
-      <WordNumberLine />
-    </WidgetSlot>
-  );
-}
-
-export function CombinedNumberLineWidget() {
-  return (
-    <WidgetSlot>
-      <CombinedNumberLine />
-    </WidgetSlot>
   );
 }
 

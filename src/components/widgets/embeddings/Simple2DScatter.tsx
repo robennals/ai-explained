@@ -151,7 +151,7 @@ const DISTINCT_WORDS: QuadPoint[] = [
   { word: "violin",    category: "instrument", quadX: 8,   quadY: 3.5 },
 ];
 
-type PresetId = "size-danger" | "animal-food" | "four-distinct" | "four-overlap";
+type PresetId = "animal-food" | "four-distinct" | "four-overlap";
 
 interface PresetDef {
   id: PresetId;
@@ -160,11 +160,6 @@ interface PresetDef {
 }
 
 const PRESETS: PresetDef[] = [
-  {
-    id: "size-danger",
-    label: "Size \u00d7 Danger",
-    description: "Two continuous properties. Bear and shark are big AND dangerous. Knife and gun are small but deadly. Most food and instruments are small and safe.",
-  },
   {
     id: "animal-food",
     label: "Animal or Food?",

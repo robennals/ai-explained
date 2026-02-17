@@ -1,62 +1,28 @@
 # Embeddings and Vector Spaces
 
 <Lead>
-How do you turn a word into something a neural network can work with? You turn it into a list of numbers — but not just any numbers. The right numbers encode *meaning itself* as geometry.
+In the previous chapter, we represented animals as vectors — lists of numbers capturing properties like size, speed, and danger. But AI systems don't just work with animals. They work with *everything*: words, images, sounds. How do you represent "anything" as a vector, when different kinds of things have completely different properties?
 </Lead>
 
-## From True/False to Words
+## The Problem with Hand-Picked Dimensions
 
-In the previous chapter, we worked with logic values — things that are either true or false. But GPT doesn't work with true/false values. It works with *words*. And words are messy.
+When we represented animals as vectors, we chose dimensions that made sense for animals: size, speed, danger. But what dimensions would you use for *all words*? "How big is the color blue?" doesn't make sense. "How fast is democracy?" There's no universal set of labeled dimensions that works for everything.
 
-One idea: give each word its own input neuron. There's a "dog" neuron, a "cat" neuron, a "magnificent" neuron. When the input is "dog", the dog neuron fires and everything else is zero. But English has over 170,000 words — that's 170,000 input neurons, and the network has to independently learn what every single one means. It gets no hint that "dog" and "puppy" are related, or that "big" and "enormous" mean the same thing.
-
-OK, so what if we just assign each word a single number instead? "Dog" = 1, "cat" = 2, "car" = 3, "puppy" = 4. Now we only need one input neuron. But the numbers are arbitrary — "dog" being 1 and "puppy" being 4 doesn't mean dogs are less than puppies. The network can't make sense of these numbers because they don't *mean* anything. Moving from 1 to 2 takes you from "dog" to "cat", but moving from 2 to 3 takes you from "cat" to "car" — there's no pattern to learn.
-
-What if we could make the numbers actually *mean* something?
-
-## Words on a Line
-
-What if we gave each word a number that captures something about what it means? For example, we could score every word by how *big* it is. An ant gets a low number. An elephant gets a high number. A truck is up there too.
-
-<WordNumberLineWidget />
-
-<TryIt>
-Toggle between axes. On "Size", notice how elephant ends up next to truck — they're both big, but have nothing else in common. Switch to "Alive" — now animals separate from objects, but elephant and mouse are neighbors. One number captures ONE property but conflates everything else.
-</TryIt>
-
-The problem is clear: one dimension isn't enough. No matter which property you choose, words that are different in other ways end up as neighbors. Elephant is next to truck on the size axis. Mouse is next to flute on the alive axis.
-
-## Being Clever with One Dimension
-
-But we can be surprisingly clever with just one number. What if we use different *regions* of the number line for different categories, and order items *within* each region by a different property?
-
-<CombinedNumberLineWidget />
-
-<TryIt>
-Try each preset. In "Animals × Foods", animals are on the left ordered by size, while foods are on the right ordered by sweetness. One number encodes the category AND a property within it. Try the other presets — each packs two categories with different orderings onto one line.
-</TryIt>
-
-This is surprisingly expressive! One number tells you both *what category* something belongs to (which region it's in) and *something about it* (its position within that region). Different parts of the number line mean different things. But it still can't handle more than two categories well — we'd need more room on the line than we have.
-
-## Adding a Second Dimension
-
-What if we use *two* numbers? Now each word is a point on a 2D plane instead of a point on a line.
+Even within things you *can* measure, two dimensions quickly run into trouble. Let's see what happens when we try to organize different kinds of things in a 2D space.
 
 <Simple2DScatterWidget />
 
 <TryIt>
-In "Size × Danger", bear and shark are big AND dangerous, while knife and gun are small but deadly. Switch to "Animal or Food?" — chicken, salmon, and lamb appear in the overlap because they belong to both categories. Try "Four Distinct Categories" — animals, buildings, planets, and instruments sit in clean separate quadrants. Then try "Four Overlapping Categories" — wild, water, land, and domestic animals overlap in every direction, and two dimensions can't untangle them.
+In "Animal or Food?" — chicken, salmon, and lamb appear in the overlap because they belong to both categories. Two dimensions can represent this, like a Venn diagram. Try "Four Distinct Categories" — animals, buildings, planets, and instruments sit in clean separate quadrants. Then try "Four Overlapping Categories" — wild, water, land, and domestic animals overlap in every direction, and two dimensions can't untangle them.
 </TryIt>
 
-Two dimensions are dramatically more expressive than one. With just two numbers, we can plot two independent properties at once, and even represent overlapping categories like a Venn diagram. But we still can't distinguish everything — dog and cat overlap, guitar and flute sit on top of each other. We'd need more dimensions: "is it a pet?", "does it have strings?", "is it edible?"
+With just two numbers, we can represent overlapping categories like a Venn diagram, or separate four distinct groups into quadrants. But we can't distinguish everything — when categories overlap in complex ways, two dimensions aren't enough. We'd need more: "is it a pet?", "does it have strings?", "is it edible?"
 
 ## Beyond Two Dimensions
 
 Each new dimension adds discriminative power. With 5 dimensions, you could separate animals from vehicles from instruments from food. With 20 dimensions, you could tell a dog from a cat. With 50 or 100 dimensions, you could capture remarkably fine-grained distinctions.
 
-But here's the problem: how do you decide *which* dimensions to use? "How dangerous is the color blue?" doesn't make sense. "How electronic is a cow?" There's no universal set of labeled dimensions that works for all words.
-
-Real AI systems solve this differently. They don't use labeled dimensions at all. Instead, they learn a space where **similar words end up nearby** and **different words end up far apart**. The dimensions are just numbers — not "alive?" or "big?" — but the proximity structure captures meaning.
+Real AI systems solve the dimension problem by not using labeled dimensions at all. Instead, they learn a space where **similar words end up nearby** and **different words end up far apart**. The dimensions are just numbers — not "alive?" or "big?" — but the proximity structure captures meaning.
 
 And it's not just proximity. The spatial *relationships* between nearby words often carry meaning too. In a well-trained embedding, the direction from "small" to "big" tends to be consistent — move an ant in that direction and you get larger animals. The direction from "man" to "woman" captures gender, so applying it to "king" lands you near "queen." These regularities aren't designed in; they emerge from training, because a space with consistent structure is more useful than one without it.
 
@@ -68,9 +34,9 @@ Real embeddings don't use labeled dimensions. They learn positions where similar
 
 ## Neural Networks Meet Embeddings
 
-In the previous chapter, you built neurons that classified inputs by drawing a decision boundary. Those inputs were abstract numbers. But now each input has a name — its position in the embedding encodes meaning. Can a neuron learn to read that meaning?
+In the previous chapters, you built neurons that classified inputs by drawing a decision boundary. Those inputs were abstract numbers. But now each input has a name — its position in the embedding encodes meaning. Can a neuron learn to read that meaning?
 
-Let's find out. Below is a single neuron whose two inputs are a word's Size and Danger coordinates from the scatter plot above. Each word sits at its embedding position, and the neuron has to learn which words match a concept.
+Let's find out. Below is a single neuron whose two inputs are a word's coordinates in a simple 2D embedding (size and danger). Each word sits at its embedding position, and the neuron has to learn which words match a concept.
 
 <EmbeddingClassifierWidget />
 

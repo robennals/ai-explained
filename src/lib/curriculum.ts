@@ -51,16 +51,6 @@ export const chapters: Chapter[] = [
   },
   {
     id: 5,
-    slug: "05-matrix-math",
-    title: "Matrix Math and Linear Transformations",
-    subtitle: "Neural networks as geometry",
-    prerequisites: [3],
-    description:
-      "Every layer is a geometric transformation. See how matrices rotate, scale, and shear space — from 1D to 4D and beyond — and why that's the same thing as a layer of neurons.",
-    ready: true,
-  },
-  {
-    id: 6,
     slug: "05-learning-from-mistakes",
     title: "Learning from Mistakes",
     subtitle: "How networks learn by failing",
@@ -69,29 +59,39 @@ export const chapters: Chapter[] = [
       "The loss function defines what 'wrong' means. Gradient descent finds the way downhill. Train too well and the model memorizes instead of learning.",
   },
   {
-    id: 7,
+    id: 6,
     slug: "06-geometry-of-meaning",
     title: "The Geometry of Meaning",
     subtitle: "How AI turns words into math",
-    prerequisites: [6],
+    prerequisites: [5],
     description:
       "Embeddings place words in space where meaning has geometry. King minus man plus woman equals queen. This is how AI 'understands' language.",
   },
   {
-    id: 8,
+    id: 7,
     slug: "07-attention-transformers",
     title: "Attention and Transformers",
     subtitle: "The architecture that changed everything",
-    prerequisites: [7],
+    prerequisites: [6],
     description:
       "Before transformers, models forgot early words like a telephone game. Attention lets every word look at every other word directly.",
+  },
+  {
+    id: 8,
+    slug: "05-matrix-math",
+    title: "Matrix Math and Linear Transformations",
+    subtitle: "Neural networks as geometry",
+    prerequisites: [7],
+    description:
+      "Every layer is a geometric transformation. See how matrices rotate, scale, and shear space — from 1D to 4D and beyond — and why that's the same thing as a layer of neurons.",
+    ready: true,
   },
   {
     id: 9,
     slug: "08-how-llms-learn",
     title: "How LLMs Learn to Talk",
     subtitle: "From raw text to conversation",
-    prerequisites: [8],
+    prerequisites: [7],
     description:
       "An LLM learns by predicting the next word. Seems too simple — but requires understanding grammar, facts, humor, and reasoning. Tokenization shapes what it can see.",
   },
@@ -118,7 +118,7 @@ export const chapters: Chapter[] = [
     slug: "11-mixture-of-experts",
     title: "Mixture of Experts",
     subtitle: "Not every neuron fires for every thought",
-    prerequisites: [8],
+    prerequisites: [7],
     description:
       "A router sends each question to specialist sub-networks. A trillion parameters, but only a fraction active per question. Smarter without getting slower.",
   },
@@ -154,7 +154,7 @@ export const chapters: Chapter[] = [
     slug: "15-image-generation",
     title: "Creating Images from Noise",
     subtitle: "Diffusion models and latent space",
-    prerequisites: [6, 7],
+    prerequisites: [5, 6],
     description:
       "Pixel-by-pixel generation fails. Diffusion models start with pure noise and denoise. Latent space is a map of all possible images.",
   },
