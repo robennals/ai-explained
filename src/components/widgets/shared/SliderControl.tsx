@@ -53,11 +53,12 @@ export function SliderControl({
             );
           })}
         </Slider.Track>
-        <Slider.Thumb className="block h-4 w-4 rounded-full border-2 border-accent bg-white shadow-sm transition-shadow focus:outline-none focus:ring-2 focus:ring-accent/30" />
+        <Slider.Thumb className="relative block h-4 w-4 rounded-full border-2 border-accent bg-white shadow-sm transition-shadow focus:outline-none focus:ring-2 focus:ring-accent/30">
+          <span className="absolute left-1/2 top-5 -translate-x-1/2 whitespace-nowrap font-mono text-[10px] text-muted">
+            {formatValue ? formatValue(value) : value.toFixed(2)}
+          </span>
+        </Slider.Thumb>
       </Slider.Root>
-      <span className="w-12 shrink-0 text-right font-mono text-xs text-muted">
-        {formatValue ? formatValue(value) : value.toFixed(2)}
-      </span>
     </div>
   );
 }

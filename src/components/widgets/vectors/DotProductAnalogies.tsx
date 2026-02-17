@@ -37,7 +37,7 @@ const SCENARIOS: Scenario[] = [
     label: "Animals",
     xAxis: "Big",
     yAxis: "Fast",
-    detectorLabel: "Looking for",
+    detectorLabel: "Scared of",
     inputLabel: "You see",
     detectors: [
       { name: "Bear detector", emoji: "🐻", x: 0.85, y: 0.50 },
@@ -49,16 +49,17 @@ const SCENARIOS: Scenario[] = [
       { name: "3 bears", emoji: "🐻", x: 0.85 * 3, y: 0.50 * 3 },
       { name: "1 bear", emoji: "🐻", x: 0.85, y: 0.50 },
       { name: "5 rabbits", emoji: "🐰", x: 0.10 * 5, y: 0.60 * 5 },
+      { name: "100 rabbits", emoji: "🐰", x: 0.10 * 100, y: 0.60 * 100 },
       { name: "2 sharks", emoji: "🦈", x: 0.75 * 2, y: 0.70 * 2 },
       { name: "1 elephant", emoji: "🐘", x: 0.98, y: 0.30 },
-      { name: "4 cats", emoji: "🐱", x: 0.15 * 4, y: 0.65 * 4 },
+      { name: "50 cats", emoji: "🐱", x: 0.15 * 50, y: 0.65 * 50 },
     ],
-    explain: (det, inp, dot, proj) => {
-      const detName = det.name.replace(" detector", "");
-      if (proj > 2.5) return `Strong match! What you see is very ${detName.toLowerCase()}-like, and there's a lot of it.`;
-      if (proj > 1.0) return `A decent match — there's some ${detName.toLowerCase()}-ness here.`;
-      if (proj > 0.3) return `A weak match. What you see isn't very ${detName.toLowerCase()}-like.`;
-      return `Almost no match. This is nothing like a ${detName.toLowerCase()}.`;
+    explain: (det, _inp, _dot, proj) => {
+      const detName = det.name.replace(" detector", "").toLowerCase();
+      if (proj > 2.5) return `Strong match! What you see is very ${detName}-like, and there's a lot of it.`;
+      if (proj > 1.0) return `A decent match — there's some ${detName}-ness here.`;
+      if (proj > 0.3) return `A weak match. Not much ${detName}-ness.`;
+      return `Almost no match. This is nothing like a ${detName}.`;
     },
   },
   {
@@ -445,8 +446,8 @@ export function DotProductAnalogies() {
             {scenario.explain(detector, input, dot, dot)}
           </div>
           {scenario.id === "animals" && (
-            <div className="text-xs text-muted italic">
-              As before, two dimensions aren&apos;t enough to distinguish these animals well, but hopefully you get the intuition.
+            <div className="mt-1 rounded-md border border-amber-300/50 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-500/30 dark:bg-amber-950/30 dark:text-amber-200">
+              <strong>⚠ Two dimensions aren&apos;t enough here.</strong> A bear detector fires on sharks and cats too, because &quot;big&quot; and &quot;fast&quot; alone can&apos;t tell them apart. The <strong>Velocity</strong> and <strong>Color</strong> tabs are more intuitive — try those. For animals, you&apos;d need more dimensions (hairy, cuddly, aquatic, …) to separate them properly.
             </div>
           )}
         </div>

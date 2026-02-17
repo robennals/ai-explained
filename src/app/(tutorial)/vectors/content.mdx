@@ -79,7 +79,7 @@ The **dot product** is the single most important vector operation in AI. It take
 The **cosine** measures direction similarity: 1 for identical directions, 0 for perpendicular, -1 for opposite. So if two vectors point the same way, the dot product is just their lengths multiplied together. If they're completely unrelated (perpendicular), it's zero — no matter how big they are. If they point in opposite directions, it's negative.
 
 <DotProductAnalogiesWidget>
-Pick a detector and something to measure. The green arrow shows the projection — the component of the input that goes in the detector's direction. Try the Animals tab: how much "bear" is in "3 bears"? Now Velocity: how fast is this car going northward? Then Color: how much red gets through a red filter? Notice how the same operation answers different questions depending on what you feed it.
+Try the Animals tab: pick "Bear detector" and compare 3 bears vs 100 rabbits. Lots of rabbits, but they don't point in the bear direction — the dot product is low. Now try Velocity: how fast is this car going northward? Then Color: how much red gets through a red filter? The same operation answers different questions depending on what you feed it.
 </DotProductAnalogiesWidget>
 
 Remarkably, there's a completely different way to compute the dot product that gives the exact same result: **multiply each pair of corresponding numbers and add up the results.**
