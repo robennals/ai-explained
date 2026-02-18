@@ -44,18 +44,27 @@ const Vector3DExplorer = dynamic(
   { ssr: false }
 );
 
-const DirectionMagnitudeExplorer = dynamic(
+const AnimalDirectionMagnitude = dynamic(
   () =>
-    import("@/components/widgets/vectors/DirectionMagnitudeExplorer").then(
-      (m) => m.DirectionMagnitudeExplorer
+    import("@/components/widgets/vectors/AnimalDirectionMagnitude").then(
+      (m) => m.AnimalDirectionMagnitude
     ),
   { ssr: false }
 );
 
-const DotProductExplorer = dynamic(
+
+const DotProductTypes = dynamic(
   () =>
-    import("@/components/widgets/vectors/DotProductExplorer").then(
-      (m) => m.DotProductExplorer
+    import("@/components/widgets/vectors/DotProductTypes").then(
+      (m) => m.DotProductTypes
+    ),
+  { ssr: false }
+);
+
+const DotProductAnalogies = dynamic(
+  () =>
+    import("@/components/widgets/vectors/DotProductAnalogies").then(
+      (m) => m.DotProductAnalogies
     ),
   { ssr: false }
 );
@@ -68,30 +77,6 @@ const NeuronDotProduct = dynamic(
   { ssr: false }
 );
 
-// Reused from neurons chapter
-const DecisionBoundaryExplorer = dynamic(
-  () =>
-    import("@/components/widgets/neurons/DecisionBoundaryExplorer").then(
-      (m) => m.DecisionBoundaryExplorer
-    ),
-  { ssr: false }
-);
-
-const XORBreakthrough = dynamic(
-  () =>
-    import("@/components/widgets/neurons/XORBreakthrough").then(
-      (m) => m.XORBreakthrough
-    ),
-  { ssr: false }
-);
-
-const LinearCollapseDemo = dynamic(
-  () =>
-    import("@/components/widgets/neurons/LinearCollapseDemo").then(
-      (m) => m.LinearCollapseDemo
-    ),
-  { ssr: false }
-);
 
 function WidgetSlot({ children, tryIt, label }: { children: React.ReactNode; tryIt?: React.ReactNode; label?: string }) {
   return (
@@ -149,18 +134,27 @@ export function Vector3DExplorerWidget({ children }: { children?: React.ReactNod
   );
 }
 
-export function DirectionMagnitudeExplorerWidget({ children }: { children?: React.ReactNode }) {
+export function AnimalDirectionMagnitudeWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children}>
-      <DirectionMagnitudeExplorer />
+      <AnimalDirectionMagnitude />
     </WidgetSlot>
   );
 }
 
-export function DotProductExplorerWidget({ children }: { children?: React.ReactNode }) {
+
+export function DotProductTypesWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children}>
-      <DotProductExplorer />
+      <DotProductTypes />
+    </WidgetSlot>
+  );
+}
+
+export function DotProductAnalogiesWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <DotProductAnalogies />
     </WidgetSlot>
   );
 }
@@ -173,26 +167,3 @@ export function NeuronDotProductWidget({ children }: { children?: React.ReactNod
   );
 }
 
-export function DecisionBoundaryExplorerWidget({ children }: { children?: React.ReactNode }) {
-  return (
-    <WidgetSlot tryIt={children}>
-      <DecisionBoundaryExplorer />
-    </WidgetSlot>
-  );
-}
-
-export function XORBreakthroughWidget({ children }: { children?: React.ReactNode }) {
-  return (
-    <WidgetSlot tryIt={children}>
-      <XORBreakthrough />
-    </WidgetSlot>
-  );
-}
-
-export function LinearCollapseDemoWidget({ children }: { children?: React.ReactNode }) {
-  return (
-    <WidgetSlot tryIt={children}>
-      <LinearCollapseDemo />
-    </WidgetSlot>
-  );
-}

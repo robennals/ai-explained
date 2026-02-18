@@ -233,12 +233,26 @@ function ImageTab() {
   );
 }
 
+type ColorMode = "rgb" | "cmy";
+
 function ColorTab() {
   const [r, setR] = useState(59);
   const [g, setG] = useState(130);
   const [b, setB] = useState(246);
+  const [mode, setMode] = useState<ColorMode>("rgb");
 
   const hex = `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
+
+  // CMY is the inverse of RGB (0–255 scale)
+  const c = 255 - r;
+  const m = 255 - g;
+  const y = 255 - b;
+
+  const setFromCmy = (cc: number, mm: number, yy: number) => {
+    setR(255 - cc);
+    setG(255 - mm);
+    setB(255 - yy);
+  };
 
   return (
     <div>
@@ -247,40 +261,107 @@ function ColorTab() {
           className="h-24 w-24 shrink-0 rounded-xl border border-border shadow-inner"
           style={{ backgroundColor: hex }}
         />
-        <div className="font-mono text-lg font-semibold text-foreground">
-          [<span className="text-red-500">{r}</span>,{" "}
-          <span className="text-green-600">{g}</span>,{" "}
-          <span className="text-blue-500">{b}</span>]
+        <div>
+          <div className="font-mono text-lg font-semibold text-foreground">
+            {mode === "rgb" ? (
+              <>
+                [<span className="text-red-500">{r}</span>,{" "}
+                <span className="text-green-600">{g}</span>,{" "}
+                <span className="text-blue-500">{b}</span>]
+              </>
+            ) : (
+              <>
+                [<span className="text-cyan-500">{c}</span>,{" "}
+                <span className="text-pink-500">{m}</span>,{" "}
+                <span className="text-yellow-500">{y}</span>]
+              </>
+            )}
+          </div>
+          <div className="mt-1 flex gap-1.5">
+            <button
+              onClick={() => setMode("rgb")}
+              className={`rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors ${
+                mode === "rgb" ? "bg-accent text-white" : "bg-surface text-muted hover:text-foreground"
+              }`}
+            >
+              Light
+            </button>
+            <button
+              onClick={() => setMode("cmy")}
+              className={`rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors ${
+                mode === "cmy" ? "bg-accent text-white" : "bg-surface text-muted hover:text-foreground"
+              }`}
+            >
+              Paint
+            </button>
+          </div>
         </div>
       </div>
-      <div className="space-y-3">
-        <SliderControl
-          label="Red"
-          value={r}
-          min={0}
-          max={255}
-          step={1}
-          onChange={setR}
-          formatValue={(v) => String(Math.round(v))}
-        />
-        <SliderControl
-          label="Green"
-          value={g}
-          min={0}
-          max={255}
-          step={1}
-          onChange={setG}
-          formatValue={(v) => String(Math.round(v))}
-        />
-        <SliderControl
-          label="Blue"
-          value={b}
-          min={0}
-          max={255}
-          step={1}
-          onChange={setB}
-          formatValue={(v) => String(Math.round(v))}
-        />
+      {mode === "rgb" ? (
+        <div className="space-y-3">
+          <SliderControl
+            label={<span className="inline-flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded-full border border-border/50" style={{ backgroundColor: "#ef4444" }} />Red</span>}
+            value={r}
+            min={0}
+            max={255}
+            step={1}
+            onChange={setR}
+            formatValue={(v) => String(Math.round(v))}
+          />
+          <SliderControl
+            label={<span className="inline-flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded-full border border-border/50" style={{ backgroundColor: "#22c55e" }} />Green</span>}
+            value={g}
+            min={0}
+            max={255}
+            step={1}
+            onChange={setG}
+            formatValue={(v) => String(Math.round(v))}
+          />
+          <SliderControl
+            label={<span className="inline-flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded-full border border-border/50" style={{ backgroundColor: "#3b82f6" }} />Blue</span>}
+            value={b}
+            min={0}
+            max={255}
+            step={1}
+            onChange={setB}
+            formatValue={(v) => String(Math.round(v))}
+          />
+        </div>
+      ) : (
+        <div className="space-y-3">
+          <SliderControl
+            label={<span className="inline-flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded-full border border-border/50" style={{ backgroundColor: "#06b6d4" }} />Cyan</span>}
+            value={c}
+            min={0}
+            max={255}
+            step={1}
+            onChange={(v) => setFromCmy(Math.round(v), m, y)}
+            formatValue={(v) => String(Math.round(v))}
+          />
+          <SliderControl
+            label={<span className="inline-flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded-full border border-border/50" style={{ backgroundColor: "#ec4899" }} />Magenta</span>}
+            value={m}
+            min={0}
+            max={255}
+            step={1}
+            onChange={(v) => setFromCmy(c, Math.round(v), y)}
+            formatValue={(v) => String(Math.round(v))}
+          />
+          <SliderControl
+            label={<span className="inline-flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded-full border border-border/50" style={{ backgroundColor: "#eab308" }} />Yellow</span>}
+            value={y}
+            min={0}
+            max={255}
+            step={1}
+            onChange={(v) => setFromCmy(c, m, Math.round(v))}
+            formatValue={(v) => String(Math.round(v))}
+          />
+        </div>
+      )}
+      <div className="mt-4 rounded-lg border-l-4 border-accent bg-accent/5 px-4 py-3 text-sm text-muted">
+        <p>
+          You may be more familiar with mixing <strong className="text-foreground">paint</strong> than mixing <strong className="text-foreground">light</strong>. They work differently: mixing red and green paint makes brown, but mixing red and green light makes yellow! Computers typically use light mixing (Red, Green, Blue) because screens emit light. Paint mixing uses Cyan, Magenta, and Yellow — sometimes called &quot;red, yellow, and blue&quot; in art class.
+        </p>
       </div>
     </div>
   );
@@ -696,8 +777,8 @@ function SoundTab() {
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "text", label: "Text" },
-  { id: "image", label: "Image" },
   { id: "color", label: "Color" },
+  { id: "image", label: "Image" },
   { id: "sound", label: "Sound" },
 ];
 

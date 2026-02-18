@@ -104,38 +104,35 @@ Click through the examples. "Error only" tells you how far off you are. "Error +
 This is the key idea behind the **gradient**. At any point on a smooth curve, you can look at the **slope** — the steepness right where you're standing. The slope tells you *exactly which direction is downhill*. Following it is called **gradient descent**, and it's dramatically faster than random guessing.
 
 <Gradient2DCurveWidget>
-Click on the curve to place a ball. The red arrow is the gradient — it points downhill from wherever the ball is. Try "Random steps" first: it picks random spots nearby and only keeps the ones that reduce the error. Then try "Gradient descent" from the same spot — it follows the gradient arrow each step. Watch how much faster gradient descent reaches the bottom.
+Click on the curve to place a ball. The red arrow is the gradient — it points downhill from wherever you are. Hit "Run gradient descent" to watch the ball follow the gradient arrow step by step to the bottom.
 </Gradient2DCurveWidget>
 
-That's the idea in one dimension: follow the slope downhill. But real models don't have just one knob — they have millions. Imagine a landscape with a dimension for each parameter. Instead of a curve, you have a vast, high-dimensional surface. And instead of a simple slope, the gradient becomes an arrow pointing in the steepest downhill direction across *all* dimensions at once.
-
-Here's what that looks like with just two parameters — a 3D surface where height is the error:
-
-<Gradient3DSurfaceWidget>
-Drag to rotate the surface. Click to set a starting point, then compare random steps vs. gradient descent. With two parameters, the gradient is an arrow on the surface pointing downhill. With millions of parameters, it's the same idea — just in a space too large to visualize.
-</Gradient3DSurfaceWidget>
+Real models don't have just one knob — they have millions. But the same idea works: the gradient is an arrow pointing in the steepest downhill direction across *all* dimensions at once. You can't visualize a million-dimensional landscape, but the math is the same — calculate the slope, step downhill, repeat.
 
 <KeyInsight>
-**The gradient tells you which way is downhill for every parameter simultaneously.** Random search tries directions and keeps lucky ones. Gradient descent *calculates* the best direction. With millions of parameters, this is the difference between feasible and impossible.
+**The gradient tells you which way is downhill for every parameter simultaneously.** Instead of guessing which change to make, gradient descent *calculates* the best direction. With millions of parameters, this is the difference between feasible and impossible.
 </KeyInsight>
 
 ## Why This Changes Everything
 
 Here's the punchline. In Chapter 1, we saw that a model is a machine with adjustable knobs. The question was: how do you find the right settings when there are millions of knobs?
 
-The answer is: **build the model so that small knob-turns produce small, predictable changes in the error**. When a model has this property — when it's *smooth* — you can calculate the slope at any point. That slope (the gradient) tells you exactly how to turn every knob to make the error a tiny bit smaller.
+Now we have two powerful ideas:
 
-No single adjustment is impressive. Each one is a tiny tweak — make this parameter 0.001 bigger, that one 0.002 smaller. But the gradient means each tweak *reliably moves in the right direction*. Make billions of these tiny improvements per second, and the model develops amazing abilities.
+- **Smoothness** means small changes to the knobs produce small, predictable changes in the error. Every tiny adjustment gives you useful feedback — did the error go up or down?
+- **The gradient** tells you *which direction* to adjust every knob at once. Instead of guessing, you calculate exactly which way is downhill.
+
+Together, these make optimization fast and reliable. No single adjustment is impressive — each one is a tiny tweak, make this parameter 0.001 bigger, that one 0.002 smaller. But each tweak *reliably moves in the right direction*. Make billions of these tiny improvements per second, and the model develops amazing abilities.
 
 It's like evolution, compressed from billions of years into hours — not by being smarter about each step, but by making each step *reliable* and then taking a huge number of them.
 
-AI didn't take off when people figured out the theory — the basic ideas have been around for decades. It took off when there was enough data to measure error on, enough computing power to make billions of tiny adjustments quickly, and the right kind of model — one where small changes to the knobs always lead to small, predictable changes in the error.
+AI didn't take off when people figured out the theory — the basic ideas have been around for decades. It took off when there was enough data to measure error on, enough computing power to make billions of tiny adjustments quickly, and the right kind of model — one where the knobs are smooth and the gradient always points the way.
 
 ## What's Next
 
 We now understand the game:
 
-1. **Build a smooth, differentiable model** (so gradient descent works)
+1. **Build a smooth model** (so small changes give useful feedback and gradients work)
 2. **Measure how wrong the model is** (the "loss function")
 3. **Calculate which way is downhill** (the gradient)
 4. **Take a tiny step** (adjust all parameters)

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useState, useCallback, useMemo, useRef, useEffect, useLayoutEffect } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
 
 interface Animal {
@@ -29,6 +29,9 @@ const ANIMALS: Animal[] = [
   { name: "Dog",      emoji: "🐕", big: 0.40, scary: 0.25, hairy: 0.65, cuddly: 0.90, fast: 0.60, fat: 0.40 },
 ];
 
+const ANIM_MS = 300;
+const GAP = 12; // matches gap-3
+
 function PropBar({ value, highlight }: { value: number; highlight?: "match" | "diff" | "none" }) {
   const bg =
     highlight === "match" ? "bg-green-400" : highlight === "diff" ? "bg-red-400" : "bg-accent";
@@ -54,30 +57,21 @@ function distance(a: Animal, b: Animal): number {
   return Math.sqrt(sum);
 }
 
-/** A column that fades in on mount via CSS animation. */
-function AnimalColumn({
+function AnimalCard({
   animal,
   highlight,
 }: {
   animal: Animal;
   highlight?: (prop: Property) => "match" | "diff" | "none";
 }) {
-  const [visible, setVisible] = useState(false);
-  useEffect(() => {
-    // Trigger fade-in on next frame
-    requestAnimationFrame(() => setVisible(true));
-  }, []);
-
   return (
-    <div
-      className="min-w-[120px] transition-opacity duration-200"
-      style={{ opacity: visible ? 1 : 0 }}
-    >
-      <div className="py-1.5 px-3 text-left text-xs font-medium text-muted border-b border-foreground/10">
+    <div className="rounded-lg border border-foreground/10 bg-foreground/[0.02] overflow-hidden shrink-0" style={{ minWidth: 150 }}>
+      <div className="py-2 px-3 text-sm font-medium text-foreground border-b border-foreground/10 bg-foreground/[0.02]">
         {animal.emoji} {animal.name}
       </div>
       {PROPERTIES.map((prop) => (
-        <div key={prop} className="py-1.5 px-3 border-b border-foreground/5">
+        <div key={prop} className="flex items-center gap-2 py-1.5 px-3 border-b border-foreground/5 last:border-b-0">
+          <span className="w-12 text-xs font-medium capitalize text-muted shrink-0">{prop}</span>
           <PropBar
             value={animal[prop]}
             highlight={highlight ? highlight(prop) : "none"}
@@ -88,11 +82,23 @@ function AnimalColumn({
   );
 }
 
+// During a swap transition, we show 3 cards: [exiting, newA, newB]
+// The strip starts offset so [exiting, newA] are visible, then slides left
+// so [newA, newB] are visible. After the animation, exiting is removed.
+interface TransitionState {
+  exitingAnimal: Animal;
+  cardWidth: number;
+}
+
 export function AnimalPropertyExplorer() {
   const [selected, setSelected] = useState<[number, number | null]>([0, null]);
+  const [transition, setTransition] = useState<TransitionState | null>(null);
+  const stripRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   const handleReset = useCallback(() => {
     setSelected([0, null]);
+    setTransition(null);
   }, []);
 
   const handleClick = useCallback(
@@ -102,11 +108,46 @@ export function AnimalPropertyExplorer() {
           return idx === a ? [a, null] : [a, idx];
         }
         if (idx === a || idx === b) return [a, b];
+
+        // Measure current card width for the animation
+        const cardWidth = cardRef.current?.offsetWidth ?? 150;
+        setTransition({ exitingAnimal: ANIMALS[a], cardWidth });
+
         return [b, idx];
       });
     },
     []
   );
+
+  // When transition is cleared, synchronously reset transform before paint
+  useLayoutEffect(() => {
+    if (!transition && stripRef.current) {
+      stripRef.current.style.transition = "none";
+      stripRef.current.style.transform = "translateX(0)";
+    }
+  }, [transition]);
+
+  // Run the slide animation after transition state is set
+  useEffect(() => {
+    if (!transition || !stripRef.current) return;
+    const strip = stripRef.current;
+    const offset = transition.cardWidth + GAP;
+
+    // Start at 0 so [exiting, newA] are visible
+    strip.style.transition = "none";
+    strip.style.transform = "translateX(0)";
+
+    // Force reflow then slide left to reveal [newA, newB]
+    strip.getBoundingClientRect();
+    strip.style.transition = `transform ${ANIM_MS}ms ease-out`;
+    strip.style.transform = `translateX(-${offset}px)`;
+
+    const timer = setTimeout(() => {
+      setTransition(null);
+    }, ANIM_MS);
+
+    return () => clearTimeout(timer);
+  }, [transition]);
 
   const [selA, selB] = selected;
   const animalA = ANIMALS[selA];
@@ -156,35 +197,25 @@ export function AnimalPropertyExplorer() {
           : "Click a second animal to compare their vectors."}
       </p>
 
-      {/* Comparison — using keys so React creates fresh columns on swap */}
-      <div className="overflow-x-auto">
-        <div className="flex">
-          {/* Property labels column */}
-          <div className="shrink-0">
-            <div className="py-1.5 pr-3 text-left text-xs font-medium text-muted border-b border-foreground/10">
-              Property
-            </div>
-            {PROPERTIES.map((prop) => (
-              <div key={prop} className="py-1.5 pr-3 text-xs font-medium capitalize text-foreground border-b border-foreground/5">
-                {prop}
-              </div>
-            ))}
+      {/* Animal cards */}
+      <div className="overflow-hidden">
+        <div ref={stripRef} className="flex gap-3">
+          {/* During transition, show exiting card first (off-screen left after animation) */}
+          {transition && (
+            <AnimalCard animal={transition.exitingAnimal} />
+          )}
+
+          {/* Card A */}
+          <div ref={cardRef}>
+            <AnimalCard
+              animal={animalA}
+              highlight={animalB ? getHighlight : undefined}
+            />
           </div>
 
-          {/* Animal A column — keyed by animal name */}
-          <AnimalColumn
-            key={`a-${animalA.name}`}
-            animal={animalA}
-            highlight={animalB ? getHighlight : undefined}
-          />
-
-          {/* Animal B column — keyed by animal name, so swaps create a fresh element */}
+          {/* Card B */}
           {animalB && (
-            <AnimalColumn
-              key={`b-${animalB.name}`}
-              animal={animalB}
-              highlight={getHighlight}
-            />
+            <AnimalCard animal={animalB} highlight={getHighlight} />
           )}
         </div>
       </div>

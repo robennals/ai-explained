@@ -182,7 +182,7 @@ function CharacterPreview({ health, strength, speed }: { health: number; strengt
   ];
   return (
     <div className="space-y-2">
-      <div className="mb-2 text-xs text-muted">RPG character stats</div>
+      <div className="mb-2 text-xs text-muted">Role-playing game character stats</div>
       {stats.map((s) => (
         <div key={s.label} className="flex items-center gap-3">
           <span className="w-8 text-right font-mono text-xs font-bold text-muted">{s.label}</span>
@@ -277,7 +277,7 @@ const EXAMPLES: Example[] = [
   },
   {
     id: "character",
-    label: "RPG Stats",
+    label: "Game Character",
     dimensions: [
       { name: "Health", min: 0, max: 100, step: 1, initial: 80 },
       { name: "Strength", min: 0, max: 100, step: 1, initial: 45 },
@@ -361,6 +361,7 @@ export function VectorExamples() {
                 step={dim.step}
                 onChange={(v) => handleChange(idx, v)}
                 formatValue={(v) => `${Math.round(v)}${dim.unit ?? ""}`}
+                {...(selectedId === "color" ? { valuePosition: "left" as const } : {})}
               />
             ))}
           </div>
