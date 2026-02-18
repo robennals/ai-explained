@@ -13,7 +13,7 @@ import {
 } from "./widgets";
 
 export const metadata = {
-  title: "Embeddings and Vector Spaces — Learn AI by Messing About",
+  title: "Embeddings and Vector Spaces — Learn AI Layer by Layer",
   description:
     "From one-hot to learned representations. Word analogies, semantic structure, and exploring the geometry of meaning.",
 };

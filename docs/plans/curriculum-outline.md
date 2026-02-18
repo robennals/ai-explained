@@ -1,4 +1,4 @@
-# Learn AI by Messing About — Curriculum Outline
+# Learn AI Layer by Layer — Curriculum Outline
 
 ## Editorial Philosophy
 

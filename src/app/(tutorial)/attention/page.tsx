@@ -17,7 +17,7 @@ import {
 } from "./widgets";
 
 export const metadata = {
-  title: "Attention — Learn AI by Messing About",
+  title: "Attention — Learn AI Layer by Layer",
   description:
     "Attention lets each word choose which other words to focus on. Built from embeddings, dot products, and neural networks.",
 };
