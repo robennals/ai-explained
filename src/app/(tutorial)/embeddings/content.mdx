@@ -1,14 +1,24 @@
 # Embeddings and Vector Spaces
 
 <Lead>
-In the last chapter, we described animals with hand-picked properties like size and scariness. That worked because animals are one kind of thing. But words represent *everything* — and there's no universal set of properties for all of them. AI solves this by letting the network discover its own dimensions.
+In the last chapter, we described animals with hand-picked properties like size and scariness. That worked because animals are one kind of thing. But words represent *everything* — and there's no universal set of properties for all of them. AI solves this by letting the network learn a space where meaning is encoded in proximity and direction, not in any individual dimension.
 </Lead>
 
 ## The Problem with Hand-Picked Dimensions
 
 When we represented animals as vectors, we chose dimensions that made sense for animals: size, speed, danger. But what dimensions would you use for *all words*? "How big is the color blue?" doesn't make sense. "How fast is democracy?" There's no universal set of labeled dimensions that works for everything.
 
-Even within things you *can* measure, two dimensions quickly run into trouble. Let's see what happens when we try to organize different kinds of things in a 2D space.
+But even with a single dimension, we can be surprisingly clever. What if we use different *regions* of the number line for different categories, and order items *within* each region by a different property?
+
+<CombinedNumberLineWidget>
+Try each preset. In "Animals × Foods", animals are on the left ordered by size, while foods are on the right ordered by sweetness. One number encodes the category AND a property within it. Try the other presets — each packs two categories with different orderings onto one line.
+</CombinedNumberLineWidget>
+
+This is surprisingly expressive! One number tells you both *what category* something belongs to (which region it's in) and *something about it* (its position within that region). But it still can't handle more than two categories well — we'd need more room on the line than we have.
+
+## Adding a Second Dimension
+
+What if we use *two* numbers? Now each word is a point on a 2D plane instead of a point on a line. This is dramatically more expressive — but still not enough.
 
 <Simple2DScatterWidget>
 In "Animal or Food?" — chicken, salmon, and lamb appear in the overlap because they belong to both categories. Try "Four Distinct Categories" — animals, buildings, planets, and instruments sit in clean separate quadrants. Then try "Four Overlapping Categories" — wild, water, land, and domestic animals overlap in every direction, and two dimensions can't untangle them.
@@ -18,18 +28,12 @@ With just two numbers, we can represent overlapping categories like a Venn diagr
 
 ## Beyond Two Dimensions
 
-We saw in the vectors chapter that more dimensions let you make finer distinctions. With 5 dimensions, you could separate animals from vehicles from instruments. With 50 or 100, you could capture remarkably fine-grained differences.
+Going from one dimension to two gave us dramatically more expressive power — more types of things, more ways they can differ, more ways categories can overlap. Adding more dimensions keeps making this better. With 50 or 100 dimensions, you can capture remarkably fine-grained distinctions.
 
-But here's the key problem for language: how do you decide *which* dimensions to use? With animals, we picked "big" and "scary" and it worked. With words? "How dangerous is the color blue?" doesn't make sense. There's no universal set of labeled dimensions that works for all words.
-
-Real AI systems solve this by not using labeled dimensions at all. Instead, they learn a space where **similar words end up nearby** and **different words end up far apart**. The dimensions are just numbers — not "alive?" or "big?" — but the proximity structure captures meaning.
-
-And it's not just proximity. The spatial *relationships* between nearby words carry meaning too. The direction from "small" to "big" tends to be consistent — move an ant in that direction and you get larger animals. The direction from "man" to "woman" captures gender, so applying it to "king" lands you near "queen." These regularities aren't designed in; they emerge from training, because a space with consistent structure is more useful than one without it.
-
-This is like the difference between organizing books by (genre, length, year) versus letting a librarian arrange them so that related books are on nearby shelves. The librarian's system has no labels, but it works better because it captures relationships that no fixed labeling scheme could.
+But there are no universal dimensions that apply to everything. As we saw, "size" means something for animals but not for colors, and the same two axes meant completely different things in each quadrant. Real embeddings don't use labeled dimensions at all. Instead, the core idea is simpler: **similar things should be close together**, and **directions should have meaning**. A direction might mean "size" in one part of the space and "formality" in another — and that's fine, because what matters is the local geometry, not any global labeling scheme.
 
 <KeyInsight>
-Real embeddings don't use labeled dimensions. They learn positions where similar things are nearby and where directions between words encode consistent relationships — size, gender, tense, and countless others — all without any human labeling.
+Real embeddings don't use labeled dimensions. They learn a space where similar things are nearby and where directions encode meaningful relationships — but the same direction can mean different things in different regions of the space.
 </KeyInsight>
 
 ## Neural Networks Meet Embeddings

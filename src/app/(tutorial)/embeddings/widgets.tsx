@@ -4,6 +4,14 @@ import dynamic from "next/dynamic";
 import { Suspense } from "react";
 import { TryItProvider } from "@/components/widgets/shared/WidgetContainer";
 
+const CombinedNumberLine = dynamic(
+  () =>
+    import("@/components/widgets/embeddings/CombinedNumberLine").then(
+      (m) => m.CombinedNumberLine
+    ),
+  { ssr: false }
+);
+
 const Simple2DScatter = dynamic(
   () =>
     import("@/components/widgets/embeddings/Simple2DScatter").then(
@@ -65,6 +73,14 @@ function WidgetSlot({ children, tryIt, label }: { children: React.ReactNode; try
         {children}
       </TryItProvider>
     </Suspense>
+  );
+}
+
+export function CombinedNumberLineWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children} label="Explore it">
+      <CombinedNumberLine />
+    </WidgetSlot>
   );
 }
 
