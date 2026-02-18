@@ -16,7 +16,7 @@ import {
 } from "./widgets";
 
 export const metadata = {
-  title: "Vectors — Learn AI by Messing About",
+  title: "Vectors — Learn AI Layer by Layer",
   description:
     "A vector is just a list of numbers — but lists of numbers can describe position, color, animals, and anything else. See neurons as vector operations and discover why activation functions make depth meaningful.",
 };

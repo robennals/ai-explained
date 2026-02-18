@@ -9,7 +9,7 @@ import {
 } from "./widgets";
 
 export const metadata = {
-  title: "Everything Is Numbers — Learn AI by Messing About",
+  title: "Everything Is Numbers — Learn AI Layer by Layer",
   description:
     "Text, images, and sound are all numbers. Thinking is a function. The challenge: find the right one.",
 };

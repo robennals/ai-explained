@@ -12,7 +12,7 @@ import {
 } from "./widgets";
 
 export const metadata = {
-  title: "The Power of Incremental Improvement — Learn AI by Messing About",
+  title: "The Power of Incremental Improvement — Learn AI Layer by Layer",
   description:
     "Evolution, the scientific method, and gradient descent are all the same algorithm. Reliable tiny improvements, repeated billions of times.",
 };
