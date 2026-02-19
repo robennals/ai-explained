@@ -454,19 +454,22 @@ export function DotProductAnalogies() {
 
       {/* Readout */}
       <div className="mt-2 space-y-2">
-        {/* Component computation */}
         <div className="rounded-lg bg-foreground/[0.03] p-3 space-y-1.5" style={{ fontVariantNumeric: "tabular-nums" }}>
+          {/* Component-wise multiplication */}
           <div className="font-mono text-xs text-muted">
-            angle = {angleDeg}° · cosine = {cosAngle.toFixed(2)} · dot product = <span className="text-accent font-semibold">{dot.toFixed(2)}</span>
+            <span className="text-blue-500">{input.x.toFixed(2)}</span>
+            <span> × </span>
+            <span className="text-[var(--color-accent)]">{dUnitX.toFixed(2)}</span>
+            <span> + </span>
+            <span className="text-blue-500">{input.y.toFixed(2)}</span>
+            <span> × </span>
+            <span className="text-[var(--color-accent)]">{dUnitY.toFixed(2)}</span>
+            <span> = </span>
+            <span className="text-foreground font-semibold">{dot.toFixed(2)}</span>
           </div>
           <div className="text-sm font-bold text-foreground">
             {scenario.explain(detector, input, dot, dot)}
           </div>
-          {scenario.id === "animals" && (
-            <div className="text-xs text-muted italic mt-1">
-              Both vectors are unit vectors here, so this is pure cosine similarity — just direction, no magnitude.
-            </div>
-          )}
         </div>
       </div>
       </>

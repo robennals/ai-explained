@@ -64,31 +64,44 @@ In 2D we could use an angle for direction, but that breaks down in higher dimens
 Pick an example and drag the slider to change the magnitude. The dashed arrow is the unit vector — it sits on the arc where all unit-length vectors live. The solid arrow shows the full vector scaled by the amount. Try switching between Velocity and Color to see how "direction = what kind, magnitude = how much" applies everywhere.
 </AnimalDirectionMagnitudeWidget>
 
-This decomposition — direction times magnitude — will matter a lot in a moment, when we look at what the dot product really means.
+
+## Comparing Directions
+
+We just saw that every vector has a direction (its unit vector) and a magnitude (its length). So how do we tell whether two vectors point in a similar direction?
+
+Here's a simple trick: take the two unit vectors, **multiply each pair of matching numbers, and add up the results.** This gives you a similarity score:
+
+- **1** means they point in exactly the same direction
+- **0** means they're perpendicular (at right angles — nothing in common)
+- **−1** means they point in exactly opposite directions
+
+<DirectionSimilarityWidget>
+On the Arrows tab, drag the two arrows around. When they point the same way, the similarity is near 1. When they're at right angles, it's near 0. When they point opposite ways, it's near −1. Then switch to the Animals tab to see how this works with our six-dimensional animal vectors — each property gets multiplied pair by pair and added up.
+</DirectionSimilarityWidget>
+
+Why does multiply-and-add measure similarity? Look at the Animals tab. If two animals both score high on a property, multiplying gives a big number — that shared trait contributes a lot. But if one animal is cuddly and the other isn't, multiplying gives almost nothing. Add up all these products, and you get a total similarity score: high when the animals are similar, low when they aren't.
+
+In AI, this is called **cosine similarity** — you'll see the term a lot.
 
 ## The Dot Product
 
-The **dot product** is the single most important vector operation in AI. It takes two vectors and produces a single number:
+Comparing unit vectors gives us a direction similarity score. But what if the vectors aren't unit length? The **dot product** extends this idea: it's the direction similarity, scaled by both vectors' magnitudes.
 
-**a · b = length(a) × length(b) × cosine(angle between them)**
+**a · b = length(a) × length(b) × similarity(direction of a, direction of b)**
 
-The cosine measures direction similarity: 1 for identical directions, 0 for perpendicular, −1 for opposite. The dot product combines this with the lengths of both vectors — but depending on the situation, different parts of that formula matter most.
+This is the single most important vector operation in AI. If two vectors point in the same direction *and* are both large, the dot product is large. If they point in opposite directions, it's a large negative number. If they're perpendicular, it's zero — no matter how big they are.
 
-<DotProductTypesWidget>
-Start with Similarity: both vectors are unit length, so the dot product is pure cosine — just direction comparison. Move to Projection: now a can be any length, so the dot product measures how much of a points along b. Finally, Full Dot Product: both vectors are free, and you see the complete formula at work. Drag the vectors to build intuition for each case.
-</DotProductTypesWidget>
-
-These three cases show up everywhere. When comparing unit vectors (like our animal vectors), the dot product is **cosine similarity**. When one vector is a unit direction, it's a **projection** — how far does this thing extend in that direction? And the full dot product scales the projection by the second vector's length.
-
-There's also a completely different way to compute the dot product that gives the exact same result: **multiply each pair of corresponding numbers and add up the results.**
+It turns out you can compute the dot product the same way as before — just multiply each pair of matching numbers and add up the results, without needing to separate out direction and magnitude first:
 
 **a · b = (a₁×b₁) + (a₂×b₂) + … + (aₙ×bₙ)**
 
-The geometry gives you the intuition; the computation is just multiply-and-add. Here's what that looks like in practice:
+Both formulas give exactly the same answer. The first gives you the intuition; the second gives you the computation.
 
-<DotProductAnalogiesWidget>
-Try the Animals tab: how similar is a bear to a shark? Both are unit vectors, so this is pure cosine similarity. Now try Velocity: how fast is a car going northward? Then Color: how much red gets through a red filter? The same operation answers different questions depending on what you feed it.
-</DotProductAnalogiesWidget>
+<DotProductExplorerWidget>
+Drag the two vectors around. Watch how the dot product changes — it's large when both vectors are long and point the same way, and zero when they're perpendicular. The two computations on the right always give the same result.
+</DotProductExplorerWidget>
+
+To make it easy to visualize, we're showing this in two dimensions — but dot products work for vectors with any number of dimensions. In AI, vectors typically have hundreds or thousands of dimensions, and the same multiply-and-add formula applies to all of them.
 
 <KeyInsight>
 **The dot product measures alignment.** Same direction → large positive. Perpendicular → zero. Opposite → large negative. This single operation is the foundation of how neural networks process information.
@@ -119,6 +132,20 @@ Drag the weight and input vectors. Watch the angle between them — when the vec
 <KeyInsight>
 **A neuron is a direction detector.** It computes the dot product of its input vector with its weight vector, adds a bias to shift the threshold, and squashes the result through an activation function. The weights define a direction in input space, and the neuron fires when the input points that way.
 </KeyInsight>
+
+## A Neuron Draws a Line
+
+If a neuron fires when its input aligns with its weights, what does that look like across *all possible inputs*?
+
+The heatmap below shows the neuron's output for every point in 2D input space. Green means the neuron fires (output near 1), red means it doesn't (output near 0). The dashed white line is the **decision boundary** — where the output is exactly 0.5.
+
+<NeuronDecisionBoundaryWidget>
+Drag the weight vector (orange) to point in different directions — watch the decision boundary rotate to stay perpendicular to it. Drag the input vector (blue) around and watch its output match the heatmap. Now adjust the bias: positive bias pushes the boundary away from the weight vector (more green), negative bias pushes it toward the weight vector (more red). Notice that the weight vector's *direction* controls the angle of the line, while the bias controls where the line sits.
+</NeuronDecisionBoundaryWidget>
+
+The decision boundary is always a straight line, perpendicular to the weight vector. On the side the weight vector points toward, inputs align with the weights and the neuron fires. On the other side, inputs oppose the weights and the neuron stays quiet. The bias shifts this line toward or away from the origin — it controls *how much* alignment the neuron demands before it fires.
+
+This is why a single neuron can only learn **linearly separable** patterns — patterns where you can draw a straight line (or in higher dimensions, a flat surface) between the "yes" cases and the "no" cases. That's a real limitation, but as we'll see in a later chapter, stacking neurons in layers lets the network draw much more complex boundaries.
 
 ## What's Next
 

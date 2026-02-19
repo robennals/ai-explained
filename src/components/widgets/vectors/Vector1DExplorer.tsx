@@ -18,31 +18,57 @@ interface Animal {
 }
 
 const ANIMALS: Animal[] = [
-  { name: "Bear",     emoji: "🐻", big: 0.85, scary: 0.90, hairy: 0.80, cuddly: 0.75, fast: 0.50, fat: 0.70 },
-  { name: "Rabbit",   emoji: "🐰", big: 0.10, scary: 0.05, hairy: 0.70, cuddly: 0.95, fast: 0.60, fat: 0.20 },
-  { name: "Shark",    emoji: "🦈", big: 0.75, scary: 0.95, hairy: 0.00, cuddly: 0.02, fast: 0.70, fat: 0.30 },
-  { name: "Mouse",    emoji: "🐭", big: 0.05, scary: 0.10, hairy: 0.40, cuddly: 0.60, fast: 0.50, fat: 0.15 },
-  { name: "Eagle",    emoji: "🦅", big: 0.40, scary: 0.50, hairy: 0.10, cuddly: 0.05, fast: 0.95, fat: 0.10 },
-  { name: "Elephant", emoji: "🐘", big: 0.98, scary: 0.40, hairy: 0.10, cuddly: 0.35, fast: 0.30, fat: 0.85 },
-  { name: "Snake",    emoji: "🐍", big: 0.30, scary: 0.80, hairy: 0.00, cuddly: 0.05, fast: 0.40, fat: 0.10 },
-  { name: "Cat",      emoji: "🐱", big: 0.15, scary: 0.15, hairy: 0.70, cuddly: 0.85, fast: 0.65, fat: 0.30 },
-  { name: "Dog",      emoji: "🐕", big: 0.40, scary: 0.25, hairy: 0.65, cuddly: 0.90, fast: 0.60, fat: 0.40 },
+  { name: "Bear",     emoji: "🐻", big: 0.90, scary: 0.85, hairy: 0.80, cuddly: 0.50, fast: 0.40, fat: 0.75 },
+  { name: "Rabbit",   emoji: "🐰", big: 0.10, scary: 0.02, hairy: 0.60, cuddly: 0.95, fast: 0.70, fat: 0.15 },
+  { name: "Shark",    emoji: "🦈", big: 0.80, scary: 0.95, hairy: 0.00, cuddly: 0.00, fast: 0.75, fat: 0.20 },
+  { name: "Mouse",    emoji: "🐭", big: 0.02, scary: 0.05, hairy: 0.30, cuddly: 0.40, fast: 0.60, fat: 0.10 },
+  { name: "Eagle",    emoji: "🦅", big: 0.35, scary: 0.60, hairy: 0.05, cuddly: 0.02, fast: 0.95, fat: 0.05 },
+  { name: "Elephant", emoji: "🐘", big: 0.98, scary: 0.30, hairy: 0.05, cuddly: 0.40, fast: 0.15, fat: 0.95 },
+  { name: "Snake",    emoji: "🐍", big: 0.20, scary: 0.85, hairy: 0.00, cuddly: 0.02, fast: 0.50, fat: 0.05 },
+  { name: "Cat",      emoji: "🐱", big: 0.15, scary: 0.30, hairy: 0.75, cuddly: 0.85, fast: 0.70, fat: 0.25 },
+  { name: "Dog",      emoji: "🐕", big: 0.45, scary: 0.20, hairy: 0.70, cuddly: 0.90, fast: 0.55, fat: 0.45 },
 ];
 
 const SVG_W = 600;
-const SVG_H = 80;
 const PAD_L = 30;
 const PAD_R = 30;
-const LINE_Y = 45;
 const PLOT_W = SVG_W - PAD_L - PAD_R;
+const EMOJI_SIZE = 16;
+const MIN_SPACING = 18; // minimum px between emoji centers before stacking
+const ROW_HEIGHT = 24; // vertical spacing between stacked rows
 
 export function Vector1DExplorer() {
   const [prop, setProp] = useState<Property>("big");
 
   const handleReset = useCallback(() => setProp("big"), []);
 
-  // Sort animals by current property to stagger labels
-  const sorted = [...ANIMALS].sort((a, b) => a[prop] - b[prop]);
+  // Sort animals by current property value, assign vertical rows to avoid overlap
+  const sorted = [...ANIMALS]
+    .map((a) => ({ ...a, x: PAD_L + a[prop] * PLOT_W }))
+    .sort((a, b) => a.x - b.x);
+
+  // Greedily assign rows: place each animal in the lowest row where it doesn't overlap
+  const rows: number[] = []; // x position of the rightmost edge in each row
+  const animalRows: { animal: (typeof sorted)[number]; row: number }[] = [];
+  for (const a of sorted) {
+    let placed = false;
+    for (let r = 0; r < rows.length; r++) {
+      if (a.x - rows[r] >= MIN_SPACING) {
+        rows[r] = a.x;
+        animalRows.push({ animal: a, row: r });
+        placed = true;
+        break;
+      }
+    }
+    if (!placed) {
+      animalRows.push({ animal: a, row: rows.length });
+      rows.push(a.x);
+    }
+  }
+
+  const maxRow = Math.max(0, ...animalRows.map((a) => a.row));
+  const LINE_Y = 30 + maxRow * ROW_HEIGHT + EMOJI_SIZE + 12;
+  const SVG_H = LINE_Y + 32;
 
   return (
     <WidgetContainer
@@ -87,15 +113,16 @@ export function Vector1DExplorer() {
         </text>
 
         {/* Animals */}
-        {sorted.map((animal) => {
-          const val = animal[prop];
-          const x = PAD_L + val * PLOT_W;
+        {animalRows.map(({ animal, row }) => {
+          const emojiY = LINE_Y - 16 - row * ROW_HEIGHT;
           return (
-            <g key={animal.name} style={{ transform: `translateX(${x}px)` }}>
+            <g key={animal.name}>
+              {/* Dashed line from emoji down to axis */}
+              <line x1={animal.x} y1={emojiY + 4} x2={animal.x} y2={LINE_Y} stroke="var(--color-accent)" strokeWidth={1} strokeOpacity={0.25} strokeDasharray="2 2" />
               {/* Dot on line */}
-              <circle cx={0} cy={LINE_Y} r={4} fill="var(--color-accent)" />
-              {/* Emoji label above */}
-              <text x={0} y={LINE_Y - 12} textAnchor="middle" fontSize={16}>
+              <circle cx={animal.x} cy={LINE_Y} r={3.5} fill="var(--color-accent)" />
+              {/* Emoji */}
+              <text x={animal.x} y={emojiY} textAnchor="middle" fontSize={EMOJI_SIZE}>
                 {animal.emoji}
               </text>
             </g>

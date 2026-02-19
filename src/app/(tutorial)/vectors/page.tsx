@@ -8,9 +8,10 @@ import {
   Vector2DExplorerWidget,
   Vector3DExplorerWidget,
   AnimalDirectionMagnitudeWidget,
-  DotProductTypesWidget,
-  DotProductAnalogiesWidget,
+  DirectionSimilarityWidget,
+  DotProductExplorerWidget,
   NeuronDotProductWidget,
+  NeuronDecisionBoundaryWidget,
 } from "./widgets";
 
 export const metadata = {
@@ -33,9 +34,10 @@ export default function ChapterVectors() {
             Vector2DExplorerWidget,
             Vector3DExplorerWidget,
             AnimalDirectionMagnitudeWidget,
-            DotProductTypesWidget,
-            DotProductAnalogiesWidget,
+            DirectionSimilarityWidget,
+            DotProductExplorerWidget,
             NeuronDotProductWidget,
+            NeuronDecisionBoundaryWidget,
           }}
         />
       </div>

@@ -44,6 +44,14 @@ const Vector3DExplorer = dynamic(
   { ssr: false }
 );
 
+const DirectionSimilarity = dynamic(
+  () =>
+    import("@/components/widgets/vectors/DirectionSimilarity").then(
+      (m) => m.DirectionSimilarity
+    ),
+  { ssr: false }
+);
+
 const AnimalDirectionMagnitude = dynamic(
   () =>
     import("@/components/widgets/vectors/AnimalDirectionMagnitude").then(
@@ -69,10 +77,26 @@ const DotProductAnalogies = dynamic(
   { ssr: false }
 );
 
+const DotProductExplorer = dynamic(
+  () =>
+    import("@/components/widgets/vectors/DotProductExplorer").then(
+      (m) => m.DotProductExplorer
+    ),
+  { ssr: false }
+);
+
 const NeuronDotProduct = dynamic(
   () =>
     import("@/components/widgets/vectors/NeuronDotProduct").then(
       (m) => m.NeuronDotProduct
+    ),
+  { ssr: false }
+);
+
+const NeuronDecisionBoundary = dynamic(
+  () =>
+    import("@/components/widgets/vectors/NeuronDecisionBoundary").then(
+      (m) => m.NeuronDecisionBoundary
     ),
   { ssr: false }
 );
@@ -134,6 +158,14 @@ export function Vector3DExplorerWidget({ children }: { children?: React.ReactNod
   );
 }
 
+export function DirectionSimilarityWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <DirectionSimilarity />
+    </WidgetSlot>
+  );
+}
+
 export function AnimalDirectionMagnitudeWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children}>
@@ -159,10 +191,26 @@ export function DotProductAnalogiesWidget({ children }: { children?: React.React
   );
 }
 
+export function DotProductExplorerWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <DotProductExplorer />
+    </WidgetSlot>
+  );
+}
+
 export function NeuronDotProductWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children}>
       <NeuronDotProduct />
+    </WidgetSlot>
+  );
+}
+
+export function NeuronDecisionBoundaryWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <NeuronDecisionBoundary />
     </WidgetSlot>
   );
 }
