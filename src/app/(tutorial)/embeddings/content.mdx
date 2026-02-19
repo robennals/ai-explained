@@ -1,80 +1,52 @@
 # Embeddings and Vector Spaces
 
 <Lead>
-In the last chapter, we described animals with hand-picked properties like size and scariness. That worked because animals are one kind of thing. But words represent *everything* — and there's no universal set of properties for all of them. AI solves this by letting the network discover its own dimensions.
+In the last chapter, we described animals with hand-picked properties like size and scariness. That worked because animals are one kind of thing. But words represent *everything* — and there's no universal set of properties for all of them. AI solves this by letting the network learn a space where meaning is encoded in proximity and direction, not in any individual dimension.
 </Lead>
 
-## From Animals to Words
+## The Problem with Hand-Picked Dimensions
 
-In the previous chapter, we described animals as vectors — lists of numbers like (big, scary, hairy, cuddly, fast, fat). This worked beautifully: bears are big and scary, rabbits are small and cuddly, and the distance between their vectors captures how different they are.
+When we represented animals as vectors, we chose dimensions that made sense for animals: size, speed, danger. But what dimensions would you use for *all words*? "How big is the color blue?" doesn't make sense. "How fast is democracy?" There's no universal set of labeled dimensions that works for everything.
 
-But what if we want to represent *words* — not just animals, but everything? "Dog" and "democracy" and "purple" and "running." There's no single set of properties that makes sense for all of them. "How scary is the color blue?" isn't a meaningful question. "How hairy is democracy?" doesn't even make sense.
-
-We need a different approach. Instead of choosing dimensions by hand, we'll let the network figure out *which numbers to use*. But first, let's see why the obvious approaches fail.
-
-One idea: give each word its own input neuron. There's a "dog" neuron, a "cat" neuron, a "magnificent" neuron. When the input is "dog", the dog neuron fires and everything else is zero. But English has over 170,000 words — that's 170,000 input neurons, and the network has to independently learn what every single one means. It gets no hint that "dog" and "puppy" are related, or that "big" and "enormous" mean the same thing.
-
-OK, so what if we just assign each word a single number instead? "Dog" = 1, "cat" = 2, "car" = 3, "puppy" = 4. Now we only need one input neuron. But the numbers are arbitrary — "dog" being 1 and "puppy" being 4 doesn't mean dogs are less than puppies. The network can't make sense of these numbers because they don't *mean* anything. Moving from 1 to 2 takes you from "dog" to "cat", but moving from 2 to 3 takes you from "cat" to "car" — there's no pattern to learn.
-
-What if we could make the numbers actually *mean* something?
-
-## Words on a Line
-
-What if we gave each word a number that captures something about what it means? For example, we could score every word by how *big* it is. An ant gets a low number. An elephant gets a high number. A truck is up there too.
-
-<WordNumberLineWidget>
-Toggle between axes. On "Size", notice how elephant ends up next to truck — they're both big, but have nothing else in common. Switch to "Alive" — now animals separate from objects, but elephant and mouse are neighbors. One number captures ONE property but conflates everything else.
-</WordNumberLineWidget>
-
-The problem is clear: one dimension isn't enough. No matter which property you choose, words that are different in other ways end up as neighbors. Elephant is next to truck on the size axis. Mouse is next to flute on the alive axis.
-
-## Being Clever with One Dimension
-
-But we can be surprisingly clever with just one number. What if we use different *regions* of the number line for different categories, and order items *within* each region by a different property?
+But even with a single dimension, we can be surprisingly clever. What if we use different *regions* of the number line for different categories, and order items *within* each region by a different property?
 
 <CombinedNumberLineWidget>
 Try each preset. In "Animals × Foods", animals are on the left ordered by size, while foods are on the right ordered by sweetness. One number encodes the category AND a property within it. Try the other presets — each packs two categories with different orderings onto one line.
 </CombinedNumberLineWidget>
 
-This is surprisingly expressive! One number tells you both *what category* something belongs to (which region it's in) and *something about it* (its position within that region). Different parts of the number line mean different things. But it still can't handle more than two categories well — we'd need more room on the line than we have.
+This is surprisingly expressive! One number tells you both *what category* something belongs to (which region it's in) and *something about it* (its position within that region). But it still can't handle more than two categories well — we'd need more room on the line than we have.
 
 ## Adding a Second Dimension
 
-What if we use *two* numbers? Now each word is a point on a 2D plane instead of a point on a line.
+What if we use *two* numbers? Now each word is a point on a 2D plane instead of a point on a line. This is dramatically more expressive — but still not enough.
 
 <Simple2DScatterWidget>
-In "Size × Danger", bear and shark are big AND dangerous, while knife and gun are small but deadly. Switch to "Animal or Food?" — chicken, salmon, and lamb appear in the overlap because they belong to both categories. Try "Four Distinct Categories" — animals, buildings, planets, and instruments sit in clean separate quadrants. Then try "Four Overlapping Categories" — wild, water, land, and domestic animals overlap in every direction, and two dimensions can't untangle them.
+In "Animal or Food?" — chicken, salmon, and lamb appear in the overlap because they belong to both categories. Try "Four Distinct Categories" — animals, buildings, planets, and instruments sit in clean separate quadrants. Then try "Four Overlapping Categories" — wild, water, land, and domestic animals overlap in every direction, and two dimensions can't untangle them.
 </Simple2DScatterWidget>
 
-Two dimensions are dramatically more expressive than one. With just two numbers, we can plot two independent properties at once, and even represent overlapping categories like a Venn diagram. But we still can't distinguish everything — dog and cat overlap, guitar and flute sit on top of each other. We'd need more dimensions: "is it a pet?", "does it have strings?", "is it edible?"
+With just two numbers, we can represent overlapping categories like a Venn diagram, or separate four distinct groups into quadrants. But we can't distinguish everything — when categories overlap in complex ways, two dimensions aren't enough. We'd need more: "is it a pet?", "does it have strings?", "is it edible?"
 
 ## Beyond Two Dimensions
 
-We saw in the vectors chapter that more dimensions let you make finer distinctions. With 5 dimensions, you could separate animals from vehicles from instruments. With 50 or 100, you could capture remarkably fine-grained differences.
+Going from one dimension to two gave us dramatically more expressive power — more types of things, more ways they can differ, more ways categories can overlap. Adding more dimensions keeps making this better. With 50 or 100 dimensions, you can capture remarkably fine-grained distinctions.
 
-But here's the key problem for language: how do you decide *which* dimensions to use? With animals, we picked "big" and "scary" and it worked. With words? "How dangerous is the color blue?" doesn't make sense. There's no universal set of labeled dimensions that works for all words.
-
-Real AI systems solve this by not using labeled dimensions at all. Instead, they learn a space where **similar words end up nearby** and **different words end up far apart**. The dimensions are just numbers — not "alive?" or "big?" — but the proximity structure captures meaning.
-
-And it's not just proximity. The spatial *relationships* between nearby words carry meaning too. The direction from "small" to "big" tends to be consistent — move an ant in that direction and you get larger animals. The direction from "man" to "woman" captures gender, so applying it to "king" lands you near "queen." These regularities aren't designed in; they emerge from training, because a space with consistent structure is more useful than one without it.
-
-This is like the difference between organizing books by (genre, length, year) versus letting a librarian arrange them so that related books are on nearby shelves. The librarian's system has no labels, but it works better because it captures relationships that no fixed labeling scheme could.
+But there are no universal dimensions that apply to everything. As we saw, "size" means something for animals but not for colors, and the same two axes meant completely different things in each quadrant. Real embeddings don't use labeled dimensions at all. Instead, the core idea is simpler: **similar things should be close together**, and **directions should have meaning**. A direction might mean "size" in one part of the space and "formality" in another — and that's fine, because what matters is the local geometry, not any global labeling scheme.
 
 <KeyInsight>
-Real embeddings don't use labeled dimensions. They learn positions where similar things are nearby and where directions between words encode consistent relationships — size, gender, tense, and countless others — all without any human labeling.
+Real embeddings don't use labeled dimensions. They learn a space where similar things are nearby and where directions encode meaningful relationships — but the same direction can mean different things in different regions of the space.
 </KeyInsight>
 
 ## Neural Networks Meet Embeddings
 
 In the vectors chapter, we saw that a neuron draws a decision boundary — a straight line through its input space. Now each input has a name — its position in the embedding encodes meaning. Can a neuron learn to read that meaning?
 
-Let's find out. Below is a single neuron whose two inputs are a word's Size and Danger coordinates from the scatter plot above. Each word sits at its embedding position, and the neuron has to learn which words match a concept.
+Let's find out. Each tab below shows one of the 2D embeddings from earlier. Pick a challenge and hit Optimize to watch the network find a solution — or drag the sliders yourself.
 
 <EmbeddingClassifierWidget>
-Start with "Dangerous" — the neuron needs to draw a boundary separating the dangerous things (bear, shark, knife, gun) from everything else. Hit Optimize and watch it learn. Then try "Big" — it draws a vertical boundary instead. Try "Big & Dangerous" and "Small & Dangerous" too — notice how the neuron tilts its boundary line differently each time to separate the right words.
+Start with "Size × Danger" and try "Dangerous" — a single neuron draws a line separating dangerous things from safe ones. Try the other challenges too — each tilts the line differently. Then switch to "Animal or Food?" and try "Both" — a single line can't isolate the middle band, so this challenge uses two neurons feeding into an output. Finally try "Four Categories" — selecting a quadrant always needs two neurons working together.
 </EmbeddingClassifierWidget>
 
-This is only a toy example with two dimensions — but the same principle scales up. Real language models feed high-dimensional embeddings (hundreds or thousands of numbers per word) into neural networks with many layers, and those networks learn to read meaning from the geometry of the embedding space.
+A single neuron can only draw one straight boundary. When you need to carve out a region — a band, a quadrant — you need multiple neurons, each drawing its own boundary, with an output neuron combining them. This is why real networks have many layers. And these are only toy 2D embeddings — real language models use hundreds or thousands of dimensions.
 
 ## Exploring a Real Embedding
 
@@ -113,7 +85,7 @@ A token can be:
 
 Why break words into parts?
 
-Because language has way too many possible words. 
+Because language has way too many possible words.
 People invent new words, spell things differently, and use rare words all the time. If we tried to create an embedding for every possible word then the data set would get impractically large, and rare words wouldn't have been seen enough times for the embedding to know what they meant.
 
 Take for example the word `treeishness`. You've probably never seen that word before, but you have a pretty good idea what it means because you can break it down into `tree`, `-ish`, and `-ness`.

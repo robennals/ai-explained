@@ -62,41 +62,41 @@ export const chapters: Chapter[] = [
   },
   {
     id: 6,
-    slug: "matrix-math",
-    title: "Matrix Math and Linear Transformations",
-    subtitle: "Neural networks as geometry",
-    prerequisites: [4],
-    description:
-      "Every layer is a geometric transformation. See how matrices rotate, scale, and shear space — from 1D to 4D and beyond — and why that's the same thing as a layer of neurons.",
-    ready: true,
-  },
-  {
-    id: 7,
     slug: "next-word-prediction",
     title: "Predicting the Next Word",
     subtitle: "Why prediction requires understanding",
-    prerequisites: [5, 6],
+    prerequisites: [5],
     description:
       "If you can predict the next word accurately, you must understand grammar, facts, and common sense. From n-grams to neural networks — prediction IS understanding.",
     ready: true,
   },
   {
-    id: 8,
+    id: 7,
     slug: "attention",
     title: "Attention",
     subtitle: "Letting words choose what to look at",
-    prerequisites: [7],
+    prerequisites: [6],
     description:
       "Attention — letting each word choose which other words to focus on — is the breakthrough behind modern AI. Built from things you already know: embeddings, dot products, and neural networks.",
   },
   {
-    id: 9,
+    id: 8,
     slug: "transformers",
     title: "Transformers",
     subtitle: "The architecture that changed everything",
-    prerequisites: [8],
+    prerequisites: [7],
     description:
       "The transformer wires attention and neural networks together. Trained only to predict the next word, it learns grammar, narrative, and common sense — from nothing but prediction.",
+  },
+  {
+    id: 9,
+    slug: "matrix-math",
+    title: "Matrix Math and Linear Transformations",
+    subtitle: "Neural networks as geometry",
+    prerequisites: [8],
+    description:
+      "Every layer is a geometric transformation. See how matrices rotate, scale, and shear space — from 1D to 4D and beyond — and why that's the same thing as a layer of neurons.",
+    ready: true,
   },
   {
     id: 10,
