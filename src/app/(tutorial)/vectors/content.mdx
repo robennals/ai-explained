@@ -145,8 +145,6 @@ Drag the weight vector (orange) to point in different directions — watch the d
 
 The decision boundary is always a straight line, perpendicular to the weight vector. On the side the weight vector points toward, inputs align with the weights and the neuron fires. On the other side, inputs oppose the weights and the neuron stays quiet. The bias shifts this line toward or away from the origin — it controls *how much* alignment the neuron demands before it fires.
 
-This is why a single neuron can only learn **linearly separable** patterns — patterns where you can draw a straight line (or in higher dimensions, a flat surface) between the "yes" cases and the "no" cases. That's a real limitation, but as we'll see in a later chapter, stacking neurons in layers lets the network draw much more complex boundaries.
-
 ## What's Next
 
 A vector is just a list of numbers — but it's a remarkably powerful idea. We've seen that a neuron computes the dot product of its input vector with its weight vector, making it a direction detector: it fires when its input aligns with what it's looking for.

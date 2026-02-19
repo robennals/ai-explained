@@ -18,6 +18,24 @@ function sigmoid(x: number): number {
   return 1 / (1 + Math.exp(-x));
 }
 
+function magnitudeWord(mag: number): string {
+  if (mag < 0.5) return "tiny";
+  if (mag < 1.5) return "small";
+  if (mag < 3.0) return "medium";
+  if (mag < 4.5) return "big";
+  return "very big";
+}
+
+function directionWord(similarity: number): string {
+  if (similarity > 0.95) return "Same direction";
+  if (similarity > 0.7) return "Similar direction";
+  if (similarity > 0.3) return "Somewhat similar";
+  if (similarity > -0.3) return "Perpendicular";
+  if (similarity > -0.7) return "Somewhat opposite";
+  if (similarity > -0.95) return "Opposite-ish";
+  return "Opposite direction";
+}
+
 function outputColor(v: number): string {
   // red (low) → gray (0.5) → green (high)
   if (v <= 0.5) {
@@ -130,29 +148,12 @@ export function NeuronDecisionBoundary() {
   const preActivation = dot + bias;
   const output = sigmoid(preActivation);
 
-  // Angle between weight and input vectors
   const magW = Math.sqrt(w1 * w1 + w2 * w2);
   const magX = Math.sqrt(x1 * x1 + x2 * x2);
   const cosTheta = magW > 0 && magX > 0 ? dot / (magW * magX) : 0;
-  const theta = Math.acos(Math.max(-1, Math.min(1, cosTheta)));
-  const thetaDeg = (theta * 180) / Math.PI;
-
-  // Unit vectors
-  const wUnitX = magW > 0 ? w1 / magW : 0;
-  const wUnitY = magW > 0 ? w2 / magW : 0;
-  const xUnitX = magX > 0 ? x1 / magX : 0;
-  const xUnitY = magX > 0 ? x2 / magX : 0;
-
-  // Projection of input onto weight direction
-  const projScalar = magW > 0 ? dot / magW : 0;
-  const projX = projScalar * wUnitX;
-  const projY = projScalar * wUnitY;
 
   const [wsx, wsy] = toSvg(w1, w2);
   const [xsx, xsy] = toSvg(x1, x2);
-  const [psx, psy] = toSvg(projX, projY);
-  const [wusx, wusy] = toSvg(wUnitX, wUnitY);
-  const [xusx, xusy] = toSvg(xUnitX, xUnitY);
 
   const outColor = outputColor(output);
 
@@ -190,16 +191,16 @@ export function NeuronDecisionBoundary() {
 
   // Neuron diagram layout
   const ND_W = 580;
-  const ND_H = 200;
+  const ND_H = 215;
   const ND_IN_X = 45;
   const ND_SUM_X = 200;
-  const ND_SUM_Y = 100;
+  const ND_SUM_Y = 110;
   const ND_ACT_X = 360;
-  const ND_ACT_Y = 100;
+  const ND_ACT_Y = 110;
   const ND_ACT_W = 100;
   const ND_ACT_H = 70;
   const ND_OUT_X = 520;
-  const ND_OUT_Y = 100;
+  const ND_OUT_Y = 110;
 
   // Sigmoid curve for diagram
   const sigmoidPath = useMemo(() => {
@@ -229,10 +230,10 @@ export function NeuronDecisionBoundary() {
 
   // Input nodes for diagram
   const inputNodes = [
-    { label: "x₁", y: 30 },
-    { label: "x₂", y: 72 },
-    { label: null, y: 110 }, // ellipsis
-    { label: "xₙ", y: 148 },
+    { label: "x₁", y: 40 },
+    { label: "x₂", y: 82 },
+    { label: null, y: 120 }, // ellipsis
+    { label: "xₙ", y: 158 },
   ];
 
   return (
@@ -242,12 +243,15 @@ export function NeuronDecisionBoundary() {
       onReset={handleReset}
     >
       {/* Neuron diagram matching NeuronFreePlay / NeuronDiagram style */}
-      <svg viewBox={`0 0 ${ND_W} ${ND_H}`} className="w-full mb-4" aria-label="Neuron as dot product diagram">
+      <svg viewBox={`0 0 ${ND_W} ${ND_H}`} className="w-full mb-4 select-none" aria-label="Neuron as dot product diagram">
         <defs>
           <marker id="ndb-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
             <path d="M 0 0 L 10 5 L 0 10 z" fill="#9ca3af" />
           </marker>
         </defs>
+
+        {/* "Input x" label above input nodes */}
+        <text x={ND_IN_X} y={12} textAnchor="middle" className="fill-foreground text-[11px] font-bold">Input x</text>
 
         {/* Input nodes */}
         {inputNodes.map((node, i) => {
@@ -268,6 +272,9 @@ export function NeuronDecisionBoundary() {
             </g>
           );
         })}
+
+        {/* "Weight w" label above weight lines */}
+        <text x={(ND_IN_X + 16 + ND_SUM_X - 26) / 2} y={12} textAnchor="middle" className="fill-foreground text-[11px] font-bold">Weight w</text>
 
         {/* Sum node — shows w · x */}
         <circle cx={ND_SUM_X} cy={ND_SUM_Y} r={24} fill="#fef9ee" stroke="#f59e0b" strokeWidth="1.5" />
@@ -303,7 +310,7 @@ export function NeuronDecisionBoundary() {
         <text x={ND_OUT_X} y={ND_OUT_Y + 5} textAnchor="middle" className="fill-white text-[13px] font-bold font-mono">{output.toFixed(2)}</text>
       </svg>
 
-      <div className="grid gap-5 lg:grid-cols-[1fr_auto]">
+      <div className="grid gap-5 lg:grid-cols-[1fr_auto] select-none">
         {/* Vector diagram */}
         <svg
           ref={svgRef}
@@ -343,75 +350,13 @@ export function NeuronDecisionBoundary() {
             const ey = CY + r * Math.sin(endAngle);
             const large = Math.abs(diff) > Math.PI ? 1 : 0;
             const sweep = diff > 0 ? 1 : 0;
-            const midAngle = aX + diff / 2;
-            const lr = 34;
-            const lx = CX + lr * Math.cos(midAngle);
-            const ly = CY + lr * Math.sin(midAngle);
-            return (
-              <>
-                <path
-                  d={`M ${sx} ${sy} A ${r} ${r} 0 ${large} ${sweep} ${ex} ${ey}`}
-                  fill="none" stroke="#94a3b8" strokeWidth={1.5}
-                />
-                <text x={lx} y={ly} fontSize={10} fill="#94a3b8" textAnchor="middle" dominantBaseline="central">
-                  {thetaDeg.toFixed(0)}°
-                </text>
-              </>
-            );
-          })()}
-
-          {/* Unit circle arc connecting both unit vectors */}
-          {magW > 0.05 && magX > 0.05 && (() => {
-            const r = SCALE; // unit circle radius in SVG pixels
-            const aW = Math.atan2(-wUnitY, wUnitX);
-            const aX = Math.atan2(-xUnitY, xUnitX);
-            let diff = aW - aX;
-            if (diff > Math.PI) diff -= 2 * Math.PI;
-            if (diff < -Math.PI) diff += 2 * Math.PI;
-            const endAngle = aX + diff;
-            const sx = CX + r * Math.cos(aX);
-            const sy = CY + r * Math.sin(aX);
-            const ex = CX + r * Math.cos(endAngle);
-            const ey = CY + r * Math.sin(endAngle);
-            const large = Math.abs(diff) > Math.PI ? 1 : 0;
-            const sweep = diff > 0 ? 1 : 0;
             return (
               <path
                 d={`M ${sx} ${sy} A ${r} ${r} 0 ${large} ${sweep} ${ex} ${ey}`}
-                fill="none" stroke="currentColor" strokeOpacity={0.12}
-                strokeWidth={1} strokeDasharray="3 3"
+                fill="none" stroke="#94a3b8" strokeWidth={1.5}
               />
             );
           })()}
-
-          {/* Dashed line from input tip to projection point */}
-          <line
-            x1={xsx} y1={xsy}
-            x2={psx} y2={psy}
-            stroke="currentColor" strokeWidth={1} strokeOpacity={0.2}
-            strokeDasharray="3 3"
-          />
-
-          {/* Projection vector (green, along weight direction) */}
-          {Math.abs(projScalar) > 0.02 && (
-            <Arrow fx={CX} fy={CY} tx={psx} ty={psy} color="#22c55e" width={3} />
-          )}
-
-          {/* Weight unit vector (dashed) */}
-          <line
-            x1={CX} y1={CY}
-            x2={wusx} y2={wusy}
-            stroke="#f59e0b" strokeWidth={1.5}
-            strokeDasharray="4 3" strokeOpacity={0.5}
-          />
-
-          {/* Input unit vector (dashed) */}
-          <line
-            x1={CX} y1={CY}
-            x2={xusx} y2={xusy}
-            stroke="#3b82f6" strokeWidth={1.5}
-            strokeDasharray="4 3" strokeOpacity={0.5}
-          />
 
           {/* Decision boundary line */}
           {boundary1 && boundary2 && (
@@ -424,9 +369,9 @@ export function NeuronDecisionBoundary() {
           )}
 
           {/* Weight vector */}
-          <Arrow fx={CX} fy={CY} tx={wsx} ty={wsy} color="#f59e0b" width={2.5} label="w" />
+          <Arrow fx={CX} fy={CY} tx={wsx} ty={wsy} color="#f59e0b" width={2.5} label="weight w" />
           {/* Input vector */}
-          <Arrow fx={CX} fy={CY} tx={xsx} ty={xsy} color="#3b82f6" width={2.5} label="x" />
+          <Arrow fx={CX} fy={CY} tx={xsx} ty={xsy} color="#3b82f6" width={2.5} label="input x" />
 
           {/* Output dot at input position */}
           <circle cx={xsx} cy={xsy} r={9} fill={outColor} stroke="white" strokeWidth={2} />
@@ -443,15 +388,20 @@ export function NeuronDecisionBoundary() {
             <div className="text-[10px] font-bold uppercase tracking-widest text-muted">Bias</div>
             <SliderControl label="bias" value={bias} min={-10} max={10} step={0.1} onChange={setBias} />
           </div>
-          <div className="rounded-lg bg-foreground/[0.03] p-3 space-y-1" style={{ fontVariantNumeric: "tabular-nums" }}>
-            <div className="text-[10px] font-bold uppercase tracking-widest text-muted">Vectors</div>
-            <div className="font-mono text-xs">
-              <span className="text-amber-500">w</span> = ({fmt(w1)}, {fmt(w2)})
+          {/* Word descriptions */}
+          <div className="rounded-lg bg-foreground/[0.03] p-3 space-y-1.5">
+            <div className="text-[10px] font-bold uppercase tracking-widest text-muted">What&apos;s happening</div>
+            <div className="text-sm">
+              <span className="font-semibold text-blue-500">Input</span> is {magnitudeWord(magX)} ({magX.toFixed(2)})
             </div>
-            <div className="font-mono text-xs">
-              <span className="text-blue-500">x</span> = ({fmt(x1)}, {fmt(x2)})
+            <div className="text-sm">
+              <span className="font-semibold text-amber-500">Weight</span> is {magnitudeWord(magW)} ({magW.toFixed(2)})
+            </div>
+            <div className="text-sm" style={{ color: cosTheta > 0.01 ? "#22c55e" : cosTheta < -0.01 ? "#ef4444" : "#94a3b8" }}>
+              {directionWord(cosTheta)} ({cosTheta.toFixed(2)})
             </div>
           </div>
+
           <div className="rounded-lg bg-foreground/[0.03] p-3 space-y-1.5" style={{ fontVariantNumeric: "tabular-nums" }}>
             <div className="text-[10px] font-bold uppercase tracking-widest text-muted">Computation</div>
             <div className="font-mono text-xs whitespace-pre">
@@ -465,20 +415,6 @@ export function NeuronDecisionBoundary() {
             </div>
             <div className="mt-1.5 border-t border-foreground/10 pt-1.5 font-mono text-xs whitespace-pre">
               sigmoid({fmt(preActivation)}) = <span className="font-bold" style={{ color: outColor }}>{output.toFixed(3)}</span>
-            </div>
-          </div>
-
-          <div className="rounded-lg bg-foreground/[0.03] p-3 space-y-1" style={{ fontVariantNumeric: "tabular-nums" }}>
-            <div className="text-[10px] font-bold uppercase tracking-widest text-muted">Alignment</div>
-            <div className="font-mono text-xs">angle = {thetaDeg.toFixed(0)}°</div>
-            <div className="text-xs text-muted mt-1">
-              {thetaDeg < 30
-                ? "Vectors are well aligned — neuron fires strongly"
-                : thetaDeg < 70
-                  ? "Partially aligned — moderate output"
-                  : thetaDeg < 110
-                    ? "Nearly perpendicular — output near 0.5"
-                    : "Opposing directions — neuron stays low"}
             </div>
           </div>
         </div>
