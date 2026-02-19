@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test";
 test.describe("Homepage", () => {
   test("renders title and chapter list", async ({ page }) => {
     await page.goto("/");
-    await expect(page.locator("h1")).toContainText("Learn AI by Messing About");
+    await expect(page.locator("h1")).toContainText("Learn AI Layer by Layer");
     await expect(
       page.getByText("An interactive guide to understanding AI")
     ).toBeVisible();

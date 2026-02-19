@@ -3,7 +3,7 @@ import { getAdjacentChapters } from "@/lib/curriculum";
 import Content from "./content.mdx";
 
 export const metadata = {
-  title: "PyTorch from Scratch — Learn AI by Messing About",
+  title: "PyTorch from Scratch — Learn AI Layer by Layer",
   description:
     "Install PyTorch, write your first tensor operations, and train a simple neural network.",
 };

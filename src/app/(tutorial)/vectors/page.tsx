@@ -15,7 +15,7 @@ import {
 } from "./widgets";
 
 export const metadata = {
-  title: "Vectors — Learn AI by Messing About",
+  title: "Vectors — Learn AI Layer by Layer",
   description:
     "A vector is just a list of numbers — but lists of numbers can describe position, color, animals, and anything else. See how the dot product measures alignment and how neurons use it to detect directions.",
 };

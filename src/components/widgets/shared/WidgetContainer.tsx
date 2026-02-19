@@ -14,6 +14,17 @@ export function TryItProvider({ content, label = "Try it", children }: { content
   return <TryItContext.Provider value={value}>{children}</TryItContext.Provider>;
 }
 
+// Context for WidgetTabs to report visited-tab state to WidgetContainer
+interface TabVisitState {
+  total: number;
+  visited: number;
+}
+
+type TabVisitSetter = (state: TabVisitState) => void;
+
+const TabVisitContext = createContext<TabVisitSetter | null>(null);
+export { TabVisitContext };
+
 interface WidgetContainerProps {
   title: string;
   description?: string;
@@ -28,12 +39,15 @@ export function WidgetContainer({
   onReset,
 }: WidgetContainerProps) {
   const [hasError, setHasError] = useState(false);
+  const [tabVisit, setTabVisit] = useState<TabVisitState | null>(null);
   const tryIt = useContext(TryItContext);
 
   const handleReset = useCallback(() => {
     setHasError(false);
     onReset?.();
   }, [onReset]);
+
+  const hasUnvisitedTabs = tabVisit !== null && tabVisit.visited < tabVisit.total;
 
   if (hasError) {
     return (
@@ -73,7 +87,11 @@ export function WidgetContainer({
           </button>
         )}
       </div>
-      <div className="p-5">{children}</div>
+      <div className="p-5">
+        <TabVisitContext.Provider value={setTabVisit}>
+          {children}
+        </TabVisitContext.Provider>
+      </div>
       {tryIt && (
         <div className="border-t border-widget-border bg-success/5 px-5 py-4">
           <p className="mb-1 text-xs font-bold uppercase tracking-widest text-success">
@@ -82,6 +100,13 @@ export function WidgetContainer({
           <div className="text-sm leading-relaxed text-foreground/80 [&>p]:my-1">
             {tryIt.content}
           </div>
+        </div>
+      )}
+      {hasUnvisitedTabs && (
+        <div className="border-t border-widget-border bg-accent/5 px-5 py-1.5">
+          <p className="text-xs text-accent font-bold">
+            👆 Don&apos;t forget to try out all the tabs!
+          </p>
         </div>
       )}
     </div>

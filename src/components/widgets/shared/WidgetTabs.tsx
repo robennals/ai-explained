@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useContext, useEffect } from "react";
+import { TabVisitContext } from "./WidgetContainer";
 
 interface Tab<T extends string> {
   id: T;
@@ -19,6 +20,11 @@ export function WidgetTabs<T extends string>({
   onTabChange,
 }: WidgetTabsProps<T>) {
   const [visited, setVisited] = useState<Set<T>>(() => new Set([activeTab]));
+  const reportTabVisit = useContext(TabVisitContext);
+
+  useEffect(() => {
+    reportTabVisit?.({ total: tabs.length, visited: visited.size });
+  }, [reportTabVisit, tabs.length, visited.size]);
 
   const handleTabClick = useCallback(
     (tabId: T) => {
