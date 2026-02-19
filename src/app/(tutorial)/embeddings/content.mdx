@@ -40,13 +40,13 @@ Real embeddings don't use labeled dimensions. They learn a space where similar t
 
 In the vectors chapter, we saw that a neuron draws a decision boundary — a straight line through its input space. Now each input has a name — its position in the embedding encodes meaning. Can a neuron learn to read that meaning?
 
-Let's find out. Below is a single neuron whose two inputs are a word's coordinates in a simple 2D embedding (size and danger). Each word sits at its embedding position, and the neuron has to learn which words match a concept.
+Let's find out. Each tab below shows one of the 2D embeddings from earlier. Pick a challenge and hit Optimize to watch the network find a solution — or drag the sliders yourself.
 
 <EmbeddingClassifierWidget>
-Start with "Dangerous" — the neuron needs to draw a boundary separating the dangerous things (bear, shark, knife, gun) from everything else. Hit Optimize and watch it learn. Then try "Big" — it draws a vertical boundary instead. Try "Big & Dangerous" and "Small & Dangerous" too — notice how the neuron tilts its boundary line differently each time to separate the right words.
+Start with "Size × Danger" and try "Dangerous" — a single neuron draws a line separating dangerous things from safe ones. Try the other challenges too — each tilts the line differently. Then switch to "Animal or Food?" and try "Both" — a single line can't isolate the middle band, so this challenge uses two neurons feeding into an output. Finally try "Four Categories" — selecting a quadrant always needs two neurons working together.
 </EmbeddingClassifierWidget>
 
-This is only a toy example with two dimensions — but the same principle scales up. Real language models feed high-dimensional embeddings (hundreds or thousands of numbers per word) into neural networks with many layers, and those networks learn to read meaning from the geometry of the embedding space.
+A single neuron can only draw one straight boundary. When you need to carve out a region — a band, a quadrant — you need multiple neurons, each drawing its own boundary, with an output neuron combining them. This is why real networks have many layers. And these are only toy 2D embeddings — real language models use hundreds or thousands of dimensions.
 
 ## Exploring a Real Embedding
 
