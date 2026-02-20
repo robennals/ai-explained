@@ -31,27 +31,29 @@ Drag the arrow to change the velocity. The card on the right shows the same info
 
 ## The Dot Product
 
-Now for the most important operation in AI. Given two vectors, we want to know: **how similar are they?** There's a beautifully simple way to find out.
+Now for the most important operation in AI.
 
-Take each pair of matching numbers, multiply them together, then add up all the results:
+With regular numbers, you can multiply them together: 3 × 5 = 15. The **dot product** extends multiplication to multiple dimensions. You multiply each matching pair of numbers, then add up all the results:
 
 **a · b = (a₁ × b₁) + (a₂ × b₂) + … + (aₙ × bₙ)**
 
-This is called the **dot product**. It measures both similarity *and* size. If two vectors point in the same direction and are both large, the dot product is large. If they point in opposite directions, it's negative. If they have nothing in common, it's zero.
+If your vectors have just one dimension, this is ordinary multiplication. With more dimensions, something interesting happens. Like multiplying regular numbers, the dot product gets bigger when each input is bigger. But unlike regular numbers, it also depends on **direction** — it gets bigger when the vectors point the same way, and goes negative when they point in opposite directions. If they're at right angles, it's zero.
+
+Let's play with this and see what it feels like in two dimensions:
 
 <DotProduct2DWidget>
 Drag the two vectors around. Watch the step-by-step math on the right — each matching pair of numbers gets multiplied, then the products are added up. The dot product is big when both vectors are long and point the same way. It's zero when they're at right angles. It goes negative when they point in opposite directions.
 </DotProduct2DWidget>
 
-Why does multiply-and-add measure similarity? Look at the step-by-step math. When both vectors have a large x value, multiplying those gives a big number — that shared component contributes a lot to the total. But if one vector has a large x and the other has a small x, multiplying gives almost nothing. Add up all these products, and you get a total that's high when the vectors agree and low when they don't.
+Why does multiply-and-add capture direction? Look at the step-by-step math. When both vectors have a large x value, multiplying those gives a big number — that shared component contributes a lot to the total. But if one vector has a large x and the other has a small x, multiplying gives almost nothing. Add up all these products, and you get a total that's high when the vectors agree and low when they don't.
 
 <KeyInsight>
-**The dot product measures alignment.** Same direction → large positive. Perpendicular → zero. Opposite → large negative. This single operation is the foundation of how neural networks process information.
+**The dot product extends multiplication to vectors.** Like regular multiplication, it gets bigger when the inputs are bigger. But it also captures direction: same direction → large positive, perpendicular → zero, opposite → large negative. This single operation is the foundation of how neural networks process information.
 </KeyInsight>
 
 ## Unit Vectors and Similarity
 
-The dot product mixes together two things: how similar the vectors are, and how big they are. Sometimes we want *pure* similarity, ignoring size. To get it, we use **unit vectors** — vectors that have been scaled so their dot product with themselves equals 1.
+Because the dot product depends on both direction *and* length, it doesn't give us a pure similarity score — two long vectors that vaguely point the same way can have a bigger dot product than two short vectors that point exactly the same way. To get *pure* similarity, ignoring size, we use **unit vectors** — vectors that have been scaled so their length is 1.
 
 The dot product of two unit vectors gives a pure similarity score:
 - **1** means they're identical
