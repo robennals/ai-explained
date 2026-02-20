@@ -1,5 +1,21 @@
 {/* Backup of sections/widgets removed from vectors chapter — to be covered in a later chapter. */}
 
+{/* --- "A Neuron Draws a Line" (version from current chapter) --- */}
+
+## A Neuron Draws a Line
+
+If a neuron fires when its input aligns with its weights, what does that look like across *all possible inputs*?
+
+The heatmap below shows the neuron's output for every point in 2D input space. Green means the neuron fires (output near 1), red means it doesn't (output near 0). The dashed white line is the **decision boundary** — where the output is exactly 0.5.
+
+<NeuronDecisionBoundaryWidget>
+Drag the weight vector (orange) to point in different directions — watch the decision boundary rotate to stay perpendicular to it. Drag the input vector (blue) around and watch its output match the heatmap. Now adjust the bias: positive bias pushes the boundary away from the weight vector (more green), negative bias pushes it toward the weight vector (more red). Notice that the weight vector's *direction* controls the angle of the line, while the bias controls where the line sits.
+</NeuronDecisionBoundaryWidget>
+
+The decision boundary is always a straight line, perpendicular to the weight vector. On the side the weight vector points toward, inputs align with the weights and the neuron fires. On the other side, inputs oppose the weights and the neuron stays quiet. The bias shifts this line toward or away from the origin — it controls *how much* alignment the neuron demands before it fires.
+
+{/* --- Old version of "A Neuron Draws a Line" below --- */}
+
 {/* --- Dot Product Explorer (Component/Projection view) --- */}
 
 <DotProductExplorerWidget>

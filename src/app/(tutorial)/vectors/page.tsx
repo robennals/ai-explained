@@ -2,22 +2,17 @@ import { ChapterNav } from "@/components/layout/ChapterNav";
 import { getAdjacentChapters } from "@/lib/curriculum";
 import Content from "./content.mdx";
 import {
-  VectorExamplesWidget,
-  AnimalPropertyExplorerWidget,
-  Vector1DExplorerWidget,
-  Vector2DExplorerWidget,
-  Vector3DExplorerWidget,
-  AnimalDirectionMagnitudeWidget,
-  DirectionSimilarityWidget,
-  DotProductExplorerWidget,
+  VectorPropertyExplorerWidget,
+  VelocityExplorerWidget,
+  DotProduct2DWidget,
+  DotProductComparisonWidget,
   NeuronDotProductWidget,
-  NeuronDecisionBoundaryWidget,
 } from "./widgets";
 
 export const metadata = {
   title: "Vectors — Learn AI Layer by Layer",
   description:
-    "A vector is just a list of numbers — but lists of numbers can describe position, color, animals, and anything else. See how the dot product measures alignment and how neurons use it to detect directions.",
+    "A vector is just a list of numbers — but lists of numbers can describe animals, characters, food, and anything else. See how the dot product measures similarity and how neurons use it to detect patterns.",
 };
 
 export default function ChapterVectors() {
@@ -28,16 +23,11 @@ export default function ChapterVectors() {
       <div className="prose prose-lg max-w-none">
         <Content
           components={{
-            VectorExamplesWidget,
-            AnimalPropertyExplorerWidget,
-            Vector1DExplorerWidget,
-            Vector2DExplorerWidget,
-            Vector3DExplorerWidget,
-            AnimalDirectionMagnitudeWidget,
-            DirectionSimilarityWidget,
-            DotProductExplorerWidget,
+            VectorPropertyExplorerWidget,
+            VelocityExplorerWidget,
+            DotProduct2DWidget,
+            DotProductComparisonWidget,
             NeuronDotProductWidget,
-            NeuronDecisionBoundaryWidget,
           }}
         />
       </div>

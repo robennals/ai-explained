@@ -5,107 +5,64 @@ The word "vector" sounds intimidating. It isn't. A vector is just a list of numb
 But this simple idea turns out to be the key to understanding what neurons actually do — and why stacking them in layers works at all.
 </Lead>
 
-## A List of Numbers
+## Describing Things with Vectors
 
-You already use vectors every day. Your location on the planet is two numbers: (latitude, longitude). A color is three numbers: (red, green, blue). A velocity is two numbers: (east/west speed, north/south speed). Your character in a role-playing game might have stats like (health, strength, speed). Each of these is a vector — a list of numbers where each slot means something specific.
+You already use lists of numbers to describe things. Your position on the planet is two numbers: (latitude, longitude). A color on screen is three numbers: (red, green, blue). An RPG character has stats like (strength, magic, speed, defense). Each of these is a **vector** — a list of numbers that together describe something.
 
-<VectorExamplesWidget>
-Toggle between examples. Notice how each vector has a different number of slots (dimensions), and each slot measures something different. Change the sliders and watch the visual update — the numbers *are* the thing they describe. The velocity example is interesting: its two numbers naturally define a direction and a speed.
-</VectorExamplesWidget>
+We can use the same idea to describe almost anything. Take animals: rate each one from 0 to 1 on properties like big, scary, hairy, cuddly, fast, and fat, and you get a vector that captures what makes that animal distinctive.
 
-The key idea: a vector is a compact way to describe something as a list of measurements. The number of measurements is the vector's **dimension** — a location is 2-dimensional, a color is 3-dimensional.
+<VectorPropertyExplorerWidget>
+Switch between tabs to see different kinds of vectors. Click two items to compare their vectors side by side — green bars mean the values are similar, red bars mean they're different. Which pair is the most similar? Try all four tabs to see how the same idea applies to completely different things.
+</VectorPropertyExplorerWidget>
 
-## Describing Animals with Vectors
+The number of measurements is the vector's **dimension** — our animal vectors have 6 dimensions, one per property. More dimensions let you make finer distinctions. With just "big" and "scary," a bear and a dog might look similar. Add "cuddly" and they separate out.
 
-Let's try describing animals as vectors. We'll score each animal on six properties: big, scary, hairy, cuddly, fast, and fat. Each score is a number between 0 and 1.
+Notice something important: the vector captures what we *chose* to measure. If we'd picked different properties, the same items would get different vectors. **The choice of dimensions determines what the vector can distinguish.**
 
-<AnimalPropertyExplorerWidget>
-Click two different animals to compare their vectors side by side. Bear and dog are both hairy, but very different on scary. Cat and rabbit are close on cuddly but far apart on size. Which pair of animals has the most similar vectors?
-</AnimalPropertyExplorerWidget>
+Vectors can also describe things in 2D space. A velocity is two numbers — how fast something is going east/west, and how fast it's going north/south. Together, these two numbers define a direction and a speed. The vectors we care about in AI usually have many more dimensions than two, but 2D vectors are easy to draw and interact with, so we'll use them a lot in this chapter to illustrate how vectors work.
 
-Notice something important: the vector captures what we *chose* to measure. If we'd picked different properties — "can it fly?", "does it live in water?" — the same animals would get different vectors, and different animals would seem similar. **The choice of dimensions determines what the vector can distinguish.**
+<VelocityExplorerWidget>
+Drag the arrow to change the velocity. The card on the right shows the same information as a list of two numbers. A long arrow means high speed; the arrow's direction shows which way. The two numbers *are* the velocity — the arrow is just a way to picture them.
+</VelocityExplorerWidget>
 
-## Visualizing Vectors
-
-Our animal vectors have six dimensions: big, scary, hairy, cuddly, fast, and fat. Six-dimensional spaces are hard to picture, but we're used to visualizing vectors in lower dimensions — so let's build up from one dimension and see how each new one helps.
-
-With just **one** number, each animal is a point on a line.
-
-<Vector1DExplorerWidget>
-Switch between properties. On "Big," elephant and bear are far apart from mouse and rabbit — but cat and eagle end up right next to each other despite being nothing alike. One dimension captures one thing but conflates everything else.
-</Vector1DExplorerWidget>
-
-With **two** numbers, each animal is a point on a plane.
-
-<Vector2DExplorerWidget>
-Start with Big x Scary. Bear is big AND scary — upper right. Rabbit is small AND not scary — lower left. Try switching axes — every combination reveals different clusters. Notice how animals that were stuck together in 1D get pulled apart in 2D.
-</Vector2DExplorerWidget>
-
-With **three** numbers, each animal is a point in 3D space.
-
-<Vector3DExplorerWidget>
-Drag to rotate the view. Try Big x Scary x Cuddly — bear and shark overlap on big and scary, but adding cuddly pulls them apart because bear is cuddly and shark definitely isn't. Each new dimension lets you distinguish things that were previously mixed together.
-</Vector3DExplorerWidget>
-
-Three dimensions is the most we can directly visualize, but higher-dimensional vectors — like our six-dimensional animal vectors — are really just more of the same. Each new dimension is another axis, another way to pull apart things that looked the same in fewer dimensions. We just don't have an easy way to visualize them other than as lists of numbers. But the geometric intuition still holds: **nearby points are similar, far-apart points are different, and more dimensions mean finer distinctions.**
-
-## Direction and Magnitude
-
-So far we've represented vectors as lists of numbers, but there's another useful way to think about them: as **direction** plus **magnitude**.
-
-- **Direction** = *what kind of thing is this?*
-- **Magnitude** = *how much of this thing?*
-
-Think about velocity: a car heading north-east at 60 mph. The direction tells you *where* it's going. The magnitude tells you *how fast*. Or think about colored light: the direction tells you the hue (red, blue, purple), and the magnitude tells you how bright it is.
-
-In 2D we could use an angle for direction, but that breaks down in higher dimensions. Instead we use a **unit vector** — a vector that points in the same direction but has length 1. Any vector equals its unit vector (the direction) times its length (the magnitude).
-
-<AnimalDirectionMagnitudeWidget>
-Pick an example and drag the slider to change the magnitude. The dashed arrow is the unit vector — it sits on the arc where all unit-length vectors live. The solid arrow shows the full vector scaled by the amount. Try switching between Velocity and Color to see how "direction = what kind, magnitude = how much" applies everywhere.
-</AnimalDirectionMagnitudeWidget>
-
-
-## Comparing Directions
-
-We just saw that every vector has a direction (its unit vector) and a magnitude (its length). So how do we tell whether two vectors point in a similar direction?
-
-Here's a simple trick: take the two unit vectors, **multiply each pair of matching numbers, and add up the results.** This gives you a similarity score:
-
-- **1** means they point in exactly the same direction
-- **0** means they're perpendicular (at right angles — nothing in common)
-- **−1** means they point in exactly opposite directions
-
-<DirectionSimilarityWidget>
-On the Arrows tab, drag the two arrows around. When they point the same way, the similarity is near 1. When they're at right angles, it's near 0. When they point opposite ways, it's near −1. Then switch to the Animals tab to see how this works with our six-dimensional animal vectors — each property gets multiplied pair by pair and added up.
-</DirectionSimilarityWidget>
-
-Why does multiply-and-add measure similarity? Look at the Animals tab. If two animals both score high on a property, multiplying gives a big number — that shared trait contributes a lot. But if one animal is cuddly and the other isn't, multiplying gives almost nothing. Add up all these products, and you get a total similarity score: high when the animals are similar, low when they aren't.
-
-In AI, this is called **cosine similarity** — you'll see the term a lot.
+<KeyInsight>
+**A vector is a compact description.** It's a list of numbers that together describe something. More dimensions mean finer distinctions. Vectors can describe positions, colors, characters, velocities — anything you can capture with numbers.
+</KeyInsight>
 
 ## The Dot Product
 
-Comparing unit vectors gives us a direction similarity score. But what if the vectors aren't unit length? The **dot product** extends this idea: it's the direction similarity, scaled by both vectors' magnitudes.
+Now for the most important operation in AI. Given two vectors, we want to know: **how similar are they?** There's a beautifully simple way to find out.
 
-**a · b = length(a) × length(b) × similarity(direction of a, direction of b)**
+Take each pair of matching numbers, multiply them together, then add up all the results:
 
-This is the single most important vector operation in AI. If two vectors point in the same direction *and* are both large, the dot product is large. If they point in opposite directions, it's a large negative number. If they're perpendicular, it's zero — no matter how big they are.
+**a · b = (a₁ × b₁) + (a₂ × b₂) + … + (aₙ × bₙ)**
 
-It turns out you can compute the dot product the same way as before — just multiply each pair of matching numbers and add up the results, without needing to separate out direction and magnitude first:
+This is called the **dot product**. It measures both similarity *and* size. If two vectors point in the same direction and are both large, the dot product is large. If they point in opposite directions, it's negative. If they have nothing in common, it's zero.
 
-**a · b = (a₁×b₁) + (a₂×b₂) + … + (aₙ×bₙ)**
+<DotProduct2DWidget>
+Drag the two vectors around. Watch the step-by-step math on the right — each matching pair of numbers gets multiplied, then the products are added up. The dot product is big when both vectors are long and point the same way. It's zero when they're at right angles. It goes negative when they point in opposite directions.
+</DotProduct2DWidget>
 
-Both formulas give exactly the same answer. The first gives you the intuition; the second gives you the computation.
-
-<DotProductExplorerWidget>
-Drag the two vectors around. Watch how the dot product changes — it's large when both vectors are long and point the same way, and zero when they're perpendicular. The two computations on the right always give the same result.
-</DotProductExplorerWidget>
-
-To make it easy to visualize, we're showing this in two dimensions — but dot products work for vectors with any number of dimensions. In AI, vectors typically have hundreds or thousands of dimensions, and the same multiply-and-add formula applies to all of them.
+Why does multiply-and-add measure similarity? Look at the step-by-step math. When both vectors have a large x value, multiplying those gives a big number — that shared component contributes a lot to the total. But if one vector has a large x and the other has a small x, multiplying gives almost nothing. Add up all these products, and you get a total that's high when the vectors agree and low when they don't.
 
 <KeyInsight>
 **The dot product measures alignment.** Same direction → large positive. Perpendicular → zero. Opposite → large negative. This single operation is the foundation of how neural networks process information.
 </KeyInsight>
+
+## Unit Vectors and Similarity
+
+The dot product mixes together two things: how similar the vectors are, and how big they are. Sometimes we want *pure* similarity, ignoring size. To get it, we use **unit vectors** — vectors that have been scaled so their dot product with themselves equals 1.
+
+The dot product of two unit vectors gives a pure similarity score:
+- **1** means they're identical
+- **0** means they have nothing in common
+- **−1** means they're completely opposite
+
+In AI, this is called **cosine similarity** — you'll see the term a lot.
+
+<DotProductComparisonWidget>
+On the **2D Arrows** tab, drag the arrows around the circle. Since they're constrained to the circle, they're always unit vectors, so the dot product is pure similarity. Then switch to the other tabs — each item is a unit vector, so you can compare pure similarity across animals, RPG characters, foods, and instruments. Look at the per-property multiplication to see which shared traits contribute the most.
+</DotProductComparisonWidget>
 
 ## A Neuron Is (Mostly) a Dot Product
 
@@ -117,37 +74,27 @@ Here's the connection that ties everything together. Remember from the previous 
 where **w** = (w₁, w₂, …, wₙ) is the weight vector and **x** = (x₁, x₂, …, xₙ) is the input vector.
 </Callout>
 
-The neuron is asking **"how much does this input point in the direction of what I'm looking for?"**. 
+The neuron is asking **"is this input what I'm looking for?"**.
 
-* **The direction** of the weight vector determines what the neuron is looking for. 
-* **The magnitude** of the weight vector determines how much of what it's looking for the neuron needs to see in order to get excited. 
-* **The bias** determines how excited it is if it hasn't seen anything at all.  
+* **The direction** of the weight vector determines what kind of thing the neuron is looking for.
+* **The magnitude** of the weight vector determines how much of what it's looking for the neuron needs to see in order to get excited.
+* **The bias** determines how excited it is if it hasn't seen anything at all.
 
-This is all a bit brain bending, but makes more sense if you play with it.
+This is all a bit brain bending, but makes more sense if you play with it. Try the **Animals** tab and set the weight to "Bear" — now you have a bear detector! Feed it different animals as input and watch the output. A wolf gets a high score because it shares many bear-like properties. A goldfish scores low. You can do the same with any category — set the weight to "Pizza" on the **Foods** tab and you have a pizza detector.
+
+The **weight magnitude** slider controls how big the weight vector is. A large magnitude means the neuron is very decisive — it fires strongly for good matches and stays very quiet for bad ones. A small magnitude means the neuron is wishy-washy — it gives a middling output for everything.
 
 <NeuronDotProductWidget>
-Drag the weight and input vectors. Watch the angle between them — when the vectors align (small angle), the output is high. When they're perpendicular (90°), the output depends mostly on the bias. When they oppose each other (large angle), the output drops. Try making the bias very negative — now the vectors need to be *very* well aligned for the neuron to fire. This visualization shows two dimensions, but real neurons have weight and input vectors with hundreds or thousands of dimensions — the same geometric intuition applies.
+Drag the weight and input vectors. Watch the angle between them — when the vectors align (small angle), the output is high. When they're perpendicular (90°), the output depends mostly on the bias. When they oppose each other (large angle), the output drops. Try the other tabs to build a bear detector or a pizza detector. Try making the weight magnitude large or small to see how it affects the neuron's decisiveness. This visualization shows two dimensions, but real neurons have weight and input vectors with hundreds or thousands of dimensions — the same geometric intuition applies.
 </NeuronDotProductWidget>
 
 <KeyInsight>
 **A neuron is a direction detector.** It computes the dot product of its input vector with its weight vector, adds a bias to shift the threshold, and squashes the result through an activation function. The weights define a direction in input space, and the neuron fires when the input points that way.
 </KeyInsight>
 
-## A Neuron Draws a Line
-
-If a neuron fires when its input aligns with its weights, what does that look like across *all possible inputs*?
-
-The heatmap below shows the neuron's output for every point in 2D input space. Green means the neuron fires (output near 1), red means it doesn't (output near 0). The dashed white line is the **decision boundary** — where the output is exactly 0.5.
-
-<NeuronDecisionBoundaryWidget>
-Drag the weight vector (orange) to point in different directions — watch the decision boundary rotate to stay perpendicular to it. Drag the input vector (blue) around and watch its output match the heatmap. Now adjust the bias: positive bias pushes the boundary away from the weight vector (more green), negative bias pushes it toward the weight vector (more red). Notice that the weight vector's *direction* controls the angle of the line, while the bias controls where the line sits.
-</NeuronDecisionBoundaryWidget>
-
-The decision boundary is always a straight line, perpendicular to the weight vector. On the side the weight vector points toward, inputs align with the weights and the neuron fires. On the other side, inputs oppose the weights and the neuron stays quiet. The bias shifts this line toward or away from the origin — it controls *how much* alignment the neuron demands before it fires.
-
 ## What's Next
 
-A vector is just a list of numbers — but it's a remarkably powerful idea. We've seen that a neuron computes the dot product of its input vector with its weight vector, making it a direction detector: it fires when its input aligns with what it's looking for.
+A vector is just a list of numbers — but it's a remarkably powerful idea. We've seen how the dot product measures similarity, how unit vectors give us pure similarity scores, and how a neuron uses the dot product to detect patterns in its input.
 
 But so far we've been describing things with *hand-picked* properties — big, scary, hairy. That works for animals, because animals are one kind of thing and we can choose sensible properties for them. But what about words? "Dog" and "democracy" and "purple" and "running" — there's no single set of properties that makes sense for all of them. "How scary is the color blue?" isn't a meaningful question.
 
