@@ -194,7 +194,7 @@ function RotaryControl({
         width={KNOB_SIZE}
         height={KNOB_SIZE}
         overflow="visible"
-        className="cursor-crosshair touch-none"
+        className="cursor-crosshair touch-none select-none"
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
@@ -282,9 +282,8 @@ export function AnimalDirectionMagnitude() {
   const maxTick = MAX_UNITS;
   const gridTicks = Array.from({ length: maxTick - minTick + 1 }, (_, i) => minTick + i);
 
-  // Max magnitude that fits on screen
-  const maxComponent = Math.max(Math.abs(unitX), Math.abs(unitY), 0.01);
-  const sliderMax = Math.max(0.5, Math.floor((MAX_UNITS / maxComponent) * 10) / 10);
+  // Fixed magnitude range
+  const sliderMax = MAX_UNITS;
 
   // Dragging the vector tip on the SVG
   const handleSvgPointerDown = useCallback((e: React.PointerEvent) => {
@@ -388,7 +387,7 @@ export function AnimalDirectionMagnitude() {
       <svg
         ref={svgRef}
         viewBox={`0 0 ${SVG_SIZE} ${SVG_SIZE}`}
-        className="mx-auto w-full max-w-[400px] cursor-crosshair touch-none"
+        className="mx-auto w-full max-w-[400px] cursor-crosshair touch-none select-none"
         onPointerDown={handleSvgPointerDown}
         onPointerMove={handleSvgPointerMove}
         onPointerUp={handleSvgPointerUp}
