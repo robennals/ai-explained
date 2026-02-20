@@ -12,13 +12,6 @@ const VectorPropertyExplorer = dynamic(
   { ssr: false }
 );
 
-const VelocityExplorer = dynamic(
-  () =>
-    import("@/components/widgets/vectors/VelocityExplorer").then(
-      (m) => m.VelocityExplorer
-    ),
-  { ssr: false }
-);
 
 const DotProduct2D = dynamic(
   () =>
@@ -69,13 +62,6 @@ export function VectorPropertyExplorerWidget({ children }: { children?: React.Re
   );
 }
 
-export function VelocityExplorerWidget({ children }: { children?: React.ReactNode }) {
-  return (
-    <WidgetSlot tryIt={children}>
-      <VelocityExplorer />
-    </WidgetSlot>
-  );
-}
 
 export function DotProduct2DWidget({ children }: { children?: React.ReactNode }) {
   return (

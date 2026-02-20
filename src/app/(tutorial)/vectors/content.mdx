@@ -19,52 +19,52 @@ The number of measurements is the vector's **dimension** — our animal vectors 
 
 Notice something important: the vector captures what we *chose* to measure. If we'd picked different properties, the same items would get different vectors. **The choice of dimensions determines what the vector can distinguish.**
 
-Vectors can also describe things in 2D space. A velocity is two numbers — how fast something is going east/west, and how fast it's going north/south. Together, these two numbers define a direction and a speed. The vectors we care about in AI usually have many more dimensions than two, but 2D vectors are easy to draw and interact with, so we'll use them a lot in this chapter to illustrate how vectors work.
-
-<VelocityExplorerWidget>
-Drag the arrow to change the velocity. The card on the right shows the same information as a list of two numbers. A long arrow means high speed; the arrow's direction shows which way. The two numbers *are* the velocity — the arrow is just a way to picture them.
-</VelocityExplorerWidget>
-
 <KeyInsight>
-**A vector is a compact description.** It's a list of numbers that together describe something. More dimensions mean finer distinctions. Vectors can describe positions, colors, characters, velocities — anything you can capture with numbers.
+**A vector is a compact description.** It's a list of numbers that together describe something. More dimensions mean finer distinctions. Vectors can describe positions, colors, characters, animals, foods — anything you can capture with numbers.
 </KeyInsight>
+
+## Unit Vectors
+
+The vectors above have been scaled so that the sum of the squares of all their dimensions adds up to 1. A vector like this is called a **unit vector**. You can think of it as the generalization of the number 1 to multiple dimensions — just as 1 is the "standard size" for a number, a unit vector is the "standard size" for a vector.
+
+This scaling preserves the *proportions* between dimensions — a bear is still scarier than it is fast — but puts every vector on the same footing, which turns out to be important for measuring similarity.
+
+## Cosine Similarity
+
+Now that we can describe things as unit vectors, how do we measure **how similar** two things are? There's a beautifully simple operation called **cosine similarity**. You multiply each matching pair of numbers, then add up all the results:
+
+**similarity = (a₁ × b₁) + (a₂ × b₂) + … + (aₙ × bₙ)**
+
+The result is a single number:
+- **1** means they're identical
+- **0** means they have nothing in common
+- **−1** means they're completely opposite
+
+This works for unit vectors, because they have been scaled so that their cosine similarity with themself is one. See the next section to find out what happens if you do the same math with vectors that aren't unit vectors.
+
+<DotProductComparisonWidget>
+Pick two items and compare their similarity. The multiply column shows what happens at each dimension — when both items score high on the same property, that contributes a lot to the total. When one scores high and the other low, it contributes almost nothing. Try the **2D Arrows** tab to see how similarity relates to the angle between vectors.
+</DotProductComparisonWidget>
+
+Why does multiply-and-add measure similarity? Look at the per-dimension math. When both vectors score high on the same property, multiplying those gives a big number — that shared trait contributes a lot to the total. But if one scores high and the other low, multiplying gives almost nothing. Add up all these products, and you get a total that's high when the vectors agree and low when they don't.
 
 ## The Dot Product
 
-Now for the most important operation in AI.
+Cosine similarity is actually a special case of a more general operation called the **dot product**. The math is exactly the same — multiply matching pairs, add them up — but the dot product works on vectors of *any* length, not just unit vectors.
 
-With regular numbers, you can multiply them together: 3 × 5 = 15. The **dot product** extends multiplication to multiple dimensions. You multiply each matching pair of numbers, then add up all the results:
+With regular numbers, you can multiply them: 3 × 5 = 15. The dot product extends multiplication to multiple dimensions:
 
 **a · b = (a₁ × b₁) + (a₂ × b₂) + … + (aₙ × bₙ)**
 
 If your vectors have just one dimension, this is ordinary multiplication. With more dimensions, something interesting happens. Like multiplying regular numbers, the dot product gets bigger when each input is bigger. But unlike regular numbers, it also depends on **direction** — it gets bigger when the vectors point the same way, and goes negative when they point in opposite directions. If they're at right angles, it's zero.
 
-Let's play with this and see what it feels like in two dimensions:
-
 <DotProduct2DWidget>
 Drag the two vectors around. Watch the step-by-step math on the right — each matching pair of numbers gets multiplied, then the products are added up. The dot product is big when both vectors are long and point the same way. It's zero when they're at right angles. It goes negative when they point in opposite directions.
 </DotProduct2DWidget>
 
-Why does multiply-and-add capture direction? Look at the step-by-step math. When both vectors have a large x value, multiplying those gives a big number — that shared component contributes a lot to the total. But if one vector has a large x and the other has a small x, multiplying gives almost nothing. Add up all these products, and you get a total that's high when the vectors agree and low when they don't.
-
 <KeyInsight>
-**The dot product extends multiplication to vectors.** Like regular multiplication, it gets bigger when the inputs are bigger. But it also captures direction: same direction → large positive, perpendicular → zero, opposite → large negative. This single operation is the foundation of how neural networks process information.
+**The dot product extends multiplication to vectors.** Like regular multiplication, it gets bigger when the inputs are bigger. But it also captures direction: same direction → large positive, perpendicular → zero, opposite → large negative. Cosine similarity is a dot product between unit vectors, giving a pure similarity score. The dot product is the foundation of how neural networks process information.
 </KeyInsight>
-
-## Unit Vectors and Similarity
-
-Because the dot product depends on both direction *and* length, it doesn't give us a pure similarity score — two long vectors that vaguely point the same way can have a bigger dot product than two short vectors that point exactly the same way. To get *pure* similarity, ignoring size, we use **unit vectors** — vectors that have been scaled so their length is 1.
-
-The dot product of two unit vectors gives a pure similarity score:
-- **1** means they're identical
-- **0** means they have nothing in common
-- **−1** means they're completely opposite
-
-In AI, this is called **cosine similarity** — you'll see the term a lot.
-
-<DotProductComparisonWidget>
-On the **2D Arrows** tab, drag the arrows around the circle. Since they're constrained to the circle, they're always unit vectors, so the dot product is pure similarity. Then switch to the other tabs — each item is a unit vector, so you can compare pure similarity across animals, RPG characters, foods, and instruments. Look at the per-property multiplication to see which shared traits contribute the most.
-</DotProductComparisonWidget>
 
 ## A Neuron Is (Mostly) a Dot Product
 
@@ -82,7 +82,7 @@ The neuron is asking **"is this input what I'm looking for?"**.
 * **The magnitude** of the weight vector determines how much of what it's looking for the neuron needs to see in order to get excited.
 * **The bias** determines how excited it is if it hasn't seen anything at all.
 
-This is all a bit brain bending, but makes more sense if you play with it. Try the **Animals** tab and set the weight to "Bear" — now you have a bear detector! Feed it different animals as input and watch the output. A wolf gets a high score because it shares many bear-like properties. A goldfish scores low. You can do the same with any category — set the weight to "Pizza" on the **Foods** tab and you have a pizza detector.
+This is all a bit brain bending, but makes more sense if you play with it. Try the **Animals** tab and set the weight to "Bear" — now you have a bear detector! Feed it different animals as input and watch the output. A dog gets a high score because it shares many bear-like properties. A mouse scores low. You can do the same with any category — set the weight to "Pizza" on the **Foods** tab and you have a pizza detector.
 
 The **weight magnitude** slider controls how big the weight vector is. A large magnitude means the neuron is very decisive — it fires strongly for good matches and stays very quiet for bad ones. A small magnitude means the neuron is wishy-washy — it gives a middling output for everything.
 
@@ -96,7 +96,7 @@ Drag the weight and input vectors. Watch the angle between them — when the vec
 
 ## What's Next
 
-A vector is just a list of numbers — but it's a remarkably powerful idea. We've seen how the dot product measures similarity, how unit vectors give us pure similarity scores, and how a neuron uses the dot product to detect patterns in its input.
+A vector is just a list of numbers — but it's a remarkably powerful idea. We've seen how cosine similarity measures how alike two vectors are, how the dot product generalizes multiplication to multiple dimensions, and how a neuron uses the dot product to detect patterns in its input.
 
 But so far we've been describing things with *hand-picked* properties — big, scary, hairy. That works for animals, because animals are one kind of thing and we can choose sensible properties for them. But what about words? "Dog" and "democracy" and "purple" and "running" — there's no single set of properties that makes sense for all of them. "How scary is the color blue?" isn't a meaningful question.
 

@@ -7,7 +7,6 @@ import { VectorCard } from "./VectorCard";
 import {
   VECTOR_DOMAINS,
   vecDot,
-  vecNormalize,
   directionSimilarityLabel,
   itemSimilarityLabel,
   productColor,
@@ -266,8 +265,8 @@ function DomainItemTab({ domain }: { domain: VectorDomain }) {
   const itemA = domain.items[aIdx];
   const itemB = domain.items[bIdx];
 
-  const vecA = vecNormalize(itemA.values);
-  const vecB = vecNormalize(itemB.values);
+  const vecA = itemA.values;
+  const vecB = itemB.values;
   const similarity = vecDot(vecA, vecB);
 
   return (

@@ -31,44 +31,45 @@ export function vecNormalize(v: number[]): number[] {
 
 // --- Domain data ---
 
+// All vectors are pre-normalized to unit length (dot product with self = 1)
 const ANIMALS: VectorItem[] = [
-  { name: "Bear",     emoji: "\u{1F43B}", values: [0.90, 0.85, 0.80, 0.50, 0.40, 0.75] },
-  { name: "Rabbit",   emoji: "\u{1F430}", values: [0.10, 0.02, 0.60, 0.95, 0.70, 0.15] },
-  { name: "Shark",    emoji: "\u{1F988}", values: [0.80, 0.95, 0.00, 0.00, 0.75, 0.20] },
-  { name: "Mouse",    emoji: "\u{1F42D}", values: [0.02, 0.05, 0.30, 0.40, 0.60, 0.10] },
-  { name: "Eagle",    emoji: "\u{1F985}", values: [0.35, 0.60, 0.05, 0.02, 0.95, 0.05] },
-  { name: "Elephant", emoji: "\u{1F418}", values: [0.98, 0.30, 0.05, 0.40, 0.15, 0.95] },
-  { name: "Snake",    emoji: "\u{1F40D}", values: [0.20, 0.85, 0.00, 0.02, 0.50, 0.05] },
-  { name: "Cat",      emoji: "\u{1F431}", values: [0.15, 0.30, 0.75, 0.85, 0.70, 0.25] },
-  { name: "Dog",      emoji: "\u{1F415}", values: [0.45, 0.20, 0.70, 0.90, 0.55, 0.45] },
+  { name: "Bear",     emoji: "\u{1F43B}", values: [0.51, 0.48, 0.45, 0.28, 0.23, 0.42] },
+  { name: "Rabbit",   emoji: "\u{1F430}", values: [0.07, 0.01, 0.45, 0.71, 0.52, 0.11] },
+  { name: "Shark",    emoji: "\u{1F988}", values: [0.55, 0.65, 0.00, 0.00, 0.51, 0.14] },
+  { name: "Mouse",    emoji: "\u{1F42D}", values: [0.03, 0.06, 0.38, 0.51, 0.76, 0.13] },
+  { name: "Eagle",    emoji: "\u{1F985}", values: [0.30, 0.51, 0.04, 0.02, 0.81, 0.04] },
+  { name: "Elephant", emoji: "\u{1F418}", values: [0.67, 0.21, 0.03, 0.27, 0.10, 0.65] },
+  { name: "Snake",    emoji: "\u{1F40D}", values: [0.20, 0.84, 0.00, 0.02, 0.50, 0.05] },
+  { name: "Cat",      emoji: "\u{1F431}", values: [0.11, 0.21, 0.54, 0.61, 0.50, 0.18] },
+  { name: "Dog",      emoji: "\u{1F415}", values: [0.31, 0.14, 0.49, 0.63, 0.38, 0.31] },
 ];
 
 const RPG_CHARACTERS: VectorItem[] = [
-  { name: "Warrior",  emoji: "\u{2694}\u{FE0F}",  values: [0.90, 0.30, 0.20, 0.85, 0.60, 0.40] },
-  { name: "Wizard",   emoji: "\u{1F9D9}",  values: [0.20, 0.95, 0.80, 0.30, 0.10, 0.70] },
-  { name: "Rogue",    emoji: "\u{1F5E1}\u{FE0F}",  values: [0.50, 0.40, 0.60, 0.40, 0.95, 0.85] },
-  { name: "Healer",   emoji: "\u{2728}",  values: [0.15, 0.80, 0.90, 0.20, 0.30, 0.50] },
-  { name: "Paladin",  emoji: "\u{1F6E1}\u{FE0F}",  values: [0.80, 0.60, 0.50, 0.90, 0.40, 0.30] },
-  { name: "Ranger",   emoji: "\u{1F3F9}",  values: [0.60, 0.35, 0.45, 0.50, 0.85, 0.75] },
+  { name: "Warrior",  emoji: "\u{2694}\u{FE0F}",  values: [0.61, 0.20, 0.14, 0.58, 0.41, 0.27] },
+  { name: "Wizard",   emoji: "\u{1F9D9}",  values: [0.14, 0.64, 0.54, 0.20, 0.07, 0.47] },
+  { name: "Rogue",    emoji: "\u{1F5E1}\u{FE0F}",  values: [0.31, 0.25, 0.38, 0.25, 0.59, 0.53] },
+  { name: "Healer",   emoji: "\u{2728}",  values: [0.11, 0.59, 0.66, 0.15, 0.22, 0.37] },
+  { name: "Paladin",  emoji: "\u{1F6E1}\u{FE0F}",  values: [0.53, 0.39, 0.33, 0.59, 0.26, 0.20] },
+  { name: "Ranger",   emoji: "\u{1F3F9}",  values: [0.40, 0.23, 0.30, 0.34, 0.57, 0.50] },
 ];
 
 const FOODS: VectorItem[] = [
-  { name: "Pizza",     emoji: "\u{1F355}", values: [0.85, 0.20, 0.75, 0.90, 0.70, 0.60] },
-  { name: "Salad",     emoji: "\u{1F957}", values: [0.10, 0.05, 0.20, 0.15, 0.85, 0.30] },
-  { name: "Ice cream", emoji: "\u{1F368}", values: [0.05, 0.95, 0.15, 0.40, 0.10, 0.80] },
-  { name: "Sushi",     emoji: "\u{1F363}", values: [0.60, 0.30, 0.50, 0.20, 0.75, 0.45] },
-  { name: "Burger",    emoji: "\u{1F354}", values: [0.90, 0.35, 0.80, 0.85, 0.50, 0.55] },
-  { name: "Fruit",     emoji: "\u{1F34E}", values: [0.05, 0.70, 0.10, 0.10, 0.90, 0.25] },
-  { name: "Cake",      emoji: "\u{1F370}", values: [0.30, 0.90, 0.40, 0.60, 0.15, 0.85] },
+  { name: "Pizza",     emoji: "\u{1F355}", values: [0.49, 0.12, 0.43, 0.52, 0.41, 0.35] },
+  { name: "Salad",     emoji: "\u{1F957}", values: [0.11, 0.05, 0.21, 0.16, 0.90, 0.32] },
+  { name: "Ice cream", emoji: "\u{1F368}", values: [0.04, 0.72, 0.11, 0.30, 0.08, 0.61] },
+  { name: "Sushi",     emoji: "\u{1F363}", values: [0.49, 0.24, 0.41, 0.16, 0.61, 0.37] },
+  { name: "Burger",    emoji: "\u{1F354}", values: [0.53, 0.21, 0.47, 0.50, 0.30, 0.33] },
+  { name: "Fruit",     emoji: "\u{1F34E}", values: [0.04, 0.59, 0.08, 0.08, 0.76, 0.21] },
+  { name: "Cake",      emoji: "\u{1F370}", values: [0.20, 0.61, 0.27, 0.41, 0.10, 0.58] },
 ];
 
 const INSTRUMENTS: VectorItem[] = [
-  { name: "Guitar",  emoji: "\u{1F3B8}", values: [0.70, 0.60, 0.75, 0.40, 0.85, 0.50] },
-  { name: "Piano",   emoji: "\u{1F3B9}", values: [0.50, 0.80, 0.90, 0.20, 0.60, 0.70] },
-  { name: "Drums",   emoji: "\u{1FA98}", values: [0.95, 0.20, 0.30, 0.90, 0.40, 0.35] },
-  { name: "Violin",  emoji: "\u{1F3BB}", values: [0.30, 0.90, 0.85, 0.15, 0.70, 0.80] },
-  { name: "Trumpet", emoji: "\u{1F3BA}", values: [0.85, 0.50, 0.40, 0.60, 0.55, 0.45] },
-  { name: "Flute",   emoji: "\u{1FA88}", values: [0.15, 0.75, 0.70, 0.10, 0.80, 0.65] },
+  { name: "Guitar",  emoji: "\u{1F3B8}", values: [0.44, 0.38, 0.47, 0.25, 0.53, 0.31] },
+  { name: "Piano",   emoji: "\u{1F3B9}", values: [0.31, 0.50, 0.56, 0.12, 0.37, 0.43] },
+  { name: "Drums",   emoji: "\u{1FA98}", values: [0.65, 0.14, 0.21, 0.62, 0.27, 0.24] },
+  { name: "Violin",  emoji: "\u{1F3BB}", values: [0.18, 0.54, 0.51, 0.09, 0.42, 0.48] },
+  { name: "Trumpet", emoji: "\u{1F3BA}", values: [0.60, 0.35, 0.28, 0.42, 0.39, 0.32] },
+  { name: "Flute",   emoji: "\u{1FA88}", values: [0.10, 0.51, 0.48, 0.07, 0.55, 0.44] },
 ];
 
 export const ANIMAL_DOMAIN: VectorDomain = {

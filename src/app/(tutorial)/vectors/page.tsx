@@ -3,7 +3,6 @@ import { getAdjacentChapters } from "@/lib/curriculum";
 import Content from "./content.mdx";
 import {
   VectorPropertyExplorerWidget,
-  VelocityExplorerWidget,
   DotProduct2DWidget,
   DotProductComparisonWidget,
   NeuronDotProductWidget,
@@ -24,7 +23,6 @@ export default function ChapterVectors() {
         <Content
           components={{
             VectorPropertyExplorerWidget,
-            VelocityExplorerWidget,
             DotProduct2DWidget,
             DotProductComparisonWidget,
             NeuronDotProductWidget,

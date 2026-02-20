@@ -5,7 +5,7 @@ import { WidgetContainer } from "../shared/WidgetContainer";
 import { WidgetTabs } from "../shared/WidgetTabs";
 import { SliderControl } from "../shared/SliderControl";
 import { VectorCard } from "./VectorCard";
-import { VECTOR_DOMAINS, vecDot, vecNormalize, productColor, type VectorDomain } from "./vectorData";
+import { VECTOR_DOMAINS, vecDot, productColor, type VectorDomain } from "./vectorData";
 
 function sigmoid(x: number): number {
   return 1 / (1 + Math.exp(-x));
@@ -376,10 +376,8 @@ function DomainNeuronTab({ domain, bias, onBiasChange, weightMag, onWeightMagCha
   const weightItem = domain.items[wIdx];
   const inputItem = domain.items[xIdx];
 
-  const normWeight = vecNormalize(weightItem.values);
-  const normInput = vecNormalize(inputItem.values);
-  const scaledWeightValues = normWeight.map((v) => v * weightMag);
-  const dot = vecDot(scaledWeightValues, normInput);
+  const scaledWeightValues = weightItem.values.map((v) => v * weightMag);
+  const dot = vecDot(scaledWeightValues, inputItem.values);
   const output = sigmoid(dot + bias);
   const outColor = outputColor(output);
 
@@ -441,10 +439,10 @@ function DomainNeuronTab({ domain, bias, onBiasChange, weightMag, onWeightMagCha
         />
         <VectorCard
           name={inputItem.name} emoji={inputItem.emoji}
-          properties={domain.properties} values={normInput}
+          properties={domain.properties} values={inputItem.values}
           barColor="#3b82f6" label="input" labelColor="#3b82f6"
         />
-        <ProductColumn vecW={scaledWeightValues} vecX={normInput} properties={domain.properties} dot={dot} />
+        <ProductColumn vecW={scaledWeightValues} vecX={inputItem.values} properties={domain.properties} dot={dot} />
       </div>
     </>
   );
