@@ -66,11 +66,21 @@ function similarityWord(cosTheta: number): { text: string; color: string } {
 }
 
 function magnitudeWord(mag: number): string {
-  if (mag < 0.3) return "tiny";
-  if (mag < 0.7) return "small";
-  if (mag < 1.1) return "medium";
-  if (mag < 1.5) return "big";
-  return "very big";
+  if (mag < 0.3) return "very short";
+  if (mag < 0.7) return "short";
+  if (mag < 1.1) return "medium length";
+  if (mag < 1.5) return "long";
+  return "very long";
+}
+
+function dotProductWord(dot: number): { text: string; color: string } {
+  if (dot > 2) return { text: "Large and positive", color: "#22c55e" };
+  if (dot > 0.5) return { text: "Positive", color: "#22c55e" };
+  if (dot > 0.1) return { text: "Small and positive", color: "#94a3b8" };
+  if (dot > -0.1) return { text: "Near zero", color: "#94a3b8" };
+  if (dot > -0.5) return { text: "Small and negative", color: "#94a3b8" };
+  if (dot > -2) return { text: "Negative", color: "#f97316" };
+  return { text: "Large and negative", color: "#ef4444" };
 }
 
 export function DotProduct2D() {
@@ -198,6 +208,8 @@ export function DotProduct2D() {
               barColor="#3b82f6"
               label="a" labelColor="#3b82f6"
               className="flex-1 min-w-0"
+              signed signedMax={1.8}
+              animate={false}
             />
             <VectorCard
               name="" emoji=""
@@ -206,6 +218,8 @@ export function DotProduct2D() {
               barColor="#f59e0b"
               label="b" labelColor="#f59e0b"
               className="flex-1 min-w-0"
+              signed signedMax={1.8}
+              animate={false}
             />
           </div>
 
@@ -247,6 +261,12 @@ export function DotProduct2D() {
             </div>
             <div className="text-sm" style={{ color: simColor }}>
               {simText}
+            </div>
+            <div className="text-center pt-1">
+              <span className="text-sm text-muted">dot product is </span>
+              <span className="text-2xl font-bold font-mono" style={{ color: dotColor }}>
+                {dotProduct.toFixed(2)}
+              </span>
             </div>
           </div>
         </div>
