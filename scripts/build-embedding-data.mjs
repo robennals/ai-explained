@@ -408,6 +408,7 @@ async function main() {
       "matthew", "jacob", "smith", "jackson", "walker", "jefferson",
       "indiana", "pioneer", "sir", "kate", "java",
       "peninsula", "continent", "hemisphere", "equator",
+      "sex", "intercourse", "abuse", "racism", "drug", "breast", "hell",
     ]);
 
     const MAX_FREQ_NOUNS = 4000;
