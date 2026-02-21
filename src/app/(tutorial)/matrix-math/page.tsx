@@ -11,7 +11,7 @@ import {
 } from "./widgets";
 
 export const metadata = {
-  title: "Matrix Math and Linear Transformations — Learn AI Layer by Layer",
+  title: "Neural Networks as Geometry — Learn AI Layer by Layer",
   description:
     "Every neural network layer is a geometric transformation. See how matrices rotate, scale, and shear space — and why that's the same thing as a layer of neurons.",
 };

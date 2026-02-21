@@ -9,7 +9,7 @@ import {
 } from "./widgets";
 
 export const metadata = {
-  title: "Predicting the Next Word — Learn AI Layer by Layer",
+  title: "Prediction Requires Understanding — Learn AI Layer by Layer",
   description:
     "If you can predict the next word accurately, you must understand grammar, facts, and common sense. Prediction IS understanding.",
 };
