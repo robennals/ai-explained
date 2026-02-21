@@ -13,6 +13,14 @@ const VectorPropertyExplorer = dynamic(
 );
 
 
+const UnitVectorExplorer = dynamic(
+  () =>
+    import("@/components/widgets/vectors/UnitVectorExplorer").then(
+      (m) => m.UnitVectorExplorer
+    ),
+  { ssr: false }
+);
+
 const DotProduct2D = dynamic(
   () =>
     import("@/components/widgets/vectors/DotProduct2D").then(
@@ -62,6 +70,14 @@ export function VectorPropertyExplorerWidget({ children }: { children?: React.Re
   );
 }
 
+
+export function UnitVectorExplorerWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <UnitVectorExplorer />
+    </WidgetSlot>
+  );
+}
 
 export function DotProduct2DWidget({ children }: { children?: React.ReactNode }) {
   return (

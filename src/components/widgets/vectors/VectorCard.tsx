@@ -6,12 +6,14 @@ export function PropBar({
   highlight,
   animate = true,
   max = 1,
+  barWidth,
 }: {
   value: number;
   color?: string;
   highlight?: "match" | "diff" | "none";
   animate?: boolean;
   max?: number;
+  barWidth?: string;
 }) {
   const bg =
     highlight === "match"
@@ -22,7 +24,7 @@ export function PropBar({
   const pct = Math.max(0, Math.min(1, value / max)) * 100;
   return (
     <div className="flex items-center gap-1.5">
-      <div className="h-2.5 w-16 rounded-full bg-foreground/5">
+      <div className={`h-2.5 ${barWidth ?? "w-16"} rounded-full bg-foreground/5`}>
         <div
           className={`h-2.5 rounded-full ${animate ? "transition-all duration-200" : ""}`}
           style={{ width: `${pct}%`, backgroundColor: bg }}
@@ -84,6 +86,7 @@ export function VectorCard({
   animate = true,
   labelWidth,
   barMax,
+  barWidth,
 }: {
   name: string;
   emoji: string;
@@ -99,6 +102,7 @@ export function VectorCard({
   animate?: boolean;
   labelWidth?: string;
   barMax?: number;
+  barWidth?: string;
 }) {
   return (
     <div className={`rounded-lg border border-foreground/10 bg-foreground/[0.02] overflow-hidden shrink-0 ${className ?? ""}`}>
@@ -130,6 +134,7 @@ export function VectorCard({
               highlight={highlight ? highlight(i) : undefined}
               animate={animate}
               max={barMax}
+              barWidth={barWidth}
             />
           )}
         </div>

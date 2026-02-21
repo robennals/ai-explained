@@ -23,15 +23,23 @@ Notice something important: the vector captures what we *chose* to measure. If w
 **A vector is a compact description.** It's a list of numbers that together describe something. More dimensions mean finer distinctions. Vectors can describe positions, colors, characters, animals, foods — anything you can capture with numbers.
 </KeyInsight>
 
-## Unit Vectors
+## Magnitude and Unit Vectors
 
-The vectors above have been scaled so that the sum of the squares of all their dimensions adds up to 1. A vector like this is called a **unit vector**. You can think of it as the generalization of the number 1 to multiple dimensions — just as 1 is the "standard size" for a number, a unit vector is the "standard size" for a vector.
+You can see in the 2D Line tab above that a 2D line has a length. It turns out that *all* vectors have a length, not just 2D ones. We compute the length of a vector — which we call its **magnitude** — using the same Pythagorean rule that we use to compute the length of a line: square all the dimensions, add them together, and take the square root.
 
-This scaling preserves the *proportions* between dimensions — a bear is still scarier than it is fast — but puts every vector on the same footing, which turns out to be important for measuring similarity.
+One particularly important kind of vector is a **unit vector** — a vector whose magnitude is 1. The animal, food, and instrument vectors above are all unit vectors. You can think of a unit vector as the "standard size" for a vector, just as 1 is the standard size for a number.
+
+Why does this matter? Scaling every vector to magnitude 1 preserves the *proportions* between dimensions — a bear is still scarier than it is fast — but makes every vector the same size. This turns out to be exactly what we need when we want to measure how similar two things are.
+
+Any vector can be multiplied by a number to make it longer or shorter. A unit vector multiplied by a magnitude gives a vector that points in the same direction but has a different length.
+
+<UnitVectorExplorerWidget>
+On the **2D Space** tab, drag the unit vector around the circle and adjust the magnitude slider. On the **Custom Animal** tab, design your own animal — notice how adjusting one property automatically scales the others to keep the magnitude at 1. On the **Amplified Animal** tab, pick an animal and see what happens when you multiply its unit vector by different magnitudes.
+</UnitVectorExplorerWidget>
 
 ## Cosine Similarity
 
-Now that we can describe things as unit vectors, how do we measure **how similar** two things are? There's a beautifully simple operation called **cosine similarity**. You multiply each matching pair of numbers, then add up all the results:
+Now that we have unit vectors — vectors that are all the same size — we can measure **how similar** two things are. There's a beautifully simple operation called **cosine similarity**. You multiply each matching pair of numbers, then add up all the results:
 
 **similarity = (a₁ × b₁) + (a₂ × b₂) + … + (aₙ × bₙ)**
 
