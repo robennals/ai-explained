@@ -4,14 +4,6 @@ import dynamic from "next/dynamic";
 import { Suspense } from "react";
 import { TryItProvider } from "@/components/widgets/shared/WidgetContainer";
 
-const WordNumberLine = dynamic(
-  () =>
-    import("@/components/widgets/embeddings/WordNumberLine").then(
-      (m) => m.WordNumberLine
-    ),
-  { ssr: false }
-);
-
 const CombinedNumberLine = dynamic(
   () =>
     import("@/components/widgets/embeddings/CombinedNumberLine").then(
@@ -81,14 +73,6 @@ function WidgetSlot({ children, tryIt, label }: { children: React.ReactNode; try
         {children}
       </TryItProvider>
     </Suspense>
-  );
-}
-
-export function WordNumberLineWidget({ children }: { children?: React.ReactNode }) {
-  return (
-    <WidgetSlot tryIt={children} label="Explore it">
-      <WordNumberLine />
-    </WidgetSlot>
   );
 }
 

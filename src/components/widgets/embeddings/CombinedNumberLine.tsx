@@ -2,13 +2,17 @@
 
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
+import { WidgetTabs } from "../shared/WidgetTabs";
 
 interface GroupItem {
   word: string;
   value: number; // position within the group's range
 }
 
+type PresetId = "animals-foods" | "vehicles-instruments" | "clothes-sports";
+
 interface Preset {
+  id: PresetId;
   label: string;
   left: { name: string; ordering: string; color: string; items: GroupItem[] };
   right: { name: string; ordering: string; color: string; items: GroupItem[] };
@@ -16,6 +20,7 @@ interface Preset {
 
 const PRESETS: Preset[] = [
   {
+    id: "animals-foods",
     label: "Animals \u00d7 Foods",
     left: {
       name: "Animals",
@@ -45,6 +50,7 @@ const PRESETS: Preset[] = [
     },
   },
   {
+    id: "vehicles-instruments",
     label: "Vehicles \u00d7 Instruments",
     left: {
       name: "Vehicles",
@@ -72,6 +78,7 @@ const PRESETS: Preset[] = [
     },
   },
   {
+    id: "clothes-sports",
     label: "Clothes \u00d7 Sports",
     left: {
       name: "Clothes",
@@ -153,12 +160,17 @@ const AXIS_MIN = -0.2;
 const AXIS_MAX = 10.2;
 
 export function CombinedNumberLine() {
-  const [presetIdx, setPresetIdx] = useState(0);
+  const [activePreset, setActivePreset] = useState<PresetId>("animals-foods");
   const [hoveredWord, setHoveredWord] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(600);
 
-  const preset = PRESETS[presetIdx];
+  const preset = PRESETS.find((p) => p.id === activePreset) ?? PRESETS[0];
+
+  const tabs = useMemo(
+    () => PRESETS.map((p) => ({ id: p.id, label: p.label })),
+    [],
+  );
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -170,7 +182,7 @@ export function CombinedNumberLine() {
   }, []);
 
   const resetState = useCallback(() => {
-    setPresetIdx(0);
+    setActivePreset("animals-foods");
     setHoveredWord(null);
   }, []);
 
@@ -229,21 +241,7 @@ export function CombinedNumberLine() {
       description="A single number line can encode both the category a word belongs to AND a property within that category."
       onReset={resetState}
     >
-      <div className="mb-4 flex flex-wrap gap-2">
-        {PRESETS.map((p, i) => (
-          <button
-            key={p.label}
-            onClick={() => { setPresetIdx(i); setHoveredWord(null); }}
-            className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
-              i === presetIdx
-                ? "bg-accent text-white"
-                : "bg-surface text-muted hover:text-foreground"
-            }`}
-          >
-            {p.label}
-          </button>
-        ))}
-      </div>
+      <WidgetTabs tabs={tabs} activeTab={activePreset} onTabChange={(id) => { setActivePreset(id); setHoveredWord(null); }} />
 
       <div ref={containerRef} className="w-full">
         <svg width={containerWidth} height={totalHeight} className="overflow-visible">

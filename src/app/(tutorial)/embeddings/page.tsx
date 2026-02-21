@@ -2,7 +2,6 @@ import { ChapterNav } from "@/components/layout/ChapterNav";
 import { getAdjacentChapters } from "@/lib/curriculum";
 import Content from "./content.mdx";
 import {
-  WordNumberLineWidget,
   CombinedNumberLineWidget,
   Simple2DScatterWidget,
   EmbeddingPlaygroundWidget,
@@ -26,7 +25,6 @@ export default function Chapter04() {
       <div className="prose prose-lg max-w-none">
         <Content
           components={{
-            WordNumberLineWidget,
             CombinedNumberLineWidget,
             Simple2DScatterWidget,
             EmbeddingPlaygroundWidget,

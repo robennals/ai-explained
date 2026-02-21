@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
+import { WidgetTabs } from "../shared/WidgetTabs";
 
 interface WordPoint {
   word: string;
@@ -121,37 +122,68 @@ const QUAD_WORDS: QuadPoint[] = [
 ];
 
 // Four clearly distinct, non-overlapping categories in separate quadrants.
+// Each quadrant uses its own pair of meaningful axes so the positions aren't arbitrary.
+//
+// Animals (top-left):     x = slow→fast,     y = small→big
+// Buildings (top-right):  x = old→modern,    y = short→tall
+// Planets (bottom-left):  x = near→far,      y = small→big
+// Instruments (bot-right): x = low→high pitch, y = small→big
+//
+// Within each quadrant the raw property values are mapped to the quadrant's
+// 0–4.5 range, then offset to the right quadrant region.
+
 const DISTINCT_WORDS: QuadPoint[] = [
-  // Animals (top-left quadrant)
-  { word: "dog",       category: "animal",     quadX: 1,   quadY: 8 },
-  { word: "cat",       category: "animal",     quadX: 2.5, quadY: 9 },
-  { word: "elephant",  category: "animal",     quadX: 1.5, quadY: 7 },
-  { word: "ant",       category: "animal",     quadX: 3,   quadY: 7.5 },
-  { word: "eagle",     category: "animal",     quadX: 2,   quadY: 6.5 },
+  // Points are kept inside the axis region (well clear of quadrant edges and labels).
+  // Top-left quadrant safe zone:  x 1.2–3.8,  y 6.2–8.8
+  // Top-right quadrant safe zone: x 6.2–8.8,  y 6.2–8.8
+  // Bot-left quadrant safe zone:  x 1.2–3.8,  y 1.2–3.8
+  // Bot-right quadrant safe zone: x 6.2–8.8,  y 1.2–3.8
 
-  // Buildings (top-right quadrant)
-  { word: "house",      category: "building",  quadX: 7,   quadY: 8 },
-  { word: "church",     category: "building",  quadX: 8.5, quadY: 9 },
-  { word: "skyscraper", category: "building",  quadX: 8,   quadY: 7 },
-  { word: "barn",       category: "building",  quadX: 9,   quadY: 7.5 },
-  { word: "lighthouse", category: "building",  quadX: 7.5, quadY: 6.5 },
+  // Animals (top-left): slow→fast, small→big
+  { word: "ant",       category: "animal",     quadX: 1.3, quadY: 6.3 },
+  { word: "cat",       category: "animal",     quadX: 2.2, quadY: 6.8 },
+  { word: "dog",       category: "animal",     quadX: 2.8, quadY: 7.3 },
+  { word: "horse",     category: "animal",     quadX: 3.7, quadY: 8.0 },
+  { word: "elephant",  category: "animal",     quadX: 1.6, quadY: 8.7 },
 
-  // Planets (bottom-left quadrant)
-  { word: "mercury",   category: "planet",     quadX: 1.5, quadY: 3 },
-  { word: "venus",     category: "planet",     quadX: 2.5, quadY: 2 },
-  { word: "mars",      category: "planet",     quadX: 1,   quadY: 1.5 },
-  { word: "jupiter",   category: "planet",     quadX: 3,   quadY: 1 },
-  { word: "saturn",    category: "planet",     quadX: 2,   quadY: 3.5 },
+  // Buildings (top-right): old→modern, short→tall
+  { word: "barn",       category: "building",  quadX: 6.4, quadY: 6.3 },
+  { word: "church",     category: "building",  quadX: 6.8, quadY: 7.4 },
+  { word: "lighthouse", category: "building",  quadX: 7.4, quadY: 7.0 },
+  { word: "house",      category: "building",  quadX: 8.0, quadY: 6.7 },
+  { word: "skyscraper", category: "building",  quadX: 8.6, quadY: 8.7 },
 
-  // Instruments (bottom-right quadrant)
-  { word: "guitar",    category: "instrument", quadX: 7.5, quadY: 3 },
-  { word: "piano",     category: "instrument", quadX: 8.5, quadY: 2 },
-  { word: "flute",     category: "instrument", quadX: 7,   quadY: 1.5 },
-  { word: "drum",      category: "instrument", quadX: 9,   quadY: 1 },
-  { word: "violin",    category: "instrument", quadX: 8,   quadY: 3.5 },
+  // Planets (bottom-left): near→far, small→big
+  { word: "mercury",   category: "planet",     quadX: 1.3, quadY: 1.3 },
+  { word: "venus",     category: "planet",     quadX: 1.8, quadY: 1.8 },
+  { word: "mars",      category: "planet",     quadX: 2.3, quadY: 1.5 },
+  { word: "saturn",    category: "planet",     quadX: 3.4, quadY: 3.2 },
+  { word: "jupiter",   category: "planet",     quadX: 2.9, quadY: 3.7 },
+
+  // Instruments (bottom-right): low→high pitch, small→big
+  { word: "flute",     category: "instrument", quadX: 8.6, quadY: 1.3 },
+  { word: "violin",    category: "instrument", quadX: 7.8, quadY: 1.8 },
+  { word: "guitar",    category: "instrument", quadX: 7.2, quadY: 2.6 },
+  { word: "drum",      category: "instrument", quadX: 6.5, quadY: 2.0 },
+  { word: "piano",     category: "instrument", quadX: 6.4, quadY: 3.6 },
 ];
 
-type PresetId = "size-danger" | "animal-food" | "four-distinct" | "four-overlap";
+// Per-quadrant axis labels for the "four distinct" preset
+const DISTINCT_AXES: {
+  label: string;
+  fill: string;
+  xLabel: [string, string]; // [low end, high end]
+  yLabel: [string, string]; // [low end, high end]
+  // quadrant bounds in data space
+  x1: number; x2: number; y1: number; y2: number;
+}[] = [
+  { label: "Animals",     fill: "#22c55e", xLabel: ["slow", "fast"],   yLabel: ["small", "big"],  x1: 0, x2: 5, y1: 5, y2: 10 },
+  { label: "Buildings",   fill: "#3b82f6", xLabel: ["old", "modern"],  yLabel: ["short", "tall"], x1: 5, x2: 10, y1: 5, y2: 10 },
+  { label: "Planets",     fill: "#8b5cf6", xLabel: ["near", "far"],    yLabel: ["small", "big"],  x1: 0, x2: 5, y1: 0, y2: 5 },
+  { label: "Instruments", fill: "#f97316", xLabel: ["low", "high"],    yLabel: ["small", "big"],  x1: 5, x2: 10, y1: 0, y2: 5 },
+];
+
+type PresetId = "animal-food" | "four-distinct" | "four-overlap";
 
 interface PresetDef {
   id: PresetId;
@@ -161,11 +193,6 @@ interface PresetDef {
 
 const PRESETS: PresetDef[] = [
   {
-    id: "size-danger",
-    label: "Size \u00d7 Danger",
-    description: "Two continuous properties. Bear and shark are big AND dangerous. Knife and gun are small but deadly. Most food and instruments are small and safe.",
-  },
-  {
     id: "animal-food",
     label: "Animal or Food?",
     description: "Chicken, salmon, and lamb are BOTH animals AND food \u2014 they sit in the overlap. Two dimensions let us represent overlapping categories, like a Venn diagram.",
@@ -173,7 +200,7 @@ const PRESETS: PresetDef[] = [
   {
     id: "four-distinct",
     label: "Four Distinct Categories",
-    description: "Animals, buildings, planets, and instruments have nothing in common \u2014 so they sit in four clean, separate quadrants. Two dimensions work perfectly when categories don\u2019t overlap.",
+    description: "Each quadrant uses the same two numbers for completely different axes \u2014 size and speed for animals, height and age for buildings, and so on. The category determines what the dimensions mean, just like how regions of the number line meant different things in the previous widget.",
   },
   {
     id: "four-overlap",
@@ -217,7 +244,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 const MARGIN = { top: 20, right: 20, bottom: 40, left: 50 };
 
 export function Simple2DScatter() {
-  const [presetIdx, setPresetIdx] = useState(0);
+  const [activePreset, setActivePreset] = useState<PresetId>("animal-food");
   const [hoveredWord, setHoveredWord] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [dims, setDims] = useState({ width: 500, height: 400 });
@@ -234,14 +261,19 @@ export function Simple2DScatter() {
     return () => obs.disconnect();
   }, []);
 
-  const preset = PRESETS[presetIdx];
+  const preset = PRESETS.find((p) => p.id === activePreset) ?? PRESETS[0];
+
+  const tabs = useMemo(
+    () => PRESETS.map((p) => ({ id: p.id, label: p.label })),
+    [],
+  );
   const isVenn = preset.id === "animal-food";
   const isQuad = preset.id === "four-overlap";
   const isDistinct = preset.id === "four-distinct";
   const isQuadLike = isQuad || isDistinct;
 
   const resetState = useCallback(() => {
-    setPresetIdx(0);
+    setActivePreset("animal-food");
     setHoveredWord(null);
   }, []);
 
@@ -309,22 +341,7 @@ export function Simple2DScatter() {
       description="Plot words using two properties at once. Toggle between views to see different ways two dimensions organize meaning."
       onReset={resetState}
     >
-      {/* Preset buttons */}
-      <div className="mb-3 flex flex-wrap gap-2">
-        {PRESETS.map((p, i) => (
-          <button
-            key={p.id}
-            onClick={() => { setPresetIdx(i); setHoveredWord(null); }}
-            className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
-              i === presetIdx
-                ? "bg-accent text-white"
-                : "bg-surface text-muted hover:text-foreground"
-            }`}
-          >
-            {p.label}
-          </button>
-        ))}
-      </div>
+      <WidgetTabs tabs={tabs} activeTab={activePreset} onTabChange={(id) => { setActivePreset(id); setHoveredWord(null); }} />
 
       {/* Legend */}
       <div className="mb-3 flex flex-wrap gap-3">
@@ -342,6 +359,13 @@ export function Simple2DScatter() {
           height={dims.height}
           className="overflow-visible"
         >
+          {/* Arrowhead marker for per-quadrant axes */}
+          <defs>
+            <marker id="arrowhead" markerWidth="6" markerHeight="4" refX="5" refY="2" orient="auto">
+              <path d="M0,0 L6,2 L0,4" fill="none" stroke="currentColor" strokeWidth="1" opacity="0.4" />
+            </marker>
+          </defs>
+
           {/* Grid lines (scatter and venn only) */}
           {!isQuadLike && [0, 2, 4, 6, 8, 10].map((v) => (
             <g key={v}>
@@ -410,37 +434,86 @@ export function Simple2DScatter() {
             </>
           )}
 
-          {/* Four distinct categories: four non-overlapping quadrants */}
+          {/* Four distinct categories: quadrants with per-category axes */}
           {isDistinct && (() => {
-            const rects = [
-              { x1: 0, y1: 5, x2: 5, y2: 10,   fill: "#22c55e", label: "Animals",     lx: 1.5, ly: 9.5 },
-              { x1: 5, y1: 5, x2: 10, y2: 10,   fill: "#3b82f6", label: "Buildings",   lx: 8.5, ly: 9.5 },
-              { x1: 0, y1: 0, x2: 5, y2: 5,      fill: "#8b5cf6", label: "Planets",     lx: 1.5, ly: 0.5 },
-              { x1: 5, y1: 0, x2: 10, y2: 5,     fill: "#f97316", label: "Instruments", lx: 8.5, ly: 0.5 },
-            ];
             return (
               <>
-                {rects.map((r) => {
-                  const sx = xScale(r.x1);
-                  const sy = yScale(r.y2);
-                  const sw = xScale(r.x2) - xScale(r.x1);
-                  const sh = yScale(r.y1) - yScale(r.y2);
+                {DISTINCT_AXES.map((q) => {
+                  const sx = xScale(q.x1);
+                  const sy = yScale(q.y2);
+                  const sw = xScale(q.x2) - xScale(q.x1);
+                  const sh = yScale(q.y1) - yScale(q.y2);
+                  const cx = (xScale(q.x1) + xScale(q.x2)) / 2;
+                  const cy = (yScale(q.y1) + yScale(q.y2)) / 2;
+                  // axis arrow insets — push well inside the quadrant so
+                  // labels don't overlap the dashed border lines
+                  const inset = 28;
+                  const axLeft = sx + inset;
+                  const axRight = sx + sw - inset;
+                  const axBottom = sy + sh - inset;
+                  const axTop = sy + inset;
                   return (
-                    <g key={r.label}>
+                    <g key={q.label}>
+                      {/* Background */}
                       <rect
                         x={sx} y={sy} width={sw} height={sh}
-                        fill={r.fill} fillOpacity={0.06}
-                        stroke={r.fill} strokeWidth={1.5} strokeDasharray="6,4" opacity={0.35}
+                        fill={q.fill} fillOpacity={0.06}
+                        stroke={q.fill} strokeWidth={1.5} strokeDasharray="6,4" opacity={0.35}
                         rx={4}
                       />
+                      {/* Category label */}
                       <text
-                        x={xScale(r.lx)}
-                        y={yScale(r.ly)}
+                        x={cx} y={sy + 14}
                         textAnchor="middle"
-                        className="text-[12px] font-semibold pointer-events-none select-none"
-                        fill={r.fill} opacity={0.5}
+                        className="text-[11px] font-semibold pointer-events-none select-none"
+                        fill={q.fill} opacity={0.6}
                       >
-                        {r.label}
+                        {q.label}
+                      </text>
+                      {/* X-axis: small arrow along the bottom */}
+                      <line
+                        x1={axLeft} y1={axBottom}
+                        x2={axRight} y2={axBottom}
+                        stroke={q.fill} strokeWidth={1} opacity={0.3}
+                        markerEnd="url(#arrowhead)"
+                      />
+                      <text
+                        x={axLeft + 2} y={axBottom + 11}
+                        className="text-[8px] pointer-events-none select-none"
+                        fill={q.fill} opacity={0.5}
+                      >
+                        {q.xLabel[0]}
+                      </text>
+                      <text
+                        x={axRight - 2} y={axBottom + 11}
+                        textAnchor="end"
+                        className="text-[8px] pointer-events-none select-none"
+                        fill={q.fill} opacity={0.5}
+                      >
+                        {q.xLabel[1]}
+                      </text>
+                      {/* Y-axis: small arrow along the left */}
+                      <line
+                        x1={axLeft} y1={axBottom}
+                        x2={axLeft} y2={axTop}
+                        stroke={q.fill} strokeWidth={1} opacity={0.3}
+                        markerEnd="url(#arrowhead)"
+                      />
+                      <text
+                        x={axLeft - 3} y={axBottom - 2}
+                        textAnchor="end"
+                        className="text-[8px] pointer-events-none select-none"
+                        fill={q.fill} opacity={0.5}
+                      >
+                        {q.yLabel[0]}
+                      </text>
+                      <text
+                        x={axLeft - 3} y={axTop + 4}
+                        textAnchor="end"
+                        className="text-[8px] pointer-events-none select-none"
+                        fill={q.fill} opacity={0.5}
+                      >
+                        {q.yLabel[1]}
                       </text>
                     </g>
                   );

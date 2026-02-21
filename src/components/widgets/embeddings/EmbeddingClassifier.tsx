@@ -2,25 +2,12 @@
 
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
+import { WidgetTabs } from "../shared/WidgetTabs";
+
+// --- Utility functions ---
 
 function sigmoid(x: number): number {
   return 1 / (1 + Math.exp(-Math.max(-500, Math.min(500, x))));
-}
-
-function outputColor(v: number): string {
-  if (v <= 0.5) {
-    const t = v / 0.5;
-    const r = Math.round(239 + (160 - 239) * t);
-    const g = Math.round(68 + (160 - 68) * t);
-    const b = Math.round(68 + (160 - 68) * t);
-    return `rgb(${r},${g},${b})`;
-  } else {
-    const t = (v - 0.5) / 0.5;
-    const r = Math.round(160 + (16 - 160) * t);
-    const g = Math.round(160 + (185 - 160) * t);
-    const b = Math.round(160 + (129 - 160) * t);
-    return `rgb(${r},${g},${b})`;
-  }
 }
 
 function outputColorRGB(v: number): [number, number, number] {
@@ -41,104 +28,174 @@ function outputColorRGB(v: number): [number, number, number] {
   }
 }
 
-// --- Word data points (normalized 0–1 from Size × Danger scatter) ---
-
-interface WordDataPoint {
-  word: string;
-  x: number; // size (0 = small, 1 = big)
-  y: number; // danger (0 = safe, 1 = dangerous)
+function outputColor(v: number): string {
+  const [r, g, b] = outputColorRGB(v);
+  return `rgb(${r},${g},${b})`;
 }
 
-const WORDS: WordDataPoint[] = [
-  { word: "ant",      x: 0.05, y: 0.03 },
-  { word: "dog",      x: 0.45, y: 0.25 },
-  { word: "horse",    x: 0.70, y: 0.20 },
-  { word: "bear",     x: 0.80, y: 0.85 },
-  { word: "elephant", x: 0.95, y: 0.35 },
-  { word: "shark",    x: 0.75, y: 0.90 },
-  { word: "bread",    x: 0.20, y: 0.00 },
-  { word: "cake",     x: 0.35, y: 0.00 },
-  { word: "pizza",    x: 0.25, y: 0.00 },
-  { word: "car",      x: 0.55, y: 0.40 },
-  { word: "truck",    x: 0.80, y: 0.50 },
-  { word: "guitar",   x: 0.35, y: 0.05 },
-  { word: "piano",    x: 0.65, y: 0.00 },
-  { word: "knife",    x: 0.15, y: 0.70 },
-  { word: "gun",      x: 0.15, y: 1.00 },
-];
-
-// --- Challenge system ---
-
-interface Challenge {
-  name: string;
-  description: string;
-  targetWords: string[];
+function forward1(x: number, y: number, w1: number, w2: number, b: number): number {
+  return sigmoid(w1 * x + w2 * y + b);
 }
 
-const CHALLENGES: Challenge[] = [
-  {
-    name: "Dangerous",
-    description: "Find things that are dangerous (bear, shark, knife, gun)",
-    targetWords: ["bear", "shark", "knife", "gun"],
-  },
-  {
-    name: "Big",
-    description: "Find things that are big (horse, bear, elephant, shark, truck, piano)",
-    targetWords: ["horse", "bear", "elephant", "shark", "truck", "piano"],
-  },
-  {
-    name: "Big & Dangerous",
-    description: "Find things that are BOTH big and dangerous (bear, shark)",
-    targetWords: ["bear", "shark"],
-  },
-  {
-    name: "Small & Dangerous",
-    description: "Find things that are small but dangerous (knife, gun)",
-    targetWords: ["knife", "gun"],
-  },
-];
-
-function getChallengePoints(challenge: Challenge): { word: string; x: number; y: number; target: number }[] {
-  return WORDS.map((w) => ({
-    word: w.word,
-    x: w.x,
-    y: w.y,
-    target: challenge.targetWords.includes(w.word) ? 1 : 0,
-  }));
-}
-
-// Forward pass for single neuron: 2 inputs → 1 output
-function forward(
-  size: number, danger: number,
-  wS: number, wD: number, bias: number,
+function forward2(
+  x: number, y: number,
+  wH1a: number, wH1b: number, bH1: number,
+  wH2a: number, wH2b: number, bH2: number,
+  wO1: number, wO2: number, bO: number,
 ): number {
-  return sigmoid(wS * size + wD * danger + bias);
+  const h1 = sigmoid(wH1a * x + wH1b * y + bH1);
+  const h2 = sigmoid(wH2a * x + wH2b * y + bH2);
+  return sigmoid(wO1 * h1 + wO2 * h2 + bO);
 }
+
+// --- Types ---
+
+interface DataPoint { word: string; x: number; y: number }
+interface Solution1 { layers: 1; w1: number; w2: number; b: number }
+interface Solution2 {
+  layers: 2;
+  wH1a: number; wH1b: number; bH1: number;
+  wH2a: number; wH2b: number; bH2: number;
+  wO1: number; wO2: number; bO: number;
+}
+type Solution = Solution1 | Solution2;
+interface Challenge { name: string; targetWords: string[]; solution: Solution }
+interface TabDef {
+  id: string;
+  label: string;
+  points: DataPoint[];
+  xAxis: string;
+  yAxis: string;
+  challenges: Challenge[];
+}
+
+// --- Tab data ---
+// Points are normalized to 0–1. Solutions are pre-computed known-good weights.
+
+const TABS: TabDef[] = [
+  {
+    id: "size-danger",
+    label: "Size × Danger",
+    xAxis: "Small → Big",
+    yAxis: "Safe → Dangerous",
+    points: [
+      { word: "ant", x: 0.05, y: 0.03 },
+      { word: "dog", x: 0.45, y: 0.25 },
+      { word: "horse", x: 0.70, y: 0.20 },
+      { word: "bear", x: 0.80, y: 0.85 },
+      { word: "elephant", x: 0.95, y: 0.35 },
+      { word: "shark", x: 0.75, y: 0.90 },
+      { word: "bread", x: 0.20, y: 0.00 },
+      { word: "cake", x: 0.35, y: 0.00 },
+      { word: "pizza", x: 0.25, y: 0.00 },
+      { word: "car", x: 0.55, y: 0.40 },
+      { word: "truck", x: 0.80, y: 0.50 },
+      { word: "guitar", x: 0.35, y: 0.05 },
+      { word: "piano", x: 0.65, y: 0.00 },
+      { word: "knife", x: 0.15, y: 0.70 },
+      { word: "gun", x: 0.15, y: 1.00 },
+    ],
+    challenges: [
+      { name: "Dangerous", targetWords: ["bear", "shark", "knife", "gun"],
+        solution: { layers: 1, w1: -5, w2: 20, b: -8 } },
+      { name: "Big", targetWords: ["horse", "bear", "elephant", "shark", "truck"],
+        solution: { layers: 1, w1: 20, w2: 0, b: -12 } },
+      { name: "Big & Dangerous", targetWords: ["bear", "shark"],
+        solution: { layers: 1, w1: 10, w2: 10, b: -14 } },
+      { name: "Small & Dangerous", targetWords: ["knife", "gun"],
+        solution: { layers: 1, w1: -15, w2: 15, b: -5 } },
+    ],
+  },
+  {
+    id: "animal-food",
+    label: "Animal or Food?",
+    xAxis: "Food ← → Animal",
+    yAxis: "Small → Big",
+    points: [
+      { word: "ant", x: 0.80, y: 0.05 },
+      { word: "cat", x: 0.90, y: 0.25 },
+      { word: "dog", x: 0.75, y: 0.40 },
+      { word: "horse", x: 0.90, y: 0.70 },
+      { word: "elephant", x: 0.80, y: 0.95 },
+      { word: "grape", x: 0.15, y: 0.05 },
+      { word: "apple", x: 0.25, y: 0.15 },
+      { word: "bread", x: 0.10, y: 0.30 },
+      { word: "cake", x: 0.20, y: 0.40 },
+      { word: "pizza", x: 0.15, y: 0.55 },
+      { word: "shrimp", x: 0.45, y: 0.10 },
+      { word: "chicken", x: 0.55, y: 0.30 },
+      { word: "salmon", x: 0.45, y: 0.35 },
+      { word: "duck", x: 0.55, y: 0.45 },
+      { word: "lamb", x: 0.50, y: 0.60 },
+    ],
+    challenges: [
+      { name: "Pure Animals", targetWords: ["ant", "cat", "dog", "horse", "elephant"],
+        solution: { layers: 1, w1: 20, w2: 0, b: -14 } },
+      { name: "Pure Food", targetWords: ["grape", "apple", "bread", "cake", "pizza"],
+        solution: { layers: 1, w1: -20, w2: 0, b: 6 } },
+      { name: "Both (Animal + Food)", targetWords: ["shrimp", "chicken", "salmon", "duck", "lamb"],
+        solution: { layers: 2, wH1a: 20, wH1b: 0, bH1: -7, wH2a: -20, wH2b: 0, bH2: 13, wO1: 15, wO2: 15, bO: -20 } },
+    ],
+  },
+  {
+    id: "four-categories",
+    label: "Four Categories",
+    xAxis: "",
+    yAxis: "",
+    // Normalized from 0–10 quadrant positions to 0–1
+    points: [
+      { word: "ant", x: 0.13, y: 0.63 },
+      { word: "cat", x: 0.22, y: 0.68 },
+      { word: "dog", x: 0.28, y: 0.73 },
+      { word: "horse", x: 0.37, y: 0.80 },
+      { word: "elephant", x: 0.16, y: 0.87 },
+      { word: "barn", x: 0.64, y: 0.63 },
+      { word: "church", x: 0.68, y: 0.74 },
+      { word: "l'house", x: 0.72, y: 0.70 },
+      { word: "house", x: 0.80, y: 0.67 },
+      { word: "sky'per", x: 0.86, y: 0.87 },
+      { word: "mercury", x: 0.13, y: 0.13 },
+      { word: "venus", x: 0.18, y: 0.18 },
+      { word: "mars", x: 0.23, y: 0.15 },
+      { word: "saturn", x: 0.34, y: 0.32 },
+      { word: "jupiter", x: 0.29, y: 0.37 },
+      { word: "flute", x: 0.86, y: 0.13 },
+      { word: "violin", x: 0.78, y: 0.18 },
+      { word: "guitar", x: 0.72, y: 0.26 },
+      { word: "drum", x: 0.65, y: 0.20 },
+      { word: "piano", x: 0.64, y: 0.36 },
+    ],
+    challenges: [
+      { name: "Animals", targetWords: ["ant", "cat", "dog", "horse", "elephant"],
+        solution: { layers: 2, wH1a: -20, wH1b: 0, bH1: 10, wH2a: 0, wH2b: 20, bH2: -10, wO1: 15, wO2: 15, bO: -20 } },
+      { name: "Buildings", targetWords: ["barn", "church", "l'house", "house", "sky'per"],
+        solution: { layers: 2, wH1a: 20, wH1b: 0, bH1: -10, wH2a: 0, wH2b: 20, bH2: -10, wO1: 15, wO2: 15, bO: -20 } },
+      { name: "Planets", targetWords: ["mercury", "venus", "mars", "saturn", "jupiter"],
+        solution: { layers: 2, wH1a: -20, wH1b: 0, bH1: 10, wH2a: 0, wH2b: -20, bH2: 10, wO1: 15, wO2: 15, bO: -20 } },
+      { name: "Instruments", targetWords: ["flute", "violin", "guitar", "drum", "piano"],
+        solution: { layers: 2, wH1a: 20, wH1b: 0, bH1: -10, wH2a: 0, wH2b: -20, bH2: 10, wO1: 15, wO2: 15, bO: -20 } },
+    ],
+  },
+];
+
+// --- Slider component ---
 
 const CANVAS_SIZE = 280;
 
-function mulberry32(seed: number) {
-  return function () {
-    let t = (seed += 0x6d2b79f5);
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
 function WeightSlider({
-  value, min, max, step, onChange, label,
+  value, min, max, step, onChange, label, disabled,
 }: {
   value: number; min: number; max: number; step: number;
-  onChange: (v: number) => void; label: string;
+  onChange: (v: number) => void; label: string; disabled?: boolean;
 }) {
   return (
     <div className="flex items-center gap-1.5">
-      <span className="text-[10px] font-mono text-muted w-10 text-right shrink-0">{label}</span>
+      <span className="text-[10px] font-mono text-muted w-8 text-right shrink-0">{label}</span>
       <input
         type="range" min={min} max={max} step={step} value={value}
         onChange={(e) => onChange(parseFloat(e.target.value))}
         className="flex-1 h-1 accent-accent min-w-0"
+        disabled={disabled}
       />
       <span className="text-[11px] font-mono font-bold text-foreground w-10 text-right shrink-0">
         {value.toFixed(1)}
@@ -147,37 +204,68 @@ function WeightSlider({
   );
 }
 
+// --- Main component ---
+
 export function EmbeddingClassifier() {
-  const [wS, setWS] = useState(0.0);
-  const [wD, setWD] = useState(0.0);
-  const [bias, setBias] = useState(0.0);
-
-  const [clickPos, setClickPos] = useState<{ x: number; y: number } | null>(null);
-  const [activeChallengeIdx, setActiveChallengeIdx] = useState<number | null>(null);
-  const [isOptimizing, setIsOptimizing] = useState(false);
-  const [optimizeStatus, setOptimizeStatus] = useState<string | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [activeTabId, setActiveTabId] = useState<string>("size-danger");
+  const [challengeIdx, setChallengeIdx] = useState<number | null>(null);
+  const [isAnimating, setIsAnimating] = useState(false);
   const animRef = useRef<number>(0);
-  const stateRef = useRef({ wS: 0, wD: 0, bias: 0, step: 0 });
-  const retryCountRef = useRef(0);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  useEffect(() => {
-    return () => {
-      if (animRef.current) cancelAnimationFrame(animRef.current);
-    };
+  // 1-layer weights
+  const [w1, setW1] = useState(0);
+  const [w2, setW2] = useState(0);
+  const [bias, setBias] = useState(0);
+
+  // 2-layer weights
+  const [wH1a, setWH1a] = useState(0);
+  const [wH1b, setWH1b] = useState(0);
+  const [bH1, setBH1] = useState(0);
+  const [wH2a, setWH2a] = useState(0);
+  const [wH2b, setWH2b] = useState(0);
+  const [bH2, setBH2] = useState(0);
+  const [wO1, setWO1] = useState(0);
+  const [wO2, setWO2] = useState(0);
+  const [bO, setBO] = useState(0);
+
+  const tab = useMemo(() => TABS.find(t => t.id === activeTabId) ?? TABS[0], [activeTabId]);
+  const widgetTabs = useMemo(() => TABS.map(t => ({ id: t.id, label: t.label })), []);
+  const challenge = challengeIdx !== null && challengeIdx < tab.challenges.length
+    ? tab.challenges[challengeIdx] : null;
+  const is2Layer = challenge?.solution.layers === 2;
+
+  const resetWeights = useCallback(() => {
+    setW1(0); setW2(0); setBias(0);
+    setWH1a(0); setWH1b(0); setBH1(0);
+    setWH2a(0); setWH2b(0); setBH2(0);
+    setWO1(0); setWO2(0); setBO(0);
   }, []);
+
+  const cancelAnim = useCallback(() => {
+    if (animRef.current) { cancelAnimationFrame(animRef.current); animRef.current = 0; }
+    setIsAnimating(false);
+  }, []);
+
+  useEffect(() => () => { if (animRef.current) cancelAnimationFrame(animRef.current); }, []);
+
+  const handleTabChange = useCallback((id: string) => {
+    cancelAnim(); setActiveTabId(id); setChallengeIdx(null); resetWeights();
+  }, [cancelAnim, resetWeights]);
+
+  const handleChallengeClick = useCallback((idx: number) => {
+    cancelAnim(); setChallengeIdx(idx); resetWeights();
+  }, [cancelAnim, resetWeights]);
 
   const reset = useCallback(() => {
-    setWS(0.0); setWD(0.0); setBias(0.0);
-    setClickPos(null);
-    setActiveChallengeIdx(null);
-    setIsOptimizing(false);
-    setOptimizeStatus(null);
-    if (animRef.current) cancelAnimationFrame(animRef.current);
-  }, []);
+    cancelAnim(); setActiveTabId("size-danger"); setChallengeIdx(null); resetWeights();
+  }, [cancelAnim, resetWeights]);
 
-  const activeChallenge = activeChallengeIdx !== null ? CHALLENGES[activeChallengeIdx] : null;
-  const activePoints = activeChallenge ? getChallengePoints(activeChallenge) : null;
+  // Compute network output at a point
+  const computeOutput = useCallback((x: number, y: number): number => {
+    if (is2Layer) return forward2(x, y, wH1a, wH1b, bH1, wH2a, wH2b, bH2, wO1, wO2, bO);
+    return forward1(x, y, w1, w2, bias);
+  }, [is2Layer, w1, w2, bias, wH1a, wH1b, bH1, wH2a, wH2b, bH2, wO1, wO2, bO]);
 
   // Render heatmap
   useEffect(() => {
@@ -192,7 +280,7 @@ export function EmbeddingClassifier() {
       for (let px = 0; px < size; px += res) {
         const x = px / (size - 1);
         const y = 1 - py / (size - 1);
-        const out = forward(x, y, wS, wD, bias);
+        const out = computeOutput(x, y);
         const [r, g, bv] = outputColorRGB(out);
         for (let dy = 0; dy < res && py + dy < size; dy++) {
           for (let dx = 0; dx < res && px + dx < size; dx++) {
@@ -206,414 +294,193 @@ export function EmbeddingClassifier() {
       }
     }
     ctx.putImageData(imageData, 0, 0);
-  }, [wS, wD, bias]);
+  }, [computeOutput]);
 
+  // Check solved
+  const targetWords = useMemo(() => challenge ? new Set(challenge.targetWords) : null, [challenge]);
   const challengeSolved = useMemo(() => {
-    if (!activePoints) return false;
-    return activePoints.every((pt) => {
-      const out = forward(pt.x, pt.y, wS, wD, bias);
-      return pt.target === 1 ? out > 0.8 : out < 0.2;
+    if (!challenge || !targetWords) return false;
+    return tab.points.every((pt) => {
+      const out = computeOutput(pt.x, pt.y);
+      return targetWords.has(pt.word) ? out > 0.65 : out < 0.35;
     });
-  }, [activePoints, wS, wD, bias]);
+  }, [challenge, targetWords, tab, computeOutput]);
 
-  const handleCanvasClick = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      const rect = e.currentTarget.getBoundingClientRect();
-      const px = e.clientX - rect.left;
-      const py = e.clientY - rect.top;
-      const x = Math.max(0, Math.min(1, px / rect.width));
-      const y = Math.max(0, Math.min(1, 1 - py / rect.height));
-      setClickPos({ x, y });
-    },
-    []
-  );
-
-  const activateChallenge = useCallback((idx: number) => {
-    setActiveChallengeIdx(idx);
-    setIsOptimizing(false);
-    setOptimizeStatus(null);
-    if (animRef.current) cancelAnimationFrame(animRef.current);
-  }, []);
-
-  const randomizeWeights = useCallback(() => {
-    setIsOptimizing(false);
-    setOptimizeStatus(null);
-    if (animRef.current) cancelAnimationFrame(animRef.current);
-    const rng = mulberry32(Date.now());
-    const randW = () => (rng() - 0.5) * 4;
-    setWS(randW()); setWD(randW()); setBias((rng() - 0.5) * 2);
-  }, []);
-
-  const initRandomWeights = useCallback(() => {
-    const rng = mulberry32(Date.now() + Math.random() * 1e9);
-    const s = {
-      wS: (rng() - 0.5) * 4,
-      wD: (rng() - 0.5) * 4,
-      bias: (rng() - 0.5) * 2,
-      step: 0,
-    };
-    stateRef.current = s;
-    setWS(s.wS); setWD(s.wD); setBias(s.bias);
-  }, []);
-
+  // Animate to known-good solution
   const startOptimize = useCallback(() => {
-    if (!activeChallenge) return;
-    if (isOptimizing) {
-      setIsOptimizing(false);
-      if (animRef.current) cancelAnimationFrame(animRef.current);
-      return;
-    }
-    setIsOptimizing(true);
-    setOptimizeStatus(null);
-    retryCountRef.current = 0;
+    if (!challenge) return;
+    if (isAnimating) { cancelAnim(); return; }
 
-    initRandomWeights();
+    const sol = challenge.solution;
+    const duration = 1500;
+    const startTime = performance.now();
 
-    const points = getChallengePoints(activeChallenge);
-    const maxSteps = 3000;
+    const startVals = sol.layers === 1
+      ? [w1, w2, bias]
+      : [wH1a, wH1b, bH1, wH2a, wH2b, bH2, wO1, wO2, bO];
+    const targetVals = sol.layers === 1
+      ? [sol.w1, sol.w2, sol.b]
+      : [sol.wH1a, sol.wH1b, sol.bH1, sol.wH2a, sol.wH2b, sol.bH2, sol.wO1, sol.wO2, sol.bO];
+    const setters: ((v: number) => void)[] = sol.layers === 1
+      ? [setW1, setW2, setBias]
+      : [setWH1a, setWH1b, setBH1, setWH2a, setWH2b, setBH2, setWO1, setWO2, setBO];
 
-    const animate = () => {
-      const s = stateRef.current;
-      const lr = 2.0;
-      const stepsPerFrame = 8;
-
-      for (let step = 0; step < stepsPerFrame; step++) {
-        let g_wS = 0, g_wD = 0, g_bias = 0;
-
-        for (const pt of points) {
-          const out = forward(pt.x, pt.y, s.wS, s.wD, s.bias);
-          const dOut = out - pt.target;
-          g_wS += dOut * pt.x;
-          g_wD += dOut * pt.y;
-          g_bias += dOut;
-        }
-
-        const n = points.length;
-        const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
-        s.wS = clamp(s.wS - lr * g_wS / n, -20, 20);
-        s.wD = clamp(s.wD - lr * g_wD / n, -20, 20);
-        s.bias = clamp(s.bias - lr * g_bias / n, -30, 30);
-        s.step++;
+    setIsAnimating(true);
+    const animate = (now: number) => {
+      const t = Math.min(1, (now - startTime) / duration);
+      const ease = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+      for (let i = 0; i < startVals.length; i++) {
+        setters[i](startVals[i] + (targetVals[i] - startVals[i]) * ease);
       }
-
-      setWS(s.wS); setWD(s.wD); setBias(s.bias);
-
-      let allCorrect = true;
-      for (const pt of points) {
-        const out = forward(pt.x, pt.y, s.wS, s.wD, s.bias);
-        if (pt.target === 1 ? out <= 0.8 : out >= 0.2) allCorrect = false;
+      if (t < 1) {
+        animRef.current = requestAnimationFrame(animate);
+      } else {
+        setIsAnimating(false);
+        animRef.current = 0;
       }
-
-      if (allCorrect) {
-        setIsOptimizing(false);
-        setOptimizeStatus("solved");
-        return;
-      }
-
-      if (s.step >= maxSteps) {
-        if (retryCountRef.current < 3) {
-          retryCountRef.current++;
-          initRandomWeights();
-          animRef.current = requestAnimationFrame(animate);
-          return;
-        }
-        setIsOptimizing(false);
-        setOptimizeStatus("done");
-        return;
-      }
-      animRef.current = requestAnimationFrame(animate);
     };
-
     animRef.current = requestAnimationFrame(animate);
-  }, [isOptimizing, activeChallenge, initRandomWeights]);
-
-  // Probed values
-  const probeInput = clickPos ?? { x: 0.5, y: 0.5 };
-  const weightedSum = wS * probeInput.x + wD * probeInput.y + bias;
-  const probeOut = sigmoid(weightedSum);
-  const prodS = wS * probeInput.x;
-  const prodD = wD * probeInput.y;
-
-  // Full neuron diagram layout: Inputs → Sum → Activation → Output
-  const NW = 620;
-  const NH = 220;
-  const INX = 50;
-  const INA_Y = 60;
-  const INB_Y = 160;
-  const SUM_X = 240;
-  const SUM_Y = 110;
-  const ACT_X = 400;
-  const ACT_Y = 110;
-  const ACT_W = 100;
-  const ACT_H = 68;
-  const OUT_X = 560;
-  const OUT_Y = 110;
-
-  // Sigmoid curve for activation box
-  const sigmoidPath = useMemo(() => {
-    const pts: string[] = [];
-    const pL = ACT_X - ACT_W / 2 + 8;
-    const pR = ACT_X + ACT_W / 2 - 8;
-    const pT = ACT_Y - ACT_H / 2 + 8;
-    const pB = ACT_Y + ACT_H / 2 - 8;
-    for (let i = 0; i <= 100; i++) {
-      const xv = -10 + 20 * (i / 100);
-      const yv = sigmoid(xv);
-      pts.push(
-        `${i === 0 ? "M" : "L"}${(pL + (i / 100) * (pR - pL)).toFixed(1)},${(pB - yv * (pB - pT)).toFixed(1)}`
-      );
-    }
-    return pts.join(" ");
-  }, []);
-
-  // Operating point on sigmoid
-  const opFrac = Math.max(0, Math.min(1, (weightedSum + 10) / 20));
-  const pL = ACT_X - ACT_W / 2 + 8;
-  const pR = ACT_X + ACT_W / 2 - 8;
-  const pT = ACT_Y - ACT_H / 2 + 8;
-  const pB = ACT_Y + ACT_H / 2 - 8;
-  const opSx = pL + opFrac * (pR - pL);
-  const opSy = pB - probeOut * (pB - pT);
+  }, [challenge, isAnimating, cancelAnim, w1, w2, bias, wH1a, wH1b, bH1, wH2a, wH2b, bH2, wO1, wO2, bO]);
 
   return (
     <WidgetContainer
       title="Neural Network on Embeddings"
-      description="A single neuron reads 2D embedding coordinates and learns to classify words by meaning."
+      description="Can a neural network learn to classify words by reading their position in an embedding?"
       onReset={reset}
     >
-      <div className="flex flex-col gap-3">
-        {/* Row 1: Full neuron diagram */}
-        <div>
-          <div className="text-[10px] font-medium text-muted mb-1">
-            Neuron ({clickPos ? "clicked point" : "center"} values)
-          </div>
-          <svg viewBox={`0 0 ${NW} ${NH}`} className="w-full" style={{ maxHeight: 240 }}>
-            <defs>
-              <marker id="ec-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-                <path d="M 0 0 L 10 5 L 0 10 z" fill="#9ca3af" />
-              </marker>
-            </defs>
+      <WidgetTabs tabs={widgetTabs} activeTab={activeTabId} onTabChange={handleTabChange} />
 
-            {/* Input: Size */}
-            <text x={INX} y={INA_Y - 22} textAnchor="middle" className="fill-foreground text-[11px] font-bold pointer-events-none select-none">Size</text>
-            <circle cx={INX} cy={INA_Y} r={18} fill="#f0f4ff" stroke="#3b82f6" strokeWidth="2" />
-            <text x={INX} y={INA_Y + 5} textAnchor="middle" className="fill-accent text-[12px] font-bold font-mono pointer-events-none select-none">
-              {probeInput.x.toFixed(2)}
-            </text>
-
-            {/* Input: Danger */}
-            <text x={INX} y={INB_Y - 22} textAnchor="middle" className="fill-foreground text-[11px] font-bold pointer-events-none select-none">Danger</text>
-            <circle cx={INX} cy={INB_Y} r={18} fill="#f0f4ff" stroke="#3b82f6" strokeWidth="2" />
-            <text x={INX} y={INB_Y + 5} textAnchor="middle" className="fill-accent text-[12px] font-bold font-mono pointer-events-none select-none">
-              {probeInput.y.toFixed(2)}
-            </text>
-
-            {/* Arrow: Size → Sum */}
-            <line x1={INX + 20} y1={INA_Y} x2={SUM_X - 24} y2={SUM_Y} stroke="#9ca3af" strokeWidth="1.5" markerEnd="url(#ec-arrow)" />
-            {/* Weight label on arrow */}
-            <text x={130} y={INA_Y - 4} textAnchor="middle" className="fill-muted text-[9px] font-mono pointer-events-none select-none">w={wS.toFixed(1)}</text>
-            {/* Product label near sum end */}
-            <text x={195} y={INA_Y + 0.7 * (SUM_Y - INA_Y) - 6} textAnchor="middle" className="fill-muted text-[8px] font-mono pointer-events-none select-none">
-              ={prodS.toFixed(1)}
-            </text>
-
-            {/* Arrow: Danger → Sum */}
-            <line x1={INX + 20} y1={INB_Y} x2={SUM_X - 24} y2={SUM_Y} stroke="#9ca3af" strokeWidth="1.5" markerEnd="url(#ec-arrow)" />
-            {/* Weight label on arrow */}
-            <text x={130} y={INB_Y + 14} textAnchor="middle" className="fill-muted text-[9px] font-mono pointer-events-none select-none">w={wD.toFixed(1)}</text>
-            {/* Product label near sum end */}
-            <text x={195} y={INB_Y + 0.7 * (SUM_Y - INB_Y) + 14} textAnchor="middle" className="fill-muted text-[8px] font-mono pointer-events-none select-none">
-              ={prodD.toFixed(1)}
-            </text>
-
-            {/* Sum node */}
-            <text x={SUM_X} y={SUM_Y - 28} textAnchor="middle" className="fill-foreground text-[11px] font-bold pointer-events-none select-none">Sum</text>
-            <circle cx={SUM_X} cy={SUM_Y} r={22} fill="#fef9ee" stroke="#f59e0b" strokeWidth="2" />
-            <text x={SUM_X} y={SUM_Y + 5} textAnchor="middle" className="fill-warning text-[13px] font-bold font-mono pointer-events-none select-none">
-              {weightedSum.toFixed(1)}
-            </text>
-
-            {/* Bias arrow into sum from below */}
-            <line x1={SUM_X} y1={SUM_Y + 46} x2={SUM_X} y2={SUM_Y + 24} stroke="#9ca3af" strokeWidth="1" strokeDasharray="3,2" markerEnd="url(#ec-arrow)" />
-            <text x={SUM_X} y={SUM_Y + 58} textAnchor="middle" className="fill-muted text-[9px] font-mono pointer-events-none select-none">bias={bias.toFixed(1)}</text>
-
-            {/* Arrow: Sum → Activation */}
-            <line x1={SUM_X + 24} y1={SUM_Y} x2={ACT_X - ACT_W / 2 - 4} y2={ACT_Y} stroke="#9ca3af" strokeWidth="1.5" markerEnd="url(#ec-arrow)" />
-
-            {/* Activation function box */}
-            <rect x={ACT_X - ACT_W / 2} y={ACT_Y - ACT_H / 2} width={ACT_W} height={ACT_H} rx={8} fill="#f0fdf4" stroke="#10b981" strokeWidth="2" />
-            <text x={ACT_X} y={ACT_Y - ACT_H / 2 - 6} textAnchor="middle" className="fill-success text-[8px] font-semibold uppercase tracking-wider pointer-events-none select-none">
-              Activation
-            </text>
-            {/* Sigmoid curve */}
-            <path d={sigmoidPath} fill="none" stroke="#10b981" strokeWidth="2" />
-            {/* Operating point crosshairs */}
-            <line x1={opSx} y1={pB} x2={opSx} y2={opSy} stroke="#f59e0b" strokeWidth="1" strokeDasharray="2,2" opacity={0.6} />
-            <line x1={pL} y1={opSy} x2={opSx} y2={opSy} stroke="#f59e0b" strokeWidth="1" strokeDasharray="2,2" opacity={0.6} />
-            <circle cx={opSx} cy={opSy} r={4} fill="#f59e0b" stroke="white" strokeWidth="1.5" />
-
-            {/* Arrow: Activation → Output */}
-            <line x1={ACT_X + ACT_W / 2 + 2} y1={ACT_Y} x2={OUT_X - 22} y2={OUT_Y} stroke="#9ca3af" strokeWidth="1.5" markerEnd="url(#ec-arrow)" />
-
-            {/* Output node */}
-            <text x={OUT_X} y={OUT_Y - 26} textAnchor="middle" className="fill-foreground text-[11px] font-bold pointer-events-none select-none">Output</text>
-            <circle cx={OUT_X} cy={OUT_Y} r={22} fill={outputColor(probeOut)} stroke={outputColor(probeOut)} strokeWidth="2" />
-            <text x={OUT_X} y={OUT_Y + 5} textAnchor="middle" className="fill-white text-[14px] font-bold font-mono pointer-events-none select-none">
-              {probeOut.toFixed(2)}
-            </text>
-          </svg>
-        </div>
-
-        {/* Row 2: Sliders */}
-        <div className="bg-foreground/[0.03] rounded-lg p-2">
-          <div className="grid grid-cols-3 gap-3">
-            <WeightSlider value={wS} min={-20} max={20} step={0.1} onChange={setWS} label="wSize" />
-            <WeightSlider value={wD} min={-20} max={20} step={0.1} onChange={setWD} label="wDanger" />
-            <WeightSlider value={bias} min={-30} max={30} step={0.1} onChange={setBias} label="bias" />
+      <div className="flex flex-col sm:flex-row gap-3 mt-3">
+        {/* Heatmap */}
+        <div className="flex-shrink-0">
+          <div
+            className="relative rounded-lg overflow-hidden border border-border"
+            style={{ width: CANVAS_SIZE, height: CANVAS_SIZE }}
+          >
+            <canvas ref={canvasRef} width={CANVAS_SIZE} height={CANVAS_SIZE} className="block" />
+            <svg width={CANVAS_SIZE} height={CANVAS_SIZE} className="absolute inset-0 pointer-events-none">
+              {tab.points.map((pt) => {
+                const cx = pt.x * (CANVAS_SIZE - 20) + 10;
+                const cy = (1 - pt.y) * (CANVAS_SIZE - 20) + 10;
+                const isTarget = targetWords?.has(pt.word) ?? false;
+                const out = computeOutput(pt.x, pt.y);
+                const correct = targetWords ? (isTarget ? out > 0.65 : out < 0.35) : false;
+                const dotColor = targetWords ? (isTarget ? "#10b981" : "#ef4444") : "#ffffff";
+                const strokeColor = targetWords ? "white" : "rgba(0,0,0,0.5)";
+                return (
+                  <g key={pt.word}>
+                    <circle cx={cx} cy={cy} r={7} fill={dotColor} opacity={0.9} />
+                    <circle cx={cx} cy={cy} r={7} fill="none" stroke={strokeColor} strokeWidth={1.5} />
+                    {targetWords && correct && (
+                      <text x={cx} y={cy + 3} textAnchor="middle" fill="white" fontSize="8" fontWeight="bold">&#10003;</text>
+                    )}
+                    <text
+                      x={cx} y={cy - 10} textAnchor="middle" fill="white" fontSize="9" fontWeight="bold"
+                      stroke="rgba(0,0,0,0.6)" strokeWidth="3" paintOrder="stroke"
+                    >
+                      {pt.word}
+                    </text>
+                  </g>
+                );
+              })}
+              {tab.xAxis && (
+                <text x={CANVAS_SIZE / 2} y={CANVAS_SIZE - 4} textAnchor="middle" fill="white" fontSize="10" fontWeight="bold" opacity={0.7}>
+                  {tab.xAxis}
+                </text>
+              )}
+              {tab.yAxis && (
+                <text x={8} y={CANVAS_SIZE / 2} textAnchor="middle" fill="white" fontSize="10" fontWeight="bold" opacity={0.7}
+                  transform={`rotate(-90, 8, ${CANVAS_SIZE / 2})`}
+                >
+                  {tab.yAxis}
+                </text>
+              )}
+            </svg>
           </div>
         </div>
 
-        {/* Row 2: Canvas + Challenges */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          {/* Canvas */}
-          <div className="flex-shrink-0">
-            <div className="text-[10px] font-medium text-muted mb-1">
-              Neuron output across embedding space
-            </div>
-            <div
-              className="relative rounded-lg overflow-hidden border border-border cursor-crosshair"
-              style={{ width: CANVAS_SIZE, height: CANVAS_SIZE }}
-              onClick={handleCanvasClick}
-            >
-              <canvas
-                ref={canvasRef}
-                width={CANVAS_SIZE}
-                height={CANVAS_SIZE}
-                className="block"
-              />
-              <svg
-                width={CANVAS_SIZE}
-                height={CANVAS_SIZE}
-                className="absolute inset-0 pointer-events-none"
-              >
-                {/* Word dots */}
-                {WORDS.map((w) => {
-                  const cx = w.x * (CANVAS_SIZE - 20) + 10;
-                  const cy = (1 - w.y) * (CANVAS_SIZE - 20) + 10;
-                  const point = activePoints?.find((p) => p.word === w.word);
-                  const isTarget = point?.target === 1;
-                  const out = forward(w.x, w.y, wS, wD, bias);
-                  const correct = activePoints
-                    ? (isTarget ? out > 0.8 : out < 0.2)
-                    : false;
-                  const dotColor = activePoints
-                    ? (isTarget ? "#10b981" : "#ef4444")
-                    : "#ffffff";
-                  const strokeColor = activePoints
-                    ? "white"
-                    : "rgba(0,0,0,0.5)";
-                  return (
-                    <g key={w.word}>
-                      <circle cx={cx} cy={cy} r={8} fill={dotColor} opacity={0.9} />
-                      <circle cx={cx} cy={cy} r={8} fill="none" stroke={strokeColor} strokeWidth={1.5} />
-                      {activePoints && correct && (
-                        <text x={cx} y={cy + 3.5} textAnchor="middle" fill="white" fontSize="9" fontWeight="bold">
-                          &#10003;
-                        </text>
-                      )}
-                      <text
-                        x={cx}
-                        y={cy - 12}
-                        textAnchor="middle"
-                        fill="white"
-                        fontSize="10"
-                        fontWeight="bold"
-                        stroke="rgba(0,0,0,0.6)"
-                        strokeWidth="3"
-                        paintOrder="stroke"
-                      >
-                        {w.word}
-                      </text>
-                    </g>
-                  );
-                })}
-                {/* Click marker */}
-                {clickPos && (
-                  <circle
-                    cx={clickPos.x * CANVAS_SIZE}
-                    cy={(1 - clickPos.y) * CANVAS_SIZE}
-                    r={5}
-                    fill={outputColor(probeOut)}
-                    stroke="white"
-                    strokeWidth={2}
-                  />
-                )}
-                {/* Axis labels */}
-                <text x={CANVAS_SIZE / 2} y={CANVAS_SIZE - 4} textAnchor="middle" fill="white" fontSize="11" fontWeight="bold" opacity={0.7}>
-                  Small → Big
-                </text>
-                <text x={8} y={CANVAS_SIZE / 2} textAnchor="middle" fill="white" fontSize="11" fontWeight="bold" opacity={0.7} transform={`rotate(-90, 8, ${CANVAS_SIZE / 2})`}>
-                  Safe → Dangerous
-                </text>
-              </svg>
-            </div>
-          </div>
-
-          {/* Challenges Panel */}
-          <div className="flex-1 min-w-0">
-            <div className="text-[10px] font-semibold text-foreground mb-2">Challenges</div>
-            <div className="flex flex-col gap-1.5">
-              {CHALLENGES.map((ch, idx) => (
+        {/* Challenges panel */}
+        <div className="flex-1 min-w-0">
+          <div className="text-[10px] font-semibold text-foreground mb-2">Challenges</div>
+          <div className="flex flex-col gap-1.5">
+            {tab.challenges.map((ch, idx) => {
+              const isActive = challengeIdx === idx;
+              const isSolved = isActive && challengeSolved;
+              return (
                 <button
                   key={ch.name}
-                  onClick={() => activateChallenge(idx)}
+                  onClick={() => handleChallengeClick(idx)}
                   className={`w-full text-left px-3 py-1.5 text-[11px] font-medium rounded-md transition-colors ${
-                    challengeSolved && activeChallengeIdx === idx
+                    isSolved
                       ? "bg-success/20 text-success ring-1 ring-success/30"
-                      : activeChallengeIdx === idx
+                      : isActive
                       ? "bg-accent/20 text-accent ring-1 ring-accent/30"
                       : "bg-foreground/5 text-foreground hover:bg-foreground/10"
                   }`}
                 >
-                  {challengeSolved && activeChallengeIdx === idx ? "\u2713 " : ""}
-                  {ch.name}
+                  {isSolved ? "\u2713 " : ""}{ch.name}
+                  {ch.solution.layers === 2 && (
+                    <span className="ml-1.5 text-[9px] opacity-50">(2-layer)</span>
+                  )}
                 </button>
-              ))}
-            </div>
-            {activeChallenge && (
-              <div className="mt-2">
-                <div className="text-[10px] text-muted mb-2">{activeChallenge.description}</div>
-                <button
-                  onClick={startOptimize}
-                  className={`w-full px-3 py-2 text-[12px] font-bold rounded-md transition-colors ${
-                    isOptimizing
-                      ? "bg-error text-white hover:bg-error/80"
-                      : "bg-accent text-white hover:bg-accent/80"
-                  }`}
-                >
-                  {isOptimizing ? "Stop" : "Optimize"}
-                </button>
-                {optimizeStatus === "solved" && (
-                  <div className="mt-1.5 text-[11px] font-medium text-success text-center">
-                    Solved! The neuron learned to classify by meaning.
-                  </div>
-                )}
-                {optimizeStatus === "done" && (
-                  <div className="mt-1.5 text-[11px] text-accent text-center">
-                    Got stuck — try again, gradient descent sometimes needs a different starting point.
-                  </div>
-                )}
-                <button
-                  onClick={randomizeWeights}
-                  className="mt-2 w-full px-3 py-1.5 text-[11px] font-medium rounded-md bg-foreground/5 text-foreground hover:bg-foreground/10 transition-colors"
-                >
-                  Randomize Weights
-                </button>
-              </div>
-            )}
+              );
+            })}
           </div>
+          {challenge && (
+            <div className="mt-3">
+              <button
+                onClick={startOptimize}
+                disabled={challengeSolved && !isAnimating}
+                className={`w-full px-3 py-2 text-[12px] font-bold rounded-md transition-colors ${
+                  isAnimating
+                    ? "bg-error text-white hover:bg-error/80"
+                    : challengeSolved
+                    ? "bg-success/20 text-success cursor-default"
+                    : "bg-accent text-white hover:bg-accent/80"
+                }`}
+              >
+                {isAnimating ? "Stop" : challengeSolved ? "Solved!" : "Optimize"}
+              </button>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Sliders — 1-layer or 2-layer depending on challenge */}
+      {challenge && (
+        <div className="mt-3">
+          {is2Layer ? (
+            <div className="grid grid-cols-3 gap-3">
+              <div className="bg-foreground/[0.03] rounded-lg p-2">
+                <div className="text-[10px] font-bold text-foreground mb-1">H&#8321;</div>
+                <WeightSlider value={wH1a} min={-20} max={20} step={0.1} onChange={setWH1a} label="w&#8321;" disabled={isAnimating} />
+                <WeightSlider value={wH1b} min={-20} max={20} step={0.1} onChange={setWH1b} label="w&#8322;" disabled={isAnimating} />
+                <WeightSlider value={bH1} min={-20} max={20} step={0.1} onChange={setBH1} label="bias" disabled={isAnimating} />
+              </div>
+              <div className="bg-foreground/[0.03] rounded-lg p-2">
+                <div className="text-[10px] font-bold text-foreground mb-1">H&#8322;</div>
+                <WeightSlider value={wH2a} min={-20} max={20} step={0.1} onChange={setWH2a} label="w&#8321;" disabled={isAnimating} />
+                <WeightSlider value={wH2b} min={-20} max={20} step={0.1} onChange={setWH2b} label="w&#8322;" disabled={isAnimating} />
+                <WeightSlider value={bH2} min={-20} max={20} step={0.1} onChange={setBH2} label="bias" disabled={isAnimating} />
+              </div>
+              <div className="bg-foreground/[0.03] rounded-lg p-2">
+                <div className="text-[10px] font-bold text-foreground mb-1">Output</div>
+                <WeightSlider value={wO1} min={-20} max={20} step={0.1} onChange={setWO1} label="wH&#8321;" disabled={isAnimating} />
+                <WeightSlider value={wO2} min={-20} max={20} step={0.1} onChange={setWO2} label="wH&#8322;" disabled={isAnimating} />
+                <WeightSlider value={bO} min={-20} max={20} step={0.1} onChange={setBO} label="bias" disabled={isAnimating} />
+              </div>
+            </div>
+          ) : (
+            <div className="bg-foreground/[0.03] rounded-lg p-2">
+              <div className="grid grid-cols-3 gap-3">
+                <WeightSlider value={w1} min={-20} max={20} step={0.1} onChange={setW1} label="w&#8321;" disabled={isAnimating} />
+                <WeightSlider value={w2} min={-20} max={20} step={0.1} onChange={setW2} label="w&#8322;" disabled={isAnimating} />
+                <WeightSlider value={bias} min={-30} max={30} step={0.1} onChange={setBias} label="bias" disabled={isAnimating} />
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </WidgetContainer>
   );
 }

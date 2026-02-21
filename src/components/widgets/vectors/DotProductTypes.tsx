@@ -229,38 +229,18 @@ function TypeExplorer({ type }: { type: DotType }) {
 
         <div className="rounded-lg bg-foreground/[0.03] p-3 space-y-1">
           <div className="text-[10px] font-bold uppercase tracking-widest text-muted">
-            {type === "similarity" ? "Cosine Similarity" : type === "projection" ? "Projection" : "Dot Product"}
+            {type === "similarity" ? "Similarity" : type === "projection" ? "Projection" : "Dot Product"}
           </div>
 
-          {type === "similarity" && (
-            <>
-              <div className="font-mono text-xs">angle = {thetaDeg.toFixed(1)}°</div>
-              <div className="mt-1 border-t border-foreground/10 pt-1 font-mono text-sm font-bold" style={{ color: dotColor }}>
-                cos({thetaDeg.toFixed(0)}°) = {cosTheta.toFixed(3)}
-              </div>
-            </>
-          )}
-
-          {type === "projection" && (
-            <>
-              <div className="font-mono text-xs">|a| = {magA.toFixed(2)}</div>
-              <div className="font-mono text-xs">angle = {thetaDeg.toFixed(1)}°</div>
-              <div className="mt-1 border-t border-foreground/10 pt-1 font-mono text-sm font-bold" style={{ color: dotColor }}>
-                {magA.toFixed(2)} × cos({thetaDeg.toFixed(0)}°) = {dotProduct.toFixed(3)}
-              </div>
-            </>
-          )}
-
-          {type === "full" && (
-            <>
-              <div className="font-mono text-xs">|a| = {magA.toFixed(2)}</div>
-              <div className="font-mono text-xs">|b| = {magB.toFixed(2)}</div>
-              <div className="font-mono text-xs">angle = {thetaDeg.toFixed(1)}°</div>
-              <div className="mt-1 border-t border-foreground/10 pt-1 font-mono text-sm font-bold" style={{ color: dotColor }}>
-                {magA.toFixed(2)} × {magB.toFixed(2)} × cos({thetaDeg.toFixed(0)}°) = {dotProduct.toFixed(3)}
-              </div>
-            </>
-          )}
+          <div className="font-mono text-xs">
+            <span className="text-blue-500">{aDisp[0].toFixed(2)}</span>×<span className="text-amber-500">{bDisp[0].toFixed(2)}</span>
+            {" + "}
+            <span className="text-blue-500">{aDisp[1].toFixed(2)}</span>×<span className="text-amber-500">{bDisp[1].toFixed(2)}</span>
+          </div>
+          <div className="font-mono text-xs">angle = {thetaDeg.toFixed(1)}°</div>
+          <div className="mt-1 border-t border-foreground/10 pt-1 font-mono text-sm font-bold" style={{ color: dotColor }}>
+            {dotProduct.toFixed(3)}
+          </div>
         </div>
 
         <div className="text-xs text-muted">
@@ -312,13 +292,13 @@ export function DotProductTypes() {
 
       <div className="mt-1 mb-3 text-sm text-muted">
         {activeTab === "similarity" && (
-          <>Both vectors constrained to unit length. The dot product is pure directional similarity: <strong>cos(angle)</strong>. How much do these point in the same direction?</>
+          <>Both vectors have length 1. The dot product is pure direction comparison: a similarity score from −1 (opposite) to 1 (identical). How much do these point in the same direction?</>
         )}
         {activeTab === "projection" && (
-          <>Vector <span className="text-amber-500 font-semibold">b</span> is a unit vector; <span className="text-blue-500 font-semibold">a</span> is free. The dot product is the projection of a onto b: <strong>|a| × cos(angle)</strong>. How much does a point in the direction of b?</>
+          <>Vector <span className="text-amber-500 font-semibold">b</span> is a unit direction; <span className="text-blue-500 font-semibold">a</span> is free. The dot product tells you how far a extends in b&apos;s direction.</>
         )}
         {activeTab === "full" && (
-          <>Both vectors are free. The full dot product: <strong>|a| × |b| × cos(angle)</strong>. Projection of a onto b, scaled by b&apos;s length.</>
+          <>Both vectors are free. The dot product combines direction similarity with both lengths.</>
         )}
       </div>
 

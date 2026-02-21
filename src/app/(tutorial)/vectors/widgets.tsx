@@ -4,67 +4,35 @@ import dynamic from "next/dynamic";
 import { Suspense } from "react";
 import { TryItProvider } from "@/components/widgets/shared/WidgetContainer";
 
-const VectorExamples = dynamic(
+const VectorPropertyExplorer = dynamic(
   () =>
-    import("@/components/widgets/vectors/VectorExamples").then(
-      (m) => m.VectorExamples
-    ),
-  { ssr: false }
-);
-
-const AnimalPropertyExplorer = dynamic(
-  () =>
-    import("@/components/widgets/vectors/AnimalPropertyExplorer").then(
-      (m) => m.AnimalPropertyExplorer
-    ),
-  { ssr: false }
-);
-
-const Vector1DExplorer = dynamic(
-  () =>
-    import("@/components/widgets/vectors/Vector1DExplorer").then(
-      (m) => m.Vector1DExplorer
-    ),
-  { ssr: false }
-);
-
-const Vector2DExplorer = dynamic(
-  () =>
-    import("@/components/widgets/vectors/Vector2DExplorer").then(
-      (m) => m.Vector2DExplorer
-    ),
-  { ssr: false }
-);
-
-const Vector3DExplorer = dynamic(
-  () =>
-    import("@/components/widgets/vectors/Vector3DExplorer").then(
-      (m) => m.Vector3DExplorer
-    ),
-  { ssr: false }
-);
-
-const AnimalDirectionMagnitude = dynamic(
-  () =>
-    import("@/components/widgets/vectors/AnimalDirectionMagnitude").then(
-      (m) => m.AnimalDirectionMagnitude
+    import("@/components/widgets/vectors/VectorPropertyExplorer").then(
+      (m) => m.VectorPropertyExplorer
     ),
   { ssr: false }
 );
 
 
-const DotProductTypes = dynamic(
+const UnitVectorExplorer = dynamic(
   () =>
-    import("@/components/widgets/vectors/DotProductTypes").then(
-      (m) => m.DotProductTypes
+    import("@/components/widgets/vectors/UnitVectorExplorer").then(
+      (m) => m.UnitVectorExplorer
     ),
   { ssr: false }
 );
 
-const DotProductAnalogies = dynamic(
+const DotProduct2D = dynamic(
   () =>
-    import("@/components/widgets/vectors/DotProductAnalogies").then(
-      (m) => m.DotProductAnalogies
+    import("@/components/widgets/vectors/DotProduct2D").then(
+      (m) => m.DotProduct2D
+    ),
+  { ssr: false }
+);
+
+const DotProductComparison = dynamic(
+  () =>
+    import("@/components/widgets/vectors/DotProductComparison").then(
+      (m) => m.DotProductComparison
     ),
   { ssr: false }
 );
@@ -94,67 +62,35 @@ function WidgetSlot({ children, tryIt, label }: { children: React.ReactNode; try
   );
 }
 
-export function VectorExamplesWidget({ children }: { children?: React.ReactNode }) {
+export function VectorPropertyExplorerWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children}>
-      <VectorExamples />
-    </WidgetSlot>
-  );
-}
-
-export function AnimalPropertyExplorerWidget({ children }: { children?: React.ReactNode }) {
-  return (
-    <WidgetSlot tryIt={children}>
-      <AnimalPropertyExplorer />
-    </WidgetSlot>
-  );
-}
-
-export function Vector1DExplorerWidget({ children }: { children?: React.ReactNode }) {
-  return (
-    <WidgetSlot tryIt={children}>
-      <Vector1DExplorer />
-    </WidgetSlot>
-  );
-}
-
-export function Vector2DExplorerWidget({ children }: { children?: React.ReactNode }) {
-  return (
-    <WidgetSlot tryIt={children}>
-      <Vector2DExplorer />
-    </WidgetSlot>
-  );
-}
-
-export function Vector3DExplorerWidget({ children }: { children?: React.ReactNode }) {
-  return (
-    <WidgetSlot tryIt={children}>
-      <Vector3DExplorer />
-    </WidgetSlot>
-  );
-}
-
-export function AnimalDirectionMagnitudeWidget({ children }: { children?: React.ReactNode }) {
-  return (
-    <WidgetSlot tryIt={children}>
-      <AnimalDirectionMagnitude />
+      <VectorPropertyExplorer />
     </WidgetSlot>
   );
 }
 
 
-export function DotProductTypesWidget({ children }: { children?: React.ReactNode }) {
+export function UnitVectorExplorerWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children}>
-      <DotProductTypes />
+      <UnitVectorExplorer />
     </WidgetSlot>
   );
 }
 
-export function DotProductAnalogiesWidget({ children }: { children?: React.ReactNode }) {
+export function DotProduct2DWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children}>
-      <DotProductAnalogies />
+      <DotProduct2D />
+    </WidgetSlot>
+  );
+}
+
+export function DotProductComparisonWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <DotProductComparison />
     </WidgetSlot>
   );
 }
