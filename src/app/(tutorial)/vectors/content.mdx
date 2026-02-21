@@ -58,20 +58,20 @@ Why does multiply-and-add measure similarity? Look at the per-dimension math. Wh
 
 ## The Dot Product
 
-Cosine similarity is actually a special case of a more general operation called the **dot product**. The math is exactly the same — multiply matching pairs, add them up — but the dot product works on vectors of *any* length, not just unit vectors.
-
-With regular numbers, you can multiply them: 3 × 5 = 15. The dot product extends multiplication to multiple dimensions:
+Cosine similarity only works on unit vectors. The **dot product** is a more general version of the same operation — the math is identical (multiply matching pairs, add them up), but it works on vectors of any size:
 
 **a · b = (a₁ × b₁) + (a₂ × b₂) + … + (aₙ × bₙ)**
 
-If your vectors have just one dimension, this is ordinary multiplication. With more dimensions, something interesting happens. Like multiplying regular numbers, the dot product gets bigger when each input is bigger. But unlike regular numbers, it also depends on **direction** — it gets bigger when the vectors point the same way, and goes negative when they point in opposite directions. If they're at right angles, it's zero.
+Like cosine similarity, the dot product measures how similar two vectors are — it's bigger when they point the same way and negative when they point in opposite directions. But it also measures how *big* each vector is — the dot product gets larger when either vector has a greater magnitude. When both vectors are unit vectors, the dot product *is* cosine similarity.
+
+The best way to understand this is to play with it:
 
 <DotProduct2DWidget>
-Drag the two vectors around. Watch the step-by-step math on the right — each matching pair of numbers gets multiplied, then the products are added up. The dot product is big when both vectors are long and point the same way. It's zero when they're at right angles. It goes negative when they point in opposite directions.
+Drag the two vectors around. The dot product gets big when both vectors are long and point the same way. It's zero when they're at right angles. It goes negative when they point in opposite directions. Try making one vector very short — the dot product shrinks even if they point the same way.
 </DotProduct2DWidget>
 
 <KeyInsight>
-**The dot product extends multiplication to vectors.** Like regular multiplication, it gets bigger when the inputs are bigger. But it also captures direction: same direction → large positive, perpendicular → zero, opposite → large negative. Cosine similarity is a dot product between unit vectors, giving a pure similarity score. The dot product is the foundation of how neural networks process information.
+**The dot product measures similarity and size together.** It gets bigger when the vectors are more similar, and bigger when the vectors have greater magnitudes. Cosine similarity is a dot product between unit vectors, giving a pure similarity score. The dot product is the foundation of how neural networks process information.
 </KeyInsight>
 
 ## A Neuron Is (Mostly) a Dot Product
@@ -86,16 +86,16 @@ where **w** = (w₁, w₂, …, wₙ) is the weight vector and **x** = (x₁, x�
 
 The neuron is asking **"is this input what I'm looking for?"**.
 
-* **The direction** of the weight vector determines what kind of thing the neuron is looking for.
-* **The magnitude** of the weight vector determines how much of what it's looking for the neuron needs to see in order to get excited.
-* **The bias** determines how excited it is if it hasn't seen anything at all.
+* **The direction** of the weight vector (it's unit vector) says what kind of thing the neuron is looking for.
+* **The magnitude** of the weight vector says how much of what it's looking for the neuron needs to see in order to get excited.
+* **The bias** says how excited it is if it hasn't seen anything at all.
 
-This is all a bit brain bending, but makes more sense if you play with it. Try the **Animals** tab and set the weight to "Bear" — now you have a bear detector! Feed it different animals as input and watch the output. A dog gets a high score because it shares many bear-like properties. A mouse scores low. You can do the same with any category — set the weight to "Pizza" on the **Foods** tab and you have a pizza detector.
-
-The **weight magnitude** slider controls how big the weight vector is. A large magnitude means the neuron is very decisive — it fires strongly for good matches and stays very quiet for bad ones. A small magnitude means the neuron is wishy-washy — it gives a middling output for everything.
+The best way to understand this is to play with it. Try the **Animals** tab and set the weight to "Bear" — now you have a bear detector! Feed it different animals as input and watch the output. A dog gets a high score because it shares many bear-like properties. A mouse scores low. You can do the same with any category — set the weight to "Pizza" on the **Foods** tab and you have a pizza detector.
 
 <NeuronDotProductWidget>
-Drag the weight and input vectors. Watch the angle between them — when the vectors align (small angle), the output is high. When they're perpendicular (90°), the output depends mostly on the bias. When they oppose each other (large angle), the output drops. Try the other tabs to build a bear detector or a pizza detector. Try making the weight magnitude large or small to see how it affects the neuron's decisiveness. This visualization shows two dimensions, but real neurons have weight and input vectors with hundreds or thousands of dimensions — the same geometric intuition applies.
+On the **2D Vectors** tab, drag the weight and input vectors to see how the angle between them affects the output.
+
+On the other tabs, try matching different animals, foods, or instruments as weights and inputs. What happens when you slide the weight magnitude up or down? What about the bias?
 </NeuronDotProductWidget>
 
 <KeyInsight>

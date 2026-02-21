@@ -393,7 +393,7 @@ function DomainNeuronTab({ domain, bias, onBiasChange, weightMag, onWeightMagCha
       <div className="grid grid-cols-[1fr_1fr_auto] gap-2 items-start overflow-x-auto">
         {/* Row 1: selectors */}
         <div>
-          <div className="mb-1 text-[10px] font-bold uppercase tracking-widest text-amber-500">Weight (detects)</div>
+          <div className="mb-1 text-[10px] font-bold uppercase tracking-widest text-amber-500">Weight direction (Detects)</div>
           <div className="flex flex-wrap gap-1">
             {domain.items.map((item, i) => (
               <button
@@ -432,7 +432,7 @@ function DomainNeuronTab({ domain, bias, onBiasChange, weightMag, onWeightMagCha
 
         {/* Row 2: cards + product column */}
         <VectorCard
-          name={weightItem.name} emoji={weightItem.emoji}
+          name={`${weightItem.name} × ${weightMag.toFixed(1)}`} emoji={weightItem.emoji}
           properties={domain.properties} values={scaledWeightValues}
           barColor="#f59e0b" label="weight" labelColor="#f59e0b"
           barMax={Math.max(weightMag, 1)}
