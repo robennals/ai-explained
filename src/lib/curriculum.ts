@@ -63,7 +63,7 @@ export const chapters: Chapter[] = [
   {
     id: 6,
     slug: "next-word-prediction",
-    title: "Prediction Requires Understanding",
+    title: "Understanding by Predicting",
     subtitle: "Next-word prediction",
     prerequisites: [5],
     description:
