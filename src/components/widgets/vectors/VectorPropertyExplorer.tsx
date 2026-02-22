@@ -131,14 +131,14 @@ function ArrowTab() {
               vector = ({vx.toFixed(2)}, {vy.toFixed(2)})
             </div>
             <div className="text-[10px] font-bold uppercase tracking-widest text-muted mt-2">Length</div>
-            <div className="font-mono text-xs">
-              √({vx.toFixed(2)}² + {vy.toFixed(2)}²)
+            <div className="font-mono text-xs flex items-baseline gap-0">
+              = <span className="inline-flex items-center"><span>√</span><span className="border-t border-current px-0.5 -mt-1">{vx.toFixed(2)}² + {vy.toFixed(2)}²</span></span>
             </div>
-            <div className="font-mono text-xs">
-              = √({(vx * vx).toFixed(2)} + {(vy * vy).toFixed(2)})
+            <div className="font-mono text-xs flex items-baseline gap-0">
+              = <span className="inline-flex items-center"><span>√</span><span className="border-t border-current px-0.5 -mt-1">{(vx * vx).toFixed(2)} + {(vy * vy).toFixed(2)}</span></span>
             </div>
-            <div className="font-mono text-xs">
-              = √{(vx * vx + vy * vy).toFixed(2)}
+            <div className="font-mono text-xs flex items-baseline gap-0">
+              = <span className="inline-flex items-center"><span>√</span><span className="border-t border-current px-0.5 -mt-1">{(vx * vx + vy * vy).toFixed(2)}</span></span>
             </div>
             <div className="font-mono text-sm font-bold">
               = {vecLength.toFixed(2)}
