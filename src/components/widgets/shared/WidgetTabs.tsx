@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useContext, useEffect } from "react";
+import { useState, useCallback, useContext, useEffect, useMemo } from "react";
 import { TabVisitContext } from "./WidgetContainer";
 
 interface Tab<T extends string> {
@@ -22,9 +22,27 @@ export function WidgetTabs<T extends string>({
   const [visited, setVisited] = useState<Set<T>>(() => new Set([activeTab]));
   const reportTabVisit = useContext(TabVisitContext);
 
+  const activeIndex = tabs.findIndex((t) => t.id === activeTab);
+  const isLastTab = activeIndex === tabs.length - 1;
+
+  const goToNext = useCallback(() => {
+    if (!isLastTab) {
+      const nextTab = tabs[activeIndex + 1];
+      onTabChange(nextTab.id);
+      setVisited((prev) => {
+        if (prev.has(nextTab.id)) return prev;
+        const next = new Set(prev);
+        next.add(nextTab.id);
+        return next;
+      });
+    }
+  }, [activeIndex, isLastTab, tabs, onTabChange]);
+
+  const stableGoToNext = useMemo(() => (isLastTab ? null : goToNext), [isLastTab, goToNext]);
+
   useEffect(() => {
-    reportTabVisit?.({ total: tabs.length, visited: visited.size });
-  }, [reportTabVisit, tabs.length, visited.size]);
+    reportTabVisit?.({ total: tabs.length, visited: visited.size, goToNext: stableGoToNext });
+  }, [reportTabVisit, tabs.length, visited.size, stableGoToNext]);
 
   const handleTabClick = useCallback(
     (tabId: T) => {

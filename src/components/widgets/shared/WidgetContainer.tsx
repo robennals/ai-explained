@@ -18,6 +18,7 @@ export function TryItProvider({ content, label = "Try it", children }: { content
 interface TabVisitState {
   total: number;
   visited: number;
+  goToNext: (() => void) | null; // null when on the last tab
 }
 
 type TabVisitSetter = (state: TabVisitState) => void;
@@ -47,7 +48,6 @@ export function WidgetContainer({
     onReset?.();
   }, [onReset]);
 
-  const hasUnvisitedTabs = tabVisit !== null && tabVisit.visited < tabVisit.total;
 
   if (hasError) {
     return (
@@ -91,6 +91,16 @@ export function WidgetContainer({
         <TabVisitContext.Provider value={setTabVisit}>
           {children}
         </TabVisitContext.Provider>
+        {tabVisit?.goToNext && (
+          <div className="mt-10 flex justify-center">
+            <button
+              onClick={tabVisit.goToNext}
+              className="rounded-lg bg-accent px-6 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-accent-dark"
+            >
+              Go to Next Tab →
+            </button>
+          </div>
+        )}
       </div>
       {tryIt && (
         <div className="border-t border-widget-border bg-success/5 px-5 py-4">
@@ -100,13 +110,6 @@ export function WidgetContainer({
           <div className="text-sm leading-relaxed text-foreground/80 [&>p]:my-1">
             {tryIt.content}
           </div>
-        </div>
-      )}
-      {hasUnvisitedTabs && (
-        <div className="border-t border-widget-border bg-accent/5 px-5 py-1.5">
-          <p className="text-xs text-accent font-bold">
-            👆 Don&apos;t forget to try out all the tabs!
-          </p>
         </div>
       )}
     </div>
