@@ -52,6 +52,14 @@ const ToyValues = dynamic(
   { ssr: false }
 );
 
+const ToyValueTable = dynamic(
+  () =>
+    import("@/components/widgets/attention/ToyValueTable").then(
+      (m) => m.ToyValueTable
+    ),
+  { ssr: false }
+);
+
 const AttentionPlayground = dynamic(
   () =>
     import("@/components/widgets/attention/AttentionPlayground").then(
@@ -168,6 +176,14 @@ export function ToyValuesWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children}>
       <ToyValues />
+    </WidgetSlot>
+  );
+}
+
+export function ToyValueTableWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <ToyValueTable />
     </WidgetSlot>
   );
 }

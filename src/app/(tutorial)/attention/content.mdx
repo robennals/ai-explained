@@ -63,9 +63,11 @@ No one told this head to resolve pronouns — it discovered that role through tr
 
 ## Softmax: Dividing Your Attention
 
-The toy example uses **softmax** to turn raw dot-product scores into attention weights. Each token has a fixed budget of attention — 100% — and softmax decides how to divide it.
+Earlier we said that we use **softmax** to turn raw dot-product scores into attention weights. But what does that actually mean, and why do we need it?
 
-The dot products give us raw scores — but they can be any numbers: large, small, negative, zero. Softmax converts them into positive weights that add up to 100%. Think of it as a competition: what matters is **who's loudest relative to everyone else**. If one score is moderately high and the others are near zero, it wins by default. But if another score comes along much higher, it drowns out the moderate one and takes nearly all the weight. The *gaps* between scores matter more than the absolute values.
+Here's the problem. Each token computes a dot product against every other token and gets back a list of raw scores — but those scores can be any numbers: large, small, negative, zero. What we need are *percentages*: each token has a fixed budget of attention — 100% — and needs to divide that budget among all the candidates. We need a way to turn arbitrary numbers into positive weights that add up to 100%.
+
+Softmax is that function. Think of it as a competition: what matters is **who's loudest relative to everyone else**. If one score is moderately high and the others are near zero, it wins by default. But if another score comes along much higher, it drowns out the moderate one and takes nearly all the weight. The *gaps* between scores matter more than the absolute values.
 
 <SoftmaxExplorerWidget>
 Start with "All equal" — everyone gets 25%. Then try "Moderate, rest silent" — A isn't very loud, but it wins by default because nobody else is saying anything. Now click "Moderate meets loud" — B comes in much higher and completely drowns out A. That's the key dynamic: softmax is about *relative* loudness. Then try making all scores large but equal (like 8, 8, 8, 8) — still 25% each! It's the gaps that matter, not the magnitudes.
@@ -73,11 +75,17 @@ Start with "All equal" — everyone gets 25%. Then try "Moderate, rest silent" �
 
 ## Values: What Did You Find?
 
-So far attention tells us *where to look* — which tokens are relevant. But we also need to know *what information to gather* from those tokens. That's what the **value** vector is for.
+So far attention tells us *where to look* — which tokens are relevant. But we also need to know *what information to gather* from those tokens.
 
-In our pronoun-resolution example, the question is "what thing does *it* refer to?" Each token publishes a **value** — the answer to whatever question the attention head is asking. For our toy example, the value encodes which animal the token represents: cat's value says "cat," dog's value says "dog," and filler tokens have nothing to contribute.
+This is where the third vector comes in. In addition to a **key** (what I advertise) and a **query** (what I'm looking for), each token also gets a **value** — what it *provides* to any token whose query matches its key. Think of it this way: the key and query decide *who talks to whom*, and the value is *what gets said*.
 
-Attention then blends these values using the attention weights as a recipe: if "it" pays 90% attention to "cat" and 10% to everything else, the result is 90% cat — the pronoun has figured out what it refers to.
+For our pronoun example, the value encodes which animal the token represents. Cat's value says "I'm a cat," dog's value says "I'm a dog," and filler tokens have nothing to contribute:
+
+<ToyValueTableWidget />
+
+Attention then blends these values using the attention weights as a recipe. If "it" pays 90% attention to "cat" and 10% to everything else, the result is 90% cat — the pronoun has figured out what it refers to.
+
+The playground below uses the same key/query matching as before — "it" still finds nouns using the same dot products and softmax. But now we can see what happens with the values:
 
 <ToyAttentionValuesWidget>
 Click "it" to see how attention weights blend value vectors into a result. With "cat bla bla it," the result is nearly 100% cat. Try "cat bla dog it" — the result is a mix of both nouns. Try "bla bla bla it" — with no nouns, the result is empty.
