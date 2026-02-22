@@ -10,28 +10,25 @@ import torch
 from transformers import BertTokenizer, BertModel
 
 SENTENCES = [
+    # Original sentences with pronouns
     "The dog chased the cat because it was angry",
-    "The bank by the river was steep and muddy",
-    "The chef who won the competition opened a restaurant",
     "The movie was not great but I loved it anyway",
-    "She picked up the guitar and played a song",
-    "The students who studied hard passed the exam easily",
-    "After the storm the sky turned a brilliant orange",
+    # New sentences — all have pronouns whose referent is in the sentence
+    "The teacher praised the student because she was proud",
+    "The ball hit the window and it broke",
+    "The cat knocked the vase off the table and it shattered",
+    "The boy gave the girl a book because she wanted it",
+    # Kept for multi-head demo later (no pronouns but interesting structure)
+    "The chef who won the competition opened a restaurant",
     "The old cat sat on the warm mat and slept",
 ]
 
-# Heads we know are interesting from analysis
+# The 4 heads used in BertAttention.tsx
 INTERESTING_HEADS = [
     (2, 0, "Next word"),      # attends to following word
-    (2, 9, "Next word (2)"),  # another next-word head
     (3, 5, "Previous word"),  # attends to preceding word
     (4, 3, "Self / pronoun"), # self-attention, but resolves pronouns
-    (3, 0, "Identity"),       # attends to self and function words
-    (5, 9, "Local context"),  # nearby words, slightly broader
-    (1, 4, "Previous word (early)"),  # early layer backward
     (6, 11, "Broad context"), # wider attention spread
-    (7, 4, "Syntactic"),      # mid-layer structure
-    (3, 9, "Forward skip"),   # sometimes skips one token ahead
 ]
 
 
@@ -103,7 +100,7 @@ def main():
                 "layer": layer,
                 "head": head,
                 "label": label,
-                "attention": [[round(v, 4) for v in row] for row in merged.tolist()],
+                "attention": [[round(v, 3) for v in row] for row in merged.tolist()],
             })
 
         all_results.append({

@@ -28,39 +28,60 @@ So how do we actually build a mechanism that does this? We need each word to be 
 
 Imagine a tiny vocabulary of just four tokens: **cat**, **dog**, **bla** (filler), and **it** (a pronoun). Our goal is to work out what noun **it** is referring to in any given sentence.
 
-Each token gets three vectors:
+Each token gets two vectors:
 
 - A **key** — what this token is *advertizing*
 - A **query** — what this token is *looking for*
-- A **value** — what this token *provides* when attended to
 
 Our keys and queries are just a single number representing "noun-ness" — how much this token is (or wants) a noun:
 
 <ToyVocabTableWidget />
 
-The interesting one is **it**: its key doesn't advertise anything — but its query says "I'm looking for a noun." 
+The interesting one is **it**: its key doesn't advertise anything — but its query says "I'm looking for a noun."
 
-To measure how well a query matches a key, we use the **dot product** from Chapter 4 — multiply corresponding numbers and add them up. A high dot product means a good match. Then we run the scores through a function called **softmax** (described soon) that those scores into positive numbers that add up to 100%.
+To measure how well a query matches a key, we use the **dot product** from Chapter 4 — multiply corresponding numbers and add them up. A high dot product means a good match. Then we run the scores through a function called **softmax** that turns those scores into positive numbers that add up to 100% — we'll explore how softmax works in a moment.
 
 <ToyAttentionWidget>
 Click "it" to see its attention computed step by step — its query [3] matches each noun's key [3] (dot product = 9) but not filler's key [0] (dot product = 0). Try "cat bla dog it" — "it" splits attention between both nouns. Try "bla bla bla it" — with no nouns, attention spreads equally over filler. Then try "cat it dog it" — each "it" independently finds the nouns.
 </ToyAttentionWidget>
 
-Notice something crucial about **it** — it doesn't advertise anything — but it is looking for a noun.  *What you advertize* isn't the same as *what you're looking for.* This is why we need separate queries and keys — a pronoun needs to find nouns without being mistaken for one itself.
+Notice something crucial about **it** — it doesn't advertise anything — but it is looking for a noun. *What you advertize* isn't the same as *what you're looking for.* This is why we need separate queries and keys — a pronoun needs to find nouns without being mistaken for one itself.
 
-In practice, real attention vectors have dozens or hundreds of dimensions, not just one. But the principle is the same — remember the "bear detector" from the vectors chapter, where a single dot product could check for a complex things like "something similar to a bear". Attention queries and keys work the same way, just asking richer questions like "is this a noun that's the subject of a nearby verb?"
+In practice, real attention vectors have dozens or hundreds of dimensions, not just one. But the principle is the same — remember the "bear detector" from the vectors chapter, where a single dot product could check for complex things like "something similar to a bear". Attention queries and keys work the same way, just asking richer questions like "is this a noun that's the subject of a nearby verb?"
 
-## Softmax: Who's Shouting Loudest?
+## Attention in a Real Model
 
-The toy example uses **softmax** to turn raw dot-product scores into attention weights. What does this function actually do, and why do we need it?
+Our toy vocabulary has four tokens and one-dimensional vectors. Real language models have tens of thousands of tokens and vectors with hundreds of dimensions. But the mechanism is exactly the same — queries, keys, and dot products.
 
-The dot products give us raw scores — but they can be any numbers: large, small, negative, zero. We need to convert them into weights that are all positive and add up to 100%, so we can use them to blend information. Softmax does exactly this. (Under the hood it uses exponentials, but you don't need to understand the formula to understand what it does.)
+Below are real attention weights from **BERT**, a well-known language model. This particular attention head learned to resolve pronouns — exactly like our toy example, but on real sentences:
 
-Think of softmax as a competition: each score is a voice in a crowd, and what matters is **who's shouting loudest relative to everyone else**. If one score is moderately high and the others are near zero, it wins by default — even without being very confident. But if another score comes along much higher, it drowns out the moderate one and takes nearly all the weight. The *absolute* values matter less than the *gaps* between them.
+<BertAttentionNoPositionWidget>
+Click "it" in the first sentence — watch it split attention between "dog" (34%) and "cat" (30%), trying to figure out which noun the pronoun refers to. Try "she" in the teacher sentence — it picks "teacher" (37%) over "student" (11%). In the ball/window sentence, "it" attends to "ball" (55%) and "window" (14%). This head learned pronoun resolution entirely on its own.
+</BertAttentionNoPositionWidget>
+
+No one told this head to resolve pronouns — it discovered that role through training, because pronoun resolution is useful for predicting language.
+
+## Softmax: Dividing Your Attention
+
+The toy example uses **softmax** to turn raw dot-product scores into attention weights. Each token has a fixed budget of attention — 100% — and softmax decides how to divide it.
+
+The dot products give us raw scores — but they can be any numbers: large, small, negative, zero. Softmax converts them into positive weights that add up to 100%. Think of it as a competition: what matters is **who's loudest relative to everyone else**. If one score is moderately high and the others are near zero, it wins by default. But if another score comes along much higher, it drowns out the moderate one and takes nearly all the weight. The *gaps* between scores matter more than the absolute values.
 
 <SoftmaxExplorerWidget>
 Start with "All equal" — everyone gets 25%. Then try "Moderate, rest silent" — A isn't very loud, but it wins by default because nobody else is saying anything. Now click "Moderate meets loud" — B comes in much higher and completely drowns out A. That's the key dynamic: softmax is about *relative* loudness. Then try making all scores large but equal (like 8, 8, 8, 8) — still 25% each! It's the gaps that matter, not the magnitudes.
 </SoftmaxExplorerWidget>
+
+## Values: What Did You Find?
+
+So far attention tells us *where to look* — which tokens are relevant. But we also need to know *what information to gather* from those tokens. That's what the **value** vector is for.
+
+In our pronoun-resolution example, the question is "what thing does *it* refer to?" Each token publishes a **value** — the answer to whatever question the attention head is asking. For our toy example, the value encodes which animal the token represents: cat's value says "cat," dog's value says "dog," and filler tokens have nothing to contribute.
+
+Attention then blends these values using the attention weights as a recipe: if "it" pays 90% attention to "cat" and 10% to everything else, the result is 90% cat — the pronoun has figured out what it refers to.
+
+<ToyAttentionValuesWidget>
+Click "it" to see how attention weights blend value vectors into a result. With "cat bla bla it," the result is nearly 100% cat. Try "cat bla dog it" — the result is a mix of both nouns. Try "bla bla bla it" — with no nouns, the result is empty.
+</ToyAttentionValuesWidget>
 
 ## But Wait — Where Are the Words?
 
@@ -128,22 +149,20 @@ This isn't free: stretching frequencies spreads out the angular resolution, so t
 
 ## Multiple Heads: Looking for Different Things
 
-So far we've built one attention mechanism — one set of Q, K, and V weights that asks one kind of question. But understanding a sentence requires many kinds of questions at once: What does this pronoun refer to? What's the nearest noun? What's the subject of this verb? What clause does this word belong to?
+Understanding a sentence requires many kinds of questions at once: What does this pronoun refer to? What's the nearest noun? What's the subject of this verb? What clause does this word belong to?
 
-Some of these questions — like "what's the nearest noun?" — depend on knowing word positions. That's why we needed positional encoding first. Now that the model knows both *what* words are and *where* they are, different attention heads can specialize in different patterns.
+Real attention models use **multiple attention heads** — each with its own key, query, and value weights, each learning to look for different kinds of relationships. They all run in parallel on the same input, and their outputs get combined.
 
-Attention models use **multiple attention heads** — each with its own Q, K, and V weights, each learning to look for different kinds of relationships. They all run in parallel on the same input, and their outputs get combined.
-
-This isn't a theoretical idea — we can see it happening inside a real model. Below are attention weights from **BERT**, a well-known language model with 12 layers of 12 heads each (that's 144 attention heads total). We've picked four heads that learned strikingly different patterns:
+Earlier we saw a single BERT head that learned pronoun resolution. Here's the same model, but now showing four of its heads — including two that use positional information:
 
 <BertAttentionWidget>
-Switch between the four heads and click words to see their attention. Start with "Self / pronoun" and click "it" in the first sentence — watch it split attention between "dog" and "cat." Then switch to "Next word" — every word rigidly attends to the one after it. Try "Previous word" — the mirror image. Finally, "Broad context" shows wider structural connections. These are real attention weights from a real model — each head genuinely learned a different job.
+Switch between the four heads. "Next word" and "Previous word" are position-based — every word rigidly attends to its neighbor, building a chain of local context. Compare with "Self / pronoun" and "Broad context" which attend based on meaning. All four run in parallel inside the same model.
 </BertAttentionWidget>
 
-Each head is a specialist. The "Next word" and "Previous word" heads build a chain of local context — they only work because the model has positional encoding telling it where each word sits. The "Self / pronoun" head resolves references and links related concepts. The "Broad context" head captures sentence structure. No one told these heads what to specialize in — they discovered their roles through training, because different kinds of attention are all useful for predicting language.
+The "Next word" and "Previous word" heads only work *because* the model has positional encoding telling it where each word sits. Without RoPE (or a similar mechanism), the model couldn't tell which word is adjacent — it would only know what the words mean, not where they are. No one told these heads what to specialize in — they discovered their roles through training.
 
 <KeyInsight>
-Multiple attention heads let the model ask many different questions in parallel. Each head has its own Q, K, and V weights, so each learns to attend to a different kind of relationship — position, pronouns, grammar, structure, semantics. **The model doesn't need to choose one kind of attention; it gets all of them at once.**
+Multiple attention heads let the model ask many different questions in parallel. Each head has its own key, query, and value weights, so each learns to attend to a different kind of relationship — position, pronouns, grammar, structure, semantics. **The model doesn't need to choose one kind of attention; it gets all of them at once.**
 </KeyInsight>
 
 ## What We've Built
