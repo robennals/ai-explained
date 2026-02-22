@@ -1,94 +1,128 @@
 "use client";
 
+import { VectorCard } from "../vectors/VectorCard";
+
 const TOKENS = [
   {
     label: "cat",
-    key: "[3, 0]",
-    query: "[3, 0]",
-    value: "[1, 0]",
-    advertises: "I'm a noun",
-    looksFor: "Other nouns",
-    valueLabel: "cat",
-    color: "text-amber-600 dark:text-amber-400",
+    emoji: "🐱",
+    key: [3],
+    query: [0],
+    value: [1, 0],
+    keyMeaning: "I'm a noun",
+    queryMeaning: "I'm not looking",
+    valueMeaning: "cat",
+    color: "#d97706",
   },
   {
     label: "dog",
-    key: "[3, 0]",
-    query: "[3, 0]",
-    value: "[0, 1]",
-    advertises: "I'm a noun",
-    looksFor: "Other nouns",
-    valueLabel: "dog",
-    color: "text-blue-600 dark:text-blue-400",
+    emoji: "🐶",
+    key: [3],
+    query: [0],
+    value: [0, 1],
+    keyMeaning: "I'm a noun",
+    queryMeaning: "I'm not looking",
+    valueMeaning: "dog",
+    color: "#2563eb",
   },
   {
     label: "bla",
-    key: "[0, 3]",
-    query: "[0, 3]",
-    value: "[0, 0]",
-    advertises: "I'm filler",
-    looksFor: "Other filler",
-    valueLabel: "–",
-    color: "text-foreground/40",
+    emoji: "💬",
+    key: [0],
+    query: [0],
+    value: [0, 0],
+    keyMeaning: "I'm not a noun",
+    queryMeaning: "I'm not looking",
+    valueMeaning: "I don't provide anything",
+    color: "#9ca3af",
   },
   {
     label: "it",
-    key: "[0, 0]",
-    query: "[3, 0]",
-    value: "[0, 0]",
-    advertises: "Nothing",
-    looksFor: "Nouns",
-    valueLabel: "–",
-    color: "text-purple-600 dark:text-purple-400",
+    emoji: "👉",
+    key: [0],
+    query: [3],
+    value: [0, 0],
+    keyMeaning: "I'm not a noun",
+    queryMeaning: "I want a noun",
+    valueMeaning: "I don't provide anything",
+    color: "#9333ea",
   },
 ];
 
+const KEY_QUERY_PROPS = ["noun"];
+const VALUE_PROPS = ["cat", "dog"];
+
 export function ToyVocabTable() {
   return (
-    <div className="my-6 overflow-x-auto">
-      <table className="w-full border-collapse text-sm">
-        <thead>
-          <tr className="border-b-2 border-border">
-            <th className="px-3 py-2 text-left font-semibold text-foreground">Token</th>
-            <th className="px-3 py-2 text-left font-semibold text-foreground">
-              Key <span className="font-normal text-muted">(advertises)</span>
-            </th>
-            <th className="px-3 py-2 text-left font-semibold text-foreground">
-              Query <span className="font-normal text-muted">(looks for)</span>
-            </th>
-            <th className="px-3 py-2 text-left font-semibold text-foreground">
-              Value <span className="font-normal text-muted">(contributes)</span>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {TOKENS.map((tok) => (
-            <tr key={tok.label} className="border-b border-border">
-              <td className="px-3 py-2.5">
-                <span className={`font-bold ${tok.color}`}>{tok.label}</span>
-              </td>
-              <td className="px-3 py-2.5">
-                <span className="rounded bg-foreground/5 px-1.5 py-0.5 font-mono text-xs">
-                  {tok.key}
-                </span>
-                <span className="ml-2 text-muted">{tok.advertises}</span>
-              </td>
-              <td className="px-3 py-2.5">
-                <span className="rounded bg-foreground/5 px-1.5 py-0.5 font-mono text-xs">
-                  {tok.query}
-                </span>
-                <span className="ml-2 text-muted">{tok.looksFor}</span>
-              </td>
-              <td className="px-3 py-2.5">
-                <span className="rounded bg-foreground/5 px-1.5 py-0.5 font-mono text-xs">
-                  {tok.value}
-                </span>
-                <span className="ml-2 text-muted">{tok.valueLabel}</span>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="my-6 space-y-4">
+      {/* Column headers */}
+      <div className="grid grid-cols-3 gap-3 pl-[72px]">
+        <div className="text-center text-xs font-semibold uppercase tracking-wider text-muted">
+          Key <span className="font-normal">(advertises)</span>
+        </div>
+        <div className="text-center text-xs font-semibold uppercase tracking-wider text-muted">
+          Query <span className="font-normal">(looks for)</span>
+        </div>
+        <div className="text-center text-xs font-semibold uppercase tracking-wider text-muted">
+          Value <span className="font-normal">(contributes)</span>
+        </div>
+      </div>
+
+      {/* One row per token */}
+      {TOKENS.map((tok) => (
+        <div key={tok.label} className="flex items-center gap-3">
+          {/* Row label */}
+          <div
+            className="w-[60px] shrink-0 text-right text-sm font-bold"
+            style={{ color: tok.color }}
+          >
+            {tok.emoji} {tok.label}
+          </div>
+
+          {/* Cards */}
+          <div className="grid grid-cols-3 gap-3 flex-1 min-w-0 items-start">
+            <VectorCard
+              name={`${tok.label} key`}
+              emoji=""
+              properties={KEY_QUERY_PROPS}
+              values={tok.key}
+              barColor={tok.color}
+              barMax={3}
+              animate={false}
+              labelWidth="w-10"
+              barWidth="w-12"
+              className="text-xs"
+              footer={tok.keyMeaning}
+            />
+            <VectorCard
+              name={`${tok.label} query`}
+              emoji=""
+              properties={KEY_QUERY_PROPS}
+              values={tok.query}
+              barColor={tok.color}
+              barMax={3}
+              labelWidth="w-10"
+              barWidth="w-12"
+              animate={false}
+              className="text-xs"
+              footer={tok.queryMeaning}
+            />
+            <VectorCard
+              name={`${tok.label} value`}
+              emoji=""
+              properties={VALUE_PROPS}
+              values={tok.value}
+              barColor={tok.color}
+              barMax={1}
+              labelWidth="w-10"
+              barWidth="w-12"
+              animate={false}
+              className="text-xs"
+              footer={tok.valueMeaning}
+            />
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
