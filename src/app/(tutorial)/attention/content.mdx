@@ -91,86 +91,14 @@ The playground below uses the same key/query matching as before — "it" still f
 Click "it" to see how attention weights blend value vectors into a result. With "cat bla bla it," the result is nearly 100% cat. Try "cat bla dog it" — the result is a mix of both nouns. Try "bla bla bla it" — with no nouns, the result is empty.
 </ToyAttentionValuesWidget>
 
-## But Wait — Where Are the Words?
-
-There's a problem hiding in our attention mechanism. Look back at how we computed attention scores: we took the dot product of each query with each key. But those queries and keys come from embeddings — and embeddings don't encode *position*. The word "cat" has the same embedding whether it's the first word or the last word. Our attention mechanism has no idea *where* words are in the sentence — it only knows *what* they are.
-
-This means "dog bla cat it" and "cat bla dog it" would give "it" identical attention scores for both nouns. The model can't tell which noun is closer. That's a serious problem — in real language, nearby words are usually more relevant than distant ones.
-
-<Callout>
-**Why not just encode per-pair distances?** The obvious fix is to add a distance correction: "these two words are 3 apart, those are 7 apart." But attention computes scores via a single matrix multiply: Q × K^T. Distance is a property of *pairs* — there are N² distances for N tokens. You'd need a separate N×N correction table on top of the attention scores, breaking the clean matrix multiply that makes attention fast. We need something more elegant.
-</Callout>
-
-The solution used by nearly every frontier model today — Llama, Mistral, Gemma, Qwen, DeepSeek — is called **RoPE** (Rotary Position Encoding). It's a beautiful trick that encodes position *inside* the dot product itself, with no extra parameters and no separate correction table.
-
-## The Rotation Trick
-
-### How Rotation Encodes Distance
-
-Here's the idea — a callback to Chapter 5 on matrix transformations. Instead of *adding* a position number to each embedding, we **rotate** each word's query and key vectors by an angle that depends on position. Word at position 1 gets rotated a little. Word at position 5 gets rotated more. Word at position 100 gets rotated a lot more.
-
-Why does this work? Remember from Chapter 5 that the dot product of two vectors depends on the angle between them. When we rotate two vectors by different amounts, the dot product depends on the *difference* in their rotation angles — which is exactly the *relative distance* between the words.
-
-Two words that are 3 positions apart always have the same angular difference, whether they're at positions 1 & 4, or positions 50 & 53. The dot product automatically captures relative distance.
-
-<RotationPositionWidget>
-Move the position sliders around. Keep the gap the same (say, 3) but change the absolute positions — the dot product stays the same! Now change the gap — the dot product changes. The dashed projection line shows this visually: its length *is* the dot product. Click "Same gap, different positions" to see the projection stay constant.
-</RotationPositionWidget>
-
-### RoPE with Our Toy Tokens
-
-Let's see this work with our familiar toy vocabulary. Below, "it" is trying to figure out which noun to attend to. Both nouns have identical keys — so without position information, they get *equal* attention scores. But watch what happens when you turn on rotation:
-
-<RoPEToyTokensWidget>
-Start with the rotation speed at 0° — both nouns get identical scores. Now slowly drag it up. The closer noun starts winning because its key is rotated to a more similar angle to "it"'s query. Try different sentences to see the effect with different word orders. This is the core insight of RoPE: rotation breaks the tie between otherwise-identical tokens based on distance.
-</RoPEToyTokensWidget>
-
-### Does Rotation Tell Us Direction?
-
-You might notice something: cos(θ) = cos(-θ). The dot product between two rotated vectors is the same whether word A is 3 positions *before* or 3 positions *after* word B. Rotation encodes *distance* but not *direction*.
-
-This turns out to be fine. Language models already have a mechanism for direction: **causal masking**. During generation, each token can only attend to tokens that came *before* it — future positions are masked to -∞ before softmax, so they get zero attention weight. RoPE handles "how far apart," and causal masking handles "which direction."
-
-### What About Wrap-Around?
-
-With a single rotation frequency, there's an obvious problem: if we rotate by 15° per position, then position 1 and position 25 look identical (both are at 15° and 375° = 15°). After a full 360° revolution, positions start repeating!
-
-The solution is to use **multiple rotation speeds** across different pairs of embedding dimensions. Some dimension pairs rotate fast (capturing fine-grained local patterns), others rotate slowly (capturing long-range dependencies). Think of it like a clock: the second hand, minute hand, and hour hand all rotate at different speeds. Any two times of day produce a *unique combination* of hand positions, even though each individual hand wraps around. Similarly, no two token positions share the same rotation pattern across all dimension pairs.
-
-### Doesn't Rotation Destroy the Content?
-
-A natural worry: if we're rotating the embedding vectors, aren't we scrambling the information about *what* the word is?
-
-No — and this is key. Rotation preserves the *length* of a vector; it only changes its *direction*. The word's identity (encoded in the vector's magnitude and the relationships between dimensions) survives the rotation intact. Position information is layered on top, not mixed in.
-
-<KeyInsight>
-The dot product of two vectors equals |A| · |B| · cos(θ). Content lives in the magnitudes |A| and |B| — how "noun-like" or "filler-like" a token is. Position lives in the angle θ between them. Rotation changes the angle without touching the magnitudes, so **content and position information stay cleanly separated.**
-</KeyInsight>
-
-### Scaling to Huge Context Windows
-
-RoPE's base rotation speed is controlled by a parameter θ_base, typically 10,000. This means the slowest-rotating dimension pair completes one full revolution over roughly 10,000 positions. Beyond that, positions start to become ambiguous — similar to how a 12-hour clock can't distinguish AM from PM.
-
-To support longer contexts, techniques like **YaRN** and **NTK-aware scaling** stretch the rotation frequencies so that the slow pairs rotate even more slowly. It's like adding an even slower "day hand" to the clock — now you can tell apart any two times across an entire day, not just within 12 hours.
-
-This isn't free: stretching frequencies spreads out the angular resolution, so the model needs fine-tuning to adapt. But it works remarkably well in practice. This is how Llama 3.1 handles 128K tokens and how Gemini extends to over a million.
-
 ## Multiple Heads: Looking for Different Things
 
-Understanding a sentence requires many kinds of questions at once: What does this pronoun refer to? What's the nearest noun? What's the subject of this verb? What clause does this word belong to?
+Understanding a sentence requires many kinds of questions at once: What does this pronoun refer to? What's the subject of this verb? What clause does this word belong to?
 
-Real attention models use **multiple attention heads** — each with its own key, query, and value weights, each learning to look for different kinds of relationships. They all run in parallel on the same input, and their outputs get combined.
-
-Earlier we saw a single BERT head that learned pronoun resolution. Here's the same model, but now showing four of its heads — including two that use positional information:
-
-<BertAttentionWidget>
-Switch between the four heads. "Next word" and "Previous word" are position-based — every word rigidly attends to its neighbor, building a chain of local context. Compare with "Self / pronoun" and "Broad context" which attend based on meaning. All four run in parallel inside the same model.
-</BertAttentionWidget>
-
-The "Next word" and "Previous word" heads only work *because* the model has positional encoding telling it where each word sits. Without RoPE (or a similar mechanism), the model couldn't tell which word is adjacent — it would only know what the words mean, not where they are. No one told these heads what to specialize in — they discovered their roles through training.
+Real attention models use **multiple attention heads** — each with its own key, query, and value weights, each learning to look for different kinds of relationships. They all run in parallel on the same input, and their outputs get combined. One head might specialize in pronoun resolution (like the BERT head we saw earlier), while another learns to link verbs to their subjects, and another tracks which clause each word belongs to. No one tells these heads what to specialize in — they discover their roles through training, because different kinds of attention are all useful for predicting language.
 
 <KeyInsight>
-Multiple attention heads let the model ask many different questions in parallel. Each head has its own key, query, and value weights, so each learns to attend to a different kind of relationship — position, pronouns, grammar, structure, semantics. **The model doesn't need to choose one kind of attention; it gets all of them at once.**
+Multiple attention heads let the model ask many different questions in parallel. Each head has its own key, query, and value weights, so each learns to attend to a different kind of relationship — pronouns, grammar, structure, semantics. **The model doesn't need to choose one kind of attention; it gets all of them at once.**
 </KeyInsight>
 
 ## What We've Built
@@ -181,13 +109,12 @@ Let's take stock. Attention is:
 2. **Dot products** — Measure how relevant each word is to each other word
 3. **Softmax** — Turn relevance scores into percentages
 4. **Weighted sum** — Blend values according to attention percentages
-5. **Rotary positions** — Rotate embeddings so dot products automatically capture word distance
-6. **Multiple heads** — Run several attention patterns in parallel, each specializing in different relationships
+5. **Multiple heads** — Run several attention patterns in parallel, each specializing in different relationships
 
 Every piece is something we already understood from earlier chapters. Attention is just a clever *wiring* of familiar operations.
 
-In the next chapter, we'll wire attention together with feed-forward neural networks to build the **transformer** — the architecture behind ChatGPT, Claude, and every modern language model. And we'll see what happens when you train it to do that simple task from Chapter 6: predict the next word.
+But there's a problem we haven't solved. Did you notice? Our attention mechanism has no idea *where* words are — it only knows *what* they are. "The dog chased the cat" and "the cat chased the dog" produce identical attention scores. Worse, in a long document, a word at the other end of the book gets treated the same as a word in the same sentence — the model has no sense of proximity at all. In the next chapter, we'll fix this with an elegant trick involving rotation.
 
 <TryItInPyTorch notebook="attention">
-Compute dot-product attention from scratch, build query/key/value projections, visualize attention heatmaps on real sentences, implement multi-head attention, see how scrambled word order doesn't change attention scores, and build rotary position embeddings that encode relative distance.
+Compute dot-product attention from scratch, build query/key/value projections, visualize attention heatmaps on real sentences, implement multi-head attention, and see how scrambled word order doesn't change attention scores — a problem we'll solve in the next chapter.
 </TryItInPyTorch>

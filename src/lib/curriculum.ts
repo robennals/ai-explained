@@ -78,9 +78,28 @@ export const chapters: Chapter[] = [
     prerequisites: [6],
     description:
       "Attention — letting each word choose which other words to focus on — is the breakthrough behind modern AI. Built from things you already know: embeddings, dot products, and neural networks.",
+    ready: true,
   },
   {
     id: 8,
+    slug: "positions",
+    title: "Where Am I?",
+    subtitle: "Positional encoding",
+    prerequisites: [7],
+    description:
+      "Attention is position-blind — it has no idea where words are in a sentence. Distance penalties, rotation tricks, and the elegant geometry of RoPE fix this.",
+  },
+  {
+    id: 9,
+    slug: "transformers",
+    title: "One Architecture to Rule Them All",
+    subtitle: "Transformers",
+    prerequisites: [8],
+    description:
+      "The transformer wires attention and neural networks together. Trained only to predict the next word, it learns grammar, narrative, and common sense — from nothing but prediction.",
+  },
+  {
+    id: 10,
     slug: "matrix-math",
     title: "Neural Networks as Geometry",
     subtitle: "Matrix math",
@@ -89,16 +108,7 @@ export const chapters: Chapter[] = [
       "Every layer is a geometric transformation. See how matrices rotate, scale, and shear space — from 1D to 4D and beyond — and why that's the same thing as a layer of neurons.",
   },
   {
-    id: 9,
-    slug: "transformers",
-    title: "One Architecture to Rule Them All",
-    subtitle: "Transformers",
-    prerequisites: [7],
-    description:
-      "The transformer wires attention and neural networks together. Trained only to predict the next word, it learns grammar, narrative, and common sense — from nothing but prediction.",
-  },
-  {
-    id: 10,
+    id: 11,
     slug: "transfer-learning",
     title: "Train Once, Adapt Everywhere",
     subtitle: "Transfer learning",
@@ -107,16 +117,16 @@ export const chapters: Chapter[] = [
       "Pre-trained models transfer knowledge to new tasks with minimal data. Fine-tune on 1,000 examples and beat training from scratch on 100,000.",
   },
   {
-    id: 11,
+    id: 12,
     slug: "distillation",
     title: "Shrinking a Giant into Something Fast",
     subtitle: "Distillation",
-    prerequisites: [10],
+    prerequisites: [11],
     description:
       "A giant model is too slow for your phone. Train a tiny model to mimic it using soft predictions. The teacher's intuition — 'dark knowledge' — transfers.",
   },
   {
-    id: 12,
+    id: 13,
     slug: "mixture-of-experts",
     title: "Not Every Neuron Fires for Every Thought",
     subtitle: "Mixture of experts",
@@ -125,34 +135,34 @@ export const chapters: Chapter[] = [
       "A router sends each question to specialist sub-networks. A trillion parameters, but only a fraction active per question. Smarter without getting slower.",
   },
   {
-    id: 13,
+    id: 14,
     slug: "thinking-step-by-step",
     title: "How AI Learned to Think Step by Step",
     subtitle: "Chain of thought",
-    prerequisites: [10],
+    prerequisites: [11],
     description:
       "Standard LLMs answer in one shot with no scratch paper. Chain-of-thought and thinking models use their own output as working memory to solve harder problems.",
   },
   {
-    id: 14,
+    id: 15,
     slug: "scaling-emergence",
     title: "Bigger Models, Surprising Abilities",
     subtitle: "Scaling and emergence",
-    prerequisites: [10],
+    prerequisites: [11],
     description:
       "10x bigger = smoothly better predictions. But individual capabilities appear suddenly — arithmetic, reasoning, translation quality jump at specific sizes.",
   },
   {
-    id: 15,
+    id: 16,
     slug: "alignment",
     title: "Teaching AI Right from Wrong",
     subtitle: "Alignment",
-    prerequisites: [10],
+    prerequisites: [11],
     description:
       "RLHF transforms a text completer into a helpful assistant. But optimize too hard and the model learns to tell you what you want to hear, not what's true.",
   },
   {
-    id: 16,
+    id: 17,
     slug: "image-generation",
     title: "Creating Images from Pure Noise",
     subtitle: "Image generation",
@@ -161,7 +171,7 @@ export const chapters: Chapter[] = [
       "Pixel-by-pixel generation fails. Diffusion models start with pure noise and denoise. Latent space is a map of all possible images.",
   },
   {
-    id: 17,
+    id: 18,
     slug: "appendix-pytorch",
     title: "PyTorch from Scratch",
     subtitle: "A hands-on introduction to the code behind AI",
