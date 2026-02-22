@@ -8,7 +8,9 @@ In the last chapter, we described animals with hand-picked properties like size 
 
 When we represented animals as vectors, we chose dimensions that made sense for animals: size, speed, danger. But what dimensions would you use for *all words*? "How big is the color blue?" doesn't make sense. "How fast is democracy?" There's no universal set of labeled dimensions that works for everything.
 
-But even with a single dimension, we can be surprisingly clever. What if we use different *regions* of the number line for different categories, and order items *within* each region by a different property?
+AI solves this by giving up on universal dimensions entirely. Instead of asking "what properties describe everything?", it places words with similar meanings close together — and lets the dimensions mean different things in different parts of the space. Near "dog," the dimensions might capture size and domestication; near "democracy," they might capture abstractness and political leaning.
+
+This is a somewhat tricky idea, so let's build up to it starting with just a single dimension. What if we use different *regions* of the number line for different categories, and order items *within* each region by a different property?
 
 <CombinedNumberLineWidget>
 Try each preset. In "Animals × Foods", animals are on the left ordered by size, while foods are on the right ordered by sweetness. One number encodes the category AND a property within it. Try the other presets — each packs two categories with different orderings onto one line.
@@ -30,40 +32,30 @@ With just two numbers, we can represent overlapping categories like a Venn diagr
 
 Going from one dimension to two gave us dramatically more expressive power — more types of things, more ways they can differ, more ways categories can overlap. Adding more dimensions keeps making this better. With 50 or 100 dimensions, you can capture remarkably fine-grained distinctions.
 
-But there are no universal dimensions that apply to everything. As we saw, "size" means something for animals but not for colors, and the same two axes meant completely different things in each quadrant. Real embeddings don't use labeled dimensions at all. Instead, the core idea is simpler: **similar things should be close together**, and **directions should have meaning**. A direction might mean "size" in one part of the space and "formality" in another — and that's fine, because what matters is the local geometry, not any global labeling scheme.
+This is the idea we introduced earlier: don't worry about labeling dimensions. Just put similar things close together, and let directions mean different things in different parts of the space. With enough dimensions, this works remarkably well.
+
+Representing something as a vector like this is called an **embedding**.
 
 <KeyInsight>
-Real embeddings don't use labeled dimensions. They learn a space where similar things are nearby and where directions encode meaningful relationships — but the same direction can mean different things in different regions of the space.
+The dimensions don't need labels. What matters is that similar things are nearby and that directions encode meaningful relationships — even if the same direction means different things in different regions of the space.
 </KeyInsight>
-
-## Neural Networks Meet Embeddings
-
-In the vectors chapter, we saw that a neuron draws a decision boundary — a straight line through its input space. Now each input has a name — its position in the embedding encodes meaning. Can a neuron learn to read that meaning?
-
-Let's find out. Each tab below shows one of the 2D embeddings from earlier. Pick a challenge and hit Optimize to watch the network find a solution — or drag the sliders yourself.
-
-<EmbeddingClassifierWidget>
-Start with "Size × Danger" and try "Dangerous" — a single neuron draws a line separating dangerous things from safe ones. Try the other challenges too — each tilts the line differently. Then switch to "Animal or Food?" and try "Both" — a single line can't isolate the middle band, so this challenge uses two neurons feeding into an output. Finally try "Four Categories" — selecting a quadrant always needs two neurons working together.
-</EmbeddingClassifierWidget>
-
-A single neuron can only draw one straight boundary. When you need to carve out a region — a band, a quadrant — you need multiple neurons, each drawing its own boundary, with an output neuron combining them. This is why real networks have many layers. And these are only toy 2D embeddings — real language models use hundreds or thousands of dimensions.
 
 ## Exploring a Real Embedding
 
-Let's explore an actual word embedding — GloVe, trained by Stanford on 6 billion words of text. Each word is a point in 50-dimensional space. We can't visualize 50 dimensions, but we *can* ask: what's nearby?
+Let's try a real embedding — GloVe, created by Stanford. Each word is a point in 50-dimensional space. The full embedding contains 400,000 words, which is too many to fit in the browser, so we're showing a subset of common nouns. We can't visualize 50 dimensions, but we *can* use cosine similarity (from the previous chapter) to ask: what's nearby?
 
 <EmbeddingPlaygroundWidget>
-Start with "dog" — its neighbors are other animals and pets. Try "guitar" — you get other instruments. Try "queen" — notice it sits near royalty words. Type your own words and see what clusters together.
+Start with "dog" — its neighbors are other animals and pets. Click on a neighbor to jump to it and browse around the space. Try "guitar" — you get other instruments. Try "queen" — notice it sits near royalty words. Type your own words and see what clusters together.
 </EmbeddingPlaygroundWidget>
 
-Notice that the embedding groups words by meaning without being told what any word means. "Dog" is near "cat" and "puppy". "Guitar" is near "piano" and "bass". This structure emerged just from reading text — the system learned that words appearing in similar contexts should be nearby.
+Notice that the embedding groups words by meaning without being told what any word means. "Dog" is near "cat" and "puppy". "Guitar" is near "piano" and "bass". Similar words end up nearby — exactly the idea we described earlier.
 
 ## Directions Have Meaning
 
 The embedding doesn't just group similar words together — *directions* in the space carry meaning too. The direction from "ant" to "whale" captures something like size. The direction from "boy" to "man" captures age. You can pick any two words, and the line between them defines a meaningful spectrum.
 
 <WordPairSpectrumWidget>
-Try "ant ↔ whale" — notice how animals arrange from small to large between the endpoints. Try "salad ↔ cake" for a healthy-to-indulgent food spectrum. Try "boy ↔ man" for an age spectrum. Pick your own word pairs and see what spectrums emerge.
+Try "ant ↔ whale" — notice how animals arrange from small and land-dwelling to large and aquatic, the two main ways ants and whales differ. Try "salad ↔ cake" for a healthy-to-indulgent food spectrum. Try "boy ↔ man" for an age spectrum. Pick your own word pairs and see what spectrums emerge. You'll sometimes find unexpected words in between — sometimes because the embedding is imperfect, and sometimes because it's capturing dimensions of meaning other than the one you were thinking of.
 </WordPairSpectrumWidget>
 
 This is why unlabeled dimensions are so powerful. Even though no dimension is labeled "size" or "age," those concepts exist as directions in the space. And there are far more meaningful directions than there could ever be labeled dimensions — every pair of words defines a potential axis of meaning.
@@ -90,7 +82,7 @@ People invent new words, spell things differently, and use rare words all the ti
 
 Take for example the word `treeishness`. You've probably never seen that word before, but you have a pretty good idea what it means because you can break it down into `tree`, `-ish`, and `-ness`.
 
-Modern language models use tokenizers that solve the problem the same way. The most common words get their own token, but others get assembled out of smaller parts. Try it out below.
+Modern language models solve the problem the same way. The most common words get their own token, but others get assembled out of smaller parts. Try it out below.
 
 <TokenizationPlaygroundWidget>
 Click "superman, superb, superlative" and look for repeated chunks.
@@ -102,15 +94,11 @@ Try punctuation too (`!`, `,`, `?`) and notice those are tokens as well.
 
 ## Where Do Embeddings Come From?
 
-We've seen that embeddings are lists of numbers that capture meaning. But how does a neural network get those numbers in the first place?
+In modern AIs, the embedding is just the first layer of the neural network. It has one input node for every possible token. When a token comes in, that input is set to 1 and every other input is set to 0 — like raising your hand in a crowd when someone calls your name. This is called **one-hot encoding**.
 
-**Learning from context.** Some embeddings (like the GloVe ones we explored above) are trained by reading huge amounts of text and noticing which words keep showing up together. "Dog" and "cat" both appear near words like "pet", "fur", and "veterinarian" — so they end up close together in the embedding. The system figures out that words used in similar sentences probably mean similar things.
+Each connection carries a weight. Since only one input word is "on," the output of the first layer is just the weights for that one word. Those weights *are* the embedding. Unlike the neurons we saw in previous chapters, the embedding layer has no bias and no activation function.
 
-**Learning as part of a network.** In modern language models, the embedding is actually the very first layer of the neural network — the layer that takes in tokens and produces numbers for the rest of the network to work with. It looks like the network diagrams from the previous chapter: a layer of input nodes connected by weights to a layer of output nodes, which then feed into more layers.
-
-But there's a trick for how the input works. The network has one input node for every possible token. When a token comes in, the network sets that token's input to 1 and every other input to 0. This is called **one-hot encoding** — it's like raising your hand in a crowd: only one hand goes up, and that tells everyone which person you are.
-
-Remember from the previous chapter that each connection between neurons carries a **weight**. Since only one input is "on" (set to 1) and all the others are "off" (set to 0), the outputs just equal the weights coming from that one active input. Those weights *are* the embedding. During training, we learn the embedding through gradient descent, just like we learn any other weights.
+The network learns those weights through gradient descent, just like any other weights - naturally assigning each word the meaning that helps the network the most.
 
 Modern language models use much bigger embeddings than our 50-dimensional GloVe example: GPT-2 uses 768 dimensions, GPT-3 uses 12,288 dimensions.
 
@@ -143,5 +131,5 @@ We've seen that embeddings turn words into lists of numbers — points in a high
 In the next chapter, we'll discover that every neural network layer is doing the same thing: **matrix multiplication** — a geometric transformation that rotates, stretches, and reshapes space. It sounds abstract, but it has a beautiful visual meaning you can watch unfold.
 
 <TryItInPyTorch notebook="embeddings">
-Build one-hot vectors, train your own word embeddings, explore real word analogies (king − man + woman = queen) with GloVe, and see how GPT-4's tokenizer splits text.
+Build one-hot vectors, train your own word embeddings, explore real word analogies (king − man + woman = queen) with GloVe, and see how GPT-4 splits text into tokens.
 </TryItInPyTorch>

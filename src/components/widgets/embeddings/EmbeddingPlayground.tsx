@@ -94,7 +94,7 @@ export function EmbeddingPlayground() {
 
   if (loading) {
     return (
-      <WidgetContainer title="Exploring a Real Embedding" description="Loading...">
+      <WidgetContainer title="Try a Real Embedding" description="Loading...">
         <div className="flex items-center justify-center p-8 text-sm text-muted">
           Loading word vectors...
         </div>
@@ -104,7 +104,7 @@ export function EmbeddingPlayground() {
 
   if (error || !data) {
     return (
-      <WidgetContainer title="Exploring a Real Embedding">
+      <WidgetContainer title="Try a Real Embedding">
         <div className="p-4 text-sm text-error">Failed to load embedding data.</div>
       </WidgetContainer>
     );
@@ -112,7 +112,7 @@ export function EmbeddingPlayground() {
 
   return (
     <WidgetContainer
-      title="Exploring a Real Embedding"
+      title="Try a Real Embedding"
       description="Type a word to see its nearest neighbors in GloVe's 50-dimensional space."
       onReset={resetState}
     >
@@ -165,9 +165,13 @@ export function EmbeddingPlayground() {
               {results.map((r, i) => {
                 const barWidth = Math.max(0, r.similarity * 100);
                 return (
-                  <div key={data.words[r.index]} className="flex items-center gap-2">
+                  <button
+                    key={data.words[r.index]}
+                    onClick={() => setMainWord(data.words[r.index])}
+                    className="flex w-full items-center gap-2 rounded-md px-1 py-0.5 cursor-pointer transition-colors hover:bg-accent/10 group"
+                  >
                     <span className="w-4 text-right text-[10px] text-muted">{i + 1}</span>
-                    <span className="w-20 text-xs font-medium text-foreground truncate">
+                    <span className="w-20 text-left text-xs font-medium text-accent group-hover:underline truncate">
                       {data.words[r.index]}
                     </span>
                     <div className="flex-1 h-4 rounded-sm bg-surface overflow-hidden">
@@ -179,7 +183,7 @@ export function EmbeddingPlayground() {
                     <span className="w-10 text-right text-[10px] font-mono text-muted">
                       {r.similarity.toFixed(2)}
                     </span>
-                  </div>
+                  </button>
                 );
               })}
             </div>
