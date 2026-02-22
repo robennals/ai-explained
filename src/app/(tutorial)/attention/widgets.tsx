@@ -100,22 +100,6 @@ const MultiHead = dynamic(
   { ssr: false }
 );
 
-const RoPEToyTokens = dynamic(
-  () =>
-    import("@/components/widgets/attention/RoPEToyTokens").then(
-      (m) => m.RoPEToyTokens
-    ),
-  { ssr: false }
-);
-
-const RotationPosition = dynamic(
-  () =>
-    import("@/components/widgets/attention/RotationPosition").then(
-      (m) => m.RotationPosition
-    ),
-  { ssr: false }
-);
-
 function WidgetSlot({ children, tryIt, label }: { children: React.ReactNode; tryIt?: React.ReactNode; label?: string }) {
   return (
     <Suspense
@@ -236,18 +220,3 @@ export function BertAttentionNoPositionWidget({ children }: { children?: React.R
   );
 }
 
-export function RoPEToyTokensWidget({ children }: { children?: React.ReactNode }) {
-  return (
-    <WidgetSlot tryIt={children}>
-      <RoPEToyTokens />
-    </WidgetSlot>
-  );
-}
-
-export function RotationPositionWidget({ children }: { children?: React.ReactNode }) {
-  return (
-    <WidgetSlot tryIt={children}>
-      <RotationPosition />
-    </WidgetSlot>
-  );
-}
