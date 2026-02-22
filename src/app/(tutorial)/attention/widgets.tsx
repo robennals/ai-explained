@@ -36,10 +36,26 @@ const ToyAttention = dynamic(
   { ssr: false }
 );
 
+const ToyAttentionValues = dynamic(
+  () =>
+    import("@/components/widgets/attention/ToyAttentionValues").then(
+      (m) => m.ToyAttentionValues
+    ),
+  { ssr: false }
+);
+
 const ToyValues = dynamic(
   () =>
     import("@/components/widgets/attention/ToyValues").then(
       (m) => m.ToyValues
+    ),
+  { ssr: false }
+);
+
+const ToyValueTable = dynamic(
+  () =>
+    import("@/components/widgets/attention/ToyValueTable").then(
+      (m) => m.ToyValueTable
     ),
   { ssr: false }
 );
@@ -148,10 +164,26 @@ export function ToyAttentionWidget({ children }: { children?: React.ReactNode })
   );
 }
 
+export function ToyAttentionValuesWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children} label="Explore it">
+      <ToyAttentionValues />
+    </WidgetSlot>
+  );
+}
+
 export function ToyValuesWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children}>
       <ToyValues />
+    </WidgetSlot>
+  );
+}
+
+export function ToyValueTableWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <ToyValueTable />
     </WidgetSlot>
   );
 }
@@ -192,6 +224,14 @@ export function BertAttentionWidget({ children }: { children?: React.ReactNode }
   return (
     <WidgetSlot tryIt={children} label="Explore it">
       <BertAttention />
+    </WidgetSlot>
+  );
+}
+
+export function BertAttentionNoPositionWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children} label="Explore it">
+      <BertAttention excludeHeads={["Next word", "Previous word", "Broad context"]} onlySentencesWithWord="it" />
     </WidgetSlot>
   );
 }

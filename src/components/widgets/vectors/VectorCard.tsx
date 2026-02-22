@@ -87,6 +87,7 @@ export function VectorCard({
   labelWidth,
   barMax,
   barWidth,
+  footer,
 }: {
   name: string;
   emoji: string;
@@ -103,6 +104,7 @@ export function VectorCard({
   labelWidth?: string;
   barMax?: number;
   barWidth?: string;
+  footer?: string;
 }) {
   return (
     <div className={`rounded-lg border border-foreground/10 bg-foreground/[0.02] overflow-hidden shrink-0 ${className ?? ""}`}>
@@ -139,6 +141,11 @@ export function VectorCard({
           )}
         </div>
       ))}
+      {footer && (
+        <div className="py-1.5 px-3 text-center text-[11px] italic text-muted border-t border-foreground/5">
+          {footer}
+        </div>
+      )}
     </div>
   );
 }
