@@ -8,7 +8,7 @@ import {
 } from "./widgets";
 
 export const metadata = {
-  title: "Transformers — Learn AI Layer by Layer",
+  title: "One Architecture to Rule Them All — Learn AI Layer by Layer",
   description:
     "The transformer wires attention and neural networks together. Trained to predict the next word, it learns grammar and common sense from nothing but prediction.",
 };

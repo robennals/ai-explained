@@ -163,11 +163,12 @@ function MiniSlider({
 export function NeuronPlayground() {
   const [inputA, setInputA] = useState(1.0);
   const [inputB, setInputB] = useState(0.0);
-  const [w1, setW1] = useState(0);
-  const [w2, setW2] = useState(0);
-  const [bias, setBias] = useState(0);
+  const [w1, setW1] = useState(GATE_SOLUTIONS.AND.w1);
+  const [w2, setW2] = useState(GATE_SOLUTIONS.AND.w2);
+  const [bias, setBias] = useState(GATE_SOLUTIONS.AND.bias);
   const [, setIsAnimating] = useState(false);
   const [animatingTo, setAnimatingTo] = useState<GateName | null>(null);
+  const [visitedGates, setVisitedGates] = useState<Set<GateName>>(() => new Set(["AND"]));
   const animRef = useRef<number>(0);
 
   // Cleanup animation on unmount
@@ -180,11 +181,12 @@ export function NeuronPlayground() {
   const reset = useCallback(() => {
     setInputA(1.0);
     setInputB(0.0);
-    setW1(0);
-    setW2(0);
-    setBias(0);
+    setW1(GATE_SOLUTIONS.AND.w1);
+    setW2(GATE_SOLUTIONS.AND.w2);
+    setBias(GATE_SOLUTIONS.AND.bias);
     setIsAnimating(false);
     setAnimatingTo(null);
+    setVisitedGates(new Set(["AND"]));
     if (animRef.current) cancelAnimationFrame(animRef.current);
   }, []);
 
@@ -260,6 +262,10 @@ export function NeuronPlayground() {
   const displayedGate: ActiveGate = animatingTo ?? matchedGate;
   const gateTargets: number[] | null = displayedGate === "Custom" ? null : GATE_CHECKS[displayedGate];
 
+  // Next gate for the "Try Next" button — cycles round
+  const currentGateIndex = matchedGate === "Custom" ? 0 : GATE_NAMES.indexOf(matchedGate);
+  const nextGate = GATE_NAMES[(currentGateIndex + 1) % GATE_NAMES.length];
+
   // Animate weights to a gate's solution
   const selectGate = useCallback((name: GateName) => {
     if (animRef.current) cancelAnimationFrame(animRef.current);
@@ -272,6 +278,12 @@ export function NeuronPlayground() {
     const duration = 60; // frames
     let step = 0;
     setIsAnimating(true);
+    setVisitedGates((prev) => {
+      if (prev.has(name)) return prev;
+      const next = new Set(prev);
+      next.add(name);
+      return next;
+    });
 
     const animate = () => {
       step++;
@@ -299,17 +311,17 @@ export function NeuronPlayground() {
       onReset={reset}
     >
       {/* Gate selector */}
-      <div className="flex gap-1 mb-4 justify-center flex-wrap">
+      <div className="flex gap-2 mb-5 justify-center flex-wrap">
         {GATE_NAMES.map((name) => {
           const active = animatingTo ? animatingTo === name : matchedGate === name;
           return (
             <button
               key={name}
               onClick={() => selectGate(name)}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors cursor-pointer ${
+              className={`px-5 py-2.5 text-sm font-bold rounded-lg transition-colors cursor-pointer border-2 ${
                 active
-                  ? "bg-accent text-white"
-                  : "bg-foreground/[0.05] text-muted hover:text-foreground"
+                  ? "bg-accent text-white border-accent shadow-md"
+                  : "bg-white text-foreground border-border hover:border-accent hover:text-accent"
               }`}
             >
               {name}
@@ -756,6 +768,15 @@ export function NeuronPlayground() {
             </tbody>
           </table>
         </div>
+      </div>
+
+      <div className="mt-10 flex justify-center">
+        <button
+          onClick={() => selectGate(nextGate)}
+          className="rounded-lg bg-accent px-6 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-accent-dark"
+        >
+          Try the Next Logic Gate →
+        </button>
       </div>
     </WidgetContainer>
   );

@@ -17,7 +17,7 @@ import {
 } from "./widgets";
 
 export const metadata = {
-  title: "Neural Networks — Learn AI Layer by Layer",
+  title: "Building a Brain — Learn AI Layer by Layer",
   description:
     "A neuron is a smooth logic gate. Stack them in layers and they can compute anything — and backpropagation lets you train all the weights at once.",
 };

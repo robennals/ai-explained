@@ -361,7 +361,6 @@ export function VectorExamples() {
                 step={dim.step}
                 onChange={(v) => handleChange(idx, v)}
                 formatValue={(v) => `${Math.round(v)}${dim.unit ?? ""}`}
-                {...(selectedId === "color" ? { valuePosition: "left" as const } : {})}
               />
             ))}
           </div>

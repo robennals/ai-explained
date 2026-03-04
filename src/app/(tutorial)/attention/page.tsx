@@ -8,16 +8,16 @@ import {
   ToyAttentionWidget,
   ToyValuesWidget,
   AttentionPlaygroundWidget,
-  BertAttentionWidget,
+  BertAttentionNoPositionWidget,
+  ToyAttentionValuesWidget,
+  ToyValueTableWidget,
   PatternAttentionWidget,
   AttentionStepThroughWidget,
   MultiHeadWidget,
-  RoPEToyTokensWidget,
-  RotationPositionWidget,
 } from "./widgets";
 
 export const metadata = {
-  title: "Attention — Learn AI Layer by Layer",
+  title: "Paying Attention — Learn AI Layer by Layer",
   description:
     "Attention lets each word choose which other words to focus on. Built from embeddings, dot products, and neural networks.",
 };
@@ -36,12 +36,12 @@ export default function Chapter07() {
             ToyAttentionWidget,
             ToyValuesWidget,
             AttentionPlaygroundWidget,
-            BertAttentionWidget,
+            BertAttentionNoPositionWidget,
+            ToyAttentionValuesWidget,
+  ToyValueTableWidget,
             PatternAttentionWidget,
             AttentionStepThroughWidget,
             MultiHeadWidget,
-            RoPEToyTokensWidget,
-            RotationPositionWidget,
           }}
         />
       </div>

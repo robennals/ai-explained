@@ -1,0 +1,11 @@
+## Neural Networks Meet Embeddings
+
+In the vectors chapter, we saw that a neuron draws a decision boundary — a straight line through its input space. Now each input has a name — its position in the embedding encodes meaning. Can a neuron learn to read that meaning?
+
+Let's find out. Each tab below shows one of the 2D embeddings from earlier. Pick a challenge and hit Optimize to watch the network find a solution — or drag the sliders yourself.
+
+<EmbeddingClassifierWidget>
+Start with "Size × Danger" and try "Dangerous" — a single neuron draws a line separating dangerous things from safe ones. Try the other challenges too — each tilts the line differently. Then switch to "Animal or Food?" and try "Both" — a single line can't isolate the middle band, so this challenge uses two neurons feeding into an output. Finally try "Four Categories" — selecting a quadrant always needs two neurons working together.
+</EmbeddingClassifierWidget>
+
+A single neuron can only draw one straight boundary. When you need to carve out a region — a band, a quadrant — you need multiple neurons, each drawing its own boundary, with an output neuron combining them. This is why real networks have many layers. And these are only toy 2D embeddings — real language models use hundreds or thousands of dimensions.

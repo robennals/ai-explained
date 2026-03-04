@@ -12,7 +12,10 @@ interface Token {
   label: string;
   key: number[];
   query: number[];
+  value: number[];
+  valueLabel: string;
   color: string;
+  hexColor: string;
 }
 
 interface Sentence {
@@ -23,23 +26,23 @@ interface Sentence {
 const S = 3;
 
 const CAT: Token = {
-  label: "cat", key: [S], query: [0],
-  color: "text-amber-600 dark:text-amber-400",
+  label: "cat", key: [S], query: [0], value: [1, 0], valueLabel: "cat",
+  color: "text-amber-600 dark:text-amber-400", hexColor: "#d97706",
 };
 const DOG: Token = {
-  label: "dog", key: [S], query: [0],
-  color: "text-blue-600 dark:text-blue-400",
+  label: "dog", key: [S], query: [0], value: [0, 1], valueLabel: "dog",
+  color: "text-blue-600 dark:text-blue-400", hexColor: "#2563eb",
 };
 const BLA: Token = {
-  label: "bla", key: [0], query: [0],
-  color: "text-foreground/40",
+  label: "bla", key: [0], query: [0], value: [0, 0], valueLabel: "–",
+  color: "text-foreground/40", hexColor: "#9ca3af",
 };
 const IT: Token = {
-  label: "it", key: [0], query: [S],
-  color: "text-purple-600 dark:text-purple-400",
+  label: "it", key: [0], query: [S], value: [0, 0], valueLabel: "–",
+  color: "text-purple-600 dark:text-purple-400", hexColor: "#9333ea",
 };
 
-const KEY_QUERY_PROPS = ["noun"];
+const VALUE_PROPS = ["cat", "dog"];
 
 const SENTENCES: Sentence[] = [
   { label: "cat bla bla it", tokens: [CAT, BLA, BLA, IT] },
@@ -66,18 +69,36 @@ function softmax(scores: number[]): number[] {
   return exps.map((e) => e / sum);
 }
 
+function weightedSum(weights: number[], values: number[][]): number[] {
+  const dim = values[0].length;
+  const result = new Array(dim).fill(0);
+  for (let i = 0; i < weights.length; i++) {
+    for (let d = 0; d < dim; d++) {
+      result[d] += weights[i] * values[i][d];
+    }
+  }
+  return result;
+}
+
 /* ------------------------------------------------------------------ */
 /*  Formatting                                                        */
 /* ------------------------------------------------------------------ */
 
-function vec(v: number[]): string {
-  return `[${v.join(", ")}]`;
+function vecF(v: number[]): string {
+  return `[${v.map((n) => n.toFixed(2)).join(", ")}]`;
 }
 
 function pct(n: number): string {
   if (n > 0.995) return "100%";
   if (n < 0.005) return "≈0%";
   return `${(n * 100).toFixed(1)}%`;
+}
+
+function outputLabel(v: number[]): string {
+  if (v[0] >= 0.7 && v[1] < 0.3) return "cat";
+  if (v[1] >= 0.7 && v[0] < 0.3) return "dog";
+  if (v[0] < 0.1 && v[1] < 0.1) return "nothing";
+  return `${Math.round(v[0] * 100)}% cat, ${Math.round(v[1] * 100)}% dog`;
 }
 
 /* ------------------------------------------------------------------ */
@@ -108,7 +129,7 @@ interface Arrow {
 /*  Component                                                         */
 /* ------------------------------------------------------------------ */
 
-export function ToyAttention() {
+export function ToyAttentionValues() {
   const [sentIdx, setSentIdx] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   const [arrows, setArrows] = useState<Arrow[]>([]);
@@ -149,6 +170,9 @@ export function ToyAttention() {
     ? tokens.map((t) => dot(tokens[selected].query, t.key))
     : null;
   const weights = scores ? softmax(scores) : null;
+  const output = weights
+    ? weightedSum(weights, tokens.map((t) => t.value))
+    : null;
   const hasSelection = selected !== null;
 
   // Measure card positions and compute arrows
@@ -194,8 +218,8 @@ export function ToyAttention() {
 
   return (
     <WidgetContainer
-      title="Toy Attention"
-      description={'Click "it" to see which tokens it pays attention to.'}
+      title="Attention + Values"
+      description={'See how attention weights blend token values into a result.'}
       onReset={handleReset}
     >
       <div className="flex flex-col gap-5">
@@ -226,7 +250,7 @@ export function ToyAttention() {
             >
               <defs>
                 <marker
-                  id="toy-arrowhead"
+                  id="val-arrowhead"
                   markerWidth="6"
                   markerHeight="5"
                   refX="5"
@@ -252,7 +276,7 @@ export function ToyAttention() {
                     fill="none"
                     stroke={weightToStroke(a.weight)}
                     strokeWidth={strokeWidth}
-                    markerEnd="url(#toy-arrowhead)"
+                    markerEnd="url(#val-arrowhead)"
                     className="transition-all duration-300"
                   />
                 );
@@ -266,11 +290,10 @@ export function ToyAttention() {
               const isSelected = selected === i;
               const weight = weights?.[i];
               const isTarget = weight != null && weight > 0.01 && !isSelected;
-
               const isIt = tok.label === "it";
 
               return (
-                <div key={`${sentIdx}-${i}`} className="flex flex-col items-center" style={{ width: 120 }}>
+                <div key={`${sentIdx}-${i}`} className="flex flex-col items-center" style={{ width: 130 }}>
                   {/* Token label — only "it" tokens are clickable */}
                   {isIt ? (
                     <button
@@ -299,65 +322,43 @@ export function ToyAttention() {
                     </div>
                   )}
 
-                  {/* Vector card + dot product below the token */}
-                  {hasSelection && (
-                    <div className="mt-2 w-full flex flex-col items-center gap-1.5">
-                      {isSelected ? (
-                        <VectorCard
-                          name=""
-                          emoji=""
-                          properties={KEY_QUERY_PROPS}
-                          values={tok.query}
-                          barColor="var(--color-accent)"
-                          barMax={3}
-                          animate={false}
-                          labelWidth="w-10"
-                          barWidth="w-10"
-                          className="text-xs w-full"
-                          label="QUERY"
-                          labelColor="var(--color-accent)"
-                        />
+                  {/* Attention weight pill */}
+                  {hasSelection && weight != null && (
+                    <span className="mt-1.5 flex h-5 items-center">
+                      {isTarget ? (
+                        <span
+                          className="rounded-full px-2 py-0.5 font-mono text-[10px] font-bold text-white transition-all duration-200"
+                          style={{ backgroundColor: weightToPill(weight) }}
+                        >
+                          {pct(weight)}
+                        </span>
                       ) : (
-                        <>
-                          <VectorCard
-                            name=""
-                            emoji=""
-                            properties={KEY_QUERY_PROPS}
-                            values={tok.key}
-                            barMax={3}
-                            animate={false}
-                            labelWidth="w-10"
-                            barWidth="w-10"
-                            className="text-xs w-full"
-                            label="KEY"
-                          />
-                          {/* Dot product math */}
-                          {scores && (
-                            <div className="text-center font-mono text-[10px] text-muted leading-tight">
-                              <span>{vec(tokens[selected!].query)}</span>
-                              {" · "}
-                              <span>{vec(tok.key)}</span>
-                              {" = "}
-                              <span className="font-bold text-foreground">{scores[i]}</span>
-                            </div>
-                          )}
-                        </>
+                        <span className={`font-mono text-[10px] font-bold ${isSelected ? "text-accent" : "text-muted"}`}>
+                          {pct(weight)}
+                        </span>
                       )}
-                      {/* Attention weight pill */}
-                      {weight != null && (
-                        isTarget ? (
-                          <span
-                            className="rounded-full px-2 py-0.5 font-mono text-[10px] font-bold text-white transition-all duration-200"
-                            style={{ backgroundColor: weightToPill(weight) }}
-                          >
-                            {pct(weight)}
-                          </span>
-                        ) : (
-                          <span className={`font-mono text-[10px] font-bold ${isSelected ? "text-accent" : "text-muted"}`}>
-                            {pct(weight)}
-                          </span>
-                        )
-                      )}
+                    </span>
+                  )}
+
+                  {/* Value card — highlighted if attended to */}
+                  {hasSelection && (
+                    <div className={`mt-1.5 w-full transition-opacity duration-200 ${
+                      isTarget ? "opacity-100" : isSelected ? "opacity-100" : "opacity-40"
+                    }`}>
+                      <VectorCard
+                        name=""
+                        emoji=""
+                        properties={VALUE_PROPS}
+                        values={tok.value}
+                        barColor={tok.hexColor}
+                        barMax={1}
+                        animate={false}
+                        labelWidth="w-10"
+                        barWidth="w-10"
+                        className="text-xs w-full"
+                        label="VALUE"
+                        footer={tok.valueLabel}
+                      />
                     </div>
                   )}
                 </div>
@@ -366,10 +367,32 @@ export function ToyAttention() {
           </div>
         </div>
 
+        {/* Result */}
+        {hasSelection && output && (
+          <div className="flex items-center justify-center gap-3 rounded-lg border border-border bg-surface px-4 py-3">
+            <span className="text-xs font-semibold uppercase text-muted">Result for &ldquo;it&rdquo;:</span>
+            <VectorCard
+              name=""
+              emoji=""
+              properties={VALUE_PROPS}
+              values={output}
+              barColor="#059669"
+              barMax={1}
+              animate={false}
+              labelWidth="w-10"
+              barWidth="w-12"
+              className="text-xs"
+              label="NEW VALUE"
+              labelColor="#059669"
+              footer={outputLabel(output)}
+            />
+          </div>
+        )}
+
         {/* Prompt when nothing selected */}
         {!hasSelection && (
           <div className="rounded-lg border border-border bg-foreground/[0.02] px-4 py-3 text-center text-sm text-muted">
-            Click &ldquo;it&rdquo; to see which tokens it pays attention to.
+            Click &ldquo;it&rdquo; to see how attention weights blend values.
           </div>
         )}
       </div>

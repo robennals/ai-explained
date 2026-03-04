@@ -180,8 +180,8 @@ export function TwoNeuronXOR() {
 
   const sel = neurons[selected];
   const neuronLabels: Record<NeuronId, string> = {
-    h1: "Neuron 1 (hidden)",
-    h2: "Neuron 2 (hidden)",
+    h1: "Hidden Neuron 1",
+    h2: "Hidden Neuron 2",
     out: "Output neuron",
   };
 
@@ -189,7 +189,7 @@ export function TwoNeuronXOR() {
   const inputLabelsForSelected: Record<NeuronId, [string, string]> = {
     h1: ["Input A", "Input B"],
     h2: ["Input A", "Input B"],
-    out: ["From N1", "From N2"],
+    out: ["From H1", "From H2"],
   };
 
   return (
@@ -291,8 +291,8 @@ export function TwoNeuronXOR() {
 
             {/* Hidden neurons */}
             {[
-              { id: "h1" as NeuronId, y: H1_Y, val: h1Out, label: "N1" },
-              { id: "h2" as NeuronId, y: H2_Y, val: h2Out, label: "N2" },
+              { id: "h1" as NeuronId, y: H1_Y, val: h1Out, label: "H1" },
+              { id: "h2" as NeuronId, y: H2_Y, val: h2Out, label: "H2" },
             ].map((n) => (
               <g
                 key={n.id}
@@ -435,8 +435,8 @@ export function TwoNeuronXOR() {
                 <tr className="border-b border-border">
                   <th className="px-1.5 py-1.5 text-left font-medium text-muted">A</th>
                   <th className="px-1.5 py-1.5 text-left font-medium text-muted">B</th>
-                  <th className="px-1.5 py-1.5 text-left font-medium text-muted">N1</th>
-                  <th className="px-1.5 py-1.5 text-left font-medium text-muted">N2</th>
+                  <th className="px-1.5 py-1.5 text-left font-medium text-muted">H1</th>
+                  <th className="px-1.5 py-1.5 text-left font-medium text-muted">H2</th>
                   <th className="px-1.5 py-1.5 text-left font-medium text-muted">Out</th>
                   <th className="px-1.5 py-1.5 text-left font-medium text-muted">XOR</th>
                   <th className="px-1.5 py-1.5 text-center font-medium text-muted"></th>

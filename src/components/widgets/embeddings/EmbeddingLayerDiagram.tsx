@@ -6,7 +6,7 @@ import { useEmbeddingData } from "./useEmbeddingData";
 
 /* ── Layout constants (matching NetworkOverview style) ── */
 const W = 620;
-const H = 360;
+const H = 396;
 const NODE_R = 14;
 
 /* Column x-positions */
@@ -115,12 +115,12 @@ export function EmbeddingLayerDiagram() {
   return (
     <WidgetContainer
       title="Embedding as a Network Layer"
-      description="Select an input token to see how the network turns it into an embedding"
+      description="Select an input word to see how the network turns it into an embedding"
       onReset={resetState}
     >
       {/* Controls */}
       <div className="mb-4 flex items-center gap-2">
-        <label className="text-xs font-medium text-muted">Input token:</label>
+        <label className="text-xs font-medium text-muted">Input word:</label>
         <select
           value={selectedIdx}
           onChange={(e) => setSelectedIdx(Number(e.target.value))}
@@ -138,25 +138,43 @@ export function EmbeddingLayerDiagram() {
       <svg
         viewBox={`0 0 ${W} ${H}`}
         className="w-full max-w-[680px]"
+        style={{ overflow: "visible" }}
         aria-label="Embedding layer shown as the first layer of a neural network"
       >
         {/* ── Connection lines: input → embedding ── */}
         {inputNodes.map((inp) => {
           if (inp.item === "dots") return null;
           const isActive = inp.item === selectedIdx;
-          return embedNodes.map((emb, ei) => {
+          return embedNodes.map((emb) => {
             if (emb.item === "dots") return null;
+            const dimIdx = emb.item as number;
+            const x1 = INPUT_X + NODE_R;
+            const y1 = inp.y;
+            const x2 = EMBED_X - NODE_R;
+            const y2 = emb.y;
             return (
-              <line
-                key={`ie-${inp.item}-${ei}`}
-                x1={INPUT_X + NODE_R}
-                y1={inp.y}
-                x2={EMBED_X - NODE_R}
-                y2={emb.y}
-                stroke={isActive ? ACTIVE_COLOR : "#d1d5db"}
-                strokeWidth={isActive ? 1.8 : 0.6}
-                opacity={isActive ? 0.7 : 0.18}
-              />
+              <g key={`ie-${inp.item}-${dimIdx}`}>
+                <line
+                  x1={x1}
+                  y1={y1}
+                  x2={x2}
+                  y2={y2}
+                  stroke={isActive ? ACTIVE_COLOR : "#d1d5db"}
+                  strokeWidth={isActive ? 1.8 : 0.6}
+                  opacity={isActive ? 0.7 : 0.18}
+                />
+                {isActive && (
+                  <text
+                    x={(x1 + x2) / 2}
+                    y={(y1 + y2) / 2 - 4}
+                    textAnchor="middle"
+                    className="fill-accent text-[8px] font-mono select-none"
+                    style={{ pointerEvents: "none" }}
+                  >
+                    {selVec[dimIdx].toFixed(2)}
+                  </text>
+                )}
+              </g>
             );
           });
         })}
@@ -223,7 +241,11 @@ export function EmbeddingLayerDiagram() {
           const idx = inp.item;
           const isActive = idx === selectedIdx;
           return (
-            <g key={`in-${idx}`}>
+            <g
+              key={`in-${idx}`}
+              onClick={() => setSelectedIdx(idx)}
+              style={{ cursor: "pointer" }}
+            >
               <circle
                 cx={INPUT_X}
                 cy={inp.y}
@@ -311,29 +333,71 @@ export function EmbeddingLayerDiagram() {
           />
         ))}
 
+        {/* ── Bounding boxes ── */}
+        {(() => {
+          const realEmbed = embedNodes.filter((e) => e.item !== "dots");
+          const embedMinY = Math.min(...realEmbed.map((e) => e.y)) - NODE_R - 6;
+          const embedMaxY = Math.max(...realEmbed.map((e) => e.y)) + NODE_R + 6;
+          const weightMidX = (INPUT_X + NODE_R + EMBED_X - NODE_R) / 2;
+          return (
+            <>
+              {/* Box around weight labels */}
+              <rect
+                x={weightMidX - 28}
+                y={embedMinY}
+                width={56}
+                height={embedMaxY - embedMinY}
+                rx={6}
+                fill="none"
+                stroke={ACTIVE_COLOR}
+                strokeWidth={1.2}
+                strokeDasharray="4 3"
+                opacity={0.5}
+              />
+              <text
+                x={weightMidX}
+                y={embedMinY - 6}
+                textAnchor="middle"
+                className="text-[8px] font-medium select-none"
+                fill={ACTIVE_COLOR}
+                opacity={0.7}
+              >
+                weights for &ldquo;{wordData[selectedIdx].word}&rdquo;
+              </text>
+              {/* Box around embedding output nodes */}
+              <rect
+                x={EMBED_X - NODE_R - 8}
+                y={embedMinY}
+                width={NODE_R * 2 + 50}
+                height={embedMaxY - embedMinY}
+                rx={6}
+                fill="none"
+                stroke={EMBED_COLOR}
+                strokeWidth={1.2}
+                strokeDasharray="4 3"
+                opacity={0.5}
+              />
+              <text
+                x={EMBED_X + 17}
+                y={embedMinY - 6}
+                textAnchor="middle"
+                className="text-[8px] font-medium select-none"
+                fill={EMBED_COLOR}
+                opacity={0.8}
+              >
+                embedding of &ldquo;{wordData[selectedIdx].word}&rdquo;
+              </text>
+            </>
+          );
+        })()}
+
         {/* ── Column labels ── */}
         <text x={INPUT_X} y={H - 6} textAnchor="middle" className="fill-muted text-[10px]">
-          Input
-        </text>
-        <text
-          x={INPUT_X}
-          y={16}
-          textAnchor="middle"
-          className="fill-muted text-[8px] italic"
-        >
-          (50,000+ in real models)
+          Input word
         </text>
 
         <text x={EMBED_X} y={H - 6} textAnchor="middle" className="fill-muted text-[10px]">
-          Embedding
-        </text>
-        <text
-          x={EMBED_X}
-          y={16}
-          textAnchor="middle"
-          className="fill-muted text-[8px] italic"
-        >
-          (768+ dims in real models)
+          Embedding layer
         </text>
 
         <text x={NEXT_X} y={H - 6} textAnchor="middle" className="fill-muted text-[10px]">

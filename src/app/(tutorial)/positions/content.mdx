@@ -1,0 +1,118 @@
+# Where Am I?
+
+<Lead>
+Attention lets each word choose which other words to focus on — but it has a blind spot. It has no idea *where* words are in the sentence. "The dog chased the cat" and "the cat chased the dog" look identical to it. In this chapter, we'll fix that.
+</Lead>
+
+## The Position Problem
+
+Look back at how attention works: we take the dot product of each query with each key. But those queries and keys come from embeddings — and embeddings don't encode *position*. The word "cat" gets the same embedding whether it's the first word or the last word.
+
+This means "dog bla cat it" and "cat bla dog it" would give "it" identical attention scores for both nouns. The model can't tell which noun is closer. That's a serious problem — in real language, nearby words are usually more relevant than distant ones.
+
+We need to give the model a sense of position. There are two main approaches used in practice, and the difference between them turns out to be surprisingly important.
+
+## The Simplest Fix: Distance Penalties
+
+The most obvious idea: just subtract a penalty from the attention score based on how far apart two tokens are. If tokens are 3 positions apart, subtract 3 times some slope *m*. If they're 10 apart, subtract 10 × *m*:
+
+> **score = (query · key) − m × distance**
+
+This is called **ALiBi** (Attention with Linear Biases), and it's used by real models like BLOOM and MPT. It's simple, requires no extra learned parameters, and works: nearby tokens automatically get higher attention scores than distant ones.
+
+<ALiBiToyTokensWidget>
+Start with slope at 0 — both nouns get identical attention, just like in the attention chapter. Now drag the slope up. The closer noun loses less to the penalty, so it wins more attention. Try the longer sentences to see the effect with bigger distance gaps.
+</ALiBiToyTokensWidget>
+
+Different attention heads get different slopes *m* — some heads have steep slopes and attend very locally (just the nearest few words), while others have gentle slopes and attend broadly across the whole context. This gives the model a range of distance sensitivities.
+
+But ALiBi has a fundamental limitation: **the distance penalty is per-head, not per-query**. Every query in a given head gets the same distance falloff. The model can't decide "this particular word needs to look far back in the text" — the slope is baked into the head. A pronoun resolving its referent and a topic word gathering broad context would get the same distance curve if they happen to share a head.
+
+Empirically, models using the approach we're about to see — RoPE — have consistently outperformed ALiBi models as scale and context length grow. Nearly every frontier model today (Llama, Mistral, Gemma, Qwen, DeepSeek) uses RoPE. Let's see why.
+
+## The Rotation Trick
+
+### How Rotation Encodes Distance
+
+Here's the idea — a callback to earlier chapters on vectors. Instead of *adding* a distance penalty after computing the dot product, we **rotate** each word's query and key vectors by an angle that depends on position. Word at position 1 gets rotated a little. Word at position 5 gets rotated more. Word at position 100 gets rotated a lot more.
+
+Why does this work? The dot product of two vectors depends on the angle between them. When we rotate two vectors by different amounts, the dot product depends on the *difference* in their rotation angles — which is exactly the *relative distance* between the words.
+
+Two words that are 3 positions apart always have the same angular difference, whether they're at positions 1 & 4, or positions 50 & 53. The dot product automatically captures relative distance.
+
+<RotationPositionWidget>
+Move the position sliders around. Keep the gap the same (say, 3) but change the absolute positions — the dot product stays the same! Now change the gap — the dot product changes. The dashed projection line shows this visually: its length *is* the dot product. Click "Same gap, different positions" to see the projection stay constant.
+</RotationPositionWidget>
+
+### RoPE with Our Toy Tokens
+
+Let's see this work with our familiar toy vocabulary from the attention chapter. Below, "it" is trying to figure out which noun to attend to. Both nouns have identical keys — so without position information, they get *equal* attention scores. But watch what happens when you turn on rotation:
+
+<RoPEToyTokensWidget>
+Start with the rotation speed at 0° — both nouns get identical scores. Now slowly drag it up. The closer noun starts winning because its key is rotated to a more similar angle to "it"'s query. Try different sentences to see the effect with different word orders. This is the core insight of RoPE: rotation breaks the tie between otherwise-identical tokens based on distance.
+</RoPEToyTokensWidget>
+
+## Pairs of Dimensions
+
+So far we've been rotating single 2D vectors. But real query and key vectors have hundreds of dimensions — Llama 3 uses 128 dimensions per head. How does RoPE scale up?
+
+The answer: **RoPE groups the dimensions into pairs** and rotates each pair independently. A 128-dimensional vector becomes 64 pairs. Dimensions 1 and 2 form the first pair, 3 and 4 the second, and so on. Each pair is treated as the X and Y coordinates of a 2D point, and that point gets rotated.
+
+This is important to understand precisely: RoPE doesn't multiply each dimension by a separate sine value. It takes two dimensions together and **rotates them as a 2D vector** — mixing them into new values of each other, exactly like rotating a point on a circle. Rotation preserves the *length* of the pair (√(x² + y²) stays the same) while changing its *direction*. That's very different from independently scaling each dimension, which could shrink or destroy information.
+
+### Multiple Rotation Speeds
+
+Crucially, **different pairs rotate at different speeds**. The first pair rotates fast — say 30° per position — while later pairs rotate progressively slower, down to fractions of a degree per position. Think of it like the hands on a clock: the second hand spins fast, the minute hand slowly, and the hour hand barely moves. At any given time, the *combination* of all three hand positions is unique. Similarly, no two token positions share the same combination of rotation angles across all 64 dimension pairs.
+
+This solves the wrap-around problem. A single pair rotating at 15° per position would repeat after 24 positions (360° ÷ 15°). But with 64 pairs at different speeds, the slowest pair might take thousands of positions to complete one revolution. The combination of all pairs gives each position a unique fingerprint.
+
+### What Rotation Does to Content
+
+You might worry about a specific pair of dimensions. Suppose a pair encodes (scariness=5, fluffiness=0). After rotating 90°, the values become (0, 5) — the scariness dimension is zero! Doesn't that destroy the content?
+
+At the **same position**, no. Both the query and key vectors get rotated by the same angle, so their dot product is perfectly preserved — rotation is a rigid turn that keeps all angles and distances intact. The "scrambling" is identical for both vectors and cancels out completely.
+
+At **different positions**, the pair's contribution to the dot product *does* change — it's modulated by the distance between the positions. A fast-rotating pair's contribution drops off rapidly with distance. A slow-rotating pair barely changes. This modulation is the whole point — it's how RoPE encodes distance. But it means the model needs to be thoughtful about which signals go in which pairs. Important content signals that should match regardless of distance belong in slow-rotating pairs. Signals where proximity matters belong in fast-rotating pairs.
+
+The model doesn't need to be told this. The learned Q and K weight matrices naturally discover how to distribute information across dimension pairs during training.
+
+<KeyInsight>
+The dot product of two vectors equals |A| · |B| · cos(θ). Content lives in the magnitudes |A| and |B| — how "noun-like" or "filler-like" a token is. Position lives in the angle θ between them. Rotation changes the angle without touching the magnitudes, so **content and position information stay cleanly separated.**
+</KeyInsight>
+
+## How Queries Choose Their Distance Sensitivity
+
+This is where RoPE's real advantage over ALiBi becomes clear. Remember ALiBi's limitation: every query in a head gets the same distance falloff. With RoPE, **each query controls its own distance sensitivity**.
+
+Here's how. A query vector distributes its signal across all 64 dimension pairs. If a query has large values in the *fast-rotating* pairs, those pairs' contributions decay rapidly with distance — making the query very distance-sensitive. If the query instead concentrates its signal in *slow-rotating* pairs, the dot product barely changes with distance — making the query attend broadly.
+
+This isn't something the model has to learn separately. It falls out naturally from the learned Q and K weight matrices. Different input tokens produce query vectors with different energy distributions across dimension pairs. A pronoun like "it" might concentrate signal in fast pairs (to find the nearest referent), while a topic word might concentrate signal in slow pairs (to gather context from anywhere in the passage).
+
+<RoPEDistanceSensitivityWidget>
+Try the two presets to see the difference. "Distance-sensitive" concentrates signal in the fast-rotating pair — attention drops off sharply with distance. "Distance-insensitive" concentrates signal in the slow pair — attention stays nearly flat. Then use the sliders to create your own mix and watch how the attention-vs-distance curve changes shape.
+</RoPEDistanceSensitivityWidget>
+
+## Does Rotation Tell Us Direction?
+
+You might notice something: cos(θ) = cos(−θ). The dot product between two rotated vectors is the same whether word A is 3 positions *before* or 3 positions *after* word B. Rotation encodes *distance* but not *direction*.
+
+This turns out to be fine. Language models already have a mechanism for direction: **causal masking**. During generation, each token can only attend to tokens that came *before* it — future positions are masked to −∞ before softmax, so they get zero attention weight. RoPE handles "how far apart," and causal masking handles "which direction."
+
+## Scaling to Huge Context Windows
+
+RoPE's base rotation speed is controlled by a parameter θ\_base, typically 10,000. This means the slowest-rotating dimension pair completes one full revolution over roughly 10,000 positions. Beyond that, positions start to become ambiguous — similar to how a 12-hour clock can't distinguish AM from PM.
+
+To support longer contexts, techniques like **YaRN** and **NTK-aware scaling** stretch the rotation frequencies so that the slow pairs rotate even more slowly. It's like adding an even slower "day hand" to the clock — now you can tell apart any two times across an entire day, not just within 12 hours.
+
+This isn't free: stretching frequencies spreads out the angular resolution, so the model needs fine-tuning to adapt. But it works remarkably well in practice. This is how Llama 3.1 handles 128K tokens and how Gemini extends to over a million.
+
+## What We've Built
+
+Position encoding solves attention's blind spot. We covered two approaches:
+
+1. **ALiBi** — subtract a linear distance penalty from attention scores. Simple, but the penalty is per-head: every query in the head gets the same distance curve.
+2. **RoPE** — rotate query and key vectors by position-dependent angles across pairs of dimensions. Each query naturally controls its own distance sensitivity through the distribution of signal across fast and slow pairs.
+
+RoPE is used by virtually every frontier model today, and its elegant geometry — encoding position through rotation, with different dimension pairs at different frequencies — is why modern language models can handle context windows of over a million tokens.
+
+In the next chapter, we'll wire attention (now with position awareness) together with feed-forward neural networks to build the **transformer** — the architecture behind ChatGPT, Claude, and every modern language model.

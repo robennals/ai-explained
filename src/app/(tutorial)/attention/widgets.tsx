@@ -36,10 +36,26 @@ const ToyAttention = dynamic(
   { ssr: false }
 );
 
+const ToyAttentionValues = dynamic(
+  () =>
+    import("@/components/widgets/attention/ToyAttentionValues").then(
+      (m) => m.ToyAttentionValues
+    ),
+  { ssr: false }
+);
+
 const ToyValues = dynamic(
   () =>
     import("@/components/widgets/attention/ToyValues").then(
       (m) => m.ToyValues
+    ),
+  { ssr: false }
+);
+
+const ToyValueTable = dynamic(
+  () =>
+    import("@/components/widgets/attention/ToyValueTable").then(
+      (m) => m.ToyValueTable
     ),
   { ssr: false }
 );
@@ -80,22 +96,6 @@ const MultiHead = dynamic(
   () =>
     import("@/components/widgets/attention/MultiHead").then(
       (m) => m.MultiHead
-    ),
-  { ssr: false }
-);
-
-const RoPEToyTokens = dynamic(
-  () =>
-    import("@/components/widgets/attention/RoPEToyTokens").then(
-      (m) => m.RoPEToyTokens
-    ),
-  { ssr: false }
-);
-
-const RotationPosition = dynamic(
-  () =>
-    import("@/components/widgets/attention/RotationPosition").then(
-      (m) => m.RotationPosition
     ),
   { ssr: false }
 );
@@ -148,10 +148,26 @@ export function ToyAttentionWidget({ children }: { children?: React.ReactNode })
   );
 }
 
+export function ToyAttentionValuesWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children} label="Explore it">
+      <ToyAttentionValues />
+    </WidgetSlot>
+  );
+}
+
 export function ToyValuesWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children}>
       <ToyValues />
+    </WidgetSlot>
+  );
+}
+
+export function ToyValueTableWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <ToyValueTable />
     </WidgetSlot>
   );
 }
@@ -196,18 +212,11 @@ export function BertAttentionWidget({ children }: { children?: React.ReactNode }
   );
 }
 
-export function RoPEToyTokensWidget({ children }: { children?: React.ReactNode }) {
+export function BertAttentionNoPositionWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot tryIt={children}>
-      <RoPEToyTokens />
+    <WidgetSlot tryIt={children} label="Explore it">
+      <BertAttention excludeHeads={["Next word", "Previous word", "Broad context"]} onlySentencesWithWord="it" />
     </WidgetSlot>
   );
 }
 
-export function RotationPositionWidget({ children }: { children?: React.ReactNode }) {
-  return (
-    <WidgetSlot tryIt={children}>
-      <RotationPosition />
-    </WidgetSlot>
-  );
-}
