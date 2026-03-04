@@ -205,7 +205,7 @@ function DomainNeuronTab({ domain, bias, onBiasChange, weightMag, onWeightMagCha
       <div className="grid grid-cols-[1fr_1fr_auto] gap-2 items-start overflow-x-auto">
         {/* Row 1: selectors */}
         <div>
-          <div className="mb-1 text-[10px] font-bold uppercase tracking-widest text-amber-500">Weight direction (Detects)</div>
+          <div className="mb-1 text-[10px] font-bold uppercase tracking-widest text-amber-500">Weight (Detects)</div>
           <div className="flex flex-wrap gap-1">
             {domain.items.map((item, i) => (
               <button

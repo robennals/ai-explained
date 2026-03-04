@@ -44,6 +44,14 @@ const NeuronDotProduct = dynamic(
   { ssr: false }
 );
 
+const AmplifiedAnimalExplorer = dynamic(
+  () =>
+    import("@/components/widgets/vectors/AmplifiedAnimalExplorer").then(
+      (m) => m.AmplifiedAnimalExplorer
+    ),
+  { ssr: false }
+);
+
 const DirectionMagnitudeExplorer = dynamic(
   () =>
     import("@/components/widgets/vectors/DirectionMagnitudeExplorer").then(
@@ -104,6 +112,14 @@ export function NeuronDotProductWidget({ children }: { children?: React.ReactNod
   return (
     <WidgetSlot tryIt={children}>
       <NeuronDotProduct />
+    </WidgetSlot>
+  );
+}
+
+export function AmplifiedAnimalExplorerWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <AmplifiedAnimalExplorer />
     </WidgetSlot>
   );
 }

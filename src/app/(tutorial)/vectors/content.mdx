@@ -59,23 +59,27 @@ To make a unit vector, divide every dimension by the magnitude. The result has m
 All the animal, food, and instrument vectors we've been using are unit vectors. That's why the dot products give clean similarity scores between −1 and 1.
 
 <UnitVectorExplorerWidget>
-On the **Custom Animal** tab, design your own animal — notice how adjusting one property automatically scales the others to keep the magnitude at 1. On the **Amplified Animal** tab, pick an animal and see what happens when you multiply its unit vector by different magnitudes.
+Design your own animal — notice how adjusting one property automatically scales the others to keep the magnitude at 1.
 </UnitVectorExplorerWidget>
 
 <KeyInsight>
 **A unit vector is a standard-size vector.** Normalizing to magnitude 1 preserves proportions but removes the size advantage, enabling fair similarity comparisons. The dot product of two unit vectors gives a pure similarity score between −1 and 1. (This is sometimes called *cosine similarity*.)
 </KeyInsight>
 
-## Direction and Magnitude: What vs How Much
+## What and How Much
 
-Any vector can be split into two parts: a **direction** (its unit vector) and a **magnitude** (its length).
+Any vector can be split into two parts: a **unit vector** and a **magnitude**.
 
 - The **unit vector** says *what kind of thing* it is — the pattern of properties, stripped of size.
 - The **magnitude** says *how much* of that thing there is.
 
-Think of a bear detector: the unit vector says "I'm looking for bear-like things," and the magnitude says "how sensitive am I." A magnitude of 1 is the standard size. Double the magnitude, and the dot product with any input doubles too — the detector gets more sensitive without changing *what* it detects.
+Think of a bear detector: the unit vector says "I'm looking for bear-like things," and the magnitude says "how sensitive is my detector to bears." A magnitude of 1 is the standard size. Double the magnitude, and the dot product with any input doubles too — the detector gets more sensitive without changing *what* it detects.
 
-This decomposition — direction for *what*, magnitude for *how much* — is one of the most important ideas in the chapter. It's how neurons work, as we'll see next.
+<AmplifiedAnimalExplorerWidget>
+Pick an animal and see what happens when you multiply its unit vector by different magnitudes. The proportions stay the same — only the size changes.
+</AmplifiedAnimalExplorerWidget>
+
+This decomposition — unit vector for *what*, magnitude for *how much* — is one of the most important ideas in the chapter. It's how neurons work, as we'll see next.
 
 ## A Neuron Is a Dot Product
 
@@ -89,8 +93,8 @@ where **w** = (w₁, w₂, …, wₙ) is the weight vector and **x** = (x₁, x�
 
 The neuron is asking **"is this input what I'm looking for?"**.
 
-* **The direction** of the weight vector (its unit vector) says what kind of thing the neuron detects.
-* **The magnitude** of the weight vector says how sensitive the neuron is — how much evidence it needs to get excited.
+* **The unit vector** of the weights says *what kind of thing* the neuron detects.
+* **The magnitude** of the weights says *how sensitive* the neuron is — how much evidence it needs to get excited.
 * **The bias** says how excited it is if it hasn't seen anything at all.
 
 Try the **Animals** tab and set the weight to "Bear" — now you have a bear detector! Feed it different animals as input and watch the output. A dog gets a high score because it shares many bear-like properties. A mouse scores low. You can do the same with any category — set the weight to "Pizza" on the **Foods** tab and you have a pizza detector.
@@ -100,17 +104,17 @@ Try matching different animals, foods, or instruments as weights and inputs. Wha
 </NeuronDotProductWidget>
 
 <KeyInsight>
-**A neuron is a direction detector.** It computes the dot product of its input vector with its weight vector, adds a bias to shift the threshold, and squashes the result through an activation function. The weights define a direction in input space, and the neuron fires when the input points that way.
+**A neuron is a pattern detector.** It computes the dot product of its input vector with its weight vector, adds a bias to shift the threshold, and squashes the result through an activation function. The weight vector's unit vector defines *what* the neuron looks for; its magnitude defines *how sensitive* it is.
 </KeyInsight>
 
 ## Seeing It in 2D
 
 Everything so far used lists of six numbers. But when a vector has just two dimensions, we can draw it as an arrow on a flat surface — and all the concepts we've learned become visible.
 
-A 2D vector like (0.8, 0.6) becomes an arrow from the origin to the point (0.8, 0.6). The **magnitude** is the length of the arrow. A **unit vector** sits on the unit circle — the circle of radius 1 centered at the origin. And the **direction + magnitude** decomposition is literally visible: the direction is where the arrow points, and the magnitude is how long it is.
+A 2D vector like (0.8, 0.6) becomes an arrow from the origin to the point (0.8, 0.6). The **magnitude** is the length of the arrow. A **unit vector** sits on the unit circle — the circle of radius 1. And the unit vector × magnitude decomposition we learned earlier is literally visible: the unit vector shows *where* the arrow points, and the magnitude shows *how long* it is.
 
 <DirectionMagnitudeExplorerWidget>
-Explore how direction and magnitude work visually. The unit vector (blue) always sits on the unit circle. The scaled vector (orange) points the same direction but has a different length. Drag the arrow to change direction; use the slider to change magnitude.
+On the **Vector** tab, drag the arrow and see its x and y components as a vector card. On the **Unit Vector × Magnitude** tab, see how the same vector splits into a unit vector (always on the circle) times a magnitude.
 </DirectionMagnitudeExplorerWidget>
 
 The dot product becomes geometric too. When two arrows point the same direction, their dot product is large and positive. When they're perpendicular, it's zero. When they point in opposite directions, it's negative. You can see this directly:

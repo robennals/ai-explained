@@ -2,12 +2,9 @@
 
 import { useState, useCallback } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
-import { WidgetTabs } from "../shared/WidgetTabs";
 import { SliderControl } from "../shared/SliderControl";
 import { VectorCard } from "./VectorCard";
 import { ANIMAL_DOMAIN } from "./vectorData";
-
-// --- Custom Animal tab ---
 
 const ANIMAL_PROPS = ANIMAL_DOMAIN.properties;
 
@@ -37,10 +34,9 @@ function normalizeToUnit(values: number[], changedIdx: number, newVal: number): 
   return result.map((v, i) => i === changedIdx ? newVal : v * scale);
 }
 
-function CustomAnimalTab() {
+export function UnitVectorExplorer() {
   const [name, setName] = useState("Dragopus");
   const [values, setValues] = useState(() => {
-    // Start with equal values that form a unit vector
     const v = Math.sqrt(1 / ANIMAL_PROPS.length);
     return ANIMAL_PROPS.map(() => v);
   });
@@ -49,10 +45,20 @@ function CustomAnimalTab() {
     setValues(prev => normalizeToUnit(prev, idx, newVal));
   }, []);
 
+  const handleReset = useCallback(() => {
+    setName("Dragopus");
+    const v = Math.sqrt(1 / ANIMAL_PROPS.length);
+    setValues(ANIMAL_PROPS.map(() => v));
+  }, []);
+
   const sumSq = values.reduce((s, v) => s + v * v, 0);
 
   return (
-    <>
+    <WidgetContainer
+      title="Unit Vectors"
+      description="A unit vector has magnitude 1 — the standard size for a vector"
+      onReset={handleReset}
+    >
       <p className="text-sm text-muted mb-3">
         Design your own animal! Drag any slider to change a property. The other properties automatically scale down so the vector stays a unit vector — the sum of squares always equals 1.
       </p>
@@ -84,6 +90,7 @@ function CustomAnimalTab() {
             properties={ANIMAL_PROPS}
             values={values}
             barColor="#8b5cf6"
+            animate={false}
           />
           <div className="rounded-lg bg-foreground/[0.03] p-3">
             <div className="text-[10px] font-bold uppercase tracking-widest text-muted mb-1">Sum of squares</div>
@@ -109,106 +116,6 @@ function CustomAnimalTab() {
           </div>
         </div>
       </div>
-    </>
-  );
-}
-
-// --- Amplified Animal tab ---
-
-function AmplifiedAnimalTab() {
-  const [animalIdx, setAnimalIdx] = useState(0);
-  const [magnitude, setMagnitude] = useState(2.0);
-  const animal = ANIMAL_DOMAIN.items[animalIdx];
-  const amplified = animal.values.map(v => v * magnitude);
-
-  return (
-    <>
-      <p className="text-sm text-muted mb-3">
-        Pick an animal to see its unit vector. The magnitude slider scales every dimension by the same amount — the proportions stay the same, but the vector gets longer. We'll find this useful later, when we use vectors to <em>detect</em> animals and use the magnitude to control how sensitive our detector is.
-      </p>
-      <div className="flex flex-wrap gap-1 mb-3">
-        {ANIMAL_DOMAIN.items.map((item, i) => (
-          <button
-            key={item.name}
-            onClick={() => setAnimalIdx(i)}
-            className={`rounded-md px-1.5 py-0.5 text-[11px] font-medium transition-colors ${
-              i === animalIdx
-                ? "bg-blue-500 text-white"
-                : "bg-foreground/5 text-foreground hover:bg-foreground/10"
-            }`}
-          >
-            {item.emoji} {item.name}
-          </button>
-        ))}
-      </div>
-
-      <SliderControl label="magnitude" value={magnitude} min={0.1} max={5} step={0.1} onChange={setMagnitude} />
-
-      <div className="grid grid-cols-[1fr_1fr_auto] gap-2 items-start mt-3">
-        <VectorCard
-          name={animal.name}
-          emoji={animal.emoji}
-          properties={ANIMAL_DOMAIN.properties}
-          values={animal.values}
-          barColor="#3b82f6"
-          label="unit vector" labelColor="#3b82f6"
-        />
-        <VectorCard
-          name={animal.name}
-          emoji={animal.emoji}
-          properties={ANIMAL_DOMAIN.properties}
-          values={amplified}
-          barColor="#f59e0b"
-          label={`× ${magnitude.toFixed(1)}`} labelColor="#f59e0b"
-          barMax={4}
-          barWidth="w-32"
-          animate={false}
-        />
-        {/* Multiplication math */}
-        <div className="rounded-lg border border-foreground/10 bg-foreground/[0.02] overflow-hidden shrink-0" style={{ maxWidth: "10rem" }}>
-          <div className="py-2 px-3 text-sm font-medium text-foreground border-b border-foreground/10 bg-foreground/[0.02]">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-muted">× {magnitude.toFixed(1)}</span>
-          </div>
-          {ANIMAL_DOMAIN.properties.map((prop, i) => (
-            <div key={prop} className="flex items-center py-1.5 px-3 border-b border-foreground/5 last:border-b-0 min-h-[28px]">
-              <span className="font-mono text-[10px] text-muted whitespace-nowrap">
-                <span className="text-blue-500">{animal.values[i].toFixed(2)}</span>
-                {" × "}
-                <span className="text-amber-500">{magnitude.toFixed(1)}</span>
-                {" = "}
-                <span className="font-semibold">{amplified[i].toFixed(2)}</span>
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </>
-  );
-}
-
-// --- Main ---
-
-const TABS = [
-  { id: "custom", label: "Custom Animal" },
-  { id: "amplified", label: "Amplified Animal" },
-];
-
-export function UnitVectorExplorer() {
-  const [activeTab, setActiveTab] = useState("custom");
-
-  const handleReset = useCallback(() => {
-    setActiveTab("custom");
-  }, []);
-
-  return (
-    <WidgetContainer
-      title="Unit Vectors"
-      description="A unit vector has length 1 — the standard size for a vector"
-      onReset={handleReset}
-    >
-      <WidgetTabs tabs={TABS} activeTab={activeTab} onTabChange={setActiveTab} />
-      {activeTab === "custom" && <CustomAnimalTab key="custom" />}
-      {activeTab === "amplified" && <AmplifiedAnimalTab key="amplified" />}
     </WidgetContainer>
   );
 }
