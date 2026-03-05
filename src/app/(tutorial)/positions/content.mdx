@@ -18,79 +18,65 @@ The most obvious idea: just subtract a penalty from the attention score based on
 
 > **score = (query · key) − m × distance**
 
-This is called **ALiBi** (Attention with Linear Biases), and it's used by real models like BLOOM and MPT. It's simple, requires no extra learned parameters, and works: nearby tokens automatically get higher attention scores than distant ones.
+This is called **ALiBi** (Attention with Linear Biases), and it's used by real models like BLOOM and MPT. It's simple and works: nearby tokens automatically get higher attention scores than distant ones.
 
 <ALiBiToyTokensWidget>
-Start with slope at 0 — both nouns get identical attention, just like in the attention chapter. Now drag the slope up. The closer noun loses less to the penalty, so it wins more attention. Try the longer sentences to see the effect with bigger distance gaps.
+Drag the slope around. At slope 0, both nouns get identical attention — the model is position-blind. Higher slopes make the closer noun win more decisively. Try the longer sentences to see the effect with bigger distance gaps.
 </ALiBiToyTokensWidget>
 
 Different attention heads get different slopes *m* — some heads have steep slopes and attend very locally (just the nearest few words), while others have gentle slopes and attend broadly across the whole context. This gives the model a range of distance sensitivities.
 
-But ALiBi has a fundamental limitation: **the distance penalty is per-head, not per-query**. Every query in a given head gets the same distance falloff. The model can't decide "this particular word needs to look far back in the text" — the slope is baked into the head. A pronoun resolving its referent and a topic word gathering broad context would get the same distance curve if they happen to share a head.
+But ALiBi has a fundamental limitation: **the distance penalty is per-head, not per-query**. Every query in a given head gets the same distance falloff. The model can't decide "this particular word needs to look far back in the text" — the slope is baked into the head.
 
-Empirically, models using the approach we're about to see — RoPE — have consistently outperformed ALiBi models as scale and context length grow. Nearly every frontier model today (Llama, Mistral, Gemma, Qwen, DeepSeek) uses RoPE. Let's see why.
+Consider: *"The president visited France. He said the treaty would be honored."* The pronoun "He" needs a steep distance falloff to latch onto the nearby "president." But "treaty" needs a gentle falloff to find its antecedent farther back. If both happen to land in the same attention head, they're stuck with the same slope — one of them gets the wrong distance curve.
 
-## The Rotation Trick
+More broadly, ALiBi's penalty is **content-blind**: it penalizes distance the same amount regardless of what the tokens actually say. And empirically, models using the approach we're about to see — RoPE — have consistently outperformed ALiBi models as scale and context length grow. Nearly every frontier model today (Llama, Mistral, Gemma, Qwen, DeepSeek) uses RoPE. Let's see why.
 
-### How Rotation Encodes Distance
+## Rotation Encodes Distance
 
-Here's the idea — a callback to earlier chapters on vectors. Instead of *adding* a distance penalty after computing the dot product, we **rotate** each word's query and key vectors by an angle that depends on position. Word at position 1 gets rotated a little. Word at position 5 gets rotated more. Word at position 100 gets rotated a lot more.
+There's a completely different way to measure how far apart two tokens are. It starts with a fact about dot products we haven't mentioned yet: **if you rotate two vectors by the same amount, their dot product doesn't change**. The dot product only cares about the angle *between* the vectors, not where they're pointing in absolute terms.
 
-Why does this work? The dot product of two vectors depends on the angle between them. When we rotate two vectors by different amounts, the dot product depends on the *difference* in their rotation angles — which is exactly the *relative distance* between the words.
-
-Two words that are 3 positions apart always have the same angular difference, whether they're at positions 1 & 4, or positions 50 & 53. The dot product automatically captures relative distance.
+Now imagine giving each token a pointer on a circle. The token at position 0 isn't rotated at all. Position 1 is rotated a little. Position 2 is rotated twice as much, position 3 three times as much, and so on. Tokens close together get rotated by similar amounts, so their pointers still nearly align and their dot product is high. Tokens far apart get rotated by very different amounts, so their pointers end up pointing in different directions and their dot product is low. And the dot product depends only on the *gap*, not on the absolute positions.
 
 <RotationPositionWidget>
-Move the position sliders around. Keep the gap the same (say, 3) but change the absolute positions — the dot product stays the same! Now change the gap — the dot product changes. The dashed projection line shows this visually: its length *is* the dot product. Click "Same gap, different positions" to see the projection stay constant.
+Slide token A's position around while keeping the gap fixed — the x and y components change, but the dot product stays the same. Now change the gap and watch the dot product change.
 </RotationPositionWidget>
 
-### RoPE with Our Toy Tokens
+How quickly we rotate per position is called the **speed** — in the playground above, it's 15° per position. A higher speed means the pointers spread apart faster, so even a small gap produces a big angle difference and a low dot product. A lower speed means tokens have to be farther apart before their dot product drops significantly. Try adjusting the speed slider to see this tradeoff.
 
-Let's see this work with our familiar toy vocabulary from the attention chapter. Below, "it" is trying to figure out which noun to attend to. Both nouns have identical keys — so without position information, they get *equal* attention scores. But watch what happens when you turn on rotation:
+## Applying Rotation to a Dimension
 
-<RoPEToyTokensWidget>
-Start with the rotation speed at 0° — both nouns get identical scores. Now slowly drag it up. The closer noun starts winning because its key is rotated to a more similar angle to "it"'s query. Try different sentences to see the effect with different word orders. This is the core insight of RoPE: rotation breaks the tie between otherwise-identical tokens based on distance.
-</RoPEToyTokensWidget>
+How do we connect this geometric idea to actual attention? Take one dimension of our token vectors — say "nouniness" — and split it into two coordinates: noun-x and noun-y. Now rotate that 2D point by position × speed. The dot product between a rotated query and a rotated key automatically favors nearby tokens, just like the circle demo above.
 
-## Pairs of Dimensions
+<RotationToyTokensWidget>
+Start with rotation speed at 0° — both nouns get identical attention, just like in the attention chapter. Now drag it up. The closer noun starts winning because its key is rotated to a more similar angle to "it"'s query. Try different sentences to see the effect with different distances. This achieves the same distance preference as ALiBi — but through geometry rather than an explicit penalty.
+</RotationToyTokensWidget>
 
-So far we've been rotating single 2D vectors. But real query and key vectors have hundreds of dimensions — Llama 3 uses 128 dimensions per head. How does RoPE scale up?
+This is the core of **RoPE** (Rotary Position Embeddings): instead of *adding* a distance penalty after computing the dot product, we **rotate** each word's query and key vectors by an angle that depends on position. The dot product naturally encodes distance.
 
-The answer: **RoPE groups the dimensions into pairs** and rotates each pair independently. A 128-dimensional vector becomes 64 pairs. Dimensions 1 and 2 form the first pair, 3 and 4 the second, and so on. Each pair is treated as the X and Y coordinates of a 2D point, and that point gets rotated.
+## Multiple Rotation Speeds
 
-This is important to understand precisely: RoPE doesn't multiply each dimension by a separate sine value. It takes two dimensions together and **rotates them as a 2D vector** — mixing them into new values of each other, exactly like rotating a point on a circle. Rotation preserves the *length* of the pair (√(x² + y²) stays the same) while changing its *direction*. That's very different from independently scaling each dimension, which could shrink or destroy information.
+A single rotation speed has a problem: if the speed is 15° per position, then tokens 24 positions apart have rotated a full 360° and look as if they're right next to each other. A fast-spinning dimension wraps around and creates false matches at multiples of its period.
 
-### Multiple Rotation Speeds
+The fix: **use multiple dimension pairs rotating at different speeds**. A 128-dimensional vector becomes 64 pairs, each rotating at its own rate. The first pair rotates fast — maybe 30° per position — while later pairs rotate progressively slower, down to fractions of a degree per position.
 
-Crucially, **different pairs rotate at different speeds**. The first pair rotates fast — say 30° per position — while later pairs rotate progressively slower, down to fractions of a degree per position. Think of it like the hands on a clock: the second hand spins fast, the minute hand slowly, and the hour hand barely moves. At any given time, the *combination* of all three hand positions is unique. Similarly, no two token positions share the same combination of rotation angles across all 64 dimension pairs.
+Think of it like the hands on a clock: the second hand spins fast, the minute hand slowly, and the hour hand barely moves. A single hand wraps around every 60 seconds and can't distinguish 1:00 from 2:00. But the *combination* of all three hands is unique at every moment. Similarly, no two token positions share the same combination of rotation angles across all 64 dimension pairs. The slow-rotating pairs disambiguate positions that the fast-rotating pairs confuse.
 
-This solves the wrap-around problem. A single pair rotating at 15° per position would repeat after 24 positions (360° ÷ 15°). But with 64 pairs at different speeds, the slowest pair might take thousands of positions to complete one revolution. The combination of all pairs gives each position a unique fingerprint.
-
-### What Rotation Does to Content
-
-You might worry about a specific pair of dimensions. Suppose a pair encodes (scariness=5, fluffiness=0). After rotating 90°, the values become (0, 5) — the scariness dimension is zero! Doesn't that destroy the content?
-
-At the **same position**, no. Both the query and key vectors get rotated by the same angle, so their dot product is perfectly preserved — rotation is a rigid turn that keeps all angles and distances intact. The "scrambling" is identical for both vectors and cancels out completely.
-
-At **different positions**, the pair's contribution to the dot product *does* change — it's modulated by the distance between the positions. A fast-rotating pair's contribution drops off rapidly with distance. A slow-rotating pair barely changes. This modulation is the whole point — it's how RoPE encodes distance. But it means the model needs to be thoughtful about which signals go in which pairs. Important content signals that should match regardless of distance belong in slow-rotating pairs. Signals where proximity matters belong in fast-rotating pairs.
-
-The model doesn't need to be told this. The learned Q and K weight matrices naturally discover how to distribute information across dimension pairs during training.
-
-<KeyInsight>
-The dot product of two vectors equals |A| · |B| · cos(θ). Content lives in the magnitudes |A| and |B| — how "noun-like" or "filler-like" a token is. Position lives in the angle θ between them. Rotation changes the angle without touching the magnitudes, so **content and position information stay cleanly separated.**
-</KeyInsight>
-
-## How Queries Choose Their Distance Sensitivity
-
-This is where RoPE's real advantage over ALiBi becomes clear. Remember ALiBi's limitation: every query in a head gets the same distance falloff. With RoPE, **each query controls its own distance sensitivity**.
-
-Here's how. A query vector distributes its signal across all 64 dimension pairs. If a query has large values in the *fast-rotating* pairs, those pairs' contributions decay rapidly with distance — making the query very distance-sensitive. If the query instead concentrates its signal in *slow-rotating* pairs, the dot product barely changes with distance — making the query attend broadly.
-
-This isn't something the model has to learn separately. It falls out naturally from the learned Q and K weight matrices. Different input tokens produce query vectors with different energy distributions across dimension pairs. A pronoun like "it" might concentrate signal in fast pairs (to find the nearest referent), while a topic word might concentrate signal in slow pairs (to gather context from anywhere in the passage).
+This also gives each query **control over its own distance sensitivity**. A query vector distributes its signal across all 64 dimension pairs. If a query has large values in the *fast-rotating* pairs, those pairs' contributions decay rapidly with distance — making the query very distance-sensitive. If the query concentrates its signal in *slow-rotating* pairs, the dot product barely changes with distance — making the query attend broadly. Different tokens naturally produce different energy distributions, so each query gets its own distance curve — unlike ALiBi, where every query in a head is stuck with one slope.
 
 <RoPEDistanceSensitivityWidget>
 Try the two presets to see the difference. "Distance-sensitive" concentrates signal in the fast-rotating pair — attention drops off sharply with distance. "Distance-insensitive" concentrates signal in the slow pair — attention stays nearly flat. Then use the sliders to create your own mix and watch how the attention-vs-distance curve changes shape.
 </RoPEDistanceSensitivityWidget>
+
+## You Don't Need to Double the Dimensions
+
+You might worry: splitting each dimension into x/y means we need *twice* as many dimensions. But in practice, models don't add new dimensions — they **pair up adjacent existing dimensions**. A 128-dimensional head vector becomes 64 pairs: dimensions 1 and 2 form the first pair, 3 and 4 the second, and so on. Each pair is treated as the x and y coordinates of a 2D point and rotated together.
+
+This works because rotation preserves the *length* of each pair (√(x² + y²) stays the same) while changing its *direction*. No information is destroyed — it's just rearranged. The model learns during training how to organize information into pairs that work well with their assigned rotation speeds.
+
+<KeyInsight>
+The dot product of two vectors equals |A| · |B| · cos(θ). Content lives in the magnitudes |A| and |B| — how "noun-like" or "filler-like" a token is. Position lives in the angle θ between them. Rotation changes the angle without touching the magnitudes, so **content and position information stay cleanly separated.**
+</KeyInsight>
 
 ## Does Rotation Tell Us Direction?
 

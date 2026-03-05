@@ -5,7 +5,7 @@ import { WidgetContainer } from "../shared/WidgetContainer";
 import { SliderControl } from "../shared/SliderControl";
 
 /* ------------------------------------------------------------------ */
-/*  Data — same toy tokens as ToyAttention                            */
+/*  Data — same toy tokens as ALiBiToyTokens                          */
 /* ------------------------------------------------------------------ */
 
 interface Token {
@@ -50,10 +50,17 @@ const SENTENCES: Sentence[] = [
 /*  Math                                                              */
 /* ------------------------------------------------------------------ */
 
-function dot(a: number[], b: number[]): number {
-  let sum = 0;
-  for (let i = 0; i < a.length; i++) sum += a[i] * b[i];
-  return sum;
+/**
+ * We take the 1D key/query value, treat it as the x-component of a 2D
+ * vector (x, 0), rotate by the given angle, then compute a 2D dot product.
+ */
+function rotateScalar(value: number, angleDeg: number): [number, number] {
+  const rad = (angleDeg * Math.PI) / 180;
+  return [value * Math.cos(rad), value * Math.sin(rad)];
+}
+
+function dot2(a: [number, number], b: [number, number]): number {
+  return a[0] * b[0] + a[1] * b[1];
 }
 
 function softmax(scores: number[]): number[] {
@@ -77,16 +84,16 @@ function pct(n: number): string {
 /*  Arrow helpers                                                     */
 /* ------------------------------------------------------------------ */
 
-const HIGHLIGHT_HUE = 240;
+const HIGHLIGHT_HUE = 30; // amber hue to distinguish from ALiBi's blue
 
 function weightToStroke(w: number): string {
   const alpha = 0.3 + w * 0.55;
-  return `hsla(${HIGHLIGHT_HUE}, 75%, 55%, ${alpha})`;
+  return `hsla(${HIGHLIGHT_HUE}, 75%, 50%, ${alpha})`;
 }
 
 function weightToPill(w: number): string {
   const alpha = 0.3 + w * 0.7;
-  return `hsla(${HIGHLIGHT_HUE}, 80%, 50%, ${alpha})`;
+  return `hsla(${HIGHLIGHT_HUE}, 80%, 45%, ${alpha})`;
 }
 
 interface Arrow {
@@ -101,9 +108,9 @@ interface Arrow {
 /*  Component                                                         */
 /* ------------------------------------------------------------------ */
 
-export function ALiBiToyTokens() {
+export function RotationToyTokens() {
   const [sentIdx, setSentIdx] = useState(0);
-  const [slope, setSlope] = useState(1);
+  const [degPerPos, setDegPerPos] = useState(15);
   const [arrows, setArrows] = useState<Arrow[]>([]);
 
   const rowRef = useRef<HTMLDivElement>(null);
@@ -111,21 +118,21 @@ export function ALiBiToyTokens() {
 
   const sentence = SENTENCES[sentIdx];
   const tokens = sentence.tokens;
-  const itIdx = tokens.length - 1; // "it" is always last
-  const selected = itIdx; // always show attention from "it"
+  const itIdx = tokens.length - 1;
+  const selected = itIdx;
 
   const handleReset = useCallback(() => {
     setSentIdx(0);
-    setSlope(1);
+    setDegPerPos(15);
   }, []);
 
-  // Compute attention scores for "it"
-  const rawScores = tokens.map((t) => dot(tokens[selected].query, t.key));
-  const penalizedScores = tokens.map((t, i) => {
-    const distance = itIdx - i;
-    return dot(tokens[selected].query, t.key) - slope * distance;
+  // Compute rotated dot products and attention weights
+  const itQuery = rotateScalar(tokens[selected].query[0], selected * degPerPos);
+  const rawScores = tokens.map((t, i) => {
+    const rotatedKey = rotateScalar(t.key[0], i * degPerPos);
+    return dot2(itQuery, rotatedKey);
   });
-  const weights = softmax(penalizedScores);
+  const weights = softmax(rawScores);
 
   // Measure card positions and compute arrows
   useEffect(() => {
@@ -165,8 +172,8 @@ export function ALiBiToyTokens() {
 
   return (
     <WidgetContainer
-      title="ALiBi: Distance Penalties"
-      description="Drag the slope to see how a linear distance penalty shifts attention toward closer tokens"
+      title="Rotation Applied to a Dimension"
+      description="One dimension gets split into x/y and rotated by position. Drag the speed to see distance-based attention emerge."
       onReset={handleReset}
     >
       <div className="flex flex-col gap-5">
@@ -187,24 +194,24 @@ export function ALiBiToyTokens() {
           ))}
         </div>
 
-        {/* Slope slider */}
-        <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 dark:border-blue-900 dark:bg-blue-950/30">
-          <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400">
-            Distance penalty slope (m)
+        {/* Rotation speed slider */}
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 dark:border-amber-900 dark:bg-amber-950/30">
+          <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
+            Rotation speed (degrees per position)
           </div>
           <SliderControl
             label=""
-            value={slope}
+            value={degPerPos}
             min={0}
-            max={3}
-            step={0.1}
-            onChange={setSlope}
-            formatValue={(v) => v.toFixed(1)}
+            max={45}
+            step={1}
+            onChange={setDegPerPos}
+            formatValue={(v) => `${v}°`}
           />
-          <div className="mt-1 text-[11px] text-blue-700/70 dark:text-blue-400/70">
-            {slope === 0
-              ? "No penalty — attention is position-blind. Both nouns get equal scores."
-              : `score = q · k − ${slope.toFixed(1)} × distance`}
+          <div className="mt-1 text-[11px] text-amber-700/70 dark:text-amber-400/70">
+            {degPerPos === 0
+              ? "No rotation — attention is position-blind. Both nouns get equal scores."
+              : `Each position rotates by ${degPerPos}°. Nearby keys stay more aligned with the query.`}
           </div>
         </div>
 
@@ -219,7 +226,7 @@ export function ALiBiToyTokens() {
               >
                 <defs>
                   <marker
-                    id="alibi-arrowhead"
+                    id="rotation-arrowhead"
                     markerWidth="6"
                     markerHeight="5"
                     refX="5"
@@ -228,7 +235,7 @@ export function ALiBiToyTokens() {
                   >
                     <polygon
                       points="0 0, 6 2.5, 0 5"
-                      fill={`hsla(${HIGHLIGHT_HUE}, 75%, 55%, 0.7)`}
+                      fill={`hsla(${HIGHLIGHT_HUE}, 75%, 50%, 0.7)`}
                     />
                   </marker>
                 </defs>
@@ -245,7 +252,7 @@ export function ALiBiToyTokens() {
                       fill="none"
                       stroke={weightToStroke(a.weight)}
                       strokeWidth={strokeWidth}
-                      markerEnd="url(#alibi-arrowhead)"
+                      markerEnd="url(#rotation-arrowhead)"
                       className="transition-all duration-300"
                     />
                   );
@@ -259,7 +266,7 @@ export function ALiBiToyTokens() {
               const isSelected = i === selected;
               const weight = weights[i];
               const isTarget = weight > 0.01 && !isSelected;
-              const distance = itIdx - i;
+              const angleDiff = Math.abs((itIdx - i) * degPerPos);
               const isNoun = tok.label === "cat" || tok.label === "dog";
 
               return (
@@ -286,11 +293,11 @@ export function ALiBiToyTokens() {
                     ) : (
                       <>
                         <span className="text-[9px] text-muted">
-                          {isNoun ? `key=${tok.key[0]}` : `key=${tok.key[0]}`}
+                          rot {(i * degPerPos)}°
                         </span>
-                        {slope > 0 && distance > 0 && (
-                          <span className="text-[9px] text-red-500">
-                            −{(slope * distance).toFixed(1)}
+                        {degPerPos > 0 && isNoun && (
+                          <span className="text-[9px] text-amber-600 dark:text-amber-400">
+                            Δ{angleDiff}°
                           </span>
                         )}
                       </>

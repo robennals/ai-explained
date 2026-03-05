@@ -36,6 +36,14 @@ const ALiBiToyTokens = dynamic(
   { ssr: false }
 );
 
+const RotationToyTokens = dynamic(
+  () =>
+    import("@/components/widgets/positions/RotationToyTokens").then(
+      (m) => m.RotationToyTokens
+    ),
+  { ssr: false }
+);
+
 const RoPEDistanceSensitivity = dynamic(
   () =>
     import("@/components/widgets/positions/RoPEDistanceSensitivity").then(
@@ -88,6 +96,14 @@ export function BertAttentionWidget({ children }: { children?: React.ReactNode }
   return (
     <WidgetSlot tryIt={children} label="Explore it">
       <BertAttention />
+    </WidgetSlot>
+  );
+}
+
+export function RotationToyTokensWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <RotationToyTokens />
     </WidgetSlot>
   );
 }

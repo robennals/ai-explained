@@ -4,7 +4,7 @@ import Content from "./content.mdx";
 import {
   ALiBiToyTokensWidget,
   RotationPositionWidget,
-  RoPEToyTokensWidget,
+  RotationToyTokensWidget,
   RoPEDistanceSensitivityWidget,
 } from "./widgets";
 
@@ -24,7 +24,7 @@ export default function ChapterPositions() {
           components={{
             ALiBiToyTokensWidget,
             RotationPositionWidget,
-            RoPEToyTokensWidget,
+            RotationToyTokensWidget,
             RoPEDistanceSensitivityWidget,
           }}
         />
