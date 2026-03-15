@@ -38,11 +38,15 @@ Drag the slope around. At slope 0, both nouns get identical attention — the mo
 
 Different attention heads get different slopes *m* — some heads have steep slopes and attend very locally (just the nearest few words), while others have gentle slopes and attend broadly across the whole context. This gives the model a range of distance sensitivities.
 
-But ALiBi has a fundamental limitation: **the distance penalty is per-head, not per-query**. Every query in a given head gets the same distance falloff. The model can't decide "this particular word needs to look far back in the text" — the slope is baked into the head.
+## The Limits of Linear Distance Penalties
+
+ALiBi has a fundamental limitation: **the distance penalty is per-head, not per-query**. Every query in a given head gets the same distance falloff. The model can't decide "this particular word needs to look far back in the text" — the slope is baked into the head.
 
 Consider: *"The president visited France. He said the treaty would be honored."* The pronoun "He" needs a steep distance falloff to latch onto the nearby "president." But "treaty" needs a gentle falloff to find its antecedent farther back. If both happen to land in the same attention head, they're stuck with the same slope — one of them gets the wrong distance curve.
 
-More broadly, ALiBi's penalty is **content-blind**: it penalizes distance the same amount regardless of what the tokens actually say. And empirically, models using the approach we're about to see — RoPE — have consistently outperformed ALiBi models as scale and context length grow. Nearly every frontier model today (Llama, Mistral, Gemma, Qwen, DeepSeek) uses RoPE. Let's see why.
+More fundamentially, ALiBi limits the distance penalty to being a linear slope. If a particular token would benefit from a different shape (e.g. sharp dropoff, then flat for a while) then ALiBi can't do that. 
+
+It turns out there is a different model - RoPE - that overcomes all of these limits. Nearly every frontier model today (Llama, Mistral, Gemma, Qwen, DeepSeek) uses RoPE. Let's see why.
 
 ## Rotation Encodes Distance
 
@@ -72,49 +76,29 @@ This is the core of **RoPE** (Rotary Position Embeddings): instead of *adding* a
 
 ## Multiple Rotation Speeds
 
-The example above uses just one rotation speed. But a single speed has a problem: if we rotate at 15° per position, then tokens 24 positions apart have rotated a full 360° and look as if they're right next to each other. A fast-spinning dimension wraps around and creates phantom matches at regular intervals.
-
 In practice, RoPE always uses **multiple dimension pairs rotating at different speeds**. A 128-dimensional vector becomes 64 pairs, each rotating at its own rate. The first pair rotates fast — maybe 30° per position — while later pairs rotate progressively slower, down to fractions of a degree per position.
 
-Think of it like the hands on a clock: the second hand spins fast, the minute hand slowly, and the hour hand barely moves. A single hand wraps around every 60 seconds and can't distinguish 1:00 from 2:00. But the *combination* of all three hands is unique at every moment. Similarly, no two token positions share the same combination of rotation angles across all 64 dimension pairs. The slow-rotating pairs disambiguate positions that the fast-rotating pairs confuse.
-
-This also gives each query **control over its own distance sensitivity**. By choosing how much weight to put in each dimension pair, a query decides how it wants attention to fall off with distance. Big weights in fast-rotating pairs mean attention drops off sharply — the token only cares about nearby words. Big weights in slow-rotating pairs mean attention stays flat over long distances. And unlike ALiBi, where every query in a head is stuck with one slope, different tokens naturally produce different weight distributions and get their own distance curve.
+The magic of RoPE is that each token can specify an arbitrary distance penalty curve by choosing how much weight to put in dimension pairs that rotate at different speeds. Let's see what this looks like:
 
 <RoPEMultiSpeedWidget>
-Click through the tabs to see common patterns. "Local attention" concentrates signal in fast pairs — sharp dropoff. "Broad attention" uses slow pairs — nearly flat. "Periodic bumps" shows what happens with a single fast pair: the wrapping creates false peaks. Then try adjusting the sliders yourself to create new attention shapes.
+The first three tabs show how zeroing out fast pairs widens the attention window — from a sharp spike to a broad spread. "Sharper medium" shows you can change the *shape* of the curve without changing its range. "Two-stage dropoff" combines fast and slow pairs for a quick initial drop followed by a long steady floor. Try adjusting the sliders yourself to create new shapes.
 </RoPEMultiSpeedWidget>
 
 ## You Don't Need to Double the Dimensions
 
 You might worry: splitting each dimension into x/y means we need *twice* as many dimensions. But in practice, models don't add new dimensions — they **pair up adjacent existing dimensions**. A 128-dimensional head vector becomes 64 pairs: dimensions 1 and 2 form the first pair, 3 and 4 the second, and so on. Each pair is treated as the x and y coordinates of a 2D point and rotated together.
 
-This works because rotation preserves the *length* of each pair (√(x² + y²) stays the same) while changing its *direction*. No information is destroyed — it's just rearranged. The model learns during training how to organize information into pairs that work well with their assigned rotation speeds.
+This works because rotation preserves the *length* of each pair (√(x² + y²) stays the same) while changing its *direction*. No information is destroyed — it's just rearranged. There is a subtle cost, though: a content vector at one position could, after rotation, look like a completely different content vector at another position. The model has to learn representations that avoid these collisions — but with 64 dimension pairs all rotating at different speeds, two unrelated vectors would have to match across *all* pairs simultaneously, which is extremely unlikely. In practice, training finds good representations without difficulty.
 
-<KeyInsight>
-The dot product of two vectors equals |A| · |B| · cos(θ). Content lives in the magnitudes |A| and |B| — how "noun-like" or "filler-like" a token is. Position lives in the angle θ between them. Rotation changes the angle without touching the magnitudes, so **content and position information stay cleanly separated.**
-</KeyInsight>
+## What about Direction?
 
-## Does Rotation Tell Us Direction?
+You might notice something: The dot product between two rotated vectors is the same whether word A is 3 positions *before* or 3 positions *after* word B. RoPE encodes *distance* but not *direction*.
 
-You might notice something: cos(θ) = cos(−θ). The dot product between two rotated vectors is the same whether word A is 3 positions *before* or 3 positions *after* word B. Rotation encodes *distance* but not *direction*.
+This turns out to be fine. As we'll see in the next chapter, real language models have another mechanism for direction **causal masking** that allows a token to only attend to tokens that came *before* it. RoPE handles "how far apart," and causal masking handles "which direction."
 
-This turns out to be fine. Language models already have a mechanism for direction: **causal masking**. During generation, each token can only attend to tokens that came *before* it — future positions are masked to −∞ before softmax, so they get zero attention weight. RoPE handles "how far apart," and causal masking handles "which direction."
 
-## Scaling to Huge Context Windows
+## Words in Order
 
-RoPE's base rotation speed is controlled by a parameter θ\_base, typically 10,000. This means the slowest-rotating dimension pair completes one full revolution over roughly 10,000 positions. Beyond that, positions start to become ambiguous — similar to how a 12-hour clock can't distinguish AM from PM.
+We started with a problem: attention couldn't tell "the dog bit the man" from "the man bit the dog." The words were floating in a bag with no order. Now, by rotating each word's vector based on its position, the model can tell how far apart two words are — and each word gets to decide for itself whether to focus on its close neighbors, scan the whole sentence, or anything in between.
 
-To support longer contexts, techniques like **YaRN** and **NTK-aware scaling** stretch the rotation frequencies so that the slow pairs rotate even more slowly. It's like adding an even slower "day hand" to the clock — now you can tell apart any two times across an entire day, not just within 12 hours.
-
-This isn't free: stretching frequencies spreads out the angular resolution, so the model needs fine-tuning to adapt. But it works remarkably well in practice. This is how Llama 3.1 handles 128K tokens and how Gemini extends to over a million.
-
-## What We've Built
-
-Position encoding solves attention's blind spot. We covered two approaches:
-
-1. **ALiBi** — subtract a linear distance penalty from attention scores. Simple, but the penalty is per-head: every query in the head gets the same distance curve.
-2. **RoPE** — rotate query and key vectors by position-dependent angles across pairs of dimensions. Each query naturally controls its own distance sensitivity through the distribution of signal across fast and slow pairs.
-
-RoPE is used by virtually every frontier model today, and its elegant geometry — encoding position through rotation, with different dimension pairs at different frequencies — is why modern language models can handle context windows of over a million tokens.
-
-In the next chapter, we'll wire attention (now with position awareness) together with feed-forward neural networks to build the **transformer** — the architecture behind ChatGPT, Claude, and every modern language model.
+Attention now knows three things: what each word *means* (from embeddings), which other words *matter* (from attention scores), and where each word *is* (from rotation). In the next chapter, we'll put all of these pieces together to build the **transformer** — the architecture behind ChatGPT, Claude, and every modern language model.
