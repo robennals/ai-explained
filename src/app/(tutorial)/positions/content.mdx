@@ -48,13 +48,17 @@ More broadly, ALiBi's penalty is **content-blind**: it penalizes distance the sa
 
 There's a completely different way to measure how far apart two tokens are. It starts with a fact about dot products we haven't mentioned yet: **if you rotate two vectors by the same amount, their dot product doesn't change**. The dot product only cares about the angle *between* the vectors, not where they're pointing in absolute terms.
 
+<RotationDotProductWidget>
+Try dragging the base angle slider. Both vectors spin around the circle together, their x and y values change completely — but the dot product doesn't budge. Now change the angle between them and watch the dot product respond. It only cares about the gap.
+</RotationDotProductWidget>
+
 Now imagine giving each token a pointer on a circle. The token at position 0 isn't rotated at all. Position 1 is rotated a little. Position 2 is rotated twice as much, position 3 three times as much, and so on. Tokens close together get rotated by similar amounts, so their pointers still nearly align and their dot product is high. Tokens far apart get rotated by very different amounts, so their pointers end up pointing in different directions and their dot product is low. And the dot product depends only on the *gap*, not on the absolute positions.
 
 <RotationPositionWidget>
 Slide token A's position around while keeping the gap fixed — the x and y components change, but the dot product stays the same. Now change the gap and watch the dot product change.
 </RotationPositionWidget>
 
-How quickly we rotate per position is called the **speed** — in the playground above, it's 15° per position. A higher speed means the pointers spread apart faster, so even a small gap produces a big angle difference and a low dot product. A lower speed means tokens have to be farther apart before their dot product drops significantly. Try adjusting the speed slider to see this tradeoff.
+How quickly we rotate per position is called the **speed**. A higher speed means the pointers spread apart faster, so even a small gap produces a big angle difference and a low dot product. A lower speed means tokens have to be farther apart before their dot product drops significantly. Try adjusting the speed slider in the playground above to see this tradeoff.
 
 ## Applying Rotation to a Dimension
 

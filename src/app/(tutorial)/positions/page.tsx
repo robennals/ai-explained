@@ -3,6 +3,7 @@ import { getAdjacentChapters } from "@/lib/curriculum";
 import Content from "./content.mdx";
 import {
   ALiBiToyTokensWidget,
+  RotationDotProductWidget,
   RotationPositionWidget,
   RotationToyTokensWidget,
   RoPEDistanceSensitivityWidget,
@@ -25,6 +26,7 @@ export default function ChapterPositions() {
           components={{
             WordOrderMattersWidget,
             ALiBiToyTokensWidget,
+            RotationDotProductWidget,
             RotationPositionWidget,
             RotationToyTokensWidget,
             RoPEDistanceSensitivityWidget,

@@ -52,6 +52,14 @@ const RotationToyTokens = dynamic(
   { ssr: false }
 );
 
+const RotationDotProduct = dynamic(
+  () =>
+    import("@/components/widgets/positions/RotationDotProduct").then(
+      (m) => m.RotationDotProduct
+    ),
+  { ssr: false }
+);
+
 const RoPEDistanceSensitivity = dynamic(
   () =>
     import("@/components/widgets/positions/RoPEDistanceSensitivity").then(
@@ -120,6 +128,14 @@ export function WordOrderMattersWidget({ children }: { children?: React.ReactNod
   return (
     <WidgetSlot tryIt={children}>
       <WordOrderMatters />
+    </WidgetSlot>
+  );
+}
+
+export function RotationDotProductWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <RotationDotProduct />
     </WidgetSlot>
   );
 }

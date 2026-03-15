@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo, useRef } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
 import { SliderControl } from "../shared/SliderControl";
 import { VectorCard } from "../vectors/VectorCard";
@@ -15,6 +15,17 @@ export function RotationPosition() {
   const [posB, setPosB] = useState(4);
   const [degPerPos, setDegPerPos] = useState(15);
 
+  // Max gap: the position gap where dot product reaches -1 (180°)
+  const maxGap = Math.floor(180 / degPerPos);
+  // Max position on circle: just before wrapping back to 0° (360°)
+  const maxPosOnCircle = Math.ceil(360 / degPerPos) - 1;
+  // B's max depends on A: can go up to A + maxGap, but not past the circle
+  const maxPosB = Math.min(posA + maxGap, maxPosOnCircle);
+  // A can go anywhere on the circle (with gap 0, B = A)
+  const maxPosA = maxPosOnCircle;
+  // Current effective max gap for the gap slider
+  const currentMaxGap = Math.min(maxGap, maxPosOnCircle - posA);
+
   const handleReset = useCallback(() => {
     setPosA(1);
     setPosB(4);
@@ -25,10 +36,14 @@ export function RotationPosition() {
   const vecA = useMemo(() => rotateVector(posA, degPerPos), [posA, degPerPos]);
   const vecB = useMemo(() => rotateVector(posB, degPerPos), [posB, degPerPos]);
 
-  const angleA = posA * degPerPos;
-  const angleB = posB * degPerPos;
+  // Clamp positions
+  const clampedPosA = Math.min(posA, maxPosA);
+  const clampedPosB = Math.min(posB, maxPosB);
+  const gap = Math.abs(clampedPosB - clampedPosA);
+
+  const angleA = clampedPosA * degPerPos;
+  const angleB = clampedPosB * degPerPos;
   const angleBetween = Math.abs(angleB - angleA);
-  const gap = Math.abs(posB - posA);
   const dotProduct = Math.cos(gap * radPerPos);
 
   // SVG config
@@ -77,6 +92,24 @@ export function RotationPosition() {
   const products = [vecA[0] * vecB[0], vecA[1] * vecB[1]];
   const dotViaComponents = products[0] + products[1];
 
+  // Auto-scroll the gap table to center the active row
+  const activeRowRef = useRef<HTMLTableRowElement>(null);
+  const tableContainerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const row = activeRowRef.current;
+    const container = tableContainerRef.current;
+    if (!row || !container) return;
+    // Scroll so the row is centered in the container
+    const rowCenter = row.offsetTop + row.offsetHeight / 2;
+    const containerCenter = container.clientHeight / 2;
+    const targetScroll = rowCenter - containerCenter;
+    const maxScroll = container.scrollHeight - container.clientHeight;
+    container.scrollTo({
+      top: Math.max(0, Math.min(targetScroll, maxScroll)),
+      behavior: "smooth",
+    });
+  }, [gap]);
+
   // Drag handling
   const svgRef = useRef<SVGSVGElement>(null);
   const dragging = useRef<"A" | "B" | null>(null);
@@ -91,10 +124,9 @@ export function RotationPosition() {
     const dx = svgX - cx;
     const dy = -(svgY - cy);
     const angleDeg = (Math.atan2(dy, dx) * 180) / Math.PI;
-    // Snap to nearest position (0-20)
     const pos = Math.round(((angleDeg % 360) + 360) % 360 / degPerPos);
-    return Math.max(0, Math.min(20, pos));
-  }, [degPerPos]);
+    return Math.max(0, Math.min(maxPosOnCircle, pos));
+  }, [degPerPos, maxPosOnCircle]);
 
   const handlePointerDown = useCallback((which: "A" | "B") => (e: React.PointerEvent) => {
     dragging.current = which;
@@ -108,22 +140,29 @@ export function RotationPosition() {
 
     if (dragging.current === "A") {
       const currentGap = posB - posA;
-      // Only accept if both A and A+gap stay in [0, 20]
-      if (newPos >= 0 && newPos + currentGap >= 0 && newPos + currentGap <= 20) {
+      const newB = newPos + currentGap;
+      if (newPos >= 0 && newB >= 0 && newB <= maxPosOnCircle && currentGap <= maxGap) {
         setPosA(newPos);
-        setPosB(newPos + currentGap);
+        setPosB(newB);
       }
     } else {
-      // Dragging B changes the gap, capped at 6
       const newGap = newPos - posA;
-      if (newGap >= 0 && newGap <= 6) {
-        setPosB(posA + newGap);
+      if (newGap >= 0 && newGap <= maxGap && newPos <= maxPosOnCircle) {
+        setPosB(newPos);
       }
     }
-  }, [posA, posB, angleToPos]);
+  }, [posA, posB, angleToPos, maxPosOnCircle, maxGap]);
 
   const handlePointerUp = useCallback(() => {
     dragging.current = null;
+  }, []);
+
+  // When speed changes, clamp positions to stay in range
+  const handleSpeedChange = useCallback((newSpeed: number) => {
+    setDegPerPos(newSpeed);
+    const newMaxCircle = Math.ceil(360 / newSpeed) - 1;
+    setPosA((prev) => Math.min(prev, newMaxCircle));
+    setPosB((prev) => Math.min(prev, newMaxCircle));
   }, []);
 
   return (
@@ -142,11 +181,13 @@ export function RotationPosition() {
                 label="Token A position"
                 value={posA}
                 min={0}
-                max={20}
+                max={maxPosA}
                 step={1}
                 onChange={(v) => {
                   const currentGap = posB - posA;
-                  const clampedA = Math.max(0, Math.min(20 - currentGap, v));
+                  // Keep gap, but clamp B to not cross 0 on the circle
+                  const maxA = maxPosOnCircle - currentGap;
+                  const clampedA = Math.max(0, Math.min(maxA, v));
                   setPosA(clampedA);
                   setPosB(clampedA + currentGap);
                 }}
@@ -156,10 +197,19 @@ export function RotationPosition() {
                 label="Gap"
                 value={gap}
                 min={0}
-                max={6}
+                max={currentMaxGap}
                 step={1}
                 onChange={(g) => {
-                  setPosB(Math.max(0, Math.min(20, posA + g)));
+                  const clampedGap = Math.min(g, maxGap);
+                  const newB = posA + clampedGap;
+                  if (newB <= maxPosOnCircle) {
+                    setPosB(newB);
+                  } else {
+                    // Push A down so B doesn't cross 0
+                    const newA = maxPosOnCircle - clampedGap;
+                    setPosA(Math.max(0, newA));
+                    setPosB(Math.max(0, newA) + clampedGap);
+                  }
                 }}
                 formatValue={(v) => String(v)}
               />
@@ -169,7 +219,7 @@ export function RotationPosition() {
                 min={5}
                 max={30}
                 step={1}
-                onChange={setDegPerPos}
+                onChange={handleSpeedChange}
                 formatValue={(v) => `${v}°/pos`}
               />
             </div>
@@ -207,7 +257,7 @@ export function RotationPosition() {
                 />
 
                 {/* Position numbers around the circle */}
-                {Array.from({ length: 21 }, (_, p) => {
+                {Array.from({ length: maxPosOnCircle + 1 }, (_, p) => {
                   const rad = -(p * degPerPos * Math.PI) / 180;
                   const tickInner = radius - 3;
                   const tickOuter = radius + 3;
@@ -431,8 +481,8 @@ export function RotationPosition() {
           </div>
 
           {/* Dot product by gap table */}
-          <div className="rounded-lg border border-border bg-surface shrink-0">
-            <div className="px-3 py-2 border-b border-border">
+          <div ref={tableContainerRef} className="rounded-lg border border-border bg-surface shrink-0 max-h-[400px] overflow-y-auto">
+            <div className="px-3 py-2 border-b border-border sticky top-0 bg-surface">
               <span className="text-[10px] font-bold uppercase tracking-wider text-muted">
                 Dot product for each gap
               </span>
@@ -445,12 +495,13 @@ export function RotationPosition() {
                 </tr>
               </thead>
               <tbody>
-                {Array.from({ length: 7 }, (_, g) => {
+                {Array.from({ length: maxGap + 1 }, (_, g) => {
                   const d = Math.cos(g * radPerPos);
                   const isCurrent = g === gap;
                   return (
                     <tr
                       key={g}
+                      ref={isCurrent ? activeRowRef : undefined}
                       className={isCurrent
                         ? "bg-accent/10 font-bold text-accent"
                         : "text-muted"
