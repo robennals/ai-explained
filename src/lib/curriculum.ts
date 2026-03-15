@@ -88,6 +88,7 @@ export const chapters: Chapter[] = [
     prerequisites: [7],
     description:
       "Attention is position-blind — it has no idea where words are in a sentence. Distance penalties, rotation tricks, and the elegant geometry of RoPE fix this.",
+    ready: true,
   },
   {
     id: 9,

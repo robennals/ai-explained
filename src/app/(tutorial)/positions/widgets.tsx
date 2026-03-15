@@ -28,6 +28,14 @@ const BertAttention = dynamic(
   { ssr: false }
 );
 
+const WordOrderMatters = dynamic(
+  () =>
+    import("@/components/widgets/positions/WordOrderMatters").then(
+      (m) => m.WordOrderMatters
+    ),
+  { ssr: false }
+);
+
 const ALiBiToyTokens = dynamic(
   () =>
     import("@/components/widgets/positions/ALiBiToyTokens").then(
@@ -104,6 +112,14 @@ export function RotationToyTokensWidget({ children }: { children?: React.ReactNo
   return (
     <WidgetSlot tryIt={children}>
       <RotationToyTokens />
+    </WidgetSlot>
+  );
+}
+
+export function WordOrderMattersWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <WordOrderMatters />
     </WidgetSlot>
   );
 }

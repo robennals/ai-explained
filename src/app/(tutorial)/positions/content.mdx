@@ -1,14 +1,26 @@
 # Where Am I?
 
 <Lead>
-Attention lets each word choose which other words to focus on — but it has a blind spot. It has no idea *where* words are in the sentence. "The dog chased the cat" and "the cat chased the dog" look identical to it. In this chapter, we'll fix that.
+The meaning of a sentence often depends on the *order* of the words — not just which words are there. But the attention system we built in the last chapter has no idea where any word is. Let's fix that.
 </Lead>
 
-## The Position Problem
+## Word Order Matters
 
-Look back at how attention works: we take the dot product of each query with each key. But those queries and keys come from embeddings — and embeddings don't encode *position*. The word "cat" gets the same embedding whether it's the first word or the last word.
+Think about "The dog bit the man" versus "The man bit the dog." Same words, completely different meaning — just from changing the order. Who's biting whom flips entirely.
 
-This means "dog bla cat it" and "cat bla dog it" would give "it" identical attention scores for both nouns. The model can't tell which noun is closer. That's a serious problem — in real language, nearby words are usually more relevant than distant ones.
+This isn't a weird edge case. Word order is how language works. Moving a single word can flip a sentence's meaning entirely.
+
+<WordOrderMattersWidget>
+Try each example. Notice how every rearrangement changes the meaning — sometimes subtly, sometimes dramatically. A system that can't tell word order apart would think all these versions mean the same thing.
+</WordOrderMattersWidget>
+
+## Attention Is Position-Blind
+
+Here's the problem: the attention system we built in the last chapter *can't tell any of these apart*.
+
+Remember how attention works — each word gets an embedding (a list of numbers representing its meaning), and then we compute how much each word should pay attention to every other word using dot products. But the word "cat" gets the *same* embedding whether it's the first word or the last word. Nothing about position goes into the calculation.
+
+That means "The dog chased the cat" and "The cat chased the dog" produce exactly the same attention pattern. The model literally cannot tell them apart. It's like reading a sentence where all the words are floating in a bag with no order — you can see which words are present, but you have no idea which came first.
 
 We need to give the model a sense of position. There are two main approaches used in practice, and the difference between them turns out to be surprisingly important.
 

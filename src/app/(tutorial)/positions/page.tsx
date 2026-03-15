@@ -6,6 +6,7 @@ import {
   RotationPositionWidget,
   RotationToyTokensWidget,
   RoPEDistanceSensitivityWidget,
+  WordOrderMattersWidget,
 } from "./widgets";
 
 export const metadata = {
@@ -22,6 +23,7 @@ export default function ChapterPositions() {
       <div className="prose prose-lg max-w-none">
         <Content
           components={{
+            WordOrderMattersWidget,
             ALiBiToyTokensWidget,
             RotationPositionWidget,
             RotationToyTokensWidget,
