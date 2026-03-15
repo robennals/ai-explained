@@ -72,17 +72,17 @@ This is the core of **RoPE** (Rotary Position Embeddings): instead of *adding* a
 
 ## Multiple Rotation Speeds
 
-A single rotation speed has a problem: if the speed is 15° per position, then tokens 24 positions apart have rotated a full 360° and look as if they're right next to each other. A fast-spinning dimension wraps around and creates false matches at multiples of its period.
+The example above uses just one rotation speed. But a single speed has a problem: if we rotate at 15° per position, then tokens 24 positions apart have rotated a full 360° and look as if they're right next to each other. A fast-spinning dimension wraps around and creates phantom matches at regular intervals.
 
-The fix: **use multiple dimension pairs rotating at different speeds**. A 128-dimensional vector becomes 64 pairs, each rotating at its own rate. The first pair rotates fast — maybe 30° per position — while later pairs rotate progressively slower, down to fractions of a degree per position.
+In practice, RoPE always uses **multiple dimension pairs rotating at different speeds**. A 128-dimensional vector becomes 64 pairs, each rotating at its own rate. The first pair rotates fast — maybe 30° per position — while later pairs rotate progressively slower, down to fractions of a degree per position.
 
 Think of it like the hands on a clock: the second hand spins fast, the minute hand slowly, and the hour hand barely moves. A single hand wraps around every 60 seconds and can't distinguish 1:00 from 2:00. But the *combination* of all three hands is unique at every moment. Similarly, no two token positions share the same combination of rotation angles across all 64 dimension pairs. The slow-rotating pairs disambiguate positions that the fast-rotating pairs confuse.
 
-This also gives each query **control over its own distance sensitivity**. A query vector distributes its signal across all 64 dimension pairs. If a query has large values in the *fast-rotating* pairs, those pairs' contributions decay rapidly with distance — making the query very distance-sensitive. If the query concentrates its signal in *slow-rotating* pairs, the dot product barely changes with distance — making the query attend broadly. Different tokens naturally produce different energy distributions, so each query gets its own distance curve — unlike ALiBi, where every query in a head is stuck with one slope.
+This also gives each query **control over its own distance sensitivity**. By choosing how much weight to put in each dimension pair, a query decides how it wants attention to fall off with distance. Big weights in fast-rotating pairs mean attention drops off sharply — the token only cares about nearby words. Big weights in slow-rotating pairs mean attention stays flat over long distances. And unlike ALiBi, where every query in a head is stuck with one slope, different tokens naturally produce different weight distributions and get their own distance curve.
 
-<RoPEDistanceSensitivityWidget>
-Try the two presets to see the difference. "Distance-sensitive" concentrates signal in the fast-rotating pair — attention drops off sharply with distance. "Distance-insensitive" concentrates signal in the slow pair — attention stays nearly flat. Then use the sliders to create your own mix and watch how the attention-vs-distance curve changes shape.
-</RoPEDistanceSensitivityWidget>
+<RoPEMultiSpeedWidget>
+Click through the tabs to see common patterns. "Local attention" concentrates signal in fast pairs — sharp dropoff. "Broad attention" uses slow pairs — nearly flat. "Periodic bumps" shows what happens with a single fast pair: the wrapping creates false peaks. Then try adjusting the sliders yourself to create new attention shapes.
+</RoPEMultiSpeedWidget>
 
 ## You Don't Need to Double the Dimensions
 

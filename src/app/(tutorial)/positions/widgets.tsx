@@ -68,6 +68,14 @@ const RoPEDistanceSensitivity = dynamic(
   { ssr: false }
 );
 
+const RoPEMultiSpeed = dynamic(
+  () =>
+    import("@/components/widgets/positions/RoPEMultiSpeed").then(
+      (m) => m.RoPEMultiSpeed
+    ),
+  { ssr: false }
+);
+
 function WidgetSlot({ children, tryIt, label }: { children: React.ReactNode; tryIt?: React.ReactNode; label?: string }) {
   return (
     <Suspense
@@ -144,6 +152,14 @@ export function RoPEDistanceSensitivityWidget({ children }: { children?: React.R
   return (
     <WidgetSlot tryIt={children}>
       <RoPEDistanceSensitivity />
+    </WidgetSlot>
+  );
+}
+
+export function RoPEMultiSpeedWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <RoPEMultiSpeed />
     </WidgetSlot>
   );
 }
