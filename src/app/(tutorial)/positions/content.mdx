@@ -1,14 +1,26 @@
 # Where Am I?
 
 <Lead>
-Attention lets each word choose which other words to focus on — but it has a blind spot. It has no idea *where* words are in the sentence. "The dog chased the cat" and "the cat chased the dog" look identical to it. In this chapter, we'll fix that.
+The meaning of a sentence often depends on the *order* of the words — not just which words are there. But the attention system we built in the last chapter has no idea where any word is. Let's fix that.
 </Lead>
 
-## The Position Problem
+## Word Order Matters
 
-Look back at how attention works: we take the dot product of each query with each key. But those queries and keys come from embeddings — and embeddings don't encode *position*. The word "cat" gets the same embedding whether it's the first word or the last word.
+Think about "The dog bit the man" versus "The man bit the dog." Same words, completely different meaning — just from changing the order. Who's biting whom flips entirely.
 
-This means "dog bla cat it" and "cat bla dog it" would give "it" identical attention scores for both nouns. The model can't tell which noun is closer. That's a serious problem — in real language, nearby words are usually more relevant than distant ones.
+This isn't a weird edge case. Word order is how language works. Moving a single word can flip a sentence's meaning entirely.
+
+<WordOrderMattersWidget>
+Try each example. Notice how every rearrangement changes the meaning — sometimes subtly, sometimes dramatically. A system that can't tell word order apart would think all these versions mean the same thing.
+</WordOrderMattersWidget>
+
+## Attention Is Position-Blind
+
+Here's the problem: the attention system we built in the last chapter *can't tell any of these apart*.
+
+Remember how attention works — each word gets an embedding (a list of numbers representing its meaning), and then we compute how much each word should pay attention to every other word using dot products. But the word "cat" gets the *same* embedding whether it's the first word or the last word. Nothing about position goes into the calculation.
+
+That means "The dog chased the cat" and "The cat chased the dog" produce exactly the same attention pattern. The model literally cannot tell them apart. It's like reading a sentence where all the words are floating in a bag with no order — you can see which words are present, but you have no idea which came first.
 
 We need to give the model a sense of position. There are two main approaches used in practice, and the difference between them turns out to be surprisingly important.
 
@@ -26,15 +38,23 @@ Drag the slope around. At slope 0, both nouns get identical attention — the mo
 
 Different attention heads get different slopes *m* — some heads have steep slopes and attend very locally (just the nearest few words), while others have gentle slopes and attend broadly across the whole context. This gives the model a range of distance sensitivities.
 
-But ALiBi has a fundamental limitation: **the distance penalty is per-head, not per-query**. Every query in a given head gets the same distance falloff. The model can't decide "this particular word needs to look far back in the text" — the slope is baked into the head.
+## The Limits of Linear Distance Penalties
+
+ALiBi has a fundamental limitation: **the distance penalty is per-head, not per-query**. Every query in a given head gets the same distance falloff. The model can't decide "this particular word needs to look far back in the text" — the slope is baked into the head.
 
 Consider: *"The president visited France. He said the treaty would be honored."* The pronoun "He" needs a steep distance falloff to latch onto the nearby "president." But "treaty" needs a gentle falloff to find its antecedent farther back. If both happen to land in the same attention head, they're stuck with the same slope — one of them gets the wrong distance curve.
 
-More broadly, ALiBi's penalty is **content-blind**: it penalizes distance the same amount regardless of what the tokens actually say. And empirically, models using the approach we're about to see — RoPE — have consistently outperformed ALiBi models as scale and context length grow. Nearly every frontier model today (Llama, Mistral, Gemma, Qwen, DeepSeek) uses RoPE. Let's see why.
+More fundamentially, ALiBi limits the distance penalty to being a linear slope. If a particular token would benefit from a different shape (e.g. sharp dropoff, then flat for a while) then ALiBi can't do that. 
+
+It turns out there is a different model - RoPE - that overcomes all of these limits. Nearly every frontier model today (Llama, Mistral, Gemma, Qwen, DeepSeek) uses RoPE. Let's see why.
 
 ## Rotation Encodes Distance
 
 There's a completely different way to measure how far apart two tokens are. It starts with a fact about dot products we haven't mentioned yet: **if you rotate two vectors by the same amount, their dot product doesn't change**. The dot product only cares about the angle *between* the vectors, not where they're pointing in absolute terms.
+
+<RotationDotProductWidget>
+Try dragging the base angle slider. Both vectors spin around the circle together, their x and y values change completely — but the dot product doesn't budge. Now change the angle between them and watch the dot product respond. It only cares about the gap.
+</RotationDotProductWidget>
 
 Now imagine giving each token a pointer on a circle. The token at position 0 isn't rotated at all. Position 1 is rotated a little. Position 2 is rotated twice as much, position 3 three times as much, and so on. Tokens close together get rotated by similar amounts, so their pointers still nearly align and their dot product is high. Tokens far apart get rotated by very different amounts, so their pointers end up pointing in different directions and their dot product is low. And the dot product depends only on the *gap*, not on the absolute positions.
 
@@ -42,7 +62,7 @@ Now imagine giving each token a pointer on a circle. The token at position 0 isn
 Slide token A's position around while keeping the gap fixed — the x and y components change, but the dot product stays the same. Now change the gap and watch the dot product change.
 </RotationPositionWidget>
 
-How quickly we rotate per position is called the **speed** — in the playground above, it's 15° per position. A higher speed means the pointers spread apart faster, so even a small gap produces a big angle difference and a low dot product. A lower speed means tokens have to be farther apart before their dot product drops significantly. Try adjusting the speed slider to see this tradeoff.
+How quickly we rotate per position is called the **speed**. A higher speed means the pointers spread apart faster, so even a small gap produces a big angle difference and a low dot product. A lower speed means tokens have to be farther apart before their dot product drops significantly. Try adjusting the speed slider in the playground above to see this tradeoff.
 
 ## Applying Rotation to a Dimension
 
@@ -56,49 +76,29 @@ This is the core of **RoPE** (Rotary Position Embeddings): instead of *adding* a
 
 ## Multiple Rotation Speeds
 
-A single rotation speed has a problem: if the speed is 15° per position, then tokens 24 positions apart have rotated a full 360° and look as if they're right next to each other. A fast-spinning dimension wraps around and creates false matches at multiples of its period.
+In practice, RoPE always uses **multiple dimension pairs rotating at different speeds**. A 128-dimensional vector becomes 64 pairs, each rotating at its own rate. The first pair rotates fast — maybe 30° per position — while later pairs rotate progressively slower, down to fractions of a degree per position.
 
-The fix: **use multiple dimension pairs rotating at different speeds**. A 128-dimensional vector becomes 64 pairs, each rotating at its own rate. The first pair rotates fast — maybe 30° per position — while later pairs rotate progressively slower, down to fractions of a degree per position.
+The magic of RoPE is that each token can specify an arbitrary distance penalty curve by choosing how much weight to put in dimension pairs that rotate at different speeds. Let's see what this looks like:
 
-Think of it like the hands on a clock: the second hand spins fast, the minute hand slowly, and the hour hand barely moves. A single hand wraps around every 60 seconds and can't distinguish 1:00 from 2:00. But the *combination* of all three hands is unique at every moment. Similarly, no two token positions share the same combination of rotation angles across all 64 dimension pairs. The slow-rotating pairs disambiguate positions that the fast-rotating pairs confuse.
-
-This also gives each query **control over its own distance sensitivity**. A query vector distributes its signal across all 64 dimension pairs. If a query has large values in the *fast-rotating* pairs, those pairs' contributions decay rapidly with distance — making the query very distance-sensitive. If the query concentrates its signal in *slow-rotating* pairs, the dot product barely changes with distance — making the query attend broadly. Different tokens naturally produce different energy distributions, so each query gets its own distance curve — unlike ALiBi, where every query in a head is stuck with one slope.
-
-<RoPEDistanceSensitivityWidget>
-Try the two presets to see the difference. "Distance-sensitive" concentrates signal in the fast-rotating pair — attention drops off sharply with distance. "Distance-insensitive" concentrates signal in the slow pair — attention stays nearly flat. Then use the sliders to create your own mix and watch how the attention-vs-distance curve changes shape.
-</RoPEDistanceSensitivityWidget>
+<RoPEMultiSpeedWidget>
+The first three tabs show how zeroing out fast pairs widens the attention window — from a sharp spike to a broad spread. "Sharper medium" shows you can change the *shape* of the curve without changing its range. "Two-stage dropoff" combines fast and slow pairs for a quick initial drop followed by a long steady floor. Try adjusting the sliders yourself to create new shapes.
+</RoPEMultiSpeedWidget>
 
 ## You Don't Need to Double the Dimensions
 
 You might worry: splitting each dimension into x/y means we need *twice* as many dimensions. But in practice, models don't add new dimensions — they **pair up adjacent existing dimensions**. A 128-dimensional head vector becomes 64 pairs: dimensions 1 and 2 form the first pair, 3 and 4 the second, and so on. Each pair is treated as the x and y coordinates of a 2D point and rotated together.
 
-This works because rotation preserves the *length* of each pair (√(x² + y²) stays the same) while changing its *direction*. No information is destroyed — it's just rearranged. The model learns during training how to organize information into pairs that work well with their assigned rotation speeds.
+This works because rotation preserves the *length* of each pair (√(x² + y²) stays the same) while changing its *direction*. No information is destroyed — it's just rearranged. There is a subtle cost, though: a content vector at one position could, after rotation, look like a completely different content vector at another position. The model has to learn representations that avoid these collisions — but with 64 dimension pairs all rotating at different speeds, two unrelated vectors would have to match across *all* pairs simultaneously, which is extremely unlikely. In practice, training finds good representations without difficulty.
 
-<KeyInsight>
-The dot product of two vectors equals |A| · |B| · cos(θ). Content lives in the magnitudes |A| and |B| — how "noun-like" or "filler-like" a token is. Position lives in the angle θ between them. Rotation changes the angle without touching the magnitudes, so **content and position information stay cleanly separated.**
-</KeyInsight>
+## What about Direction?
 
-## Does Rotation Tell Us Direction?
+You might notice something: The dot product between two rotated vectors is the same whether word A is 3 positions *before* or 3 positions *after* word B. RoPE encodes *distance* but not *direction*.
 
-You might notice something: cos(θ) = cos(−θ). The dot product between two rotated vectors is the same whether word A is 3 positions *before* or 3 positions *after* word B. Rotation encodes *distance* but not *direction*.
+This turns out to be fine. As we'll see in the next chapter, real language models have another mechanism for direction **causal masking** that allows a token to only attend to tokens that came *before* it. RoPE handles "how far apart," and causal masking handles "which direction."
 
-This turns out to be fine. Language models already have a mechanism for direction: **causal masking**. During generation, each token can only attend to tokens that came *before* it — future positions are masked to −∞ before softmax, so they get zero attention weight. RoPE handles "how far apart," and causal masking handles "which direction."
 
-## Scaling to Huge Context Windows
+## Words in Order
 
-RoPE's base rotation speed is controlled by a parameter θ\_base, typically 10,000. This means the slowest-rotating dimension pair completes one full revolution over roughly 10,000 positions. Beyond that, positions start to become ambiguous — similar to how a 12-hour clock can't distinguish AM from PM.
+We started with a problem: attention couldn't tell "the dog bit the man" from "the man bit the dog." The words were floating in a bag with no order. Now, by rotating each word's vector based on its position, the model can tell how far apart two words are — and each word gets to decide for itself whether to focus on its close neighbors, scan the whole sentence, or anything in between.
 
-To support longer contexts, techniques like **YaRN** and **NTK-aware scaling** stretch the rotation frequencies so that the slow pairs rotate even more slowly. It's like adding an even slower "day hand" to the clock — now you can tell apart any two times across an entire day, not just within 12 hours.
-
-This isn't free: stretching frequencies spreads out the angular resolution, so the model needs fine-tuning to adapt. But it works remarkably well in practice. This is how Llama 3.1 handles 128K tokens and how Gemini extends to over a million.
-
-## What We've Built
-
-Position encoding solves attention's blind spot. We covered two approaches:
-
-1. **ALiBi** — subtract a linear distance penalty from attention scores. Simple, but the penalty is per-head: every query in the head gets the same distance curve.
-2. **RoPE** — rotate query and key vectors by position-dependent angles across pairs of dimensions. Each query naturally controls its own distance sensitivity through the distribution of signal across fast and slow pairs.
-
-RoPE is used by virtually every frontier model today, and its elegant geometry — encoding position through rotation, with different dimension pairs at different frequencies — is why modern language models can handle context windows of over a million tokens.
-
-In the next chapter, we'll wire attention (now with position awareness) together with feed-forward neural networks to build the **transformer** — the architecture behind ChatGPT, Claude, and every modern language model.
+Attention now knows three things: what each word *means* (from embeddings), which other words *matter* (from attention scores), and where each word *is* (from rotation). In the next chapter, we'll put all of these pieces together to build the **transformer** — the architecture behind ChatGPT, Claude, and every modern language model.

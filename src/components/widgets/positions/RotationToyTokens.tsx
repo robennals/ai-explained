@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
 import { SliderControl } from "../shared/SliderControl";
+import { VectorCard } from "../vectors/VectorCard";
 
 /* ------------------------------------------------------------------ */
 /*  Data — same toy tokens as ALiBiToyTokens                          */
@@ -50,10 +51,6 @@ const SENTENCES: Sentence[] = [
 /*  Math                                                              */
 /* ------------------------------------------------------------------ */
 
-/**
- * We take the 1D key/query value, treat it as the x-component of a 2D
- * vector (x, 0), rotate by the given angle, then compute a 2D dot product.
- */
 function rotateScalar(value: number, angleDeg: number): [number, number] {
   const rad = (angleDeg * Math.PI) / 180;
   return [value * Math.cos(rad), value * Math.sin(rad)];
@@ -105,12 +102,149 @@ interface Arrow {
 }
 
 /* ------------------------------------------------------------------ */
+/*  Mini rotation circle                                               */
+/* ------------------------------------------------------------------ */
+
+function RotationCircle({
+  vecA,
+  vecB,
+  angleBetween,
+  colorA,
+  colorB,
+  labelA,
+  labelB,
+}: {
+  vecA: [number, number];
+  vecB: [number, number];
+  angleBetween: number;
+  colorA: string;
+  colorB: string;
+  labelA: string;
+  labelB: string;
+}) {
+  const size = 160;
+  const cx = size / 2;
+  const cy = size / 2;
+  const r = 55;
+
+  // Scale vectors to fit the circle, preserving relative lengths
+  const lenA = Math.sqrt(vecA[0] * vecA[0] + vecA[1] * vecA[1]);
+  const lenB = Math.sqrt(vecB[0] * vecB[0] + vecB[1] * vecB[1]);
+  const maxLen = Math.max(lenA, lenB, 0.001);
+  const scaleA = lenA / maxLen;
+  const scaleB = lenB / maxLen;
+  const dirA: [number, number] = lenA > 0 ? [vecA[0] / lenA, vecA[1] / lenA] : [1, 0];
+  const dirB: [number, number] = lenB > 0 ? [vecB[0] / lenB, vecB[1] / lenB] : [1, 0];
+
+  const aEndX = cx + dirA[0] * r * scaleA;
+  const aEndY = cy - dirA[1] * r * scaleA;
+  const bEndX = cx + dirB[0] * r * scaleB;
+  const bEndY = cy - dirB[1] * r * scaleB;
+
+  const bothNonZero = lenA > 0.01 && lenB > 0.01;
+
+  // Arc between vectors (only when both are non-zero)
+  const arcR = 25;
+  const angleA_rad = Math.atan2(dirA[1], dirA[0]);
+  const angleB_rad = Math.atan2(dirB[1], dirB[0]);
+  const arcStartX = cx + Math.cos(-angleA_rad) * arcR;
+  const arcStartY = cy + Math.sin(-angleA_rad) * arcR;
+  const arcEndX = cx + Math.cos(-angleB_rad) * arcR;
+  const arcEndY = cy + Math.sin(-angleB_rad) * arcR;
+  const absDiff = Math.abs(angleBetween);
+  const largeArc = absDiff > 180 ? 1 : 0;
+  const sweep = angleBetween >= 0 ? 0 : 1;
+
+  const dotProduct = dot2(vecA, vecB);
+
+  return (
+    <div className="flex flex-col items-center gap-1">
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="shrink-0">
+        {/* Unit circle */}
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke="currentColor" strokeWidth={1} opacity={0.1} />
+
+        {/* Arc — only when both vectors are non-zero */}
+        {bothNonZero && absDiff > 0.5 && (
+          <>
+            <path
+              d={`M ${arcStartX} ${arcStartY} A ${arcR} ${arcR} 0 ${largeArc} ${sweep} ${arcEndX} ${arcEndY}`}
+              fill="none"
+              stroke="#f59e0b"
+              strokeWidth={2}
+              opacity={0.6}
+            />
+            <text
+              x={cx + Math.cos(-(angleA_rad + angleB_rad) / 2) * (arcR + 12)}
+              y={cy + Math.sin(-(angleA_rad + angleB_rad) / 2) * (arcR + 12)}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              fontSize={10}
+              fill="#f59e0b"
+              fontWeight="bold"
+            >
+              {Math.round(absDiff)}°
+            </text>
+          </>
+        )}
+
+        <defs>
+          <marker id="rot-mini-a" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill={colorA} />
+          </marker>
+          <marker id="rot-mini-b" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill={colorB} />
+          </marker>
+        </defs>
+
+        {/* Vector A */}
+        <line x1={cx} y1={cy} x2={aEndX} y2={aEndY} stroke={colorA} strokeWidth={2.5} markerEnd={scaleA > 0.05 ? "url(#rot-mini-a)" : undefined} />
+        {scaleA < 0.05 && <circle cx={cx} cy={cy} r={4} fill={colorA} opacity={0.5} />}
+        <text
+          x={scaleA > 0.05 ? cx + dirA[0] * (r * scaleA + 14) : cx + 14}
+          y={scaleA > 0.05 ? cy - dirA[1] * (r * scaleA + 14) : cy - 14}
+          textAnchor="middle"
+          dominantBaseline="middle"
+          fontSize={10}
+          fontWeight="bold"
+          fill={colorA}
+        >
+          {labelA}
+        </text>
+
+        {/* Vector B */}
+        <line x1={cx} y1={cy} x2={bEndX} y2={bEndY} stroke={colorB} strokeWidth={2.5} markerEnd={scaleB > 0.05 ? "url(#rot-mini-b)" : undefined} />
+        {scaleB < 0.05 && <circle cx={cx} cy={cy} r={4} fill={colorB} opacity={0.5} />}
+        <text
+          x={scaleB > 0.05 ? cx + dirB[0] * (r * scaleB + 14) : cx - 14}
+          y={scaleB > 0.05 ? cy - dirB[1] * (r * scaleB + 14) : cy + 14}
+          textAnchor="middle"
+          dominantBaseline="middle"
+          fontSize={10}
+          fontWeight="bold"
+          fill={colorB}
+        >
+          {labelB}
+        </text>
+
+        {/* Origin */}
+        <circle cx={cx} cy={cy} r={2} fill="currentColor" opacity={0.3} />
+      </svg>
+      <div className="text-center">
+        <span className="text-[10px] text-muted">dot product = </span>
+        <span className="font-mono text-sm font-bold text-accent">{dotProduct.toFixed(2)}</span>
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /*  Component                                                         */
 /* ------------------------------------------------------------------ */
 
 export function RotationToyTokens() {
   const [sentIdx, setSentIdx] = useState(0);
   const [degPerPos, setDegPerPos] = useState(15);
+  const [selectedToken, setSelectedToken] = useState<number | null>(null);
   const [arrows, setArrows] = useState<Arrow[]>([]);
 
   const rowRef = useRef<HTMLDivElement>(null);
@@ -119,20 +253,48 @@ export function RotationToyTokens() {
   const sentence = SENTENCES[sentIdx];
   const tokens = sentence.tokens;
   const itIdx = tokens.length - 1;
-  const selected = itIdx;
+
+  // Find the default selected token (first noun) when sentence changes
+  const firstNounIdx = useMemo(() => {
+    return tokens.findIndex((t) => t.label === "dog" || t.label === "cat");
+  }, [tokens]);
+
+  // Use explicit selection, or default to first noun
+  const activeSelection = selectedToken !== null && selectedToken < tokens.length
+    ? selectedToken
+    : firstNounIdx;
+
+  const isNoun = (t: Token) => t.label === "cat" || t.label === "dog";
+  const isClickable = (t: Token) => t.label !== "it";
 
   const handleReset = useCallback(() => {
     setSentIdx(0);
     setDegPerPos(15);
+    setSelectedToken(null);
   }, []);
 
+  const handleSentenceChange = (idx: number) => {
+    setSentIdx(idx);
+    setSelectedToken(null); // reset to default for new sentence
+  };
+
   // Compute rotated dot products and attention weights
-  const itQuery = rotateScalar(tokens[selected].query[0], selected * degPerPos);
+  const itQuery = rotateScalar(tokens[itIdx].query[0], itIdx * degPerPos);
   const rawScores = tokens.map((t, i) => {
     const rotatedKey = rotateScalar(t.key[0], i * degPerPos);
     return dot2(itQuery, rotatedKey);
   });
   const weights = softmax(rawScores);
+
+  // Rotated vectors for the detail view
+  const itRotated = itQuery;
+  const selectedRotated = activeSelection >= 0
+    ? rotateScalar(tokens[activeSelection].key[0], activeSelection * degPerPos)
+    : null;
+
+  const angleBetween = activeSelection >= 0
+    ? (itIdx - activeSelection) * degPerPos
+    : 0;
 
   // Measure card positions and compute arrows
   useEffect(() => {
@@ -140,7 +302,7 @@ export function RotationToyTokens() {
       const row = rowRef.current;
       if (!row) return;
       const rowRect = row.getBoundingClientRect();
-      const fromEl = cardRefs.current.get(selected);
+      const fromEl = cardRefs.current.get(itIdx);
       if (!fromEl) { setArrows([]); return; }
 
       const fromRect = fromEl.getBoundingClientRect();
@@ -149,7 +311,7 @@ export function RotationToyTokens() {
 
       const newArrows: Arrow[] = [];
       for (let i = 0; i < tokens.length; i++) {
-        if (i === selected) continue;
+        if (i === itIdx) continue;
         const w = weights[i];
         if (w < 0.01) continue;
         const toEl = cardRefs.current.get(i);
@@ -166,14 +328,24 @@ export function RotationToyTokens() {
     });
 
     return () => cancelAnimationFrame(raf);
-  }, [selected, weights, sentIdx, tokens]);
+  }, [itIdx, weights, sentIdx, tokens]);
 
   const arcPad = 50;
+
+  // Colors for the detail view
+  const itColor = "#9333ea"; // purple
+  const selectedColor = activeSelection >= 0
+    ? tokens[activeSelection].label === "dog"
+      ? "#2563eb" // blue
+      : tokens[activeSelection].label === "cat"
+      ? "#d97706" // amber
+      : "#6b7280" // gray for bla
+    : "#6b7280";
 
   return (
     <WidgetContainer
       title="Rotation Applied to a Dimension"
-      description="One dimension gets split into x/y and rotated by position. Drag the speed to see distance-based attention emerge."
+      description="One dimension gets split into x/y and rotated by position. Click a noun to inspect its rotated vector."
       onReset={handleReset}
     >
       <div className="flex flex-col gap-5">
@@ -182,7 +354,7 @@ export function RotationToyTokens() {
           {SENTENCES.map((s, i) => (
             <button
               key={i}
-              onClick={() => setSentIdx(i)}
+              onClick={() => handleSentenceChange(i)}
               className={`rounded-full px-3 py-1 font-mono text-xs font-medium transition-colors ${
                 i === sentIdx
                   ? "bg-accent text-white"
@@ -203,7 +375,7 @@ export function RotationToyTokens() {
             label=""
             value={degPerPos}
             min={0}
-            max={45}
+            max={25}
             step={1}
             onChange={setDegPerPos}
             formatValue={(v) => `${v}°`}
@@ -263,11 +435,12 @@ export function RotationToyTokens() {
             {/* Token cards */}
             <div className="flex justify-center gap-1.5" style={{ paddingTop: `${arcPad + 8}px` }}>
             {tokens.map((tok, i) => {
-              const isSelected = i === selected;
+              const isIt = i === itIdx;
+              const isActive = i === activeSelection;
               const weight = weights[i];
-              const isTarget = weight > 0.01 && !isSelected;
+              const isTarget = weight > 0.01 && !isIt;
               const angleDiff = Math.abs((itIdx - i) * degPerPos);
-              const isNoun = tok.label === "cat" || tok.label === "dog";
+              const clickable = isClickable(tok);
 
               return (
                 <div key={`${sentIdx}-${i}`} className="flex flex-col items-center" style={{ width: 56 }}>
@@ -277,9 +450,22 @@ export function RotationToyTokens() {
                       if (el) cardRefs.current.set(i, el);
                       else cardRefs.current.delete(i);
                     }}
+                    role={clickable ? "button" : undefined}
+                    tabIndex={clickable ? 0 : undefined}
+                    onClick={clickable ? () => setSelectedToken(i) : undefined}
+                    onKeyDown={clickable ? (e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setSelectedToken(i);
+                      }
+                    } : undefined}
                     className={`rounded-md border px-2 py-1 ${
-                      isSelected
+                      isIt
                         ? "ring-2 ring-accent ring-offset-1 border-border bg-surface"
+                        : isActive
+                        ? "ring-2 ring-amber-500 ring-offset-1 border-border bg-surface"
+                        : clickable
+                        ? "border-border bg-surface cursor-pointer hover:border-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/20"
                         : "border-border bg-surface"
                     }`}
                   >
@@ -288,14 +474,14 @@ export function RotationToyTokens() {
 
                   {/* Compact info below the token */}
                   <div className="mt-1 flex flex-col items-center gap-0.5">
-                    {isSelected ? (
+                    {isIt ? (
                       <span className="text-[9px] font-bold text-accent uppercase">query</span>
                     ) : (
                       <>
                         <span className="text-[9px] text-muted">
                           rot {(i * degPerPos)}°
                         </span>
-                        {degPerPos > 0 && isNoun && (
+                        {degPerPos > 0 && isNoun(tok) && (
                           <span className="text-[9px] text-amber-600 dark:text-amber-400">
                             Δ{angleDiff}°
                           </span>
@@ -311,7 +497,7 @@ export function RotationToyTokens() {
                         {pct(weight)}
                       </span>
                     ) : (
-                      <span className={`font-mono text-[9px] font-bold ${isSelected ? "text-accent" : "text-muted"}`}>
+                      <span className={`font-mono text-[9px] font-bold ${isIt ? "text-accent" : "text-muted"}`}>
                         {pct(weight)}
                       </span>
                     )}
@@ -322,6 +508,54 @@ export function RotationToyTokens() {
           </div>
           </div>
         </div>
+
+        {/* Detail view: vector cards + rotation circle */}
+        {activeSelection >= 0 && selectedRotated && (
+          <div className="rounded-lg border border-border bg-surface/50 p-4">
+            <div className="mb-3 text-[10px] font-bold uppercase tracking-wider text-muted">
+              Rotated vectors — &ldquo;{tokens[activeSelection].label}&rdquo; key vs &ldquo;it&rdquo; query
+            </div>
+            <div className="flex flex-wrap items-start justify-center gap-4">
+              <VectorCard
+                name={`"${tokens[activeSelection].label}" at pos ${activeSelection}`}
+                emoji=""
+                properties={["noun-x", "noun-y"]}
+                values={[selectedRotated[0], selectedRotated[1]]}
+                barColor={selectedColor}
+                label="key"
+                labelColor={selectedColor}
+                signed
+                signedMax={S}
+                className="text-xs w-40"
+                labelWidth="w-12"
+              />
+
+              <RotationCircle
+                vecA={selectedRotated}
+                vecB={itRotated}
+                angleBetween={-angleBetween}
+                colorA={selectedColor}
+                colorB={itColor}
+                labelA={tokens[activeSelection].label}
+                labelB="it"
+              />
+
+              <VectorCard
+                name={`"it" at pos ${itIdx}`}
+                emoji=""
+                properties={["noun-x", "noun-y"]}
+                values={[itRotated[0], itRotated[1]]}
+                barColor={itColor}
+                label="query"
+                labelColor={itColor}
+                signed
+                signedMax={S}
+                className="text-xs w-40"
+                labelWidth="w-12"
+              />
+            </div>
+          </div>
+        )}
       </div>
     </WidgetContainer>
   );
