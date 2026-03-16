@@ -14,6 +14,7 @@ import {
   PatternAttentionWidget,
   AttentionStepThroughWidget,
   MultiHeadWidget,
+  QKVProjectionWidget,
 } from "./widgets";
 
 export const metadata = {
@@ -42,6 +43,7 @@ export default function Chapter07() {
             PatternAttentionWidget,
             AttentionStepThroughWidget,
             MultiHeadWidget,
+            QKVProjectionWidget,
           }}
         />
       </div>
