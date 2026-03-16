@@ -2,9 +2,14 @@ import { ChapterNav } from "@/components/layout/ChapterNav";
 import { getAdjacentChapters } from "@/lib/curriculum";
 import Content from "./content.mdx";
 import {
-  ToyTransformerWidget,
-  StoryTransformerWidget,
-  StoryGeneratorWidget,
+  TransformerBlockDiagramWidget,
+  ResidualConnectionWidget,
+  LayerNormWidget,
+  MicroTransformerWidget,
+  DepthComparisonWidget,
+  LiveTransformerWidget,
+  TransformerXRayWidget,
+  PrefixAttentionWidget,
 } from "./widgets";
 
 export const metadata = {
@@ -13,7 +18,7 @@ export const metadata = {
     "The transformer wires attention and neural networks together. Trained to predict the next word, it learns grammar and common sense from nothing but prediction.",
 };
 
-export default function Chapter08() {
+export default function Chapter09() {
   const { prev, next } = getAdjacentChapters("transformers");
 
   return (
@@ -21,9 +26,14 @@ export default function Chapter08() {
       <div className="prose prose-lg max-w-none">
         <Content
           components={{
-            ToyTransformerWidget,
-            StoryTransformerWidget,
-            StoryGeneratorWidget,
+            TransformerBlockDiagramWidget,
+            ResidualConnectionWidget,
+            LayerNormWidget,
+            MicroTransformerWidget,
+            DepthComparisonWidget,
+            LiveTransformerWidget,
+            TransformerXRayWidget,
+            PrefixAttentionWidget,
           }}
         />
       </div>
