@@ -16,27 +16,29 @@ Click any box in the diagram, or hit Next Block to step through. The grey box is
 
 ## Add Residual
 
-We want to stack many transformer blocks — GPT-3 stacks 96 of them. But there's a problem: every time information passes through a block, it gets changed. After dozens of blocks, the original meaning can get completely lost. It's like a game of telephone — each person changes the message a little, and by the end it's nonsense.
+Each time we run a round of attention, we discover new, more abstract ways of representing a word. The first layer might figure out "this is a noun." The next might figure out "this noun is the subject of the sentence." The layer after that might figure out "this subject is a character in a story."
 
-The fix is a **residual connection** (the red paths in the diagram that skip around each step). Instead of *replacing* the input with the output, you *add* the output to the input:
+But here's the thing — the earlier, simpler information is still useful! Later layers might need to know "this is a noun" just as much as "this is a character." If each layer just *replaced* the old representation with a new one, all that earlier work would be lost.
 
-**output = input + what the layer computed**
+The solution is the **residual connection** (the red paths in the diagram). Instead of replacing the old representation, we **add the new one on top of it**:
 
-This way, the original information always makes it through untouched. Each block only needs to figure out a small improvement to add on top. It's like a highway bypass around a small town — even if the detour through town is confusing, the highway carries the original signal through safely.
+**new representation = old representation + what this layer figured out**
+
+This way, every layer's discoveries accumulate. The vector for a word keeps everything the earlier layers learned, plus whatever new thing this layer added. Nothing gets thrown away.
+
+The model can also control how much each layer matters. If a layer produces a new representation with large numbers, it will have a big effect. If the numbers are small, the old representation stays mostly unchanged. This lets the model learn to make big changes when it needs to and small tweaks when it doesn't.
 
 <ResidualConnectionWidget>
-Watch what happens to a signal as it passes through many layers. Without residual connections, it turns to mush. With them, the original stays clear and each layer adds useful improvements. Try cranking the layers up to 20 or more.
+Watch what happens to a signal as it passes through many layers. Without residual connections, earlier information gets lost. With them, each layer's contribution accumulates. Try cranking the layers up to 20 or more.
 </ResidualConnectionWidget>
-
-<Callout type="info" title="A team of editors">
-Imagine editing a document. Without residual connections, each editor rewrites the entire thing from scratch — after 96 rewrites, nothing remains of the original. With residual connections, each editor just adds notes and corrections to the same document. The original is always there, getting better with each pass.
-</Callout>
 
 ## Layer Normalization
 
-After each residual add step, the numbers in our vectors can start to drift. Some might grow huge (in the thousands), while others shrink close to zero. This makes it really hard for the next layer to do its job — the numbers are all over the place.
+There's a practical problem with adding things together over and over: the numbers keep getting bigger. After dozens of layers of additions, the values in our vectors can grow enormous. This makes it hard for the next layer to do its job — the numbers are all over the place.
 
-**Layer normalization** fixes this by rescaling the numbers after each step. It shifts them so their average is 0, and stretches or squishes them so their spread is about 1. Think of it like an automatic volume knob on a microphone — no matter how loud or quiet the speaker is, the output always comes out at a comfortable level.
+**Layer normalization** fixes this. After each addition step, it rescales the numbers so their average is 0 and their spread is about 1. The relative pattern is preserved — which dimensions are bigger and which are smaller stays the same — but the overall scale is reset to something manageable.
+
+Think of it like adjusting the volume after each layer. Each layer can add its contribution at whatever scale makes sense for learning, and then layer normalization brings everything back to a comfortable level before the next layer starts.
 
 <LayerNormWidget>
 Try pushing values to extremes and watch layer normalization snap them back to a reasonable range. Then see what happens when you stack layers without it — the numbers quickly explode or collapse.
