@@ -76,6 +76,14 @@ const RoPEMultiSpeed = dynamic(
   { ssr: false }
 );
 
+const CausalMasking = dynamic(
+  () =>
+    import("@/components/widgets/positions/CausalMasking").then(
+      (m) => m.CausalMasking
+    ),
+  { ssr: false }
+);
+
 function WidgetSlot({ children, tryIt, label }: { children: React.ReactNode; tryIt?: React.ReactNode; label?: string }) {
   return (
     <Suspense
@@ -160,6 +168,14 @@ export function RoPEMultiSpeedWidget({ children }: { children?: React.ReactNode 
   return (
     <WidgetSlot tryIt={children}>
       <RoPEMultiSpeed />
+    </WidgetSlot>
+  );
+}
+
+export function CausalMaskingWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <CausalMasking />
     </WidgetSlot>
   );
 }

@@ -90,11 +90,21 @@ You might worry: splitting each dimension into x/y means we need *twice* as many
 
 This works because rotation preserves the *length* of each pair (√(x² + y²) stays the same) while changing its *direction*. No information is destroyed — it's just rearranged. There is a subtle cost, though: a content vector at one position could, after rotation, look like a completely different content vector at another position. The model has to learn representations that avoid these collisions — but with 64 dimension pairs all rotating at different speeds, two unrelated vectors would have to match across *all* pairs simultaneously, which is extremely unlikely. In practice, training finds good representations without difficulty.
 
-## What about Direction?
+## Causal Masking: Only Look Backward
 
-You might notice something: The dot product between two rotated vectors is the same whether word A is 3 positions *before* or 3 positions *after* word B. RoPE encodes *distance* but not *direction*.
+You might notice something: the dot product between two rotated vectors is the same whether word A is 3 positions *before* or 3 positions *after* word B. RoPE encodes *distance* but not *direction*.
 
-This turns out to be fine. As we'll see in the next chapter, real language models have another mechanism for direction **causal masking** that allows a token to only attend to tokens that came *before* it. RoPE handles "how far apart," and causal masking handles "which direction."
+This turns out to be fine, because generative language models have another mechanism called **causal masking** that handles direction for us.
+
+Think about how a [language model generates text](/next-word-prediction): it produces one token at a time, each one based on the tokens that came before. When the model generates the word "dragon," the words that will come *after* "dragon" don't exist yet — they haven't been generated. So each token can only attend to tokens at earlier positions. Future tokens are **masked out** — their attention scores are set to negative infinity so they contribute zero attention weight.
+
+This is called "causal" masking because it enforces a causal relationship: earlier tokens can influence later ones, but not the other way around. It's the same idea as not being able to see the future — each token only has access to its past.
+
+<CausalMaskingWidget>
+Click "Generate" to watch tokens appear one at a time. Notice how the attention matrix is triangular — each row only has values in columns to its left. The upper-right triangle is all masked out. Click any generated token to see its attention pattern.
+</CausalMaskingWidget>
+
+This solves the direction problem neatly. RoPE tells the model *how far apart* two tokens are, and causal masking ensures a token only ever attends *backward*. Together, they give the model a complete sense of position.
 
 
 ## Words in Order

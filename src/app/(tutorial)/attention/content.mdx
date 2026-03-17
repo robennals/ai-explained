@@ -101,6 +101,18 @@ Real attention models use **multiple attention heads** — each with its own key
 Multiple attention heads let the model ask many different questions in parallel. Each head has its own key, query, and value weights, so each learns to attend to a different kind of relationship — pronouns, grammar, structure, semantics. **The model doesn't need to choose one kind of attention; it gets all of them at once.**
 </KeyInsight>
 
+## Where the Vectors Come From
+
+We've been talking about query, key, and value vectors — but where do they actually come from? The answer is surprisingly simple: **a single-layer neural network**, just like we saw in earlier chapters.
+
+Each token starts as an embedding vector. To get the query, key, and value vectors, we feed that embedding through three separate single-layer networks — one for each vector. Each network takes the embedding as input and computes a weighted sum for each output, just like the neurons we saw before. The only difference is there's *no activation function* — just the weighted sums, nothing else.
+
+<QKVProjectionWidget>
+Click different tokens to see how the same three networks produce different Q, K, V vectors for each token. Notice that "cat" and "dog" (similar embeddings) produce similar outputs, while "it" (very different embedding) produces very different vectors. Use the Focus buttons to highlight one network at a time — each has its own set of weighted connections. Thicker lines mean larger weights; dashed lines mean negative weights.
+</QKVProjectionWidget>
+
+In a model with multiple attention heads, each head gets its own set of three networks with their own weights, so each head translates the same embedding into its own private Q, K, V vectors — this is how different heads learn to look for different things.
+
 ## What We've Built
 
 Let's take stock. Attention is:
