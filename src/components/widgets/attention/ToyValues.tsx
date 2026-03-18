@@ -40,9 +40,9 @@ const IT: Token = {
 };
 
 const SENTENCES: Sentence[] = [
-  { label: "cat blahblahit", tokens: [CAT, BLA, BLA, IT] },
-  { label: "blahdog blahit", tokens: [BLA, DOG, BLA, IT] },
-  { label: "blahblahcat it", tokens: [BLA, BLA, CAT, IT] },
+  { label: "cat blah blah it", tokens: [CAT, BLA, BLA, IT] },
+  { label: "blah dog blah it", tokens: [BLA, DOG, BLA, IT] },
+  { label: "blah blah cat it", tokens: [BLA, BLA, CAT, IT] },
 ];
 
 /* ------------------------------------------------------------------ */

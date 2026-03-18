@@ -41,10 +41,10 @@ const IT: Token = {
 };
 
 const SENTENCES: Sentence[] = [
-  { label: "dog blahblahblahcat blahit", tokens: [DOG, BLA, BLA, BLA, CAT, BLA, IT] },
-  { label: "cat blahblahblahdog blahit", tokens: [CAT, BLA, BLA, BLA, DOG, BLA, IT] },
-  { label: "dog blahcat blahit", tokens: [DOG, BLA, CAT, BLA, IT] },
-  { label: "cat blahblahblahblahdog blahblahit", tokens: [CAT, BLA, BLA, BLA, BLA, DOG, BLA, BLA, IT] },
+  { label: "dog blah blah blah cat blah it", tokens: [DOG, BLA, BLA, BLA, CAT, BLA, IT] },
+  { label: "cat blah blah blah dog blah it", tokens: [CAT, BLA, BLA, BLA, DOG, BLA, IT] },
+  { label: "dog blah cat blah it", tokens: [DOG, BLA, CAT, BLA, IT] },
+  { label: "cat blah blah blah blah dog blah blah it", tokens: [CAT, BLA, BLA, BLA, BLA, DOG, BLA, BLA, IT] },
 ];
 
 /* ------------------------------------------------------------------ */

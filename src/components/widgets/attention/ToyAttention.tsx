@@ -42,10 +42,10 @@ const IT: Token = {
 const KEY_QUERY_PROPS = ["noun"];
 
 const SENTENCES: Sentence[] = [
-  { label: "cat blahblahit", tokens: [CAT, BLA, BLA, IT] },
-  { label: "blahdog blahit", tokens: [BLA, DOG, BLA, IT] },
-  { label: "cat blahdog it", tokens: [CAT, BLA, DOG, IT] },
-  { label: "blahblahblahit", tokens: [BLA, BLA, BLA, IT] },
+  { label: "cat blah blah it", tokens: [CAT, BLA, BLA, IT] },
+  { label: "blah dog blah it", tokens: [BLA, DOG, BLA, IT] },
+  { label: "cat blah dog it", tokens: [CAT, BLA, DOG, IT] },
+  { label: "blah blah blah it", tokens: [BLA, BLA, BLA, IT] },
   { label: "cat it dog it", tokens: [CAT, IT, DOG, IT] },
 ];
 

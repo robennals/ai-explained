@@ -48,10 +48,10 @@ interface Sentence {
 }
 
 const SENTENCES: Sentence[] = [
-  { label: "dog blahcat it", tokens: [DOG, BLA, CAT, IT] },
-  { label: "cat blahdog it", tokens: [CAT, BLA, DOG, IT] },
-  { label: "dog cat blahit", tokens: [DOG, CAT, BLA, IT] },
-  { label: "blahdog cat it", tokens: [BLA, DOG, CAT, IT] },
+  { label: "dog blah cat it", tokens: [DOG, BLA, CAT, IT] },
+  { label: "cat blah dog it", tokens: [CAT, BLA, DOG, IT] },
+  { label: "dog cat blah it", tokens: [DOG, CAT, BLA, IT] },
+  { label: "blah dog cat it", tokens: [BLA, DOG, CAT, IT] },
 ];
 
 /* ------------------------------------------------------------------ */
