@@ -18,7 +18,7 @@ const TOKENS = [
     color: "#2563eb",
   },
   {
-    label: "bla",
+    label: "blah",
     emoji: "💬",
     value: [0, 0],
     footer: "I don't provide anything",

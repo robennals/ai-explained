@@ -22,7 +22,7 @@ const TOKENS = [
     color: "#2563eb",
   },
   {
-    label: "bla",
+    label: "blah",
     emoji: "💬",
     key: [0],
     query: [0],
@@ -70,7 +70,7 @@ export function ToyVocabTable() {
           {/* Cards */}
           <div className="grid grid-cols-2 gap-3 flex-1 min-w-0 items-start">
             <VectorCard
-              name={`${tok.label} key`}
+              name={`key for "${tok.label}"`}
               emoji=""
               properties={KEY_QUERY_PROPS}
               values={tok.key}
@@ -83,7 +83,7 @@ export function ToyVocabTable() {
               footer={tok.keyMeaning}
             />
             <VectorCard
-              name={`${tok.label} query`}
+              name={`query for "${tok.label}"`}
               emoji=""
               properties={KEY_QUERY_PROPS}
               values={tok.query}

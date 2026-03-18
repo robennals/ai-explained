@@ -68,7 +68,7 @@ function isConnectionHighlighted(sel: Selection | null, groupId: string, outputI
 /*  SVG diagram                                                        */
 /* ------------------------------------------------------------------ */
 
-const SVG_W = 520;
+const SVG_W = 540;
 const SVG_H = 310;
 
 function ProjectionDiagram({
@@ -86,7 +86,7 @@ function ProjectionDiagram({
   selected: Selection | null;
   onSelect: (s: Selection | null) => void;
 }) {
-  const inX = 65;
+  const inX = 100;
   const outX = 455;
 
   const inputDim = embedding.length;
@@ -210,7 +210,29 @@ function ProjectionDiagram({
           </g>
         );
       })}
-      <text x={inX} y={SVG_H - 2} textAnchor="middle" fontSize={9} fill="#6b7280">
+      {/* Group label to the left, matching the Query/Key/Value labels on the right */}
+      <text
+        x={inX - 24}
+        y={SVG_H / 2 + 4}
+        textAnchor="end"
+        fontSize={11}
+        fontWeight="bold"
+        fill={COLORS.emb}
+        opacity={hasSelection && selected?.kind === "output" ? 0.4 : 1}
+        style={{ transition: "opacity 0.2s" }}
+      >
+        Input
+      </text>
+      <text
+        x={inX - 24}
+        y={SVG_H / 2 + 16}
+        textAnchor="end"
+        fontSize={11}
+        fontWeight="bold"
+        fill={COLORS.emb}
+        opacity={hasSelection && selected?.kind === "output" ? 0.4 : 1}
+        style={{ transition: "opacity 0.2s" }}
+      >
         Embedding
       </text>
 

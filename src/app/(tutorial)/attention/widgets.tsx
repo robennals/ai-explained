@@ -231,7 +231,7 @@ export function BertAttentionWidget({ children }: { children?: React.ReactNode }
 export function BertAttentionNoPositionWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children} label="Explore it">
-      <BertAttention excludeHeads={["Next word", "Previous word", "Broad context"]} onlySentencesWithWord="it" />
+      <BertAttention excludeHeads={["Next word", "Previous word"]} />
     </WidgetSlot>
   );
 }
