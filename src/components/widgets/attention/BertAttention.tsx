@@ -258,20 +258,15 @@ export function BertAttention({ excludeHeads, onlySentencesWithWord }: { exclude
             return (
               <span key={`${sentIdx}-${headIdx}-${i}`} className="relative inline-flex flex-col items-center">
                 {/* Percentage above */}
-                {attnRow != null && !isSelected && weight >= 0.02 && (
+                {attnRow != null && weight >= 0.02 && (
                   <span
-                    className="mb-1 font-mono text-[10px] font-bold leading-none"
-                    style={{ color: weight > 0.3 ? "rgb(99, 102, 241)" : "var(--color-muted)" }}
+                    className={`mb-1 font-mono text-[10px] font-bold leading-none ${isSelected ? "text-accent" : ""}`}
+                    style={!isSelected ? { color: weight > 0.3 ? "rgb(99, 102, 241)" : "var(--color-muted)" } : undefined}
                   >
                     {Math.round(weight * 100)}%
                   </span>
                 )}
-                {isSelected && (
-                  <span className="mb-1 font-mono text-[10px] font-bold leading-none text-accent">
-                    query
-                  </span>
-                )}
-                {attnRow != null && !isSelected && weight < 0.02 && (
+                {attnRow != null && weight < 0.02 && (
                   <span className="mb-1 text-[10px] leading-none text-transparent">·</span>
                 )}
                 {attnRow == null && (

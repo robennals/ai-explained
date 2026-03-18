@@ -31,7 +31,7 @@ const DOG: Token = {
   color: "text-blue-600 dark:text-blue-400",
 };
 const BLA: Token = {
-  label: "bla", key: [0], query: [0],
+  label: "blah", key: [0], query: [0],
   color: "text-foreground/40",
 };
 const IT: Token = {
@@ -40,10 +40,10 @@ const IT: Token = {
 };
 
 const SENTENCES: Sentence[] = [
-  { label: "dog bla bla bla cat bla it", tokens: [DOG, BLA, BLA, BLA, CAT, BLA, IT] },
-  { label: "cat bla bla bla dog bla it", tokens: [CAT, BLA, BLA, BLA, DOG, BLA, IT] },
-  { label: "dog bla cat bla it", tokens: [DOG, BLA, CAT, BLA, IT] },
-  { label: "cat bla bla bla bla dog bla bla it", tokens: [CAT, BLA, BLA, BLA, BLA, DOG, BLA, BLA, IT] },
+  { label: "dog blahblahblahcat blahit", tokens: [DOG, BLA, BLA, BLA, CAT, BLA, IT] },
+  { label: "cat blahblahblahdog blahit", tokens: [CAT, BLA, BLA, BLA, DOG, BLA, IT] },
+  { label: "dog blahcat blahit", tokens: [DOG, BLA, CAT, BLA, IT] },
+  { label: "cat blahblahblahblahdog blahblahit", tokens: [CAT, BLA, BLA, BLA, BLA, DOG, BLA, BLA, IT] },
 ];
 
 /* ------------------------------------------------------------------ */
