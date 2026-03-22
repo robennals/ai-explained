@@ -8,6 +8,7 @@ import {
   DotProductComparisonWidget,
   NeuronDotProductWidget,
   AmplifiedAnimalExplorerWidget,
+  VectorMixerWidget,
   DirectionMagnitudeExplorerWidget,
 } from "./widgets";
 
@@ -31,6 +32,7 @@ export default function ChapterVectors() {
             DotProductComparisonWidget,
             NeuronDotProductWidget,
             AmplifiedAnimalExplorerWidget,
+            VectorMixerWidget,
             DirectionMagnitudeExplorerWidget,
           }}
         />

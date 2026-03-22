@@ -52,6 +52,14 @@ const AmplifiedAnimalExplorer = dynamic(
   { ssr: false }
 );
 
+const VectorMixer = dynamic(
+  () =>
+    import("@/components/widgets/vectors/VectorMixer").then(
+      (m) => m.VectorMixer
+    ),
+  { ssr: false }
+);
+
 const DirectionMagnitudeExplorer = dynamic(
   () =>
     import("@/components/widgets/vectors/DirectionMagnitudeExplorer").then(
@@ -120,6 +128,14 @@ export function AmplifiedAnimalExplorerWidget({ children }: { children?: React.R
   return (
     <WidgetSlot tryIt={children}>
       <AmplifiedAnimalExplorer />
+    </WidgetSlot>
+  );
+}
+
+export function VectorMixerWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <VectorMixer />
     </WidgetSlot>
   );
 }
