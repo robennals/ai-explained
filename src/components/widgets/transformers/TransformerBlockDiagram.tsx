@@ -1,0 +1,502 @@
+"use client";
+
+import { useState, useCallback } from "react";
+import { WidgetContainer } from "../shared/WidgetContainer";
+
+// ---------------------------------------------------------------------------
+// Data
+// ---------------------------------------------------------------------------
+
+interface ChapterLink {
+  label: string;
+  href: string;
+}
+
+interface BlockInfo {
+  id: string;
+  tabLabel: string;
+  diagramLabel: string;
+  description: string;
+  chapterLinks: ChapterLink[];
+  color: string;
+  border: string;
+}
+
+const BLOCKS: BlockInfo[] = [
+  {
+    id: "tokenization",
+    tabLabel: "Tokenization",
+    diagramLabel: "Tokenizer",
+    description:
+      "Splits raw text into tokens — subword chunks that the model can work with. Common words get their own token; rare words are assembled from pieces (e.g. \"unbreakable\" → \"un\", \"break\", \"able\").",
+    chapterLinks: [{ label: "Chapter 5: From Words to Meanings", href: "/embeddings" }],
+    color: "#e9d5ff",
+    border: "#9333ea",
+  },
+  {
+    id: "embedding",
+    tabLabel: "Embedding",
+    diagramLabel: "Token Embedding",
+    description:
+      "Looks up each token in a learned table and returns a vector (list of numbers) that captures its meaning. Similar words end up with similar vectors. This is the model's vocabulary of meanings.",
+    chapterLinks: [{ label: "Chapter 5: From Words to Meanings", href: "/embeddings" }],
+    color: "#d1fae5",
+    border: "#059669",
+  },
+  {
+    id: "attention",
+    tabLabel: "Attention",
+    diagramLabel: "Multi-Head Attention",
+    description:
+      "Each word looks at earlier words and gathers relevant context. First, a single layer of neurons (with no activation function) converts each word's embedding into query, key, and value vectors. Then attention uses these to figure out which words matter. A causal mask prevents each word from peeking at future words. Multiple heads run in parallel, each specializing in different patterns. This step also includes positional encoding (RoPE) so the model knows word order.",
+    chapterLinks: [
+      { label: "Chapter 7: Paying Attention", href: "/attention" },
+      { label: "Chapter 8: Where Am I?", href: "/positions" },
+    ],
+    color: "#fed7aa",
+    border: "#f97316",
+  },
+  {
+    id: "addresidual1",
+    tabLabel: "Add Residual",
+    diagramLabel: "Add Residual",
+    description:
+      "Adds the original input (from before attention) back to the attention output. This is the residual connection — a \"highway bypass\" that lets the original signal flow through unchanged. Each layer only needs to learn small corrections, not rebuild everything from scratch.",
+    chapterLinks: [],
+    color: "#fecaca",
+    border: "#dc2626",
+  },
+  {
+    id: "layernorm1",
+    tabLabel: "Layer Norm",
+    diagramLabel: "Layer Norm",
+    description:
+      "Rescales values so the average is 0 and the spread is 1, then lets the model adjust from there. Without this, values can drift after repeated transformations — some growing enormous, others shrinking to near-zero. Think of it as an automatic volume knob.",
+    chapterLinks: [],
+    color: "#fef08a",
+    border: "#ca8a04",
+  },
+  {
+    id: "feedforward",
+    tabLabel: "Feed Forward",
+    diagramLabel: "Feed-Forward Network",
+    description:
+      "A small 2-layer neural network that processes what attention gathered. If attention is \"collecting relevant information from other words,\" the feed-forward network is \"thinking about what it all means.\" It runs independently on each word position.",
+    chapterLinks: [{ label: "Chapter 3: Building a Brain", href: "/neurons" }],
+    color: "#bfdbfe",
+    border: "#3b82f6",
+  },
+  {
+    id: "addresidual2",
+    tabLabel: "Add Residual",
+    diagramLabel: "Add Residual",
+    description:
+      "Same as the first — adds the input (from before the feed-forward network) back to the output. Together, the two residual connections create a \"highway\" that the original information can always flow through, even across 96+ stacked blocks.",
+    chapterLinks: [],
+    color: "#fecaca",
+    border: "#dc2626",
+  },
+  {
+    id: "layernorm2",
+    tabLabel: "Layer Norm",
+    diagramLabel: "Layer Norm",
+    description:
+      "Another round of normalization after the feed-forward step. Keeps values stable before they flow into the next transformer block.",
+    chapterLinks: [],
+    color: "#fef08a",
+    border: "#ca8a04",
+  },
+  {
+    id: "stacking",
+    tabLabel: "× N Blocks",
+    diagramLabel: "More Transformer Blocks",
+    description:
+      "In practice, we stack many transformer blocks on top of each other — the output of one feeds into the next. GPT-2 uses 12 blocks, GPT-3 uses 96, and GPT-4 uses even more. Early blocks tend to learn grammar, middle blocks resolve references, and later blocks capture abstract meaning.",
+    chapterLinks: [],
+    color: "#f3f4f6",
+    border: "#9ca3af",
+  },
+  {
+    id: "output",
+    tabLabel: "Output",
+    diagramLabel: "Next Token Probabilities",
+    description:
+      "A linear layer converts each token's final representation into a score for every word in the vocabulary. Softmax turns these scores into probabilities — \"How likely is 'cat'? How likely is 'sat'?\" The highest-probability token is the model's prediction for what comes next.",
+    chapterLinks: [{ label: "Chapter 6: Understanding by Predicting", href: "/next-word-prediction" }],
+    color: "#fce7f3",
+    border: "#db2777",
+  },
+];
+
+const TRANSFORMER_BLOCK_IDS = new Set([
+  "attention",
+  "addresidual1",
+  "layernorm1",
+  "feedforward",
+  "addresidual2",
+  "layernorm2",
+]);
+
+// ---------------------------------------------------------------------------
+// SVG layout
+// ---------------------------------------------------------------------------
+
+const W = 420;
+const H = 810;
+const CX = 230;
+const BW = 210;
+const BH = 44;
+const ARR = "#888";
+const RX = 72;
+
+// Y positions bottom-to-top (output near top, text at bottom)
+const Y: Record<string, number> = {
+  text: 780,
+  tokenization: 725,
+  embedding: 665,
+  // -- transformer block --
+  attention: 560,
+  addresidual1: 500,
+  layernorm1: 440,
+  feedforward: 350,
+  addresidual2: 290,
+  layernorm2: 230,
+  // -- end block --
+  stacking: 120,
+  output: 35,
+};
+
+const TB_TOP = Y.layernorm2 - BH / 2 - 18;
+const TB_BOT = Y.attention + BH / 2 + 18;
+
+// ---------------------------------------------------------------------------
+// SVG primitives
+// ---------------------------------------------------------------------------
+
+function DiagramBox({
+  id,
+  cx,
+  cy,
+  w,
+  h,
+  label,
+  fill,
+  stroke,
+  selected,
+  onClick,
+}: {
+  id: string;
+  cx: number;
+  cy: number;
+  w: number;
+  h: number;
+  label: string;
+  fill: string;
+  stroke: string;
+  selected: boolean;
+  onClick: (id: string) => void;
+}) {
+  return (
+    <g onClick={() => onClick(id)} style={{ cursor: "pointer" }}>
+      <rect
+        x={cx - w / 2}
+        y={cy - h / 2}
+        width={w}
+        height={h}
+        rx={8}
+        fill={fill}
+        stroke={selected ? "#6366f1" : stroke}
+        strokeWidth={selected ? 3 : 2}
+      />
+      {selected && (
+        <rect
+          x={cx - w / 2 - 4}
+          y={cy - h / 2 - 4}
+          width={w + 8}
+          height={h + 8}
+          rx={12}
+          fill="none"
+          stroke="#6366f1"
+          strokeWidth={1.5}
+          opacity={0.3}
+        />
+      )}
+      <text
+        x={cx}
+        y={cy + 1}
+        textAnchor="middle"
+        dominantBaseline="central"
+        fontSize={14}
+        fontWeight={600}
+        fill="#333"
+        className="pointer-events-none select-none"
+      >
+        {label}
+      </text>
+    </g>
+  );
+}
+
+function DiagramArrow({
+  x,
+  y1,
+  y2,
+  color = ARR,
+}: {
+  x: number;
+  y1: number;
+  y2: number;
+  color?: string;
+}) {
+  const dir = y2 < y1 ? -1 : 1;
+  return (
+    <g>
+      <line x1={x} y1={y1} x2={x} y2={y2} stroke={color} strokeWidth={2} />
+      <polygon
+        points={`${x},${y2} ${x - 5},${y2 - dir * 8} ${x + 5},${y2 - dir * 8}`}
+        fill={color}
+      />
+    </g>
+  );
+}
+
+function ResidualPath({
+  id,
+  fromY,
+  toY,
+  mainX,
+  sideX,
+  selected,
+  onClick,
+}: {
+  id: string;
+  fromY: number;
+  toY: number;
+  mainX: number;
+  sideX: number;
+  selected: boolean;
+  onClick: (id: string) => void;
+}) {
+  const color = "#ef4444";
+  const sw = selected ? 3 : 2;
+  const boxLeft = mainX - BW / 2;
+  const arrowLen = 8;
+
+  return (
+    <g onClick={() => onClick(id)} style={{ cursor: "pointer" }}>
+      {/* Path: from main line, left, up, then right stopping before the arrowhead */}
+      <path
+        d={`M ${mainX} ${fromY} L ${sideX} ${fromY} L ${sideX} ${toY} L ${boxLeft - arrowLen} ${toY}`}
+        fill="none"
+        stroke={color}
+        strokeWidth={sw}
+      />
+      {/* Right-pointing arrowhead, tip touching the left edge of the box */}
+      <polygon
+        points={`${boxLeft},${toY} ${boxLeft - arrowLen},${toY - 5} ${boxLeft - arrowLen},${toY + 5}`}
+        fill={color}
+      />
+    </g>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Main component
+// ---------------------------------------------------------------------------
+
+export function TransformerBlockDiagram() {
+  const [tabId, setTabId] = useState<string>(BLOCKS[0].id);
+
+  const tabIdx = BLOCKS.findIndex((b) => b.id === tabId);
+  const block = BLOCKS[tabIdx >= 0 ? tabIdx : 0];
+
+  const handleBoxClick = useCallback((id: string) => {
+    setTabId(id);
+  }, []);
+
+  // Clicking a residual path selects the corresponding Add Residual block
+  const handleResidualClick = useCallback((id: string) => {
+    setTabId(id === "res1" ? "addresidual1" : "addresidual2");
+  }, []);
+
+  const handleReset = useCallback(() => {
+    setTabId(BLOCKS[0].id);
+  }, []);
+
+  return (
+    <WidgetContainer
+      title="The Transformer — Component by Component"
+      description="Click any box to learn about it, then hit Next Block to continue."
+      onReset={handleReset}
+    >
+      <div className="flex flex-col gap-6 lg:flex-row lg:gap-8">
+        {/* SVG diagram */}
+        <div className="flex justify-center lg:w-[420px] lg:shrink-0">
+          <svg
+            viewBox={`0 0 ${W} ${H}`}
+            className="w-full max-w-[420px]"
+            style={{ height: "auto" }}
+          >
+            {/* ── Transformer block background ── */}
+            <rect
+              x={52}
+              y={TB_TOP}
+              width={CX + BW / 2 + 16 - 52}
+              height={TB_BOT - TB_TOP}
+              rx={12}
+              fill="var(--color-surface, #f8f8f8)"
+              stroke="var(--color-border, #e0e0e0)"
+              strokeWidth={1.5}
+            />
+            <text
+              x={36}
+              y={(TB_TOP + TB_BOT) / 2}
+              textAnchor="middle"
+              dominantBaseline="central"
+              fontSize={20}
+              fontWeight={700}
+              fill="#bbb"
+              className="select-none"
+            >
+              N×
+            </text>
+            <text
+              x={52}
+              y={TB_TOP - 8}
+              textAnchor="start"
+              fontSize={14}
+              fontWeight={600}
+              fill="#333"
+              className="select-none"
+            >
+              Transformer Block
+            </text>
+
+            {/* ── Arrows (bottom to top) ── */}
+            <DiagramArrow x={CX} y1={Y.text - 8} y2={Y.tokenization + BH / 2 + 2} />
+            <DiagramArrow x={CX} y1={Y.tokenization - BH / 2 - 2} y2={Y.embedding + BH / 2 + 2} />
+            <DiagramArrow x={CX} y1={Y.embedding - BH / 2 - 2} y2={Y.attention + BH / 2 + 2} />
+            <DiagramArrow x={CX} y1={Y.attention - BH / 2 - 2} y2={Y.addresidual1 + BH / 2 + 2} />
+            <DiagramArrow x={CX} y1={Y.addresidual1 - BH / 2 - 2} y2={Y.layernorm1 + BH / 2 + 2} />
+            <DiagramArrow x={CX} y1={Y.layernorm1 - BH / 2 - 2} y2={Y.feedforward + BH / 2 + 2} />
+            <DiagramArrow x={CX} y1={Y.feedforward - BH / 2 - 2} y2={Y.addresidual2 + BH / 2 + 2} />
+            <DiagramArrow x={CX} y1={Y.addresidual2 - BH / 2 - 2} y2={Y.layernorm2 + BH / 2 + 2} />
+            <DiagramArrow x={CX} y1={Y.layernorm2 - BH / 2 - 2} y2={Y.stacking + BH / 2 + 2} />
+            <DiagramArrow x={CX} y1={Y.stacking - BH / 2 - 2} y2={Y.output + BH / 2 + 2} />
+
+            {/* ── Boxes ── */}
+            {BLOCKS.map((b) => (
+              <DiagramBox
+                key={b.id}
+                id={b.id}
+                cx={CX}
+                cy={Y[b.id]}
+                w={TRANSFORMER_BLOCK_IDS.has(b.id) ? BW : BW - 14}
+                h={BH}
+                label={b.diagramLabel}
+                fill={b.color}
+                stroke={b.border}
+                selected={tabId === b.id}
+                onClick={handleBoxClick}
+              />
+            ))}
+
+            {/* ── Residual skip connections (rendered after boxes so arrowheads are visible) ── */}
+            <ResidualPath
+              id="res1"
+              fromY={(Y.embedding + Y.attention) / 2}
+              toY={Y.addresidual1}
+              mainX={CX}
+              sideX={RX}
+              selected={tabId === "addresidual1"}
+              onClick={handleResidualClick}
+            />
+            <ResidualPath
+              id="res2"
+              fromY={(Y.layernorm1 + Y.feedforward) / 2}
+              toY={Y.addresidual2}
+              mainX={CX}
+              sideX={RX}
+              selected={tabId === "addresidual2"}
+              onClick={handleResidualClick}
+            />
+
+            {/* ── Input label ── */}
+            <text
+              x={CX}
+              y={Y.text + 6}
+              textAnchor="middle"
+              fontSize={14}
+              fontWeight={600}
+              fill="#666"
+              className="select-none"
+            >
+              &quot;The cat sat on the mat&quot;
+            </text>
+          </svg>
+        </div>
+
+        {/* Info panel */}
+        <div className="flex flex-1 flex-col">
+          <div className="flex-1 rounded-lg border border-border bg-surface p-5">
+            <div className="mb-1 text-sm text-muted">
+              {tabIdx + 1} of {BLOCKS.length}
+            </div>
+            <div
+              className="mb-3 inline-block rounded-md px-3 py-1.5 font-bold"
+              style={{
+                backgroundColor: block.color,
+                color: block.border,
+                border: `1.5px solid ${block.border}`,
+              }}
+            >
+              {block.diagramLabel}
+            </div>
+            <p className="mb-3 text-sm leading-relaxed text-foreground/80">
+              {block.description}
+            </p>
+            {block.chapterLinks.length > 0 && (
+              <div className="flex flex-wrap gap-x-3 gap-y-1 text-sm">
+                {block.chapterLinks.map((link) => (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    className="font-medium text-accent underline decoration-accent/30 hover:decoration-accent"
+                  >
+                    {link.label}
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Navigation */}
+          <div className="mt-4 flex items-center gap-3">
+            {tabIdx > 0 && (
+              <button
+                onClick={() => {
+                  const prev = BLOCKS[tabIdx - 1];
+                  if (prev) setTabId(prev.id);
+                }}
+                className="rounded-md bg-surface px-4 py-2.5 text-sm font-medium text-muted transition-colors hover:bg-foreground/5 hover:text-foreground"
+              >
+                ← Previous
+              </button>
+            )}
+            {tabIdx < BLOCKS.length - 1 && (
+              <button
+                onClick={() => {
+                  const next = BLOCKS[tabIdx + 1];
+                  if (next) setTabId(next.id);
+                }}
+                className="rounded-lg bg-accent px-6 py-2.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-accent/90"
+              >
+                Next Block →
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </WidgetContainer>
+  );
+}

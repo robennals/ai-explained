@@ -31,7 +31,7 @@ const DOG: Token = {
   color: "text-blue-600 dark:text-blue-400",
 };
 const BLA: Token = {
-  label: "bla", key: [0], query: [0],
+  label: "blah", key: [0], query: [0],
   color: "text-foreground/40",
 };
 const IT: Token = {
@@ -40,10 +40,10 @@ const IT: Token = {
 };
 
 const SENTENCES: Sentence[] = [
-  { label: "dog bla bla bla cat bla it", tokens: [DOG, BLA, BLA, BLA, CAT, BLA, IT] },
-  { label: "cat bla bla bla dog bla it", tokens: [CAT, BLA, BLA, BLA, DOG, BLA, IT] },
-  { label: "dog bla cat bla it", tokens: [DOG, BLA, CAT, BLA, IT] },
-  { label: "cat bla bla bla bla dog bla bla it", tokens: [CAT, BLA, BLA, BLA, BLA, DOG, BLA, BLA, IT] },
+  { label: "dog blah blah blah cat blah it", tokens: [DOG, BLA, BLA, BLA, CAT, BLA, IT] },
+  { label: "cat blah blah blah dog blah it", tokens: [CAT, BLA, BLA, BLA, DOG, BLA, IT] },
+  { label: "dog blah cat blah it", tokens: [DOG, BLA, CAT, BLA, IT] },
+  { label: "cat blah blah blah blah dog blah blah it", tokens: [CAT, BLA, BLA, BLA, BLA, DOG, BLA, BLA, IT] },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -103,7 +103,7 @@ interface Arrow {
 
 export function ALiBiToyTokens() {
   const [sentIdx, setSentIdx] = useState(0);
-  const [slope, setSlope] = useState(0);
+  const [slope, setSlope] = useState(1);
   const [arrows, setArrows] = useState<Arrow[]>([]);
 
   const rowRef = useRef<HTMLDivElement>(null);
@@ -116,7 +116,7 @@ export function ALiBiToyTokens() {
 
   const handleReset = useCallback(() => {
     setSentIdx(0);
-    setSlope(0);
+    setSlope(1);
   }, []);
 
   // Compute attention scores for "it"

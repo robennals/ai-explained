@@ -30,7 +30,7 @@ const DOG: Token = {
   color: "#2563eb", // blue-600
 };
 const BLA: Token = {
-  label: "bla",
+  label: "blah",
   key: [0, S],
   query: [0, S],
   color: "#9ca3af", // gray-400
@@ -48,10 +48,10 @@ interface Sentence {
 }
 
 const SENTENCES: Sentence[] = [
-  { label: "dog bla cat it", tokens: [DOG, BLA, CAT, IT] },
-  { label: "cat bla dog it", tokens: [CAT, BLA, DOG, IT] },
-  { label: "dog cat bla it", tokens: [DOG, CAT, BLA, IT] },
-  { label: "bla dog cat it", tokens: [BLA, DOG, CAT, IT] },
+  { label: "dog blah cat it", tokens: [DOG, BLA, CAT, IT] },
+  { label: "cat blah dog it", tokens: [CAT, BLA, DOG, IT] },
+  { label: "dog cat blah it", tokens: [DOG, CAT, BLA, IT] },
+  { label: "blah dog cat it", tokens: [BLA, DOG, CAT, IT] },
 ];
 
 /* ------------------------------------------------------------------ */

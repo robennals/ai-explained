@@ -19,11 +19,14 @@ interface SentenceData {
   guide: string;
   /** Per-head hints for this sentence */
   headGuides: Record<string, string>;
+  /** Index of the word to select by default */
+  defaultSelected: number;
 }
 
 const SENTENCES: SentenceData[] = [
   {
     words: ["The","dog","chased","the","cat","because","it","was","angry"],
+    defaultSelected: 6,
     guide: 'Click "it" — the pronoun head splits attention between "dog" (34%) and "cat" (30%), trying to figure out which noun the pronoun refers to.',
     headGuides: {
       "Next word": "Every word attends almost 100% to the word that follows it — a simple forward chain.",
@@ -40,6 +43,7 @@ const SENTENCES: SentenceData[] = [
   },
   {
     words: ["The","movie","was","not","great","but","I","loved","it","anyway"],
+    defaultSelected: 8,
     guide: 'Click "it" — it attends to "movie" (55%) across seven words. The model learned to link a pronoun back to the thing being talked about.',
     headGuides: {
       "Next word": "The standard forward chain. \"anyway\" (last word) attends mostly to itself — there's nothing after it.",
@@ -56,6 +60,7 @@ const SENTENCES: SentenceData[] = [
   },
   {
     words: ["The","teacher","praised","the","student","because","she","was","proud"],
+    defaultSelected: 6,
     guide: 'Click "she" — it attends to "teacher" (37%) and "student" (11%), weighing which person the pronoun refers to.',
     headGuides: {
       "Next word": "The standard forward chain — each word passes information to its neighbor.",
@@ -72,6 +77,7 @@ const SENTENCES: SentenceData[] = [
   },
   {
     words: ["The","ball","hit","the","window","and","it","broke"],
+    defaultSelected: 6,
     guide: 'Click "it" — it attends to "ball" (55%) and "window" (14%), weighing which object broke.',
     headGuides: {
       "Next word": "The forward chain — \"it\" attends to \"broke\" (100%).",
@@ -88,6 +94,7 @@ const SENTENCES: SentenceData[] = [
   },
   {
     words: ["The","cat","knocked","the","vase","off","the","table","and","it","shattered"],
+    defaultSelected: 9,
     guide: 'Click "it" — it attends to "cat" (53%) and "vase" (13%). The model weighs which object shattered (a tricky pronoun — it\'s actually the vase!).',
     headGuides: {
       "Next word": "The forward chain — \"it\" attends to \"shattered\" (100%).",
@@ -104,6 +111,7 @@ const SENTENCES: SentenceData[] = [
   },
   {
     words: ["The","boy","gave","the","girl","a","book","because","she","wanted","it"],
+    defaultSelected: 8,
     guide: 'Two pronouns: click "she" — it attends to "girl" (45%) and "boy" (7%). Click "it" — it splits between "book" (37%) and itself (39%).',
     headGuides: {
       "Next word": "The forward chain. \"it\" at the end mostly attends to itself (98%).",
@@ -120,6 +128,7 @@ const SENTENCES: SentenceData[] = [
   },
   {
     words: ["The","chef","who","won","the","competition","opened","a","restaurant"],
+    defaultSelected: 2,
     guide: 'Click "who" on the pronoun head — it links back to "chef" (implicit). Click "opened" — it attends to itself (97%). Try the position heads to see structural patterns.',
     headGuides: {
       "Next word": "The familiar forward chain. Every word passes its information to the next.",
@@ -136,6 +145,7 @@ const SENTENCES: SentenceData[] = [
   },
   {
     words: ["The","old","cat","sat","on","the","warm","mat","and","slept"],
+    defaultSelected: 9,
     guide: 'Click "slept" — it attends to "sat" (10%) and itself (77%), connecting the two actions of the same subject. Try "mat" — it connects back to "cat" (8%).',
     headGuides: {
       "Next word": "The standard chain. \"slept\" (last word) mostly attends to itself (91%).",
@@ -180,7 +190,7 @@ export function BertAttention({ excludeHeads, onlySentencesWithWord }: { exclude
 
   const [sentIdx, setSentIdx] = useState(0);
   const [headIdx, setHeadIdx] = useState(0);
-  const [selected, setSelected] = useState<number | null>(null);
+  const [selected, setSelected] = useState<number | null>(filteredSentences[0]?.defaultSelected ?? null);
 
   const sentence = filteredSentences[sentIdx] ?? filteredSentences[0];
   const filteredHeads = excludeHeads
@@ -193,8 +203,8 @@ export function BertAttention({ excludeHeads, onlySentencesWithWord }: { exclude
   const handleReset = useCallback(() => {
     setSentIdx(0);
     setHeadIdx(0);
-    setSelected(null);
-  }, []);
+    setSelected(filteredSentences[0]?.defaultSelected ?? null);
+  }, [filteredSentences]);
 
   return (
     <WidgetContainer
@@ -208,7 +218,7 @@ export function BertAttention({ excludeHeads, onlySentencesWithWord }: { exclude
           {filteredSentences.map((s, i) => (
             <button
               key={i}
-              onClick={() => { setSentIdx(i); setSelected(null); }}
+              onClick={() => { setSentIdx(i); setSelected(filteredSentences[i]?.defaultSelected ?? null); }}
               className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
                 i === sentIdx
                   ? "bg-accent text-white"
@@ -226,7 +236,7 @@ export function BertAttention({ excludeHeads, onlySentencesWithWord }: { exclude
             {filteredHeads.map((h, i) => (
               <button
                 key={i}
-                onClick={() => { setHeadIdx(i); setSelected(null); }}
+                onClick={() => { setHeadIdx(i); }}
                 className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
                   i === headIdx
                     ? "border-indigo-400 bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300"
@@ -248,20 +258,15 @@ export function BertAttention({ excludeHeads, onlySentencesWithWord }: { exclude
             return (
               <span key={`${sentIdx}-${headIdx}-${i}`} className="relative inline-flex flex-col items-center">
                 {/* Percentage above */}
-                {attnRow != null && !isSelected && weight >= 0.02 && (
+                {attnRow != null && weight >= 0.02 && (
                   <span
-                    className="mb-1 font-mono text-[10px] font-bold leading-none"
-                    style={{ color: weight > 0.3 ? "rgb(99, 102, 241)" : "var(--color-muted)" }}
+                    className={`mb-1 font-mono text-[10px] font-bold leading-none ${isSelected ? "text-accent" : ""}`}
+                    style={!isSelected ? { color: weight > 0.3 ? "rgb(99, 102, 241)" : "var(--color-muted)" } : undefined}
                   >
                     {Math.round(weight * 100)}%
                   </span>
                 )}
-                {isSelected && (
-                  <span className="mb-1 font-mono text-[10px] font-bold leading-none text-accent">
-                    query
-                  </span>
-                )}
-                {attnRow != null && !isSelected && weight < 0.02 && (
+                {attnRow != null && weight < 0.02 && (
                   <span className="mb-1 text-[10px] leading-none text-transparent">·</span>
                 )}
                 {attnRow == null && (

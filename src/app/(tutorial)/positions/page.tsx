@@ -3,9 +3,13 @@ import { getAdjacentChapters } from "@/lib/curriculum";
 import Content from "./content.mdx";
 import {
   ALiBiToyTokensWidget,
+  RotationDotProductWidget,
   RotationPositionWidget,
-  RoPEToyTokensWidget,
+  RotationToyTokensWidget,
   RoPEDistanceSensitivityWidget,
+  RoPEMultiSpeedWidget,
+  CausalMaskingWidget,
+  WordOrderMattersWidget,
 } from "./widgets";
 
 export const metadata = {
@@ -22,10 +26,14 @@ export default function ChapterPositions() {
       <div className="prose prose-lg max-w-none">
         <Content
           components={{
+            WordOrderMattersWidget,
             ALiBiToyTokensWidget,
+            RotationDotProductWidget,
             RotationPositionWidget,
-            RoPEToyTokensWidget,
+            RotationToyTokensWidget,
             RoPEDistanceSensitivityWidget,
+            RoPEMultiSpeedWidget,
+            CausalMaskingWidget,
           }}
         />
       </div>

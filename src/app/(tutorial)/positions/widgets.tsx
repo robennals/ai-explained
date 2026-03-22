@@ -28,6 +28,14 @@ const BertAttention = dynamic(
   { ssr: false }
 );
 
+const WordOrderMatters = dynamic(
+  () =>
+    import("@/components/widgets/positions/WordOrderMatters").then(
+      (m) => m.WordOrderMatters
+    ),
+  { ssr: false }
+);
+
 const ALiBiToyTokens = dynamic(
   () =>
     import("@/components/widgets/positions/ALiBiToyTokens").then(
@@ -36,10 +44,42 @@ const ALiBiToyTokens = dynamic(
   { ssr: false }
 );
 
+const RotationToyTokens = dynamic(
+  () =>
+    import("@/components/widgets/positions/RotationToyTokens").then(
+      (m) => m.RotationToyTokens
+    ),
+  { ssr: false }
+);
+
+const RotationDotProduct = dynamic(
+  () =>
+    import("@/components/widgets/positions/RotationDotProduct").then(
+      (m) => m.RotationDotProduct
+    ),
+  { ssr: false }
+);
+
 const RoPEDistanceSensitivity = dynamic(
   () =>
     import("@/components/widgets/positions/RoPEDistanceSensitivity").then(
       (m) => m.RoPEDistanceSensitivity
+    ),
+  { ssr: false }
+);
+
+const RoPEMultiSpeed = dynamic(
+  () =>
+    import("@/components/widgets/positions/RoPEMultiSpeed").then(
+      (m) => m.RoPEMultiSpeed
+    ),
+  { ssr: false }
+);
+
+const CausalMasking = dynamic(
+  () =>
+    import("@/components/widgets/positions/CausalMasking").then(
+      (m) => m.CausalMasking
     ),
   { ssr: false }
 );
@@ -92,10 +132,50 @@ export function BertAttentionWidget({ children }: { children?: React.ReactNode }
   );
 }
 
+export function RotationToyTokensWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <RotationToyTokens />
+    </WidgetSlot>
+  );
+}
+
+export function WordOrderMattersWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <WordOrderMatters />
+    </WidgetSlot>
+  );
+}
+
+export function RotationDotProductWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <RotationDotProduct />
+    </WidgetSlot>
+  );
+}
+
 export function RoPEDistanceSensitivityWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children}>
       <RoPEDistanceSensitivity />
+    </WidgetSlot>
+  );
+}
+
+export function RoPEMultiSpeedWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <RoPEMultiSpeed />
+    </WidgetSlot>
+  );
+}
+
+export function CausalMaskingWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <CausalMasking />
     </WidgetSlot>
   );
 }

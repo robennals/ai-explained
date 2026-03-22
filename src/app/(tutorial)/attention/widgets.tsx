@@ -76,6 +76,14 @@ const BertAttention = dynamic(
   { ssr: false }
 );
 
+const QKVProjection = dynamic(
+  () =>
+    import("@/components/widgets/attention/QKVProjection").then(
+      (m) => m.QKVProjection
+    ),
+  { ssr: false }
+);
+
 const PatternAttention = dynamic(
   () =>
     import("@/components/widgets/attention/PatternAttention").then(
@@ -204,6 +212,14 @@ export function MultiHeadWidget({ children }: { children?: React.ReactNode }) {
   );
 }
 
+export function QKVProjectionWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children} label="Explore it">
+      <QKVProjection />
+    </WidgetSlot>
+  );
+}
+
 export function BertAttentionWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children} label="Explore it">
@@ -215,7 +231,7 @@ export function BertAttentionWidget({ children }: { children?: React.ReactNode }
 export function BertAttentionNoPositionWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children} label="Explore it">
-      <BertAttention excludeHeads={["Next word", "Previous word", "Broad context"]} onlySentencesWithWord="it" />
+      <BertAttention excludeHeads={["Next word", "Previous word"]} />
     </WidgetSlot>
   );
 }
