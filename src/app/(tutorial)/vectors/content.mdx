@@ -66,6 +66,22 @@ Design your own animal — notice how adjusting one property automatically scale
 **A unit vector is a standard-size vector.** Normalizing to magnitude 1 preserves proportions but removes the size advantage, enabling fair similarity comparisons. The dot product of two unit vectors gives a pure similarity score between −1 and 1. (This is sometimes called *cosine similarity*.)
 </KeyInsight>
 
+## Combining Vectors
+
+Since vectors are just lists of numbers, you can add them — add each dimension separately. The result is a new vector that combines information from both inputs.
+
+**Blending.** Add two animal vectors and normalize the result back to a unit vector, and you get an animal "in between" the two. Blend a bear and a rabbit and you get something medium-sized, moderately cuddly, and somewhat hairy. Check the similarity ranking — the blend often lands near an animal you'd expect.
+
+**Modifying.** You can also add a vector that pushes in a specific direction. Start with a bear and add "more cuddly, less scary, smaller" — you get something like Paddington Bear. Start with a dog and add "bigger, scarier" — you get a wolf. The result describes something that wasn't in our original list.
+
+<VectorMixerWidget>
+On the **Blend** tab, pick two animals and drag the slider to see what's in between. On the **Modify** tab, start with a base animal and use the sliders to add or subtract properties. Try the presets — Paddington, Direwolf, Tiny Eagle — then invent your own.
+</VectorMixerWidget>
+
+This idea — building up complex descriptions by adding simpler vectors together — turns out to be fundamental to how neural networks work. In a later chapter, we'll see that deep inside a neural network, information flows through a running sum called a **residual stream**, and each layer *adds* its contribution to this stream. The entire architecture depends on the fact that vectors can be combined by addition.
+
+We'll also see in the next chapter that learned word vectors have a famous property: **king − man + woman ≈ queen**. The direction from "man" to "woman" captures something about gender, and you can add that direction to other words. Vector addition isn't just a mathematical curiosity — it's one of the core operations of AI.
+
 ## What and How Much
 
 Any vector can be split into two parts: a **unit vector** and a **magnitude**.
