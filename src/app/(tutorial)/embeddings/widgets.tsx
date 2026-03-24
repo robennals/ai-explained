@@ -52,6 +52,14 @@ const EmbeddingClassifier = dynamic(
   { ssr: false }
 );
 
+const EmbeddingArithmetic = dynamic(
+  () =>
+    import("@/components/widgets/embeddings/EmbeddingArithmetic").then(
+      (m) => m.EmbeddingArithmetic
+    ),
+  { ssr: false }
+);
+
 const TokenizationPlayground = dynamic(
   () =>
     import("@/components/widgets/embeddings/TokenizationPlayground").then(
@@ -120,6 +128,14 @@ export function EmbeddingClassifierWidget({ children }: { children?: React.React
   return (
     <WidgetSlot tryIt={children}>
       <EmbeddingClassifier />
+    </WidgetSlot>
+  );
+}
+
+export function EmbeddingArithmeticWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children} label="Explore it">
+      <EmbeddingArithmetic />
     </WidgetSlot>
   );
 }
