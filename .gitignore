@@ -48,3 +48,6 @@ public/data/next-word-model/
 
 # large data files (downloaded on demand by notebooks/scripts)
 notebooks/glove.*
+
+# broomy
+.broomy/output/
