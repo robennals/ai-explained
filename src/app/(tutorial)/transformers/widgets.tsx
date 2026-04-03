@@ -4,31 +4,87 @@ import dynamic from "next/dynamic";
 import { Suspense } from "react";
 import { TryItProvider } from "@/components/widgets/shared/WidgetContainer";
 
-const ToyTransformer = dynamic(
+const TransformerBlockDiagram = dynamic(
   () =>
-    import("@/components/widgets/transformers/ToyTransformer").then(
-      (m) => m.ToyTransformer
+    import("@/components/widgets/transformers/TransformerBlockDiagram").then(
+      (m) => m.TransformerBlockDiagram
     ),
   { ssr: false }
 );
 
-const StoryTransformer = dynamic(
+const CausalMask = dynamic(
   () =>
-    import("@/components/widgets/transformers/StoryTransformer").then(
-      (m) => m.StoryTransformer
+    import("@/components/widgets/transformers/CausalMask").then(
+      (m) => m.CausalMask
     ),
   { ssr: false }
 );
 
-const StoryGenerator = dynamic(
+const ResidualConnection = dynamic(
   () =>
-    import("@/components/widgets/transformers/StoryGenerator").then(
-      (m) => m.StoryGenerator
+    import("@/components/widgets/transformers/ResidualConnection").then(
+      (m) => m.ResidualConnection
     ),
   { ssr: false }
 );
 
-function WidgetSlot({ children, tryIt, label }: { children: React.ReactNode; tryIt?: React.ReactNode; label?: string }) {
+const LayerNorm = dynamic(
+  () =>
+    import("@/components/widgets/transformers/LayerNorm").then(
+      (m) => m.LayerNorm
+    ),
+  { ssr: false }
+);
+
+const MicroTransformer = dynamic(
+  () =>
+    import("@/components/widgets/transformers/MicroTransformer").then(
+      (m) => m.MicroTransformer
+    ),
+  { ssr: false }
+);
+
+const DepthComparison = dynamic(
+  () =>
+    import("@/components/widgets/transformers/DepthComparison").then(
+      (m) => m.DepthComparison
+    ),
+  { ssr: false }
+);
+
+const LiveTransformer = dynamic(
+  () =>
+    import("@/components/widgets/transformers/LiveTransformer").then(
+      (m) => m.LiveTransformer
+    ),
+  { ssr: false }
+);
+
+const TransformerXRay = dynamic(
+  () =>
+    import("@/components/widgets/transformers/TransformerXRay").then(
+      (m) => m.TransformerXRay
+    ),
+  { ssr: false }
+);
+
+const PrefixAttention = dynamic(
+  () =>
+    import("@/components/widgets/transformers/PrefixAttention").then(
+      (m) => m.PrefixAttention
+    ),
+  { ssr: false }
+);
+
+function WidgetSlot({
+  children,
+  tryIt,
+  label,
+}: {
+  children: React.ReactNode;
+  tryIt?: React.ReactNode;
+  label?: string;
+}) {
   return (
     <Suspense
       fallback={
@@ -44,26 +100,110 @@ function WidgetSlot({ children, tryIt, label }: { children: React.ReactNode; try
   );
 }
 
-export function ToyTransformerWidget({ children }: { children?: React.ReactNode }) {
+export function TransformerBlockDiagramWidget({
+  children,
+}: {
+  children?: React.ReactNode;
+}) {
   return (
     <WidgetSlot tryIt={children} label="Explore it">
-      <ToyTransformer />
+      <TransformerBlockDiagram />
     </WidgetSlot>
   );
 }
 
-export function StoryTransformerWidget({ children }: { children?: React.ReactNode }) {
+export function CausalMaskWidget({
+  children,
+}: {
+  children?: React.ReactNode;
+}) {
   return (
-    <WidgetSlot tryIt={children}>
-      <StoryTransformer />
+    <WidgetSlot tryIt={children} label="Try it">
+      <CausalMask />
     </WidgetSlot>
   );
 }
 
-export function StoryGeneratorWidget({ children }: { children?: React.ReactNode }) {
+export function ResidualConnectionWidget({
+  children,
+}: {
+  children?: React.ReactNode;
+}) {
   return (
-    <WidgetSlot tryIt={children}>
-      <StoryGenerator />
+    <WidgetSlot tryIt={children} label="Try it">
+      <ResidualConnection />
+    </WidgetSlot>
+  );
+}
+
+export function LayerNormWidget({
+  children,
+}: {
+  children?: React.ReactNode;
+}) {
+  return (
+    <WidgetSlot tryIt={children} label="Try it">
+      <LayerNorm />
+    </WidgetSlot>
+  );
+}
+
+export function MicroTransformerWidget({
+  children,
+}: {
+  children?: React.ReactNode;
+}) {
+  return (
+    <WidgetSlot tryIt={children} label="Explore it">
+      <MicroTransformer />
+    </WidgetSlot>
+  );
+}
+
+export function DepthComparisonWidget({
+  children,
+}: {
+  children?: React.ReactNode;
+}) {
+  return (
+    <WidgetSlot tryIt={children} label="Compare">
+      <DepthComparison />
+    </WidgetSlot>
+  );
+}
+
+export function LiveTransformerWidget({
+  children,
+}: {
+  children?: React.ReactNode;
+}) {
+  return (
+    <WidgetSlot tryIt={children} label="Try it">
+      <LiveTransformer />
+    </WidgetSlot>
+  );
+}
+
+export function TransformerXRayWidget({
+  children,
+}: {
+  children?: React.ReactNode;
+}) {
+  return (
+    <WidgetSlot tryIt={children} label="Explore it">
+      <TransformerXRay />
+    </WidgetSlot>
+  );
+}
+
+export function PrefixAttentionWidget({
+  children,
+}: {
+  children?: React.ReactNode;
+}) {
+  return (
+    <WidgetSlot tryIt={children} label="Try it">
+      <PrefixAttention />
     </WidgetSlot>
   );
 }

@@ -8,12 +8,13 @@ import {
   ToyAttentionWidget,
   ToyValuesWidget,
   AttentionPlaygroundWidget,
-  BertAttentionWidget,
+  BertAttentionNoPositionWidget,
+  ToyAttentionValuesWidget,
+  ToyValueTableWidget,
   PatternAttentionWidget,
   AttentionStepThroughWidget,
   MultiHeadWidget,
-  RoPEToyTokensWidget,
-  RotationPositionWidget,
+  QKVProjectionWidget,
 } from "./widgets";
 
 export const metadata = {
@@ -36,12 +37,13 @@ export default function Chapter07() {
             ToyAttentionWidget,
             ToyValuesWidget,
             AttentionPlaygroundWidget,
-            BertAttentionWidget,
+            BertAttentionNoPositionWidget,
+            ToyAttentionValuesWidget,
+  ToyValueTableWidget,
             PatternAttentionWidget,
             AttentionStepThroughWidget,
             MultiHeadWidget,
-            RoPEToyTokensWidget,
-            RotationPositionWidget,
+            QKVProjectionWidget,
           }}
         />
       </div>

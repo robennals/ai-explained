@@ -13,8 +13,6 @@ interface SliderControlProps {
   formatValue?: (value: number) => string;
   /** Show tick marks at these values along the track */
   ticks?: number[];
-  /** Where to display the current value. "below" (default) shows it under the thumb; "left" shows it between the label and slider. */
-  valuePosition?: "below" | "left";
 }
 
 export function SliderControl({
@@ -27,19 +25,13 @@ export function SliderControl({
   onCommit,
   formatValue,
   ticks,
-  valuePosition = "below",
 }: SliderControlProps) {
   const displayValue = formatValue ? formatValue(value) : value.toFixed(2);
   return (
-    <div className="flex items-center gap-4">
-      <label className="w-24 shrink-0 text-xs font-medium text-muted">
+    <div className="flex items-center gap-2">
+      <label className="mr-2 w-24 shrink-0 overflow-visible whitespace-nowrap text-xs font-medium text-muted">
         {label}
       </label>
-      {valuePosition === "left" && (
-        <span className="w-8 shrink-0 text-right font-mono text-[10px] text-muted">
-          {displayValue}
-        </span>
-      )}
       <Slider.Root
         className="relative flex h-5 flex-1 touch-none select-none items-center"
         value={[value]}
@@ -62,14 +54,11 @@ export function SliderControl({
             );
           })}
         </Slider.Track>
-        <Slider.Thumb className="relative block h-4 w-4 rounded-full border-2 border-accent bg-white shadow-sm transition-shadow focus:outline-none focus:ring-2 focus:ring-accent/30">
-          {valuePosition === "below" && (
-            <span className="absolute left-1/2 top-5 -translate-x-1/2 whitespace-nowrap font-mono text-[10px] text-muted">
-              {displayValue}
-            </span>
-          )}
-        </Slider.Thumb>
+        <Slider.Thumb className="block h-4 w-4 rounded-full border-2 border-accent bg-white shadow-sm transition-shadow focus:outline-none focus:ring-2 focus:ring-accent/30" />
       </Slider.Root>
+      <span className="w-12 shrink-0 text-left font-mono text-[10px] text-muted">
+        {displayValue}
+      </span>
     </div>
   );
 }

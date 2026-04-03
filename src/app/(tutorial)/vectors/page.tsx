@@ -7,6 +7,9 @@ import {
   DotProduct2DWidget,
   DotProductComparisonWidget,
   NeuronDotProductWidget,
+  AmplifiedAnimalExplorerWidget,
+  VectorMixerWidget,
+  DirectionMagnitudeExplorerWidget,
 } from "./widgets";
 
 export const metadata = {
@@ -28,6 +31,9 @@ export default function ChapterVectors() {
             DotProduct2DWidget,
             DotProductComparisonWidget,
             NeuronDotProductWidget,
+            AmplifiedAnimalExplorerWidget,
+            VectorMixerWidget,
+            DirectionMagnitudeExplorerWidget,
           }}
         />
       </div>

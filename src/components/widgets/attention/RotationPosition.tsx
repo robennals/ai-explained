@@ -1,55 +1,57 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
 import { SliderControl } from "../shared/SliderControl";
+import { VectorCard } from "../vectors/VectorCard";
 
-const DEG_PER_POS = 15; // degrees per position
-const RAD_PER_POS = (Math.PI / 180) * DEG_PER_POS;
-
-function rotateVector(position: number): [number, number] {
-  const angle = position * RAD_PER_POS;
+function rotateVector(position: number, degPerPos: number): [number, number] {
+  const angle = position * degPerPos * (Math.PI / 180);
   return [Math.cos(angle), Math.sin(angle)];
 }
-
-const SAME_GAP_PRESETS = [
-  [1, 4],
-  [5, 8],
-  [10, 13],
-];
-
-const DIFF_GAP_PRESETS = [
-  [3, 4],
-  [3, 6],
-  [3, 10],
-  [3, 16],
-];
 
 export function RotationPosition() {
   const [posA, setPosA] = useState(1);
   const [posB, setPosB] = useState(4);
-  const [presetCycleIdx, setPresetCycleIdx] = useState(0);
+  const [degPerPos, setDegPerPos] = useState(15);
+
+  // Max gap: the position gap where dot product reaches -1 (180°)
+  const maxGap = Math.floor(180 / degPerPos);
+  // Max position on circle: just before wrapping back to 0° (360°)
+  const maxPosOnCircle = Math.ceil(360 / degPerPos) - 1;
+  // B's max depends on A: can go up to A + maxGap, but not past the circle
+  const maxPosB = Math.min(posA + maxGap, maxPosOnCircle);
+  // A can go anywhere on the circle (with gap 0, B = A)
+  const maxPosA = maxPosOnCircle;
+  // Current effective max gap for the gap slider
+  const currentMaxGap = Math.min(maxGap, maxPosOnCircle - posA);
 
   const handleReset = useCallback(() => {
     setPosA(1);
     setPosB(4);
-    setPresetCycleIdx(0);
+    setDegPerPos(15);
   }, []);
 
-  const vecA = useMemo(() => rotateVector(posA), [posA]);
-  const vecB = useMemo(() => rotateVector(posB), [posB]);
+  const radPerPos = (Math.PI / 180) * degPerPos;
+  const vecA = useMemo(() => rotateVector(posA, degPerPos), [posA, degPerPos]);
+  const vecB = useMemo(() => rotateVector(posB, degPerPos), [posB, degPerPos]);
 
-  const angleA = posA * DEG_PER_POS;
-  const angleB = posB * DEG_PER_POS;
+  // Clamp positions
+  const clampedPosA = Math.min(posA, maxPosA);
+  const clampedPosB = Math.min(posB, maxPosB);
+  const gap = Math.abs(clampedPosB - clampedPosA);
+
+  const angleA = clampedPosA * degPerPos;
+  const angleB = clampedPosB * degPerPos;
   const angleBetween = Math.abs(angleB - angleA);
-  const gap = Math.abs(posB - posA);
-  const dotProduct = Math.cos(gap * RAD_PER_POS);
+  const dotProduct = Math.cos(gap * radPerPos);
 
   // SVG config
-  const size = 300;
+  const size = 340;
   const cx = size / 2;
   const cy = size / 2;
   const radius = 110;
+  const labelRadius = radius + 18;
 
   // Convert to SVG coordinates (y-axis flipped)
   const aEndX = cx + vecA[0] * radius;
@@ -86,376 +88,491 @@ export function RotationPosition() {
   // Sweep direction depends on which angle is larger
   const sweep = angleB > angleA ? 0 : 1;
 
-  const handleSameGap = () => {
-    const nextIdx = (presetCycleIdx + 1) % SAME_GAP_PRESETS.length;
-    setPresetCycleIdx(nextIdx);
-    const [a, b] = SAME_GAP_PRESETS[nextIdx];
-    setPosA(a);
-    setPosB(b);
-  };
+  // Element-wise products for the multiply-and-add display
+  const products = [vecA[0] * vecB[0], vecA[1] * vecB[1]];
+  const dotViaComponents = products[0] + products[1];
 
-  const handleDiffGap = () => {
-    const nextIdx = (presetCycleIdx + 1) % DIFF_GAP_PRESETS.length;
-    setPresetCycleIdx(nextIdx);
-    const [a, b] = DIFF_GAP_PRESETS[nextIdx];
-    setPosA(a);
-    setPosB(b);
-  };
+  // Auto-scroll the gap table to center the active row
+  const activeRowRef = useRef<HTMLTableRowElement>(null);
+  const tableContainerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const row = activeRowRef.current;
+    const container = tableContainerRef.current;
+    if (!row || !container) return;
+    // Scroll so the row is centered in the container
+    const rowCenter = row.offsetTop + row.offsetHeight / 2;
+    const containerCenter = container.clientHeight / 2;
+    const targetScroll = rowCenter - containerCenter;
+    const maxScroll = container.scrollHeight - container.clientHeight;
+    container.scrollTo({
+      top: Math.max(0, Math.min(targetScroll, maxScroll)),
+      behavior: "smooth",
+    });
+  }, [gap]);
 
-  // Comparison table
-  const sameGapRows = SAME_GAP_PRESETS.map(([a, b]) => ({
-    a,
-    b,
-    gap: Math.abs(b - a),
-    dot: Math.cos(Math.abs(b - a) * RAD_PER_POS),
-  }));
+  // Drag handling
+  const svgRef = useRef<SVGSVGElement>(null);
+  const dragging = useRef<"A" | "B" | null>(null);
 
-  const diffGapRows = DIFF_GAP_PRESETS.map(([a, b]) => ({
-    a,
-    b,
-    gap: Math.abs(b - a),
-    dot: Math.cos(Math.abs(b - a) * RAD_PER_POS),
-  }));
+  const angleToPos = useCallback((clientX: number, clientY: number) => {
+    const svg = svgRef.current;
+    if (!svg) return null;
+    const rect = svg.getBoundingClientRect();
+    const svgX = ((clientX - rect.left) / rect.width) * size;
+    const svgY = ((clientY - rect.top) / rect.height) * size;
+    // Convert from SVG coords to math coords (y flipped)
+    const dx = svgX - cx;
+    const dy = -(svgY - cy);
+    const angleDeg = (Math.atan2(dy, dx) * 180) / Math.PI;
+    const pos = Math.round(((angleDeg % 360) + 360) % 360 / degPerPos);
+    return Math.max(0, Math.min(maxPosOnCircle, pos));
+  }, [degPerPos, maxPosOnCircle]);
+
+  const handlePointerDown = useCallback((which: "A" | "B") => (e: React.PointerEvent) => {
+    dragging.current = which;
+    (e.target as SVGElement).setPointerCapture(e.pointerId);
+  }, []);
+
+  const handlePointerMove = useCallback((e: React.PointerEvent) => {
+    if (!dragging.current) return;
+    const newPos = angleToPos(e.clientX, e.clientY);
+    if (newPos === null) return;
+
+    if (dragging.current === "A") {
+      const currentGap = posB - posA;
+      const newB = newPos + currentGap;
+      if (newPos >= 0 && newB >= 0 && newB <= maxPosOnCircle && currentGap <= maxGap) {
+        setPosA(newPos);
+        setPosB(newB);
+      }
+    } else {
+      const newGap = newPos - posA;
+      if (newGap >= 0 && newGap <= maxGap && newPos <= maxPosOnCircle) {
+        setPosB(newPos);
+      }
+    }
+  }, [posA, posB, angleToPos, maxPosOnCircle, maxGap]);
+
+  const handlePointerUp = useCallback(() => {
+    dragging.current = null;
+  }, []);
+
+  // When speed changes, clamp positions to stay in range
+  const handleSpeedChange = useCallback((newSpeed: number) => {
+    setDegPerPos(newSpeed);
+    const newMaxCircle = Math.ceil(360 / newSpeed) - 1;
+    setPosA((prev) => Math.min(prev, newMaxCircle));
+    setPosB((prev) => Math.min(prev, newMaxCircle));
+  }, []);
 
   return (
     <WidgetContainer
-      title="Rotary Position Encoding"
-      description="Rotate query and key vectors by position — the dot product captures relative distance"
+      title="Rotation and Dot Product"
+      description="Two pointers on a circle, each rotated by their position — the dot product depends only on the gap"
       onReset={handleReset}
     >
       <div className="flex flex-col gap-4">
-        {/* Sliders */}
-        <div className="flex flex-col gap-2">
-          <SliderControl
-            label="Query position"
-            value={posA}
-            min={1}
-            max={20}
-            step={1}
-            onChange={setPosA}
-            formatValue={(v) => String(v)}
-          />
-          <SliderControl
-            label="Key position"
-            value={posB}
-            min={1}
-            max={20}
-            step={1}
-            onChange={setPosB}
-            formatValue={(v) => String(v)}
-          />
-        </div>
+        {/* Top row: sliders + dot product on left, gap table on right */}
+        <div className="flex flex-wrap items-start gap-6">
+          <div className="flex flex-1 min-w-0 flex-col gap-4">
+            {/* Sliders */}
+            <div className="flex flex-col gap-2">
+              <SliderControl
+                label="Token A position"
+                value={posA}
+                min={0}
+                max={maxPosA}
+                step={1}
+                onChange={(v) => {
+                  const currentGap = posB - posA;
+                  // Keep gap, but clamp B to not cross 0 on the circle
+                  const maxA = maxPosOnCircle - currentGap;
+                  const clampedA = Math.max(0, Math.min(maxA, v));
+                  setPosA(clampedA);
+                  setPosB(clampedA + currentGap);
+                }}
+                formatValue={(v) => String(v)}
+              />
+              <SliderControl
+                label="Gap"
+                value={gap}
+                min={0}
+                max={currentMaxGap}
+                step={1}
+                onChange={(g) => {
+                  const clampedGap = Math.min(g, maxGap);
+                  const newB = posA + clampedGap;
+                  if (newB <= maxPosOnCircle) {
+                    setPosB(newB);
+                  } else {
+                    // Push A down so B doesn't cross 0
+                    const newA = maxPosOnCircle - clampedGap;
+                    setPosA(Math.max(0, newA));
+                    setPosB(Math.max(0, newA) + clampedGap);
+                  }
+                }}
+                formatValue={(v) => String(v)}
+              />
+              <SliderControl
+                label="Speed"
+                value={degPerPos}
+                min={5}
+                max={30}
+                step={1}
+                onChange={handleSpeedChange}
+                formatValue={(v) => `${v}°/pos`}
+              />
+            </div>
 
-        {/* SVG visualization */}
-        <div className="flex justify-center">
-          <svg
-            width={size}
-            height={size}
-            viewBox={`0 0 ${size} ${size}`}
-            className="max-w-full"
-          >
-            {/* Unit circle */}
-            <circle
-              cx={cx}
-              cy={cy}
-              r={radius}
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1}
-              opacity={0.1}
-            />
+            {/* Dot product — prominent display */}
+            <div className="flex items-baseline justify-center gap-3">
+              <span className="text-sm font-medium text-muted">A · B =</span>
+              <span className="font-mono text-3xl font-bold text-accent">
+                {dotViaComponents.toFixed(4)}
+              </span>
+              <span className="text-sm text-muted">(gap = {gap})</span>
+            </div>
 
-            {/* Axes */}
-            <line
-              x1={cx - radius - 10}
-              y1={cy}
-              x2={cx + radius + 10}
-              y2={cy}
-              stroke="currentColor"
-              strokeWidth={0.5}
-              opacity={0.1}
-            />
-            <line
-              x1={cx}
-              y1={cy - radius - 10}
-              x2={cx}
-              y2={cy + radius + 10}
-              stroke="currentColor"
-              strokeWidth={0.5}
-              opacity={0.1}
-            />
-
-            {/* Projection line from B tip perpendicular to A */}
-            {gap > 0 && (
-              <>
-                <line
-                  x1={bEndX}
-                  y1={bEndY}
-                  x2={projX}
-                  y2={projY}
-                  stroke="#f59e0b"
-                  strokeWidth={1.5}
-                  strokeDasharray="4 3"
-                  opacity={0.6}
-                />
-                {/* Projection point on A */}
-                <circle cx={projX} cy={projY} r={3} fill="#f59e0b" opacity={0.7} />
-                {/* Right-angle mark */}
-                <polyline
-                  points={`${mark1X},${mark1Y} ${mark2X},${mark2Y} ${mark3X},${mark3Y}`}
+            {/* Circle visualization */}
+            <div className="flex justify-center">
+              <svg
+                ref={svgRef}
+                width={size}
+                height={size}
+                viewBox={`0 0 ${size} ${size}`}
+                className="max-w-full shrink-0"
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerUp}
+                style={{ touchAction: "none" }}
+              >
+                {/* Unit circle */}
+                <circle
+                  cx={cx}
+                  cy={cy}
+                  r={radius}
                   fill="none"
-                  stroke="#f59e0b"
+                  stroke="currentColor"
                   strokeWidth={1}
-                  opacity={0.5}
+                  opacity={0.1}
                 />
-                {/* Projection segment on A (from origin to projection) — shows dot product magnitude */}
+
+                {/* Position numbers around the circle */}
+                {Array.from({ length: maxPosOnCircle + 1 }, (_, p) => {
+                  const rad = -(p * degPerPos * Math.PI) / 180;
+                  const tickInner = radius - 3;
+                  const tickOuter = radius + 3;
+                  const isActive = p === posA || p === posB;
+                  return (
+                    <g key={p}>
+                      <line
+                        x1={cx + Math.cos(rad) * tickInner}
+                        y1={cy + Math.sin(rad) * tickInner}
+                        x2={cx + Math.cos(rad) * tickOuter}
+                        y2={cy + Math.sin(rad) * tickOuter}
+                        stroke="currentColor"
+                        strokeWidth={isActive ? 1.5 : 0.5}
+                        opacity={isActive ? 0.5 : 0.2}
+                      />
+                      <text
+                        x={cx + Math.cos(rad) * labelRadius}
+                        y={cy + Math.sin(rad) * labelRadius}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        fontSize={9}
+                        fill="currentColor"
+                        opacity={isActive ? 0.8 : 0.25}
+                        fontWeight={isActive ? "bold" : "normal"}
+                      >
+                        {p}
+                      </text>
+                    </g>
+                  );
+                })}
+
+                {/* Axes */}
+                <line
+                  x1={cx - radius - 10}
+                  y1={cy}
+                  x2={cx + radius + 10}
+                  y2={cy}
+                  stroke="currentColor"
+                  strokeWidth={0.5}
+                  opacity={0.1}
+                />
+                <line
+                  x1={cx}
+                  y1={cy - radius - 10}
+                  x2={cx}
+                  y2={cy + radius + 10}
+                  stroke="currentColor"
+                  strokeWidth={0.5}
+                  opacity={0.1}
+                />
+
+                {/* Projection line from B tip perpendicular to A */}
+                {gap > 0 && (
+                  <>
+                    <line
+                      x1={bEndX}
+                      y1={bEndY}
+                      x2={projX}
+                      y2={projY}
+                      stroke="#f59e0b"
+                      strokeWidth={1.5}
+                      strokeDasharray="4 3"
+                      opacity={0.6}
+                    />
+                    {/* Projection point on A */}
+                    <circle cx={projX} cy={projY} r={3} fill="#f59e0b" opacity={0.7} />
+                    {/* Right-angle mark */}
+                    <polyline
+                      points={`${mark1X},${mark1Y} ${mark2X},${mark2Y} ${mark3X},${mark3Y}`}
+                      fill="none"
+                      stroke="#f59e0b"
+                      strokeWidth={1}
+                      opacity={0.5}
+                    />
+                    {/* Projection segment on A (from origin to projection) — shows dot product magnitude */}
+                    <line
+                      x1={cx}
+                      y1={cy}
+                      x2={projX}
+                      y2={projY}
+                      stroke="#f59e0b"
+                      strokeWidth={3}
+                      opacity={0.25}
+                    />
+                  </>
+                )}
+
+                {/* Arc between vectors */}
+                {gap > 0 && (
+                  <path
+                    d={`M ${arcStartX} ${arcStartY} A ${arcRadius} ${arcRadius} 0 ${largeArc} ${sweep} ${arcEndX} ${arcEndY}`}
+                    fill="none"
+                    stroke="#f59e0b"
+                    strokeWidth={2}
+                    opacity={0.6}
+                  />
+                )}
+
+                {/* Arc label */}
+                {gap > 0 && (
+                  <text
+                    x={
+                      cx +
+                      Math.cos(
+                        -(((angleA + angleB) / 2) * Math.PI) / 180
+                      ) *
+                        (arcRadius + 14)
+                    }
+                    y={
+                      cy +
+                      Math.sin(
+                        -(((angleA + angleB) / 2) * Math.PI) / 180
+                      ) *
+                        (arcRadius + 14)
+                    }
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    fontSize={11}
+                    fill="#f59e0b"
+                    fontWeight="bold"
+                  >
+                    {angleBetween}°
+                  </text>
+                )}
+
+                <defs>
+                  <marker
+                    id="arrowA"
+                    viewBox="0 0 10 10"
+                    refX="10"
+                    refY="5"
+                    markerWidth="6"
+                    markerHeight="6"
+                    orient="auto"
+                  >
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#3b82f6" />
+                  </marker>
+                  <marker
+                    id="arrowB"
+                    viewBox="0 0 10 10"
+                    refX="10"
+                    refY="5"
+                    markerWidth="6"
+                    markerHeight="6"
+                    orient="auto"
+                  >
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#10b981" />
+                  </marker>
+                </defs>
+
+                {/* Vector A */}
                 <line
                   x1={cx}
                   y1={cy}
-                  x2={projX}
-                  y2={projY}
-                  stroke="#f59e0b"
-                  strokeWidth={3}
-                  opacity={0.25}
+                  x2={aEndX}
+                  y2={aEndY}
+                  stroke="#3b82f6"
+                  strokeWidth={2.5}
+                  markerEnd="url(#arrowA)"
                 />
-              </>
-            )}
+                <circle cx={aEndX} cy={aEndY} r={4} fill="#3b82f6" />
+                {/* Invisible larger hit area for dragging A */}
+                <circle
+                  cx={aEndX}
+                  cy={aEndY}
+                  r={14}
+                  fill="transparent"
+                  cursor="grab"
+                  onPointerDown={handlePointerDown("A")}
+                />
+                <text
+                  x={cx + vecA[0] * (labelRadius + 14)}
+                  y={cy - vecA[1] * (labelRadius + 14)}
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  fontSize={12}
+                  fontWeight="bold"
+                  fill="#3b82f6"
+                  style={{ pointerEvents: "none" }}
+                >
+                  A
+                </text>
 
-            {/* Arc between vectors */}
-            {gap > 0 && (
-              <path
-                d={`M ${arcStartX} ${arcStartY} A ${arcRadius} ${arcRadius} 0 ${largeArc} ${sweep} ${arcEndX} ${arcEndY}`}
-                fill="none"
-                stroke="#f59e0b"
-                strokeWidth={2}
-                opacity={0.6}
-              />
-            )}
+                {/* Vector B */}
+                <line
+                  x1={cx}
+                  y1={cy}
+                  x2={bEndX}
+                  y2={bEndY}
+                  stroke="#10b981"
+                  strokeWidth={2.5}
+                  markerEnd="url(#arrowB)"
+                />
+                <circle cx={bEndX} cy={bEndY} r={4} fill="#10b981" />
+                {/* Invisible larger hit area for dragging B */}
+                <circle
+                  cx={bEndX}
+                  cy={bEndY}
+                  r={14}
+                  fill="transparent"
+                  cursor="grab"
+                  onPointerDown={handlePointerDown("B")}
+                />
+                <text
+                  x={cx + vecB[0] * (labelRadius + 14)}
+                  y={cy - vecB[1] * (labelRadius + 14)}
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  fontSize={12}
+                  fontWeight="bold"
+                  fill="#10b981"
+                  style={{ pointerEvents: "none" }}
+                >
+                  B
+                </text>
 
-            {/* Arc label */}
-            {gap > 0 && (
-              <text
-                x={
-                  cx +
-                  Math.cos(
-                    -(((angleA + angleB) / 2) * Math.PI) / 180
-                  ) *
-                    (arcRadius + 14)
-                }
-                y={
-                  cy +
-                  Math.sin(
-                    -(((angleA + angleB) / 2) * Math.PI) / 180
-                  ) *
-                    (arcRadius + 14)
-                }
-                textAnchor="middle"
-                dominantBaseline="middle"
-                fontSize={11}
-                fill="#f59e0b"
-                fontWeight="bold"
-              >
-                {angleBetween}°
-              </text>
-            )}
-
-            <defs>
-              <marker
-                id="arrowQ"
-                viewBox="0 0 10 10"
-                refX="10"
-                refY="5"
-                markerWidth="6"
-                markerHeight="6"
-                orient="auto"
-              >
-                <path d="M 0 0 L 10 5 L 0 10 z" fill="#3b82f6" />
-              </marker>
-              <marker
-                id="arrowK"
-                viewBox="0 0 10 10"
-                refX="10"
-                refY="5"
-                markerWidth="6"
-                markerHeight="6"
-                orient="auto"
-              >
-                <path d="M 0 0 L 10 5 L 0 10 z" fill="#10b981" />
-              </marker>
-            </defs>
-
-            {/* Vector A (Query) */}
-            <line
-              x1={cx}
-              y1={cy}
-              x2={aEndX}
-              y2={aEndY}
-              stroke="#3b82f6"
-              strokeWidth={2.5}
-              markerEnd="url(#arrowQ)"
-            />
-            <circle cx={aEndX} cy={aEndY} r={4} fill="#3b82f6" />
-            <text
-              x={aEndX + (vecA[0] > 0 ? 10 : -10)}
-              y={aEndY + (vecA[1] > 0 ? -8 : 12)}
-              textAnchor={vecA[0] > 0 ? "start" : "end"}
-              fontSize={11}
-              fontWeight="bold"
-              fill="#3b82f6"
-            >
-              Query (pos {posA})
-            </text>
-
-            {/* Vector B (Key) */}
-            <line
-              x1={cx}
-              y1={cy}
-              x2={bEndX}
-              y2={bEndY}
-              stroke="#10b981"
-              strokeWidth={2.5}
-              markerEnd="url(#arrowK)"
-            />
-            <circle cx={bEndX} cy={bEndY} r={4} fill="#10b981" />
-            <text
-              x={bEndX + (vecB[0] > 0 ? 10 : -10)}
-              y={bEndY + (vecB[1] > 0 ? -8 : 12)}
-              textAnchor={vecB[0] > 0 ? "start" : "end"}
-              fontSize={11}
-              fontWeight="bold"
-              fill="#10b981"
-            >
-              Key (pos {posB})
-            </text>
-
-            {/* Origin dot */}
-            <circle cx={cx} cy={cy} r={3} fill="currentColor" opacity={0.3} />
-
-            {/* Projection label */}
-            {gap > 0 && projScalar > 0.1 && (
-              <text
-                x={(cx + projX) / 2 + perpX * 12}
-                y={(cy + projY) / 2 - perpY * 12}
-                textAnchor="middle"
-                dominantBaseline="middle"
-                fontSize={10}
-                fill="#f59e0b"
-                opacity={0.8}
-              >
-                dot = {dotProduct.toFixed(2)}
-              </text>
-            )}
-          </svg>
-        </div>
-
-        {/* Stats display */}
-        <div className="flex justify-center gap-6">
-          <div className="flex flex-col items-center">
-            <span className="text-[10px] font-medium uppercase tracking-wider text-muted">
-              Gap |K - Q|
-            </span>
-            <span className="font-mono text-lg font-bold text-foreground">
-              {gap}
-            </span>
-          </div>
-          <div className="flex flex-col items-center">
-            <span className="text-[10px] font-medium uppercase tracking-wider text-muted">
-              Angle
-            </span>
-            <span className="font-mono text-lg font-bold text-amber-500">
-              {angleBetween}°
-            </span>
-          </div>
-          <div className="flex flex-col items-center">
-            <span className="text-[10px] font-medium uppercase tracking-wider text-muted">
-              Dot Product
-            </span>
-            <span className="font-mono text-lg font-bold text-accent">
-              {dotProduct.toFixed(4)}
-            </span>
-          </div>
-        </div>
-
-        {/* Preset buttons */}
-        <div className="flex justify-center gap-2">
-          <button
-            onClick={handleSameGap}
-            className="rounded-full bg-accent px-4 py-1.5 text-xs font-medium text-white transition-colors hover:bg-accent-dark"
-          >
-            Same gap, different positions
-          </button>
-          <button
-            onClick={handleDiffGap}
-            className="rounded-full border border-border px-4 py-1.5 text-xs font-medium text-muted transition-colors hover:text-foreground"
-          >
-            Same query pos, different gaps
-          </button>
-        </div>
-
-        {/* Comparison tables */}
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div className="rounded-lg border border-border bg-surface px-3 py-2">
-            <div className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-muted">
-              Same gap (3) = same dot product
+                {/* Origin dot */}
+                <circle cx={cx} cy={cy} r={3} fill="currentColor" opacity={0.3} />
+              </svg>
             </div>
-            <table className="w-full text-left font-mono text-xs">
+          </div>
+
+          {/* Dot product by gap table */}
+          <div ref={tableContainerRef} className="rounded-lg border border-border bg-surface shrink-0 max-h-[400px] overflow-y-auto">
+            <div className="px-3 py-2 border-b border-border sticky top-0 bg-surface">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted">
+                Dot product for each gap
+              </span>
+            </div>
+            <table className="text-xs font-mono">
               <thead>
-                <tr className="text-[10px] text-muted">
-                  <th className="pb-1 pr-2">Q</th>
-                  <th className="pb-1 pr-2">K</th>
-                  <th className="pb-1 pr-2">Gap</th>
-                  <th className="pb-1">Dot</th>
+                <tr className="text-[10px] uppercase text-muted">
+                  <th className="px-3 py-1.5 text-left font-medium">Gap</th>
+                  <th className="px-3 py-1.5 text-right font-medium">A · B</th>
                 </tr>
               </thead>
               <tbody>
-                {sameGapRows.map((row, i) => (
-                  <tr key={i} className="text-foreground">
-                    <td className="pr-2">{row.a}</td>
-                    <td className="pr-2">{row.b}</td>
-                    <td className="pr-2">{row.gap}</td>
-                    <td className="font-semibold text-accent">
-                      {row.dot.toFixed(4)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          <div className="rounded-lg border border-border bg-surface px-3 py-2">
-            <div className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-muted">
-              Different gap = different dot product
-            </div>
-            <table className="w-full text-left font-mono text-xs">
-              <thead>
-                <tr className="text-[10px] text-muted">
-                  <th className="pb-1 pr-2">Q</th>
-                  <th className="pb-1 pr-2">K</th>
-                  <th className="pb-1 pr-2">Gap</th>
-                  <th className="pb-1">Dot</th>
-                </tr>
-              </thead>
-              <tbody>
-                {diffGapRows.map((row, i) => (
-                  <tr key={i} className="text-foreground">
-                    <td className="pr-2">{row.a}</td>
-                    <td className="pr-2">{row.b}</td>
-                    <td className="pr-2">{row.gap}</td>
-                    <td className="font-semibold text-accent">
-                      {row.dot.toFixed(4)}
-                    </td>
-                  </tr>
-                ))}
+                {Array.from({ length: maxGap + 1 }, (_, g) => {
+                  const d = Math.cos(g * radPerPos);
+                  const isCurrent = g === gap;
+                  return (
+                    <tr
+                      key={g}
+                      ref={isCurrent ? activeRowRef : undefined}
+                      className={isCurrent
+                        ? "bg-accent/10 font-bold text-accent"
+                        : "text-muted"
+                      }
+                    >
+                      <td className="px-3 py-0.5">{g}</td>
+                      <td className="px-3 py-0.5 text-right">{d.toFixed(4)}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
         </div>
 
-        {/* Key insight */}
-        <div className="rounded-lg border border-border bg-surface px-4 py-3 text-sm text-foreground">
-          The dashed line shows the <strong>projection</strong> of the key onto
-          the query — its length <em>is</em> the dot product. Same gap → same
-          projection length → same dot product, regardless of absolute position.
+        {/* Vector cards + dot product computation */}
+        <div className="flex flex-wrap items-start justify-center gap-3">
+          <VectorCard
+            name={`position ${posA}`}
+            emoji=""
+            properties={["x", "y"]}
+            values={[vecA[0], vecA[1]]}
+            barColor="#3b82f6"
+            label="A"
+            labelColor="#3b82f6"
+            signed
+            signedMax={1}
+            className="text-xs w-36"
+            labelWidth="w-6"
+          />
+          <VectorCard
+            name={`position ${posB}`}
+            emoji=""
+            properties={["x", "y"]}
+            values={[vecB[0], vecB[1]]}
+            barColor="#10b981"
+            label="B"
+            labelColor="#10b981"
+            signed
+            signedMax={1}
+            className="text-xs w-36"
+            labelWidth="w-6"
+          />
+
+          {/* Multiply-and-add column */}
+          <div className="rounded-lg border border-foreground/10 bg-foreground/[0.02] text-xs w-48">
+            <div className="py-2 px-3 font-medium border-b border-foreground/10 bg-foreground/[0.02]">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400">
+                Dot product
+              </span>
+              <br />
+              multiply &amp; add
+            </div>
+            {["x", "y"].map((dim, i) => (
+              <div key={dim} className="flex items-center py-1.5 px-3 border-b border-foreground/5 last:border-b-0 font-mono text-[11px]">
+                <span className="text-blue-500">{vecA[i].toFixed(2)}</span>
+                <span className="text-muted mx-1">×</span>
+                <span className="text-emerald-500">{vecB[i].toFixed(2)}</span>
+                <span className="text-muted mx-1">=</span>
+                <span className="font-semibold">{products[i].toFixed(2)}</span>
+              </div>
+            ))}
+            <div className="py-2 px-3 border-t-2 border-foreground/10">
+              <div className="font-mono text-[11px] text-muted">
+                {products[0].toFixed(2)} + {products[1].toFixed(2)}
+              </div>
+              <div className="font-mono text-base font-bold text-accent mt-0.5">
+                = {dotViaComponents.toFixed(4)}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </WidgetContainer>

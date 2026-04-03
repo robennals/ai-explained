@@ -88,7 +88,7 @@ But logic gates have a problem. Their outputs snap between 0 and 1 with nothing 
 One way to think of a neuron is as a **smooth version of a logic gate**. With the right weights, a single two-input neuron can compute AND, OR, NOT, and more — but unlike a logic gate, its output changes smoothly when you adjust the weights. That smooth change is what makes neurons trainable.
 
 <NeuronPlaygroundWidget>
-Click each gate tab and watch the weights smoothly shift to compute it. Then try sliding the weights yourself — notice how you can smoothly blend between different logic gates.
+Click the **AND**, **OR**, **NOT**, and **NAND** buttons above and watch the weights smoothly shift to compute each gate. Then try sliding the weights yourself — notice how you can smoothly blend between different logic operations.
 </NeuronPlaygroundWidget>
 
 But there's something important here beyond just mimicking logic gates. Notice what happens when you slide an input to a value *between* 0 and 1 — say 0.6. The output isn't forced to snap to "true" or "false." It can be somewhere in between: 0.73, or 0.4, or any other value. The neuron handles *degrees* naturally — "probably true" rather than just "true" or "false."
@@ -106,8 +106,8 @@ There's one more operation worth knowing: **XOR** (short for "exclusive or"). It
 But what if we use *two* neurons feeding into a third? The two middle neurons are called **hidden neurons** — they don't produce the final answer, but instead compute intermediate results that the output neuron needs.
 
 Here's the trick:
-- **Neuron 1** computes OR: "is *at least one* input on?"
-- **Neuron 2** computes NAND (not-and): "are they *not both* on?"
+- **Hidden Neuron 1** computes OR: "is *at least one* input on?"
+- **Hidden Neuron 2** computes NAND (not-and): "are they *not both* on?"
 - **Output neuron** computes AND of those two results: "at least one is on, AND they're not both on."
 
 That's XOR. Three neurons, two layers — problem solved.

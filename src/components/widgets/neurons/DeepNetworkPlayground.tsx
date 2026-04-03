@@ -210,7 +210,7 @@ export function DeepNetworkPlayground() {
           { label: "Neurons/layer", value: neuronsPerLayer, set: (v: number) => rebuildNetwork(numInputs, numLayers, v, numOutputs), min: 1, max: 8 },
           { label: "Outputs", value: numOutputs, set: (v: number) => rebuildNetwork(numInputs, numLayers, neuronsPerLayer, v), min: 1, max: 4 },
         ].map((c) => (
-          <div key={c.label} className="flex items-center gap-2">
+          <div key={c.label} className="flex items-center gap-1">
             <span className="text-[11px] font-semibold text-foreground">{c.label}</span>
             <input
               type="range"
@@ -221,7 +221,7 @@ export function DeepNetworkPlayground() {
               onChange={(e) => c.set(parseInt(e.target.value))}
               className="w-20 h-1.5 accent-accent"
             />
-            <span className="text-[12px] font-mono font-bold text-foreground w-6 text-right">
+            <span className="text-[12px] font-mono font-bold text-foreground w-4 text-left">
               {c.value}
             </span>
           </div>
@@ -421,8 +421,8 @@ export function DeepNetworkPlayground() {
           </div>
           <div className="flex flex-col gap-1.5 max-h-48 overflow-y-auto">
             {selWeights.slice(0, selInputSize).map((w, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <span className="text-[10px] text-muted w-16 shrink-0">
+              <div key={i} className="flex items-center gap-1">
+                <span className="text-[10px] text-muted w-8 shrink-0">
                   w{i + 1}
                 </span>
                 <input
@@ -444,13 +444,13 @@ export function DeepNetworkPlayground() {
                   onPointerLeave={() => setActiveWeight(null)}
                   className="flex-1 h-1.5 accent-accent"
                 />
-                <span className="text-[10px] font-mono font-bold text-foreground w-10 text-right">
+                <span className="text-[10px] font-mono font-bold text-foreground w-10 text-left">
                   {w.toFixed(1)}
                 </span>
               </div>
             ))}
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] text-muted w-16 shrink-0">
+            <div className="flex items-center gap-1">
+              <span className="text-[10px] text-muted w-8 shrink-0">
                 bias
               </span>
               <input
@@ -469,7 +469,7 @@ export function DeepNetworkPlayground() {
                 }
                 className="flex-1 h-1.5 accent-accent"
               />
-              <span className="text-[10px] font-mono font-bold text-foreground w-10 text-right">
+              <span className="text-[10px] font-mono font-bold text-foreground w-10 text-left">
                 {selWeights[selInputSize].toFixed(1)}
               </span>
             </div>

@@ -12,7 +12,6 @@ const VectorPropertyExplorer = dynamic(
   { ssr: false }
 );
 
-
 const UnitVectorExplorer = dynamic(
   () =>
     import("@/components/widgets/vectors/UnitVectorExplorer").then(
@@ -45,6 +44,29 @@ const NeuronDotProduct = dynamic(
   { ssr: false }
 );
 
+const AmplifiedAnimalExplorer = dynamic(
+  () =>
+    import("@/components/widgets/vectors/AmplifiedAnimalExplorer").then(
+      (m) => m.AmplifiedAnimalExplorer
+    ),
+  { ssr: false }
+);
+
+const VectorMixer = dynamic(
+  () =>
+    import("@/components/widgets/vectors/VectorMixer").then(
+      (m) => m.VectorMixer
+    ),
+  { ssr: false }
+);
+
+const DirectionMagnitudeExplorer = dynamic(
+  () =>
+    import("@/components/widgets/vectors/DirectionMagnitudeExplorer").then(
+      (m) => m.DirectionMagnitudeExplorer
+    ),
+  { ssr: false }
+);
 
 function WidgetSlot({ children, tryIt, label }: { children: React.ReactNode; tryIt?: React.ReactNode; label?: string }) {
   return (
@@ -69,7 +91,6 @@ export function VectorPropertyExplorerWidget({ children }: { children?: React.Re
     </WidgetSlot>
   );
 }
-
 
 export function UnitVectorExplorerWidget({ children }: { children?: React.ReactNode }) {
   return (
@@ -103,3 +124,26 @@ export function NeuronDotProductWidget({ children }: { children?: React.ReactNod
   );
 }
 
+export function AmplifiedAnimalExplorerWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <AmplifiedAnimalExplorer />
+    </WidgetSlot>
+  );
+}
+
+export function VectorMixerWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <VectorMixer />
+    </WidgetSlot>
+  );
+}
+
+export function DirectionMagnitudeExplorerWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <DirectionMagnitudeExplorer />
+    </WidgetSlot>
+  );
+}
