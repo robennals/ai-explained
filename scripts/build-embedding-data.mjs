@@ -208,6 +208,26 @@ const CONCRETE_NOUNS = [
   "wizard", "witch", "pirate", "cowboy", "clown", "magician",
   "hero", "villain", "warrior", "thief", "spy",
 
+  // Countries & Capitals (for analogy demos)
+  "france", "paris", "germany", "berlin", "italy", "rome",
+  "japan", "tokyo", "russia", "moscow", "china", "beijing",
+  "spain", "madrid", "england", "london",
+
+  // Verb forms (for tense analogy demos)
+  "walk", "walked", "walking",
+  "run", "ran", "running",
+  "swim", "swam", "swimming",
+  "fly", "flew", "flying",
+
+  // Adjective forms (for comparative analogy demos)
+  "big", "bigger", "biggest",
+  "small", "smaller", "smallest",
+  "fast", "faster", "fastest",
+  "slow", "slower", "slowest",
+
+  // Additional gender-pair words
+  "nephew", "niece", "actress", "waitress",
+
   // Abstract but guessable
   "shadow", "light",
   "music", "song", "dance",
@@ -341,10 +361,10 @@ async function main() {
     }
 
     const BLOCKED_WORDS = new Set([
-      "moscow", "jerusalem", "baghdad", "kabul", "tehran", "beirut", "delhi",
+      "jerusalem", "baghdad", "kabul", "tehran", "beirut", "delhi",
       "iraq", "iran", "syria", "afghanistan", "pakistan", "gaza", "los",
-      "tokyo", "japan", "china", "india", "london", "paris", "berlin", "rome",
-      "africa", "europe", "asia", "america", "mexico", "canada", "spain",
+      "india",
+      "africa", "europe", "asia", "america", "mexico", "canada",
       "city", "town", "east", "west", "north", "south", "street", "avenue",
       "county", "district", "province", "borough", "suburb",
       "gen", "col", "sgt", "capt", "lt", "cpl", "pvt", "maj",
@@ -386,8 +406,8 @@ async function main() {
       "negro", "slave", "slaughter",
       "israel", "iraq", "korea", "vietnam", "taiwan", "cuba", "brazil",
       "egypt", "turkey", "greece", "norway", "sweden", "finland",
-      "germany", "france", "italy", "russia", "ukraine", "poland",
-      "australia", "zealand", "ireland", "scotland", "wales", "england",
+      "ukraine", "poland",
+      "australia", "zealand", "ireland", "scotland", "wales",
       "california", "texas", "florida", "york", "jersey",
       "january", "february", "march", "april", "may", "june", "july",
       "august", "september", "october", "november", "december",

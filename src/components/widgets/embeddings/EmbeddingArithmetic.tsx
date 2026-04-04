@@ -12,13 +12,48 @@ interface Preset {
   label: string;
 }
 
-const PRESETS: Preset[] = [
-  { a: "king", b: "man", c: "woman", label: "king \u2212 man + woman" },
-  { a: "prince", b: "man", c: "woman", label: "prince \u2212 man + woman" },
-  { a: "father", b: "man", c: "woman", label: "father \u2212 man + woman" },
-  { a: "boy", b: "man", c: "woman", label: "boy \u2212 man + woman" },
-  { a: "son", b: "man", c: "woman", label: "son \u2212 man + woman" },
-  { a: "husband", b: "man", c: "woman", label: "husband \u2212 man + woman" },
+interface PresetGroup {
+  name: string;
+  presets: Preset[];
+}
+
+const PRESET_GROUPS: PresetGroup[] = [
+  {
+    name: "Gender",
+    presets: [
+      { a: "king", b: "man", c: "woman", label: "king \u2212 man + woman" },
+      { a: "actor", b: "man", c: "woman", label: "actor \u2212 man + woman" },
+      { a: "nephew", b: "man", c: "woman", label: "nephew \u2212 man + woman" },
+      { a: "grandfather", b: "man", c: "woman", label: "grandfather \u2212 man + woman" },
+      { a: "husband", b: "man", c: "woman", label: "husband \u2212 man + woman" },
+    ],
+  },
+  {
+    name: "Capitals",
+    presets: [
+      { a: "paris", b: "france", c: "germany", label: "paris \u2212 france + germany" },
+      { a: "paris", b: "france", c: "japan", label: "paris \u2212 france + japan" },
+      { a: "paris", b: "france", c: "italy", label: "paris \u2212 france + italy" },
+      { a: "paris", b: "france", c: "russia", label: "paris \u2212 france + russia" },
+      { a: "tokyo", b: "japan", c: "france", label: "tokyo \u2212 japan + france" },
+    ],
+  },
+  {
+    name: "Verb tense",
+    presets: [
+      { a: "walking", b: "walk", c: "swim", label: "walking \u2212 walk + swim" },
+      { a: "running", b: "run", c: "walk", label: "running \u2212 run + walk" },
+      { a: "walked", b: "walk", c: "swim", label: "walked \u2212 walk + swim" },
+      { a: "flying", b: "fly", c: "swim", label: "flying \u2212 fly + swim" },
+    ],
+  },
+  {
+    name: "Workplace",
+    presets: [
+      { a: "surgeon", b: "hospital", c: "restaurant", label: "surgeon \u2212 hospital + restaurant" },
+      { a: "farmer", b: "farm", c: "school", label: "farmer \u2212 farm + school" },
+    ],
+  },
 ];
 
 function Autocomplete({
@@ -148,31 +183,35 @@ export function EmbeddingArithmetic() {
       description="Subtract one word's embedding from another, add a third, and see what word lands nearest the result."
       onReset={resetState}
     >
-      {/* Preset buttons */}
-      <div className="mb-4 flex flex-wrap gap-2">
-        <span className="text-[10px] font-medium uppercase tracking-wider text-muted self-center">
-          Try:
-        </span>
-        {PRESETS.map((p) => {
-          const active = p.a === wordA && p.b === wordB && p.c === wordC;
-          return (
-            <button
-              key={p.label}
-              onClick={() => {
-                setWordA(p.a);
-                setWordB(p.b);
-                setWordC(p.c);
-              }}
-              className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-colors ${
-                active
-                  ? "bg-accent text-white"
-                  : "bg-surface text-muted hover:bg-accent/10 hover:text-accent"
-              }`}
-            >
-              {p.label}
-            </button>
-          );
-        })}
+      {/* Preset buttons grouped by category */}
+      <div className="mb-4 space-y-2">
+        {PRESET_GROUPS.map((group) => (
+          <div key={group.name} className="flex flex-wrap items-center gap-2">
+            <span className="w-16 shrink-0 text-[10px] font-medium uppercase tracking-wider text-muted">
+              {group.name}
+            </span>
+            {group.presets.map((p) => {
+              const active = p.a === wordA && p.b === wordB && p.c === wordC;
+              return (
+                <button
+                  key={p.label}
+                  onClick={() => {
+                    setWordA(p.a);
+                    setWordB(p.b);
+                    setWordC(p.c);
+                  }}
+                  className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-colors ${
+                    active
+                      ? "bg-accent text-white"
+                      : "bg-surface text-muted hover:bg-accent/10 hover:text-accent"
+                  }`}
+                >
+                  {p.label}
+                </button>
+              );
+            })}
+          </div>
+        ))}
       </div>
 
       {/* Equation inputs */}
