@@ -44,7 +44,15 @@ const PRESET_GROUPS: PresetGroup[] = [
       { a: "walking", b: "walk", c: "swim", label: "walking \u2212 walk + swim" },
       { a: "running", b: "run", c: "walk", label: "running \u2212 run + walk" },
       { a: "walked", b: "walk", c: "swim", label: "walked \u2212 walk + swim" },
-      { a: "flying", b: "fly", c: "swim", label: "flying \u2212 fly + swim" },
+      { a: "walked", b: "walk", c: "fly", label: "walked \u2212 walk + fly" },
+    ],
+  },
+  {
+    name: "Comparative",
+    presets: [
+      { a: "bigger", b: "big", c: "fast", label: "bigger \u2212 big + fast" },
+      { a: "bigger", b: "big", c: "slow", label: "bigger \u2212 big + slow" },
+      { a: "faster", b: "fast", c: "slow", label: "faster \u2212 fast + slow" },
     ],
   },
   {
