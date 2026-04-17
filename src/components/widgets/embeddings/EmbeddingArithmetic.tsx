@@ -24,8 +24,6 @@ const PRESET_GROUPS: PresetGroup[] = [
       { a: "king", b: "man", c: "woman", label: "king \u2212 man + woman" },
       { a: "actor", b: "man", c: "woman", label: "actor \u2212 man + woman" },
       { a: "nephew", b: "man", c: "woman", label: "nephew \u2212 man + woman" },
-      { a: "grandfather", b: "man", c: "woman", label: "grandfather \u2212 man + woman" },
-      { a: "husband", b: "man", c: "woman", label: "husband \u2212 man + woman" },
     ],
   },
   {
@@ -33,8 +31,6 @@ const PRESET_GROUPS: PresetGroup[] = [
     presets: [
       { a: "paris", b: "france", c: "germany", label: "paris \u2212 france + germany" },
       { a: "paris", b: "france", c: "japan", label: "paris \u2212 france + japan" },
-      { a: "paris", b: "france", c: "italy", label: "paris \u2212 france + italy" },
-      { a: "paris", b: "france", c: "russia", label: "paris \u2212 france + russia" },
       { a: "tokyo", b: "japan", c: "france", label: "tokyo \u2212 japan + france" },
     ],
   },
@@ -42,9 +38,8 @@ const PRESET_GROUPS: PresetGroup[] = [
     name: "Verb tense",
     presets: [
       { a: "walking", b: "walk", c: "swim", label: "walking \u2212 walk + swim" },
-      { a: "running", b: "run", c: "walk", label: "running \u2212 run + walk" },
-      { a: "walked", b: "walk", c: "swim", label: "walked \u2212 walk + swim" },
       { a: "walked", b: "walk", c: "fly", label: "walked \u2212 walk + fly" },
+      { a: "walked", b: "walk", c: "swim", label: "walked \u2212 walk + swim" },
     ],
   },
   {
