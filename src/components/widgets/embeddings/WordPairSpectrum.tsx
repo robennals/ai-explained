@@ -5,11 +5,9 @@ import { WidgetContainer } from "../shared/WidgetContainer";
 import { useEmbeddingData } from "./useEmbeddingData";
 import {
   vecSub,
-  vecAdd,
   vecScale,
   vecNormalize,
   dotProduct,
-  cosineSimilarity,
 } from "./embeddingUtils";
 
 interface Preset {
@@ -20,12 +18,14 @@ interface Preset {
 }
 
 const PRESETS: Preset[] = [
-  { label: "ant \u2194 whale", wordA: "ant", wordB: "whale", description: "Small to large animals \u2014 the embedding captures size within a category." },
-  { label: "salad \u2194 cake", wordA: "salad", wordB: "cake", description: "Healthy to indulgent foods \u2014 the direction encodes something like richness." },
-  { label: "boy \u2194 man", wordA: "boy", wordB: "man", description: "Youth to maturity \u2014 a direction encoding age." },
-  { label: "cottage \u2194 palace", wordA: "cottage", wordB: "palace", description: "Modest to grand \u2014 the embedding captures a spectrum of grandeur." },
-  { label: "violin \u2194 drum", wordA: "violin", wordB: "drum", description: "Melodic to percussive \u2014 instruments organized by type." },
-  { label: "bicycle \u2194 airplane", wordA: "bicycle", wordB: "airplane", description: "Simple to complex vehicles \u2014 a spectrum of speed and technology." },
+  { label: "tiny \u2194 huge", wordA: "tiny", wordB: "huge", description: "Clean size gradient \u2014 both endpoints are pure size adjectives, so the direction encodes only size." },
+  { label: "salad \u2194 cake", wordA: "salad", wordB: "cake", description: "Clean savory-to-sweet \u2014 both endpoints lie on a clear taste axis, so the line fills with foods varying along that axis." },
+  { label: "boy \u2194 man", wordA: "boy", wordB: "man", description: "Mostly age, with gender bleed \u2014 the direction encodes both, because boys and men differ on both axes." },
+  { label: "cottage \u2194 palace", wordA: "cottage", wordB: "palace", description: "Sparse direction \u2014 only a handful of dwellings (mansion, hotel, castle) lie cleanly on this line. The embedding doesn't have many words that share the cottage-to-palace axis." },
+  { label: "pond \u2194 ocean", wordA: "pond", wordB: "ocean", description: "Water-body size, with a touch of aquatic context \u2014 alongside lakes and rivers, \u201Ccoral\u201D appears because the direction encodes both \u201Cgetting bigger\u201D and \u201Cmore ocean-like.\u201D" },
+  { label: "bicycle \u2194 airplane", wordA: "bicycle", wordB: "airplane", description: "Vehicle complexity bundled with flying context \u2014 cars and trucks in the middle, but \u201Cpilot\u201D and \u201Ccrash\u201D creep in near airplane." },
+  { label: "ant \u2194 whale", wordA: "ant", wordB: "whale", description: "Size and habitat bundled \u2014 small land creatures progress to large aquatic ones, because the embedding learned both axes together." },
+  { label: "man \u2194 sausage", wordA: "man", wordB: "sausage", description: "No shared axis \u2014 nothing meaningful connects people and sausages, so the middle is empty and the words pile up at each end." },
 ];
 
 const NUM_RESULTS = 12;
@@ -94,7 +94,8 @@ function Autocomplete({
 
 interface SpectrumEntry {
   word: string;
-  t: number; // 0..1 normalized position on the spectrum
+  t: number; // 0..1 normalized position on the arc (A at 0, B at 1)
+  closeness: number; // cosine similarity to closest point on the arc (1 = on the line, 0 = perpendicular)
   isAnchor: boolean;
 }
 
@@ -112,58 +113,64 @@ export function WordPairSpectrum() {
 
   const wordSet = useMemo(() => new Set(data?.words ?? []), [data]);
 
-  // Compute spectrum results as a sorted list
+  // Treat the embedding as a hypersphere: words are directions, the "spectrum"
+  // between A and B is the great-circle arc between them. Rank candidate words
+  // by angular distance from that arc (smaller = more on-spectrum), and place
+  // each candidate by its arc position (t=0 at A, t=1 at B).
   const entries = useMemo((): SpectrumEntry[] | null => {
     if (!data) return null;
     const idxA = data.words.indexOf(wordA);
     const idxB = data.words.indexOf(wordB);
     if (idxA < 0 || idxB < 0) return null;
 
-    const vecA = data.vectors[idxA];
-    const vecB = data.vectors[idxB];
+    const uA = vecNormalize(data.vectors[idxA]);
+    const uB = vecNormalize(data.vectors[idxB]);
+    const dotAB = dotProduct(uA, uB);
+    const thetaAB = Math.acos(Math.max(-1, Math.min(1, dotAB)));
+    if (thetaAB < 1e-6) return null;
 
-    // Direction from A to B
-    const direction = vecNormalize(vecSub(vecB, vecA));
-    // Midpoint for relevance scoring
-    const midpoint = vecScale(vecAdd(vecA, vecB), 0.5);
+    // Orthonormal basis (uA, ePerp) for the plane containing the arc.
+    const ePerp = vecNormalize(vecSub(uB, vecScale(uA, dotAB)));
 
-    // Score all words by relevance to the pair
+    const margin = 0.1;
+    // Quality threshold: orth = sin(angle to closest arc point). Random pairs
+    // in 300d hover around orth ≈ 0.99, so 0.86 means ≥3× closer to the arc
+    // than a random word. Only show words that are genuinely on the direction;
+    // don't pad weak results with noise. The widget self-documents: clean
+    // directions surface many words, sparse ones surface few.
+    const maxOrth = 0.86;
     const exclude = new Set([idxA, idxB]);
-    const scored: { index: number; relevance: number; projection: number }[] = [];
+    const scored: { index: number; t: number; closeness: number; orth: number }[] = [];
 
     for (let i = 0; i < data.words.length; i++) {
       if (exclude.has(i)) continue;
-      const simToMid = cosineSimilarity(data.vectors[i], midpoint);
-      const proj = dotProduct(data.vectors[i], direction);
-      scored.push({ index: i, relevance: simToMid, projection: proj });
+      const uP = vecNormalize(data.vectors[i]);
+      const pA = dotProduct(uP, uA);
+      const pPerp = dotProduct(uP, ePerp);
+      const planeMag2 = pA * pA + pPerp * pPerp;
+      const orth = Math.sqrt(Math.max(0, 1 - planeMag2));
+      if (orth > maxOrth) continue;
+      const t = Math.atan2(pPerp, pA) / thetaAB;
+      if (t < -margin || t > 1 + margin) continue;
+      // closeness = cos similarity to closest point on arc = √(planeMag²)
+      const closeness = Math.sqrt(planeMag2);
+      scored.push({ index: i, t, closeness, orth });
     }
 
-    // Take top by relevance
-    scored.sort((a, b) => b.relevance - a.relevance);
+    scored.sort((a, b) => a.orth - b.orth);
     const top = scored.slice(0, NUM_RESULTS);
 
-    // Include anchor projections
-    const projA = dotProduct(vecA, direction);
-    const projB = dotProduct(vecB, direction);
-
-    // Compute min/max for normalization
-    const allProjs = [projA, projB, ...top.map((t) => t.projection)];
-    const minProj = Math.min(...allProjs);
-    const maxProj = Math.max(...allProjs);
-    const range = maxProj - minProj || 1;
-
-    // Build entries: anchors + results
     const all: SpectrumEntry[] = [
-      { word: wordA, t: (projA - minProj) / range, isAnchor: true },
-      { word: wordB, t: (projB - minProj) / range, isAnchor: true },
+      { word: wordA, t: 0, closeness: 1, isAnchor: true },
+      { word: wordB, t: 1, closeness: 1, isAnchor: true },
       ...top.map((r) => ({
         word: data.words[r.index],
-        t: (r.projection - minProj) / range,
+        t: Math.max(0, Math.min(1, r.t)),
+        closeness: r.closeness,
         isAnchor: false,
       })),
     ];
 
-    // Sort by projection (low to high = wordA direction to wordB direction)
     all.sort((a, b) => a.t - b.t);
 
     return all;
@@ -196,7 +203,7 @@ export function WordPairSpectrum() {
   return (
     <WidgetContainer
       title="Word Pair Spectrum"
-      description="Pick two words. The embedding places related words on a spectrum between them."
+      description="Pick two words. Each candidate gets two bars: where it sits along the line between A and B, and how close it is to that line. Words too far off the line are dropped — sparse directions surface few words, by design."
       onReset={resetState}
     >
       {/* Preset buttons */}
@@ -256,11 +263,15 @@ export function WordPairSpectrum() {
       {/* Vertical spectrum list */}
       {entries ? (
         <div className="space-y-0">
-          {/* Header row showing direction */}
-          <div className="mb-1 flex items-center text-[10px] text-muted">
+          {/* Header row showing what the two bars represent */}
+          <div className="mb-1 flex items-center gap-2 text-[10px] text-muted">
             <span className="w-24" />
-            <span className="flex-1 text-left">{wordA}</span>
-            <span className="flex-1 text-right">{wordB}</span>
+            <div className="flex-[2] flex items-baseline justify-between">
+              <span>{wordA}</span>
+              <span className="text-[9px] uppercase tracking-wider">position on the line</span>
+              <span>{wordB}</span>
+            </div>
+            <div className="w-24 text-center text-[9px] uppercase tracking-wider">closeness to line</div>
           </div>
 
           {entries.map((entry) => (
@@ -279,14 +290,36 @@ export function WordPairSpectrum() {
               >
                 {entry.word}
               </span>
-              {/* Position bar */}
-              <div className="relative flex-1 h-3">
+              {/* Position bar (slider with dot at t) */}
+              <div className="relative flex-[2] h-3">
                 <div className="absolute inset-y-0 left-0 right-0 flex items-center">
                   <div className="h-px w-full bg-border" />
                 </div>
                 <div
                   className="absolute top-1/2 -translate-y-1/2"
                   style={{ left: `${entry.t * 100}%` }}
+                >
+                  <div
+                    className={`h-2.5 w-2.5 -ml-[5px] rounded-full ${
+                      entry.isAnchor ? "bg-accent" : "bg-foreground/60"
+                    }`}
+                  />
+                </div>
+              </div>
+              {/* Closeness bar (slider with dot at planeMag, with fill behind) */}
+              <div className="relative w-24 h-3">
+                <div className="absolute inset-y-0 left-0 right-0 flex items-center">
+                  <div className="h-px w-full bg-border" />
+                </div>
+                <div
+                  className={`absolute inset-y-0 left-0 rounded-sm ${
+                    entry.isAnchor ? "bg-accent/30" : "bg-foreground/15"
+                  }`}
+                  style={{ width: `${entry.closeness * 100}%` }}
+                />
+                <div
+                  className="absolute top-1/2 -translate-y-1/2"
+                  style={{ left: `${entry.closeness * 100}%` }}
                 >
                   <div
                     className={`h-2.5 w-2.5 -ml-[5px] rounded-full ${

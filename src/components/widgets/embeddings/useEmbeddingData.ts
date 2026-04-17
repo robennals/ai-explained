@@ -14,7 +14,7 @@ function fetchData(): Promise<EmbeddingData> {
   if (cachedData) return Promise.resolve(cachedData);
   if (fetchPromise) return fetchPromise;
 
-  fetchPromise = fetch("/data/embeddings.json")
+  fetchPromise = fetch("https://pub-0f0bc2e5708e4f6b87d02e38956b7b72.r2.dev/data/embeddings/embeddings.json")
     .then((res) => {
       if (!res.ok) throw new Error(`Failed to load embedding data: ${res.status}`);
       return res.json();

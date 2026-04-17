@@ -13,10 +13,12 @@ AI solves this by giving up on universal dimensions entirely. Instead of asking 
 This is a somewhat tricky idea, so let's build up to it starting with just a single dimension. What if we use different *regions* of the number line for different categories, and order items *within* each region by a different property?
 
 <CombinedNumberLineWidget>
-Try each preset. In "Animals × Foods", animals are on the left ordered by size, while foods are on the right ordered by sweetness. One number encodes the category AND a property within it. Try the other presets — each packs two categories with different orderings onto one line.
+Try each preset. In "Animals + Foods", animals are on the left ordered by size, while foods are on the right ordered by sweetness. One number encodes the category AND a property within it. Try "Animals + Foods + Instruments" too — there's no two-category limit; you can keep carving the line into more regions.
 </CombinedNumberLineWidget>
 
-This is surprisingly expressive! One number tells you both *what category* something belongs to (which region it's in) and *something about it* (its position within that region). But it still can't handle more than two categories well — we'd need more room on the line than we have.
+This is surprisingly expressive. One number tells you both *what category* something belongs to (which region it's in) and *something about it* (its position within that region). And nothing stops us from adding more regions — three, four, or more categories share the same line just fine.
+
+But a single dimension has two hard limits. First, each region can only order its words by *one* property. Animals vary by size, but also by cuddliness, intelligence, and danger — one number within a region can't express all of those at once. Second, a line can't show any structure *between* categories. Some items belong to more than one at once — chicken is both an animal and a food — but a single line forces every item into exactly one region. And just as we want item positions *within* a category to carry meaning, we'd want the positions of categories *themselves* to carry meaning: animals and people are both living things; instruments and tools are both objects people use. On a single line there's no way to express any of that — every category is just its own chunk.
 
 ## Adding a Second Dimension
 
@@ -42,7 +44,7 @@ The dimensions don't need labels. What matters is that similar things are nearby
 
 ## Exploring a Real Embedding
 
-Let's try a real embedding — GloVe, created by Stanford. Each word is a point in 50-dimensional space. The full embedding contains 400,000 words, which is too many to fit in the browser, so we're showing a subset of common nouns. We can't visualize 50 dimensions, but we *can* use cosine similarity (from the previous chapter) to ask: what's nearby?
+Let's try a real embedding — GloVe, created by Stanford. Each word is a point in 300-dimensional space. The full embedding contains 400,000 words, which is too many to fit in the browser, so we're showing a subset of common nouns. We can't visualize 300 dimensions, but we *can* use cosine similarity (from the previous chapter) to ask: what's nearby?
 
 <EmbeddingPlaygroundWidget>
 Start with "dog" — its neighbors are other animals and pets. Click on a neighbor to jump to it and browse around the space. Try "guitar" — you get other instruments. Try "queen" — notice it sits near royalty words. Type your own words and see what clusters together.
@@ -52,16 +54,18 @@ Notice that the embedding groups words by meaning without being told what any wo
 
 ## Directions Have Meaning
 
-The embedding doesn't just group similar words together — *directions* in the space carry meaning too. The direction from "ant" to "whale" captures something like size. The direction from "boy" to "man" captures age. You can pick any two words, and the line between them defines a meaningful spectrum.
+The embedding doesn't just group similar words together — *directions* in the space carry meaning too. The direction from "tiny" to "huge" captures size. The direction from "boy" to "man" captures age. The direction from "salad" to "cake" captures savory-to-sweet. Within regions where the embedding has learned useful structure, the line between two words defines a meaningful spectrum.
+
+The widget below tries to find words that genuinely lie on this direction — not just words that are similar to one endpoint, but words whose embedding sits close to the *line* connecting both. Some pairs of words produce a rich, cleanly-ordered spectrum. Others produce only a handful of matches. And some — pairs the embedding never had a reason to organize together — produce nothing meaningful in between.
 
 <WordPairSpectrumWidget>
-Try "ant ↔ whale" — notice how animals arrange from small and land-dwelling to large and aquatic, the two main ways ants and whales differ. Try "salad ↔ cake" for a healthy-to-indulgent food spectrum. Try "boy ↔ man" for an age spectrum. Pick your own word pairs and see what spectrums emerge. You'll sometimes find unexpected words in between — sometimes because the embedding is imperfect, and sometimes because it's capturing dimensions of meaning other than the one you were thinking of.
+Try "tiny ↔ huge" first — a long, clean size gradient because both endpoints differ only in size, so the direction is pure. Try "salad ↔ cake" for a savory-to-sweet food spectrum. Then try "cottage ↔ palace" — you'll get only a handful of buildings; the embedding has surprisingly few words that lie cleanly on this direction. Try "pond ↔ ocean" — lakes and rivers appear, but also "coral," because the direction is bundled: water-body size *and* aquatic context together. Then try "man ↔ sausage" — words pile up near each endpoint with empty space in the middle, because there's no learned direction connecting people and sausages. The widget shows whatever the embedding learned, no padding.
 </WordPairSpectrumWidget>
 
-This is why unlabeled dimensions are so powerful. Even though no dimension is labeled "size" or "age," those concepts exist as directions in the space. And there are far more meaningful directions than there could ever be labeled dimensions — every pair of words defines a potential axis of meaning.
+This is why unlabeled dimensions are powerful: concepts like size and age exist as directions in the space even though no dimension is labeled. But here's the catch — each direction encodes whatever bundle of features happens to vary between the two endpoints in the training corpus, not necessarily a single clean concept. Pick endpoints that differ in only one obvious way (`tiny` and `huge` are both pure size adjectives) and the direction is pure. Pick endpoints that differ in many ways and the line collects whatever shares that bundle. The embedding is rich in local structure, and that structure is shaped by what the model was trained on — not by some idealized geometry of meaning.
 
 <KeyInsight>
-In a well-trained embedding, directions carry meaning. The direction from small to large, from young to old, from simple to complex — these all exist as paths through the space. This structure emerges from training on text, with no human labeling.
+In a well-trained embedding, directions carry meaning — but a direction encodes whatever bundle of features varies between two words in the training corpus, not necessarily a single clean concept. Pick words that differ in only one way and you get a pure spectrum. Pick words that differ in many ways and the line encodes the whole bundle.
 </KeyInsight>
 
 
@@ -83,7 +87,7 @@ This is an important point: a neural network will learn an embedding where addit
 
 Why does this work at all? Because the embedding has learned to represent certain relationships as *consistent directions*. If the capital-of relationship is roughly the same direction everywhere in the space — the same offset from France to Paris as from Germany to Berlin, from Japan to Tokyo — then subtraction isolates that direction, and addition applies it. Mathematicians call this **linear structure**, and it's remarkably useful.
 
-This principle goes further than word analogies. A word embedding for "bear" captures bear-ness in 50 dimensions. But what about "friendly bear"? Or "friendly bear who likes marmalade sandwiches, was found at Paddington Station, and stars in a children's story"? Each additional detail adds more meaning to the vector. In high-dimensional space (real models use 768 or more dimensions), you can keep layering on meaning through addition — and this turns out to be one of the most important ideas in modern AI. We'll see exactly how when we get to [transformers](/transformers).
+This principle goes further than word analogies. A word embedding for "bear" captures bear-ness in 300 dimensions. But what about "friendly bear"? Or "friendly bear who likes marmalade sandwiches, was found at Paddington Station, and stars in a children's story"? Each additional detail adds more meaning to the vector. In high-dimensional space (real models use 768 or more dimensions), you can keep layering on meaning through addition — and this turns out to be one of the most important ideas in modern AI. We'll see exactly how when we get to [transformers](/transformers).
 
 <KeyInsight>
 Vector arithmetic works in embedding space because the network learns consistent directions for relationships. This composability — building complex meaning by combining simple parts — is one of the most powerful properties of embeddings, and a foundation for how modern AI builds up rich understanding.
@@ -124,7 +128,7 @@ Each connection carries a weight. Since only one input word is "on," the output 
 
 The network learns those weights through gradient descent, just like any other weights - naturally assigning each word the meaning that helps the network the most.
 
-Modern language models use much bigger embeddings than our 50-dimensional GloVe example: GPT-2 uses 768 dimensions, GPT-3 uses 12,288 dimensions.
+Modern language models use even bigger embeddings than our 300-dimensional GloVe example: GPT-2 uses 768 dimensions, GPT-3 uses 12,288 dimensions.
 
 <EmbeddingLayerDiagramWidget>
 Select different tokens from the dropdown. Notice how the selected token's input lights up with a 1, and all the others show 0 — that's one-hot encoding. The bright lines show the weights connecting that token to the embedding layer, and those weights become the embedding values on the right. The embedding then feeds into more layers of neurons — the rest of the network. Try selecting "dog" then "cat" — their embedding values look more similar to each other than to "car".

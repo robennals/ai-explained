@@ -45,6 +45,7 @@ next-env.d.ts
 
 # model files (served from R2, not git)
 public/data/next-word-model/
+public/data/embeddings/
 
 # large data files (downloaded on demand by notebooks/scripts)
 notebooks/glove.*
