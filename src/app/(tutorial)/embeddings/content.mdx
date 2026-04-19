@@ -1,14 +1,14 @@
 # From Words to Meanings
 
 <Lead>
-In the last chapter, we described animals with hand-picked properties like size and scariness. That worked because animals are one kind of thing. But words represent *everything* — and there's no universal set of properties for all of them. AI solves this by letting the network learn a space where meaning is encoded in proximity and direction, not in any individual dimension.
+In the last chapter, we described animals with hand-picked properties like size and scariness. That worked because animals are one kind of thing. But words represent *everything* — and no single set of properties works for all of them. Modern AI solves this by giving up on the idea of universal properties, and instead putting similar words close to each other and letting directions mean different things in different places.
 </Lead>
 
 ## The Problem with Hand-Picked Dimensions
 
 When we represented animals as vectors, we chose dimensions that made sense for animals: size, speed, danger. But what dimensions would you use for *all words*? "How big is the color blue?" doesn't make sense. "How fast is democracy?" There's no universal set of labeled dimensions that works for everything.
 
-AI solves this by giving up on universal dimensions entirely. Instead of asking "what properties describe everything?", it places words with similar meanings close together — and lets the dimensions mean different things in different parts of the space. Near "dog," the dimensions might capture size and domestication; near "democracy," they might capture abstractness and political leaning.
+AI solves this by giving up on universal dimensions entirely. Instead of asking "what properties describe everything?", it places words with similar meanings close together — and lets the dimensions mean different things in different parts of the space. Near "dog," the dimensions might capture size and domestication; near "cake," the same dimensions might capture sweetness and saltiness.
 
 This is a somewhat tricky idea, so let's build up to it starting with just a single dimension. What if we use different *regions* of the number line for different categories, and order items *within* each region by a different property?
 
@@ -44,7 +44,7 @@ The dimensions don't need labels. What matters is that similar things are nearby
 
 ## Exploring a Real Embedding
 
-Let's try a real embedding — GloVe, created by Stanford. Each word is a point in 300-dimensional space. The full embedding contains 400,000 words, which is too many to fit in the browser, so we're showing a subset of common nouns. We can't visualize 300 dimensions, but we *can* use cosine similarity (from the previous chapter) to ask: what's nearby?
+Let's try a real embedding — GloVe, created by Stanford. Each word is a point in 300-dimensional space. The full embedding contains 400,000 words, which is too many to fit in the browser, so we're showing a subset of common nouns. We can't visualize 300 dimensions, but we *can* use [cosine similarity](/vectors) (from the previous chapter) to ask: what's nearby?
 
 <EmbeddingPlaygroundWidget>
 Start with "dog" — its neighbors are other animals and pets. Click on a neighbor to jump to it and browse around the space. Try "guitar" — you get other instruments. Try "queen" — notice it sits near royalty words. Type your own words and see what clusters together.
@@ -82,7 +82,7 @@ Like directions, these transformations only exist where the embedding has learne
 **This isn't a party trick.** It's how modern AI builds up complex meaning. In the chapter on [transformers](/transformers), we'll see that each layer of a transformer model adds vectors to deepen the model's understanding of what each word in a text is about.
 
 <KeyInsight>
-You can apply transformations like "capital of" or "bigger animal" by adding a vector that encodes that transformation. 
+You can apply transformations like "capital of" or "bigger animal" by adding a vector that encodes that transformation.
 </KeyInsight>
 
 ## From Words to Tokens (Subwords)
@@ -116,9 +116,9 @@ Try punctuation too (`!`, `,`, `?`) and notice those are tokens as well.
 
 In modern AIs, the embedding is just the first layer of the neural network. It has one input node for every possible token. When a token comes in, that input is set to 1 and every other input is set to 0 — like raising your hand in a crowd when someone calls your name. This is called **one-hot encoding**.
 
-Each connection carries a weight. Since only one input word is "on," the output of the first layer is just the weights for that one word. Those weights *are* the embedding. Unlike the neurons we saw in previous chapters, the embedding layer has no bias and no activation function.
+Each connection carries a weight. Since only one input word is "on," the output of the first layer is just the weights for that one word. Those weights *are* the embedding. Unlike the [neurons](/neurons) we saw in previous chapters, the embedding layer has no bias and no activation function.
 
-The network learns those weights through gradient descent, just like any other weights - naturally assigning each word the meaning that helps the network the most.
+The network learns those weights through [gradient descent](/optimization), just like any other weights — naturally assigning each word the meaning that helps the network the most.
 
 Modern language models use even bigger embeddings than our 300-dimensional GloVe example: GPT-2 uses 768 dimensions, GPT-3 uses 12,288 dimensions.
 
@@ -138,7 +138,7 @@ Embeddings are one of the most powerful ideas in modern AI. The pattern — take
 - **Users and products** in recommendation systems
 - **Molecules** in drug discovery
 
-In every case, the same principle holds: similar things end up nearby, and the geometry of the space encodes meaningful relationships. An embedding is a learned translation from symbols to geometry — and the geometry of meaning emerges from the pressure to be useful.
+In every case, the same principle holds: similar things end up nearby, and the geometry of the space encodes meaningful relationships.
 
 <KeyInsight>
 An embedding is a learned mapping from discrete symbols to continuous geometry. The network discovers what dimensions to use and what structure to create — driven entirely by the need to perform its task well. This idea extends far beyond words to images, audio, molecules, and more.
