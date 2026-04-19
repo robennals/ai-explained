@@ -67,7 +67,7 @@ export const chapters: Chapter[] = [
     subtitle: "Next-word prediction",
     prerequisites: [5],
     description:
-      "If you can predict the next word accurately, you must understand grammar, facts, and common sense. From n-grams to neural networks — prediction IS understanding.",
+      "If you can predict the next word accurately, you must understand grammar, facts, and common sense. From n-grams to neural networks — prediction REQUIRES understanding.",
     ready: true,
   },
   {

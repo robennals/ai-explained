@@ -11,7 +11,7 @@ import {
 export const metadata = {
   title: "Understanding by Predicting — Learn AI Layer by Layer",
   description:
-    "If you can predict the next word accurately, you must understand grammar, facts, and common sense. Prediction IS understanding.",
+    "If you can predict the next word accurately, you must understand grammar, facts, and common sense. Prediction REQUIRES understanding.",
 };
 
 export default function Chapter06() {
