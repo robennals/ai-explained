@@ -8,6 +8,7 @@ import {
   WordPairSpectrumWidget,
   EmbeddingLayerDiagramWidget,
   EmbeddingClassifierWidget,
+  EmbeddingArithmeticWidget,
   TokenizationPlaygroundWidget,
 } from "./widgets";
 
@@ -31,6 +32,7 @@ export default function Chapter04() {
             WordPairSpectrumWidget,
             EmbeddingLayerDiagramWidget,
             EmbeddingClassifierWidget,
+            EmbeddingArithmeticWidget,
             TokenizationPlaygroundWidget,
           }}
         />

@@ -1,19 +1,22 @@
 #!/usr/bin/env node
 
 /**
- * Build script: exports raw GloVe 6B 50d vectors for curated nouns.
+ * Build script: exports raw GloVe 6B 300d vectors for curated nouns.
  *
  * Usage:
- *   node scripts/build-embedding-data.mjs <path-to-glove.6B.50d.txt>
+ *   node scripts/build-embedding-data.mjs <path-to-glove.6B.300d.txt>
  *
- * Download GloVe from: https://nlp.stanford.edu/data/glove.6B.zip → unzip → glove.6B.50d.txt
+ * Download GloVe from: https://nlp.stanford.edu/data/glove.6B.zip → unzip → glove.6B.300d.txt
  *
- * Output: public/data/embeddings.json
+ * Output: public/data/embeddings/embeddings.json (gitignored, served from R2)
+ *
+ * After rebuilding, upload to R2 with:
+ *   pnpm sync-r2:apply
  *   Format: { words: string[], vectors: number[][] }
- *   Each vector is the raw 50d GloVe vector for the corresponding word.
+ *   Each vector is the raw 300d GloVe vector for the corresponding word.
  */
 
-import { readFileSync, writeFileSync } from "fs";
+import { readFileSync, writeFileSync, mkdirSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 import { createReadStream } from "fs";
@@ -208,6 +211,32 @@ const CONCRETE_NOUNS = [
   "wizard", "witch", "pirate", "cowboy", "clown", "magician",
   "hero", "villain", "warrior", "thief", "spy",
 
+  // Countries & Capitals (for analogy demos)
+  "france", "paris", "germany", "berlin", "italy", "rome",
+  "japan", "tokyo", "russia", "moscow", "china", "beijing",
+  "spain", "madrid", "england", "london",
+
+  // Verb forms (for tense analogy demos)
+  "walk", "walked", "walking",
+  "run", "ran", "running",
+  "swim", "swam", "swimming",
+  "fly", "flew", "flying",
+
+  // Adjective forms (for comparative analogy demos)
+  "big", "bigger", "biggest",
+  "small", "smaller", "smallest",
+  "fast", "faster", "fastest",
+  "slow", "slower", "slowest",
+
+  // Size adjectives (for spectrum demos)
+  "tiny", "huge", "large", "vast", "massive", "enormous", "gigantic", "minuscule",
+  "warm", "hot", "cold", "cool", "freezing", "scorching",
+  "loud", "quiet", "silent", "noisy",
+  "bright", "dim", "dark",
+
+  // Additional gender-pair words
+  "nephew", "niece", "actress", "waitress",
+
   // Abstract but guessable
   "shadow", "light",
   "music", "song", "dance",
@@ -244,7 +273,7 @@ async function main() {
   const glovePath = process.argv[2];
 
   if (!glovePath) {
-    console.error("Usage: node scripts/build-embedding-data.mjs <path-to-glove.6B.50d.txt>");
+    console.error("Usage: node scripts/build-embedding-data.mjs <path-to-glove.6B.300d.txt>");
     console.error("\nDownload from: https://nlp.stanford.edu/data/glove.6B.zip");
     process.exit(1);
   }
@@ -252,6 +281,7 @@ async function main() {
   // ─── Load GloVe vectors ──────────────────────────────────────────────
   console.log("Reading GloVe vectors...");
   const gloveMap = new Map();
+  const gloveOrder = []; // GloVe lists words in descending frequency order
 
   const rl = createInterface({ input: createReadStream(resolve(glovePath)), crlfDelay: Infinity });
   let isFirstLine = true;
@@ -269,7 +299,10 @@ async function main() {
     if (idx < 0) continue;
     const word = line.slice(0, idx);
     const vec = line.slice(idx + 1).split(" ").map(Number);
-    if (vec.length > 0) gloveMap.set(word, vec);
+    if (vec.length > 0) {
+      gloveMap.set(word, vec);
+      gloveOrder.push(word);
+    }
   }
   console.log(`  Loaded ${gloveMap.size} vectors (dim=${gloveMap.get("the")?.length || "?"})`);
 
@@ -284,11 +317,21 @@ async function main() {
     }
   }
 
-  // Supplement with frequency nouns
-  const NOUN_LIST_PATH = process.argv[3] || resolve("/tmp/top_english_nouns_lower_10000.txt");
-  try {
+  // Supplement with frequency-ranked words. If a noun list file is provided
+  // we use it; otherwise we fall back to GloVe's own frequency order (GloVe
+  // lists words in descending frequency).
+  const NOUN_LIST_PATH = process.argv[3];
+  let frequencyNouns;
+  let frequencySource;
+  if (NOUN_LIST_PATH) {
     const nounListRaw = readFileSync(NOUN_LIST_PATH, "utf8");
-    const frequencyNouns = nounListRaw.trim().split("\n").map((w) => w.trim().toLowerCase());
+    frequencyNouns = nounListRaw.trim().split("\n").map((w) => w.trim().toLowerCase());
+    frequencySource = `noun list ${NOUN_LIST_PATH}`;
+  } else {
+    frequencyNouns = gloveOrder;
+    frequencySource = "GloVe natural frequency order";
+  }
+  {
 
     const ABSTRACT_WORDS = new Set([
       "time", "times", "year", "years", "day", "days", "week", "weeks", "month", "months",
@@ -341,10 +384,10 @@ async function main() {
     }
 
     const BLOCKED_WORDS = new Set([
-      "moscow", "jerusalem", "baghdad", "kabul", "tehran", "beirut", "delhi",
+      "jerusalem", "baghdad", "kabul", "tehran", "beirut", "delhi",
       "iraq", "iran", "syria", "afghanistan", "pakistan", "gaza", "los",
-      "tokyo", "japan", "china", "india", "london", "paris", "berlin", "rome",
-      "africa", "europe", "asia", "america", "mexico", "canada", "spain",
+      "india",
+      "africa", "europe", "asia", "america", "mexico", "canada",
       "city", "town", "east", "west", "north", "south", "street", "avenue",
       "county", "district", "province", "borough", "suburb",
       "gen", "col", "sgt", "capt", "lt", "cpl", "pvt", "maj",
@@ -386,8 +429,8 @@ async function main() {
       "negro", "slave", "slaughter",
       "israel", "iraq", "korea", "vietnam", "taiwan", "cuba", "brazil",
       "egypt", "turkey", "greece", "norway", "sweden", "finland",
-      "germany", "france", "italy", "russia", "ukraine", "poland",
-      "australia", "zealand", "ireland", "scotland", "wales", "england",
+      "ukraine", "poland",
+      "australia", "zealand", "ireland", "scotland", "wales",
       "california", "texas", "florida", "york", "jersey",
       "january", "february", "march", "april", "may", "june", "july",
       "august", "september", "october", "november", "december",
@@ -430,9 +473,7 @@ async function main() {
         freqAdded++;
       }
     }
-    console.log(`\nWord list: ${wordSet.size - freqAdded} curated + ${freqAdded} from frequency list = ${wordSet.size} total`);
-  } catch {
-    console.log(`\nWord list: ${wordSet.size} curated nouns (frequency list not found at ${NOUN_LIST_PATH})`);
+    console.log(`\nWord list: ${wordSet.size - freqAdded} curated + ${freqAdded} from ${frequencySource} = ${wordSet.size} total`);
   }
 
   if (missing.length > 0) {
@@ -441,14 +482,18 @@ async function main() {
 
   const words = [...wordSet];
 
-  // ─── Export raw 50d vectors ────────────────────────────────────────────
+  // ─── Export vectors ────────────────────────────────────────────────────
+  // Round to 3 decimal places — saves ~25% of file size at negligible cost
+  // to nearest-neighbor / direction quality (verified against full-precision).
   const vectors = words.map((w) => {
     const v = gloveMap.get(w);
-    return v.map((x) => Math.round(x * 10000) / 10000);
+    return v.map((x) => Math.round(x * 1000) / 1000);
   });
 
   const output = { words, vectors };
-  const outPath = resolve(PROJECT_ROOT, "public/data/embeddings.json");
+  const outPath = resolve(PROJECT_ROOT, "public/data/embeddings/embeddings.json");
+  // Ensure the directory exists (it's gitignored, so may not be present in fresh checkouts)
+  mkdirSync(resolve(PROJECT_ROOT, "public/data/embeddings"), { recursive: true });
   const json = JSON.stringify(output);
   writeFileSync(outPath, json, "utf8");
 
