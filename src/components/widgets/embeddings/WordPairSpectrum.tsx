@@ -18,14 +18,10 @@ interface Preset {
 }
 
 const PRESETS: Preset[] = [
-  { label: "tiny \u2194 huge", wordA: "tiny", wordB: "huge", description: "Clean size gradient \u2014 both endpoints are pure size adjectives, so the direction encodes only size." },
-  { label: "salad \u2194 cake", wordA: "salad", wordB: "cake", description: "Clean savory-to-sweet \u2014 both endpoints lie on a clear taste axis, so the line fills with foods varying along that axis." },
-  { label: "boy \u2194 man", wordA: "boy", wordB: "man", description: "Mostly age, with gender bleed \u2014 the direction encodes both, because boys and men differ on both axes." },
-  { label: "cottage \u2194 palace", wordA: "cottage", wordB: "palace", description: "Sparse direction \u2014 only a handful of dwellings (mansion, hotel, castle) lie cleanly on this line. The embedding doesn't have many words that share the cottage-to-palace axis." },
-  { label: "pond \u2194 ocean", wordA: "pond", wordB: "ocean", description: "Water-body size, with a touch of aquatic context \u2014 alongside lakes and rivers, \u201Ccoral\u201D appears because the direction encodes both \u201Cgetting bigger\u201D and \u201Cmore ocean-like.\u201D" },
-  { label: "bicycle \u2194 airplane", wordA: "bicycle", wordB: "airplane", description: "Vehicle complexity bundled with flying context \u2014 cars and trucks in the middle, but \u201Cpilot\u201D and \u201Ccrash\u201D creep in near airplane." },
-  { label: "ant \u2194 whale", wordA: "ant", wordB: "whale", description: "Size and habitat bundled \u2014 small land creatures progress to large aquatic ones, because the embedding learned both axes together." },
-  { label: "man \u2194 sausage", wordA: "man", wordB: "sausage", description: "No shared axis \u2014 nothing meaningful connects people and sausages, so the middle is empty and the words pile up at each end." },
+  { label: "tiny \u2194 huge", wordA: "tiny", wordB: "huge", description: "Pure size gradient \u2014 both endpoints are size adjectives, so the line fills with size words: small, smaller, larger, vast, bigger, biggest, gigantic, enormous." },
+  { label: "rabbit \u2194 elephant", wordA: "rabbit", wordB: "elephant", description: "Size gradient within mammals \u2014 mouse, rat, pig, goat, cat, dog, deer, monkey, lion, rhino. Both endpoints are terrestrial mammals, so size is the only thing varying." },
+  { label: "salad \u2194 cake", wordA: "salad", wordB: "cake", description: "Savory to sweet \u2014 lettuce, spinach, tomato, soup at one end; pudding, pie, cookie, chocolate at the other. A clean taste axis." },
+  { label: "man \u2194 sausage", wordA: "man", wordB: "sausage", description: "No shared axis \u2014 nothing meaningful connects people and sausages, so nothing sits between them. Words pile up near each end with empty space in the middle." },
 ];
 
 const NUM_RESULTS = 12;
