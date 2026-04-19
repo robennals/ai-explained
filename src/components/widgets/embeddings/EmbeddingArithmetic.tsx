@@ -19,6 +19,15 @@ interface PresetGroup {
 
 const PRESET_GROUPS: PresetGroup[] = [
   {
+    name: "Bigger animal",
+    presets: [
+      { a: "elephant", b: "mouse", c: "rabbit", label: "elephant \u2212 mouse + rabbit" },
+      { a: "elephant", b: "mouse", c: "cat", label: "elephant \u2212 mouse + cat" },
+      { a: "elephant", b: "mouse", c: "salmon", label: "elephant \u2212 mouse + salmon" },
+      { a: "elephant", b: "mouse", c: "lizard", label: "elephant \u2212 mouse + lizard" },
+    ],
+  },
+  {
     name: "Gender",
     presets: [
       { a: "king", b: "man", c: "woman", label: "king \u2212 man + woman" },
@@ -130,16 +139,16 @@ function Autocomplete({
 
 export function EmbeddingArithmetic() {
   const { data, loading, error } = useEmbeddingData();
-  const [wordA, setWordA] = useState("king");
-  const [wordB, setWordB] = useState("man");
-  const [wordC, setWordC] = useState("woman");
+  const [wordA, setWordA] = useState("elephant");
+  const [wordB, setWordB] = useState("mouse");
+  const [wordC, setWordC] = useState("rabbit");
 
   const wordSet = useMemo(() => new Set(data?.words ?? []), [data]);
 
   const resetState = useCallback(() => {
-    setWordA("king");
-    setWordB("man");
-    setWordC("woman");
+    setWordA("elephant");
+    setWordB("mouse");
+    setWordC("rabbit");
   }, []);
 
   const results = useMemo(() => {

@@ -69,28 +69,20 @@ In a well-trained embedding, directions carry meaning. Concepts like size and sw
 </KeyInsight>
 
 
-## Adding and Subtracting Meaning
+## Adding Meaning
 
-In the previous chapter, we saw that you can add vectors together. If directions in embedding space carry meaning, then *arithmetic* on those directions should transfer meaning between words.
-
-While we write this as "king &minus; man + woman," what we're really doing is a two-step process. First, the subtraction (woman &minus; man) isolates a *direction* — a vector that captures what changes between "man" and "woman." Then we *add* that direction to "king," nudging it along the same axis. The result lands near "queen" because the embedding learned a consistent direction for this relationship.
-
-This works for many kinds of relationships, not just gender. The difference "paris &minus; france" isolates a direction that means something like "capital-of" — add it to "germany" and you get "berlin," add it to "japan" and you get "tokyo." The difference "walking &minus; walk" captures the present-participle transformation — add it to "swim" and you get "swimming." The difference "bigger &minus; big" captures the comparative form — add it to "fast" and you get "faster."
+If directions in embedding space carry meaning, then adding a vector to a word moves its meaning along that direction. Subtracting two words gives us the vector for the change between them: `elephant − mouse` is a "bigger animal" vector; add it to "rabbit" and you land near lion, giraffe, rhino. Other transformations work the same way — `paris − france` is "capital of," `woman − man` is "swap male for female," `walking − walk` is "present participle." Each is extracted by subtraction and applied by addition.
 
 <EmbeddingArithmeticWidget>
-Start with the classic: king &minus; man + woman = queen. Then explore the other categories — capitals, verb tenses, comparatives, workplace roles. Try paris &minus; france + japan to see Tokyo emerge. Try walking &minus; walk + swim for tense transfer. Then try your own: pick any word for A, something it shares a relationship with for B, and the other end of that relationship for C. What analogies can you find? What happens when you try one that doesn&apos;t make sense?
+Try each preset. Combine your own. Try nonsense like cat − dog + piano to see what happens when there's no learned transformation to extract.
 </EmbeddingArithmeticWidget>
 
-Not every analogy works. Try subtracting "cat" from "dog" and adding "piano" — you'll get other instruments, not something meaningful about dogs. The embedding only learned relationships that were useful for its training task. Gender, geography, verb tense, and comparative forms show up as consistent directions because they matter for predicting word usage. But "dog-ness minus cat-ness" isn't a relationship the embedding had any reason to learn.
+Like directions, these transformations only exist where the embedding has learned them. Our small GloVe embedding knows a few dozen clean ones; a frontier model like Claude encodes vastly more. And subtraction is just a detective's trick — we extract transformations this way so we can *see* them, but real neural networks learn transformation vectors directly as weights during training.
 
-This is an important point: a neural network will learn an embedding where addition is meaningful for the relationships it *needs* — but you can't expect every possible analogy to work. The structure is real, but it's shaped by the training task, not by some universal geometry of meaning.
-
-Why does this work at all? Because the embedding has learned to represent certain relationships as *consistent directions*. If the capital-of relationship is roughly the same direction everywhere in the space — the same offset from France to Paris as from Germany to Berlin, from Japan to Tokyo — then subtraction isolates that direction, and addition applies it. Mathematicians call this **linear structure**, and it's remarkably useful.
-
-This principle goes further than word analogies. A word embedding for "bear" captures bear-ness in 300 dimensions. But what about "friendly bear"? Or "friendly bear who likes marmalade sandwiches, was found at Paddington Station, and stars in a children's story"? Each additional detail adds more meaning to the vector. In high-dimensional space (real models use 768 or more dimensions), you can keep layering on meaning through addition — and this turns out to be one of the most important ideas in modern AI. We'll see exactly how when we get to [transformers](/transformers).
+**This isn't a party trick.** It's how modern AI builds up complex meaning. In the chapter on [transformers](/transformers), we'll see that each layer of a transformer model adds vectors to deepen the model's understanding of what each word in a text is about.
 
 <KeyInsight>
-Vector arithmetic works in embedding space because the network learns consistent directions for relationships. This composability — building complex meaning by combining simple parts — is one of the most powerful properties of embeddings, and a foundation for how modern AI builds up rich understanding.
+You can apply transformations like "capital of" or "bigger animal" by adding a vector that encodes that transformation. 
 </KeyInsight>
 
 ## From Words to Tokens (Subwords)
