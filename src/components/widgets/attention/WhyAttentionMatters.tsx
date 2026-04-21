@@ -17,6 +17,8 @@ interface SentenceExample {
   targets: Record<number, number>;
   /** Explanation shown below */
   explanation: string;
+  /** Richer meaning we can derive for the selected word once we gather info from the target words */
+  enrichedMeaning: string;
 }
 
 const SENTENCES: SentenceExample[] = [
@@ -30,6 +32,7 @@ const SENTENCES: SentenceExample[] = [
     targets: { 4: 0.95 },
     explanation:
       '"bank" could mean a place for money or the side of a river. You need to see "river" to know which meaning is intended.',
+    enrichedMeaning: "the bank of a river",
   },
   {
     label: "What does it refer to?",
@@ -40,6 +43,7 @@ const SENTENCES: SentenceExample[] = [
     targets: { 3: 0.95 },
     explanation:
       'What does "it" refer to? You have to look back to "glass" — the thing that was dropped.',
+    enrichedMeaning: "the glass",
   },
   {
     label: "Who did it?",
@@ -51,6 +55,7 @@ const SENTENCES: SentenceExample[] = [
     targets: { 1: 0.95 },
     explanation:
       'Who opened a restaurant? The chef — not the competition. You have to skip over the whole "who won the competition" clause to connect "opened" back to "chef."',
+    enrichedMeaning: "opened by the chef",
   },
 ];
 
@@ -76,6 +81,7 @@ interface Arrow {
 export function WhyAttentionMatters() {
   const [sentenceIdx, setSentenceIdx] = useState(0);
   const [arrows, setArrows] = useState<Arrow[]>([]);
+  const [boxAnchorX, setBoxAnchorX] = useState<number | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const wordRefs = useRef<Map<number, HTMLSpanElement>>(new Map());
@@ -91,7 +97,11 @@ export function WhyAttentionMatters() {
       if (!container) return;
       const containerRect = container.getBoundingClientRect();
       const fromEl = wordRefs.current.get(selectedWord);
-      if (!fromEl) { setArrows([]); return; }
+      if (!fromEl) {
+        setArrows([]);
+        setBoxAnchorX(null);
+        return;
+      }
 
       const fromRect = fromEl.getBoundingClientRect();
       const fromX = fromRect.left + fromRect.width / 2 - containerRect.left;
@@ -112,6 +122,7 @@ export function WhyAttentionMatters() {
         });
       }
       setArrows(newArrows);
+      setBoxAnchorX(fromX);
     });
 
     return () => cancelAnimationFrame(raf);
@@ -191,7 +202,7 @@ export function WhyAttentionMatters() {
           )}
 
           {/* Words */}
-          <div className="flex flex-wrap gap-x-1 gap-y-0 px-5 py-4 text-lg" style={{ paddingTop: `${arcPad + 16}px` }}>
+          <div className="flex flex-wrap gap-x-1 gap-y-0 px-5 pt-4 text-lg" style={{ paddingTop: `${arcPad + 16}px` }}>
             {sentence.words.map((word, i) => {
               const isSelected = i === selectedWord;
               const isTarget = i in targets;
@@ -215,6 +226,34 @@ export function WhyAttentionMatters() {
                 </span>
               );
             })}
+          </div>
+
+          {/* Enriched-meaning box — positioned horizontally under the selected word */}
+          <div className="relative px-5 pb-5 pt-2">
+            {boxAnchorX !== null && (
+              <div
+                className="pointer-events-none absolute text-sm"
+                style={{
+                  left: `${boxAnchorX}px`,
+                  top: 0,
+                  transform: "translateX(-50%)",
+                  maxWidth: "calc(100% - 24px)",
+                }}
+              >
+                <div className="mx-auto mb-1 h-3 w-px bg-indigo-400/60 dark:bg-indigo-400/40" />
+                <div className="rounded-md border border-indigo-400/60 bg-indigo-50 px-3 py-1.5 shadow-sm dark:border-indigo-400/40 dark:bg-indigo-950/40">
+                  <span className="font-semibold text-indigo-700 dark:text-indigo-300">
+                    {sentence.words[selectedWord]}
+                  </span>
+                  <span className="text-muted">: </span>
+                  <span className="italic text-foreground">
+                    {sentence.enrichedMeaning}
+                  </span>
+                </div>
+              </div>
+            )}
+            {/* Spacer to reserve height for the absolute box */}
+            <div className="h-14" aria-hidden />
           </div>
         </div>
 
