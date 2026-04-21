@@ -26,7 +26,7 @@ Imagine a tiny vocabulary of just four tokens: **cat**, **dog**, **blah** (fille
 
 Each token gets two vectors:
 
-- A **key** — what this token is *advertizing*
+- A **key** — what this token is *advertising*
 - A **query** — what this token is *looking for*
 
 Our keys and queries are just a single number representing "noun-ness" — how much this token is (or wants) a noun:
@@ -41,7 +41,7 @@ To measure how well a query matches a key, we use the **dot product** from Chapt
 Click "it" to see its attention computed step by step — its query [3] matches each noun's key [3] (dot product = 9) but not filler's key [0] (dot product = 0). Try "cat blah dog it" — "it" splits attention between both nouns. Try "blah blah blah it" — with no nouns, attention spreads equally over filler. Then try "cat it dog it" — each "it" independently finds the nouns.
 </ToyAttentionWidget>
 
-Notice something crucial about **it** — it doesn't advertise anything — but it is looking for a noun. *What you advertize* isn't the same as *what you're looking for.* This is why we need separate queries and keys — a pronoun needs to find nouns without being mistaken for one itself.
+Notice something crucial about **it** — it doesn't advertise anything — but it is looking for a noun. *What you advertise* isn't the same as *what you're looking for.* This is why we need separate queries and keys — a pronoun needs to find nouns without being mistaken for one itself.
 
 In practice, real attention vectors have dozens or hundreds of dimensions, not just one. But the principle is the same — remember the "bear detector" from the vectors chapter, where a single dot product could check for complex things like "something similar to a bear". Attention queries and keys work the same way, just asking richer questions like "is this a noun that's the subject of a nearby verb?"
 
@@ -91,7 +91,7 @@ Click "it" to see how attention weights blend value vectors into a result. With 
 
 Understanding a sentence requires many kinds of questions at once: What does this pronoun refer to? What's the subject of this verb? What clause does this word belong to?
 
-Real attention models use **multiple attention heads** — each with its own key, query, and value weights, each learning to look for different kinds of relationships. They all run in parallel on the same input, and their outputs get combined. One head might specialize in pronoun resolution (like the BERT head we saw earlier), while another learns to link verbs to their subjects, and another tracks which clause each word belongs to. No one tells these heads what to specialize in — they discover their roles through training, because different kinds of attention are all useful for predicting language.
+Real attention models use **multiple attention heads** — each with its own keys, queries, and values, each free to learn a different pattern. They all run in parallel on the same input, and their outputs get combined. That's what you saw with BERT earlier: one head specialized in pronouns, another in broader context — and each found its role through training, without being told what to look for.
 
 <KeyInsight>
 Multiple attention heads let the model ask many different questions in parallel. Each head has its own key, query, and value weights, so each learns to attend to a different kind of relationship — pronouns, grammar, structure, semantics. **The model doesn't need to choose one kind of attention; it gets all of them at once.**
