@@ -14,6 +14,32 @@ Step through each component to get a brief overview. The sections that follow wi
 Click any box in the diagram, or hit Next Block to step through. The grey box is one "transformer block" — a real model stacks many of these (GPT-3 stacks 96 of them!).
 </TransformerBlockDiagramWidget>
 
+## How Can One Vector Hold Many Ideas?
+
+Before we watch a transformer in motion, one more piece of intuition. Each token's vector has thousands of dimensions — far more than needed to store just its own meaning. This turns out to matter.
+
+When an attention head pulls information from another token, that information lands in a *different subspace* of this token's vector — a different direction — via the head's output projection. The original self-info and the new pulled-in info coexist, because they point different ways. Nothing is overwritten.
+
+The feed-forward network that runs after attention reads across the whole vector at once. It sees both the self-info and the pulled-in info, and can compose them into a richer meaning — "Mars" plus "previous word was 'on'" becomes "Mars as a location someone is currently on."
+
+This is why each layer genuinely *accumulates* understanding. Attention brings new material in; the feed-forward composes it. Stack enough layers and ideas pile up — without erasing each other.
+
+<VectorSubspaceFigWidget />
+
+## A Transformer In Action
+
+Enough theory — let's watch one run. The playground below shows a real sentence flowing through three transformer layers. Every representation is written as a plain English sentence. Click a layer to see where the model has arrived; click a word to see what any head did to it.
+
+One thing to look for as you explore: the model never sees the word *Earth* spelled out in the sentence. But by the final layer, "blue" has accumulated enough context to predict a word that specifically names it. Watch it happen step by step.
+
+<TransformerInActionWidget>
+Start at **Embed** and click through the layers: L1 attaches each token to its predecessor, L2 resolves the pronoun *her*, and L3 pulls scene features into the prediction slot *blue*. Then click **Predict** to see the top candidates for the next word.
+</TransformerInActionWidget>
+
+Notice what just happened. The word **Earth** never appears in the sentence. Yet by the end of L3, the model has composed *a blue thing, belonging to the astronaut, seen in the sky of Mars — her home planet*. Nothing in any single layer did this on its own: L1 barely did more than bolt each word to its neighbour; L2 resolved one pronoun; L3 pulled three features into one slot. Stacked together, they fingerprint a specific idea that wasn't in any of the input tokens. That accumulation is the whole mechanism.
+
+Each head here is a simplified version of a pattern real interpretability research has documented in trained transformers — previous-token heads, coreference heads, and name-mover-style heads that move features to the prediction slot. A real model has hundreds of narrow heads; we're showing the handful that do visible work on this particular sentence.
+
 ## Add Residual
 
 Each time we run a round of attention, we discover new, more abstract ways of representing a word. The first layer might figure out "this is a noun." The next might figure out "this noun is the subject of the sentence." The layer after that might figure out "this subject is a character in a story."
