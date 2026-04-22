@@ -130,8 +130,8 @@ function SentenceDisplay({
 
   useEffect(() => {
     if (!attention || !containerRef.current) {
-      setArrows([]);
-      return;
+      const raf = requestAnimationFrame(() => setArrows([]));
+      return () => cancelAnimationFrame(raf);
     }
 
     const raf = requestAnimationFrame(() => {

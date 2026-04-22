@@ -24,7 +24,7 @@ export function AmplifiedAnimalExplorer() {
       onReset={handleReset}
     >
       <p className="text-sm text-muted mb-3">
-        Pick an animal to see its unit vector. The magnitude slider scales every dimension by the same amount — the proportions stay the same, but the vector gets bigger. We'll find this useful later, when we use vectors to <em>detect</em> animals and use the magnitude to control how sensitive our detector is.
+        Pick an animal to see its unit vector. The magnitude slider scales every dimension by the same amount — the proportions stay the same, but the vector gets bigger. We&apos;ll find this useful later, when we use vectors to <em>detect</em> animals and use the magnitude to control how sensitive our detector is.
       </p>
       <div className="flex flex-wrap gap-1 mb-3">
         {ANIMAL_DOMAIN.items.map((item, i) => (

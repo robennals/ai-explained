@@ -78,30 +78,27 @@ export function RotationDotProduct() {
       (e.target as SVGElement).setPointerCapture(e.pointerId);
     };
 
-  const handlePointerMove = useCallback(
-    (e: React.PointerEvent) => {
-      if (!dragging.current) return;
-      const angle = clientToAngle(e.clientX, e.clientY);
-      if (angle === null) return;
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!dragging.current) return;
+    const angle = clientToAngle(e.clientX, e.clientY);
+    if (angle === null) return;
 
-      if (dragging.current === "A") {
-        // Move base angle, keep diff fixed
-        setBaseAngle(Math.round(angle));
-      } else {
-        // Move B — change diff
-        let newDiff = Math.round(angle - baseAngle);
-        // Normalize to -180..180
-        while (newDiff > 180) newDiff -= 360;
-        while (newDiff < -180) newDiff += 360;
-        setDiffAngle(Math.max(-180, Math.min(180, newDiff)));
-      }
-    },
-    [clientToAngle, baseAngle]
-  );
+    if (dragging.current === "A") {
+      // Move base angle, keep diff fixed
+      setBaseAngle(Math.round(angle));
+    } else {
+      // Move B — change diff
+      let newDiff = Math.round(angle - baseAngle);
+      // Normalize to -180..180
+      while (newDiff > 180) newDiff -= 360;
+      while (newDiff < -180) newDiff += 360;
+      setDiffAngle(Math.max(-180, Math.min(180, newDiff)));
+    }
+  };
 
-  const handlePointerUp = useCallback(() => {
+  const handlePointerUp = () => {
     dragging.current = null;
-  }, []);
+  };
 
   return (
     <WidgetContainer

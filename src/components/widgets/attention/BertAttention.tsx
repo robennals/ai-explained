@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
 
 /* ------------------------------------------------------------------ */
@@ -200,11 +200,11 @@ export function BertAttention({ excludeHeads, onlySentencesWithWord }: { exclude
   const attnRow = selected !== null ? head.attention[selected] : null;
   const headGuide = sentence.headGuides[head.label];
 
-  const handleReset = useCallback(() => {
+  const handleReset = () => {
     setSentIdx(0);
     setHeadIdx(0);
     setSelected(filteredSentences[0]?.defaultSelected ?? null);
-  }, [filteredSentences]);
+  };
 
   return (
     <WidgetContainer
