@@ -84,6 +84,14 @@ const predictions: ExampleData["predictions"] = [
  * 12: "blue"
  */
 
+// Named indices for tokens referenced by non-positional head cards.
+// Cross-checked against the tokens array below by validateExample (via the
+// tokens-array comment) — if you reorder tokens, update these too.
+const IDX_MARS = 1;
+const IDX_ASTRONAUT = 4;
+const IDX_SKY = 8;
+const IDX_HER = 11;
+
 const tokens: ExampleData["tokens"] = [
   // 0: On
   {
@@ -368,7 +376,7 @@ const tokens: ExampleData["tokens"] = [
           query: "a human noun",
           pulls: [
             {
-              fromTokenIndex: 4,
+              fromTokenIndex: IDX_ASTRONAUT,
               key: "a human noun",
               value: "the astronaut",
               weight: 1.0,
@@ -408,7 +416,7 @@ const tokens: ExampleData["tokens"] = [
           query: "a possessor",
           pulls: [
             {
-              fromTokenIndex: 11,
+              fromTokenIndex: IDX_HER,
               key: "a possessor",
               value: "the astronaut",
               weight: 1.0,
@@ -422,7 +430,7 @@ const tokens: ExampleData["tokens"] = [
           query: "a location",
           pulls: [
             {
-              fromTokenIndex: 1,
+              fromTokenIndex: IDX_MARS,
               key: "a location",
               value: "the Martian setting — not Earth",
               weight: 1.0,
@@ -436,7 +444,7 @@ const tokens: ExampleData["tokens"] = [
           query: "a direction of observation",
           pulls: [
             {
-              fromTokenIndex: 8,
+              fromTokenIndex: IDX_SKY,
               key: "a direction of observation",
               value: "seen in the sky above",
               weight: 1.0,
