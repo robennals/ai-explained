@@ -1,0 +1,132 @@
+"use client";
+
+import { useMemo, useState, useCallback } from "react";
+import { WidgetContainer } from "@/components/widgets/shared/WidgetContainer";
+import { astronautExample } from "./astronaut-example";
+import { StackStrip } from "./StackStrip";
+import { HeadStrip } from "./HeadStrip";
+import { Passage } from "./Passage";
+import { DetailCard } from "./DetailCard";
+import { PredictionCard } from "./PredictionCard";
+import type { HeadCard, HeadDef, LayerId, NonPredictLayerId } from "./types";
+
+const INITIAL_LAYER: LayerId = "L0";
+const INITIAL_FOCAL: number | null = null;
+
+export function TransformerInAction() {
+  const data = astronautExample;
+
+  const [selectedLayerId, setSelectedLayerId] = useState<LayerId>(INITIAL_LAYER);
+  const [selectedHeadId, setSelectedHeadId] = useState<string | null>(null);
+  const [focalTokenIndex, setFocalTokenIndex] = useState<number | null>(INITIAL_FOCAL);
+
+  const selectedLayer = useMemo(
+    () => data.layers.find((l) => l.id === selectedLayerId) ?? data.layers[0],
+    [data.layers, selectedLayerId]
+  );
+
+  const selectedHead: HeadDef | null = useMemo(() => {
+    if (!selectedLayer || selectedLayer.heads.length === 0) return null;
+    if (selectedHeadId) {
+      const found = selectedLayer.heads.find((h) => h.id === selectedHeadId);
+      if (found) return found;
+    }
+    return selectedLayer.heads[0];
+  }, [selectedLayer, selectedHeadId]);
+
+  const handleSelectLayer = useCallback((id: LayerId) => {
+    setSelectedLayerId(id);
+    setSelectedHeadId(null); // re-auto-select first head on layer change
+  }, []);
+
+  const handleSelectHead = useCallback((id: string) => {
+    setSelectedHeadId(id);
+  }, []);
+
+  const handleClickToken = useCallback((index: number) => {
+    setFocalTokenIndex(index);
+  }, []);
+
+  const handleReset = useCallback(() => {
+    setSelectedLayerId(INITIAL_LAYER);
+    setSelectedHeadId(null);
+    setFocalTokenIndex(INITIAL_FOCAL);
+  }, []);
+
+  // Resolve what to show in the detail region.
+  const focalToken = focalTokenIndex !== null ? data.tokens[focalTokenIndex] : null;
+
+  const card: HeadCard | null = useMemo(() => {
+    if (!focalToken || !selectedHead) return null;
+    if (selectedLayerId === "Predict" || selectedLayerId === "L0") return null;
+    const layerCards = focalToken.headCards[selectedLayerId as NonPredictLayerId];
+    return layerCards?.[selectedHead.id] ?? null;
+  }, [focalToken, selectedHead, selectedLayerId]);
+
+  const outputRep: string | null = useMemo(() => {
+    if (!focalToken) return null;
+    if (selectedLayerId === "Predict") return null;
+    return focalToken.reps[selectedLayerId as NonPredictLayerId];
+  }, [focalToken, selectedLayerId]);
+
+  const pulledFromIndices = card?.pulls.map((p) => p.fromTokenIndex) ?? [];
+
+  return (
+    <WidgetContainer
+      title="A Transformer In Action"
+      description="Watch this sentence flow through 3 transformer layers. Click a layer to see each token's current rep; click a word to see what any head did to it."
+      onReset={handleReset}
+    >
+      <div className="flex flex-col gap-4 p-4">
+        <StackStrip
+          layers={data.layers}
+          selectedId={selectedLayerId}
+          onSelect={handleSelectLayer}
+        />
+
+        {selectedLayer && selectedLayer.heads.length > 0 && (
+          <>
+            <HeadStrip
+              heads={selectedLayer.heads}
+              selectedHeadId={selectedHead?.id ?? null}
+              onSelect={handleSelectHead}
+              layerLabel={selectedLayer.label}
+            />
+            {selectedHead && (
+              <div className="pl-4 text-xs text-muted">{selectedHead.description}</div>
+            )}
+          </>
+        )}
+
+        <Passage
+          tokens={data.tokens}
+          focusedTokenIndex={focalTokenIndex}
+          pulledFromIndices={pulledFromIndices}
+          onClickToken={handleClickToken}
+        />
+
+        {selectedLayerId === "Predict" ? (
+          <PredictionCard predictions={data.predictions} />
+        ) : focalToken ? (
+          <DetailCard
+            focalToken={focalToken}
+            tokens={data.tokens}
+            headDef={selectedHead}
+            card={card}
+            outputRep={outputRep}
+            layerLabel={selectedLayer.label}
+          />
+        ) : (
+          <div className="rounded-lg border border-dashed border-border bg-foreground/[0.03] p-6 text-center text-sm italic text-muted">
+            Click a word in the passage above to inspect it.
+          </div>
+        )}
+
+        <div className="rounded border border-border/60 bg-foreground/[0.03] p-3 text-[11px] italic text-muted">
+          Real transformers use dozens of narrow heads per layer. We're showing the five that do the visible
+          work for this sentence. Other heads exist but don't contribute here.
+        </div>
+      </div>
+    </WidgetContainer>
+  );
+}
