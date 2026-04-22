@@ -52,3 +52,6 @@ notebooks/glove.*
 
 # broomy
 .broomy/output/
+
+# superpowers brainstorm scratch
+.superpowers/
