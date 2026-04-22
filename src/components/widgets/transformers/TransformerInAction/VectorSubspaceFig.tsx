@@ -23,7 +23,7 @@ export function VectorSubspaceFig() {
           strokeWidth="1.5"
         />
         <text x="170" y="72" textAnchor="middle" fontSize="12" fill="currentColor">
-          one token's vector
+          one token&apos;s vector
         </text>
 
         {/* Self arrow (horizontal) */}

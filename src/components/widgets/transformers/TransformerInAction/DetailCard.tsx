@@ -44,7 +44,7 @@ export function DetailCard({
           {layerLabel} · {headDef.label} · {focalToken.token}
         </div>
         <div className="italic text-muted">
-          This head's Q does not match any K strongly for this token — its rep passes through unchanged.
+          This head&apos;s Q does not match any K strongly for this token — its rep passes through unchanged.
         </div>
       </div>
     );
@@ -115,7 +115,7 @@ export function DetailCard({
       {/* Contribution */}
       <div className="mb-3">
         <div className="text-[10px] font-medium uppercase tracking-wider text-muted">
-          This head's contribution
+          This head&apos;s contribution
         </div>
         <div className="rounded bg-surface px-2 py-1 italic">{card.contribution}</div>
       </div>

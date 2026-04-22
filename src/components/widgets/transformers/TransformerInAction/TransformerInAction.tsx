@@ -123,8 +123,8 @@ export function TransformerInAction() {
         )}
 
         <div className="rounded border border-border/60 bg-foreground/[0.03] p-3 text-[11px] italic text-muted">
-          Real transformers use dozens of narrow heads per layer. We're showing the five that do the visible
-          work for this sentence. Other heads exist but don't contribute here.
+          Real transformers use dozens of narrow heads per layer. We&apos;re showing the five that do the visible
+          work for this sentence. Other heads exist but don&apos;t contribute here.
         </div>
       </div>
     </WidgetContainer>
