@@ -116,7 +116,7 @@ export function TransformerInAction() {
   }, [nextLayer, handleSelectLayer]);
 
   const predictionSlotToken = "blue";
-  const predictionFinalRep = data.tokens[data.tokens.length - 1].reps.L4;
+  const predictionFinalRep = data.tokens[data.tokens.length - 1].reps.L6;
 
   const clickableOverride = useMemo(() => {
     if (selectedLayerId !== "Predict") return null;

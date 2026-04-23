@@ -12,7 +12,9 @@ test.describe("Transformers chapter — A Transformer In Action widget", () => {
     await expect(widget.getByRole("button", { name: "Previous-token" })).toBeVisible();
     await expect(widget.getByRole("button", { name: "Place in the scene" })).toBeVisible();
     await expect(widget.getByRole("button", { name: "Find what each word refers to" })).toBeVisible();
-    await expect(widget.getByRole("button", { name: "Compose the picture" })).toBeVisible();
+    await expect(widget.getByRole("button", { name: "Find the possessor" })).toBeVisible();
+    await expect(widget.getByRole("button", { name: "Find what verb acts on this" })).toBeVisible();
+    await expect(widget.getByRole("button", { name: "Find where this is visible" })).toBeVisible();
     await expect(widget.getByRole("button", { name: "Predict" })).toBeVisible();
   });
 
@@ -22,7 +24,7 @@ test.describe("Transformers chapter — A Transformer In Action widget", () => {
 
     // Blue's final representation is shown above the prediction bars.
     await expect(
-      widget.getByText("seen by her in the Martian sky", { exact: false })
+      widget.getByText("visible in the Martian sky", { exact: false })
     ).toBeVisible();
 
     // Prediction card heading.
@@ -33,24 +35,19 @@ test.describe("Transformers chapter — A Transformer In Action widget", () => {
     await expect(widget.getByText("62%").first()).toBeVisible();
   });
 
-  test("clicking 'blue' at Compose the picture shows the 'Compose the picture' head pulling the scene", async ({ page }) => {
+  test("clicking 'blue' at Find the possessor shows it pulling 'her' as the astronaut", async ({ page }) => {
     const widget = page.locator(".widget-container").filter({ hasText: "A Transformer In Action" });
-    await widget.getByRole("button", { name: "Compose the picture" }).click();
+    await widget.getByRole("button", { name: "Find the possessor" }).click();
     await widget.getByRole("button", { name: "blue" }).click();
 
-    // L4's single head is "Compose the picture".
-    await expect(widget.getByText("the scene this thing belongs to", { exact: false }).first()).toBeVisible();
+    // L4's single head queries for "a possessor".
+    await expect(widget.getByText("a possessor", { exact: false }).first()).toBeVisible();
 
     // The Paying-attention-to table appears.
     await expect(widget.getByText("Paying attention to")).toBeVisible();
 
     // Value row contains the astronaut-on-Mars phrase.
     await expect(widget.getByText("the astronaut", { exact: false }).first()).toBeVisible();
-
-    // Output representation shows the full composition.
-    await expect(
-      widget.getByText("seen by her in the Martian sky", { exact: false }).first()
-    ).toBeVisible();
   });
 
   test("clicking 'astronaut' at Place in the scene shows it binding to Mars", async ({ page }) => {
