@@ -66,15 +66,36 @@ export function DetailCard({
           <div className="rounded bg-surface px-2 py-1 italic">{card.inputRep}</div>
         </div>
 
-        {/* Q (or positional rule) */}
-        <div>
-          <div className="text-[10px] font-medium uppercase tracking-wider text-muted">
-            {card.kind === "positional" ? "Rule" : "Looking for"}
+        {/* Q (or positional looking-for + bias) */}
+        {card.kind === "content" ? (
+          <div>
+            <div className="text-[10px] font-medium uppercase tracking-wider text-muted">
+              Looking for
+            </div>
+            <div className="rounded bg-blue-50 px-2 py-1 dark:bg-blue-900/30">
+              {card.query}
+            </div>
           </div>
-          <div className="rounded bg-blue-50 px-2 py-1 dark:bg-blue-900/30">
-            {card.kind === "positional" ? card.positionalRule : card.query}
+        ) : (
+          <div className="flex flex-col gap-2">
+            <div>
+              <div className="text-[10px] font-medium uppercase tracking-wider text-muted">
+                Looking for
+              </div>
+              <div className="rounded bg-blue-50 px-2 py-1 dark:bg-blue-900/30">
+                anything
+              </div>
+            </div>
+            <div>
+              <div className="text-[10px] font-medium uppercase tracking-wider text-muted">
+                Position bias
+              </div>
+              <div className="rounded bg-blue-50 px-2 py-1 dark:bg-blue-900/30">
+                very close
+              </div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Paying attention to */}

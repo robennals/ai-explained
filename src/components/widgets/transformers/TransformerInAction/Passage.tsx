@@ -43,7 +43,7 @@ export function Passage({
           : isPulledFrom
           ? "bg-blue-50 dark:bg-blue-900/30 border border-blue-400"
           : hasContent
-          ? "border border-transparent underline decoration-accent decoration-2 underline-offset-4 hover:bg-foreground/10"
+          ? "border border-transparent underline decoration-current decoration-1 underline-offset-4 hover:bg-foreground/10"
           : "border border-transparent hover:bg-foreground/10";
 
         return (
