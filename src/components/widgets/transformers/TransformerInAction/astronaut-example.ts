@@ -10,7 +10,7 @@ const layers: ExampleData["layers"] = [
   },
   {
     id: "L1",
-    label: "L1",
+    label: "Previous-token",
     description: "Layer 1 runs one attention head — it gives every token a copy of its previous token, which the feed-forward step then composes.",
     heads: [
       {
@@ -23,7 +23,7 @@ const layers: ExampleData["layers"] = [
   },
   {
     id: "L2",
-    label: "L2",
+    label: "Place in the scene",
     description: "Layer 2 ties each word to the scene's location — several words pull from 'Mars' to learn where the action is happening.",
     heads: [
       {
@@ -36,7 +36,7 @@ const layers: ExampleData["layers"] = [
   },
   {
     id: "L3",
-    label: "L3",
+    label: "Find what each word refers to",
     description: "Layer 3 figures out what each word refers to — pronouns find their nouns.",
     heads: [
       {
@@ -49,7 +49,7 @@ const layers: ExampleData["layers"] = [
   },
   {
     id: "L4",
-    label: "L4",
+    label: "Compose the picture",
     description: "Layer 4 composes the picture for the next word. 'Blue' (the prediction slot) pulls together its owner and the scene where it's being seen.",
     heads: [
       {

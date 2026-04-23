@@ -41,7 +41,7 @@ export function DetailCard({
     return (
       <div className="rounded-lg border border-border bg-foreground/[0.03] p-4 text-sm">
         <div className="mb-1 text-xs font-medium uppercase tracking-wider text-muted">
-          {layerLabel} · {headDef.label} · {focalToken.token}
+          {layerLabel} · {focalToken.token}
         </div>
         <div className="italic text-muted">
           This head&apos;s Q does not match any K strongly for this token — its rep passes through unchanged.
@@ -53,14 +53,14 @@ export function DetailCard({
   return (
     <div className="rounded-lg border border-border bg-foreground/[0.03] p-4 text-sm">
       <div className="mb-2 text-xs font-medium uppercase tracking-wider text-muted">
-        {layerLabel} · {headDef.label} · {focalToken.token}
+        {layerLabel} · {focalToken.token}
       </div>
       <div className="mb-2 text-sm text-muted">{headDef.description}</div>
 
-      {/* Input Representation (full-width) */}
+      {/* Previous Representation (full-width) */}
       <div className="mb-3">
         <div className="text-xs font-medium uppercase tracking-wider text-muted">
-          Input Representation
+          Previous Representation
         </div>
         <div className="rounded bg-surface px-2 py-1 italic">{card.inputRep}</div>
       </div>
@@ -69,7 +69,7 @@ export function DetailCard({
       {outputRep && (
         <div className="mb-3 rounded border-l-4 border-green-500 bg-green-50 px-3 py-2 dark:bg-green-900/20">
           <div className="text-xs font-medium uppercase tracking-wider text-green-900 dark:text-green-300">
-            Output Representation after {layerLabel} (shared across all heads of this layer, post-FFN)
+            New Representation
           </div>
           <div className="mt-1 font-medium">{outputRep}</div>
         </div>
