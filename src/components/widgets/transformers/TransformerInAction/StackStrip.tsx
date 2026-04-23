@@ -11,7 +11,7 @@ interface StackStripProps {
 export function StackStrip({ layers, selectedId, onSelect }: StackStripProps) {
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <span className="mr-2 text-sm font-medium uppercase tracking-wider text-muted">
+      <span className="mr-2 text-xs font-medium uppercase tracking-wider text-muted">
         Layers
       </span>
       {layers.map((layer, idx) => (
@@ -25,7 +25,7 @@ export function StackStrip({ layers, selectedId, onSelect }: StackStripProps) {
             type="button"
             onClick={() => onSelect(layer.id)}
             aria-pressed={selectedId === layer.id}
-            className={`rounded-md border px-4 py-2 text-base font-medium transition-colors ${
+            className={`rounded-md border px-4 py-2 text-sm font-medium transition-colors ${
               selectedId === layer.id
                 ? "border-accent bg-accent text-white shadow-md ring-2 ring-accent/40"
                 : "border-border bg-surface text-foreground hover:bg-foreground/10"
