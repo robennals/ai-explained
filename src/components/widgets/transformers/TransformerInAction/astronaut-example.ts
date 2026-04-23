@@ -53,15 +53,9 @@ const layers: ExampleData["layers"] = [
     description: "Layer 4 composes the picture for the next word. 'Blue' (the prediction slot) pulls together its owner and the scene where it's being seen.",
     heads: [
       {
-        id: "owner",
-        label: "Find the owner",
-        description: "Find the owner of the thing this adjective is modifying.",
-        kind: "content",
-      },
-      {
-        id: "seeing",
-        label: "Find where this is seen",
-        description: "Find the visual scene this thing appears in.",
+        id: "compose",
+        label: "Compose the picture",
+        description: "Pulls together the scene context for the prediction slot — the owner and the place where it's being seen.",
         kind: "content",
       },
     ],
@@ -129,10 +123,10 @@ const tokens: ExampleData["tokens"] = [
     clickable: true,
     reps: {
       L0: "the fourth planet from the sun — a cold, reddish desert world",
-      L1: "the planet Mars — the location someone or something is on, not necessarily a person",
-      L2: "the planet Mars — the location someone or something is on, not necessarily a person",
-      L3: "the planet Mars — the location someone or something is on, not necessarily a person",
-      L4: "the planet Mars — the location someone or something is on, not necessarily a person",
+      L1: "the planet Mars — the location someone or something is on",
+      L2: "the planet Mars — the location someone or something is on",
+      L3: "the planet Mars — the location someone or something is on",
+      L4: "the planet Mars — the location someone or something is on",
     },
     headCards: {
       L1: {
@@ -490,39 +484,31 @@ const tokens: ExampleData["tokens"] = [
         },
       },
       L4: {
-        owner: {
+        compose: {
           kind: "content",
           inputRep: "the color blue, modifying something that belongs to 'her'",
-          query: "the owner of this thing",
+          query: "the scene this thing belongs to",
           pulls: [
             {
               fromTokenIndex: IDX_HER,
-              key: "the owner of this thing",
+              key: "the scene this thing belongs to",
               value: "the astronaut, who is on Mars",
-              weight: 1.0,
+              weight: 0.5,
             },
-          ],
-          contribution: "this blue thing belongs to the astronaut who is on Mars",
-        },
-        seeing: {
-          kind: "content",
-          inputRep: "the color blue, modifying something that belongs to 'her'",
-          query: "the visual scene this thing appears in",
-          pulls: [
             {
               fromTokenIndex: IDX_SKY,
-              key: "the visual scene this thing appears in",
+              key: "the scene this thing belongs to",
               value: "the Martian sky, where the seeing happens",
-              weight: 0.5,
+              weight: 0.3,
             },
             {
               fromTokenIndex: IDX_SAW,
-              key: "the visual scene this thing appears in",
+              key: "the scene this thing belongs to",
               value: "the act of seeing happening on Mars",
-              weight: 0.5,
+              weight: 0.2,
             },
           ],
-          contribution: "this blue thing is seen in the sky on Mars",
+          contribution: "this blue thing is the astronaut's, seen by her in the Martian sky",
         },
       },
     },

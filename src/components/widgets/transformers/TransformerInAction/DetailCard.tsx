@@ -57,46 +57,54 @@ export function DetailCard({
       </div>
       <div className="mb-2 text-sm text-muted">{headDef.description}</div>
 
-      {/* Input Representation */}
-      <div className="mb-3 grid gap-3 md:grid-cols-2">
-        <div>
-          <div className="text-xs font-medium uppercase tracking-wider text-muted">
-            Input Representation
-          </div>
-          <div className="rounded bg-surface px-2 py-1 italic">{card.inputRep}</div>
+      {/* Input Representation (full-width) */}
+      <div className="mb-3">
+        <div className="text-xs font-medium uppercase tracking-wider text-muted">
+          Input Representation
         </div>
+        <div className="rounded bg-surface px-2 py-1 italic">{card.inputRep}</div>
+      </div>
 
-        {/* Q (or positional looking-for + bias) */}
-        {card.kind === "content" ? (
+      {/* Output rep */}
+      {outputRep && (
+        <div className="mb-3 rounded border-l-4 border-green-500 bg-green-50 px-3 py-2 dark:bg-green-900/20">
+          <div className="text-xs font-medium uppercase tracking-wider text-green-900 dark:text-green-300">
+            Output Representation after {layerLabel} (shared across all heads of this layer, post-FFN)
+          </div>
+          <div className="mt-1 font-medium">{outputRep}</div>
+        </div>
+      )}
+
+      {/* Q (or positional looking-for + bias) */}
+      {card.kind === "content" ? (
+        <div className="mb-3">
+          <div className="text-xs font-medium uppercase tracking-wider text-muted">
+            Looking for
+          </div>
+          <div className="rounded bg-blue-50 px-2 py-1 dark:bg-blue-900/30">
+            {card.query}
+          </div>
+        </div>
+      ) : (
+        <div className="mb-3 flex flex-col gap-2">
           <div>
             <div className="text-xs font-medium uppercase tracking-wider text-muted">
               Looking for
             </div>
             <div className="rounded bg-blue-50 px-2 py-1 dark:bg-blue-900/30">
-              {card.query}
+              anything
             </div>
           </div>
-        ) : (
-          <div className="flex flex-col gap-2">
-            <div>
-              <div className="text-xs font-medium uppercase tracking-wider text-muted">
-                Looking for
-              </div>
-              <div className="rounded bg-blue-50 px-2 py-1 dark:bg-blue-900/30">
-                anything
-              </div>
+          <div>
+            <div className="text-xs font-medium uppercase tracking-wider text-muted">
+              Position bias
             </div>
-            <div>
-              <div className="text-xs font-medium uppercase tracking-wider text-muted">
-                Position bias
-              </div>
-              <div className="rounded bg-blue-50 px-2 py-1 dark:bg-blue-900/30">
-                very close
-              </div>
+            <div className="rounded bg-blue-50 px-2 py-1 dark:bg-blue-900/30">
+              very close
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Paying attention to */}
       {card.pulls.length > 0 && (
@@ -151,16 +159,6 @@ export function DetailCard({
         </div>
         <div className="rounded bg-surface px-2 py-1 italic">{card.contribution}</div>
       </div>
-
-      {/* Output rep */}
-      {outputRep && (
-        <div className="rounded border-l-4 border-green-500 bg-green-50 px-3 py-2 dark:bg-green-900/20">
-          <div className="text-xs font-medium uppercase tracking-wider text-green-900 dark:text-green-300">
-            Output Representation after {layerLabel} (shared across all heads of this layer, post-FFN)
-          </div>
-          <div className="mt-1 font-medium">{outputRep}</div>
-        </div>
-      )}
     </div>
   );
 }

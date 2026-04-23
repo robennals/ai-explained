@@ -33,15 +33,15 @@ test.describe("Transformers chapter — A Transformer In Action widget", () => {
     await expect(widget.getByText("62%").first()).toBeVisible();
   });
 
-  test("clicking 'blue' at L4 shows the 'Find the owner' head pulling her", async ({ page }) => {
+  test("clicking 'blue' at L4 shows the 'Compose the picture' head pulling the scene", async ({ page }) => {
     const widget = page.locator(".widget-container").filter({ hasText: "A Transformer In Action" });
     await widget.getByRole("button", { name: "L4" }).click();
     await widget.getByRole("button", { name: "blue" }).click();
 
-    // Default L4 head is "Find the owner".
-    await expect(widget.getByText("the owner of this thing", { exact: false }).first()).toBeVisible();
+    // L4's single head is "Compose the picture".
+    await expect(widget.getByText("the scene this thing belongs to", { exact: false }).first()).toBeVisible();
 
-    // "her" appears in the Paying-attention-to table.
+    // The Paying-attention-to table appears.
     await expect(widget.getByText("Paying attention to")).toBeVisible();
 
     // Value row contains the astronaut-on-Mars phrase.

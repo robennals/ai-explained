@@ -11,7 +11,7 @@ interface HeadStripProps {
 }
 
 export function HeadStrip({ heads, selectedHeadId, onSelect, layerLabel }: HeadStripProps) {
-  if (heads.length === 0) {
+  if (heads.length <= 1) {
     return null;
   }
   return (
