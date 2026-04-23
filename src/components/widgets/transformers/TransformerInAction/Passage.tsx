@@ -37,11 +37,13 @@ export function Passage({
           );
         }
 
-        const base = "relative mx-0.5 rounded px-1.5 py-0.5 transition-colors cursor-pointer";
+        const base = "mx-0.5 rounded px-1.5 py-0.5 transition-colors cursor-pointer";
         const stateClasses = isFocused
           ? "bg-amber-100 dark:bg-amber-900/40 border-2 border-amber-500 font-semibold"
           : isPulledFrom
           ? "bg-blue-50 dark:bg-blue-900/30 border border-blue-400"
+          : hasContent
+          ? "border border-transparent underline decoration-accent decoration-2 underline-offset-4 hover:bg-foreground/10"
           : "border border-transparent hover:bg-foreground/10";
 
         return (
@@ -51,12 +53,6 @@ export function Passage({
             onClick={() => onClickToken(i)}
             className={`${base} ${stateClasses}`}
           >
-            {hasContent && !isFocused && (
-              <span
-                aria-hidden="true"
-                className="pointer-events-none absolute -top-1 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-accent"
-              />
-            )}
             {token.token}
           </button>
         );
