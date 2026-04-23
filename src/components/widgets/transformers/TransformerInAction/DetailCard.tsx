@@ -12,6 +12,8 @@ interface DetailCardProps {
   outputRep: string | null;
   /** Layer label for section headers. */
   layerLabel: string;
+  /** The focal token's rep at the layer immediately before the selected one. Null only at L0 / Predict. */
+  previousRep: string | null;
 }
 
 export function DetailCard({
@@ -21,6 +23,7 @@ export function DetailCard({
   card,
   outputRep,
   layerLabel,
+  previousRep,
 }: DetailCardProps) {
   // L0 — no head, just show the embedding rep.
   if (!headDef) {
@@ -40,12 +43,30 @@ export function DetailCard({
   if (!card) {
     return (
       <div className="rounded-lg border border-border bg-foreground/[0.03] p-4 text-sm">
-        <div className="mb-1 text-xs font-medium uppercase tracking-wider text-muted">
+        <div className="mb-3 text-xs font-medium uppercase tracking-wider text-muted">
           {layerLabel} · {focalToken.token}
         </div>
-        <div className="italic text-muted">
-          This head&apos;s Q does not match any K strongly for this token — its representation passes through unchanged.
+        <div className="mb-3 italic text-muted">
+          This head doesn&apos;t pull anything for this token. Its representation is unchanged from the previous layer.
         </div>
+
+        {previousRep && (
+          <div className="mb-3 rounded border-l-4 border-amber-400 bg-amber-50 px-3 py-2 dark:bg-amber-900/20">
+            <div className="text-xs font-medium uppercase tracking-wider text-amber-900 dark:text-amber-300">
+              Previous Representation
+            </div>
+            <div className="mt-1 italic">{previousRep}</div>
+          </div>
+        )}
+
+        {outputRep && (
+          <div className="rounded border-l-4 border-green-500 bg-green-50 px-3 py-2 dark:bg-green-900/20">
+            <div className="text-xs font-medium uppercase tracking-wider text-green-900 dark:text-green-300">
+              New Representation
+            </div>
+            <div className="mt-1 font-medium">{outputRep}</div>
+          </div>
+        )}
       </div>
     );
   }
@@ -151,13 +172,6 @@ export function DetailCard({
         </div>
       )}
 
-      {/* Contribution */}
-      <div className="mb-3">
-        <div className="text-xs font-medium uppercase tracking-wider text-muted">
-          This head&apos;s contribution
-        </div>
-        <div className="rounded bg-surface px-2 py-1 italic">{card.contribution}</div>
-      </div>
     </div>
   );
 }

@@ -69,6 +69,16 @@ export function TransformerInAction() {
     return focalToken.reps[selectedLayerId as NonPredictLayerId];
   }, [focalToken, selectedLayerId]);
 
+  const previousRep: string | null = useMemo(() => {
+    if (!focalToken) return null;
+    if (selectedLayerId === "L0" || selectedLayerId === "Predict") return null;
+    const idx = data.layers.findIndex((l) => l.id === selectedLayerId);
+    if (idx <= 0) return null;
+    const prev = data.layers[idx - 1];
+    if (prev.id === "Predict") return null;
+    return focalToken.reps[prev.id as NonPredictLayerId];
+  }, [focalToken, selectedLayerId, data.layers]);
+
   const pulledFromIndices = card?.pulls.map((p) => p.fromTokenIndex) ?? [];
 
   // Indices of tokens that have something inspectable at the current layer/head.
@@ -142,6 +152,7 @@ export function TransformerInAction() {
             card={card}
             outputRep={outputRep}
             layerLabel={selectedLayer.label}
+            previousRep={previousRep}
           />
         ) : (
           <div className="rounded-lg border border-dashed border-border bg-foreground/[0.03] p-6 text-center text-sm italic text-muted">
