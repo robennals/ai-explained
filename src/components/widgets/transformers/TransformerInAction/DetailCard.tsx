@@ -25,8 +25,8 @@ export function DetailCard({
   // L0 — no head, just show the embedding rep.
   if (!headDef) {
     return (
-      <div className="rounded-lg border border-border bg-foreground/[0.03] p-4 text-sm">
-        <div className="mb-1 text-[10px] font-medium uppercase tracking-wider text-muted">
+      <div className="rounded-lg border border-border bg-foreground/[0.03] p-4 text-base">
+        <div className="mb-1 text-sm font-medium uppercase tracking-wider text-muted">
           {layerLabel} · {focalToken.token}
         </div>
         <div className="text-foreground/80">
@@ -39,8 +39,8 @@ export function DetailCard({
   // Head exists but did nothing for this token → pass-through.
   if (!card) {
     return (
-      <div className="rounded-lg border border-border bg-foreground/[0.03] p-4 text-sm">
-        <div className="mb-1 text-[10px] font-medium uppercase tracking-wider text-muted">
+      <div className="rounded-lg border border-border bg-foreground/[0.03] p-4 text-base">
+        <div className="mb-1 text-sm font-medium uppercase tracking-wider text-muted">
           {layerLabel} · {headDef.label} · {focalToken.token}
         </div>
         <div className="italic text-muted">
@@ -51,16 +51,16 @@ export function DetailCard({
   }
 
   return (
-    <div className="rounded-lg border border-border bg-foreground/[0.03] p-4 text-sm">
-      <div className="mb-2 text-[10px] font-medium uppercase tracking-wider text-muted">
+    <div className="rounded-lg border border-border bg-foreground/[0.03] p-4 text-base">
+      <div className="mb-2 text-sm font-medium uppercase tracking-wider text-muted">
         {layerLabel} · {headDef.label} · {focalToken.token}
       </div>
-      <div className="mb-2 text-xs text-muted">{headDef.description}</div>
+      <div className="mb-2 text-base text-muted">{headDef.description}</div>
 
       {/* Input Representation */}
       <div className="mb-3 grid gap-3 md:grid-cols-2">
         <div>
-          <div className="text-[10px] font-medium uppercase tracking-wider text-muted">
+          <div className="text-sm font-medium uppercase tracking-wider text-muted">
             Input Representation
           </div>
           <div className="rounded bg-surface px-2 py-1 italic">{card.inputRep}</div>
@@ -69,7 +69,7 @@ export function DetailCard({
         {/* Q (or positional looking-for + bias) */}
         {card.kind === "content" ? (
           <div>
-            <div className="text-[10px] font-medium uppercase tracking-wider text-muted">
+            <div className="text-sm font-medium uppercase tracking-wider text-muted">
               Looking for
             </div>
             <div className="rounded bg-blue-50 px-2 py-1 dark:bg-blue-900/30">
@@ -79,7 +79,7 @@ export function DetailCard({
         ) : (
           <div className="flex flex-col gap-2">
             <div>
-              <div className="text-[10px] font-medium uppercase tracking-wider text-muted">
+              <div className="text-sm font-medium uppercase tracking-wider text-muted">
                 Looking for
               </div>
               <div className="rounded bg-blue-50 px-2 py-1 dark:bg-blue-900/30">
@@ -87,7 +87,7 @@ export function DetailCard({
               </div>
             </div>
             <div>
-              <div className="text-[10px] font-medium uppercase tracking-wider text-muted">
+              <div className="text-sm font-medium uppercase tracking-wider text-muted">
                 Position bias
               </div>
               <div className="rounded bg-blue-50 px-2 py-1 dark:bg-blue-900/30">
@@ -101,12 +101,12 @@ export function DetailCard({
       {/* Paying attention to */}
       {card.pulls.length > 0 && (
         <div className="mb-3">
-          <div className="mb-1 text-[10px] font-medium uppercase tracking-wider text-muted">
+          <div className="mb-1 text-sm font-medium uppercase tracking-wider text-muted">
             Paying attention to
           </div>
-          <table className="w-full border-separate border-spacing-y-1 text-xs">
+          <table className="w-full border-separate border-spacing-y-1 text-base">
             <thead>
-              <tr className="text-left text-[10px] font-medium uppercase tracking-wider text-muted">
+              <tr className="text-left text-sm font-medium uppercase tracking-wider text-muted">
                 <th className="px-2 py-1 font-medium">Token</th>
                 <th className="px-2 py-1 font-medium">Key</th>
                 <th className="px-2 py-1 font-medium">Value</th>
@@ -146,7 +146,7 @@ export function DetailCard({
 
       {/* Contribution */}
       <div className="mb-3">
-        <div className="text-[10px] font-medium uppercase tracking-wider text-muted">
+        <div className="text-sm font-medium uppercase tracking-wider text-muted">
           This head&apos;s contribution
         </div>
         <div className="rounded bg-surface px-2 py-1 italic">{card.contribution}</div>
@@ -155,7 +155,7 @@ export function DetailCard({
       {/* Output rep */}
       {outputRep && (
         <div className="rounded border-l-4 border-green-500 bg-green-50 px-3 py-2 dark:bg-green-900/20">
-          <div className="text-[10px] font-medium uppercase tracking-wider text-green-900 dark:text-green-300">
+          <div className="text-sm font-medium uppercase tracking-wider text-green-900 dark:text-green-300">
             Output Representation after {layerLabel} (shared across all heads of this layer, post-FFN)
           </div>
           <div className="mt-1 font-medium">{outputRep}</div>

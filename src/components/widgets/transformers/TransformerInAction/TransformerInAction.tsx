@@ -120,7 +120,7 @@ export function TransformerInAction() {
               layerLabel={selectedLayer.label}
             />
             {selectedHead && (
-              <div className="pl-4 text-xs text-muted">{selectedHead.description}</div>
+              <div className="pl-4 text-base text-muted">{selectedHead.description}</div>
             )}
           </>
         )}
@@ -154,7 +154,7 @@ export function TransformerInAction() {
           </div>
         )}
 
-        <div className="rounded border border-border/60 bg-foreground/[0.03] p-3 text-[11px] italic text-muted">
+        <div className="rounded border border-border/60 bg-foreground/[0.03] p-3 text-sm italic text-muted">
           Real transformers use dozens of narrow heads per layer. We&apos;re showing the five that do the visible
           work for this sentence. Other heads exist but don&apos;t contribute here.
         </div>
@@ -164,7 +164,7 @@ export function TransformerInAction() {
             <button
               type="button"
               onClick={handleNextLayer}
-              className="rounded-lg bg-accent px-6 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-accent-dark"
+              className="rounded-lg bg-accent px-6 py-3 text-base font-bold text-white shadow-sm transition-colors hover:bg-accent-dark"
             >
               Next layer →
             </button>
