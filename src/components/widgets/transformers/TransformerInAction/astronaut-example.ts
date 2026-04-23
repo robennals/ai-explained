@@ -521,6 +521,10 @@ export const astronautExample: ExampleData = {
   tokens,
   layers,
   predictions,
+  answerEmbedding: {
+    token: "Earth",
+    description: "a blue planet, home to humans, visible from other planets in the solar system",
+  },
 };
 
 // Fail fast if a later edit breaks the data.

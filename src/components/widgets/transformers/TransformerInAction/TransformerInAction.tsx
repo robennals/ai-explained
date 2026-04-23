@@ -108,6 +108,12 @@ export function TransformerInAction() {
   const predictionSlotToken = "blue";
   const predictionFinalRep = data.tokens[data.tokens.length - 1].reps.L4;
 
+  const clickableOverride = useMemo(() => {
+    if (selectedLayerId !== "Predict") return null;
+    const blueIndex = data.tokens.findIndex((t) => t.token === "blue");
+    return blueIndex >= 0 ? [blueIndex] : null;
+  }, [data.tokens, selectedLayerId]);
+
   return (
     <WidgetContainer
       title="A Transformer In Action"
@@ -135,6 +141,7 @@ export function TransformerInAction() {
           focusedTokenIndex={focalTokenIndex}
           pulledFromIndices={pulledFromIndices}
           tokensWithContent={tokensWithContent}
+          clickableOverride={clickableOverride}
           onClickToken={handleClickToken}
         />
 
@@ -143,6 +150,7 @@ export function TransformerInAction() {
             predictions={data.predictions}
             predictionSlotToken={predictionSlotToken}
             finalRep={predictionFinalRep}
+            answerEmbedding={data.answerEmbedding}
           />
         ) : focalToken ? (
           <DetailCard

@@ -75,4 +75,9 @@ export interface ExampleData {
   layers: LayerDef[];
   /** Top-k next-word predictions shown on the Predict stack item. */
   predictions: PredictionRow[];
+  /** The model's embedding-style description of the canonical answer token, shown on the Predict view. */
+  answerEmbedding: {
+    token: string;
+    description: string;
+  };
 }

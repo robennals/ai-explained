@@ -9,6 +9,8 @@ interface PassageProps {
   pulledFromIndices: number[];
   /** Indices of tokens that have something interesting to inspect at the current layer/head. */
   tokensWithContent: number[];
+  /** When set, only tokens at these indices are clickable. Others render as static text. */
+  clickableOverride?: number[] | null;
   onClickToken: (index: number) => void;
 }
 
@@ -17,18 +19,21 @@ export function Passage({
   focusedTokenIndex,
   pulledFromIndices,
   tokensWithContent,
+  clickableOverride,
   onClickToken,
 }: PassageProps) {
   const pulledSet = new Set(pulledFromIndices);
   const contentSet = new Set(tokensWithContent);
+  const overrideSet = clickableOverride ? new Set(clickableOverride) : null;
   return (
     <div className="rounded-lg border border-border bg-surface px-4 py-5 text-base leading-loose">
       {tokens.map((token, i) => {
         const isFocused = focusedTokenIndex === i;
         const isPulledFrom = pulledSet.has(i);
         const hasContent = contentSet.has(i);
+        const isOverrideRestricted = overrideSet !== null && !overrideSet.has(i);
 
-        if (!token.clickable) {
+        if (!token.clickable || isOverrideRestricted) {
           return (
             <span key={i} className="text-foreground/70">
               {/* tokens that attach to their predecessor visually keep spacing clean */}

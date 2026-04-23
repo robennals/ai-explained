@@ -6,9 +6,15 @@ interface PredictionCardProps {
   predictions: PredictionRow[];
   predictionSlotToken: string;
   finalRep: string;
+  answerEmbedding: { token: string; description: string };
 }
 
-export function PredictionCard({ predictions, predictionSlotToken, finalRep }: PredictionCardProps) {
+export function PredictionCard({
+  predictions,
+  predictionSlotToken,
+  finalRep,
+  answerEmbedding,
+}: PredictionCardProps) {
   const max = Math.max(...predictions.map((p) => p.probability));
   return (
     <div className="flex flex-col gap-4">
@@ -20,8 +26,20 @@ export function PredictionCard({ predictions, predictionSlotToken, finalRep }: P
           The model reads this representation of the final word{" "}
           <span className="font-mono text-foreground">&ldquo;{predictionSlotToken}&rdquo;</span>:
         </div>
-        <div className="border-l-4 border-green-500 bg-green-50 px-3 py-2 text-sm text-foreground">
+        <div className="mb-3 border-l-4 border-green-500 bg-green-50 px-3 py-2 text-sm text-foreground">
           {finalRep}
+        </div>
+
+        <div className="mb-3 rounded border-l-4 border-purple-400 bg-purple-50 px-3 py-2 dark:bg-purple-900/20">
+          <div className="text-xs font-medium uppercase tracking-wider text-purple-900 dark:text-purple-300">
+            What the model&apos;s embedding says about &ldquo;{answerEmbedding.token}&rdquo;
+          </div>
+          <div className="mt-1 italic">{answerEmbedding.description}</div>
+        </div>
+
+        <div className="text-sm text-foreground/70">
+          Blue&apos;s accumulated representation closely matches this embedding — that&apos;s why
+          &ldquo;planet&rdquo; and &ldquo;Earth&rdquo; rank as top candidates.
         </div>
       </div>
 
