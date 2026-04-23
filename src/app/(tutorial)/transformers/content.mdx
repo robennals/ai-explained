@@ -28,17 +28,17 @@ This is why each layer genuinely *accumulates* understanding. Attention brings n
 
 ## A Transformer In Action
 
-Enough theory — let's watch one run. The playground below shows a real sentence flowing through three transformer layers. Every representation is written as a plain English sentence. Click a layer to see where the model has arrived; click a word to see what any head did to it.
+Enough theory — let's watch one run. The playground below shows a real sentence flowing through four transformer layers. Every representation is written as a plain English sentence. Click a layer to see where the model has arrived; click a word to see what any head did to it.
 
-One thing to look for as you explore: the model never sees the word *Earth* spelled out in the sentence. But by the final layer, "blue" has accumulated enough context to predict a word that specifically names it. Watch it happen step by step.
+One thing to look for as you explore: the model never sees the word *Earth* spelled out in the sentence. But by the final layer, the word "blue" has accumulated enough context to predict a word that specifically names it. Watch it happen step by step.
 
 <TransformerInActionWidget>
-Start at **Embed** and click through the layers: L1 attaches each token to its predecessor, L2 resolves the pronoun *her*, and L3 pulls scene features into the prediction slot *blue*. Then click **Predict** to see the top candidates for the next word.
+Click **Next layer** to step through, or jump to any layer in the strip above the passage. L1 gives every word a copy of its previous word. L2 ties several words to the Martian setting. L3 resolves the pronoun *her*. L4 pulls everything into the prediction slot *blue*. Finally, click **Predict** to see the top candidates for the next word.
 </TransformerInActionWidget>
 
-Notice what just happened. The word **Earth** never appears in the sentence. Yet by the end of L3, the model has composed *a blue thing, belonging to the astronaut, seen in the sky of Mars — her home planet*. Nothing in any single layer did this on its own: L1 barely did more than bolt each word to its neighbour; L2 resolved one pronoun; L3 pulled three features into one slot. Stacked together, they fingerprint a specific idea that wasn't in any of the input tokens. That accumulation is the whole mechanism.
+Notice what just happened. The word **Earth** never appears in the sentence. Yet by the end of L4, the model has composed *a blue thing belonging to the astronaut on Mars, seen by her in the Martian sky — her home*. Nothing in any single layer did this on its own: L1 barely did more than bolt each word to its neighbour; L2 placed several words into the Martian setting; L3 resolved one pronoun; L4 pulled the chain together for the prediction slot. Stacked together, they fingerprint a specific idea that wasn't in any of the input tokens. That accumulation is the whole mechanism.
 
-Each head here is a simplified version of a pattern real interpretability research has documented in trained transformers — previous-token heads, coreference heads, and name-mover-style heads that move features to the prediction slot. A real model has hundreds of narrow heads; we're showing the handful that do visible work on this particular sentence.
+Each head here is a simplified version of a pattern real interpretability research has documented in trained transformers — previous-token heads, coreference heads, and heads that move features into the prediction slot. A real model has hundreds of narrow heads; we're showing the handful that do visible work on this particular sentence.
 
 ## Add Residual
 
