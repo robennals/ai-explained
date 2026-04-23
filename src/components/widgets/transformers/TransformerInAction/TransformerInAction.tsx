@@ -53,8 +53,18 @@ export function TransformerInAction() {
     setFocalTokenIndex(INITIAL_FOCAL);
   }, []);
 
+  // On the Predict layer, auto-focus "blue" (the prediction slot) so the reader doesn't
+  // have to click to see the passage highlight blue as the relevant token.
+  const effectiveFocalIndex = useMemo(() => {
+    if (selectedLayerId === "Predict") {
+      const blueIdx = data.tokens.findIndex((t) => t.token === "blue");
+      if (blueIdx >= 0) return blueIdx;
+    }
+    return focalTokenIndex;
+  }, [data.tokens, selectedLayerId, focalTokenIndex]);
+
   // Resolve what to show in the detail region.
-  const focalToken = focalTokenIndex !== null ? data.tokens[focalTokenIndex] : null;
+  const focalToken = effectiveFocalIndex !== null ? data.tokens[effectiveFocalIndex] : null;
 
   const card: HeadCard | null = useMemo(() => {
     if (!focalToken || !selectedHead) return null;
@@ -138,7 +148,7 @@ export function TransformerInAction() {
 
         <Passage
           tokens={data.tokens}
-          focusedTokenIndex={focalTokenIndex}
+          focusedTokenIndex={effectiveFocalIndex}
           pulledFromIndices={pulledFromIndices}
           tokensWithContent={tokensWithContent}
           clickableOverride={clickableOverride}
