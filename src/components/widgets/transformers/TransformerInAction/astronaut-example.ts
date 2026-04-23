@@ -36,27 +36,27 @@ const layers: ExampleData["layers"] = [
   },
   {
     id: "L3",
-    label: "Find what each word refers to",
-    description: "Pronouns find their nouns. Click 'her' to see it resolve to the astronaut — inheriting all the Mars context the astronaut accumulated at the previous layer.",
+    label: "Resolve pronouns",
+    description: "Every pronoun in the sentence attends to its noun. Click 'her' to see it resolve to the astronaut — inheriting all the Mars context the astronaut accumulated at the previous layer.",
     heads: [
       {
         id: "refers",
-        label: "Find what each word refers to",
-        description: "Pronouns query for a matching noun and pull its meaning in.",
+        label: "Resolve pronouns",
+        description: "Rule: a pronoun attends to the nearest preceding compatible noun (matching person/gender/number). In this sentence, only 'her' matches the rule.",
         kind: "content",
       },
     ],
   },
   {
     id: "L4",
-    label: "Find the possessor",
-    description: "An adjective right after a possessive pronoun attends to who the pronoun refers to. Click 'blue' to see it pull in 'her' — now known to be the astronaut on Mars.",
+    label: "Previous-token",
+    description: "Same head as Layer 1 — every token pulls a copy of its previous token — but now the previous tokens have been enriched by the intervening layers. 'Blue' pulls 'her' again and this time gets her's resolved meaning ('the astronaut on Mars'). 'To' pulls 'looked' again and gets its Mars-enriched rep, and so on.",
     heads: [
       {
-        id: "possessor",
-        label: "Find the possessor",
-        description: "Rule: an adjective immediately following a possessive pronoun attends to that pronoun's antecedent. In this sentence, only 'blue' matches — it follows 'her'.",
-        kind: "content",
+        id: "prev",
+        label: "Previous-token",
+        description: "Uses normal attention — every token offers the same Key and the same Value; position encoding biases strongly toward the token immediately before. The same head from Layer 1, re-applied over the now-richer representations.",
+        kind: "positional",
       },
     ],
   },
@@ -144,6 +144,15 @@ const tokens: ExampleData["tokens"] = [
           contribution: "no previous token (this is the first word)",
         },
       },
+      L4: {
+        prev: {
+          kind: "positional",
+          inputRep: "a preposition meaning 'at the location of'",
+          positionalRule: "attend to the token at position N-1",
+          pulls: [],
+          contribution: "no previous token (this is the first word)",
+        },
+      },
     },
   },
   // 1: Mars
@@ -169,6 +178,17 @@ const tokens: ExampleData["tokens"] = [
             { fromTokenIndex: 0, value: "a preposition meaning 'at the location of'", weight: 1.0 },
           ],
           contribution: "previous token is 'On'",
+        },
+      },
+      L4: {
+        prev: {
+          kind: "positional",
+          inputRep: "the planet Mars — the fourth planet from the sun, a cold reddish desert world, another planet in Earth's solar system; here, the location someone or something is on",
+          positionalRule: "attend to the token at position N-1",
+          pulls: [
+            { fromTokenIndex: 0, value: "a preposition meaning 'at the location of'", weight: 1.0 },
+          ],
+          contribution: "previous token is 'On'; its representation was not updated by intervening layers",
         },
       },
     },
@@ -211,6 +231,17 @@ const tokens: ExampleData["tokens"] = [
             { fromTokenIndex: 2, value: "a comma (pacing)", weight: 1.0 },
           ],
           contribution: "previous token is ','",
+        },
+      },
+      L4: {
+        prev: {
+          kind: "positional",
+          inputRep: "a definite article following a comma",
+          positionalRule: "attend to the token at position N-1",
+          pulls: [
+            { fromTokenIndex: 2, value: "a comma (pacing punctuation)", weight: 1.0 },
+          ],
+          contribution: "previous token is ','; its representation was not updated by intervening layers",
         },
       },
     },
@@ -256,6 +287,17 @@ const tokens: ExampleData["tokens"] = [
           contribution: "binds the astronaut to being on Mars",
         },
       },
+      L4: {
+        prev: {
+          kind: "positional",
+          inputRep: "the astronaut — a specific human trained to travel in space, currently on Mars (the fourth planet from the sun, a cold reddish desert world, another planet in Earth's solar system; the location they are on)",
+          positionalRule: "attend to the token at position N-1",
+          pulls: [
+            { fromTokenIndex: 3, value: "a definite article following a comma", weight: 1.0 },
+          ],
+          contribution: "previous token is 'the'; its representation was not updated by intervening layers",
+        },
+      },
     },
   },
   // 5: looked
@@ -267,9 +309,9 @@ const tokens: ExampleData["tokens"] = [
       L1: "a past act of looking — turning one's visual attention somewhere — performed by the astronaut",
       L2: "a past act of looking — turning one's visual attention somewhere — performed by the astronaut, happening on Mars (another planet in Earth's solar system)",
       L3: "a past act of looking — turning one's visual attention somewhere — performed by the astronaut, happening on Mars (another planet in Earth's solar system)",
-      L4: "a past act of looking — turning one's visual attention somewhere — performed by the astronaut, happening on Mars (another planet in Earth's solar system)",
-      L5: "a past act of looking — turning one's visual attention somewhere — performed by the astronaut, happening on Mars (another planet in Earth's solar system)",
-      L6: "a past act of looking — turning one's visual attention somewhere — performed by the astronaut, happening on Mars (another planet in Earth's solar system)",
+      L4: "a past act of looking — turning one's visual attention somewhere — performed by the astronaut (a specific human trained to travel in space), happening on Mars (another planet in Earth's solar system)",
+      L5: "a past act of looking — turning one's visual attention somewhere — performed by the astronaut (a specific human trained to travel in space), happening on Mars (another planet in Earth's solar system)",
+      L6: "a past act of looking — turning one's visual attention somewhere — performed by the astronaut (a specific human trained to travel in space), happening on Mars (another planet in Earth's solar system)",
     },
     headCards: {
       L1: {
@@ -299,6 +341,21 @@ const tokens: ExampleData["tokens"] = [
           contribution: "binds the looking to happen on Mars",
         },
       },
+      L4: {
+        prev: {
+          kind: "positional",
+          inputRep: "a past act of looking — turning one's visual attention somewhere — performed by the astronaut, happening on Mars (another planet in Earth's solar system)",
+          positionalRule: "attend to the token at position N-1",
+          pulls: [
+            {
+              fromTokenIndex: IDX_ASTRONAUT,
+              value: "the astronaut — a specific human trained to travel in space, currently on Mars (the fourth planet from the sun, a cold reddish desert world, another planet in Earth's solar system; the location they are on)",
+              weight: 1.0,
+            },
+          ],
+          contribution: "previous token is 'astronaut'; its representation has since been enriched by intervening layers",
+        },
+      },
     },
   },
   // 6: to
@@ -310,9 +367,9 @@ const tokens: ExampleData["tokens"] = [
       L1: "a directional preposition attached to the act of looking",
       L2: "a directional preposition attached to the act of looking",
       L3: "a directional preposition attached to the act of looking",
-      L4: "a directional preposition attached to the act of looking",
-      L5: "a directional preposition attached to the act of looking",
-      L6: "a directional preposition attached to the act of looking",
+      L4: "a directional preposition attached to a past act of looking — turning one's visual attention somewhere — performed by the astronaut (a specific human trained to travel in space), happening on Mars (another planet in Earth's solar system)",
+      L5: "a directional preposition attached to a past act of looking — turning one's visual attention somewhere — performed by the astronaut (a specific human trained to travel in space), happening on Mars (another planet in Earth's solar system)",
+      L6: "a directional preposition attached to a past act of looking — turning one's visual attention somewhere — performed by the astronaut (a specific human trained to travel in space), happening on Mars (another planet in Earth's solar system)",
     },
     headCards: {
       L1: {
@@ -324,6 +381,21 @@ const tokens: ExampleData["tokens"] = [
             { fromTokenIndex: 5, value: "a verb of visual attention", weight: 1.0 },
           ],
           contribution: "previous token is 'looked'",
+        },
+      },
+      L4: {
+        prev: {
+          kind: "positional",
+          inputRep: "a directional preposition attached to the act of looking",
+          positionalRule: "attend to the token at position N-1",
+          pulls: [
+            {
+              fromTokenIndex: IDX_LOOKED,
+              value: "a past act of looking — turning one's visual attention somewhere — performed by the astronaut, happening on Mars (another planet in Earth's solar system)",
+              weight: 1.0,
+            },
+          ],
+          contribution: "previous token is 'looked'; its representation has since been enriched by intervening layers",
         },
       },
     },
@@ -351,6 +423,17 @@ const tokens: ExampleData["tokens"] = [
             { fromTokenIndex: 6, value: "a directional preposition", weight: 1.0 },
           ],
           contribution: "previous token is 'to'",
+        },
+      },
+      L4: {
+        prev: {
+          kind: "positional",
+          inputRep: "a definite article following the preposition 'to'",
+          positionalRule: "attend to the token at position N-1",
+          pulls: [
+            { fromTokenIndex: 6, value: "a directional preposition attached to the act of looking", weight: 1.0 },
+          ],
+          contribution: "previous token is 'to'; its representation was not updated by intervening layers",
         },
       },
     },
@@ -396,6 +479,17 @@ const tokens: ExampleData["tokens"] = [
           contribution: "binds the sky to being above Mars",
         },
       },
+      L4: {
+        prev: {
+          kind: "positional",
+          inputRep: "the specific Martian sky — the expanse above where clouds and celestial objects appear, here on Mars (another planet in Earth's solar system)",
+          positionalRule: "attend to the token at position N-1",
+          pulls: [
+            { fromTokenIndex: 7, value: "a definite article following the preposition 'to'", weight: 1.0 },
+          ],
+          contribution: "previous token is 'the'; its representation was not updated by intervening layers",
+        },
+      },
       L5: {
         "verb-of-object": {
           kind: "content",
@@ -423,9 +517,9 @@ const tokens: ExampleData["tokens"] = [
       L1: "a conjunction following the first clause (ending at 'sky')",
       L2: "a conjunction following the first clause (ending at 'sky')",
       L3: "a conjunction following the first clause (ending at 'sky')",
-      L4: "a conjunction following the first clause (ending at 'sky')",
-      L5: "a conjunction following the first clause (ending at 'sky')",
-      L6: "a conjunction following the first clause (ending at 'sky')",
+      L4: "a conjunction following the first clause (which ended at 'sky' — the specific Martian sky, the expanse above where clouds and celestial objects appear, here on Mars, another planet in Earth's solar system)",
+      L5: "a conjunction following the first clause (which ended at 'sky' — the specific Martian sky, the expanse above where clouds and celestial objects appear, here on Mars, another planet in Earth's solar system)",
+      L6: "a conjunction following the first clause (which ended at 'sky' — the specific Martian sky, the expanse above where clouds and celestial objects appear, here on Mars, another planet in Earth's solar system)",
     },
     headCards: {
       L1: {
@@ -437,6 +531,21 @@ const tokens: ExampleData["tokens"] = [
             { fromTokenIndex: 8, value: "the sky (the first clause's object)", weight: 1.0 },
           ],
           contribution: "previous token is 'sky'",
+        },
+      },
+      L4: {
+        prev: {
+          kind: "positional",
+          inputRep: "a conjunction following the first clause (ending at 'sky')",
+          positionalRule: "attend to the token at position N-1",
+          pulls: [
+            {
+              fromTokenIndex: IDX_SKY,
+              value: "the specific Martian sky — the expanse above where clouds and celestial objects appear, here on Mars (another planet in Earth's solar system)",
+              weight: 1.0,
+            },
+          ],
+          contribution: "previous token is 'sky'; its representation has since been enriched by intervening layers",
         },
       },
     },
@@ -482,6 +591,17 @@ const tokens: ExampleData["tokens"] = [
           contribution: "binds the seeing to happen on Mars",
         },
       },
+      L4: {
+        prev: {
+          kind: "positional",
+          inputRep: "a past act of seeing with the eyes, happening on Mars (another planet in Earth's solar system), starting a new conjoined action",
+          positionalRule: "attend to the token at position N-1",
+          pulls: [
+            { fromTokenIndex: 9, value: "a conjunction following the first clause (ending at 'sky')", weight: 1.0 },
+          ],
+          contribution: "previous token is 'and'; its representation was not updated by intervening layers",
+        },
+      },
     },
   },
   // 11: her
@@ -493,9 +613,9 @@ const tokens: ExampleData["tokens"] = [
       L1: "a feminine possessive pronoun, appearing as the possessor of what was seen",
       L2: "a feminine possessive pronoun, appearing as the possessor of what was seen",
       L3: "her — a feminine possessive pronoun appearing as the possessor of what was seen, now known to refer to the astronaut (a specific human trained to travel in space, currently on Mars — another planet in Earth's solar system)",
-      L4: "her — a feminine possessive pronoun appearing as the possessor of what was seen, now known to refer to the astronaut (a specific human trained to travel in space, currently on Mars — another planet in Earth's solar system)",
-      L5: "her — a feminine possessive pronoun appearing as the possessor of what was seen, now known to refer to the astronaut (a specific human trained to travel in space, currently on Mars — another planet in Earth's solar system); also the possessor of the thing observed in the act of seeing (a past act of seeing with the eyes, happening on Mars, starting a new conjoined action)",
-      L6: "her — a feminine possessive pronoun appearing as the possessor of what was seen, now known to refer to the astronaut (a specific human trained to travel in space, currently on Mars — another planet in Earth's solar system); also the possessor of the thing observed in the act of seeing (a past act of seeing with the eyes, happening on Mars, starting a new conjoined action)",
+      L4: "her — a feminine possessive pronoun appearing as the possessor of what was seen, now known to refer to the astronaut (a specific human trained to travel in space, currently on Mars — another planet in Earth's solar system); observed via a past act of seeing with the eyes, happening on Mars",
+      L5: "her — a feminine possessive pronoun appearing as the possessor of what was seen, now known to refer to the astronaut (a specific human trained to travel in space, currently on Mars — another planet in Earth's solar system); observed via a past act of seeing with the eyes, happening on Mars; also the possessor of the thing observed in the act of seeing (a past act of seeing with the eyes, happening on Mars, starting a new conjoined action)",
+      L6: "her — a feminine possessive pronoun appearing as the possessor of what was seen, now known to refer to the astronaut (a specific human trained to travel in space, currently on Mars — another planet in Earth's solar system); observed via a past act of seeing with the eyes, happening on Mars; also the possessor of the thing observed in the act of seeing (a past act of seeing with the eyes, happening on Mars, starting a new conjoined action)",
     },
     headCards: {
       L1: {
@@ -525,10 +645,25 @@ const tokens: ExampleData["tokens"] = [
           contribution: "resolves 'her' to the astronaut on Mars",
         },
       },
+      L4: {
+        prev: {
+          kind: "positional",
+          inputRep: "her — a feminine possessive pronoun appearing as the possessor of what was seen, now known to refer to the astronaut (a specific human trained to travel in space, currently on Mars — another planet in Earth's solar system)",
+          positionalRule: "attend to the token at position N-1",
+          pulls: [
+            {
+              fromTokenIndex: IDX_SAW,
+              value: "a past act of seeing with the eyes, happening on Mars (another planet in Earth's solar system), starting a new conjoined action",
+              weight: 1.0,
+            },
+          ],
+          contribution: "previous token is 'saw'; its representation has since been enriched by intervening layers",
+        },
+      },
       L5: {
         "verb-of-object": {
           kind: "content",
-          inputRep: "her — a feminine possessive pronoun appearing as the possessor of what was seen, now known to refer to the astronaut (a specific human trained to travel in space, currently on Mars — another planet in Earth's solar system)",
+          inputRep: "her — a feminine possessive pronoun appearing as the possessor of what was seen, now known to refer to the astronaut (a specific human trained to travel in space, currently on Mars — another planet in Earth's solar system); observed via a past act of seeing with the eyes, happening on Mars",
           query: "a verb acting on this thing",
           pulls: [
             {
@@ -569,19 +704,18 @@ const tokens: ExampleData["tokens"] = [
         },
       },
       L4: {
-        possessor: {
-          kind: "content",
+        prev: {
+          kind: "positional",
           inputRep: "the color blue, modifying something that belongs to 'her'",
-          query: "a possessor",
+          positionalRule: "attend to the token at position N-1",
           pulls: [
             {
               fromTokenIndex: IDX_HER,
-              key: "a possessor",
               value: "her — a feminine possessive pronoun appearing as the possessor of what was seen, now known to refer to the astronaut (a specific human trained to travel in space, currently on Mars — another planet in Earth's solar system)",
               weight: 1.0,
             },
           ],
-          contribution: "blue binds to the astronaut as the owner of the thing it modifies",
+          contribution: "previous token is 'her'; its representation has since been enriched by intervening layers",
         },
       },
       L5: {

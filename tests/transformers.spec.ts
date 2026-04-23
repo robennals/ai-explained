@@ -9,10 +9,11 @@ test.describe("Transformers chapter — A Transformer In Action widget", () => {
     const widget = page.locator(".widget-container").filter({ hasText: "A Transformer In Action" });
     await expect(widget).toBeVisible();
     await expect(widget.getByRole("button", { name: "Start" })).toBeVisible();
-    await expect(widget.getByRole("button", { name: "Previous-token" })).toBeVisible();
+    // "Previous-token" appears twice in the stack (L1 and L4).
+    await expect(widget.getByRole("button", { name: "Previous-token" }).first()).toBeVisible();
+    await expect(widget.getByRole("button", { name: "Previous-token" }).nth(1)).toBeVisible();
     await expect(widget.getByRole("button", { name: "Place in the scene" })).toBeVisible();
-    await expect(widget.getByRole("button", { name: "Find what each word refers to" })).toBeVisible();
-    await expect(widget.getByRole("button", { name: "Find the possessor" })).toBeVisible();
+    await expect(widget.getByRole("button", { name: "Resolve pronouns" })).toBeVisible();
     await expect(widget.getByRole("button", { name: "Find what verb acts on this" })).toBeVisible();
     await expect(widget.getByRole("button", { name: "Find where this is visible" })).toBeVisible();
     await expect(widget.getByRole("button", { name: "Predict" })).toBeVisible();
@@ -35,18 +36,19 @@ test.describe("Transformers chapter — A Transformer In Action widget", () => {
     await expect(widget.getByText("62%").first()).toBeVisible();
   });
 
-  test("clicking 'blue' at Find the possessor shows it pulling 'her' as the astronaut", async ({ page }) => {
+  test("clicking 'blue' at the second Previous-token layer shows it pulling 'her' as the astronaut", async ({ page }) => {
     const widget = page.locator(".widget-container").filter({ hasText: "A Transformer In Action" });
-    await widget.getByRole("button", { name: "Find the possessor" }).click();
+    // The second "Previous-token" button is L4 (the first is L1).
+    await widget.getByRole("button", { name: "Previous-token" }).nth(1).click();
     await widget.getByRole("button", { name: "blue" }).click();
 
-    // L4's single head queries for "a possessor".
-    await expect(widget.getByText("a possessor", { exact: false }).first()).toBeVisible();
+    // L4's head is positional — the detail card shows the "Position bias" label.
+    await expect(widget.getByText("Position bias", { exact: false }).first()).toBeVisible();
 
     // The Paying-attention-to table appears.
     await expect(widget.getByText("Paying attention to")).toBeVisible();
 
-    // Value row contains the astronaut-on-Mars phrase.
+    // Value row contains the astronaut-on-Mars phrase (pulled from 'her' — now enriched).
     await expect(widget.getByText("the astronaut", { exact: false }).first()).toBeVisible();
   });
 
@@ -68,7 +70,7 @@ test.describe("Transformers chapter — A Transformer In Action widget", () => {
     const nextBtn = widget.getByRole("button", { name: /Next layer/i });
     await expect(nextBtn).toBeVisible();
     await nextBtn.click();
-    // L1 button should now look pressed / highlighted. Assert by checking aria-pressed.
-    await expect(widget.getByRole("button", { name: "Previous-token" })).toHaveAttribute("aria-pressed", "true");
+    // L1 is the first Previous-token button. It should now look pressed / highlighted.
+    await expect(widget.getByRole("button", { name: "Previous-token" }).first()).toHaveAttribute("aria-pressed", "true");
   });
 });
