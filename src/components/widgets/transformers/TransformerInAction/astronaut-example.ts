@@ -5,13 +5,13 @@ const layers: ExampleData["layers"] = [
   {
     id: "L0",
     label: "Start",
-    description: "Each token is looked up in the model's table — its raw, dictionary-style meaning, before any other word has influenced it.",
+    description: "Each token shows just its dictionary meaning — what the model knows before any word has talked to any other. Click any word to see its raw embedding.",
     heads: [],
   },
   {
     id: "L1",
     label: "Previous-token",
-    description: "Layer 1 runs one attention head — it gives every token a copy of its previous token, which the feed-forward step then composes.",
+    description: "Every word pulls a copy of the word immediately before it. Click 'Mars' to see how it picks up that 'On' came before — the seed for later realising it's a location.",
     heads: [
       {
         id: "prev",
@@ -24,7 +24,7 @@ const layers: ExampleData["layers"] = [
   {
     id: "L2",
     label: "Place in the scene",
-    description: "Layer 2 ties each word to the scene's location — several words pull from 'Mars' to learn where the action is happening.",
+    description: "Several words query for a location and pull from 'Mars'. Click 'astronaut', 'looked', 'sky', or 'saw' — each one's representation now includes 'on Mars' alongside everything it already knew.",
     heads: [
       {
         id: "location",
@@ -37,7 +37,7 @@ const layers: ExampleData["layers"] = [
   {
     id: "L3",
     label: "Find what each word refers to",
-    description: "Layer 3 figures out what each word refers to — pronouns find their nouns.",
+    description: "Pronouns find their nouns. Click 'her' to see it resolve to the astronaut — inheriting all the Mars context the astronaut accumulated at the previous layer.",
     heads: [
       {
         id: "refers",
@@ -50,7 +50,7 @@ const layers: ExampleData["layers"] = [
   {
     id: "L4",
     label: "Compose the picture",
-    description: "Layer 4 composes the picture for the next word. 'Blue' (the prediction slot) pulls together its owner and the scene where it's being seen.",
+    description: "The prediction slot 'blue' pulls together the scene — its owner ('her', who is now the astronaut on Mars) plus the visual context ('sky', 'saw'). Click 'blue' to see all three pieces compose into 'her home planet'.",
     heads: [
       {
         id: "compose",
@@ -63,7 +63,7 @@ const layers: ExampleData["layers"] = [
   {
     id: "Predict",
     label: "Predict",
-    description: "The prediction head reads 'blue's L4 output and produces a probability distribution over the next token.",
+    description: "The model reads 'blue's accumulated representation and ranks possible next words. The top candidate is 'planet' because everything blue now carries — Earth-human, on Mars, looking at the sky — fingerprints exactly that word.",
     heads: [],
   },
 ];
@@ -123,10 +123,10 @@ const tokens: ExampleData["tokens"] = [
     clickable: true,
     reps: {
       L0: "the fourth planet from the sun — a cold, reddish desert world",
-      L1: "the planet Mars — the location someone or something is on",
-      L2: "the planet Mars — the location someone or something is on",
-      L3: "the planet Mars — the location someone or something is on",
-      L4: "the planet Mars — the location someone or something is on",
+      L1: "the planet Mars — the fourth planet from the sun, a cold reddish desert world; here, the location someone or something is on",
+      L2: "the planet Mars — the fourth planet from the sun, a cold reddish desert world; here, the location someone or something is on",
+      L3: "the planet Mars — the fourth planet from the sun, a cold reddish desert world; here, the location someone or something is on",
+      L4: "the planet Mars — the fourth planet from the sun, a cold reddish desert world; here, the location someone or something is on",
     },
     headCards: {
       L1: {
@@ -187,9 +187,9 @@ const tokens: ExampleData["tokens"] = [
     reps: {
       L0: "a human trained to travel in space",
       L1: "the astronaut — a specific human trained to travel in space",
-      L2: "the astronaut, currently on Mars",
-      L3: "the astronaut, currently on Mars",
-      L4: "the astronaut, currently on Mars",
+      L2: "the astronaut — a specific human trained to travel in space, currently on Mars",
+      L3: "the astronaut — a specific human trained to travel in space, currently on Mars",
+      L4: "the astronaut — a specific human trained to travel in space, currently on Mars",
     },
     headCards: {
       L1: {
@@ -212,7 +212,7 @@ const tokens: ExampleData["tokens"] = [
             {
               fromTokenIndex: IDX_MARS,
               key: "a location",
-              value: "Mars (a non-Earth desert planet, where this scene is set)",
+              value: "the planet Mars — a cold reddish desert world; here, the location someone is on",
               weight: 1.0,
             },
           ],
@@ -227,10 +227,10 @@ const tokens: ExampleData["tokens"] = [
     clickable: true,
     reps: {
       L0: "past tense of 'look' — turned one's visual attention somewhere",
-      L1: "a past act of visual attention, performed by the astronaut",
-      L2: "a past act of visual attention, happening on Mars, performed by the astronaut",
-      L3: "a past act of visual attention, happening on Mars, performed by the astronaut",
-      L4: "a past act of visual attention, happening on Mars, performed by the astronaut",
+      L1: "a past act of looking — turning one's visual attention somewhere — performed by the astronaut",
+      L2: "a past act of looking — turning one's visual attention somewhere — performed by the astronaut, happening on Mars",
+      L3: "a past act of looking — turning one's visual attention somewhere — performed by the astronaut, happening on Mars",
+      L4: "a past act of looking — turning one's visual attention somewhere — performed by the astronaut, happening on Mars",
     },
     headCards: {
       L1: {
@@ -247,13 +247,13 @@ const tokens: ExampleData["tokens"] = [
       L2: {
         location: {
           kind: "content",
-          inputRep: "a past act of visual attention, performed by the astronaut",
+          inputRep: "a past act of looking — turning one's visual attention somewhere — performed by the astronaut",
           query: "a location",
           pulls: [
             {
               fromTokenIndex: IDX_MARS,
               key: "a location",
-              value: "Mars (a non-Earth desert planet, where this scene is set)",
+              value: "the planet Mars — a cold reddish desert world; here, the location someone is on",
               weight: 1.0,
             },
           ],
@@ -318,10 +318,10 @@ const tokens: ExampleData["tokens"] = [
     clickable: true,
     reps: {
       L0: "the expanse above, where clouds and celestial objects appear",
-      L1: "the specific sky being referred to",
-      L2: "the Martian sky — the expanse above where things are seen, here on Mars",
-      L3: "the Martian sky — the expanse above where things are seen, here on Mars",
-      L4: "the Martian sky — the expanse above where things are seen, here on Mars",
+      L1: "the specific sky — the expanse above, where clouds and celestial objects appear",
+      L2: "the specific Martian sky — the expanse above where clouds and celestial objects appear, here on Mars",
+      L3: "the specific Martian sky — the expanse above where clouds and celestial objects appear, here on Mars",
+      L4: "the specific Martian sky — the expanse above where clouds and celestial objects appear, here on Mars",
     },
     headCards: {
       L1: {
@@ -338,13 +338,13 @@ const tokens: ExampleData["tokens"] = [
       L2: {
         location: {
           kind: "content",
-          inputRep: "the specific sky being referred to",
+          inputRep: "the specific sky — the expanse above, where clouds and celestial objects appear",
           query: "a location",
           pulls: [
             {
               fromTokenIndex: IDX_MARS,
               key: "a location",
-              value: "Mars (a non-Earth desert planet, where this scene is set)",
+              value: "the planet Mars — a cold reddish desert world; here, the location someone is on",
               weight: 1.0,
             },
           ],
@@ -384,10 +384,10 @@ const tokens: ExampleData["tokens"] = [
     clickable: true,
     reps: {
       L0: "past tense of 'see' — observed with the eyes",
-      L1: "a past act of seeing, starting a new conjoined action",
-      L2: "a past act of seeing, happening on Mars, starting a new conjoined action",
-      L3: "a past act of seeing, happening on Mars, starting a new conjoined action",
-      L4: "a past act of seeing, happening on Mars, starting a new conjoined action",
+      L1: "a past act of seeing with the eyes, starting a new conjoined action",
+      L2: "a past act of seeing with the eyes, happening on Mars, starting a new conjoined action",
+      L3: "a past act of seeing with the eyes, happening on Mars, starting a new conjoined action",
+      L4: "a past act of seeing with the eyes, happening on Mars, starting a new conjoined action",
     },
     headCards: {
       L1: {
@@ -404,13 +404,13 @@ const tokens: ExampleData["tokens"] = [
       L2: {
         location: {
           kind: "content",
-          inputRep: "a past act of seeing, starting a new conjoined action",
+          inputRep: "a past act of seeing with the eyes, starting a new conjoined action",
           query: "a location",
           pulls: [
             {
               fromTokenIndex: IDX_MARS,
               key: "a location",
-              value: "Mars (a non-Earth desert planet, where this scene is set)",
+              value: "the planet Mars — a cold reddish desert world; here, the location someone is on",
               weight: 1.0,
             },
           ],
@@ -427,8 +427,8 @@ const tokens: ExampleData["tokens"] = [
       L0: "a feminine possessive pronoun",
       L1: "a feminine possessive pronoun, appearing as the possessor of what was seen",
       L2: "a feminine possessive pronoun, appearing as the possessor of what was seen",
-      L3: "her — the astronaut, who is on Mars",
-      L4: "her — the astronaut, who is on Mars",
+      L3: "her — a feminine possessive pronoun appearing as the possessor of what was seen, now known to refer to the astronaut (a specific human trained to travel in space, currently on Mars)",
+      L4: "her — a feminine possessive pronoun appearing as the possessor of what was seen, now known to refer to the astronaut (a specific human trained to travel in space, currently on Mars)",
     },
     headCards: {
       L1: {
@@ -451,7 +451,7 @@ const tokens: ExampleData["tokens"] = [
             {
               fromTokenIndex: IDX_ASTRONAUT,
               key: "a human person",
-              value: "the astronaut, who is on Mars",
+              value: "the astronaut — a specific human trained to travel in space, currently on Mars",
               weight: 1.0,
             },
           ],
@@ -469,7 +469,7 @@ const tokens: ExampleData["tokens"] = [
       L1: "the color blue, modifying something that belongs to 'her'",
       L2: "the color blue, modifying something that belongs to 'her'",
       L3: "the color blue, modifying something that belongs to 'her'",
-      L4: "a blue thing belonging to the astronaut on Mars, seen by her in the Martian sky — her home",
+      L4: "the color blue, modifying a thing that belongs to her — the astronaut, a specific human trained to travel in space and currently on Mars — seen by her in the Martian sky; her home",
     },
     headCards: {
       L1: {
@@ -492,19 +492,19 @@ const tokens: ExampleData["tokens"] = [
             {
               fromTokenIndex: IDX_HER,
               key: "the scene this thing belongs to",
-              value: "the astronaut, who is on Mars",
+              value: "her — the astronaut (a specific human trained to travel in space, currently on Mars), the possessor of what was seen",
               weight: 0.5,
             },
             {
               fromTokenIndex: IDX_SKY,
               key: "the scene this thing belongs to",
-              value: "the Martian sky, where the seeing happens",
+              value: "the specific Martian sky — the expanse above where things appear, here on Mars",
               weight: 0.3,
             },
             {
               fromTokenIndex: IDX_SAW,
               key: "the scene this thing belongs to",
-              value: "the act of seeing happening on Mars",
+              value: "a past act of seeing with the eyes, happening on Mars",
               weight: 0.2,
             },
           ],

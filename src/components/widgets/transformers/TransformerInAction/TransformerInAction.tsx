@@ -112,19 +112,12 @@ export function TransformerInAction() {
         />
 
         {selectedLayer && selectedLayer.heads.length > 0 && (
-          <>
-            <HeadStrip
-              heads={selectedLayer.heads}
-              selectedHeadId={selectedHead?.id ?? null}
-              onSelect={handleSelectHead}
-              layerLabel={selectedLayer.label}
-            />
-            {selectedHead && (
-              <div className="rounded-md border border-border bg-surface px-4 py-3 text-sm text-foreground/80">
-                {selectedHead.description}
-              </div>
-            )}
-          </>
+          <HeadStrip
+            heads={selectedLayer.heads}
+            selectedHeadId={selectedHead?.id ?? null}
+            onSelect={handleSelectHead}
+            layerLabel={selectedLayer.label}
+          />
         )}
 
         <Passage
@@ -153,6 +146,15 @@ export function TransformerInAction() {
         ) : (
           <div className="rounded-lg border border-dashed border-border bg-foreground/[0.03] p-6 text-center text-sm italic text-muted">
             Click a word in the passage above to inspect it.
+          </div>
+        )}
+
+        {selectedLayer && (
+          <div className="rounded-lg border-l-4 border-blue-400 bg-blue-50 px-4 py-3 text-base text-foreground/80 dark:bg-blue-900/20">
+            <div className="mb-1 text-xs font-medium uppercase tracking-wider text-blue-900 dark:text-blue-300">
+              About this layer
+            </div>
+            <div>{selectedLayer.description}</div>
           </div>
         )}
 

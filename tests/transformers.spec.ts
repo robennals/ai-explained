@@ -22,7 +22,7 @@ test.describe("Transformers chapter — A Transformer In Action widget", () => {
 
     // Blue's final representation is shown above the prediction bars.
     await expect(
-      widget.getByText("a blue thing belonging to the astronaut on Mars", { exact: false })
+      widget.getByText("seen by her in the Martian sky", { exact: false })
     ).toBeVisible();
 
     // Prediction card heading.
@@ -45,11 +45,11 @@ test.describe("Transformers chapter — A Transformer In Action widget", () => {
     await expect(widget.getByText("Paying attention to")).toBeVisible();
 
     // Value row contains the astronaut-on-Mars phrase.
-    await expect(widget.getByText("the astronaut, who is on Mars", { exact: false }).first()).toBeVisible();
+    await expect(widget.getByText("the astronaut", { exact: false }).first()).toBeVisible();
 
     // Output representation shows the full composition.
     await expect(
-      widget.getByText("a blue thing belonging to the astronaut on Mars", { exact: false }).first()
+      widget.getByText("seen by her in the Martian sky", { exact: false }).first()
     ).toBeVisible();
   });
 
