@@ -16,7 +16,7 @@ const layers: ExampleData["layers"] = [
       {
         id: "prev",
         label: "Previous-token",
-        description: "Rule-based: every token attends to the one immediately before it. No content-based matching.",
+        description: "Uses normal attention — but every token offers the same Key and the same Value. Position encoding gives a strong bias toward the token immediately before, so each word effectively pulls a copy of its predecessor.",
         kind: "positional",
       },
     ],
