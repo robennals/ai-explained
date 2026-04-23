@@ -71,6 +71,24 @@ export function TransformerInAction() {
 
   const pulledFromIndices = card?.pulls.map((p) => p.fromTokenIndex) ?? [];
 
+  // Indices of tokens that have something inspectable at the current layer/head.
+  // L0: every clickable token has a rep to show.
+  // Predict: nothing per-token to inspect.
+  // Other layers: only tokens that have a head card for the selected head.
+  const tokensWithContent = useMemo(() => {
+    if (selectedLayerId === "Predict") return [];
+    if (selectedLayerId === "L0") {
+      return data.tokens
+        .map((t, i) => (t.clickable ? i : -1))
+        .filter((i) => i >= 0);
+    }
+    if (!selectedHead) return [];
+    const layerId = selectedLayerId as NonPredictLayerId;
+    return data.tokens
+      .map((t, i) => (t.headCards[layerId]?.[selectedHead.id] ? i : -1))
+      .filter((i) => i >= 0);
+  }, [data.tokens, selectedLayerId, selectedHead]);
+
   const currentLayerIndex = data.layers.findIndex((l) => l.id === selectedLayerId);
   const nextLayer = currentLayerIndex >= 0 ? data.layers[currentLayerIndex + 1] : undefined;
   const handleNextLayer = useCallback(() => {
@@ -111,6 +129,7 @@ export function TransformerInAction() {
           tokens={data.tokens}
           focusedTokenIndex={focalTokenIndex}
           pulledFromIndices={pulledFromIndices}
+          tokensWithContent={tokensWithContent}
           onClickToken={handleClickToken}
         />
 
