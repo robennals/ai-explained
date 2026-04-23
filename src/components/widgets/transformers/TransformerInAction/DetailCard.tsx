@@ -57,11 +57,11 @@ export function DetailCard({
       </div>
       <div className="mb-2 text-xs text-muted">{headDef.description}</div>
 
-      {/* Input rep */}
+      {/* Input Representation */}
       <div className="mb-3 grid gap-3 md:grid-cols-2">
         <div>
           <div className="text-[10px] font-medium uppercase tracking-wider text-muted">
-            Input rep
+            Input Representation
           </div>
           <div className="rounded bg-surface px-2 py-1 italic">{card.inputRep}</div>
         </div>
@@ -69,7 +69,7 @@ export function DetailCard({
         {/* Q (or positional rule) */}
         <div>
           <div className="text-[10px] font-medium uppercase tracking-wider text-muted">
-            {card.kind === "positional" ? "Rule" : "Q — seeking"}
+            {card.kind === "positional" ? "Rule" : "Looking for"}
           </div>
           <div className="rounded bg-blue-50 px-2 py-1 dark:bg-blue-900/30">
             {card.kind === "positional" ? card.positionalRule : card.query}
@@ -77,38 +77,49 @@ export function DetailCard({
         </div>
       </div>
 
-      {/* Pulled-from list */}
+      {/* Paying attention to */}
       {card.pulls.length > 0 && (
         <div className="mb-3">
           <div className="mb-1 text-[10px] font-medium uppercase tracking-wider text-muted">
-            Pulled from
+            Paying attention to
           </div>
-          <div className="grid gap-1">
-            {card.pulls.map((pull) => {
-              const from = tokens[pull.fromTokenIndex];
-              return (
-                <div
-                  key={pull.fromTokenIndex}
-                  className="grid grid-cols-[90px_1fr_1fr_50px] items-center gap-2 rounded border border-border bg-surface px-2 py-1 text-xs"
-                >
-                  <span className="font-medium">{from.token}</span>
-                  {card.kind === "content" ? (
-                    <span className="rounded bg-green-50 px-1.5 py-0.5 dark:bg-green-900/30">
-                      <span className="text-[10px] text-muted">K</span> {pull.key}
-                    </span>
-                  ) : (
-                    <span className="text-muted">—</span>
-                  )}
-                  <span className="rounded bg-yellow-50 px-1.5 py-0.5 dark:bg-yellow-900/30">
-                    <span className="text-[10px] text-muted">V</span> {pull.value}
-                  </span>
-                  <span className="text-right font-medium text-accent">
-                    {Math.round(pull.weight * 100)}%
-                  </span>
-                </div>
-              );
-            })}
-          </div>
+          <table className="w-full border-separate border-spacing-y-1 text-xs">
+            <thead>
+              <tr className="text-left text-[10px] font-medium uppercase tracking-wider text-muted">
+                <th className="px-2 py-1 font-medium">Token</th>
+                <th className="px-2 py-1 font-medium">Key</th>
+                <th className="px-2 py-1 font-medium">Value</th>
+                <th className="px-2 py-1 text-right font-medium">Weight</th>
+              </tr>
+            </thead>
+            <tbody>
+              {card.pulls.map((pull) => {
+                const from = tokens[pull.fromTokenIndex];
+                return (
+                  <tr key={pull.fromTokenIndex} className="align-top">
+                    <td className="rounded-l border-y border-l border-border bg-surface px-2 py-1 font-medium">
+                      {from.token}
+                    </td>
+                    {card.kind === "content" ? (
+                      <td className="border-y border-border bg-green-50 px-2 py-1 dark:bg-green-900/30">
+                        {pull.key}
+                      </td>
+                    ) : (
+                      <td className="border-y border-border bg-surface px-2 py-1 text-muted">
+                        —
+                      </td>
+                    )}
+                    <td className="border-y border-border bg-yellow-50 px-2 py-1 dark:bg-yellow-900/30">
+                      {pull.value}
+                    </td>
+                    <td className="rounded-r border-y border-r border-border bg-surface px-2 py-1 text-right font-medium text-accent">
+                      {Math.round(pull.weight * 100)}%
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       )}
 
@@ -124,7 +135,7 @@ export function DetailCard({
       {outputRep && (
         <div className="rounded border-l-4 border-green-500 bg-green-50 px-3 py-2 dark:bg-green-900/20">
           <div className="text-[10px] font-medium uppercase tracking-wider text-green-900 dark:text-green-300">
-            Output rep after {layerLabel} (shared across all heads of this layer, post-FFN)
+            Output Representation after {layerLabel} (shared across all heads of this layer, post-FFN)
           </div>
           <div className="mt-1 font-medium">{outputRep}</div>
         </div>
