@@ -120,7 +120,9 @@ export function TransformerInAction() {
               layerLabel={selectedLayer.label}
             />
             {selectedHead && (
-              <div className="pl-4 text-xs text-muted">{selectedHead.description}</div>
+              <div className="rounded-md border border-border bg-surface px-4 py-3 text-sm text-foreground/80">
+                {selectedHead.description}
+              </div>
             )}
           </>
         )}

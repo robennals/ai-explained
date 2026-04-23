@@ -44,7 +44,7 @@ export function DetailCard({
           {layerLabel} · {focalToken.token}
         </div>
         <div className="italic text-muted">
-          This head&apos;s Q does not match any K strongly for this token — its rep passes through unchanged.
+          This head&apos;s Q does not match any K strongly for this token — its representation passes through unchanged.
         </div>
       </div>
     );
@@ -52,17 +52,16 @@ export function DetailCard({
 
   return (
     <div className="rounded-lg border border-border bg-foreground/[0.03] p-4 text-sm">
-      <div className="mb-2 text-xs font-medium uppercase tracking-wider text-muted">
+      <div className="mb-3 text-xs font-medium uppercase tracking-wider text-muted">
         {layerLabel} · {focalToken.token}
       </div>
-      <div className="mb-2 text-sm text-muted">{headDef.description}</div>
 
-      {/* Previous Representation (full-width) */}
-      <div className="mb-3">
-        <div className="text-xs font-medium uppercase tracking-wider text-muted">
+      {/* Previous Representation (full-width, quote-style box, amber accent) */}
+      <div className="mb-3 rounded border-l-4 border-amber-400 bg-amber-50 px-3 py-2 dark:bg-amber-900/20">
+        <div className="text-xs font-medium uppercase tracking-wider text-amber-900 dark:text-amber-300">
           Previous Representation
         </div>
-        <div className="rounded bg-surface px-2 py-1 italic">{card.inputRep}</div>
+        <div className="mt-1 italic">{card.inputRep}</div>
       </div>
 
       {/* Output rep */}
