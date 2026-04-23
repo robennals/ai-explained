@@ -71,6 +71,15 @@ export function TransformerInAction() {
 
   const pulledFromIndices = card?.pulls.map((p) => p.fromTokenIndex) ?? [];
 
+  const currentLayerIndex = data.layers.findIndex((l) => l.id === selectedLayerId);
+  const nextLayer = currentLayerIndex >= 0 ? data.layers[currentLayerIndex + 1] : undefined;
+  const handleNextLayer = useCallback(() => {
+    if (nextLayer) handleSelectLayer(nextLayer.id);
+  }, [nextLayer, handleSelectLayer]);
+
+  const predictionSlotToken = "blue";
+  const predictionFinalRep = data.tokens[data.tokens.length - 1].reps.L4;
+
   return (
     <WidgetContainer
       title="A Transformer In Action"
@@ -106,7 +115,11 @@ export function TransformerInAction() {
         />
 
         {selectedLayerId === "Predict" ? (
-          <PredictionCard predictions={data.predictions} />
+          <PredictionCard
+            predictions={data.predictions}
+            predictionSlotToken={predictionSlotToken}
+            finalRep={predictionFinalRep}
+          />
         ) : focalToken ? (
           <DetailCard
             focalToken={focalToken}
@@ -126,6 +139,18 @@ export function TransformerInAction() {
           Real transformers use dozens of narrow heads per layer. We&apos;re showing the five that do the visible
           work for this sentence. Other heads exist but don&apos;t contribute here.
         </div>
+
+        {nextLayer && (
+          <div className="mt-4 flex justify-end">
+            <button
+              type="button"
+              onClick={handleNextLayer}
+              className="rounded-lg bg-accent px-6 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-accent-dark"
+            >
+              Next layer →
+            </button>
+          </div>
+        )}
       </div>
     </WidgetContainer>
   );
