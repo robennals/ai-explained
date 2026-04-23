@@ -1,6 +1,6 @@
 import type { ExampleData, NonPredictLayerId } from "./types";
 
-const NON_PREDICT_LAYERS: NonPredictLayerId[] = ["L0", "L1", "L2", "L3"];
+const NON_PREDICT_LAYERS: NonPredictLayerId[] = ["L0", "L1", "L2", "L3", "L4"];
 
 /**
  * Throws if the example data is internally inconsistent.

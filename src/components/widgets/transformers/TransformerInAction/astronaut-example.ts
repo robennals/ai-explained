@@ -4,14 +4,14 @@ import { validateExample } from "./validate";
 const layers: ExampleData["layers"] = [
   {
     id: "L0",
-    label: "Embed",
-    description: "Each token is looked up in the model's embedding table — its raw dictionary meaning, before any other word has influenced it.",
+    label: "Start",
+    description: "Each token is looked up in the model's table — its raw, dictionary-style meaning, before any other word has influenced it.",
     heads: [],
   },
   {
     id: "L1",
     label: "L1",
-    description: "Layer 1 runs one attention head — a positional head that gives every token a copy of its predecessor, which the feed-forward step then composes.",
+    description: "Layer 1 runs one attention head — it gives every token a copy of its previous token, which the feed-forward step then composes.",
     heads: [
       {
         id: "prev",
@@ -24,12 +24,12 @@ const layers: ExampleData["layers"] = [
   {
     id: "L2",
     label: "L2",
-    description: "Layer 2 runs one attention head — pronouns find their antecedents via a content-based match.",
+    description: "Layer 2 ties each word to the scene's location — several words pull from 'Mars' to learn where the action is happening.",
     heads: [
       {
-        id: "pronoun",
-        label: "Pronoun → Antecedent",
-        description: "Each pronoun's Q seeks a compatible preceding noun. Only 'her' does work here.",
+        id: "location",
+        label: "Place in the scene",
+        description: "Each word that needs to be situated in the scene queries for a location and pulls from 'Mars'.",
         kind: "content",
       },
     ],
@@ -37,24 +37,31 @@ const layers: ExampleData["layers"] = [
   {
     id: "L3",
     label: "L3",
-    description: "Layer 3 runs three narrow heads that together pull the features 'blue' needs to predict the next word.",
+    description: "Layer 3 figures out what each word refers to — pronouns find their nouns.",
     heads: [
       {
-        id: "possessor",
-        label: "Adj → Possessor",
-        description: "'blue' attends to the possessor whose noun it modifies.",
+        id: "refers",
+        label: "Find what each word refers to",
+        description: "Pronouns query for a matching noun and pull its meaning in.",
+        kind: "content",
+      },
+    ],
+  },
+  {
+    id: "L4",
+    label: "L4",
+    description: "Layer 4 composes the picture for the next word. 'Blue' (the prediction slot) pulls together its owner and the scene where it's being seen.",
+    heads: [
+      {
+        id: "owner",
+        label: "Find the owner",
+        description: "Find the owner of the thing this adjective is modifying.",
         kind: "content",
       },
       {
-        id: "location",
-        label: "Adj → Location",
-        description: "'blue' attends to the scene's location.",
-        kind: "content",
-      },
-      {
-        id: "direction",
-        label: "Adj → Direction",
-        description: "'blue' attends to the direction in which the observation is happening.",
+        id: "seeing",
+        label: "Find where this is seen",
+        description: "Find the visual scene this thing appears in.",
         kind: "content",
       },
     ],
@@ -62,7 +69,7 @@ const layers: ExampleData["layers"] = [
   {
     id: "Predict",
     label: "Predict",
-    description: "The prediction head reads 'blue's L3 output rep and produces a probability distribution over the next token.",
+    description: "The prediction head reads 'blue's L4 output and produces a probability distribution over the next token.",
     heads: [],
   },
 ];
@@ -85,11 +92,11 @@ const predictions: ExampleData["predictions"] = [
  */
 
 // Named indices for tokens referenced by non-positional head cards.
-// Cross-checked against the tokens array below by validateExample (via the
-// tokens-array comment) — if you reorder tokens, update these too.
+// Cross-checked against the tokens array below — if you reorder tokens, update these too.
 const IDX_MARS = 1;
 const IDX_ASTRONAUT = 4;
 const IDX_SKY = 8;
+const IDX_SAW = 10;
 const IDX_HER = 11;
 
 const tokens: ExampleData["tokens"] = [
@@ -99,9 +106,10 @@ const tokens: ExampleData["tokens"] = [
     clickable: true,
     reps: {
       L0: "a preposition meaning 'at the location of'",
-      L1: "a preposition indicating location — first word of the sentence, no predecessor to pull",
-      L2: "a preposition indicating location — first word of the sentence, no predecessor to pull",
-      L3: "a preposition indicating location — first word of the sentence, no predecessor to pull",
+      L1: "a preposition meaning 'at the location of'",
+      L2: "a preposition meaning 'at the location of'",
+      L3: "a preposition meaning 'at the location of'",
+      L4: "a preposition meaning 'at the location of'",
     },
     headCards: {
       L1: {
@@ -110,7 +118,7 @@ const tokens: ExampleData["tokens"] = [
           inputRep: "a preposition meaning 'at the location of'",
           positionalRule: "attend to the token at position N-1",
           pulls: [],
-          contribution: "nothing (no predecessor)",
+          contribution: "no previous token (this is the first word)",
         },
       },
     },
@@ -121,9 +129,10 @@ const tokens: ExampleData["tokens"] = [
     clickable: true,
     reps: {
       L0: "the fourth planet from the sun — a cold, reddish desert world",
-      L1: "the planet Mars, serving as the location someone is on",
-      L2: "the planet Mars, serving as the location someone is on",
-      L3: "the planet Mars, serving as the location someone is on",
+      L1: "the planet Mars — the location someone or something is on, not necessarily a person",
+      L2: "the planet Mars — the location someone or something is on, not necessarily a person",
+      L3: "the planet Mars — the location someone or something is on, not necessarily a person",
+      L4: "the planet Mars — the location someone or something is on, not necessarily a person",
     },
     headCards: {
       L1: {
@@ -132,18 +141,14 @@ const tokens: ExampleData["tokens"] = [
           inputRep: "the fourth planet from the sun — a cold, reddish desert world",
           positionalRule: "attend to the token at position N-1",
           pulls: [
-            {
-              fromTokenIndex: 0,
-              value: "a preposition indicating location-of-being",
-              weight: 1.0,
-            },
+            { fromTokenIndex: 0, value: "a preposition meaning 'at the location of'", weight: 1.0 },
           ],
-          contribution: "marks Mars as the location in an 'on'-phrase",
+          contribution: "previous token is 'On'",
         },
       },
     },
   },
-  // 2: ","  (punctuation — not clickable, reps exist but are trivial)
+  // 2: ","  (punctuation — not clickable)
   {
     token: ",",
     clickable: false,
@@ -152,6 +157,7 @@ const tokens: ExampleData["tokens"] = [
       L1: "a comma (pacing punctuation)",
       L2: "a comma (pacing punctuation)",
       L3: "a comma (pacing punctuation)",
+      L4: "a comma (pacing punctuation)",
     },
     headCards: {},
   },
@@ -160,21 +166,22 @@ const tokens: ExampleData["tokens"] = [
     token: "the",
     clickable: true,
     reps: {
-      L0: "a definite article",
+      L0: "a definite article following a comma",
       L1: "a definite article following a comma",
       L2: "a definite article following a comma",
       L3: "a definite article following a comma",
+      L4: "a definite article following a comma",
     },
     headCards: {
       L1: {
         prev: {
           kind: "positional",
-          inputRep: "a definite article",
+          inputRep: "a definite article following a comma",
           positionalRule: "attend to the token at position N-1",
           pulls: [
             { fromTokenIndex: 2, value: "a comma (pacing)", weight: 1.0 },
           ],
-          contribution: "nothing meaningful — prev is punctuation",
+          contribution: "previous token is ','",
         },
       },
     },
@@ -186,8 +193,9 @@ const tokens: ExampleData["tokens"] = [
     reps: {
       L0: "a human trained to travel in space",
       L1: "the astronaut — a specific human trained to travel in space",
-      L2: "the astronaut — a specific human trained to travel in space",
-      L3: "the astronaut — a specific human trained to travel in space",
+      L2: "the astronaut, currently on Mars",
+      L3: "the astronaut, currently on Mars",
+      L4: "the astronaut, currently on Mars",
     },
     headCards: {
       L1: {
@@ -198,7 +206,23 @@ const tokens: ExampleData["tokens"] = [
           pulls: [
             { fromTokenIndex: 3, value: "a definite article", weight: 1.0 },
           ],
-          contribution: "marks 'astronaut' as a specific individual",
+          contribution: "previous token is 'the'",
+        },
+      },
+      L2: {
+        location: {
+          kind: "content",
+          inputRep: "the astronaut — a specific human trained to travel in space",
+          query: "a location",
+          pulls: [
+            {
+              fromTokenIndex: IDX_MARS,
+              key: "a location",
+              value: "Mars (a non-Earth desert planet, where this scene is set)",
+              weight: 1.0,
+            },
+          ],
+          contribution: "binds the astronaut to being on Mars",
         },
       },
     },
@@ -210,8 +234,9 @@ const tokens: ExampleData["tokens"] = [
     reps: {
       L0: "past tense of 'look' — turned one's visual attention somewhere",
       L1: "a past act of visual attention, performed by the astronaut",
-      L2: "a past act of visual attention, performed by the astronaut",
-      L3: "a past act of visual attention, performed by the astronaut",
+      L2: "a past act of visual attention, happening on Mars, performed by the astronaut",
+      L3: "a past act of visual attention, happening on Mars, performed by the astronaut",
+      L4: "a past act of visual attention, happening on Mars, performed by the astronaut",
     },
     headCards: {
       L1: {
@@ -222,7 +247,23 @@ const tokens: ExampleData["tokens"] = [
           pulls: [
             { fromTokenIndex: 4, value: "the astronaut (a human performing an action)", weight: 1.0 },
           ],
-          contribution: "binds the astronaut as the subject of the looking",
+          contribution: "previous token is 'astronaut'",
+        },
+      },
+      L2: {
+        location: {
+          kind: "content",
+          inputRep: "a past act of visual attention, performed by the astronaut",
+          query: "a location",
+          pulls: [
+            {
+              fromTokenIndex: IDX_MARS,
+              key: "a location",
+              value: "Mars (a non-Earth desert planet, where this scene is set)",
+              weight: 1.0,
+            },
+          ],
+          contribution: "binds the looking to happen on Mars",
         },
       },
     },
@@ -232,21 +273,22 @@ const tokens: ExampleData["tokens"] = [
     token: "to",
     clickable: true,
     reps: {
-      L0: "a directional preposition",
+      L0: "a directional preposition attached to the act of looking",
       L1: "a directional preposition attached to the act of looking",
       L2: "a directional preposition attached to the act of looking",
       L3: "a directional preposition attached to the act of looking",
+      L4: "a directional preposition attached to the act of looking",
     },
     headCards: {
       L1: {
         prev: {
           kind: "positional",
-          inputRep: "a directional preposition",
+          inputRep: "a directional preposition attached to the act of looking",
           positionalRule: "attend to the token at position N-1",
           pulls: [
             { fromTokenIndex: 5, value: "a verb of visual attention", weight: 1.0 },
           ],
-          contribution: "marks 'to' as the directional preposition of 'looked'",
+          contribution: "previous token is 'looked'",
         },
       },
     },
@@ -256,21 +298,22 @@ const tokens: ExampleData["tokens"] = [
     token: "the",
     clickable: true,
     reps: {
-      L0: "a definite article",
+      L0: "a definite article following the preposition 'to'",
       L1: "a definite article following the preposition 'to'",
       L2: "a definite article following the preposition 'to'",
       L3: "a definite article following the preposition 'to'",
+      L4: "a definite article following the preposition 'to'",
     },
     headCards: {
       L1: {
         prev: {
           kind: "positional",
-          inputRep: "a definite article",
+          inputRep: "a definite article following the preposition 'to'",
           positionalRule: "attend to the token at position N-1",
           pulls: [
             { fromTokenIndex: 6, value: "a directional preposition", weight: 1.0 },
           ],
-          contribution: "marks the following noun as the definite object of 'to'",
+          contribution: "previous token is 'to'",
         },
       },
     },
@@ -282,8 +325,9 @@ const tokens: ExampleData["tokens"] = [
     reps: {
       L0: "the expanse above, where clouds and celestial objects appear",
       L1: "the specific sky being referred to",
-      L2: "the specific sky being referred to",
-      L3: "the specific sky being referred to",
+      L2: "the Martian sky — the expanse above where things are seen, here on Mars",
+      L3: "the Martian sky — the expanse above where things are seen, here on Mars",
+      L4: "the Martian sky — the expanse above where things are seen, here on Mars",
     },
     headCards: {
       L1: {
@@ -294,7 +338,23 @@ const tokens: ExampleData["tokens"] = [
           pulls: [
             { fromTokenIndex: 7, value: "a definite article", weight: 1.0 },
           ],
-          contribution: "marks 'sky' as a specific definite referent",
+          contribution: "previous token is 'the'",
+        },
+      },
+      L2: {
+        location: {
+          kind: "content",
+          inputRep: "the specific sky being referred to",
+          query: "a location",
+          pulls: [
+            {
+              fromTokenIndex: IDX_MARS,
+              key: "a location",
+              value: "Mars (a non-Earth desert planet, where this scene is set)",
+              weight: 1.0,
+            },
+          ],
+          contribution: "binds the sky to being above Mars",
         },
       },
     },
@@ -304,21 +364,22 @@ const tokens: ExampleData["tokens"] = [
     token: "and",
     clickable: true,
     reps: {
-      L0: "a conjunction joining two clauses",
+      L0: "a conjunction following the first clause (ending at 'sky')",
       L1: "a conjunction following the first clause (ending at 'sky')",
       L2: "a conjunction following the first clause (ending at 'sky')",
       L3: "a conjunction following the first clause (ending at 'sky')",
+      L4: "a conjunction following the first clause (ending at 'sky')",
     },
     headCards: {
       L1: {
         prev: {
           kind: "positional",
-          inputRep: "a conjunction joining two clauses",
+          inputRep: "a conjunction following the first clause (ending at 'sky')",
           positionalRule: "attend to the token at position N-1",
           pulls: [
             { fromTokenIndex: 8, value: "the sky (the first clause's object)", weight: 1.0 },
           ],
-          contribution: "marks this conjunction as joining after 'sky'",
+          contribution: "previous token is 'sky'",
         },
       },
     },
@@ -330,8 +391,9 @@ const tokens: ExampleData["tokens"] = [
     reps: {
       L0: "past tense of 'see' — observed with the eyes",
       L1: "a past act of seeing, starting a new conjoined action",
-      L2: "a past act of seeing, starting a new conjoined action",
-      L3: "a past act of seeing, starting a new conjoined action",
+      L2: "a past act of seeing, happening on Mars, starting a new conjoined action",
+      L3: "a past act of seeing, happening on Mars, starting a new conjoined action",
+      L4: "a past act of seeing, happening on Mars, starting a new conjoined action",
     },
     headCards: {
       L1: {
@@ -342,7 +404,23 @@ const tokens: ExampleData["tokens"] = [
           pulls: [
             { fromTokenIndex: 9, value: "a conjunction", weight: 1.0 },
           ],
-          contribution: "marks 'saw' as starting the second conjoined clause",
+          contribution: "previous token is 'and'",
+        },
+      },
+      L2: {
+        location: {
+          kind: "content",
+          inputRep: "a past act of seeing, starting a new conjoined action",
+          query: "a location",
+          pulls: [
+            {
+              fromTokenIndex: IDX_MARS,
+              key: "a location",
+              value: "Mars (a non-Earth desert planet, where this scene is set)",
+              weight: 1.0,
+            },
+          ],
+          contribution: "binds the seeing to happen on Mars",
         },
       },
     },
@@ -354,8 +432,9 @@ const tokens: ExampleData["tokens"] = [
     reps: {
       L0: "a feminine possessive pronoun",
       L1: "a feminine possessive pronoun, appearing as the possessor of what was seen",
-      L2: "her — now known to be the astronaut",
-      L3: "her — now known to be the astronaut",
+      L2: "a feminine possessive pronoun, appearing as the possessor of what was seen",
+      L3: "her — the astronaut, who is on Mars",
+      L4: "her — the astronaut, who is on Mars",
     },
     headCards: {
       L1: {
@@ -366,23 +445,23 @@ const tokens: ExampleData["tokens"] = [
           pulls: [
             { fromTokenIndex: 10, value: "a verb of perception — its object follows", weight: 1.0 },
           ],
-          contribution: "marks 'her' as the possessor of what was seen",
+          contribution: "previous token is 'saw'",
         },
       },
-      L2: {
-        pronoun: {
+      L3: {
+        refers: {
           kind: "content",
           inputRep: "a feminine possessive pronoun, appearing as the possessor of what was seen",
-          query: "a human noun",
+          query: "a human person",
           pulls: [
             {
               fromTokenIndex: IDX_ASTRONAUT,
-              key: "a human noun",
-              value: "the astronaut",
+              key: "a human person",
+              value: "the astronaut, who is on Mars",
               weight: 1.0,
             },
           ],
-          contribution: "resolves 'her' to the astronaut",
+          contribution: "resolves 'her' to the astronaut on Mars",
         },
       },
     },
@@ -395,7 +474,8 @@ const tokens: ExampleData["tokens"] = [
       L0: "the color blue",
       L1: "the color blue, modifying something that belongs to 'her'",
       L2: "the color blue, modifying something that belongs to 'her'",
-      L3: "a blue thing, belonging to the astronaut, seen in the sky of Mars — her home planet",
+      L3: "the color blue, modifying something that belongs to 'her'",
+      L4: "a blue thing belonging to the astronaut on Mars, seen by her in the Martian sky — her home",
     },
     headCards: {
       L1: {
@@ -406,51 +486,43 @@ const tokens: ExampleData["tokens"] = [
           pulls: [
             { fromTokenIndex: 11, value: "a feminine possessive pronoun", weight: 1.0 },
           ],
-          contribution: "marks blue as modifying something belonging to 'her'",
+          contribution: "previous token is 'her'",
         },
       },
-      L3: {
-        possessor: {
+      L4: {
+        owner: {
           kind: "content",
           inputRep: "the color blue, modifying something that belongs to 'her'",
-          query: "a possessor",
+          query: "the owner of this thing",
           pulls: [
             {
               fromTokenIndex: IDX_HER,
-              key: "a possessor",
-              value: "the astronaut",
+              key: "the owner of this thing",
+              value: "the astronaut, who is on Mars",
               weight: 1.0,
             },
           ],
-          contribution: "this blue thing belongs to the astronaut",
+          contribution: "this blue thing belongs to the astronaut who is on Mars",
         },
-        location: {
+        seeing: {
           kind: "content",
           inputRep: "the color blue, modifying something that belongs to 'her'",
-          query: "a location",
-          pulls: [
-            {
-              fromTokenIndex: IDX_MARS,
-              key: "a location",
-              value: "the Martian setting — not Earth",
-              weight: 1.0,
-            },
-          ],
-          contribution: "this blue thing is set in a Martian, non-Earth context",
-        },
-        direction: {
-          kind: "content",
-          inputRep: "the color blue, modifying something that belongs to 'her'",
-          query: "a direction of observation",
+          query: "the visual scene this thing appears in",
           pulls: [
             {
               fromTokenIndex: IDX_SKY,
-              key: "a direction of observation",
-              value: "seen in the sky above",
-              weight: 1.0,
+              key: "the visual scene this thing appears in",
+              value: "the Martian sky, where the seeing happens",
+              weight: 0.5,
+            },
+            {
+              fromTokenIndex: IDX_SAW,
+              key: "the visual scene this thing appears in",
+              value: "the act of seeing happening on Mars",
+              weight: 0.5,
             },
           ],
-          contribution: "this blue thing is seen up in the sky",
+          contribution: "this blue thing is seen in the sky on Mars",
         },
       },
     },

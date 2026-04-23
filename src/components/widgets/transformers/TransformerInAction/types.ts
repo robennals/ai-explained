@@ -1,4 +1,4 @@
-export type LayerId = "L0" | "L1" | "L2" | "L3" | "Predict";
+export type LayerId = "L0" | "L1" | "L2" | "L3" | "L4" | "Predict";
 
 export type NonPredictLayerId = Exclude<LayerId, "Predict">;
 
