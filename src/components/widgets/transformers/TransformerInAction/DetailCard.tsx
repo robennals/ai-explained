@@ -77,12 +77,15 @@ export function DetailCard({
         {layerLabel} · {focalToken.token}
       </div>
 
-      {/* Previous Representation (full-width, quote-style box, amber accent) */}
+      {/* Previous Representation (full-width, quote-style box, amber accent).
+          Read from previousRep (the focal token's actual rep at the prior layer)
+          rather than card.inputRep, so the displayed text always matches the
+          source of truth in the data file. */}
       <div className="mb-3 rounded border-l-4 border-amber-400 bg-amber-50 px-3 py-2 dark:bg-amber-900/20">
         <div className="text-xs font-medium uppercase tracking-wider text-amber-900 dark:text-amber-300">
           Previous Representation
         </div>
-        <div className="mt-1 italic">{card.inputRep}</div>
+        <div className="mt-1 italic">{previousRep ?? card.inputRep}</div>
       </div>
 
       {/* Output rep */}
