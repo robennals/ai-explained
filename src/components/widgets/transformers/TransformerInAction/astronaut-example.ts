@@ -133,6 +133,7 @@ const tokens: ExampleData["tokens"] = [
       L4: {
         prev: {
           kind: "positional",
+          interesting: false,
           inputRep: "A preposition meaning 'at the location of'.",
           positionalRule: "attend to the token at position N-1",
           pulls: [],
@@ -168,6 +169,7 @@ const tokens: ExampleData["tokens"] = [
       L4: {
         prev: {
           kind: "positional",
+          interesting: false,
           inputRep: "The planet Mars. The fourth planet from the sun. A cold, reddish desert world. Another planet in our solar system, like Earth. Here, it's the location of this scene.",
           positionalRule: "attend to the token at position N-1",
           pulls: [
@@ -219,6 +221,7 @@ const tokens: ExampleData["tokens"] = [
       L4: {
         prev: {
           kind: "positional",
+          interesting: false,
           inputRep: "A definite article. Comes after a comma.",
           positionalRule: "attend to the token at position N-1",
           pulls: [
@@ -272,6 +275,7 @@ const tokens: ExampleData["tokens"] = [
       L4: {
         prev: {
           kind: "positional",
+          interesting: false,
           inputRep: "An astronaut. A human trained to travel in space. The previous word was 'the' — so this is a specific astronaut. Currently on Mars. Mars is the fourth planet from the sun. Mars is a cold, reddish desert world. Mars is another planet in our solar system, like Earth.",
           positionalRule: "attend to the token at position N-1",
           pulls: [
@@ -325,6 +329,7 @@ const tokens: ExampleData["tokens"] = [
       L4: {
         prev: {
           kind: "positional",
+          interesting: false,
           inputRep: "A past act of looking. Someone turned their visual attention somewhere. The looker is the astronaut. An astronaut is a human trained to travel in space. It happened on Mars. Mars is another planet in our solar system.",
           positionalRule: "attend to the token at position N-1",
           pulls: [
@@ -407,6 +412,7 @@ const tokens: ExampleData["tokens"] = [
       L4: {
         prev: {
           kind: "positional",
+          interesting: false,
           inputRep: "A definite article. Comes after the preposition 'to'.",
           positionalRule: "attend to the token at position N-1",
           pulls: [
@@ -460,6 +466,7 @@ const tokens: ExampleData["tokens"] = [
       L4: {
         prev: {
           kind: "positional",
+          interesting: false,
           inputRep: "The sky. The expanse above. Where clouds and celestial objects appear. A specific sky — the previous word was 'the'. Here, the sky is above Mars. Mars is another planet in our solar system.",
           positionalRule: "attend to the token at position N-1",
           pulls: [
@@ -576,6 +583,7 @@ const tokens: ExampleData["tokens"] = [
       L4: {
         prev: {
           kind: "positional",
+          interesting: false,
           inputRep: "A past act of seeing with the eyes. Joins what came before — the previous word is 'and'. Happened on Mars. Mars is another planet in our solar system. Took place against the Martian sky.",
           positionalRule: "attend to the token at position N-1",
           pulls: [
