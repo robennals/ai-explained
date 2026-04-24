@@ -55,7 +55,7 @@ export function DetailCard({
             <div className="text-xs font-medium uppercase tracking-wider text-amber-900 dark:text-amber-300">
               Previous Representation
             </div>
-            <div className="mt-1 italic">{previousRep}</div>
+            <div className="mt-1 font-medium">{previousRep}</div>
           </div>
         )}
 
@@ -85,7 +85,7 @@ export function DetailCard({
         <div className="text-xs font-medium uppercase tracking-wider text-amber-900 dark:text-amber-300">
           Previous Representation
         </div>
-        <div className="mt-1 italic">{previousRep ?? card.inputRep}</div>
+        <div className="mt-1 font-medium">{previousRep ?? card.inputRep}</div>
       </div>
 
       {/* Output rep */}
