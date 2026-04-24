@@ -593,10 +593,10 @@ const tokens: ExampleData["tokens"] = [
     reps: {
       L0: "a feminine possessive pronoun",
       L1: "a feminine possessive pronoun, appearing as the possessor of what was seen",
-      L2: "a feminine possessive pronoun, appearing as the possessor of what was seen, set in the Martian scene (on Mars — another planet in Earth's solar system)",
-      L3: "her — a feminine possessive pronoun appearing as the possessor of what was seen, set in the Martian scene, now known to refer to the astronaut (a specific human trained to travel in space, currently on Mars — another planet in Earth's solar system)",
-      L4: "her — a feminine possessive pronoun appearing as the possessor of what was seen, set in the Martian scene, now known to refer to the astronaut (a specific human trained to travel in space, currently on Mars — another planet in Earth's solar system); observed via a past act of seeing with the eyes, happening on Mars",
-      L5: "her — a feminine possessive pronoun appearing as the possessor of what was seen, set in the Martian scene, now known to refer to the astronaut (a specific human trained to travel in space, currently on Mars — another planet in Earth's solar system); also the possessor of the thing observed in the act of seeing (a past act of seeing with the eyes, happening on Mars and against the visual backdrop of the Martian sky)",
+      L2: "a feminine possessive pronoun, appearing as the possessor of what was seen, set in the Martian scene (on Mars — another planet in Earth's solar system) and against the backdrop of the Martian sky (the expanse above where clouds and celestial objects appear)",
+      L3: "her — a feminine possessive pronoun appearing as the possessor of what was seen, set in the Martian scene against the Martian sky, now known to refer to the astronaut (a specific human trained to travel in space, currently on Mars — another planet in Earth's solar system)",
+      L4: "her — a feminine possessive pronoun appearing as the possessor of what was seen, set in the Martian scene against the Martian sky, now known to refer to the astronaut (a specific human trained to travel in space, currently on Mars — another planet in Earth's solar system); observed via a past act of seeing with the eyes, happening on Mars",
+      L5: "her — a feminine possessive pronoun appearing as the possessor of what was seen, set in the Martian scene against the Martian sky, now known to refer to the astronaut (a specific human trained to travel in space, currently on Mars — another planet in Earth's solar system); also the possessor of the thing observed in the act of seeing (a past act of seeing with the eyes, happening on Mars and against the visual backdrop of the Martian sky)",
     },
     headCards: {
       L1: {
@@ -620,16 +620,22 @@ const tokens: ExampleData["tokens"] = [
               fromTokenIndex: IDX_MARS,
               key: "a scene-location",
               value: "the planet Mars — the fourth planet from the sun, a cold reddish desert world, another planet in Earth's solar system; here, the location someone or something is on",
-              weight: 1.0,
+              weight: 0.5,
+            },
+            {
+              fromTokenIndex: IDX_SKY,
+              key: "a scene-location",
+              value: "the specific sky — the expanse above, where clouds and celestial objects appear",
+              weight: 0.5,
             },
           ],
-          contribution: "ties 'her' to the Martian scene (whoever 'her' refers to is somewhere in this Mars scene)",
+          contribution: "ties 'her' to the Martian scene and the Martian sky (whoever 'her' refers to belongs in this scene under that sky)",
         },
       },
       L3: {
         refers: {
           kind: "content",
-          inputRep: "a feminine possessive pronoun, appearing as the possessor of what was seen, set in the Martian scene (on Mars — another planet in Earth's solar system)",
+          inputRep: "a feminine possessive pronoun, appearing as the possessor of what was seen, set in the Martian scene (on Mars — another planet in Earth's solar system) and against the backdrop of the Martian sky (the expanse above where clouds and celestial objects appear)",
           query: "a human person",
           pulls: [
             {
@@ -645,7 +651,7 @@ const tokens: ExampleData["tokens"] = [
       L4: {
         prev: {
           kind: "positional",
-          inputRep: "her — a feminine possessive pronoun appearing as the possessor of what was seen, set in the Martian scene, now known to refer to the astronaut (a specific human trained to travel in space, currently on Mars — another planet in Earth's solar system)",
+          inputRep: "her — a feminine possessive pronoun appearing as the possessor of what was seen, set in the Martian scene against the Martian sky, now known to refer to the astronaut (a specific human trained to travel in space, currently on Mars — another planet in Earth's solar system)",
           positionalRule: "attend to the token at position N-1",
           pulls: [
             {
@@ -660,7 +666,7 @@ const tokens: ExampleData["tokens"] = [
       L5: {
         "verb-of-object": {
           kind: "content",
-          inputRep: "her — a feminine possessive pronoun appearing as the possessor of what was seen, set in the Martian scene, now known to refer to the astronaut (a specific human trained to travel in space, currently on Mars — another planet in Earth's solar system); observed via a past act of seeing with the eyes, happening on Mars",
+          inputRep: "her — a feminine possessive pronoun appearing as the possessor of what was seen, set in the Martian scene against the Martian sky, now known to refer to the astronaut (a specific human trained to travel in space, currently on Mars — another planet in Earth's solar system); observed via a past act of seeing with the eyes, happening on Mars",
           query: "a verb acting on this thing",
           pulls: [
             {
@@ -707,7 +713,7 @@ const tokens: ExampleData["tokens"] = [
           pulls: [
             {
               fromTokenIndex: IDX_HER,
-              value: "her — a feminine possessive pronoun appearing as the possessor of what was seen, set in the Martian scene, now known to refer to the astronaut (a specific human trained to travel in space, currently on Mars — another planet in Earth's solar system)",
+              value: "her — a feminine possessive pronoun appearing as the possessor of what was seen, set in the Martian scene against the Martian sky, now known to refer to the astronaut (a specific human trained to travel in space, currently on Mars — another planet in Earth's solar system)",
               weight: 1.0,
             },
           ],
