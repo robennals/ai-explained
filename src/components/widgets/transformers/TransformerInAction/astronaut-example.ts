@@ -113,18 +113,18 @@ const tokens: ExampleData["tokens"] = [
     token: "On",
     clickable: true,
     reps: {
-      L0: "a preposition meaning 'at the location of'",
-      L1: "a preposition meaning 'at the location of'",
-      L2: "a preposition meaning 'at the location of'",
-      L3: "a preposition meaning 'at the location of'",
-      L4: "a preposition meaning 'at the location of'",
-      L5: "a preposition meaning 'at the location of'",
+      L0: "A preposition meaning 'at the location of'.",
+      L1: "A preposition meaning 'at the location of'.",
+      L2: "A preposition meaning 'at the location of'.",
+      L3: "A preposition meaning 'at the location of'.",
+      L4: "A preposition meaning 'at the location of'.",
+      L5: "A preposition meaning 'at the location of'.",
     },
     headCards: {
       L1: {
         prev: {
           kind: "positional",
-          inputRep: "a preposition meaning 'at the location of'",
+          inputRep: "A preposition meaning 'at the location of'.",
           positionalRule: "attend to the token at position N-1",
           pulls: [],
           contribution: "no previous token (this is the first word)",
@@ -133,7 +133,7 @@ const tokens: ExampleData["tokens"] = [
       L4: {
         prev: {
           kind: "positional",
-          inputRep: "a preposition meaning 'at the location of'",
+          inputRep: "A preposition meaning 'at the location of'.",
           positionalRule: "attend to the token at position N-1",
           pulls: [],
           contribution: "no previous token (this is the first word)",
@@ -146,21 +146,21 @@ const tokens: ExampleData["tokens"] = [
     token: "Mars",
     clickable: true,
     reps: {
-      L0: "the fourth planet from the sun — a cold, reddish desert world; another planet in Earth's solar system",
-      L1: "The planet Mars. It's the fourth planet from the sun: cold, reddish, and covered in desert. It's another planet in Earth's solar system. Here, it's the location that someone or something is on.",
-      L2: "The planet Mars. It's the fourth planet from the sun: cold, reddish, and covered in desert. It's another planet in Earth's solar system. Here, it's the location that someone or something is on.",
-      L3: "The planet Mars. It's the fourth planet from the sun: cold, reddish, and covered in desert. It's another planet in Earth's solar system. Here, it's the location that someone or something is on.",
-      L4: "The planet Mars. It's the fourth planet from the sun: cold, reddish, and covered in desert. It's another planet in Earth's solar system. Here, it's the location that someone or something is on.",
-      L5: "The planet Mars. It's the fourth planet from the sun: cold, reddish, and covered in desert. It's another planet in Earth's solar system. Here, it's the location that someone or something is on.",
+      L0: "The planet Mars. The fourth planet from the sun. A cold, reddish desert world. Another planet in our solar system, like Earth.",
+      L1: "The planet Mars. The fourth planet from the sun. A cold, reddish desert world. Another planet in our solar system, like Earth. Here, it's the location of this scene.",
+      L2: "The planet Mars. The fourth planet from the sun. A cold, reddish desert world. Another planet in our solar system, like Earth. Here, it's the location of this scene.",
+      L3: "The planet Mars. The fourth planet from the sun. A cold, reddish desert world. Another planet in our solar system, like Earth. Here, it's the location of this scene.",
+      L4: "The planet Mars. The fourth planet from the sun. A cold, reddish desert world. Another planet in our solar system, like Earth. Here, it's the location of this scene.",
+      L5: "The planet Mars. The fourth planet from the sun. A cold, reddish desert world. Another planet in our solar system, like Earth. Here, it's the location of this scene.",
     },
     headCards: {
       L1: {
         prev: {
           kind: "positional",
-          inputRep: "the fourth planet from the sun — a cold, reddish desert world; another planet in Earth's solar system",
+          inputRep: "The planet Mars. The fourth planet from the sun. A cold, reddish desert world. Another planet in our solar system, like Earth.",
           positionalRule: "attend to the token at position N-1",
           pulls: [
-            { fromTokenIndex: 0, value: "a preposition meaning 'at the location of'", weight: 1.0 },
+            { fromTokenIndex: 0, value: "A preposition meaning 'at the location of'.", weight: 1.0 },
           ],
           contribution: "previous token is 'On'",
         },
@@ -168,10 +168,10 @@ const tokens: ExampleData["tokens"] = [
       L4: {
         prev: {
           kind: "positional",
-          inputRep: "The planet Mars. It's the fourth planet from the sun: cold, reddish, and covered in desert. It's another planet in Earth's solar system. Here, it's the location that someone or something is on.",
+          inputRep: "The planet Mars. The fourth planet from the sun. A cold, reddish desert world. Another planet in our solar system, like Earth. Here, it's the location of this scene.",
           positionalRule: "attend to the token at position N-1",
           pulls: [
-            { fromTokenIndex: 0, value: "a preposition meaning 'at the location of'", weight: 1.0 },
+            { fromTokenIndex: 0, value: "A preposition meaning 'at the location of'.", weight: 1.0 },
           ],
           contribution: "previous token is 'On'; its representation was not updated by intervening layers",
         },
@@ -197,21 +197,21 @@ const tokens: ExampleData["tokens"] = [
     token: "the",
     clickable: true,
     reps: {
-      L0: "a definite article following a comma",
-      L1: "a definite article following a comma",
-      L2: "a definite article following a comma",
-      L3: "a definite article following a comma",
-      L4: "a definite article following a comma",
-      L5: "a definite article following a comma",
+      L0: "A definite article. Comes after a comma.",
+      L1: "A definite article. Comes after a comma.",
+      L2: "A definite article. Comes after a comma.",
+      L3: "A definite article. Comes after a comma.",
+      L4: "A definite article. Comes after a comma.",
+      L5: "A definite article. Comes after a comma.",
     },
     headCards: {
       L1: {
         prev: {
           kind: "positional",
-          inputRep: "a definite article following a comma",
+          inputRep: "A definite article. Comes after a comma.",
           positionalRule: "attend to the token at position N-1",
           pulls: [
-            { fromTokenIndex: 2, value: "a comma (pacing)", weight: 1.0 },
+            { fromTokenIndex: 2, value: "a comma (pacing punctuation)", weight: 1.0 },
           ],
           contribution: "previous token is ','",
         },
@@ -219,7 +219,7 @@ const tokens: ExampleData["tokens"] = [
       L4: {
         prev: {
           kind: "positional",
-          inputRep: "a definite article following a comma",
+          inputRep: "A definite article. Comes after a comma.",
           positionalRule: "attend to the token at position N-1",
           pulls: [
             { fromTokenIndex: 2, value: "a comma (pacing punctuation)", weight: 1.0 },
@@ -234,21 +234,21 @@ const tokens: ExampleData["tokens"] = [
     token: "astronaut",
     clickable: true,
     reps: {
-      L0: "a human trained to travel in space",
-      L1: "the astronaut — a specific human trained to travel in space",
-      L2: "The astronaut. A specific human trained to travel in space. Currently on Mars — the fourth planet from the sun. Mars is cold, reddish, and another planet in Earth's solar system.",
-      L3: "The astronaut. A specific human trained to travel in space. Currently on Mars — the fourth planet from the sun. Mars is cold, reddish, and another planet in Earth's solar system.",
-      L4: "The astronaut. A specific human trained to travel in space. Currently on Mars — the fourth planet from the sun. Mars is cold, reddish, and another planet in Earth's solar system.",
-      L5: "The astronaut. A specific human trained to travel in space. Currently on Mars — the fourth planet from the sun. Mars is cold, reddish, and another planet in Earth's solar system.",
+      L0: "An astronaut. A human trained to travel in space.",
+      L1: "An astronaut. A human trained to travel in space. The previous word was 'the' — so this is a specific astronaut.",
+      L2: "An astronaut. A human trained to travel in space. The previous word was 'the' — so this is a specific astronaut. Currently on Mars. Mars is the fourth planet from the sun. Mars is a cold, reddish desert world. Mars is another planet in our solar system, like Earth.",
+      L3: "An astronaut. A human trained to travel in space. The previous word was 'the' — so this is a specific astronaut. Currently on Mars. Mars is the fourth planet from the sun. Mars is a cold, reddish desert world. Mars is another planet in our solar system, like Earth.",
+      L4: "An astronaut. A human trained to travel in space. The previous word was 'the' — so this is a specific astronaut. Currently on Mars. Mars is the fourth planet from the sun. Mars is a cold, reddish desert world. Mars is another planet in our solar system, like Earth.",
+      L5: "An astronaut. A human trained to travel in space. The previous word was 'the' — so this is a specific astronaut. Currently on Mars. Mars is the fourth planet from the sun. Mars is a cold, reddish desert world. Mars is another planet in our solar system, like Earth.",
     },
     headCards: {
       L1: {
         prev: {
           kind: "positional",
-          inputRep: "a human trained to travel in space",
+          inputRep: "An astronaut. A human trained to travel in space.",
           positionalRule: "attend to the token at position N-1",
           pulls: [
-            { fromTokenIndex: 3, value: "a definite article", weight: 1.0 },
+            { fromTokenIndex: 3, value: "A definite article.", weight: 1.0 },
           ],
           contribution: "previous token is 'the'",
         },
@@ -256,13 +256,13 @@ const tokens: ExampleData["tokens"] = [
       L2: {
         location: {
           kind: "content",
-          inputRep: "the astronaut — a specific human trained to travel in space",
+          inputRep: "An astronaut. A human trained to travel in space. The previous word was 'the' — so this is a specific astronaut.",
           query: "a scene-location",
           pulls: [
             {
               fromTokenIndex: IDX_MARS,
               key: "a scene-location",
-              value: "The planet Mars. It's the fourth planet from the sun: cold, reddish, and covered in desert. It's another planet in Earth's solar system. Here, it's the location that someone or something is on.",
+              value: "The planet Mars. The fourth planet from the sun. A cold, reddish desert world. Another planet in our solar system, like Earth. Here, it's the location of this scene.",
               weight: 1.0,
             },
           ],
@@ -272,10 +272,10 @@ const tokens: ExampleData["tokens"] = [
       L4: {
         prev: {
           kind: "positional",
-          inputRep: "The astronaut. A specific human trained to travel in space. Currently on Mars — the fourth planet from the sun. Mars is cold, reddish, and another planet in Earth's solar system.",
+          inputRep: "An astronaut. A human trained to travel in space. The previous word was 'the' — so this is a specific astronaut. Currently on Mars. Mars is the fourth planet from the sun. Mars is a cold, reddish desert world. Mars is another planet in our solar system, like Earth.",
           positionalRule: "attend to the token at position N-1",
           pulls: [
-            { fromTokenIndex: 3, value: "a definite article following a comma", weight: 1.0 },
+            { fromTokenIndex: 3, value: "A definite article. Comes after a comma.", weight: 1.0 },
           ],
           contribution: "previous token is 'the'; its representation was not updated by intervening layers",
         },
@@ -287,21 +287,21 @@ const tokens: ExampleData["tokens"] = [
     token: "looked",
     clickable: true,
     reps: {
-      L0: "past tense of 'look' — turned one's visual attention somewhere",
-      L1: "A past act of looking. Someone turned their visual attention somewhere. The astronaut — a human trained to travel in space — did the looking.",
-      L2: "A past act of looking. Someone turned their visual attention somewhere. The astronaut — a human trained to travel in space — did the looking. It happened on Mars, another planet in Earth's solar system.",
-      L3: "A past act of looking. Someone turned their visual attention somewhere. The astronaut — a human trained to travel in space — did the looking. It happened on Mars, another planet in Earth's solar system.",
-      L4: "A past act of looking. Someone turned their visual attention somewhere. The astronaut — a human trained to travel in space — did the looking. It happened on Mars, another planet in Earth's solar system.",
-      L5: "A past act of looking. Someone turned their visual attention somewhere. The astronaut — a human trained to travel in space — did the looking. It happened on Mars, another planet in Earth's solar system.",
+      L0: "A past act of looking. Someone turned their visual attention somewhere.",
+      L1: "A past act of looking. Someone turned their visual attention somewhere. The looker is the astronaut. An astronaut is a human trained to travel in space.",
+      L2: "A past act of looking. Someone turned their visual attention somewhere. The looker is the astronaut. An astronaut is a human trained to travel in space. It happened on Mars. Mars is another planet in our solar system.",
+      L3: "A past act of looking. Someone turned their visual attention somewhere. The looker is the astronaut. An astronaut is a human trained to travel in space. It happened on Mars. Mars is another planet in our solar system.",
+      L4: "A past act of looking. Someone turned their visual attention somewhere. The looker is the astronaut. An astronaut is a human trained to travel in space. It happened on Mars. Mars is another planet in our solar system.",
+      L5: "A past act of looking. Someone turned their visual attention somewhere. The looker is the astronaut. An astronaut is a human trained to travel in space. It happened on Mars. Mars is another planet in our solar system.",
     },
     headCards: {
       L1: {
         prev: {
           kind: "positional",
-          inputRep: "past tense of 'look' — turned one's visual attention somewhere",
+          inputRep: "A past act of looking. Someone turned their visual attention somewhere.",
           positionalRule: "attend to the token at position N-1",
           pulls: [
-            { fromTokenIndex: 4, value: "the astronaut (a human performing an action)", weight: 1.0 },
+            { fromTokenIndex: 4, value: "An astronaut. A human trained to travel in space.", weight: 1.0 },
           ],
           contribution: "previous token is 'astronaut'",
         },
@@ -309,13 +309,13 @@ const tokens: ExampleData["tokens"] = [
       L2: {
         location: {
           kind: "content",
-          inputRep: "A past act of looking. Someone turned their visual attention somewhere. The astronaut — a human trained to travel in space — did the looking.",
+          inputRep: "A past act of looking. Someone turned their visual attention somewhere. The looker is the astronaut. An astronaut is a human trained to travel in space.",
           query: "a scene-location",
           pulls: [
             {
               fromTokenIndex: IDX_MARS,
               key: "a scene-location",
-              value: "The planet Mars. It's the fourth planet from the sun: cold, reddish, and covered in desert. It's another planet in Earth's solar system. Here, it's the location that someone or something is on.",
+              value: "The planet Mars. The fourth planet from the sun. A cold, reddish desert world. Another planet in our solar system, like Earth. Here, it's the location of this scene.",
               weight: 1.0,
             },
           ],
@@ -325,12 +325,12 @@ const tokens: ExampleData["tokens"] = [
       L4: {
         prev: {
           kind: "positional",
-          inputRep: "A past act of looking. Someone turned their visual attention somewhere. The astronaut — a human trained to travel in space — did the looking. It happened on Mars, another planet in Earth's solar system.",
+          inputRep: "A past act of looking. Someone turned their visual attention somewhere. The looker is the astronaut. An astronaut is a human trained to travel in space. It happened on Mars. Mars is another planet in our solar system.",
           positionalRule: "attend to the token at position N-1",
           pulls: [
             {
               fromTokenIndex: IDX_ASTRONAUT,
-              value: "The astronaut. A specific human trained to travel in space. Currently on Mars — the fourth planet from the sun. Mars is cold, reddish, and another planet in Earth's solar system.",
+              value: "An astronaut. A human trained to travel in space. The previous word was 'the' — so this is a specific astronaut. Currently on Mars. Mars is the fourth planet from the sun. Mars is a cold, reddish desert world. Mars is another planet in our solar system, like Earth.",
               weight: 1.0,
             },
           ],
@@ -344,21 +344,21 @@ const tokens: ExampleData["tokens"] = [
     token: "to",
     clickable: true,
     reps: {
-      L0: "a directional preposition attached to the act of looking",
-      L1: "a directional preposition attached to the act of looking",
-      L2: "a directional preposition attached to the act of looking",
-      L3: "a directional preposition attached to the act of looking",
-      L4: "A directional preposition. It attaches to a past act of looking. The looking was performed by the astronaut (a specific human trained to travel in space). It happened on Mars, another planet in Earth's solar system.",
-      L5: "A directional preposition. It attaches to a past act of looking. The looking was performed by the astronaut (a specific human trained to travel in space). It happened on Mars, another planet in Earth's solar system.",
+      L0: "A directional preposition.",
+      L1: "A directional preposition. Attached to the act of looking.",
+      L2: "A directional preposition. Attached to the act of looking.",
+      L3: "A directional preposition. Attached to the act of looking.",
+      L4: "A directional preposition. Attached to the act of looking. The looker is the astronaut. An astronaut is a human trained to travel in space. The looking happened on Mars.",
+      L5: "A directional preposition. Attached to the act of looking. The looker is the astronaut. An astronaut is a human trained to travel in space. The looking happened on Mars.",
     },
     headCards: {
       L1: {
         prev: {
           kind: "positional",
-          inputRep: "a directional preposition attached to the act of looking",
+          inputRep: "A directional preposition.",
           positionalRule: "attend to the token at position N-1",
           pulls: [
-            { fromTokenIndex: 5, value: "a verb about looking", weight: 1.0 },
+            { fromTokenIndex: 5, value: "A past act of looking. Someone turned their visual attention somewhere.", weight: 1.0 },
           ],
           contribution: "previous token is 'looked'",
         },
@@ -366,12 +366,12 @@ const tokens: ExampleData["tokens"] = [
       L4: {
         prev: {
           kind: "positional",
-          inputRep: "a directional preposition attached to the act of looking",
+          inputRep: "A directional preposition. Attached to the act of looking.",
           positionalRule: "attend to the token at position N-1",
           pulls: [
             {
               fromTokenIndex: IDX_LOOKED,
-              value: "A past act of looking. Someone turned their visual attention somewhere. The astronaut — a human trained to travel in space — did the looking. It happened on Mars, another planet in Earth's solar system.",
+              value: "A past act of looking. Someone turned their visual attention somewhere. The looker is the astronaut. An astronaut is a human trained to travel in space. It happened on Mars. Mars is another planet in our solar system.",
               weight: 1.0,
             },
           ],
@@ -385,21 +385,21 @@ const tokens: ExampleData["tokens"] = [
     token: "the",
     clickable: true,
     reps: {
-      L0: "a definite article following the preposition 'to'",
-      L1: "a definite article following the preposition 'to'",
-      L2: "a definite article following the preposition 'to'",
-      L3: "a definite article following the preposition 'to'",
-      L4: "a definite article following the preposition 'to'",
-      L5: "a definite article following the preposition 'to'",
+      L0: "A definite article. Comes after the preposition 'to'.",
+      L1: "A definite article. Comes after the preposition 'to'.",
+      L2: "A definite article. Comes after the preposition 'to'.",
+      L3: "A definite article. Comes after the preposition 'to'.",
+      L4: "A definite article. Comes after the preposition 'to'.",
+      L5: "A definite article. Comes after the preposition 'to'.",
     },
     headCards: {
       L1: {
         prev: {
           kind: "positional",
-          inputRep: "a definite article following the preposition 'to'",
+          inputRep: "A definite article. Comes after the preposition 'to'.",
           positionalRule: "attend to the token at position N-1",
           pulls: [
-            { fromTokenIndex: 6, value: "a directional preposition", weight: 1.0 },
+            { fromTokenIndex: 6, value: "A directional preposition.", weight: 1.0 },
           ],
           contribution: "previous token is 'to'",
         },
@@ -407,10 +407,10 @@ const tokens: ExampleData["tokens"] = [
       L4: {
         prev: {
           kind: "positional",
-          inputRep: "a definite article following the preposition 'to'",
+          inputRep: "A definite article. Comes after the preposition 'to'.",
           positionalRule: "attend to the token at position N-1",
           pulls: [
-            { fromTokenIndex: 6, value: "a directional preposition attached to the act of looking", weight: 1.0 },
+            { fromTokenIndex: 6, value: "A directional preposition. Attached to the act of looking.", weight: 1.0 },
           ],
           contribution: "previous token is 'to'; its representation was not updated by intervening layers",
         },
@@ -422,21 +422,21 @@ const tokens: ExampleData["tokens"] = [
     token: "sky",
     clickable: true,
     reps: {
-      L0: "the expanse above, where clouds and celestial objects appear",
-      L1: "The specific sky. It's the expanse above, where clouds and celestial objects appear.",
-      L2: "The specific Martian sky. It's the expanse above, where clouds and celestial objects appear. Here, it's above Mars — another planet in Earth's solar system.",
-      L3: "The specific Martian sky. It's the expanse above, where clouds and celestial objects appear. Here, it's above Mars — another planet in Earth's solar system.",
-      L4: "The specific Martian sky. It's the expanse above, where clouds and celestial objects appear. Here, it's above Mars — another planet in Earth's solar system.",
-      L5: "The specific Martian sky. It's the expanse above, where clouds and celestial objects appear. Here, it's above Mars — another planet in Earth's solar system. Now known to be what the astronaut (a human trained to travel in space) looked at.",
+      L0: "The sky. The expanse above. Where clouds and celestial objects appear.",
+      L1: "The sky. The expanse above. Where clouds and celestial objects appear. A specific sky — the previous word was 'the'.",
+      L2: "The sky. The expanse above. Where clouds and celestial objects appear. A specific sky — the previous word was 'the'. Here, the sky is above Mars. Mars is another planet in our solar system.",
+      L3: "The sky. The expanse above. Where clouds and celestial objects appear. A specific sky — the previous word was 'the'. Here, the sky is above Mars. Mars is another planet in our solar system.",
+      L4: "The sky. The expanse above. Where clouds and celestial objects appear. A specific sky — the previous word was 'the'. Here, the sky is above Mars. Mars is another planet in our solar system.",
+      L5: "The sky. The expanse above. Where clouds and celestial objects appear. A specific sky — the previous word was 'the'. Here, the sky is above Mars. Mars is another planet in our solar system. Now known to be what the astronaut looked at.",
     },
     headCards: {
       L1: {
         prev: {
           kind: "positional",
-          inputRep: "the expanse above, where clouds and celestial objects appear",
+          inputRep: "The sky. The expanse above. Where clouds and celestial objects appear.",
           positionalRule: "attend to the token at position N-1",
           pulls: [
-            { fromTokenIndex: 7, value: "a definite article", weight: 1.0 },
+            { fromTokenIndex: 7, value: "A definite article.", weight: 1.0 },
           ],
           contribution: "previous token is 'the'",
         },
@@ -444,13 +444,13 @@ const tokens: ExampleData["tokens"] = [
       L2: {
         location: {
           kind: "content",
-          inputRep: "The specific sky. It's the expanse above, where clouds and celestial objects appear.",
+          inputRep: "The sky. The expanse above. Where clouds and celestial objects appear. A specific sky — the previous word was 'the'.",
           query: "a scene-location",
           pulls: [
             {
               fromTokenIndex: IDX_MARS,
               key: "a scene-location",
-              value: "The planet Mars. It's the fourth planet from the sun: cold, reddish, and covered in desert. It's another planet in Earth's solar system. Here, it's the location that someone or something is on.",
+              value: "The planet Mars. The fourth planet from the sun. A cold, reddish desert world. Another planet in our solar system, like Earth. Here, it's the location of this scene.",
               weight: 1.0,
             },
           ],
@@ -460,10 +460,10 @@ const tokens: ExampleData["tokens"] = [
       L4: {
         prev: {
           kind: "positional",
-          inputRep: "The specific Martian sky. It's the expanse above, where clouds and celestial objects appear. Here, it's above Mars — another planet in Earth's solar system.",
+          inputRep: "The sky. The expanse above. Where clouds and celestial objects appear. A specific sky — the previous word was 'the'. Here, the sky is above Mars. Mars is another planet in our solar system.",
           positionalRule: "attend to the token at position N-1",
           pulls: [
-            { fromTokenIndex: 7, value: "a definite article following the preposition 'to'", weight: 1.0 },
+            { fromTokenIndex: 7, value: "A definite article. Comes after the preposition 'to'.", weight: 1.0 },
           ],
           contribution: "previous token is 'the'; its representation was not updated by intervening layers",
         },
@@ -471,13 +471,13 @@ const tokens: ExampleData["tokens"] = [
       L5: {
         "verb-of-object": {
           kind: "content",
-          inputRep: "The specific Martian sky. It's the expanse above, where clouds and celestial objects appear. Here, it's above Mars — another planet in Earth's solar system.",
+          inputRep: "The sky. The expanse above. Where clouds and celestial objects appear. A specific sky — the previous word was 'the'. Here, the sky is above Mars. Mars is another planet in our solar system.",
           query: "a verb acting on this thing",
           pulls: [
             {
               fromTokenIndex: IDX_LOOKED,
               key: "a verb whose object this is",
-              value: "A past act of looking. Someone turned their visual attention somewhere. The astronaut — a human trained to travel in space — did the looking. It happened on Mars, another planet in Earth's solar system.",
+              value: "A past act of looking. Someone turned their visual attention somewhere. The looker is the astronaut. An astronaut is a human trained to travel in space. It happened on Mars. Mars is another planet in our solar system.",
               weight: 1.0,
             },
           ],
@@ -491,21 +491,21 @@ const tokens: ExampleData["tokens"] = [
     token: "and",
     clickable: true,
     reps: {
-      L0: "the word 'and', joining what came before to what comes next",
-      L1: "the word 'and', joining what came before to what comes next",
-      L2: "the word 'and', joining what came before to what comes next",
-      L3: "the word 'and', joining what came before to what comes next",
-      L4: "The word 'and'. It joins what came before to what comes next. What came before ended at 'sky' — the specific Martian sky, the expanse above on Mars where clouds and celestial objects appear.",
-      L5: "The word 'and'. It joins what came before to what comes next. What came before ended at 'sky' — the specific Martian sky, the expanse above on Mars where clouds and celestial objects appear.",
+      L0: "The word 'and'. It joins what came before to what comes next.",
+      L1: "The word 'and'. It joins what came before to what comes next. The word right before is 'sky'.",
+      L2: "The word 'and'. It joins what came before to what comes next. The word right before is 'sky'.",
+      L3: "The word 'and'. It joins what came before to what comes next. The word right before is 'sky'.",
+      L4: "The word 'and'. It joins what came before to what comes next. The word right before is 'sky'. The sky here is above Mars.",
+      L5: "The word 'and'. It joins what came before to what comes next. The word right before is 'sky'. The sky here is above Mars.",
     },
     headCards: {
       L1: {
         prev: {
           kind: "positional",
-          inputRep: "the word 'and', joining what came before to what comes next",
+          inputRep: "The word 'and'. It joins what came before to what comes next.",
           positionalRule: "attend to the token at position N-1",
           pulls: [
-            { fromTokenIndex: 8, value: "the sky", weight: 1.0 },
+            { fromTokenIndex: 8, value: "The sky. The expanse above. Where clouds and celestial objects appear.", weight: 1.0 },
           ],
           contribution: "previous token is 'sky'",
         },
@@ -513,12 +513,12 @@ const tokens: ExampleData["tokens"] = [
       L4: {
         prev: {
           kind: "positional",
-          inputRep: "the word 'and', joining what came before to what comes next",
+          inputRep: "The word 'and'. It joins what came before to what comes next. The word right before is 'sky'.",
           positionalRule: "attend to the token at position N-1",
           pulls: [
             {
               fromTokenIndex: IDX_SKY,
-              value: "The specific Martian sky. It's the expanse above, where clouds and celestial objects appear. Here, it's above Mars — another planet in Earth's solar system.",
+              value: "The sky. The expanse above. Where clouds and celestial objects appear. A specific sky — the previous word was 'the'. Here, the sky is above Mars. Mars is another planet in our solar system.",
               weight: 1.0,
             },
           ],
@@ -532,21 +532,21 @@ const tokens: ExampleData["tokens"] = [
     token: "saw",
     clickable: true,
     reps: {
-      L0: "past tense of 'see' — observed with the eyes",
-      L1: "a past act of seeing with the eyes",
-      L2: "A past act of seeing with the eyes. It happens on Mars, another planet in Earth's solar system. It takes place against the visual backdrop of the Martian sky.",
-      L3: "A past act of seeing with the eyes. It happens on Mars, another planet in Earth's solar system. It takes place against the visual backdrop of the Martian sky.",
-      L4: "A past act of seeing with the eyes. It happens on Mars, another planet in Earth's solar system. It takes place against the visual backdrop of the Martian sky.",
-      L5: "A past act of seeing with the eyes. It happens on Mars, another planet in Earth's solar system. It takes place against the visual backdrop of the Martian sky.",
+      L0: "A past act of seeing with the eyes.",
+      L1: "A past act of seeing with the eyes. Joins what came before — the previous word is 'and'.",
+      L2: "A past act of seeing with the eyes. Joins what came before — the previous word is 'and'. Happened on Mars. Mars is another planet in our solar system. Took place against the Martian sky.",
+      L3: "A past act of seeing with the eyes. Joins what came before — the previous word is 'and'. Happened on Mars. Mars is another planet in our solar system. Took place against the Martian sky.",
+      L4: "A past act of seeing with the eyes. Joins what came before — the previous word is 'and'. Happened on Mars. Mars is another planet in our solar system. Took place against the Martian sky.",
+      L5: "A past act of seeing with the eyes. Joins what came before — the previous word is 'and'. Happened on Mars. Mars is another planet in our solar system. Took place against the Martian sky.",
     },
     headCards: {
       L1: {
         prev: {
           kind: "positional",
-          inputRep: "past tense of 'see' — observed with the eyes",
+          inputRep: "A past act of seeing with the eyes.",
           positionalRule: "attend to the token at position N-1",
           pulls: [
-            { fromTokenIndex: 9, value: "a conjunction", weight: 1.0 },
+            { fromTokenIndex: 9, value: "The word 'and'. It joins what came before to what comes next.", weight: 1.0 },
           ],
           contribution: "previous token is 'and'",
         },
@@ -554,19 +554,19 @@ const tokens: ExampleData["tokens"] = [
       L2: {
         location: {
           kind: "content",
-          inputRep: "a past act of seeing with the eyes",
+          inputRep: "A past act of seeing with the eyes. Joins what came before — the previous word is 'and'.",
           query: "a scene-location",
           pulls: [
             {
               fromTokenIndex: IDX_MARS,
               key: "a scene-location",
-              value: "The planet Mars. It's the fourth planet from the sun: cold, reddish, and covered in desert. It's another planet in Earth's solar system. Here, it's the location that someone or something is on.",
+              value: "The planet Mars. The fourth planet from the sun. A cold, reddish desert world. Another planet in our solar system, like Earth. Here, it's the location of this scene.",
               weight: 0.5,
             },
             {
               fromTokenIndex: IDX_SKY,
               key: "a scene-location",
-              value: "The specific sky. It's the expanse above, where clouds and celestial objects appear.",
+              value: "The sky. The expanse above. Where clouds and celestial objects appear. A specific sky — the previous word was 'the'.",
               weight: 0.5,
             },
           ],
@@ -576,10 +576,10 @@ const tokens: ExampleData["tokens"] = [
       L4: {
         prev: {
           kind: "positional",
-          inputRep: "A past act of seeing with the eyes. It happens on Mars, another planet in Earth's solar system. It takes place against the visual backdrop of the Martian sky.",
+          inputRep: "A past act of seeing with the eyes. Joins what came before — the previous word is 'and'. Happened on Mars. Mars is another planet in our solar system. Took place against the Martian sky.",
           positionalRule: "attend to the token at position N-1",
           pulls: [
-            { fromTokenIndex: 9, value: "the word 'and', joining what came before to what comes next", weight: 1.0 },
+            { fromTokenIndex: 9, value: "The word 'and'. It joins what came before to what comes next. The word right before is 'sky'.", weight: 1.0 },
           ],
           contribution: "previous token is 'and'; its representation was not updated by intervening layers",
         },
@@ -591,21 +591,21 @@ const tokens: ExampleData["tokens"] = [
     token: "her",
     clickable: true,
     reps: {
-      L0: "a feminine possessive pronoun",
-      L1: "a feminine possessive pronoun, appearing as the possessor of what was seen",
-      L2: "A feminine possessive pronoun (the word 'her'). It marks the owner of whatever was seen. The scene is on Mars, another planet in Earth's solar system. The backdrop is the Martian sky — the expanse above where clouds and celestial objects appear.",
-      L3: "The word 'her'. A feminine possessive pronoun marking the owner of whatever was seen. Set in the Martian scene under the Martian sky. Now known to refer to the astronaut: a specific human trained to travel in space, currently on Mars (another planet in Earth's solar system).",
-      L4: "The word 'her'. A feminine possessive pronoun marking the owner of whatever was seen. Set in the Martian scene under the Martian sky. Now known to refer to the astronaut: a specific human trained to travel in space, currently on Mars. Observed via a past act of seeing with the eyes, happening on Mars.",
-      L5: "The word 'her'. A feminine possessive pronoun marking the owner of whatever was seen. Set in the Martian scene under the Martian sky. Now known to refer to the astronaut: a specific human trained to travel in space, currently on Mars. Also the owner of the thing observed in the act of seeing — a past act of seeing with the eyes, happening on Mars and against the Martian sky.",
+      L0: "A feminine possessive pronoun.",
+      L1: "A feminine possessive pronoun. The owner of whatever was seen.",
+      L2: "A feminine possessive pronoun. The owner of whatever was seen. The scene is on Mars. The backdrop is the Martian sky.",
+      L3: "A feminine possessive pronoun. The owner of whatever was seen. The scene is on Mars. The backdrop is the Martian sky. 'Her' refers to the astronaut. An astronaut is a human trained to travel in space. The astronaut is currently on Mars.",
+      L4: "A feminine possessive pronoun. The owner of whatever was seen. The scene is on Mars. The backdrop is the Martian sky. 'Her' refers to the astronaut. An astronaut is a human trained to travel in space. The astronaut is currently on Mars. The act of seeing happened on Mars and against the Martian sky.",
+      L5: "A feminine possessive pronoun. The owner of whatever was seen. The scene is on Mars. The backdrop is the Martian sky. 'Her' refers to the astronaut. An astronaut is a human trained to travel in space. The astronaut is currently on Mars. The act of seeing happened on Mars and against the Martian sky.",
     },
     headCards: {
       L1: {
         prev: {
           kind: "positional",
-          inputRep: "a feminine possessive pronoun",
+          inputRep: "A feminine possessive pronoun.",
           positionalRule: "attend to the token at position N-1",
           pulls: [
-            { fromTokenIndex: 10, value: "a verb about seeing — what was seen comes next", weight: 1.0 },
+            { fromTokenIndex: 10, value: "A past act of seeing with the eyes.", weight: 1.0 },
           ],
           contribution: "previous token is 'saw'",
         },
@@ -613,19 +613,19 @@ const tokens: ExampleData["tokens"] = [
       L2: {
         location: {
           kind: "content",
-          inputRep: "a feminine possessive pronoun, appearing as the possessor of what was seen",
+          inputRep: "A feminine possessive pronoun. The owner of whatever was seen.",
           query: "a scene-location",
           pulls: [
             {
               fromTokenIndex: IDX_MARS,
               key: "a scene-location",
-              value: "The planet Mars. It's the fourth planet from the sun: cold, reddish, and covered in desert. It's another planet in Earth's solar system. Here, it's the location that someone or something is on.",
+              value: "The planet Mars. The fourth planet from the sun. A cold, reddish desert world. Another planet in our solar system, like Earth. Here, it's the location of this scene.",
               weight: 0.5,
             },
             {
               fromTokenIndex: IDX_SKY,
               key: "a scene-location",
-              value: "The specific sky. It's the expanse above, where clouds and celestial objects appear.",
+              value: "The sky. The expanse above. Where clouds and celestial objects appear. A specific sky — the previous word was 'the'.",
               weight: 0.5,
             },
           ],
@@ -635,13 +635,13 @@ const tokens: ExampleData["tokens"] = [
       L3: {
         refers: {
           kind: "content",
-          inputRep: "A feminine possessive pronoun (the word 'her'). It marks the owner of whatever was seen. The scene is on Mars, another planet in Earth's solar system. The backdrop is the Martian sky — the expanse above where clouds and celestial objects appear.",
+          inputRep: "A feminine possessive pronoun. The owner of whatever was seen. The scene is on Mars. The backdrop is the Martian sky.",
           query: "a human person",
           pulls: [
             {
               fromTokenIndex: IDX_ASTRONAUT,
               key: "a human person",
-              value: "The astronaut. A specific human trained to travel in space. Currently on Mars — the fourth planet from the sun. Mars is cold, reddish, and another planet in Earth's solar system.",
+              value: "An astronaut. A human trained to travel in space. The previous word was 'the' — so this is a specific astronaut. Currently on Mars. Mars is the fourth planet from the sun. Mars is a cold, reddish desert world. Mars is another planet in our solar system, like Earth.",
               weight: 1.0,
             },
           ],
@@ -651,12 +651,12 @@ const tokens: ExampleData["tokens"] = [
       L4: {
         prev: {
           kind: "positional",
-          inputRep: "The word 'her'. A feminine possessive pronoun marking the owner of whatever was seen. Set in the Martian scene under the Martian sky. Now known to refer to the astronaut: a specific human trained to travel in space, currently on Mars (another planet in Earth's solar system).",
+          inputRep: "A feminine possessive pronoun. The owner of whatever was seen. The scene is on Mars. The backdrop is the Martian sky. 'Her' refers to the astronaut. An astronaut is a human trained to travel in space. The astronaut is currently on Mars.",
           positionalRule: "attend to the token at position N-1",
           pulls: [
             {
               fromTokenIndex: IDX_SAW,
-              value: "A past act of seeing with the eyes. It happens on Mars, another planet in Earth's solar system. It takes place against the visual backdrop of the Martian sky.",
+              value: "A past act of seeing with the eyes. Joins what came before — the previous word is 'and'. Happened on Mars. Mars is another planet in our solar system. Took place against the Martian sky.",
               weight: 1.0,
             },
           ],
@@ -666,13 +666,13 @@ const tokens: ExampleData["tokens"] = [
       L5: {
         "verb-of-object": {
           kind: "content",
-          inputRep: "The word 'her'. A feminine possessive pronoun marking the owner of whatever was seen. Set in the Martian scene under the Martian sky. Now known to refer to the astronaut: a specific human trained to travel in space, currently on Mars. Observed via a past act of seeing with the eyes, happening on Mars.",
+          inputRep: "A feminine possessive pronoun. The owner of whatever was seen. The scene is on Mars. The backdrop is the Martian sky. 'Her' refers to the astronaut. An astronaut is a human trained to travel in space. The astronaut is currently on Mars. The act of seeing happened on Mars and against the Martian sky.",
           query: "a verb acting on this thing",
           pulls: [
             {
               fromTokenIndex: IDX_SAW,
               key: "a verb whose object this is",
-              value: "A past act of seeing with the eyes. It happens on Mars, another planet in Earth's solar system. It takes place against the visual backdrop of the Martian sky.",
+              value: "A past act of seeing with the eyes. Joins what came before — the previous word is 'and'. Happened on Mars. Mars is another planet in our solar system. Took place against the Martian sky.",
               weight: 1.0,
             },
           ],
@@ -686,21 +686,21 @@ const tokens: ExampleData["tokens"] = [
     token: "blue",
     clickable: true,
     reps: {
-      L0: "the color blue",
-      L1: "the color blue, modifying something that belongs to 'her'",
-      L2: "the color blue, modifying something that belongs to 'her'",
-      L3: "the color blue, modifying something that belongs to 'her'",
-      L4: "The color blue. It modifies a thing. That thing belongs to her — the astronaut, a specific human trained to travel in space, currently on Mars (another planet in Earth's solar system).",
-      L5: "The color blue. It modifies a thing. That thing belongs to her — the astronaut (a human trained to travel in space), currently on Mars (another planet in Earth's solar system). That thing is what was seen. The seeing happened with the eyes, on Mars, against the backdrop of the Martian sky.",
+      L0: "The color blue.",
+      L1: "The color blue. It modifies a thing. The thing belongs to her.",
+      L2: "The color blue. It modifies a thing. The thing belongs to her.",
+      L3: "The color blue. It modifies a thing. The thing belongs to her.",
+      L4: "The color blue. It modifies a thing. The thing belongs to her. 'Her' is the astronaut. An astronaut is a human trained to travel in space. The astronaut is currently on Mars.",
+      L5: "The color blue. It modifies a thing. The thing belongs to her. 'Her' is the astronaut. An astronaut is a human trained to travel in space. The astronaut is currently on Mars. The thing was seen by her. The seeing happened with the eyes. It happened on Mars, against the Martian sky.",
     },
     headCards: {
       L1: {
         prev: {
           kind: "positional",
-          inputRep: "the color blue",
+          inputRep: "The color blue.",
           positionalRule: "attend to the token at position N-1",
           pulls: [
-            { fromTokenIndex: 11, value: "a feminine possessive pronoun", weight: 1.0 },
+            { fromTokenIndex: 11, value: "A feminine possessive pronoun.", weight: 1.0 },
           ],
           contribution: "previous token is 'her'",
         },
@@ -708,12 +708,12 @@ const tokens: ExampleData["tokens"] = [
       L4: {
         prev: {
           kind: "positional",
-          inputRep: "the color blue, modifying something that belongs to 'her'",
+          inputRep: "The color blue. It modifies a thing. The thing belongs to her.",
           positionalRule: "attend to the token at position N-1",
           pulls: [
             {
               fromTokenIndex: IDX_HER,
-              value: "The word 'her'. A feminine possessive pronoun marking the owner of whatever was seen. Set in the Martian scene under the Martian sky. Now known to refer to the astronaut: a specific human trained to travel in space, currently on Mars (another planet in Earth's solar system).",
+              value: "A feminine possessive pronoun. The owner of whatever was seen. The scene is on Mars. The backdrop is the Martian sky. 'Her' refers to the astronaut. An astronaut is a human trained to travel in space. The astronaut is currently on Mars.",
               weight: 1.0,
             },
           ],
@@ -723,13 +723,13 @@ const tokens: ExampleData["tokens"] = [
       L5: {
         "verb-of-object": {
           kind: "content",
-          inputRep: "The color blue. It modifies a thing. That thing belongs to her — the astronaut, a specific human trained to travel in space, currently on Mars (another planet in Earth's solar system).",
+          inputRep: "The color blue. It modifies a thing. The thing belongs to her. 'Her' is the astronaut. An astronaut is a human trained to travel in space. The astronaut is currently on Mars.",
           query: "a verb acting on this thing",
           pulls: [
             {
               fromTokenIndex: IDX_SAW,
               key: "a verb whose object this is",
-              value: "A past act of seeing with the eyes. It happens on Mars, another planet in Earth's solar system. It takes place against the visual backdrop of the Martian sky.",
+              value: "A past act of seeing with the eyes. Joins what came before — the previous word is 'and'. Happened on Mars. Mars is another planet in our solar system. Took place against the Martian sky.",
               weight: 1.0,
             },
           ],
