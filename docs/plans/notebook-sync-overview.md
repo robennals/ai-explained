@@ -24,7 +24,7 @@ Bring the notebooks back in sync with the chapters per `notebook-philosophy.md`.
 | embeddings | yes | yes | major rework + factual bug | A (bug) + B (rework) |
 | next-word-prediction | yes | yes | major rework | B |
 | attention | yes | yes | major rework | B |
-| positions | yes | **no** | missing notebook AND MDX link | A |
+| positions | yes | **no** | missing notebook AND MDX link | B (after attention) |
 | transformers | yes | yes | **SKIP** — actively being edited | — |
 | matrix-math | no | yes | **SKIP** — chapter not ready | — |
 | appendix-pytorch | yes | yes | minor drift | C |
@@ -113,18 +113,20 @@ Each unit will become its own focused brainstorm → spec → plan cycle when pi
 Smallest, highest urgency. User-visible breakage today.
 
 1. Create `notebooks/vectors.ipynb` from scratch (chapter links to it).
-2. Create `notebooks/positions.ipynb` from scratch AND add `<TryItInPyTorch notebook="positions">` to `src/app/(tutorial)/positions/content.mdx`.
-3. Fix the GloVe dimensionality bug in `notebooks/embeddings.ipynb` (50d → 300d). This is a factual correction, not part of the embeddings major rework — ship it separately if the rework is deferred.
-4. Update `pytorch-prerequisites.md` for both new notebooks.
+2. Fix the GloVe dimensionality bug in `notebooks/embeddings.ipynb` (50d → 300d). This is a factual correction, not part of the embeddings major rework — ship it separately if the rework is deferred.
+3. Update `pytorch-prerequisites.md` for the new vectors notebook.
 
-### Unit B — major reworks
+`positions.ipynb` was originally in Unit A but was moved into Unit B because it conceptually depends on attention; creating it against a soon-to-be-reworked attention notebook would mean hitting a moving target.
 
-Bulk of the writing. Each notebook gets its own brainstorm/plan within this unit.
+### Unit B — major reworks and dependent new notebooks
 
-1. `neurons.ipynb`
-2. `embeddings.ipynb` (after the Unit A bug fix)
-3. `next-word-prediction.ipynb`
-4. `attention.ipynb`
+Bulk of the writing. Each item gets its own brainstorm/plan within this unit.
+
+1. `neurons.ipynb` — rework
+2. `embeddings.ipynb` — rework (after the Unit A GloVe fix)
+3. `next-word-prediction.ipynb` — rework
+4. `attention.ipynb` — rework
+5. `positions.ipynb` — **new notebook** (depends on the reworked attention notebook). Also add `<TryItInPyTorch notebook="positions">` to `src/app/(tutorial)/positions/content.mdx` and update `pytorch-prerequisites.md`.
 
 ### Unit C — minor touch-ups
 
@@ -136,9 +138,9 @@ Cosmetic alignment. Can be rolled up into one spec or absorbed into each chapter
 
 ## Ordering rationale
 
-Do Unit A first — `vectors` is a broken link users hit today, and the GloVe bug teaches wrong intuition. Then Unit B, which is the substantive content work. Unit C last, or folded into unrelated chapter edits when convenient.
+Do Unit A first — `vectors` is a broken link users hit today, and the GloVe bug teaches wrong intuition. Then Unit B, which is the substantive content work plus the positions notebook. Unit C last, or folded into unrelated chapter edits when convenient.
 
-Within Unit B, order by dependency: `neurons` is a prerequisite for the rest conceptually; `embeddings` is a prerequisite for `next-word-prediction` and `attention`. Suggested order: neurons → embeddings → next-word-prediction → attention.
+Within Unit B, order by dependency: `neurons` is a prerequisite for the rest conceptually; `embeddings` is a prerequisite for `next-word-prediction` and `attention`; `positions` depends on `attention`. Suggested order: neurons → embeddings → next-word-prediction → attention → positions.
 
 ## Keeping this doc current
 
