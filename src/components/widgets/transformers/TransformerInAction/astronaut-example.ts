@@ -358,7 +358,7 @@ const tokens: ExampleData["tokens"] = [
           inputRep: "a directional preposition attached to the act of looking",
           positionalRule: "attend to the token at position N-1",
           pulls: [
-            { fromTokenIndex: 5, value: "a verb of visual attention", weight: 1.0 },
+            { fromTokenIndex: 5, value: "a verb about looking", weight: 1.0 },
           ],
           contribution: "previous token is 'looked'",
         },
@@ -491,21 +491,21 @@ const tokens: ExampleData["tokens"] = [
     token: "and",
     clickable: true,
     reps: {
-      L0: "a conjunction following the first clause (ending at 'sky')",
-      L1: "a conjunction following the first clause (ending at 'sky')",
-      L2: "a conjunction following the first clause (ending at 'sky')",
-      L3: "a conjunction following the first clause (ending at 'sky')",
-      L4: "a conjunction following the first clause (which ended at 'sky' — the specific Martian sky, the expanse above where clouds and celestial objects appear, here on Mars, another planet in Earth's solar system)",
-      L5: "a conjunction following the first clause (which ended at 'sky' — the specific Martian sky, the expanse above where clouds and celestial objects appear, here on Mars, another planet in Earth's solar system)",
+      L0: "the word 'and', joining what came before to what comes next",
+      L1: "the word 'and', joining what came before to what comes next",
+      L2: "the word 'and', joining what came before to what comes next",
+      L3: "the word 'and', joining what came before to what comes next",
+      L4: "the word 'and', joining what came before (ending at 'sky' — the specific Martian sky, the expanse above where clouds and celestial objects appear, here on Mars, another planet in Earth's solar system)",
+      L5: "the word 'and', joining what came before (ending at 'sky' — the specific Martian sky, the expanse above where clouds and celestial objects appear, here on Mars, another planet in Earth's solar system)",
     },
     headCards: {
       L1: {
         prev: {
           kind: "positional",
-          inputRep: "a conjunction following the first clause (ending at 'sky')",
+          inputRep: "the word 'and', joining what came before to what comes next",
           positionalRule: "attend to the token at position N-1",
           pulls: [
-            { fromTokenIndex: 8, value: "the sky (the first clause's object)", weight: 1.0 },
+            { fromTokenIndex: 8, value: "the sky", weight: 1.0 },
           ],
           contribution: "previous token is 'sky'",
         },
@@ -513,7 +513,7 @@ const tokens: ExampleData["tokens"] = [
       L4: {
         prev: {
           kind: "positional",
-          inputRep: "a conjunction following the first clause (ending at 'sky')",
+          inputRep: "the word 'and', joining what came before to what comes next",
           positionalRule: "attend to the token at position N-1",
           pulls: [
             {
@@ -533,11 +533,11 @@ const tokens: ExampleData["tokens"] = [
     clickable: true,
     reps: {
       L0: "past tense of 'see' — observed with the eyes",
-      L1: "a past act of seeing with the eyes, starting a new conjoined action",
-      L2: "a past act of seeing with the eyes, happening on Mars (another planet in Earth's solar system) and taking place against the visual backdrop of the Martian sky, starting a new conjoined action",
-      L3: "a past act of seeing with the eyes, happening on Mars (another planet in Earth's solar system) and taking place against the visual backdrop of the Martian sky, starting a new conjoined action",
-      L4: "a past act of seeing with the eyes, happening on Mars (another planet in Earth's solar system) and taking place against the visual backdrop of the Martian sky, starting a new conjoined action",
-      L5: "a past act of seeing with the eyes, happening on Mars (another planet in Earth's solar system) and taking place against the visual backdrop of the Martian sky, starting a new conjoined action",
+      L1: "a past act of seeing with the eyes",
+      L2: "a past act of seeing with the eyes, happening on Mars (another planet in Earth's solar system) and taking place against the visual backdrop of the Martian sky",
+      L3: "a past act of seeing with the eyes, happening on Mars (another planet in Earth's solar system) and taking place against the visual backdrop of the Martian sky",
+      L4: "a past act of seeing with the eyes, happening on Mars (another planet in Earth's solar system) and taking place against the visual backdrop of the Martian sky",
+      L5: "a past act of seeing with the eyes, happening on Mars (another planet in Earth's solar system) and taking place against the visual backdrop of the Martian sky",
     },
     headCards: {
       L1: {
@@ -554,7 +554,7 @@ const tokens: ExampleData["tokens"] = [
       L2: {
         location: {
           kind: "content",
-          inputRep: "a past act of seeing with the eyes, starting a new conjoined action",
+          inputRep: "a past act of seeing with the eyes",
           query: "a scene-location",
           pulls: [
             {
@@ -576,10 +576,10 @@ const tokens: ExampleData["tokens"] = [
       L4: {
         prev: {
           kind: "positional",
-          inputRep: "a past act of seeing with the eyes, happening on Mars (another planet in Earth's solar system) and taking place against the visual backdrop of the Martian sky, starting a new conjoined action",
+          inputRep: "a past act of seeing with the eyes, happening on Mars (another planet in Earth's solar system) and taking place against the visual backdrop of the Martian sky",
           positionalRule: "attend to the token at position N-1",
           pulls: [
-            { fromTokenIndex: 9, value: "a conjunction following the first clause (ending at 'sky')", weight: 1.0 },
+            { fromTokenIndex: 9, value: "the word 'and', joining what came before to what comes next", weight: 1.0 },
           ],
           contribution: "previous token is 'and'; its representation was not updated by intervening layers",
         },
@@ -593,10 +593,10 @@ const tokens: ExampleData["tokens"] = [
     reps: {
       L0: "a feminine possessive pronoun",
       L1: "a feminine possessive pronoun, appearing as the possessor of what was seen",
-      L2: "a feminine possessive pronoun, appearing as the possessor of what was seen",
-      L3: "her — a feminine possessive pronoun appearing as the possessor of what was seen, now known to refer to the astronaut (a specific human trained to travel in space, currently on Mars — another planet in Earth's solar system)",
-      L4: "her — a feminine possessive pronoun appearing as the possessor of what was seen, now known to refer to the astronaut (a specific human trained to travel in space, currently on Mars — another planet in Earth's solar system); observed via a past act of seeing with the eyes, happening on Mars",
-      L5: "her — a feminine possessive pronoun appearing as the possessor of what was seen, now known to refer to the astronaut (a specific human trained to travel in space, currently on Mars — another planet in Earth's solar system); also the possessor of the thing observed in the act of seeing (a past act of seeing with the eyes, happening on Mars and against the visual backdrop of the Martian sky, starting a new conjoined action)",
+      L2: "a feminine possessive pronoun, appearing as the possessor of what was seen, set in the Martian scene (on Mars — another planet in Earth's solar system)",
+      L3: "her — a feminine possessive pronoun appearing as the possessor of what was seen, set in the Martian scene, now known to refer to the astronaut (a specific human trained to travel in space, currently on Mars — another planet in Earth's solar system)",
+      L4: "her — a feminine possessive pronoun appearing as the possessor of what was seen, set in the Martian scene, now known to refer to the astronaut (a specific human trained to travel in space, currently on Mars — another planet in Earth's solar system); observed via a past act of seeing with the eyes, happening on Mars",
+      L5: "her — a feminine possessive pronoun appearing as the possessor of what was seen, set in the Martian scene, now known to refer to the astronaut (a specific human trained to travel in space, currently on Mars — another planet in Earth's solar system); also the possessor of the thing observed in the act of seeing (a past act of seeing with the eyes, happening on Mars and against the visual backdrop of the Martian sky)",
     },
     headCards: {
       L1: {
@@ -605,15 +605,31 @@ const tokens: ExampleData["tokens"] = [
           inputRep: "a feminine possessive pronoun",
           positionalRule: "attend to the token at position N-1",
           pulls: [
-            { fromTokenIndex: 10, value: "a verb of perception — its object follows", weight: 1.0 },
+            { fromTokenIndex: 10, value: "a verb about seeing — what was seen comes next", weight: 1.0 },
           ],
           contribution: "previous token is 'saw'",
+        },
+      },
+      L2: {
+        location: {
+          kind: "content",
+          inputRep: "a feminine possessive pronoun, appearing as the possessor of what was seen",
+          query: "a scene-location",
+          pulls: [
+            {
+              fromTokenIndex: IDX_MARS,
+              key: "a scene-location",
+              value: "the planet Mars — the fourth planet from the sun, a cold reddish desert world, another planet in Earth's solar system; here, the location someone or something is on",
+              weight: 1.0,
+            },
+          ],
+          contribution: "ties 'her' to the Martian scene (whoever 'her' refers to is somewhere in this Mars scene)",
         },
       },
       L3: {
         refers: {
           kind: "content",
-          inputRep: "a feminine possessive pronoun, appearing as the possessor of what was seen",
+          inputRep: "a feminine possessive pronoun, appearing as the possessor of what was seen, set in the Martian scene (on Mars — another planet in Earth's solar system)",
           query: "a human person",
           pulls: [
             {
@@ -629,12 +645,12 @@ const tokens: ExampleData["tokens"] = [
       L4: {
         prev: {
           kind: "positional",
-          inputRep: "her — a feminine possessive pronoun appearing as the possessor of what was seen, now known to refer to the astronaut (a specific human trained to travel in space, currently on Mars — another planet in Earth's solar system)",
+          inputRep: "her — a feminine possessive pronoun appearing as the possessor of what was seen, set in the Martian scene, now known to refer to the astronaut (a specific human trained to travel in space, currently on Mars — another planet in Earth's solar system)",
           positionalRule: "attend to the token at position N-1",
           pulls: [
             {
               fromTokenIndex: IDX_SAW,
-              value: "a past act of seeing with the eyes, happening on Mars (another planet in Earth's solar system) and taking place against the visual backdrop of the Martian sky, starting a new conjoined action",
+              value: "a past act of seeing with the eyes, happening on Mars (another planet in Earth's solar system) and taking place against the visual backdrop of the Martian sky",
               weight: 1.0,
             },
           ],
@@ -644,13 +660,13 @@ const tokens: ExampleData["tokens"] = [
       L5: {
         "verb-of-object": {
           kind: "content",
-          inputRep: "her — a feminine possessive pronoun appearing as the possessor of what was seen, now known to refer to the astronaut (a specific human trained to travel in space, currently on Mars — another planet in Earth's solar system); observed via a past act of seeing with the eyes, happening on Mars",
+          inputRep: "her — a feminine possessive pronoun appearing as the possessor of what was seen, set in the Martian scene, now known to refer to the astronaut (a specific human trained to travel in space, currently on Mars — another planet in Earth's solar system); observed via a past act of seeing with the eyes, happening on Mars",
           query: "a verb acting on this thing",
           pulls: [
             {
               fromTokenIndex: IDX_SAW,
               key: "a verb whose object this is",
-              value: "a past act of seeing with the eyes, happening on Mars (another planet in Earth's solar system) and taking place against the visual backdrop of the Martian sky, starting a new conjoined action",
+              value: "a past act of seeing with the eyes, happening on Mars (another planet in Earth's solar system) and taking place against the visual backdrop of the Martian sky",
               weight: 1.0,
             },
           ],
@@ -691,7 +707,7 @@ const tokens: ExampleData["tokens"] = [
           pulls: [
             {
               fromTokenIndex: IDX_HER,
-              value: "her — a feminine possessive pronoun appearing as the possessor of what was seen, now known to refer to the astronaut (a specific human trained to travel in space, currently on Mars — another planet in Earth's solar system)",
+              value: "her — a feminine possessive pronoun appearing as the possessor of what was seen, set in the Martian scene, now known to refer to the astronaut (a specific human trained to travel in space, currently on Mars — another planet in Earth's solar system)",
               weight: 1.0,
             },
           ],
@@ -707,7 +723,7 @@ const tokens: ExampleData["tokens"] = [
             {
               fromTokenIndex: IDX_SAW,
               key: "a verb whose object this is",
-              value: "a past act of seeing with the eyes, happening on Mars (another planet in Earth's solar system) and taking place against the visual backdrop of the Martian sky, starting a new conjoined action",
+              value: "a past act of seeing with the eyes, happening on Mars (another planet in Earth's solar system) and taking place against the visual backdrop of the Martian sky",
               weight: 1.0,
             },
           ],
