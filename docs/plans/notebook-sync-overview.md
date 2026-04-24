@@ -110,11 +110,12 @@ Each unit will become its own focused brainstorm → spec → plan cycle when pi
 
 ### Unit A — unblock broken and missing
 
-Smallest, highest urgency. User-visible breakage today.
+Smallest, highest urgency. User-visible breakage today. Full spec: [notebook-sync-unit-a.md](notebook-sync-unit-a.md).
 
 1. Create `notebooks/vectors.ipynb` from scratch (chapter links to it).
-2. Fix the GloVe dimensionality bug in `notebooks/embeddings.ipynb` (50d → 300d). This is a factual correction, not part of the embeddings major rework — ship it separately if the rework is deferred.
+2. Fix the GloVe dimensionality bug in `notebooks/embeddings.ipynb` (50d → 300d).
 3. Update `pytorch-prerequisites.md` for the new vectors notebook.
+4. Add Anthropic to the researcher list in `appendix-pytorch/content.mdx` (adjacent tiny copy edit).
 
 `positions.ipynb` was originally in Unit A but was moved into Unit B because it conceptually depends on attention; creating it against a soon-to-be-reworked attention notebook would mean hitting a moving target.
 
