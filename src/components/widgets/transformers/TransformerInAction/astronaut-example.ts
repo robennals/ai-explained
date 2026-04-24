@@ -288,11 +288,11 @@ const tokens: ExampleData["tokens"] = [
     clickable: true,
     reps: {
       L0: "past tense of 'look' — turned one's visual attention somewhere",
-      L1: "A past act of looking. Someone turned their visual attention somewhere. The astronaut did the looking.",
-      L2: "A past act of looking. Someone turned their visual attention somewhere. The astronaut did the looking. It happened on Mars, another planet in Earth's solar system.",
-      L3: "A past act of looking. Someone turned their visual attention somewhere. The astronaut did the looking. It happened on Mars, another planet in Earth's solar system.",
-      L4: "A past act of looking. Someone turned their visual attention somewhere. The astronaut did the looking. It happened on Mars, another planet in Earth's solar system.",
-      L5: "A past act of looking. Someone turned their visual attention somewhere. The astronaut did the looking. It happened on Mars, another planet in Earth's solar system.",
+      L1: "A past act of looking. Someone turned their visual attention somewhere. The astronaut — a human trained to travel in space — did the looking.",
+      L2: "A past act of looking. Someone turned their visual attention somewhere. The astronaut — a human trained to travel in space — did the looking. It happened on Mars, another planet in Earth's solar system.",
+      L3: "A past act of looking. Someone turned their visual attention somewhere. The astronaut — a human trained to travel in space — did the looking. It happened on Mars, another planet in Earth's solar system.",
+      L4: "A past act of looking. Someone turned their visual attention somewhere. The astronaut — a human trained to travel in space — did the looking. It happened on Mars, another planet in Earth's solar system.",
+      L5: "A past act of looking. Someone turned their visual attention somewhere. The astronaut — a human trained to travel in space — did the looking. It happened on Mars, another planet in Earth's solar system.",
     },
     headCards: {
       L1: {
@@ -309,7 +309,7 @@ const tokens: ExampleData["tokens"] = [
       L2: {
         location: {
           kind: "content",
-          inputRep: "A past act of looking. Someone turned their visual attention somewhere. The astronaut did the looking.",
+          inputRep: "A past act of looking. Someone turned their visual attention somewhere. The astronaut — a human trained to travel in space — did the looking.",
           query: "a scene-location",
           pulls: [
             {
@@ -325,7 +325,7 @@ const tokens: ExampleData["tokens"] = [
       L4: {
         prev: {
           kind: "positional",
-          inputRep: "A past act of looking. Someone turned their visual attention somewhere. The astronaut did the looking. It happened on Mars, another planet in Earth's solar system.",
+          inputRep: "A past act of looking. Someone turned their visual attention somewhere. The astronaut — a human trained to travel in space — did the looking. It happened on Mars, another planet in Earth's solar system.",
           positionalRule: "attend to the token at position N-1",
           pulls: [
             {
@@ -371,7 +371,7 @@ const tokens: ExampleData["tokens"] = [
           pulls: [
             {
               fromTokenIndex: IDX_LOOKED,
-              value: "A past act of looking. Someone turned their visual attention somewhere. The astronaut did the looking. It happened on Mars, another planet in Earth's solar system.",
+              value: "A past act of looking. Someone turned their visual attention somewhere. The astronaut — a human trained to travel in space — did the looking. It happened on Mars, another planet in Earth's solar system.",
               weight: 1.0,
             },
           ],
@@ -427,7 +427,7 @@ const tokens: ExampleData["tokens"] = [
       L2: "The specific Martian sky. It's the expanse above, where clouds and celestial objects appear. Here, it's above Mars — another planet in Earth's solar system.",
       L3: "The specific Martian sky. It's the expanse above, where clouds and celestial objects appear. Here, it's above Mars — another planet in Earth's solar system.",
       L4: "The specific Martian sky. It's the expanse above, where clouds and celestial objects appear. Here, it's above Mars — another planet in Earth's solar system.",
-      L5: "The specific Martian sky. It's the expanse above, where clouds and celestial objects appear. Here, it's above Mars — another planet in Earth's solar system. Now known to be what the astronaut looked at.",
+      L5: "The specific Martian sky. It's the expanse above, where clouds and celestial objects appear. Here, it's above Mars — another planet in Earth's solar system. Now known to be what the astronaut (a human trained to travel in space) looked at.",
     },
     headCards: {
       L1: {
@@ -477,7 +477,7 @@ const tokens: ExampleData["tokens"] = [
             {
               fromTokenIndex: IDX_LOOKED,
               key: "a verb whose object this is",
-              value: "A past act of looking. Someone turned their visual attention somewhere. The astronaut did the looking. It happened on Mars, another planet in Earth's solar system.",
+              value: "A past act of looking. Someone turned their visual attention somewhere. The astronaut — a human trained to travel in space — did the looking. It happened on Mars, another planet in Earth's solar system.",
               weight: 1.0,
             },
           ],
@@ -691,7 +691,7 @@ const tokens: ExampleData["tokens"] = [
       L2: "the color blue, modifying something that belongs to 'her'",
       L3: "the color blue, modifying something that belongs to 'her'",
       L4: "The color blue. It modifies a thing. That thing belongs to her — the astronaut, a specific human trained to travel in space, currently on Mars (another planet in Earth's solar system).",
-      L5: "The color blue. It modifies a thing. That thing belongs to her — the astronaut, currently on Mars (another planet in Earth's solar system). That thing is what was seen. The seeing happened with the eyes, on Mars, against the backdrop of the Martian sky.",
+      L5: "The color blue. It modifies a thing. That thing belongs to her — the astronaut (a human trained to travel in space), currently on Mars (another planet in Earth's solar system). That thing is what was seen. The seeing happened with the eyes, on Mars, against the backdrop of the Martian sky.",
     },
     headCards: {
       L1: {
