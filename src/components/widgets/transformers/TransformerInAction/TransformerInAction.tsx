@@ -116,7 +116,7 @@ export function TransformerInAction() {
   }, [nextLayer, handleSelectLayer]);
 
   const predictionSlotToken = "blue";
-  const predictionFinalRep = data.tokens[data.tokens.length - 1].reps.L6;
+  const predictionFinalRep = data.tokens[data.tokens.length - 1].reps.L5;
 
   const clickableOverride = useMemo(() => {
     if (selectedLayerId !== "Predict") return null;
@@ -127,7 +127,7 @@ export function TransformerInAction() {
   return (
     <WidgetContainer
       title="A Transformer In Action"
-      description="Watch this sentence flow through six transformer layers. Click a layer to see each token's representation there; click a word to see what the layer's head did to it."
+      description="Watch this sentence flow through five transformer layers. Click a layer to see each token's representation there; click a word to see what the layer's head did to it."
       onReset={handleReset}
     >
       <div className="flex flex-col gap-4 p-4">
@@ -188,7 +188,7 @@ export function TransformerInAction() {
         )}
 
         <div className="rounded border border-border/60 bg-foreground/[0.03] p-3 text-xs italic text-muted">
-          Real transformers use dozens of narrow heads per layer. We&apos;re showing the six that do the visible
+          Real transformers use dozens of narrow heads per layer. We&apos;re showing the five that do the visible
           work for this sentence. Other heads exist but don&apos;t contribute here.
         </div>
 

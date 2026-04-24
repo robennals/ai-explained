@@ -15,7 +15,6 @@ test.describe("Transformers chapter — A Transformer In Action widget", () => {
     await expect(widget.getByRole("button", { name: "Place in the scene" })).toBeVisible();
     await expect(widget.getByRole("button", { name: "Resolve pronouns" })).toBeVisible();
     await expect(widget.getByRole("button", { name: "Find what verb acts on this" })).toBeVisible();
-    await expect(widget.getByRole("button", { name: "Find where this is visible" })).toBeVisible();
     await expect(widget.getByRole("button", { name: "Predict" })).toBeVisible();
   });
 
@@ -25,7 +24,7 @@ test.describe("Transformers chapter — A Transformer In Action widget", () => {
 
     // Blue's final representation is shown above the prediction bars.
     await expect(
-      widget.getByText("visible in the Martian sky", { exact: false })
+      widget.getByText("Martian sky", { exact: false })
     ).toBeVisible();
 
     // Prediction card heading.
