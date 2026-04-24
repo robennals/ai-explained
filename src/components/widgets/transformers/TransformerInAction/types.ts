@@ -24,6 +24,15 @@ export interface HeadCard {
   pulls: HeadPull[];
   /** One short English phrase: what this head added to the focal token's rep. */
   contribution: string;
+  /**
+   * Whether this card meaningfully changes the focal token's representation.
+   * Defaults to true. Set false when the head technically applied (the rule matched)
+   * but the pulled value didn't add new info beyond what the token already knew —
+   * e.g. at the second Previous-token layer, most tokens just re-pull the same
+   * predecessor info that was already absorbed at L1. Tokens with `interesting: false`
+   * are not visually highlighted in the passage.
+   */
+  interesting?: boolean;
 }
 
 export interface TokenState {

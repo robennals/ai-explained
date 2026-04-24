@@ -105,7 +105,14 @@ export function TransformerInAction() {
     if (!selectedHead) return [];
     const layerId = selectedLayerId as NonPredictLayerId;
     return data.tokens
-      .map((t, i) => (t.headCards[layerId]?.[selectedHead.id] ? i : -1))
+      .map((t, i) => {
+        const card = t.headCards[layerId]?.[selectedHead.id];
+        if (!card) return -1;
+        // Skip cards explicitly marked uninteresting — the rule applied but
+        // the pulled value didn't change the token's rep meaningfully.
+        if (card.interesting === false) return -1;
+        return i;
+      })
       .filter((i) => i >= 0);
   }, [data.tokens, selectedLayerId, selectedHead]);
 
