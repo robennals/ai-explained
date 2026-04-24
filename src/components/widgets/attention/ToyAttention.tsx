@@ -139,9 +139,12 @@ export function ToyAttention() {
 
   // Auto-select on first render
   useEffect(() => {
-    if (selected === null && autoSelect !== null) {
-      setSelected(autoSelect);
-    }
+    const raf = requestAnimationFrame(() => {
+      if (selected === null && autoSelect !== null) {
+        setSelected(autoSelect);
+      }
+    });
+    return () => cancelAnimationFrame(raf);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Compute attention for selected token

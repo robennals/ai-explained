@@ -10,6 +10,8 @@ import {
   LiveTransformerWidget,
   TransformerXRayWidget,
   PrefixAttentionWidget,
+  TransformerInActionWidget,
+  VectorSubspaceFigWidget,
 } from "./widgets";
 
 export const metadata = {
@@ -34,6 +36,8 @@ export default function Chapter09() {
             LiveTransformerWidget,
             TransformerXRayWidget,
             PrefixAttentionWidget,
+            TransformerInActionWidget,
+            VectorSubspaceFigWidget,
           }}
         />
       </div>

@@ -95,8 +95,8 @@ export function CausalMasking() {
   useEffect(() => {
     if (!isPlaying) return;
     if (generatedCount >= maxTokens) {
-      setIsPlaying(false);
-      return;
+      const raf = requestAnimationFrame(() => setIsPlaying(false));
+      return () => cancelAnimationFrame(raf);
     }
     timerRef.current = setTimeout(() => {
       setGeneratedCount((c) => c + 1);
@@ -109,7 +109,8 @@ export function CausalMasking() {
   // When selectedToken is beyond generated range, clear it
   useEffect(() => {
     if (selectedToken !== null && selectedToken >= generatedCount) {
-      setSelectedToken(null);
+      const raf = requestAnimationFrame(() => setSelectedToken(null));
+      return () => cancelAnimationFrame(raf);
     }
   }, [generatedCount, selectedToken]);
 

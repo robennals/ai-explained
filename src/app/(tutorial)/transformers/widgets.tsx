@@ -76,6 +76,22 @@ const PrefixAttention = dynamic(
   { ssr: false }
 );
 
+const TransformerInAction = dynamic(
+  () =>
+    import("@/components/widgets/transformers/TransformerInAction").then(
+      (m) => m.TransformerInAction
+    ),
+  { ssr: false }
+);
+
+const VectorSubspaceFig = dynamic(
+  () =>
+    import("@/components/widgets/transformers/TransformerInAction").then(
+      (m) => m.VectorSubspaceFig
+    ),
+  { ssr: false }
+);
+
 function WidgetSlot({
   children,
   tryIt,
@@ -205,5 +221,25 @@ export function PrefixAttentionWidget({
     <WidgetSlot tryIt={children} label="Try it">
       <PrefixAttention />
     </WidgetSlot>
+  );
+}
+
+export function TransformerInActionWidget({
+  children,
+}: {
+  children?: React.ReactNode;
+}) {
+  return (
+    <WidgetSlot tryIt={children} label="Explore it">
+      <TransformerInAction />
+    </WidgetSlot>
+  );
+}
+
+export function VectorSubspaceFigWidget() {
+  return (
+    <Suspense fallback={<div className="my-6 h-40 animate-pulse rounded bg-foreground/[0.03]" />}>
+      <VectorSubspaceFig />
+    </Suspense>
   );
 }
