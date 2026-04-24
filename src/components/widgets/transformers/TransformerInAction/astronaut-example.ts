@@ -63,12 +63,12 @@ const layers: ExampleData["layers"] = [
   {
     id: "L5",
     label: "Find what verb acts on this",
-    description: "Every word inside a verb's object-phrase attends to that verb. 'Sky' (object of 'looked to') pulls 'looked'; 'her' and 'blue' (inside 'saw's object phrase) pull 'saw'.",
+    description: "Each word inside a verb's object-phrase reaches for its verb context. Sky (object of 'looked to') pulls looked directly. Her (inside saw's object phrase) pulls saw directly. Blue can't reach saw cleanly, so it pulls 'her' — which by this layer has already absorbed saw's context via the previous-token pass.",
     heads: [
       {
         id: "verb-of-object",
         label: "Find what verb acts on this",
-        description: "Rule: a word within a verb's object-phrase attends to the verb. Click 'blue', 'her', or 'sky' to see the binding.",
+        description: "Rule: a word within a verb's object-phrase pulls in its verb context — either the verb itself, or a nearby noun that has already absorbed the verb. Click 'sky', 'her', or 'blue' to see each token's binding.",
         kind: "content",
       },
     ],
@@ -691,7 +691,7 @@ const tokens: ExampleData["tokens"] = [
       L2: "The color blue. It modifies a thing. The thing belongs to her.",
       L3: "The color blue. It modifies a thing. The thing belongs to her.",
       L4: "The color blue. It modifies a thing. The thing belongs to her. 'Her' is the astronaut. An astronaut is a human trained to travel in space. The astronaut is currently on Mars.",
-      L5: "The color blue. It modifies a thing. The thing belongs to her. 'Her' is the astronaut. An astronaut is a human trained to travel in space. The astronaut is currently on Mars. The thing was seen by her. The seeing happened with the eyes. It happened on Mars, against the Martian sky.",
+      L5: "The color blue. It modifies a thing. The thing belongs to her. 'Her' is the astronaut. An astronaut is a human trained to travel in space. The astronaut is currently on Mars. The thing was seen. The seeing happened on Mars and against the Martian sky.",
     },
     headCards: {
       L1: {
@@ -724,16 +724,16 @@ const tokens: ExampleData["tokens"] = [
         "verb-of-object": {
           kind: "content",
           inputRep: "The color blue. It modifies a thing. The thing belongs to her. 'Her' is the astronaut. An astronaut is a human trained to travel in space. The astronaut is currently on Mars.",
-          query: "a verb acting on this thing",
+          query: "the noun carrying my verb context",
           pulls: [
             {
-              fromTokenIndex: IDX_SAW,
-              key: "a verb whose object this is",
-              value: "A past act of seeing with the eyes. Joins what came before — the previous word is 'and'. Happened on Mars. Mars is another planet in our solar system. Took place against the Martian sky.",
+              fromTokenIndex: IDX_HER,
+              key: "the noun carrying my verb context",
+              value: "A feminine possessive pronoun. The owner of whatever was seen. The scene is on Mars. The backdrop is the Martian sky. 'Her' refers to the astronaut. An astronaut is a human trained to travel in space. The astronaut is currently on Mars. The act of seeing happened on Mars and against the Martian sky.",
               weight: 1.0,
             },
           ],
-          contribution: "blue binds to the act of seeing that targets its noun",
+          contribution: "blue re-pulls 'her' — but now her carries the seeing/Mars/sky context, so blue absorbs it all in one shot",
         },
       },
     },
