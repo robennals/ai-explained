@@ -63,12 +63,12 @@ const layers: ExampleData["layers"] = [
   {
     id: "L5",
     label: "Find what verb acts on this",
-    description: "Each word inside a verb's object-phrase reaches for its verb context. Sky (object of 'looked to') pulls looked directly. Her (inside saw's object phrase) pulls saw directly. Blue can't reach saw cleanly, so it pulls 'her' — which by this layer has already absorbed saw's context via the previous-token pass.",
+    description: "Each word inside a verb's object-phrase pulls in its verb context. Sky (object of 'looked to') pulls 'looked'. Her (inside saw's object phrase) pulls 'saw'. Blue pulls BOTH 'saw' (its verb directly) AND 'her' (which has already absorbed saw's context via the previous-token pass) — when multiple tokens match the rule, attention pulls all of them.",
     heads: [
       {
         id: "verb-of-object",
         label: "Find what verb acts on this",
-        description: "Rule: a word within a verb's object-phrase pulls in its verb context — either the verb itself, or a nearby noun that has already absorbed the verb. Click 'sky', 'her', or 'blue' to see each token's binding.",
+        description: "Rule: a word within a verb's object-phrase pulls in its verb context. When multiple nearby tokens carry the verb's context (the verb itself, or a noun that already absorbed it), attention pulls all of them, weighted. Click 'sky', 'her', or 'blue' to see each token's bindings.",
         kind: "content",
       },
     ],
@@ -691,7 +691,7 @@ const tokens: ExampleData["tokens"] = [
       L2: "The color blue. It modifies a thing. The thing belongs to her.",
       L3: "The color blue. It modifies a thing. The thing belongs to her.",
       L4: "The color blue. It modifies a thing. The thing belongs to her. 'Her' is the astronaut. An astronaut is a human trained to travel in space. The astronaut is currently on Mars.",
-      L5: "The color blue. It modifies a thing. The thing belongs to her. 'Her' is the astronaut. An astronaut is a human trained to travel in space. The astronaut is currently on Mars. The thing was seen. The seeing happened on Mars and against the Martian sky.",
+      L5: "The color blue. It modifies a thing. The thing belongs to her. 'Her' is the astronaut. An astronaut is a human trained to travel in space. The astronaut is currently on Mars. The thing was the object of an act of seeing. The seeing happened with the eyes, on Mars, against the Martian sky.",
     },
     headCards: {
       L1: {
@@ -724,16 +724,22 @@ const tokens: ExampleData["tokens"] = [
         "verb-of-object": {
           kind: "content",
           inputRep: "The color blue. It modifies a thing. The thing belongs to her. 'Her' is the astronaut. An astronaut is a human trained to travel in space. The astronaut is currently on Mars.",
-          query: "the noun carrying my verb context",
+          query: "the verb context for this thing",
           pulls: [
             {
+              fromTokenIndex: IDX_SAW,
+              key: "the verb whose object this is",
+              value: "A past act of seeing with the eyes. Joins what came before — the previous word is 'and'. Happened on Mars. Mars is another planet in our solar system. Took place against the Martian sky.",
+              weight: 0.5,
+            },
+            {
               fromTokenIndex: IDX_HER,
-              key: "the noun carrying my verb context",
+              key: "the noun next to me that carries the verb's context",
               value: "A feminine possessive pronoun. The owner of whatever was seen. The scene is on Mars. The backdrop is the Martian sky. 'Her' refers to the astronaut. An astronaut is a human trained to travel in space. The astronaut is currently on Mars. The act of seeing happened on Mars and against the Martian sky.",
-              weight: 1.0,
+              weight: 0.5,
             },
           ],
-          contribution: "blue re-pulls 'her' — but now her carries the seeing/Mars/sky context, so blue absorbs it all in one shot",
+          contribution: "blue pulls both saw (the verb directly) and her (which already carries the verb's context). Combining them gives blue everything about the seeing without needing saw to know its own subject.",
         },
       },
     },
