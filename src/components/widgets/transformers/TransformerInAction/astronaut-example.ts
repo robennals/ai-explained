@@ -691,7 +691,7 @@ const tokens: ExampleData["tokens"] = [
       L2: "the color blue, modifying something that belongs to 'her'",
       L3: "the color blue, modifying something that belongs to 'her'",
       L4: "the color blue, modifying a thing that belongs to her — the astronaut (a specific human trained to travel in space, currently on Mars, another planet in Earth's solar system)",
-      L5: "the color blue, modifying a thing that belongs to her (the astronaut, currently on Mars — another planet in Earth's solar system); that thing is the object of an act of seeing with the eyes, happening on Mars and against the visual backdrop of the Martian sky; her home, which by all this context is the other blue planet in this same solar system",
+      L5: "the color blue, modifying a thing that belongs to her (the astronaut, currently on Mars — another planet in Earth's solar system); that thing is the object of an act of seeing with the eyes, happening on Mars and against the visual backdrop of the Martian sky",
     },
     headCards: {
       L1: {
