@@ -84,10 +84,6 @@ function weightedSum(weights: number[], values: number[][]): number[] {
 /*  Formatting                                                        */
 /* ------------------------------------------------------------------ */
 
-function vecF(v: number[]): string {
-  return `[${v.map((n) => n.toFixed(2)).join(", ")}]`;
-}
-
 function pct(n: number): string {
   if (n > 0.995) return "100%";
   if (n < 0.005) return "≈0%";

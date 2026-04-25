@@ -7,7 +7,6 @@ import { WidgetTabs } from "../shared/WidgetTabs";
 // --- Animal data (same as AnimalPropertyExplorer) ---
 
 const PROPERTIES = ["big", "scary", "hairy", "cuddly", "fast", "fat"] as const;
-type Property = (typeof PROPERTIES)[number];
 
 interface Animal {
   name: string;
@@ -146,11 +145,10 @@ function MeasurementArrow({ x1, y1, x2, y2, color }: { x1: number; y1: number; x
 
 function MeasurementLines({
   tipX, tipY, vx, vy, color,
-  otherTipX, otherTipY, xOffset, yOffset,
+  xOffset, yOffset,
 }: {
   tipX: number; tipY: number; vx: number; vy: number;
   color: string;
-  otherTipX: number; otherTipY: number;
   xOffset: number; yOffset: number;
 }) {
   // Fixed L-shape: horizontal along x-axis, then vertical to tip.
@@ -291,7 +289,7 @@ function ArrowsTab() {
             return (
               <g key={id}>
                 {id === topVector && (
-                  <MeasurementLines tipX={tipX} tipY={tipY} vx={vx} vy={vy} color={color} otherTipX={0} otherTipY={0} xOffset={MEASUREMENT_OFFSET} yOffset={MEASUREMENT_OFFSET} />
+                  <MeasurementLines tipX={tipX} tipY={tipY} vx={vx} vy={vy} color={color} xOffset={MEASUREMENT_OFFSET} yOffset={MEASUREMENT_OFFSET} />
                 )}
                 <line x1={CX} y1={CY} x2={tipX} y2={tipY} stroke={color} strokeWidth={3} />
                 <Arrowhead x={tipX} y={tipY} angle={Math.atan2(tipY - CY, tipX - CX)} color={color} />

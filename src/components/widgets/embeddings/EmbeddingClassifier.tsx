@@ -28,11 +28,6 @@ function outputColorRGB(v: number): [number, number, number] {
   }
 }
 
-function outputColor(v: number): string {
-  const [r, g, b] = outputColorRGB(v);
-  return `rgb(${r},${g},${b})`;
-}
-
 function forward1(x: number, y: number, w1: number, w2: number, b: number): number {
   return sigmoid(w1 * x + w2 * y + b);
 }

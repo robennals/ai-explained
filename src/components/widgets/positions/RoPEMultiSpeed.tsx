@@ -184,7 +184,7 @@ export function RoPEMultiSpeed() {
         return `${i === 0 ? "M" : "L"} ${x} ${y}`;
       })
       .join(" ");
-  }, [curvePoints, plotW, plotH, curveMin, curveRange]);
+  }, [curvePoints, plotW, plotH, curveMin, curveRange, pad.left, pad.top]);
 
   // Per-pair contribution curves (faint)
   const pairCurves = useMemo(() => {
@@ -200,7 +200,7 @@ export function RoPEMultiSpeed() {
       }
       return pts.join(" ");
     });
-  }, [weights, plotW, plotH, curveMin, curveRange]);
+  }, [weights, plotW, plotH, curveMin, curveRange, pad.left, pad.top]);
 
   // Bar chart
   const barChartH = 100;

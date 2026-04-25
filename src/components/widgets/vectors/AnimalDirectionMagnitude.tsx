@@ -307,7 +307,7 @@ export function AnimalDirectionMagnitude() {
       setAngle(newAngle);
       setMagnitude(Math.min(Math.max(0.1, mag), sliderMax));
     }
-  }, [originX, originY, centered, sliderMax]);
+  }, [originX, originY, centered, sliderMax, UNIT_PX]);
 
   const handleSvgPointerMove = useCallback((e: React.PointerEvent) => {
     if (!dragRef.current) return;

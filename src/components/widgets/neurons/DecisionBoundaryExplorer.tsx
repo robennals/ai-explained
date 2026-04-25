@@ -25,6 +25,13 @@ const POINTS: [number, number][] = [
 
 type GateName = "AND" | "OR" | "NOT" | "NAND" | "XOR";
 
+const GATE_PRESETS: Record<string, { w1: number; w2: number; bias: number }> = {
+  AND:  { w1: 0.7, w2: 0.7, bias: -0.9 },
+  OR:   { w1: 0.7, w2: 0.7, bias: -0.3 },
+  NOT:  { w1: -0.7, w2: 0.0, bias: 0.35 },
+  NAND: { w1: -0.7, w2: -0.7, bias: 0.9 },
+};
+
 const GATE_TARGETS: Record<GateName, number[]> = {
   AND: [0, 0, 0, 1],
   OR: [0, 1, 1, 1],
@@ -162,14 +169,6 @@ export function DecisionBoundaryExplorer() {
     }
     return solved;
   }, [pointOutputs]);
-
-  // Gate presets: weights and bias that solve each gate
-  const GATE_PRESETS: Record<string, { w1: number; w2: number; bias: number }> = {
-    AND:  { w1: 0.7, w2: 0.7, bias: -0.9 },
-    OR:   { w1: 0.7, w2: 0.7, bias: -0.3 },
-    NOT:  { w1: -0.7, w2: 0.0, bias: 0.35 },
-    NAND: { w1: -0.7, w2: -0.7, bias: 0.9 },
-  };
 
   const applyGatePreset = useCallback((gate: string) => {
     const p = GATE_PRESETS[gate];

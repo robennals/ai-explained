@@ -168,7 +168,7 @@ export function NeuronPlayground() {
   const [bias, setBias] = useState(GATE_SOLUTIONS.AND.bias);
   const [, setIsAnimating] = useState(false);
   const [animatingTo, setAnimatingTo] = useState<GateName | null>(null);
-  const [visitedGates, setVisitedGates] = useState<Set<GateName>>(() => new Set(["AND"]));
+  const [, setVisitedGates] = useState<Set<GateName>>(() => new Set(["AND"]));
   const animRef = useRef<number>(0);
 
   // Cleanup animation on unmount
