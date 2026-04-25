@@ -99,4 +99,11 @@ test.describe("Transformers chapter — A Transformer At a Glance widget", () =>
     // Title contains the layer label.
     await expect(widget.getByText("Resolve pronouns", { exact: false }).first()).toBeVisible();
   });
+
+  test("clicking the 'Resolve pronouns' label shows the layer summary", async ({ page }) => {
+    const widget = page.locator(".widget-container").filter({ hasText: "A Transformer At a Glance" });
+    await widget.getByLabel(/Resolve pronouns — click to see what this layer does/).click();
+    // The popup body matches the layer summary.
+    await expect(widget.getByText("pronoun her looks back to find who she is", { exact: false })).toBeVisible();
+  });
 });

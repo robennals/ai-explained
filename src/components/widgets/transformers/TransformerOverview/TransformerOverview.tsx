@@ -6,7 +6,8 @@ import { astronautExample } from "@/components/widgets/transformers/TransformerI
 import type { LayerId, NonPredictLayerId } from "@/components/widgets/transformers/TransformerInAction/types";
 import { Grid } from "./Grid";
 import { Popup } from "./Popup";
-import { columnX, layerRowY, VIEW_WIDTH, VIEW_HEIGHT } from "./geometry";
+import { columnX, layerRowY, LABEL_GUTTER_RIGHT_X, VIEW_WIDTH, VIEW_HEIGHT } from "./geometry";
+import { LAYER_SUMMARIES } from "./layer-summaries";
 
 interface CellSelection {
   tokenIndex: number;
@@ -77,6 +78,22 @@ export function TransformerOverview() {
     };
   }, [selectedCell]);
 
+  const layerPopup = useMemo(() => {
+    if (!selectedLayer) return null;
+    const layerDef = astronautExample.layers.find((l) => l.id === selectedLayer);
+    const layerLabel = layerDef ? layerDef.label : selectedLayer;
+    return {
+      anchorX: LABEL_GUTTER_RIGHT_X,
+      anchorY: layerRowY(selectedLayer) + 11,
+      title: (
+        <span>
+          {selectedLayer} — {layerLabel}
+        </span>
+      ),
+      body: LAYER_SUMMARIES[selectedLayer],
+    };
+  }, [selectedLayer]);
+
   return (
     <WidgetContainer title="A Transformer At a Glance" onReset={handleReset}>
       <div
@@ -99,6 +116,18 @@ export function TransformerOverview() {
             title={cellPopup.title}
             body={cellPopup.body}
             onClose={() => setSelectedCell(null)}
+          />
+        )}
+        {layerPopup && (
+          <Popup
+            anchorX={layerPopup.anchorX}
+            anchorY={layerPopup.anchorY}
+            pointerDirection="above"
+            viewWidth={VIEW_WIDTH}
+            viewHeight={VIEW_HEIGHT}
+            title={layerPopup.title}
+            body={layerPopup.body}
+            onClose={() => setSelectedLayer(null)}
           />
         )}
       </div>
