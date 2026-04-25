@@ -89,4 +89,14 @@ test.describe("Transformers chapter — A Transformer At a Glance widget", () =>
     // Predict output box.
     await expect(widget.getByText("(top guess)")).toBeVisible();
   });
+
+  test("clicking 'her' at L3 shows the resolved-pronoun rep", async ({ page }) => {
+    const widget = page.locator(".widget-container").filter({ hasText: "A Transformer At a Glance" });
+    // Click the 'her' cell on the L3 row. Cells are aria-labeled "her at L3".
+    await widget.getByLabel("her at L3").click();
+    // Popup body contains the L3 rep text.
+    await expect(widget.getByText("Her' refers to the astronaut", { exact: false })).toBeVisible();
+    // Title contains the layer label.
+    await expect(widget.getByText("Resolve pronouns", { exact: false }).first()).toBeVisible();
+  });
 });
