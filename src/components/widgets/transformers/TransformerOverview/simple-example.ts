@@ -7,6 +7,11 @@ import type { LayerId } from "@/components/widgets/transformers/TransformerInAct
 
 export interface OverviewToken {
   token: string;
+  /**
+   * Very short phrase showing what this token's vector "means" after each layer.
+   * Keyed by layer id; only L0/L1/L2 are populated for this widget.
+   */
+  reps: Record<"L0" | "L1" | "L2", string>;
 }
 
 export interface OverviewAttentionPull {
@@ -29,14 +34,16 @@ export interface OverviewExample {
   layers: OverviewLayer[];
   /** Top-k next-word predictions shown on the Predict cell. */
   predictions: { token: string; probability: number }[];
+  /** Short text shown in the rep-box when the Predict cell is selected. */
+  predictRep: string;
 }
 
 // Token indices: 0=the, 1=dog, 2=chased, 3=its
 const tokens: OverviewToken[] = [
-  { token: "the" },
-  { token: "dog" },
-  { token: "chased" },
-  { token: "its" },
+  { token: "the",    reps: { L0: "the",    L1: "the",               L2: "the" } },
+  { token: "dog",    reps: { L0: "a dog",  L1: "a specific dog",    L2: "a specific dog" } },
+  { token: "chased", reps: { L0: "chased", L1: "chased by a dog",   L2: "chased by a dog" } },
+  { token: "its",    reps: { L0: "its",    L1: "chased by it",      L2: "chased by a specific dog" } },
 ];
 
 const layers: OverviewLayer[] = [
@@ -68,4 +75,5 @@ export const simpleOverviewExample: OverviewExample = {
     { token: "owner", probability: 0.21 },
     { token: "leash", probability: 0.11 },
   ],
+  predictRep: "tail",
 };

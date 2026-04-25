@@ -48,6 +48,37 @@ export function TransformerOverview() {
     return () => window.removeEventListener("keydown", onKey);
   }, [selectedCell, selectedLayer, closeAll]);
 
+  const repBox = useMemo(() => {
+    if (!selectedCell) {
+      return { label: null as string | null, body: "Click any word-cell to see what it means at that layer." };
+    }
+    const tokIndex = selectedCell.tokenIndex;
+    const tok = simpleOverviewExample.tokens[tokIndex];
+    const layer = selectedCell.layer;
+    const layerDef = simpleOverviewExample.layers.find((l) => l.id === layer);
+    const layerLabel = layerDef ? layerDef.label : layer;
+    const headerLeft = `${tok.token}`;
+    const headerRight = `${layer}${layer !== "L0" && layer !== "Predict" ? ` · ${layerLabel}` : ""}`;
+    if (layer === "Predict") {
+      return {
+        label: `${headerLeft} → predicted next word`,
+        body: simpleOverviewExample.predictRep,
+      };
+    }
+    if (layer === "L0") {
+      return { label: `${headerLeft} · ${headerRight}`, body: tok.reps.L0 };
+    }
+    // L1 or L2: show prev → new if changed, else just the rep.
+    const layerKey = layer as "L1" | "L2";
+    const prevKey = layerKey === "L1" ? "L0" : "L1";
+    const prev = tok.reps[prevKey];
+    const now = tok.reps[layerKey];
+    if (prev === now) {
+      return { label: `${headerLeft} · ${headerRight}`, body: now };
+    }
+    return { label: `${headerLeft} · ${headerRight}`, body: `${prev} → ${now}` };
+  }, [selectedCell]);
+
   const layerPopup = useMemo(() => {
     if (!selectedLayer) return null;
     const layerDef = simpleOverviewExample.layers.find((l) => l.id === selectedLayer);
@@ -110,6 +141,17 @@ export function TransformerOverview() {
             onClose={() => setSelectedLayer(null)}
           />
         )}
+      </div>
+      <div
+        className="mt-4 rounded-md border border-foreground/10 bg-foreground/[0.03] px-4 py-3 text-sm"
+        aria-live="polite"
+      >
+        {repBox.label ? (
+          <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted">
+            {repBox.label}
+          </div>
+        ) : null}
+        <div className="text-foreground">{repBox.body}</div>
       </div>
     </WidgetContainer>
   );

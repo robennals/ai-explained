@@ -99,6 +99,22 @@ test.describe("Transformers chapter — A Transformer At a Glance widget", () =>
     await expect(widget.getByLabel("its at L1")).toHaveAttribute("stroke", "#d97706");
   });
 
+  test("clicking 'its' at L2 shows the rep transformation in the bottom box", async ({ page }) => {
+    const widget = page.locator(".widget-container").filter({ hasText: "A Transformer At a Glance" });
+    await widget.getByLabel("its at L2").click();
+    // The bottom rep-box renders the prev → new transformation.
+    await expect(widget.getByText("chased by it → chased by a specific dog")).toBeVisible();
+  });
+
+  test("clicking the Predict cell shows the predicted word in the bottom box", async ({ page }) => {
+    const widget = page.locator(".widget-container").filter({ hasText: "A Transformer At a Glance" });
+    await widget.getByLabel(/Predict next word: tail/).click();
+    // The bottom rep box header references the prediction; body is 'tail'.
+    await expect(widget.getByText("its → predicted next word", { exact: false })).toBeVisible();
+    // 'tail' appears both in the predict cell AND the rep box now; assert one is in the rep box specifically by checking for it inside the lower text region.
+    await expect(widget.getByText("tail", { exact: true }).nth(1)).toBeVisible();
+  });
+
   test("clicking the 'Resolve pronouns' label shows the layer summary", async ({ page }) => {
     const widget = page.locator(".widget-container").filter({ hasText: "A Transformer At a Glance" });
     await widget.getByLabel(/Resolve pronouns — click to see what this layer does/).click();
