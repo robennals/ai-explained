@@ -3,17 +3,17 @@
 
 import type { LayerId, NonPredictLayerId } from "@/components/widgets/transformers/TransformerInAction/types";
 
-export const CELL_WIDTH = 50;
-export const CELL_HEIGHT = 22;
-export const COL_GAP = 4;
-export const COL_STRIDE = CELL_WIDTH + COL_GAP; // 54
+export const CELL_WIDTH = 100;
+export const CELL_HEIGHT = 36;
+export const COL_GAP = 8;
+export const COL_STRIDE = CELL_WIDTH + COL_GAP; // 108
 
-export const LABEL_GUTTER_RIGHT_X = 120; // right edge of the left gutter where layer labels are anchored
-export const FIRST_COL_X = 140; // left gutter for layer labels = 0..120
-export const ROW_GAP = 65; // vertical distance between consecutive layer rows
+export const LABEL_GUTTER_RIGHT_X = 175;
+export const FIRST_COL_X = 195;
+export const ROW_GAP = 80;
 
 // Bottom row (L0) sits at this y. Layers stack upward.
-export const L0_Y = 430;
+export const L0_Y = 520;
 
 // Layer order from bottom to top, indexed by row from L0..L6.
 export const LAYER_ORDER: LayerId[] = ["L0", "L1", "L2", "L3", "L4", "L5", "Predict"];
@@ -49,24 +49,21 @@ export function previousLayer(layer: LayerId): LayerId | null {
 export const CELL_ROW_LAYERS: LayerId[] = LAYER_ORDER.filter((l) => l !== "Predict");
 
 /**
- * Layout for the small "→ planet" output box at the top right of the grid.
- * Fixed to the right edge of the viewBox, inside the Predict row's vertical band.
+ * Layout for the small "next-word guess" output box at the top right of the grid.
+ * Sits to the right of the Predict cell (which is on the last token's column at the
+ * Predict row), aligned vertically with that cell.
  */
 export const PREDICT_BOX = {
-  x: 858,
-  y: 34,
-  width: 74,
-  height: 34,
-  /** Inbound arrow line: from the right edge of the Predict cell into the box. */
-  arrow: { fromX: 838, toX: 858, y: 51 },
-  /** Center x for the box's text labels. */
-  textCenterX: 895,
-  /** Y of the main token label (top guess). */
-  tokenY: 48,
-  /** Y of the small "(top guess)" subtitle. */
-  subtitleY: 60,
+  x: 770,
+  y: 36,
+  width: 130,
+  height: 44,
+  arrow: { fromX: 727, toX: 770, y: 58 },
+  textCenterX: 835,
+  tokenY: 56,
+  subtitleY: 72,
 } as const;
 
-// View box. The right padding leaves room for the predict output box.
-export const VIEW_WIDTH = 940;
-export const VIEW_HEIGHT = 460;
+// View box. Includes margin around the grid + room for the predict output box on the right.
+export const VIEW_WIDTH = 920;
+export const VIEW_HEIGHT = 580;

@@ -20,7 +20,9 @@ This looks a lot like a regular neural network — boxes in layers, weighted edg
 
 ## A Transformer In Action
 
-Theory is one thing. Watching it actually work is another. The playground below is the same five layers as above, on the same sentence — but now you can see the **actual representation** the model carries for each word, written as plain English. Click a layer to step through; click a word to see exactly which earlier words contributed and what they added.
+The picture above showed the *shape* of the wiring — words sitting in rows, layers stacked above, attention flowing between them. What it didn't show is what each cell actually *means*. The playground below fills that in. Every box now carries the model's understanding of that word at that layer, written out in plain English, so you can watch the meaning of each word grow richer as the layers stack up — pulling in context, resolving pronouns, binding objects to verbs — until the last word knows enough to predict what comes next.
+
+Click a layer to step through; click a word to see exactly which earlier words contributed and what they added.
 
 <TransformerInActionWidget>
 Click **Next layer** to step through, or jump to any layer in the strip above the passage. **Previous-token** gives every word a copy of its predecessor. **Place in the scene** ties words to scene-locations. **Resolve pronouns** wires *her* to the astronaut. **Previous-token** (again) lets *blue* re-pull *her* with all the new context. **Find what verb acts on this** binds objects to their verbs. Click **Predict** to see the top guesses for the next word.

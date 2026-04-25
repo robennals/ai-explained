@@ -65,7 +65,7 @@ export function Grid({ selectedCell, selectedLayer, sourceCells, onCellClick, on
       {LAYER_ORDER.slice().reverse().filter((layer) => presentLayerIds.has(layer)).map((layer) => {
         const layerDef = simpleOverviewExample.layers.find((l) => l.id === layer);
         const label = layerDef ? layerDef.label : "Tokens";
-        const y = layerRowY(layer) + 16;
+        const y = layerRowY(layer) + 22;
         const isSelected = selectedLayer === layer;
         return (
           <g key={`label-${layer}`}>
@@ -73,7 +73,7 @@ export function Grid({ selectedCell, selectedLayer, sourceCells, onCellClick, on
               x={LABEL_GUTTER_RIGHT_X}
               y={y}
               textAnchor="end"
-              fontSize={11}
+              fontSize={14}
               fontWeight={layer === "L0" ? 600 : 400}
               fill={isSelected ? "#92400e" : "#374151"}
               style={{ cursor: "pointer" }}
@@ -85,7 +85,7 @@ export function Grid({ selectedCell, selectedLayer, sourceCells, onCellClick, on
             >
               {label}
             </text>
-            <text x={LABEL_GUTTER_RIGHT_X} y={y + 12} textAnchor="end" fontSize={9} fill="#9ca3af">
+            <text x={LABEL_GUTTER_RIGHT_X} y={y + 14} textAnchor="end" fontSize={11} fill="#9ca3af">
               {layer}
             </text>
           </g>
@@ -166,9 +166,9 @@ export function Grid({ selectedCell, selectedLayer, sourceCells, onCellClick, on
               />
               <text
                 x={columnX(i)}
-                y={layerRowY(layer) + 16}
+                y={layerRowY(layer) + 23}
                 textAnchor="middle"
-                fontSize={10}
+                fontSize={15}
                 fontWeight={isInputRow || isSelected ? 600 : 400}
                 fill={isSelected ? "#92400e" : isInputRow ? "#1e3a8a" : "#374151"}
                 pointerEvents="none"
@@ -199,9 +199,9 @@ export function Grid({ selectedCell, selectedLayer, sourceCells, onCellClick, on
       />
       <text
         x={columnX(lastIdx)}
-        y={layerRowY("Predict") + 15}
+        y={layerRowY("Predict") + 22}
         textAnchor="middle"
-        fontSize={9}
+        fontSize={12}
         fontWeight={700}
         fill="#1e3a8a"
         pointerEvents="none"
@@ -211,10 +211,10 @@ export function Grid({ selectedCell, selectedLayer, sourceCells, onCellClick, on
 
       {/* Predict output box */}
       <rect x={PREDICT_BOX.x} y={PREDICT_BOX.y} width={PREDICT_BOX.width} height={PREDICT_BOX.height} rx={6} fill="#bfdbfe" stroke="#1d4ed8" />
-      <text x={PREDICT_BOX.textCenterX} y={PREDICT_BOX.tokenY} textAnchor="middle" fontSize={10} fontWeight={700} fill="#1e3a8a">
+      <text x={PREDICT_BOX.textCenterX} y={PREDICT_BOX.tokenY} textAnchor="middle" fontSize={14} fontWeight={700} fill="#1e3a8a">
         {simpleOverviewExample.predictions[0]?.token ?? "?"}
       </text>
-      <text x={PREDICT_BOX.textCenterX} y={PREDICT_BOX.subtitleY} textAnchor="middle" fontSize={9} fill="#1e3a8a">
+      <text x={PREDICT_BOX.textCenterX} y={PREDICT_BOX.subtitleY} textAnchor="middle" fontSize={11} fill="#1e3a8a">
         (top guess)
       </text>
       <line x1={PREDICT_BOX.arrow.fromX} y1={PREDICT_BOX.arrow.y} x2={PREDICT_BOX.arrow.toX} y2={PREDICT_BOX.arrow.y} stroke="#1d4ed8" strokeWidth={2} markerEnd="url(#ov-att)" />
