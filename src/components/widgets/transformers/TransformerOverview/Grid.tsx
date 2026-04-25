@@ -1,0 +1,200 @@
+"use client";
+
+import { astronautExample } from "@/components/widgets/transformers/TransformerInAction/astronaut-example";
+import type { LayerId } from "@/components/widgets/transformers/TransformerInAction/types";
+import { overviewEdges } from "./edges";
+import {
+  CELL_HEIGHT,
+  CELL_WIDTH,
+  LABEL_GUTTER_RIGHT_X,
+  LAYER_ORDER,
+  VIEW_HEIGHT,
+  VIEW_WIDTH,
+  columnLeft,
+  columnX,
+  layerRowY,
+  previousLayer,
+} from "./geometry";
+
+const ATT_COLOR = "#2563eb";
+const RES_COLOR = "#ea580c";
+const NON_PREDICT_LAYERS_INCL_L0: LayerId[] = ["L0", "L1", "L2", "L3", "L4", "L5"];
+
+interface GridProps {
+  selectedCell: { tokenIndex: number; layer: LayerId } | null;
+  selectedLayer: LayerId | null;
+  onCellClick: (tokenIndex: number, layer: LayerId) => void;
+  onLayerLabelClick: (layer: LayerId) => void;
+}
+
+export function Grid({ selectedCell, selectedLayer, onCellClick, onLayerLabelClick }: GridProps) {
+  const tokens = astronautExample.tokens;
+  const lastIdx = tokens.length - 1;
+
+  return (
+    <svg
+      viewBox={`0 0 ${VIEW_WIDTH} ${VIEW_HEIGHT}`}
+      className="block w-full max-w-[960px] mx-auto"
+      role="img"
+      aria-label="Stacked transformer layers showing attention and residual edges across the astronaut sentence."
+    >
+      <defs>
+        <marker id="ov-att" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill={ATT_COLOR} />
+        </marker>
+        <marker id="ov-res" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill={RES_COLOR} />
+        </marker>
+      </defs>
+
+      {/* Layer labels in the left gutter */}
+      {LAYER_ORDER.slice().reverse().map((layer) => {
+        const layerDef = astronautExample.layers.find((l) => l.id === layer);
+        const label = layerDef ? layerDef.label : "Tokens";
+        const y = layerRowY(layer) + 16;
+        const isSelected = selectedLayer === layer;
+        return (
+          <g key={`label-${layer}`}>
+            <text
+              x={LABEL_GUTTER_RIGHT_X}
+              y={y}
+              textAnchor="end"
+              fontSize={11}
+              fontWeight={layer === "L0" ? 600 : 400}
+              fill={isSelected ? "#92400e" : "#374151"}
+              style={{ cursor: "pointer" }}
+              onClick={() => onLayerLabelClick(layer)}
+              role="button"
+              tabIndex={0}
+              aria-label={`${label} — click to see what this layer does`}
+            >
+              {label}
+            </text>
+            <text x={LABEL_GUTTER_RIGHT_X} y={y + 12} textAnchor="end" fontSize={9} fill="#9ca3af">
+              {layer}
+            </text>
+          </g>
+        );
+      })}
+
+      {/* Residual edges */}
+      {overviewEdges.residuals.map((e, i) => {
+        const x = columnX(e.tokenIndex);
+        const yEnd = layerRowY(e.toLayer) + CELL_HEIGHT + 1; // arrow tip at bottom of consumer cell
+        const fromLayer = previousLayer(e.toLayer);
+        if (!fromLayer) return null;
+        const yStart = layerRowY(fromLayer); // top of source cell
+        return (
+          <line
+            key={`res-${i}`}
+            x1={x}
+            y1={yStart}
+            x2={x}
+            y2={yEnd}
+            stroke={RES_COLOR}
+            strokeWidth={1.8}
+            markerEnd="url(#ov-res)"
+          />
+        );
+      })}
+
+      {/* Attention edges */}
+      {overviewEdges.attention.map((e, i) => {
+        const xFrom = columnX(e.fromTokenIndex);
+        const xTo = columnX(e.toTokenIndex);
+        const fromLayer = previousLayer(e.toLayer);
+        if (!fromLayer) return null;
+        const yStart = layerRowY(fromLayer);
+        const yEnd = layerRowY(e.toLayer) + CELL_HEIGHT + 1;
+        const yMid = (yStart + yEnd) / 2 - 8;
+        const path = `M ${xFrom} ${yStart} C ${xFrom} ${yMid}, ${xTo} ${yMid}, ${xTo} ${yEnd}`;
+        return (
+          <path
+            key={`att-${i}`}
+            d={path}
+            stroke={ATT_COLOR}
+            strokeWidth={Math.max(1, e.weight * 2.4)}
+            fill="none"
+            markerEnd="url(#ov-att)"
+          />
+        );
+      })}
+
+      {/* Cells (L0..L5) */}
+      {NON_PREDICT_LAYERS_INCL_L0.map((layer) =>
+        tokens.map((tok, i) => {
+          const isSelected = selectedCell?.tokenIndex === i && selectedCell?.layer === layer;
+          const isInputRow = layer === "L0";
+          return (
+            <g key={`cell-${layer}-${i}`}>
+              <rect
+                x={columnLeft(i)}
+                y={layerRowY(layer)}
+                width={CELL_WIDTH}
+                height={CELL_HEIGHT}
+                rx={4}
+                fill={isSelected ? "#fde68a" : isInputRow ? "#eef2ff" : "#fafafa"}
+                stroke={isSelected ? "#b45309" : isInputRow ? "#c7d2fe" : "#d1d5db"}
+                strokeWidth={isSelected ? 2 : 1}
+                style={{ cursor: "pointer" }}
+                onClick={() => onCellClick(i, layer)}
+                role="button"
+                tabIndex={0}
+                aria-label={`${tok.token} at ${layer}`}
+              />
+              <text
+                x={columnX(i)}
+                y={layerRowY(layer) + 16}
+                textAnchor="middle"
+                fontSize={10}
+                fontWeight={isInputRow || isSelected ? 600 : 400}
+                fill={isSelected ? "#92400e" : isInputRow ? "#1e3a8a" : "#374151"}
+                pointerEvents="none"
+              >
+                {tok.token}
+              </text>
+            </g>
+          );
+        })
+      )}
+
+      {/* Predict cell (last token's column only) */}
+      <rect
+        x={columnLeft(lastIdx)}
+        y={layerRowY("Predict")}
+        width={CELL_WIDTH}
+        height={CELL_HEIGHT}
+        rx={4}
+        fill={selectedCell?.layer === "Predict" ? "#fde68a" : "#dbeafe"}
+        stroke={selectedCell?.layer === "Predict" ? "#b45309" : "#2563eb"}
+        strokeWidth={1.5}
+        style={{ cursor: "pointer" }}
+        onClick={() => onCellClick(lastIdx, "Predict")}
+        role="button"
+        tabIndex={0}
+        aria-label={`Predict cell at ${tokens[lastIdx].token}`}
+      />
+      <text
+        x={columnX(lastIdx)}
+        y={layerRowY("Predict") + 15}
+        textAnchor="middle"
+        fontSize={9}
+        fontWeight={700}
+        fill="#1e3a8a"
+        pointerEvents="none"
+      >
+        → next
+      </text>
+
+      {/* Predict output box */}
+      <rect x={858} y={34} width={74} height={34} rx={6} fill="#bfdbfe" stroke="#1d4ed8" />
+      <text x={895} y={48} textAnchor="middle" fontSize={10} fontWeight={700} fill="#1e3a8a">
+        {astronautExample.predictions[0]?.token ?? "?"}
+      </text>
+      <text x={895} y={60} textAnchor="middle" fontSize={9} fill="#1e3a8a">
+        (top guess)
+      </text>
+      <line x1={838} y1={51} x2={858} y2={51} stroke="#1d4ed8" strokeWidth={2} markerEnd="url(#ov-att)" />
+    </svg>
+  );
+}

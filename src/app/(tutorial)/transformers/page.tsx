@@ -12,6 +12,7 @@ import {
   PrefixAttentionWidget,
   TransformerInActionWidget,
   VectorSubspaceFigWidget,
+  TransformerOverviewWidget,
 } from "./widgets";
 
 export const metadata = {
@@ -38,6 +39,7 @@ export default function Chapter09() {
             PrefixAttentionWidget,
             TransformerInActionWidget,
             VectorSubspaceFigWidget,
+            TransformerOverviewWidget,
           }}
         />
       </div>

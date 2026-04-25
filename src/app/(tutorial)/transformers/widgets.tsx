@@ -92,6 +92,14 @@ const VectorSubspaceFig = dynamic(
   { ssr: false }
 );
 
+const TransformerOverview = dynamic(
+  () =>
+    import("@/components/widgets/transformers/TransformerOverview").then(
+      (m) => m.TransformerOverview
+    ),
+  { ssr: false }
+);
+
 function WidgetSlot({
   children,
   tryIt,
@@ -232,6 +240,18 @@ export function TransformerInActionWidget({
   return (
     <WidgetSlot tryIt={children} label="Explore it">
       <TransformerInAction />
+    </WidgetSlot>
+  );
+}
+
+export function TransformerOverviewWidget({
+  children,
+}: {
+  children?: React.ReactNode;
+}) {
+  return (
+    <WidgetSlot tryIt={children} label="Explore it">
+      <TransformerOverview />
     </WidgetSlot>
   );
 }
