@@ -3,13 +3,6 @@ import { getAdjacentChapters } from "@/lib/curriculum";
 import Content from "./content.mdx";
 import {
   TransformerBlockDiagramWidget,
-  ResidualConnectionWidget,
-  LayerNormWidget,
-  MicroTransformerWidget,
-  DepthComparisonWidget,
-  LiveTransformerWidget,
-  TransformerXRayWidget,
-  PrefixAttentionWidget,
   TransformerInActionWidget,
   VectorSubspaceFigWidget,
   TransformerOverviewWidget,
@@ -30,13 +23,6 @@ export default function Chapter09() {
         <Content
           components={{
             TransformerBlockDiagramWidget,
-            ResidualConnectionWidget,
-            LayerNormWidget,
-            MicroTransformerWidget,
-            DepthComparisonWidget,
-            LiveTransformerWidget,
-            TransformerXRayWidget,
-            PrefixAttentionWidget,
             TransformerInActionWidget,
             VectorSubspaceFigWidget,
             TransformerOverviewWidget,
