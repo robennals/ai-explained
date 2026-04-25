@@ -28,6 +28,10 @@ No forward references. Only uses `torch.tensor`, basic arithmetic, and matplotli
 | `nn.BCELoss` | Chapter 6 (loss functions) | Described as "loss function for yes/no problems" |
 | `torch.optim.SGD` | Chapter 2 (gradient descent) | Described as "does the step-downhill part automatically" |
 
+### vectors.ipynb
+
+No forward references. Uses `torch.tensor`, `torch.dot`, basic arithmetic, and `torch.sigmoid` — all covered in earlier chapters or the PyTorch appendix. Assumes appendix-level tensor familiarity.
+
 ### embeddings.ipynb
 
 | Concept | Where explained | Notebook explanation |
