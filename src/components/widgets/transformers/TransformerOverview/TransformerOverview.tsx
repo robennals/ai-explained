@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { WidgetContainer } from "@/components/widgets/shared/WidgetContainer";
 import { astronautExample } from "@/components/widgets/transformers/TransformerInAction/astronaut-example";
 import type { LayerId, NonPredictLayerId } from "@/components/widgets/transformers/TransformerInAction/types";
@@ -31,6 +31,20 @@ export function TransformerOverview() {
     setSelectedCell(null);
     setSelectedLayer(null);
   }, []);
+
+  const closeAll = useCallback(() => {
+    setSelectedCell(null);
+    setSelectedLayer(null);
+  }, []);
+
+  useEffect(() => {
+    if (!selectedCell && !selectedLayer) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeAll();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [selectedCell, selectedLayer, closeAll]);
 
   const cellPopup = useMemo(() => {
     if (!selectedCell) return null;
@@ -65,7 +79,10 @@ export function TransformerOverview() {
 
   return (
     <WidgetContainer title="A Transformer At a Glance" onReset={handleReset}>
-      <div className="relative overflow-x-auto">
+      <div
+        className="relative overflow-x-auto mx-auto max-w-[960px]"
+        onClick={(e) => { if (e.target === e.currentTarget) closeAll(); }}
+      >
         <Grid
           selectedCell={selectedCell}
           selectedLayer={selectedLayer}

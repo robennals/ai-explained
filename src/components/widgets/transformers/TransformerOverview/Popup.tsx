@@ -42,8 +42,8 @@ export function Popup({
     <div
       className="absolute z-10 w-[300px] rounded-lg border border-amber-700 bg-white p-3 text-xs text-foreground shadow-lg"
       style={{ left: `${leftPct}%`, top: `${topPct}%`, transform }}
-      role="dialog"
-      aria-modal="false"
+      role="region"
+      aria-label="Cell details"
     >
       <div className="mb-1 flex items-baseline justify-between">
         <div className="font-semibold text-amber-900">{title}</div>
@@ -58,7 +58,7 @@ export function Popup({
       <div className="leading-relaxed">{body}</div>
       {/* Pointer triangle */}
       <div
-        className="absolute h-3 w-3 rotate-45 border border-amber-700 bg-white"
+        className="absolute h-3 w-3 border border-amber-700 bg-white"
         style={
           pointerDirection === "below"
             ? { left: "50%", bottom: "-7px", transform: "translateX(-50%) rotate(45deg)", borderTop: "none", borderLeft: "none" }
