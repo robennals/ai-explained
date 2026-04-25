@@ -73,3 +73,20 @@ test.describe("Transformers chapter — A Transformer In Action widget", () => {
     await expect(widget.getByRole("button", { name: "Previous-token" }).first()).toHaveAttribute("aria-pressed", "true");
   });
 });
+
+test.describe("Transformers chapter — A Transformer At a Glance widget", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto("/transformers");
+  });
+
+  test("overview widget renders with all 13 token cells in the input row", async ({ page }) => {
+    const widget = page.locator(".widget-container").filter({ hasText: "A Transformer At a Glance" });
+    await expect(widget).toBeVisible();
+    // Spot-check a few token labels — they appear once per row, so the total count is high.
+    await expect(widget.getByText("On", { exact: true }).first()).toBeVisible();
+    await expect(widget.getByText("astronaut", { exact: true }).first()).toBeVisible();
+    await expect(widget.getByText("blue", { exact: true }).first()).toBeVisible();
+    // Predict output box.
+    await expect(widget.getByText("(top guess)")).toBeVisible();
+  });
+});
