@@ -90,20 +90,22 @@ test.describe("Transformers chapter — A Transformer At a Glance widget", () =>
     await expect(widget.getByLabel(/Predict next word: tail/)).toBeVisible();
   });
 
-  test("clicking 'its' at L2 highlights its 'dog' attention source and 'its' residual source on L1", async ({ page }) => {
+  test("clicking 'its' at L2 highlights its three source cells on L1 (dog, chased, and its)", async ({ page }) => {
     const widget = page.locator(".widget-container").filter({ hasText: "A Transformer At a Glance" });
     await widget.getByLabel("its at L2").click();
-    // Attention source: dog at L1 should have the source-cell stroke #d97706.
+    // Two attention sources at L1.
     await expect(widget.getByLabel("dog at L1")).toHaveAttribute("stroke", "#d97706");
-    // Residual source: its at L1 should also have the source-cell stroke.
+    await expect(widget.getByLabel("chased at L1")).toHaveAttribute("stroke", "#d97706");
+    // Plus the residual source (same column, layer below).
     await expect(widget.getByLabel("its at L1")).toHaveAttribute("stroke", "#d97706");
   });
 
   test("clicking 'its' at L2 shows the rep transformation in the bottom box", async ({ page }) => {
     const widget = page.locator(".widget-container").filter({ hasText: "A Transformer At a Glance" });
     await widget.getByLabel("its at L2").click();
-    // The bottom rep-box renders the prev → new transformation.
-    await expect(widget.getByText("chased by it → chased by a specific dog")).toBeVisible();
+    await expect(
+      widget.getByText("chasing something belonging to it → belonging to a specific dog that is chasing")
+    ).toBeVisible();
   });
 
   test("clicking the Predict cell shows the predicted word in the bottom box", async ({ page }) => {

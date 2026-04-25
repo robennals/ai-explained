@@ -40,10 +40,10 @@ export interface OverviewExample {
 
 // Token indices: 0=the, 1=dog, 2=chased, 3=its
 const tokens: OverviewToken[] = [
-  { token: "the",    reps: { L0: "the",    L1: "the",               L2: "the" } },
-  { token: "dog",    reps: { L0: "a dog",  L1: "a specific dog",    L2: "a specific dog" } },
-  { token: "chased", reps: { L0: "chased", L1: "chased by a dog",   L2: "chased by a dog" } },
-  { token: "its",    reps: { L0: "its",    L1: "chased by it",      L2: "chased by a specific dog" } },
+  { token: "the",    reps: { L0: "the",             L1: "the",                               L2: "the" } },
+  { token: "dog",    reps: { L0: "a dog",           L1: "a specific dog",                    L2: "a specific dog" } },
+  { token: "chased", reps: { L0: "chased",          L1: "a dog that is chasing",             L2: "a dog that is chasing" } },
+  { token: "its",    reps: { L0: "belonging to it", L1: "chasing something belonging to it", L2: "belonging to a specific dog that is chasing" } },
 ];
 
 const layers: OverviewLayer[] = [
@@ -61,7 +61,10 @@ const layers: OverviewLayer[] = [
     id: "L2",
     label: "Resolve pronouns",
     attention: [
-      { fromTokenIndex: 1, toTokenIndex: 3, weight: 1.0, headId: "refers" },
+      // its (3) ← dog (1) — picks up the noun "a specific dog"
+      { fromTokenIndex: 1, toTokenIndex: 3, weight: 0.5, headId: "refers" },
+      // its (3) ← chased (2) — picks up the noun via "a dog that is chasing"
+      { fromTokenIndex: 2, toTokenIndex: 3, weight: 0.5, headId: "refers" },
     ],
   },
   { id: "Predict", label: "Predict", attention: [] },
