@@ -106,4 +106,15 @@ test.describe("Transformers chapter — A Transformer At a Glance widget", () =>
     // The popup body matches the layer summary.
     await expect(widget.getByText("pronoun her looks back to find who she is", { exact: false })).toBeVisible();
   });
+
+  test("clicking 'her' at L3 highlights its astronaut and her sources at L2", async ({ page }) => {
+    const widget = page.locator(".widget-container").filter({ hasText: "A Transformer At a Glance" });
+    await widget.getByLabel("her at L3").click();
+    // The astronaut cell at L2 should have the source-cell stroke color #d97706.
+    const astronautAtL2 = widget.getByLabel("astronaut at L2");
+    await expect(astronautAtL2).toHaveAttribute("stroke", "#d97706");
+    // The 'her' cell at L2 (residual source) likewise.
+    const herAtL2 = widget.getByLabel("her at L2");
+    await expect(herAtL2).toHaveAttribute("stroke", "#d97706");
+  });
 });

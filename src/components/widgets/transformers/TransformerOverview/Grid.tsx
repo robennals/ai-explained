@@ -25,11 +25,12 @@ const RES_COLOR = "#ea580c";
 interface GridProps {
   selectedCell: { tokenIndex: number; layer: LayerId } | null;
   selectedLayer: LayerId | null;
+  sourceCells: Set<string>;
   onCellClick: (tokenIndex: number, layer: LayerId) => void;
   onLayerLabelClick: (layer: LayerId) => void;
 }
 
-export function Grid({ selectedCell, selectedLayer, onCellClick, onLayerLabelClick }: GridProps) {
+export function Grid({ selectedCell, selectedLayer, sourceCells, onCellClick, onLayerLabelClick }: GridProps) {
   const tokens = astronautExample.tokens;
   const lastIdx = tokens.length - 1;
 
@@ -136,6 +137,7 @@ export function Grid({ selectedCell, selectedLayer, onCellClick, onLayerLabelCli
       {CELL_ROW_LAYERS.map((layer) =>
         tokens.map((tok, i) => {
           const isSelected = selectedCell?.tokenIndex === i && selectedCell?.layer === layer;
+          const isSourceCell = sourceCells.has(`${layer}:${i}`);
           const isInputRow = layer === "L0";
           return (
             <g key={`cell-${layer}-${i}`}>
@@ -145,12 +147,17 @@ export function Grid({ selectedCell, selectedLayer, onCellClick, onLayerLabelCli
                 width={CELL_WIDTH}
                 height={CELL_HEIGHT}
                 rx={4}
-                fill={isSelected ? "#fde68a" : isInputRow ? "#eef2ff" : "#fafafa"}
-                stroke={isSelected ? "#b45309" : isInputRow ? "#c7d2fe" : "#d1d5db"}
-                strokeWidth={isSelected ? 2 : 1}
+                fill={isSelected ? "#fde68a" : isSourceCell ? "#fef3c7" : isInputRow ? "#eef2ff" : "#fafafa"}
+                stroke={isSelected ? "#b45309" : isSourceCell ? "#d97706" : isInputRow ? "#c7d2fe" : "#d1d5db"}
+                strokeWidth={isSelected ? 2 : isSourceCell ? 1.5 : 1}
                 style={{ cursor: "pointer" }}
                 onClick={() => onCellClick(i, layer)}
-                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onCellClick(i, layer); } }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    onCellClick(i, layer);
+                  }
+                }}
                 role="button"
                 tabIndex={0}
                 aria-label={`${tok.token} at ${layer}`}

@@ -6,8 +6,9 @@ import { astronautExample } from "@/components/widgets/transformers/TransformerI
 import type { LayerId, NonPredictLayerId } from "@/components/widgets/transformers/TransformerInAction/types";
 import { Grid } from "./Grid";
 import { Popup } from "./Popup";
-import { columnX, layerRowY, LABEL_GUTTER_RIGHT_X, VIEW_WIDTH, VIEW_HEIGHT } from "./geometry";
+import { columnX, layerRowY, LABEL_GUTTER_RIGHT_X, VIEW_WIDTH, VIEW_HEIGHT, previousLayer } from "./geometry";
 import { LAYER_SUMMARIES } from "./layer-summaries";
+import { overviewEdges } from "./edges";
 
 interface CellSelection {
   tokenIndex: number;
@@ -94,6 +95,27 @@ export function TransformerOverview() {
     };
   }, [selectedLayer]);
 
+  const sourceCells = useMemo(() => {
+    if (!selectedCell) return new Set<string>();
+    const out = new Set<string>();
+
+    // Residual: the same column on the layer immediately below.
+    const below = previousLayer(selectedCell.layer);
+    if (below) {
+      out.add(`${below}:${selectedCell.tokenIndex}`);
+    }
+
+    // Attention sources at this layer, this column. None for L0 (no consumers) or Predict.
+    if (selectedCell.layer !== "L0" && selectedCell.layer !== "Predict" && below) {
+      for (const e of overviewEdges.attention) {
+        if (e.toLayer === selectedCell.layer && e.toTokenIndex === selectedCell.tokenIndex) {
+          out.add(`${below}:${e.fromTokenIndex}`);
+        }
+      }
+    }
+    return out;
+  }, [selectedCell]);
+
   return (
     <WidgetContainer title="A Transformer At a Glance" onReset={handleReset}>
       <div
@@ -103,6 +125,7 @@ export function TransformerOverview() {
         <Grid
           selectedCell={selectedCell}
           selectedLayer={selectedLayer}
+          sourceCells={sourceCells}
           onCellClick={handleCellClick}
           onLayerLabelClick={handleLayerLabelClick}
         />
