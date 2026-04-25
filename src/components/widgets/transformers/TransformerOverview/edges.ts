@@ -5,6 +5,7 @@ import type {
   LayerId,
   NonPredictLayerId,
 } from "@/components/widgets/transformers/TransformerInAction/types";
+import { NON_PREDICT_LAYERS, LAYER_ORDER } from "./geometry";
 
 export interface ResidualEdge {
   /** Layer this edge enters (the consumer's layer). */
@@ -30,8 +31,6 @@ export interface OverviewEdges {
   residuals: ResidualEdge[];
   attention: AttentionEdge[];
 }
-
-const NON_PREDICT_LAYERS: NonPredictLayerId[] = ["L1", "L2", "L3", "L4", "L5"];
 
 function buildResiduals(data: ExampleData): ResidualEdge[] {
   const out: ResidualEdge[] = [];
@@ -95,10 +94,17 @@ export function validateOverviewEdges(edges: OverviewEdges, data: ExampleData): 
     if (e.weight < 0 || e.weight > 1) {
       errs.push(`attention edge weight out of [0,1]: ${e.weight}`);
     }
+    if (!(NON_PREDICT_LAYERS as string[]).includes(e.toLayer)) {
+      errs.push(`attention edge has unknown toLayer: ${e.toLayer}`);
+    }
   }
   for (const e of edges.residuals) {
     if (e.tokenIndex < 0 || e.tokenIndex >= data.tokens.length) {
-      errs.push(`residual edge tokenIndex out of range: ${e.tokenIndex}`);
+      errs.push(`residual edge at ${e.toLayer} tokenIndex out of range: ${e.tokenIndex}`);
+    }
+    const layerIdx = LAYER_ORDER.indexOf(e.toLayer);
+    if (layerIdx <= 0) {
+      errs.push(`residual edge has invalid toLayer (cannot be L0 or unknown): ${e.toLayer}`);
     }
   }
   if (errs.length > 0) {
