@@ -1,13 +1,16 @@
 "use client";
 
+import type React from "react";
 import { astronautExample } from "@/components/widgets/transformers/TransformerInAction/astronaut-example";
 import type { LayerId } from "@/components/widgets/transformers/TransformerInAction/types";
 import { overviewEdges } from "./edges";
 import {
   CELL_HEIGHT,
+  CELL_ROW_LAYERS,
   CELL_WIDTH,
   LABEL_GUTTER_RIGHT_X,
   LAYER_ORDER,
+  PREDICT_BOX,
   VIEW_HEIGHT,
   VIEW_WIDTH,
   columnLeft,
@@ -18,7 +21,6 @@ import {
 
 const ATT_COLOR = "#2563eb";
 const RES_COLOR = "#ea580c";
-const NON_PREDICT_LAYERS_INCL_L0: LayerId[] = ["L0", "L1", "L2", "L3", "L4", "L5"];
 
 interface GridProps {
   selectedCell: { tokenIndex: number; layer: LayerId } | null;
@@ -30,6 +32,15 @@ interface GridProps {
 export function Grid({ selectedCell, selectedLayer, onCellClick, onLayerLabelClick }: GridProps) {
   const tokens = astronautExample.tokens;
   const lastIdx = tokens.length - 1;
+
+  function activateOnKey<T>(handler: (arg: T) => void, arg: T) {
+    return (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        handler(arg);
+      }
+    };
+  }
 
   return (
     <svg
@@ -64,6 +75,7 @@ export function Grid({ selectedCell, selectedLayer, onCellClick, onLayerLabelCli
               fill={isSelected ? "#92400e" : "#374151"}
               style={{ cursor: "pointer" }}
               onClick={() => onLayerLabelClick(layer)}
+              onKeyDown={activateOnKey(onLayerLabelClick, layer)}
               role="button"
               tabIndex={0}
               aria-label={`${label} — click to see what this layer does`}
@@ -121,7 +133,7 @@ export function Grid({ selectedCell, selectedLayer, onCellClick, onLayerLabelCli
       })}
 
       {/* Cells (L0..L5) */}
-      {NON_PREDICT_LAYERS_INCL_L0.map((layer) =>
+      {CELL_ROW_LAYERS.map((layer) =>
         tokens.map((tok, i) => {
           const isSelected = selectedCell?.tokenIndex === i && selectedCell?.layer === layer;
           const isInputRow = layer === "L0";
@@ -138,6 +150,7 @@ export function Grid({ selectedCell, selectedLayer, onCellClick, onLayerLabelCli
                 strokeWidth={isSelected ? 2 : 1}
                 style={{ cursor: "pointer" }}
                 onClick={() => onCellClick(i, layer)}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onCellClick(i, layer); } }}
                 role="button"
                 tabIndex={0}
                 aria-label={`${tok.token} at ${layer}`}
@@ -170,6 +183,7 @@ export function Grid({ selectedCell, selectedLayer, onCellClick, onLayerLabelCli
         strokeWidth={1.5}
         style={{ cursor: "pointer" }}
         onClick={() => onCellClick(lastIdx, "Predict")}
+        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onCellClick(lastIdx, "Predict"); } }}
         role="button"
         tabIndex={0}
         aria-label={`Predict cell at ${tokens[lastIdx].token}`}
@@ -187,14 +201,14 @@ export function Grid({ selectedCell, selectedLayer, onCellClick, onLayerLabelCli
       </text>
 
       {/* Predict output box */}
-      <rect x={858} y={34} width={74} height={34} rx={6} fill="#bfdbfe" stroke="#1d4ed8" />
-      <text x={895} y={48} textAnchor="middle" fontSize={10} fontWeight={700} fill="#1e3a8a">
+      <rect x={PREDICT_BOX.x} y={PREDICT_BOX.y} width={PREDICT_BOX.width} height={PREDICT_BOX.height} rx={6} fill="#bfdbfe" stroke="#1d4ed8" />
+      <text x={PREDICT_BOX.textCenterX} y={PREDICT_BOX.tokenY} textAnchor="middle" fontSize={10} fontWeight={700} fill="#1e3a8a">
         {astronautExample.predictions[0]?.token ?? "?"}
       </text>
-      <text x={895} y={60} textAnchor="middle" fontSize={9} fill="#1e3a8a">
+      <text x={PREDICT_BOX.textCenterX} y={PREDICT_BOX.subtitleY} textAnchor="middle" fontSize={9} fill="#1e3a8a">
         (top guess)
       </text>
-      <line x1={838} y1={51} x2={858} y2={51} stroke="#1d4ed8" strokeWidth={2} markerEnd="url(#ov-att)" />
+      <line x1={PREDICT_BOX.arrow.fromX} y1={PREDICT_BOX.arrow.y} x2={PREDICT_BOX.arrow.toX} y2={PREDICT_BOX.arrow.y} stroke="#1d4ed8" strokeWidth={2} markerEnd="url(#ov-att)" />
     </svg>
   );
 }

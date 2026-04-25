@@ -42,6 +42,31 @@ export function previousLayer(layer: LayerId): LayerId | null {
   return LAYER_ORDER[idx - 1];
 }
 
+/**
+ * Layers that get a full row of cells in the grid (everything except Predict).
+ * Predict gets only one cell on the last token's column, rendered separately.
+ */
+export const CELL_ROW_LAYERS: LayerId[] = LAYER_ORDER.filter((l) => l !== "Predict");
+
+/**
+ * Layout for the small "→ planet" output box at the top right of the grid.
+ * Fixed to the right edge of the viewBox, inside the Predict row's vertical band.
+ */
+export const PREDICT_BOX = {
+  x: 858,
+  y: 34,
+  width: 74,
+  height: 34,
+  /** Inbound arrow line: from the right edge of the Predict cell into the box. */
+  arrow: { fromX: 838, toX: 858, y: 51 },
+  /** Center x for the box's text labels. */
+  textCenterX: 895,
+  /** Y of the main token label (top guess). */
+  tokenY: 48,
+  /** Y of the small "(top guess)" subtitle. */
+  subtitleY: 60,
+} as const;
+
 // View box. The right padding leaves room for the predict output box.
 export const VIEW_WIDTH = 940;
 export const VIEW_HEIGHT = 460;
