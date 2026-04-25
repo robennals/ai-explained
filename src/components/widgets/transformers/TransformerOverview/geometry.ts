@@ -54,16 +54,16 @@ export const CELL_ROW_LAYERS: LayerId[] = LAYER_ORDER.filter((l) => l !== "Predi
  * Predict row), aligned vertically with that cell.
  */
 export const PREDICT_BOX = {
-  x: 770,
+  x: 660,
   y: 36,
   width: 130,
   height: 44,
-  arrow: { fromX: 727, toX: 770, y: 58 },
-  textCenterX: 835,
+  arrow: { fromX: 619, toX: 660, y: 58 },
+  textCenterX: 725,
   tokenY: 56,
   subtitleY: 72,
 } as const;
 
 // View box. Includes margin around the grid + room for the predict output box on the right.
-export const VIEW_WIDTH = 920;
+export const VIEW_WIDTH = 810;
 export const VIEW_HEIGHT = 580;

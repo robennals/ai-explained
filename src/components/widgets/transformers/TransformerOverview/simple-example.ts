@@ -31,13 +31,12 @@ export interface OverviewExample {
   predictions: { token: string; probability: number }[];
 }
 
-// Token indices: 0=the, 1=dog, 2=chased, 3=its, 4=tail
+// Token indices: 0=the, 1=dog, 2=chased, 3=its
 const tokens: OverviewToken[] = [
   { token: "the" },
   { token: "dog" },
   { token: "chased" },
   { token: "its" },
-  { token: "tail" },
 ];
 
 const layers: OverviewLayer[] = [
@@ -49,7 +48,6 @@ const layers: OverviewLayer[] = [
       { fromTokenIndex: 0, toTokenIndex: 1, weight: 1.0, headId: "prev" },
       { fromTokenIndex: 1, toTokenIndex: 2, weight: 1.0, headId: "prev" },
       { fromTokenIndex: 2, toTokenIndex: 3, weight: 1.0, headId: "prev" },
-      { fromTokenIndex: 3, toTokenIndex: 4, weight: 1.0, headId: "prev" },
     ],
   },
   {
@@ -62,10 +60,10 @@ const layers: OverviewLayer[] = [
   },
   {
     id: "L3",
-    label: "Verb of object",
+    label: "Subject of verb",
     attention: [
-      // tail (4) ← chased (2)
-      { fromTokenIndex: 2, toTokenIndex: 4, weight: 1.0, headId: "verb-of-object" },
+      // chased (2) ← dog (1) — the verb pulls in its subject
+      { fromTokenIndex: 1, toTokenIndex: 2, weight: 1.0, headId: "subject-of-verb" },
     ],
   },
   { id: "Predict", label: "Predict", attention: [] },
@@ -75,8 +73,8 @@ export const simpleOverviewExample: OverviewExample = {
   tokens,
   layers,
   predictions: [
-    { token: ".", probability: 0.35 },
-    { token: " around", probability: 0.22 },
-    { token: " happily", probability: 0.13 },
+    { token: "tail", probability: 0.42 },
+    { token: "owner", probability: 0.21 },
+    { token: "leash", probability: 0.11 },
   ],
 };
