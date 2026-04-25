@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { astronautExample } from "@/components/widgets/transformers/TransformerInAction/astronaut-example";
+import { simpleOverviewExample } from "./simple-example";
 import type { LayerId } from "@/components/widgets/transformers/TransformerInAction/types";
 import { overviewEdges } from "./edges";
 import {
@@ -31,8 +31,10 @@ interface GridProps {
 }
 
 export function Grid({ selectedCell, selectedLayer, sourceCells, onCellClick, onLayerLabelClick }: GridProps) {
-  const tokens = astronautExample.tokens;
+  const tokens = simpleOverviewExample.tokens;
   const lastIdx = tokens.length - 1;
+  const presentLayerIds = new Set(simpleOverviewExample.layers.map((l) => l.id));
+  const cellRowLayers = CELL_ROW_LAYERS.filter((l) => presentLayerIds.has(l));
 
   function activateOnKey<T>(handler: (arg: T) => void, arg: T) {
     return (e: React.KeyboardEvent) => {
@@ -48,7 +50,7 @@ export function Grid({ selectedCell, selectedLayer, sourceCells, onCellClick, on
       viewBox={`0 0 ${VIEW_WIDTH} ${VIEW_HEIGHT}`}
       className="block w-full max-w-[960px] mx-auto"
       role="img"
-      aria-label="Stacked transformer layers showing attention and residual edges across the astronaut sentence."
+      aria-label="Stacked transformer layers showing attention and residual edges across the sentence."
     >
       <defs>
         <marker id="ov-att" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto">
@@ -60,8 +62,8 @@ export function Grid({ selectedCell, selectedLayer, sourceCells, onCellClick, on
       </defs>
 
       {/* Layer labels in the left gutter */}
-      {LAYER_ORDER.slice().reverse().map((layer) => {
-        const layerDef = astronautExample.layers.find((l) => l.id === layer);
+      {LAYER_ORDER.slice().reverse().filter((layer) => presentLayerIds.has(layer)).map((layer) => {
+        const layerDef = simpleOverviewExample.layers.find((l) => l.id === layer);
         const label = layerDef ? layerDef.label : "Tokens";
         const y = layerRowY(layer) + 16;
         const isSelected = selectedLayer === layer;
@@ -133,8 +135,8 @@ export function Grid({ selectedCell, selectedLayer, sourceCells, onCellClick, on
         );
       })}
 
-      {/* Cells (L0..L5) */}
-      {CELL_ROW_LAYERS.map((layer) =>
+      {/* Cells — only layers present in the example data */}
+      {cellRowLayers.map((layer) =>
         tokens.map((tok, i) => {
           const isSelected = selectedCell?.tokenIndex === i && selectedCell?.layer === layer;
           const isSourceCell = sourceCells.has(`${layer}:${i}`);
@@ -210,7 +212,7 @@ export function Grid({ selectedCell, selectedLayer, sourceCells, onCellClick, on
       {/* Predict output box */}
       <rect x={PREDICT_BOX.x} y={PREDICT_BOX.y} width={PREDICT_BOX.width} height={PREDICT_BOX.height} rx={6} fill="#bfdbfe" stroke="#1d4ed8" />
       <text x={PREDICT_BOX.textCenterX} y={PREDICT_BOX.tokenY} textAnchor="middle" fontSize={10} fontWeight={700} fill="#1e3a8a">
-        {astronautExample.predictions[0]?.token ?? "?"}
+        {simpleOverviewExample.predictions[0]?.token ?? "?"}
       </text>
       <text x={PREDICT_BOX.textCenterX} y={PREDICT_BOX.subtitleY} textAnchor="middle" fontSize={9} fill="#1e3a8a">
         (top guess)

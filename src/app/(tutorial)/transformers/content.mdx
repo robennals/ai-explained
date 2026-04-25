@@ -1,15 +1,19 @@
 # One Architecture to Rule Them All
 
 <Lead>
-You've now seen every piece — embeddings, attention, position encoding, neural networks. The transformer wires them together in a way that turns out to be remarkably good at thinking. This chapter shows that wiring at three zoom levels: the whole stack at a glance, one sentence flowing through it, and finally one block in close-up.
+The transformer is the architecture behind every major AI you've heard of — ChatGPT, Claude, Gemini, Llama. It's the wiring that turns the pieces we've been building (embeddings, attention, positional encoding) into something that can read a sentence and tell you what comes next.
 </Lead>
+
+The shape of that wiring is simple: a stack of layers, applied one after another to your sentence. At each layer, every word looks at the other words it cares about, pulls in information from them, and uses what it pulled in to refine its own meaning. The first layer might just notice "this word is a noun." Layers above figure out "this noun is the subject of the sentence," then "this subject is a character in a story." Stack enough layers and the words have built up an understanding rich enough to predict what comes next.
+
+This chapter shows that idea at three zoom levels: the whole stack at a glance, one sentence flowing through it in detail, and finally a close-up of one layer.
 
 ## A Transformer At a Glance
 
-Every box in the picture below is one word's representation at one layer. The bottom row is the input — just dictionary meanings. Each row above is what those representations look like after one transformer layer of work. **Amber arrows** carry each word's own information forward. **Blue arrows** are attention — at each layer, every word picks which earlier words it wants to listen to and pulls information from them. The blue arcs only ever lean rightward: a word can never see the future.
+The picture below is a transformer doing its work on a tiny sentence. The bottom row is the words you typed in. Each row above is what those words look like after one more layer has run. **Amber arrows** are each word's own information passing up unchanged. **Blue arrows** are attention — at every layer, every word picks which earlier words to listen to and pulls information from them. Blue arrows only ever lean rightward: a word can never look at the future.
 
 <TransformerOverviewWidget>
-Click any cell to see what that word means at that point. Click a layer name on the left to see what the layer is doing.
+Click any word-cell to see which earlier words fed into it. Click a layer's name on the left to see what that layer is doing.
 </TransformerOverviewWidget>
 
 This looks a lot like a regular neural network — boxes in layers, weighted edges between them. The big difference: in a normal neural network the wiring is fixed, learned once during training. Here the blue wiring is recomputed for every sentence. Attention is the model rewiring itself on the fly to suit the input.

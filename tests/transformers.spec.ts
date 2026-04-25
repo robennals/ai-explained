@@ -79,42 +79,29 @@ test.describe("Transformers chapter — A Transformer At a Glance widget", () =>
     await page.goto("/transformers");
   });
 
-  test("overview widget renders with all 13 token cells in the input row", async ({ page }) => {
+  test("overview widget renders with all 5 token cells in the input row", async ({ page }) => {
     const widget = page.locator(".widget-container").filter({ hasText: "A Transformer At a Glance" });
     await expect(widget).toBeVisible();
-    // Spot-check a few token labels — they appear once per row, so the total count is high.
-    await expect(widget.getByText("On", { exact: true }).first()).toBeVisible();
-    await expect(widget.getByText("astronaut", { exact: true }).first()).toBeVisible();
-    await expect(widget.getByText("blue", { exact: true }).first()).toBeVisible();
-    // Predict output box.
+    await expect(widget.getByText("the", { exact: true }).first()).toBeVisible();
+    await expect(widget.getByText("dog", { exact: true }).first()).toBeVisible();
+    await expect(widget.getByText("chased", { exact: true }).first()).toBeVisible();
+    await expect(widget.getByText("its", { exact: true }).first()).toBeVisible();
+    await expect(widget.getByText("tail", { exact: true }).first()).toBeVisible();
     await expect(widget.getByText("(top guess)")).toBeVisible();
   });
 
-  test("clicking 'her' at L3 shows the resolved-pronoun rep", async ({ page }) => {
+  test("clicking 'its' at L2 highlights its 'dog' attention source and 'its' residual source on L1", async ({ page }) => {
     const widget = page.locator(".widget-container").filter({ hasText: "A Transformer At a Glance" });
-    // Click the 'her' cell on the L3 row. Cells are aria-labeled "her at L3".
-    await widget.getByLabel("her at L3").click();
-    // Popup body contains the L3 rep text.
-    await expect(widget.getByText("Her' refers to the astronaut", { exact: false })).toBeVisible();
-    // Title contains the layer label.
-    await expect(widget.getByText("Resolve pronouns", { exact: false }).first()).toBeVisible();
+    await widget.getByLabel("its at L2").click();
+    // Attention source: dog at L1 should have the source-cell stroke #d97706.
+    await expect(widget.getByLabel("dog at L1")).toHaveAttribute("stroke", "#d97706");
+    // Residual source: its at L1 should also have the source-cell stroke.
+    await expect(widget.getByLabel("its at L1")).toHaveAttribute("stroke", "#d97706");
   });
 
   test("clicking the 'Resolve pronouns' label shows the layer summary", async ({ page }) => {
     const widget = page.locator(".widget-container").filter({ hasText: "A Transformer At a Glance" });
     await widget.getByLabel(/Resolve pronouns — click to see what this layer does/).click();
-    // The popup body matches the layer summary.
-    await expect(widget.getByText("pronoun her looks back to find who she is", { exact: false })).toBeVisible();
-  });
-
-  test("clicking 'her' at L3 highlights its astronaut and her sources at L2", async ({ page }) => {
-    const widget = page.locator(".widget-container").filter({ hasText: "A Transformer At a Glance" });
-    await widget.getByLabel("her at L3").click();
-    // The astronaut cell at L2 should have the source-cell stroke color #d97706.
-    const astronautAtL2 = widget.getByLabel("astronaut at L2");
-    await expect(astronautAtL2).toHaveAttribute("stroke", "#d97706");
-    // The 'her' cell at L2 (residual source) likewise.
-    const herAtL2 = widget.getByLabel("her at L2");
-    await expect(herAtL2).toHaveAttribute("stroke", "#d97706");
+    await expect(widget.getByText("pronoun 'its' looks back", { exact: false })).toBeVisible();
   });
 });

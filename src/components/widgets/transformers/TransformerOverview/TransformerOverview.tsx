@@ -2,11 +2,11 @@
 
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { WidgetContainer } from "@/components/widgets/shared/WidgetContainer";
-import { astronautExample } from "@/components/widgets/transformers/TransformerInAction/astronaut-example";
-import type { LayerId, NonPredictLayerId } from "@/components/widgets/transformers/TransformerInAction/types";
+import { simpleOverviewExample } from "./simple-example";
+import type { LayerId } from "@/components/widgets/transformers/TransformerInAction/types";
 import { Grid } from "./Grid";
 import { Popup } from "./Popup";
-import { columnX, layerRowY, LABEL_GUTTER_RIGHT_X, VIEW_WIDTH, VIEW_HEIGHT, previousLayer } from "./geometry";
+import { layerRowY, LABEL_GUTTER_RIGHT_X, VIEW_WIDTH, VIEW_HEIGHT, previousLayer } from "./geometry";
 import { LAYER_SUMMARIES } from "./layer-summaries";
 import { overviewEdges } from "./edges";
 
@@ -48,40 +48,9 @@ export function TransformerOverview() {
     return () => window.removeEventListener("keydown", onKey);
   }, [selectedCell, selectedLayer, closeAll]);
 
-  const cellPopup = useMemo(() => {
-    if (!selectedCell) return null;
-    const tok = astronautExample.tokens[selectedCell.tokenIndex];
-    const layerDef = astronautExample.layers.find((l) => l.id === selectedCell.layer);
-    const layerLabel = layerDef ? layerDef.label : selectedCell.layer;
-    const isPredict = selectedCell.layer === "Predict";
-    let bodyText: string;
-    if (isPredict) {
-      const top = astronautExample.predictions
-        .slice(0, 3)
-        .map((p) => `${p.token} (${Math.round(p.probability * 100)}%)`)
-        .join(", ");
-      bodyText = `Top guesses for the next word: ${top}.`;
-    } else {
-      bodyText = tok.reps[selectedCell.layer as NonPredictLayerId];
-    }
-    return {
-      anchorX: columnX(selectedCell.tokenIndex),
-      anchorY: layerRowY(selectedCell.layer),
-      title: (
-        <span>
-          {tok.token}
-          <span className="ml-1 font-normal text-muted">
-            · after {selectedCell.layer} ({layerLabel})
-          </span>
-        </span>
-      ),
-      body: bodyText,
-    };
-  }, [selectedCell]);
-
   const layerPopup = useMemo(() => {
     if (!selectedLayer) return null;
-    const layerDef = astronautExample.layers.find((l) => l.id === selectedLayer);
+    const layerDef = simpleOverviewExample.layers.find((l) => l.id === selectedLayer);
     const layerLabel = layerDef ? layerDef.label : selectedLayer;
     return {
       anchorX: LABEL_GUTTER_RIGHT_X,
@@ -129,18 +98,6 @@ export function TransformerOverview() {
           onCellClick={handleCellClick}
           onLayerLabelClick={handleLayerLabelClick}
         />
-        {cellPopup && (
-          <Popup
-            anchorX={cellPopup.anchorX}
-            anchorY={cellPopup.anchorY}
-            pointerDirection="below"
-            viewWidth={VIEW_WIDTH}
-            viewHeight={VIEW_HEIGHT}
-            title={cellPopup.title}
-            body={cellPopup.body}
-            onClose={() => setSelectedCell(null)}
-          />
-        )}
         {layerPopup && (
           <Popup
             anchorX={layerPopup.anchorX}
