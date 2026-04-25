@@ -444,7 +444,6 @@ export function Simple2DScatter() {
                   const sw = xScale(q.x2) - xScale(q.x1);
                   const sh = yScale(q.y1) - yScale(q.y2);
                   const cx = (xScale(q.x1) + xScale(q.x2)) / 2;
-                  const cy = (yScale(q.y1) + yScale(q.y2)) / 2;
                   // axis arrow insets — push well inside the quadrant so
                   // labels don't overlap the dashed border lines
                   const inset = 28;

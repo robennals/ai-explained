@@ -224,10 +224,6 @@ export function DotProductAnalogies() {
   const detAngleSvg = Math.atan2(-(dUnitY), dUnitX);   // SVG y is flipped
   const inpAngleSvg = Math.atan2(-(iUnitY), iUnitX);
 
-  // Component-wise computation display
-  const comp1 = input.x * dUnitX;
-  const comp2 = input.y * dUnitY;
-
   return (
     <WidgetContainer
       title="Dot Products in Real Life"

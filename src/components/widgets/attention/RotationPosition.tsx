@@ -126,7 +126,7 @@ export function RotationPosition() {
     const angleDeg = (Math.atan2(dy, dx) * 180) / Math.PI;
     const pos = Math.round(((angleDeg % 360) + 360) % 360 / degPerPos);
     return Math.max(0, Math.min(maxPosOnCircle, pos));
-  }, [degPerPos, maxPosOnCircle]);
+  }, [degPerPos, maxPosOnCircle, cx, cy]);
 
   const handlePointerDown = useCallback((which: "A" | "B") => (e: React.PointerEvent) => {
     dragging.current = which;

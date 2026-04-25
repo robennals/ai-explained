@@ -37,7 +37,7 @@ const LAYER_DESCRIPTIONS: Record<string, string> = {
     "This is an **output neuron**. It produces the network's answer. In an image recognizer, one output might mean 'cat' and another 'dog'.",
 };
 
-export function NetworkOverview({ children }: { children?: React.ReactNode }) {
+export function NetworkOverview() {
   const [selected, setSelected] = useState<{
     layer: number;
     index: number;

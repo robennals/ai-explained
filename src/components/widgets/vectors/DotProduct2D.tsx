@@ -73,16 +73,6 @@ function magnitudeWord(mag: number): string {
   return "very long";
 }
 
-function dotProductWord(dot: number): { text: string; color: string } {
-  if (dot > 2) return { text: "Large and positive", color: "#22c55e" };
-  if (dot > 0.5) return { text: "Positive", color: "#22c55e" };
-  if (dot > 0.1) return { text: "Small and positive", color: "#94a3b8" };
-  if (dot > -0.1) return { text: "Near zero", color: "#94a3b8" };
-  if (dot > -0.5) return { text: "Small and negative", color: "#94a3b8" };
-  if (dot > -2) return { text: "Negative", color: "#f97316" };
-  return { text: "Large and negative", color: "#ef4444" };
-}
-
 export function DotProduct2D() {
   const [a, setA] = useState<[number, number]>([1.2, 0.5]);
   const [b, setB] = useState<[number, number]>([0.4, 1.1]);

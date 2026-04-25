@@ -147,8 +147,6 @@ export function CausalMasking() {
     }
   }, [generatedCount, maxTokens]);
 
-  // The visible tokens are only the ones generated so far
-  const visibleTokens = tokens.slice(0, generatedCount);
   // The attention row for the most recently generated token
   const latestIdx = generatedCount - 1;
 

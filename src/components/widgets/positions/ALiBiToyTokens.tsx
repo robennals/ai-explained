@@ -120,7 +120,6 @@ export function ALiBiToyTokens() {
   }, []);
 
   // Compute attention scores for "it"
-  const rawScores = tokens.map((t) => dot(tokens[selected].query, t.key));
   const penalizedScores = tokens.map((t, i) => {
     const distance = itIdx - i;
     return dot(tokens[selected].query, t.key) - slope * distance;
