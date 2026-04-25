@@ -10,7 +10,6 @@ import {
   CELL_WIDTH,
   LABEL_GUTTER_RIGHT_X,
   LAYER_ORDER,
-  PREDICT_BOX,
   VIEW_HEIGHT,
   VIEW_WIDTH,
   columnLeft,
@@ -180,7 +179,7 @@ export function Grid({ selectedCell, selectedLayer, sourceCells, onCellClick, on
         })
       )}
 
-      {/* Predict cell (last token's column only) */}
+      {/* Predict cell (last token's column only) — shows the model's top next-word guess. */}
       <rect
         x={columnLeft(lastIdx)}
         y={layerRowY("Predict")}
@@ -192,32 +191,27 @@ export function Grid({ selectedCell, selectedLayer, sourceCells, onCellClick, on
         strokeWidth={1.5}
         style={{ cursor: "pointer" }}
         onClick={() => onCellClick(lastIdx, "Predict")}
-        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onCellClick(lastIdx, "Predict"); } }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onCellClick(lastIdx, "Predict");
+          }
+        }}
         role="button"
         tabIndex={0}
-        aria-label={`Predict cell at ${tokens[lastIdx].token}`}
+        aria-label={`Predict next word: ${simpleOverviewExample.predictions[0]?.token ?? "?"}`}
       />
       <text
         x={columnX(lastIdx)}
-        y={layerRowY("Predict") + 22}
+        y={layerRowY("Predict") + 23}
         textAnchor="middle"
-        fontSize={12}
+        fontSize={15}
         fontWeight={700}
         fill="#1e3a8a"
         pointerEvents="none"
       >
-        → next
-      </text>
-
-      {/* Predict output box */}
-      <rect x={PREDICT_BOX.x} y={PREDICT_BOX.y} width={PREDICT_BOX.width} height={PREDICT_BOX.height} rx={6} fill="#bfdbfe" stroke="#1d4ed8" />
-      <text x={PREDICT_BOX.textCenterX} y={PREDICT_BOX.tokenY} textAnchor="middle" fontSize={14} fontWeight={700} fill="#1e3a8a">
         {simpleOverviewExample.predictions[0]?.token ?? "?"}
       </text>
-      <text x={PREDICT_BOX.textCenterX} y={PREDICT_BOX.subtitleY} textAnchor="middle" fontSize={11} fill="#1e3a8a">
-        (top guess)
-      </text>
-      <line x1={PREDICT_BOX.arrow.fromX} y1={PREDICT_BOX.arrow.y} x2={PREDICT_BOX.arrow.toX} y2={PREDICT_BOX.arrow.y} stroke="#1d4ed8" strokeWidth={2} markerEnd="url(#ov-att)" />
     </svg>
   );
 }

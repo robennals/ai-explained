@@ -79,16 +79,15 @@ test.describe("Transformers chapter — A Transformer At a Glance widget", () =>
     await page.goto("/transformers");
   });
 
-  test("overview widget renders with all 4 input token cells and 'tail' as the prediction", async ({ page }) => {
+  test("overview widget renders with 4 input cells and 'tail' as the predicted next word", async ({ page }) => {
     const widget = page.locator(".widget-container").filter({ hasText: "A Transformer At a Glance" });
     await expect(widget).toBeVisible();
     await expect(widget.getByText("the", { exact: true }).first()).toBeVisible();
     await expect(widget.getByText("dog", { exact: true }).first()).toBeVisible();
     await expect(widget.getByText("chased", { exact: true }).first()).toBeVisible();
     await expect(widget.getByText("its", { exact: true }).first()).toBeVisible();
-    // 'tail' should appear ONLY in the prediction output box, not as an input cell.
-    await expect(widget.getByText("tail", { exact: true })).toBeVisible();
-    await expect(widget.getByText("(top guess)")).toBeVisible();
+    // 'tail' appears inside the Predict cell, accessible via its aria-label.
+    await expect(widget.getByLabel(/Predict next word: tail/)).toBeVisible();
   });
 
   test("clicking 'its' at L2 highlights its 'dog' attention source and 'its' residual source on L1", async ({ page }) => {

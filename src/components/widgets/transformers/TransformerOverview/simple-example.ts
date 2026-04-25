@@ -54,16 +54,7 @@ const layers: OverviewLayer[] = [
     id: "L2",
     label: "Resolve pronouns",
     attention: [
-      // its (3) ← dog (1)
       { fromTokenIndex: 1, toTokenIndex: 3, weight: 1.0, headId: "refers" },
-    ],
-  },
-  {
-    id: "L3",
-    label: "Subject of verb",
-    attention: [
-      // chased (2) ← dog (1) — the verb pulls in its subject
-      { fromTokenIndex: 1, toTokenIndex: 2, weight: 1.0, headId: "subject-of-verb" },
     ],
   },
   { id: "Predict", label: "Predict", attention: [] },

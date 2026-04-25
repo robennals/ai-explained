@@ -13,13 +13,13 @@ export const FIRST_COL_X = 195;
 export const ROW_GAP = 80;
 
 // Bottom row (L0) sits at this y. Layers stack upward.
-export const L0_Y = 520;
+export const L0_Y = 320;
 
 // Layer order from bottom to top, indexed by row from L0..L6.
-export const LAYER_ORDER: LayerId[] = ["L0", "L1", "L2", "L3", "L4", "L5", "Predict"];
+export const LAYER_ORDER: LayerId[] = ["L0", "L1", "L2", "Predict"];
 
 // Layers where attention can be a consumer (all non-predict layers except L0).
-export const NON_PREDICT_LAYERS: NonPredictLayerId[] = ["L1", "L2", "L3", "L4", "L5"];
+export const NON_PREDICT_LAYERS: NonPredictLayerId[] = ["L1", "L2"];
 
 export function layerRowY(layer: LayerId): number {
   const idx = LAYER_ORDER.indexOf(layer);
@@ -48,22 +48,6 @@ export function previousLayer(layer: LayerId): LayerId | null {
  */
 export const CELL_ROW_LAYERS: LayerId[] = LAYER_ORDER.filter((l) => l !== "Predict");
 
-/**
- * Layout for the small "next-word guess" output box at the top right of the grid.
- * Sits to the right of the Predict cell (which is on the last token's column at the
- * Predict row), aligned vertically with that cell.
- */
-export const PREDICT_BOX = {
-  x: 660,
-  y: 36,
-  width: 130,
-  height: 44,
-  arrow: { fromX: 619, toX: 660, y: 58 },
-  textCenterX: 725,
-  tokenY: 56,
-  subtitleY: 72,
-} as const;
-
-// View box. Includes margin around the grid + room for the predict output box on the right.
+// View box. Includes margin around the grid.
 export const VIEW_WIDTH = 810;
-export const VIEW_HEIGHT = 580;
+export const VIEW_HEIGHT = 400;
