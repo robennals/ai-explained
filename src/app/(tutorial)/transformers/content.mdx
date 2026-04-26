@@ -30,10 +30,11 @@ Click **Next layer** to step through, or jump to any layer in the strip above th
 
 The model never sees *Earth* spelled out. But by the last layer, *blue*'s representation says *a blue thing belonging to the astronaut on Mars, seen in the Martian sky* — and the embedding for *Earth* (a blue planet, home to humans, visible from other planets in our solar system) lines up almost exactly. That's where the prediction comes from.
 
-## Real Transformers are Big, Very Big
+## Large Language Models are Very Large
 
-The example we have in the playground above has 5 layers, with one attention head on each one. Real transformers are much much much bigger, typically with hundreds of layers, hundreds of heads per layer, and thousands of dimensions in their embeddings. 
+The example we have in the playground above has 5 layers, with one attention head on each one. Real transformers are much much much bigger. The latest models don't disclose how many layers and heads they have, but GPT3 had 96 layers with 96 heads per layer and the latest models are probably significantly larger.
 
+Modern LLMs also use embeddings with thousands of dimensions (12,288 for GPT3). This provides enough space to encode complex things like "A blue thing that belongs to a human astraut, seen by that astronaut in the sky of mars, which is a planet in earth's solar system". 
 
 ## Interpretability
 
@@ -51,27 +52,6 @@ The playground below gives more detail on how exactly a single layer of a transf
 Click any box, or hit Next Block to step through. The grey box is one transformer block — a real model stacks many of these (GPT-3 stacks 96).
 </TransformerBlockDiagramWidget>
 
-### Residual connection
-
-The red paths carry each word's previous representation forward, unchanged, and add the new layer's output on top. Without them, layer 50's output would have nothing to do with the original word. With them, each layer's contribution accumulates instead of overwriting. The model can also tune how big a contribution to add — small numbers tweak the representation, big numbers transform it.
-
-### Layer normalization
-
-Each layer adds something. After many layers, the numbers can grow huge. Layer normalization rescales the vector after each addition so its average is zero and its spread is about one. The pattern is preserved; only the overall loudness is reset.
-
-### Feed-forward network
-
-Attention lets words *talk to each other*. The feed-forward network lets each word *think to itself* — it processes one word's vector at a time, with no cross-talk. Researchers have found these layers act like memory: they store facts and associations the model picks up during training. Attention finds the relevant facts; the feed-forward layers retrieve them.
-
-## How Can One Vector Hold So Many Ideas?
-
-Each token's vector has thousands of dimensions. When attention pulls information in from another token, that information lands in a *different direction* of the vector — a different subspace — via the head's output projection. The original meaning and the pulled-in meaning coexist, because they point different ways. Nothing is overwritten.
-
-The feed-forward network reads across the whole vector at once. It sees both the self-info and the pulled-in info, and can compose them into something richer. *Mars* plus *previous word was 'on'* becomes *Mars as a location someone is on*.
-
-This is why each layer genuinely accumulates understanding. Attention brings new material in. The feed-forward composes it. Stack enough layers and ideas pile up, without erasing each other.
-
-<VectorSubspaceFigWidget />
 
 ## The Big Picture
 
