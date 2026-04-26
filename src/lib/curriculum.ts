@@ -98,6 +98,7 @@ export const chapters: Chapter[] = [
     prerequisites: [8],
     description:
       "The transformer wires attention and neural networks together. Trained only to predict the next word, it learns grammar, narrative, and common sense — from nothing but prediction.",
+    ready: true,
   },
   {
     id: 10,
