@@ -1,187 +1,75 @@
 # One Architecture to Rule Them All
 
 <Lead>
-We now have all the pieces: embeddings that capture meaning, attention that lets words talk to each other, position encoding that tracks word order, and neural networks that transform information. The transformer wires these together into one architecture — and when you train it to predict the next word, something remarkable happens. It learns grammar, stories, and common sense from nothing but prediction.
+The transformer is the architecture behind every major AI you've heard of — ChatGPT, Claude, Gemini, Llama. It's the wiring that turns the pieces we've been building (embeddings, attention, positional encoding) into something that can read a sentence and tell you what comes next.
 </Lead>
 
-## The Transformer
+## A Transformer At a Glance
 
-The transformer takes ideas we've mostly already introduced and wires them together in a specific pattern that has turned out to be extraordinarily effective. The diagram below shows the complete pipeline — from raw text all the way to a prediction of the next word.
+The core idea behind the transformer is remarkably simple. We pass a passage of text through a sequence of layers. Each layer creates a better representation of each token by combining what is already known about the token with information from other tokens. The transformer uses attention to identify which other tokens have relevant information.
 
-Step through each component to get a brief overview. The sections that follow will dig deeper into each one.
+The original paper that introduced transformers was called *"Attention Is All You Need"*, and indeed attention is where a lot of the magic is happening — identifying which other tokens have information relevant to the current token.
 
-<TransformerBlockDiagramWidget>
-Click any box in the diagram, or hit Next Block to step through. The grey box is one "transformer block" — a real model stacks many of these (GPT-3 stacks 96 of them!).
-</TransformerBlockDiagramWidget>
+The picture below shows a very simple transformer doing its work on a tiny sentence. The final layer's embedding of the last token tells us enough to predict the next word.
 
-## How Can One Vector Hold Many Ideas?
+<TransformerOverviewWidget>
+Click any word-cell to see which earlier words fed into it. Click a layer's name on the left to see what that layer is doing.
+</TransformerOverviewWidget>
 
-Before we watch a transformer in motion, one more piece of intuition. Each token's vector has thousands of dimensions — far more than needed to store just its own meaning. This turns out to matter.
+Notice how the representation of each token gets more sophisticated at each layer, by bringing in information from the tokens it paid attention to.
 
-When an attention head pulls information from another token, that information lands in a *different subspace* of this token's vector — a different direction — via the head's output projection. The original self-info and the new pulled-in info coexist, because they point different ways. Nothing is overwritten.
+This looks a lot like a regular [neural network](/neurons) — boxes in layers, connected by links whose weights control how strongly the signal flows. The big difference: in a normal neural network the wiring is fixed, learned once during training. Here, attention tells us which information should flow where. And, as you'll see later, each node actually has its own little neural network combining the information flowing in with what it already knows.
 
-The feed-forward network that runs after attention reads across the whole vector at once. It sees both the self-info and the pulled-in info, and can compose them into a richer meaning — "Mars" plus "previous word was 'on'" becomes "Mars as a location someone is currently on."
+## A Transformer In More Detail
 
-This is why each layer genuinely *accumulates* understanding. Attention brings new material in; the feed-forward composes it. Stack enough layers and ideas pile up — without erasing each other.
-
-<VectorSubspaceFigWidget />
-
-## A Transformer In Action
-
-Enough theory — let's watch one run. The playground below shows a real sentence flowing through five transformer layers. Every representation is written as a plain English sentence. Click a layer to see where the model has arrived; click a word to see what any head did to it.
-
-One thing to look for as you explore: the model never sees the word *Earth* spelled out in the sentence. But by the final layer, the word "blue" has accumulated enough context to predict a word that specifically names it. Watch it happen step by step.
+The playground below shows a more detailed example with a longer sentence and more layers. Go through the layers one at a time and see how the representation of each token becomes more sophisticated as we bring in information from other tokens.
 
 <TransformerInActionWidget>
-Click **Next layer** to step through, or jump to any layer in the strip above the passage. **Previous-token** gives every word a copy of its previous word. **Place in the scene** ties words to scene locations — astronaut, looked, and sky all reach Mars; saw reaches both Mars and the sky. **Resolve pronouns** resolves the pronoun *her*. **Previous-token** (applied a second time) lets *blue* pull in *her* again — this time carrying the astronaut-on-Mars info from Layer 3. **Find what verb acts on this** binds objects to their verbs — sky to looked; her and blue to saw, picking up the sky context saw collected at Layer 2. Finally, click **Predict** to see the top candidates for the next word.
+Click **Next layer** to step through, or jump to any layer in the strip above the passage. **Previous-token** gives every word a copy of its predecessor. **Place in the scene** ties words to scene-locations. **Resolve pronouns** wires *her* to the astronaut. **Previous-token** (again) lets *blue* re-pull *her* with all the new context. **Find what verb acts on this** binds objects to their verbs. Click **Predict** to see the top guesses for the next word.
 </TransformerInActionWidget>
 
-Notice what just happened. The word **Earth** never appears in the sentence. Yet by the end of the last layer, *blue* has composed *a blue thing belonging to the astronaut on Mars, seen in the Martian sky*. The model never explicitly thinks "her home is Earth" — instead, the prediction head matches blue's accumulated description against every token's embedding, and the embedding for *Earth* (a blue planet, home to humans, visible from other planets in the solar system) lines up almost exactly. That match is where "planet" / "home" / "Earth" emerge as the top guesses. Nothing in any single layer did this on its own: the **Previous-token** layer barely did more than bolt each word to its neighbour; **Place in the scene** placed words into the Martian setting (with saw and her also picking up the sky); **Resolve pronouns** resolved one pronoun; **Previous-token** (again) let blue refresh its view of her with all the accumulated context; **Find what verb acts on this** brought the seeing-context into the prediction slot. Stacked together, they fingerprint a description so specific that the embedding for *Earth* is the obvious match.
+The model never sees *Earth* spelled out. But by the last layer, *blue*'s representation says *a blue thing belonging to the astronaut on Mars, seen in the Martian sky* — and the embedding for *Earth* (a blue planet, home to humans, visible from other planets in our solar system) lines up almost exactly. That's where the prediction comes from.
 
-Each head here is a simplified version of a pattern real interpretability research has documented in trained transformers — previous-token heads, coreference heads, and heads that move features into the prediction slot. A real model has hundreds of narrow heads; we're showing the handful that do visible work on this particular sentence.
+## Large Language Models are Very Large
 
-## Add Residual
+The example we have in the playground above has 5 layers, with one [attention head](/attention) on each layer. Real transformers are much much much bigger. The latest models don't disclose how many layers and heads they have, but GPT-3 had 96 layers with 96 heads per layer and the latest models are probably significantly larger.
 
-Each time we run a round of attention, we discover new, more abstract ways of representing a word. The first layer might figure out "this is a noun." The next might figure out "this noun is the subject of the sentence." The layer after that might figure out "this subject is a character in a story."
+Modern LLMs also use [embeddings](/embeddings) with thousands of [dimensions](/vectors) (12,288 for GPT-3). This provides enough space to encode complex things like "A blue thing that belongs to a human astronaut, seen by that astronaut in the sky of Mars, which is a planet in Earth's solar system".
 
-But here's the thing — the earlier, simpler information is still useful! Later layers might need to know "this is a noun" just as much as "this is a character." If each layer just *replaced* the old representation with a new one, all that earlier work would be lost.
+## Interpretability
 
-The solution is the **residual connection** (the red paths in the diagram). Instead of replacing the old representation, we **add the new one on top of it**:
+The examples given above have their representations written by hand rather than being generated by a real transformer. One of the weird things about real transformers is that we usually don't actually know what the intermediate representations of tokens mean, or even what a particular attention head or particular layer is trying to do. When we train a transformer, it isn't trying to produce layers, heads, or representations that make sense to humans. It is just trying to come up with representations that best help it complete its task — such as predicting the next word.
 
-**new representation = old representation + what this layer figured out**
+Trying to understand the inner thought processes of transformers is an area of active research.
 
-This way, every layer's discoveries accumulate. The vector for a word keeps everything the earlier layers learned, plus whatever new thing this layer added. Nothing gets thrown away.
+## Inside One Transformer Layer
 
-The model can also control how much each layer matters. If a layer produces a new representation with large numbers, it will have a big effect. If the numbers are small, the old representation stays mostly unchanged. This lets the model learn to make big changes when it needs to and small tweaks when it doesn't.
+We said at the beginning that each layer of a transformer creates a new representation for each token by using attention to find relevant tokens, and combining information from those tokens with what we already know about that token.
 
-<ResidualConnectionWidget>
-Watch what happens to a signal as it passes through many layers. Without residual connections, earlier information gets lost. With them, each layer's contribution accumulates. Try cranking the layers up to 20 or more.
-</ResidualConnectionWidget>
+The playground below gives more detail on how exactly a single layer of a transformer does that. Click on each box to see a description of what it does and how it does it.
 
-## Layer Normalization
+(One transformer layer is sometimes also called a *transformer block*. The two names mean the same thing — we'll stick with "layer" because that's how people describe model size: "GPT-3 has 96 layers".)
 
-There's a practical problem with adding things together over and over: the numbers keep getting bigger. After dozens of layers of additions, the values in our vectors can grow enormous. This makes it hard for the next layer to do its job — the numbers are all over the place.
+<TransformerBlockDiagramWidget>
+Click any box, or hit Next Block to step through. The grey box is one transformer layer — a real model stacks many of these (GPT-3 stacks 96).
+</TransformerBlockDiagramWidget>
 
-**Layer normalization** fixes this. After each addition step, it rescales the numbers so their average is 0 and their spread is about 1. The relative pattern is preserved — which dimensions are bigger and which are smaller stays the same — but the overall scale is reset to something manageable.
-
-Think of it like adjusting the volume after each layer. Each layer can add its contribution at whatever scale makes sense for learning, and then layer normalization brings everything back to a comfortable level before the next layer starts.
-
-<LayerNormWidget>
-Try pushing values to extremes and watch layer normalization snap them back to a reasonable range. Then see what happens when you stack layers without it — the numbers quickly explode or collapse.
-</LayerNormWidget>
-
-## Feed-Forward Network
-
-The second half of each transformer block is a **feed-forward network** — a small neural network with two layers and an activation function in between (called GELU, which works a lot like the ReLU you saw in [Chapter 3](/neurons)).
-
-Here's the key difference between attention and the feed-forward network: attention lets words *talk to each other* and share information, while the feed-forward network lets each word *think about* the information it has gathered. It processes each word's vector independently — word 1's feed-forward computation doesn't know anything about word 5's.
-
-What does this "thinking" actually do? Researchers have found that these layers work like a kind of **memory**. During training, the feed-forward weights learn to store facts and associations — things like "the capital of France is Paris" or "after 'once upon a' the next word is usually 'time'." The attention layers figure out *which* facts are relevant; the feed-forward layers *recall* them.
-
-The network first expands each word's vector to 4× its original size (giving it more room to work with), applies the activation function, then shrinks it back down. It's like spreading out your notes on a big desk to think things through, then packing them back into a neat folder.
-
-## The Simplest Real Transformer
-
-Enough architecture — let's actually *run one*. This is a real transformer with real learned weights doing real math in your browser right now.
-
-It's tiny: just 1 layer, 2 attention heads, and 32-dimensional embeddings. It was trained on children's stories. With only about 50,000 learned parameters (not counting the embedding table), it's roughly one ten-millionth the size of GPT-4.
-
-But it works. Sort of:
-
-<MicroTransformerWidget>
-Type a prompt and see what this tiny transformer predicts. It gets basic patterns right but struggles with anything complex — like a toddler who knows some words but can't quite tell a story yet. Click "Show internals" to see every computation happening inside.
-</MicroTransformerWidget>
-
-What can this tiny model do?
-- It knows common word patterns ("once upon" → "a")
-- It has a rough sense of how stories work
-- But it loses track quickly — it just doesn't have enough room in its brain to remember complex things
-
-What happens if we give it a bigger brain?
-
-## More Layers, More Understanding
-
-Same architecture, same training data — just more layers, wider embeddings, more attention heads:
-
-<DepthComparisonWidget>
-The same prompt fed to transformers of increasing size. The 1-layer model gets basic word associations. The 2-layer model handles simple grammar. The 4-layer model starts telling coherent stories. Same design — the only difference is size.
-</DepthComparisonWidget>
-
-Each extra layer means one more round of "look at other words, then think about what you found." More rounds = more chances to figure out grammar, track what characters are doing, and build up meaning.
-
-## A Transformer That Tells Stories
-
-Now let's try one that's big enough to be genuinely interesting. This transformer has about 2 million parameters — still tiny compared to ChatGPT (which is a million times bigger), but enough to write text that sometimes surprises you.
-
-<LiveTransformerWidget>
-Type a prompt and hit Generate to watch the transformer write, one word at a time. Try the temperature slider: low = safe and predictable, high = creative and weird. Click any word it generates to see what other words it was considering.
-</LiveTransformerWidget>
-
-This is **auto-regressive generation** — the trick every language model uses:
-
-1. Look at the text so far
-2. Predict the most likely next word
-3. Add that word to the text
-4. Go back to step 1
-
-That's it. That's how ChatGPT writes. That's how Claude writes. The model you just played with does exactly the same thing — just smaller.
-
-**Temperature** controls how adventurous the model is. At temperature 0, it always picks the single most likely word — safe, but boring and repetitive. Turn it up and the model starts taking risks — more creative, but eventually nonsensical.
-
-<KeyInsight>
-This model was trained to do one thing: predict the next word. Nobody told it what grammar is. Nobody explained how stories work. Nobody taught it that characters have names. It figured all of this out on its own, just by trying to guess what comes next. Scale this up — more parameters, more training data — and you get the AI systems people use every day.
-</KeyInsight>
-
-## Seeing Inside: The X-Ray View
-
-Because we're running this transformer right here in your browser, we can peek inside and see exactly what it's doing. Let's watch the attention heads in action.
-
-<TransformerXRayWidget>
-Pick a sentence and explore what's happening inside. The Attention tab shows which words each attention head is paying attention to. The Residual Stream tab shows how each word's representation changes as it flows through the layers.
-</TransformerXRayWidget>
-
-Different attention heads learn completely different jobs:
-- Some focus on **nearby words** — they're figuring out local grammar
-- Some focus on **the beginning of the sentence** — they're tracking the overall topic
-- Some focus on **specific patterns** — like connecting pronouns back to the nouns they refer to
-
-Nobody programmed these specializations. The model figured out on its own that having different heads do different jobs leads to better predictions.
-
-## A Nuance: Prompt vs Generation
-
-Earlier, we said each word can only look backward. But there's a subtlety.
-
-When you type a prompt like "Once upon a time," all those words are already known — you typed them in. There's no reason "upon" can't look at "time," since they're both sitting right there. The no-peeking rule is really only needed for the words the model is *generating*, because those don't exist yet.
-
-Some models take advantage of this: they let all the prompt words look at each other freely, and only apply the causal mask to the generated words. The attention pattern changes from a pure triangle to a filled square (the prompt) with a triangle extending below it (the generation).
-
-<PrefixAttentionWidget>
-Compare "causal only" mode (pure triangle) with "prefix attention" mode (prompt words can see each other freely). Notice how the shape changes.
-</PrefixAttentionWidget>
-
-## From Tiny to Titan
-
-You've now played with transformers ranging from 50,000 to 2 million parameters. The architecture is the same across all of them — tokenize, embed, attend, think, predict. The only difference is scale.
-
-GPT-4 has over a trillion parameters. Claude is similarly large. Same architecture, same math, same word-by-word generation loop. Just more layers, wider embeddings, bigger feed-forward networks, more attention heads, trained on enormously more data.
-
-And as you scale up, something surprising keeps happening: new abilities *emerge*. Arithmetic, reasoning, writing code, composing poetry, understanding humor — abilities that were never explicitly programmed, never directly trained for. They just appeared, as a side effect of getting better at predicting the next word. We'll explore why this happens in a later chapter.
 
 ## The Big Picture
 
-Let's trace the path we've taken through these chapters:
+We've come a long way:
 
-1. **Everything is numbers** ([Chapter 1](/computation)) — text, images, and sound are all just lists of numbers
-2. **Small improvements add up** ([Chapter 2](/optimization)) — gradient descent finds good solutions step by step
-3. **Neural networks learn patterns** ([Chapter 3](/neurons)) — layers of neurons can learn to recognize anything
-4. **Vectors capture meaning** ([Chapter 4](/vectors)) — similar things end up with similar numbers
-5. **Embeddings give words geometry** ([Chapter 5](/embeddings)) — words live in a space where closeness = similarity
-6. **Prediction requires understanding** ([Chapter 6](/next-word-prediction)) — to guess the next word, you need to *get* the sentence
-7. **Attention lets words talk** ([Chapter 7](/attention)) — each word chooses which other words to listen to
-8. **Position encoding adds order** ([Chapter 8](/positions)) — so "dog bit man" isn't the same as "man bit dog"
-9. **The transformer wires it all together** (this chapter) — and meaning emerges from prediction
+1. **Everything is numbers** ([Chapter 1](/computation)) — text, images, sound, all just lists of numbers.
+2. **Small improvements add up** ([Chapter 2](/optimization)) — gradient descent finds good solutions step by step.
+3. **Neural networks learn patterns** ([Chapter 3](/neurons)) — layers of neurons can learn anything.
+4. **Vectors capture meaning** ([Chapter 4](/vectors)) — similar things end up with similar numbers.
+5. **Embeddings give words geometry** ([Chapter 5](/embeddings)) — words live in a space where closeness equals similarity.
+6. **Prediction requires understanding** ([Chapter 6](/next-word-prediction)) — to guess the next word, you have to *get* the sentence.
+7. **Attention lets words talk** ([Chapter 7](/attention)) — each word chooses which others to listen to.
+8. **Position encoding adds order** ([Chapter 8](/positions)) — so "dog bit man" isn't the same as "man bit dog".
+9. **The transformer wires it all together** (this chapter) — and meaning emerges from prediction.
 
-That's the architecture behind the AI revolution. Attention and feed-forward layers, with residual connections to keep information flowing and layer normalization to keep numbers stable, all trained to predict the next word. Simple pieces, carefully wired together, trained at enormous scale.
+Same architecture, scaled up trillions of times, is what powers ChatGPT, Claude, and Gemini.
 
 <TryItInPyTorch notebook="transformers">
 Build a complete transformer from scratch in PyTorch. Train one on simple patterns, visualize what the attention heads learn, then train a bigger one on real stories and experiment with temperature and generation.
