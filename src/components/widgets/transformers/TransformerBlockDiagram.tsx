@@ -48,7 +48,7 @@ const BLOCKS: BlockInfo[] = [
     tabLabel: "Attention",
     diagramLabel: "Multi-Head Attention",
     description:
-      "Find related words and get information from them.\n\n Each token is mapped to query, key, and value vectors. If the key of another token matches the key of this value then we include its value vector. We use softmax applied to the dot product of the key and value to determine how to combine the values from the different related tokens.\n\n A causal mask ensures that a token only pays attention to tokens before it.\n\nThis step also includes postional encoding so that it takes account of word position.\n\n There may be multiple attention \"heads\" in one attention block - meaning that we run attenton multiple times, using different keys, queries, and values, to model different kinds of word relationships.",
+      "Find related words and get information from them.\n\n Each token is mapped to a query vector, a key vector, and a value vector. If another token's key matches this token's query, we pull in that token's value vector. We use softmax applied to the dot product of query and key to determine how much we pull in each value.\n\n A causal mask ensures that a token only pays attention to tokens before it.\n\n This step also includes positional encoding so that it takes account of word position.\n\n There may be multiple attention \"heads\" in one attention block — meaning that we run attention multiple times, using different keys, queries, and values, to model different kinds of word relationships.",
     chapterLinks: [
       { label: "Chapter 7: Paying Attention", href: "/attention" },
       { label: "Chapter 8: Where Am I?", href: "/positions" },
@@ -61,7 +61,7 @@ const BLOCKS: BlockInfo[] = [
     tabLabel: "Add Residual",
     diagramLabel: "Add Residual",
     description:
-      "This is a simple one. Add the result of the attention block to embedding we previous had for the token.\n\n This ensures that each layer of the transformer is adding new information to what we already know.",
+      "This is a simple one. Add the result of the attention block to the embedding we previously had for the token.\n\n This ensures that each layer of the transformer is adding new information to what we already know.",
     chapterLinks: [],
     color: "#fecaca",
     border: "#dc2626",
@@ -71,7 +71,7 @@ const BLOCKS: BlockInfo[] = [
     tabLabel: "Layer Norm",
     diagramLabel: "Layer Norm",
     description:
-      "A simple one. Scale the values of the embedding so the average is 0 and the spread is 1.\n\n Without this, the values in the embedding could get really big or really small, making them behave less well, including making the activation loose its smooth gradient.",
+      "A simple one. Scale the values of the embedding so the average is 0 and the spread is 1.\n\n Without this, the values in the embedding could get really big or really small, making them behave less well, including making the activation lose its smooth gradient.",
     chapterLinks: [],
     color: "#fef08a",
     border: "#ca8a04",
@@ -81,7 +81,7 @@ const BLOCKS: BlockInfo[] = [
     tabLabel: "Feed Forward",
     diagramLabel: "Feed-Forward Network",
     description:
-      "To a bit of thinking to process what we learned from the other tokens.\n\nWe use a small 2-layer neural network. Each layer has a different neural network that knows how to think about the kinds of information retreived by that layer's attention heads.",
+      "Do a bit of thinking to process what we learned from the other tokens.\n\n Each transformer block has its own two-layer neural network which it applies to each token.",
     chapterLinks: [{ label: "Chapter 3: Building a Brain", href: "/neurons" }],
     color: "#bfdbfe",
     border: "#3b82f6",
@@ -91,7 +91,7 @@ const BLOCKS: BlockInfo[] = [
     tabLabel: "Add Residual",
     diagramLabel: "Add Residual",
     description:
-      "This is a simple one. Add the result of the feed forward network to the embedding we already had for the token.\n\nThis ensures that the feed forward network is computing a modification to what already knew and doesn't need to worry about having to preserve existing knowledge.\n\nResiduals also make the network easier to train.",
+      "This is a simple one. Add the result of the feed forward network to the embedding we already had for the token.\n\n This ensures that the feed forward network is computing a modification to what we already knew and doesn't need to worry about having to preserve existing knowledge.\n\n Residuals also make the network easier to train.",
     chapterLinks: [],
     color: "#fecaca",
     border: "#dc2626",
@@ -101,7 +101,7 @@ const BLOCKS: BlockInfo[] = [
     tabLabel: "Layer Norm",
     diagramLabel: "Layer Norm",
     description:
-        "A simple one. Scale the values of the embedding so the average is 0 and the spread is 1.\n\n Without this, the values in the embedding could get really big or really small, making them behave less well, including making the activation loose its smooth gradient.\n\n The same as the layer norm applied after attention, except that this one is after the feed forward network.",
+        "A simple one. Scale the values of the embedding so the average is 0 and the spread is 1.\n\n Without this, the values in the embedding could get really big or really small, making them behave less well, including making the activation lose its smooth gradient.\n\n The same as the layer norm applied after attention, except that this one is after the feed forward network.",
     chapterLinks: [],
     color: "#fef08a",
     border: "#ca8a04",
@@ -111,7 +111,7 @@ const BLOCKS: BlockInfo[] = [
     tabLabel: "× N Blocks",
     diagramLabel: "More Transformer Blocks",
     description:
-      "A typical transformer stacks many many transformer layers on top of each other.\n\nEach transformer layer computer a more sophisticated embedding for each token which incorporates more knowledge from other tokens. Typical large language models have hundreds of layers, each of which has hundreds of heads.",
+      "A typical transformer stacks many transformer layers on top of each other.\n\n Each transformer layer computes a more sophisticated embedding for each token, incorporating more knowledge from other tokens.\n\n State-of-the-art models like GPT-5 don't disclose how many layers they have, but GPT-3 was 96 layers.",
     chapterLinks: [],
     color: "#f3f4f6",
     border: "#9ca3af",
@@ -121,7 +121,7 @@ const BLOCKS: BlockInfo[] = [
     tabLabel: "Output",
     diagramLabel: "Next Token Probabilities",
     description:
-      "If the transforme is being used for next word prediction, then at the end of the transformer, we identify the likely next token.\n\n The way this works is a lot like how attention works. We use a simple neural network to compute a key, take the dot product of that key with the embeddings of all tokens, and then use softmax to determine the probability of each token.",
+      "If the transformer is being used for next word prediction, then at the end of the transformer, we identify the likely next token.\n\n The way this works is a lot like how attention works. We compute a query vector from the final token's representation, take the dot product of that query with the embedding of every word in the vocabulary, and then use softmax to get the probability of each possible next token.",
     chapterLinks: [{ label: "Chapter 6: Understanding by Predicting", href: "/next-word-prediction" }],
     color: "#fce7f3",
     border: "#db2777",
