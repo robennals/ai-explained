@@ -104,7 +104,7 @@ test.describe("Transformers chapter — A Transformer At a Glance widget", () =>
     const widget = page.locator(".widget-container").filter({ hasText: "A Transformer At a Glance" });
     await widget.getByLabel("its at L2").click();
     await expect(
-      widget.getByText("chasing something belonging to it → belonging to a specific dog that is chasing")
+      widget.getByText("belonging to the thing chasing it → belonging to a specific dog that is chasing it")
     ).toBeVisible();
   });
 

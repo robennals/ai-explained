@@ -452,9 +452,11 @@ export function TransformerBlockDiagram() {
             >
               {block.diagramLabel}
             </div>
-            <p className="mb-3 text-sm leading-relaxed text-foreground/80">
-              {block.description}
-            </p>
+            {block.description.split(/\n\s*\n/).map((para, i) => (
+              <p key={i} className="mb-3 text-sm leading-relaxed text-foreground/80">
+                {para}
+              </p>
+            ))}
             {block.chapterLinks.length > 0 && (
               <div className="flex flex-wrap gap-x-3 gap-y-1 text-sm">
                 {block.chapterLinks.map((link) => (
