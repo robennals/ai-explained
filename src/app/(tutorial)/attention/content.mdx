@@ -87,11 +87,15 @@ The playground below uses the same key/query matching as before — "it" still f
 Click "it" to see how attention weights blend value vectors into a result. With "cat blah blah it," the result is nearly 100% cat. Try "cat blah dog it" — the result is a mix of both nouns. Try "blah blah blah it" — with no nouns, attention spreads equally everywhere (including back to "it" itself, since nothing matches better), and the result is empty.
 </ToyAttentionValuesWidget>
 
-## Multiple Heads: Looking for Different Things
+## Multi-Headed Attention
 
-Understanding a sentence requires many kinds of questions at once: What does this pronoun refer to? What's the subject of this verb? What clause does this word belong to?
+An **attention head** is one full attention computation — one set of keys, queries, and values, learning one pattern of which words attend to which.
 
-Real attention models use **multiple attention heads** — each with its own keys, queries, and values, each free to learn a different pattern. They all run in parallel on the same input, and their outputs get combined. That's what you saw with BERT earlier: one head specialized in pronouns, another in broader context — and each found its role through training, without being told what to look for.
+Real models don't run just one head. They run many in parallel, each with its own keys, queries, and values, each free to learn a different pattern. This is called **multi-headed attention**. Each head produces its own new representation of every token; those per-head outputs are then combined into a single representation that gets passed on.
+
+Why bother with more than one head? Understanding a sentence requires many kinds of questions at once: What does this pronoun refer to? What's the subject of this verb? What clause does this word belong to? Multi-headed attention lets the model ask all of these at the same time, with each head specializing in a different kind of relationship.
+
+That's what you saw with BERT earlier: one head specialized in pronouns, another in broader context — each found its role through training, without being told what to look for.
 
 <KeyInsight>
 Multiple attention heads let the model ask many different questions in parallel. Each head has its own key, query, and value weights, so each learns to attend to a different kind of relationship — pronouns, grammar, structure, semantics. **The model doesn't need to choose one kind of attention; it gets all of them at once.**
