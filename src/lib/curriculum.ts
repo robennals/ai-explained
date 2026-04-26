@@ -47,7 +47,7 @@ export const chapters: Chapter[] = [
     subtitle: "Vectors",
     prerequisites: [3],
     description:
-      "A vector is just a list of numbers — but lists of numbers can describe position, color, animals, and anything else. See neurons as vector operations and discover why activation functions make depth meaningful.",
+      "A vector is just a list of numbers — but lists of numbers can describe position, color, animals, and anything else. The dot product measures similarity, and a single neuron turns out to be a pattern detector built from one.",
     ready: true,
   },
   {

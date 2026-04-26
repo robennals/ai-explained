@@ -44,9 +44,9 @@ ALiBi has a fundamental limitation: **the distance penalty is per-head, not per-
 
 Consider: *"The president visited France. He said the treaty would be honored."* The pronoun "He" needs a steep distance falloff to latch onto the nearby "president." But "treaty" needs a gentle falloff to find its antecedent farther back. If both happen to land in the same attention head, they're stuck with the same slope — one of them gets the wrong distance curve.
 
-More fundamentially, ALiBi limits the distance penalty to being a linear slope. If a particular token would benefit from a different shape (e.g. sharp dropoff, then flat for a while) then ALiBi can't do that. 
+More fundamentally, ALiBi limits the distance penalty to being a linear slope. If a particular token would benefit from a different shape (e.g. sharp dropoff, then flat for a while) then ALiBi can't do that.
 
-It turns out there is a different model - RoPE - that overcomes all of these limits. Nearly every frontier model today (Llama, Mistral, Gemma, Qwen, DeepSeek) uses RoPE. Let's see why.
+It turns out there is a different model — **RoPE** — that overcomes all of these limits. Nearly every frontier model today (Llama, Mistral, Gemma, Qwen, DeepSeek) uses RoPE. Let's see why.
 
 ## Rotation Encodes Distance
 
