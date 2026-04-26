@@ -121,7 +121,7 @@ const BLOCKS: BlockInfo[] = [
     tabLabel: "Output",
     diagramLabel: "Next Token Probabilities",
     description:
-      "A linear layer converts each token's final representation into a score for every word in the vocabulary. Softmax turns these scores into probabilities — \"How likely is 'cat'? How likely is 'sat'?\" The highest-probability token is the model's prediction for what comes next.",
+      "At the end of the transformer, we identify the most likely next tokens. We use a linear layer to transform the embedding of the final token into a query (like in attention). To find the possible next tokens, we take the dot product of that query with the embedding of every possible token, and then use softmax to work out next token proabilities.",
     chapterLinks: [{ label: "Chapter 6: Understanding by Predicting", href: "/next-word-prediction" }],
     color: "#fce7f3",
     border: "#db2777",

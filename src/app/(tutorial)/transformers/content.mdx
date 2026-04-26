@@ -4,25 +4,25 @@
 The transformer is the architecture behind every major AI you've heard of — ChatGPT, Claude, Gemini, Llama. It's the wiring that turns the pieces we've been building (embeddings, attention, positional encoding) into something that can read a sentence and tell you what comes next.
 </Lead>
 
-The shape of that wiring is simple: a stack of layers, applied one after another to your sentence. At each layer, every word looks at the other words it cares about, pulls in information from them, and uses what it pulled in to refine its own meaning. The first layer might just notice "this word is a noun." Layers above figure out "this noun is the subject of the sentence," then "this subject is a character in a story." Stack enough layers and the words have built up an understanding rich enough to predict what comes next.
-
-This chapter shows that idea at three zoom levels: the whole stack at a glance, one sentence flowing through it in detail, and finally a close-up of one layer.
-
 ## A Transformer At a Glance
 
-The picture below is a transformer doing its work on a tiny sentence. The bottom row is the words you typed in. Each row above is what those words look like after one more layer has run. **Amber arrows** are each word's own information passing up unchanged. **Blue arrows** are attention — at every layer, every word picks which earlier words to listen to and pulls information from them. Blue arrows only ever lean rightward: a word can never look at the future.
+The core idea behind the transformer is remarkably simple. We pass a passage of text through a sequence of layers. Each layer creates a better representation of each token by combining what is already known about the token with information from other tokens. The transformer uses attention to identify which other tokens have relevant information.
+
+The original paper that introduced Transformers was called "Attention is all you need", and indeed attention is where a lot of the magic is happening - identifying which other tokens have information relevant to the current token.
+
+The picture below shows a very simple transformer doing it's work on a tiny sentence. The final layer's embedding of the last token tells us enough to predict the next word. 
 
 <TransformerOverviewWidget>
 Click any word-cell to see which earlier words fed into it. Click a layer's name on the left to see what that layer is doing.
 </TransformerOverviewWidget>
 
-This looks a lot like a regular neural network — boxes in layers, weighted edges between them. The big difference: in a normal neural network the wiring is fixed, learned once during training. Here the blue wiring is recomputed for every sentence. Attention is the model rewiring itself on the fly to suit the input.
+Notice how the representation of each token gets more sophisticated at each layer, by bringing in information from the tokens it paid attention to.
 
-## A Transformer In Action
+This looks a lot like a regular neural network — boxes in layers, weighted edges between them. The big difference: in a normal neural network the wiring is fixed, learned once during training. Here, attention tells us which information should flow where. And, as you'll see later, each node actually has it's own little neural network combining the information flowing in with what it already knows.
 
-The picture above showed the *shape* of the wiring — words sitting in rows, layers stacked above, attention flowing between them. What it didn't show is what each cell actually *means*. The playground below fills that in. Every box now carries the model's understanding of that word at that layer, written out in plain English, so you can watch the meaning of each word grow richer as the layers stack up — pulling in context, resolving pronouns, binding objects to verbs — until the last word knows enough to predict what comes next.
+## A Transformer In More Detail
 
-Click a layer to step through; click a word to see exactly which earlier words contributed and what they added.
+The playground below shows a more detailed example with a longer sentence and more layers. Go through the layers one at a time and see how the representation of each token becomes more sophisticated as we bring in information from other tokens.
 
 <TransformerInActionWidget>
 Click **Next layer** to step through, or jump to any layer in the strip above the passage. **Previous-token** gives every word a copy of its predecessor. **Place in the scene** ties words to scene-locations. **Resolve pronouns** wires *her* to the astronaut. **Previous-token** (again) lets *blue* re-pull *her* with all the new context. **Find what verb acts on this** binds objects to their verbs. Click **Predict** to see the top guesses for the next word.
@@ -30,9 +30,22 @@ Click **Next layer** to step through, or jump to any layer in the strip above th
 
 The model never sees *Earth* spelled out. But by the last layer, *blue*'s representation says *a blue thing belonging to the astronaut on Mars, seen in the Martian sky* — and the embedding for *Earth* (a blue planet, home to humans, visible from other planets in our solar system) lines up almost exactly. That's where the prediction comes from.
 
+## Real Transformers are Big, Very Big
+
+The example we have in the playground above has 5 layers, with one attention head on each one. Real transformers are much much much bigger, typically with hundreds of layers, hundreds of heads per layer, and thousands of dimensions in their embeddings. 
+
+
+## Interpretability
+
+The examples given above have their representations written by hand rather than being generated by a real transformer. One of the weird things about real transformers is that we usually don't actually know what the intemediate representations of tokens mean, or ever what a particular attention head or particular layer is trying to do. When we train a transformer, it isn't trying to produce layers, heads, or representations that make sense to humans. It is just trying to come up with representations that best help it complete it's task - such as predicting the next word.
+
+Trying to understand the inner thought processes of transformers is an area of active research.
+
 ## Inside One Transformer Block
 
-Zooming in on one of those layer rows: each one is built from a few specific pieces, wired together in a specific pattern. Step through to see them.
+We said at the beginning that a transformer creates a new representation of each token by using attention to find relevant tokens, and combining information from those tokens with what we already know about that token.
+
+The playground below gives a lot more detail on how exactly a single layer of a transformer does that. Click on each box to see a description of what it does and how it does it.
 
 <TransformerBlockDiagramWidget>
 Click any box, or hit Next Block to step through. The grey box is one transformer block — a real model stacks many of these (GPT-3 stacks 96).

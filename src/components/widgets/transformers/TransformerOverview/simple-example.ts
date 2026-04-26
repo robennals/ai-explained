@@ -41,9 +41,9 @@ export interface OverviewExample {
 // Token indices: 0=the, 1=dog, 2=chased, 3=its
 const tokens: OverviewToken[] = [
   { token: "the",    reps: { L0: "the",             L1: "the",                               L2: "the" } },
-  { token: "dog",    reps: { L0: "a dog",           L1: "a specific dog",                    L2: "a specific dog" } },
-  { token: "chased", reps: { L0: "chased",          L1: "a dog that is chasing",             L2: "a dog that is chasing" } },
-  { token: "its",    reps: { L0: "belonging to it", L1: "chasing something belonging to it", L2: "belonging to a specific dog that is chasing" } },
+  { token: "dog",    reps: { L0: "dog",             L1: "a specific dog",                    L2: "a specific dog" } },
+  { token: "chased", reps: { L0: "chased",          L1: "chased by a dog",                   L2: "chased by a dog" } },
+  { token: "its",    reps: { L0: "its",              L1: "belonging to the thing chasing it", L2: "belonging to a specific dog that is chasing it" } },
 ];
 
 const layers: OverviewLayer[] = [
