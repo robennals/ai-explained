@@ -38,7 +38,7 @@ const BLOCKS: BlockInfo[] = [
     tabLabel: "Embedding",
     diagramLabel: "Token Embedding",
     description:
-      "Converts each token to a vector that represents its meaning.\n\n Similar words end up with similar vectors and directions have meaning within particular parts of the space.\n\n The mapping from tokens to embedding vectors is learned, just like every other part of the neural network.",
+      "Converts each token to a vector that represents its meaning.\n\n Similar words end up with similar vectors. Directions in the space also carry meaning — for example, the direction from 'king' to 'queen' is similar to the direction from 'man' to 'woman'.\n\n The mapping from tokens to embedding vectors is learned, just like every other part of the neural network.",
     chapterLinks: [{ label: "Chapter 5: From Words to Meanings", href: "/embeddings" }],
     color: "#d1fae5",
     border: "#059669",
@@ -71,7 +71,7 @@ const BLOCKS: BlockInfo[] = [
     tabLabel: "Layer Norm",
     diagramLabel: "Layer Norm",
     description:
-      "A simple one. Scale the values of the embedding so the average is 0 and the spread is 1.\n\n Without this, the values in the embedding could get really big or really small, making them behave less well, including making the activation lose its smooth gradient.",
+      "A simple one. Scale the values of the embedding so the average is 0 and the spread is 1.\n\n Without this, the values in the embedding could get really big or really small, which makes the model harder to train.",
     chapterLinks: [],
     color: "#fef08a",
     border: "#ca8a04",
@@ -81,7 +81,7 @@ const BLOCKS: BlockInfo[] = [
     tabLabel: "Feed Forward",
     diagramLabel: "Feed-Forward Network",
     description:
-      "Do a bit of thinking to process what we learned from the other tokens.\n\n Each transformer block has its own two-layer neural network which it applies to each token.",
+      "Do a bit of thinking to process what we learned from the other tokens.\n\n Each transformer layer has its own two-layer neural network which it applies to each token.",
     chapterLinks: [{ label: "Chapter 3: Building a Brain", href: "/neurons" }],
     color: "#bfdbfe",
     border: "#3b82f6",
@@ -101,15 +101,15 @@ const BLOCKS: BlockInfo[] = [
     tabLabel: "Layer Norm",
     diagramLabel: "Layer Norm",
     description:
-        "A simple one. Scale the values of the embedding so the average is 0 and the spread is 1.\n\n Without this, the values in the embedding could get really big or really small, making them behave less well, including making the activation lose its smooth gradient.\n\n The same as the layer norm applied after attention, except that this one is after the feed forward network.",
+        "A simple one. Scale the values of the embedding so the average is 0 and the spread is 1.\n\n Without this, the values in the embedding could get really big or really small, which makes the model harder to train.\n\n The same as the layer norm applied after attention, except that this one is after the feed forward network.",
     chapterLinks: [],
     color: "#fef08a",
     border: "#ca8a04",
   },
   {
     id: "stacking",
-    tabLabel: "× N Blocks",
-    diagramLabel: "More Transformer Blocks",
+    tabLabel: "× N Layers",
+    diagramLabel: "More Transformer Layers",
     description:
       "A typical transformer stacks many transformer layers on top of each other.\n\n Each transformer layer computes a more sophisticated embedding for each token, incorporating more knowledge from other tokens.\n\n State-of-the-art models like GPT-5 don't disclose how many layers they have, but GPT-3 was 96 layers.",
     chapterLinks: [],

@@ -8,9 +8,9 @@ The transformer is the architecture behind every major AI you've heard of — Ch
 
 The core idea behind the transformer is remarkably simple. We pass a passage of text through a sequence of layers. Each layer creates a better representation of each token by combining what is already known about the token with information from other tokens. The transformer uses attention to identify which other tokens have relevant information.
 
-The original paper that introduced Transformers was called "Attention is all you need", and indeed attention is where a lot of the magic is happening - identifying which other tokens have information relevant to the current token.
+The original paper that introduced transformers was called *"Attention Is All You Need"*, and indeed attention is where a lot of the magic is happening — identifying which other tokens have information relevant to the current token.
 
-The picture below shows a very simple transformer doing it's work on a tiny sentence. The final layer's embedding of the last token tells us enough to predict the next word. 
+The picture below shows a very simple transformer doing its work on a tiny sentence. The final layer's embedding of the last token tells us enough to predict the next word.
 
 <TransformerOverviewWidget>
 Click any word-cell to see which earlier words fed into it. Click a layer's name on the left to see what that layer is doing.
@@ -18,7 +18,7 @@ Click any word-cell to see which earlier words fed into it. Click a layer's name
 
 Notice how the representation of each token gets more sophisticated at each layer, by bringing in information from the tokens it paid attention to.
 
-This looks a lot like a regular neural network — boxes in layers, weighted edges between them. The big difference: in a normal neural network the wiring is fixed, learned once during training. Here, attention tells us which information should flow where. And, as you'll see later, each node actually has it's own little neural network combining the information flowing in with what it already knows.
+This looks a lot like a regular [neural network](/neurons) — boxes in layers, connected by lines whose weights control how strongly the signal flows. The big difference: in a normal neural network the wiring is fixed, learned once during training. Here, attention tells us which information should flow where. And, as you'll see later, each node actually has its own little neural network combining the information flowing in with what it already knows.
 
 ## A Transformer In More Detail
 
@@ -32,9 +32,9 @@ The model never sees *Earth* spelled out. But by the last layer, *blue*'s repres
 
 ## Large Language Models are Very Large
 
-The example we have in the playground above has 5 layers, with one attention head on each one. Real transformers are much much much bigger. The latest models don't disclose how many layers and heads they have, but GPT-3 had 96 layers with 96 heads per layer and the latest models are probably significantly larger.
+The example we have in the playground above has 5 layers, with one attention head on each layer (an "attention head" is a single attention pattern; a layer can run several in parallel — we'll see this in the close-up below). Real transformers are much much much bigger. The latest models don't disclose how many layers and heads they have, but GPT-3 had 96 layers with 96 heads per layer and the latest models are probably significantly larger.
 
-Modern LLMs also use embeddings with thousands of dimensions (12,288 for GPT-3). This provides enough space to encode complex things like "A blue thing that belongs to a human astronaut, seen by that astronaut in the sky of Mars, which is a planet in Earth's solar system".
+Modern LLMs also use [embeddings](/embeddings) with thousands of [dimensions](/vectors) (12,288 for GPT-3). This provides enough space to encode complex things like "A blue thing that belongs to a human astronaut, seen by that astronaut in the sky of Mars, which is a planet in Earth's solar system".
 
 ## Interpretability
 

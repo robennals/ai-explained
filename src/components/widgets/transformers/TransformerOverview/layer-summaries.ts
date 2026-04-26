@@ -6,7 +6,7 @@ import type { LayerId } from "@/components/widgets/transformers/TransformerInAct
  */
 export const LAYER_SUMMARIES: Record<LayerId, string> = {
   L0: "These are just dictionary meanings — 'dog' means dog, 'its' means its — before the model has thought about how the words fit together.",
-  L1: "Every word grabs a copy of the word right before it. The simplest kind of context: who's my neighbour?",
+  L1: "Every word grabs a copy of the word right before it. The simplest kind of context: who's my neighbor?",
   L2: "The pronoun 'its' looks back for nouns it could refer to. It finds two: 'dog' (which after L1 reads 'a specific dog'), and 'chased' (which after L1 reads 'a dog that is chasing'). Both carry the dog-noun, just with different extra info. 'its' pulls both in.",
   L3: "(unused in this example)",
   L4: "(unused in this example)",
