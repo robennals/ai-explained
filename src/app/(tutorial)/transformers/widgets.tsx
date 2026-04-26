@@ -20,14 +20,6 @@ const TransformerInAction = dynamic(
   { ssr: false }
 );
 
-const VectorSubspaceFig = dynamic(
-  () =>
-    import("@/components/widgets/transformers/TransformerInAction").then(
-      (m) => m.VectorSubspaceFig
-    ),
-  { ssr: false }
-);
-
 const TransformerOverview = dynamic(
   () =>
     import("@/components/widgets/transformers/TransformerOverview").then(
@@ -96,10 +88,3 @@ export function TransformerOverviewWidget({
   );
 }
 
-export function VectorSubspaceFigWidget() {
-  return (
-    <Suspense fallback={<div className="my-6 h-40 animate-pulse rounded bg-foreground/[0.03]" />}>
-      <VectorSubspaceFig />
-    </Suspense>
-  );
-}

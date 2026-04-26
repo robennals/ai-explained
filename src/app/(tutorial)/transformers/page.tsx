@@ -4,7 +4,6 @@ import Content from "./content.mdx";
 import {
   TransformerBlockDiagramWidget,
   TransformerInActionWidget,
-  VectorSubspaceFigWidget,
   TransformerOverviewWidget,
 } from "./widgets";
 
@@ -24,7 +23,6 @@ export default function Chapter09() {
           components={{
             TransformerBlockDiagramWidget,
             TransformerInActionWidget,
-            VectorSubspaceFigWidget,
             TransformerOverviewWidget,
           }}
         />
