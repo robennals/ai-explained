@@ -28,7 +28,7 @@ const BLOCKS: BlockInfo[] = [
     tabLabel: "Tokenization",
     diagramLabel: "Tokenizer",
     description:
-      "Splits raw text into tokens — subword chunks that the model can work with. Common words get their own token; rare words are assembled from pieces (e.g. \"unbreakable\" → \"un\", \"break\", \"able\").",
+      "Splits raw text into tokens.\n\n Common words get their own token; rare words are assembled from pieces (e.g. \"unbreakable\" → \"un\", \"break\", \"able\").",
     chapterLinks: [{ label: "Chapter 5: From Words to Meanings", href: "/embeddings" }],
     color: "#e9d5ff",
     border: "#9333ea",
@@ -38,7 +38,7 @@ const BLOCKS: BlockInfo[] = [
     tabLabel: "Embedding",
     diagramLabel: "Token Embedding",
     description:
-      "Looks up each token in a learned table and returns a vector (list of numbers) that captures its meaning. Similar words end up with similar vectors. This is the model's vocabulary of meanings.",
+      "Converts each token to a vector that represents its meaning.\n\n Similar words end up with similar vectors and directions have meaning within particular parts of the space.\n\n The mapping from tokens to embedding vectors is learned, just like every other part of the neural network.",
     chapterLinks: [{ label: "Chapter 5: From Words to Meanings", href: "/embeddings" }],
     color: "#d1fae5",
     border: "#059669",
@@ -48,7 +48,7 @@ const BLOCKS: BlockInfo[] = [
     tabLabel: "Attention",
     diagramLabel: "Multi-Head Attention",
     description:
-      "Each word looks at earlier words and gathers relevant context. First, a single layer of neurons (with no activation function) converts each word's embedding into query, key, and value vectors. Then attention uses these to figure out which words matter. A causal mask prevents each word from peeking at future words. Multiple heads run in parallel, each specializing in different patterns. This step also includes positional encoding (RoPE) so the model knows word order.",
+      "Find related words and get information from them.\n\n Each token is mapped to query, key, and value vectors. If the key of another token matches the key of this value then we include its value vector. We use softmax applied to the dot product of the key and value to determine how to combine the values from the different related tokens.\n\n A causal mask ensures that a token only pays attention to tokens before it.\n\nThis step also includes postional encoding so that it takes account of word position.\n\n There may be multiple attention \"heads\" in one attention block - meaning that we run attenton multiple times, using different keys, queries, and values, to model different kinds of word relationships.",
     chapterLinks: [
       { label: "Chapter 7: Paying Attention", href: "/attention" },
       { label: "Chapter 8: Where Am I?", href: "/positions" },
@@ -61,7 +61,7 @@ const BLOCKS: BlockInfo[] = [
     tabLabel: "Add Residual",
     diagramLabel: "Add Residual",
     description:
-      "Adds the original input (from before attention) back to the attention output. This is the residual connection — a \"highway bypass\" that lets the original signal flow through unchanged. Each layer only needs to learn small corrections, not rebuild everything from scratch.",
+      "This is a simple one. Add the result of the attention block to embedding we previous had for the token.\n\n This ensures that each layer of the transformer is adding new information to what we already know.",
     chapterLinks: [],
     color: "#fecaca",
     border: "#dc2626",
@@ -71,7 +71,7 @@ const BLOCKS: BlockInfo[] = [
     tabLabel: "Layer Norm",
     diagramLabel: "Layer Norm",
     description:
-      "Rescales values so the average is 0 and the spread is 1, then lets the model adjust from there. Without this, values can drift after repeated transformations — some growing enormous, others shrinking to near-zero. Think of it as an automatic volume knob.",
+      "A simple one. Scale the values of the embedding so the average is 0 and the spread is 1.\n\n Without this, the values in the embedding could get really big or really small, making them behave less well, including making the activation loose its smooth gradient.",
     chapterLinks: [],
     color: "#fef08a",
     border: "#ca8a04",
@@ -81,7 +81,7 @@ const BLOCKS: BlockInfo[] = [
     tabLabel: "Feed Forward",
     diagramLabel: "Feed-Forward Network",
     description:
-      "A small 2-layer neural network that processes what attention gathered. If attention is \"collecting relevant information from other words,\" the feed-forward network is \"thinking about what it all means.\" It runs independently on each word position.",
+      "To a bit of thinking to process what we learned from the other tokens.\n\nWe use a small 2-layer neural network. Each layer has a different neural network that knows how to think about the kinds of information retreived by that layer's attention heads.",
     chapterLinks: [{ label: "Chapter 3: Building a Brain", href: "/neurons" }],
     color: "#bfdbfe",
     border: "#3b82f6",
@@ -91,7 +91,7 @@ const BLOCKS: BlockInfo[] = [
     tabLabel: "Add Residual",
     diagramLabel: "Add Residual",
     description:
-      "Same as the first — adds the input (from before the feed-forward network) back to the output. Together, the two residual connections create a \"highway\" that the original information can always flow through, even across 96+ stacked blocks.",
+      "This is a simple one. Add the result of the feed forward network to the embedding we already had for the token.\n\nThis ensures that the feed forward network is computing a modification to what already knew and doesn't need to worry about having to preserve existing knowledge.\n\nResiduals also make the network easier to train.",
     chapterLinks: [],
     color: "#fecaca",
     border: "#dc2626",
@@ -101,7 +101,7 @@ const BLOCKS: BlockInfo[] = [
     tabLabel: "Layer Norm",
     diagramLabel: "Layer Norm",
     description:
-      "Another round of normalization after the feed-forward step. Keeps values stable before they flow into the next transformer block.",
+        "A simple one. Scale the values of the embedding so the average is 0 and the spread is 1.\n\n Without this, the values in the embedding could get really big or really small, making them behave less well, including making the activation loose its smooth gradient.\n\n The same as the layer norm applied after attention, except that this one is after the feed forward network.",
     chapterLinks: [],
     color: "#fef08a",
     border: "#ca8a04",
@@ -111,7 +111,7 @@ const BLOCKS: BlockInfo[] = [
     tabLabel: "× N Blocks",
     diagramLabel: "More Transformer Blocks",
     description:
-      "In practice, we stack many transformer blocks on top of each other — the output of one feeds into the next. GPT-2 uses 12 blocks, GPT-3 uses 96, and GPT-4 uses even more. Early blocks tend to learn grammar, middle blocks resolve references, and later blocks capture abstract meaning.",
+      "A typical transformer stacks many many transformer layers on top of each other.\n\nEach transformer layer computer a more sophisticated embedding for each token which incorporates more knowledge from other tokens. Typical large language models have hundreds of layers, each of which has hundreds of heads.",
     chapterLinks: [],
     color: "#f3f4f6",
     border: "#9ca3af",
@@ -121,7 +121,7 @@ const BLOCKS: BlockInfo[] = [
     tabLabel: "Output",
     diagramLabel: "Next Token Probabilities",
     description:
-      "At the end of the transformer, we identify the most likely next tokens. We use a linear layer to transform the embedding of the final token into a query (like in attention). To find the possible next tokens, we take the dot product of that query with the embedding of every possible token, and then use softmax to work out next token proabilities.",
+      "If the transforme is being used for next word prediction, then at the end of the transformer, we identify the likely next token.\n\n The way this works is a lot like how attention works. We use a simple neural network to compute a key, take the dot product of that key with the embeddings of all tokens, and then use softmax to determine the probability of each token.",
     chapterLinks: [{ label: "Chapter 6: Understanding by Predicting", href: "/next-word-prediction" }],
     color: "#fce7f3",
     border: "#db2777",

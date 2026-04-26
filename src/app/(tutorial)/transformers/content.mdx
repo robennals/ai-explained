@@ -41,11 +41,11 @@ The examples given above have their representations written by hand rather than 
 
 Trying to understand the inner thought processes of transformers is an area of active research.
 
-## Inside One Transformer Block
+## Inside One Transformer Layer
 
-We said at the beginning that a transformer creates a new representation of each token by using attention to find relevant tokens, and combining information from those tokens with what we already know about that token.
+We said at the beginning that each layer of a transformer creates a new representation for each token by using attention to find relevant tokens, and combining information from those tokens with what we already know about that token.
 
-The playground below gives a lot more detail on how exactly a single layer of a transformer does that. Click on each box to see a description of what it does and how it does it.
+The playground below gives more detail on how exactly a single layer of a transformer does that. Click on each box to see a description of what it does and how it does it.
 
 <TransformerBlockDiagramWidget>
 Click any box, or hit Next Block to step through. The grey box is one transformer block — a real model stacks many of these (GPT-3 stacks 96).
