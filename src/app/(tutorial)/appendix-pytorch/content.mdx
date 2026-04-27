@@ -125,7 +125,7 @@ a * b       # tensor([4., 10., 18.])   — 1×4, 2×5, 3×6
 a ** 2      # tensor([1., 4., 9.])     — 1², 2², 3²
 ```
 
-For **matrix multiplication** (the workhorse of neural networks — see [Chapter 5](/matrix-math)), use `@`:
+For **matrix multiplication** (the workhorse of neural networks — every layer of weighted sums in [Chapter 3](/neurons) is a matrix multiply under the hood), use `@`:
 
 ```python
 # Matrix multiply: (2x3) @ (3x4) -> (2x4)
@@ -189,7 +189,7 @@ PyTorch provides `torch.nn` — a library of common neural network building bloc
 
 ### nn.Linear
 
-The most fundamental layer. It computes `y = x @ W.T + b` — a matrix multiplication plus a bias (see [Chapter 3](/neurons) and [Chapter 5](/matrix-math)):
+The most fundamental layer. It computes `y = x @ W.T + b` — a weighted sum of the inputs plus a bias, applied to a whole layer of neurons at once (see [Chapter 3](/neurons)):
 
 ```python
 import torch.nn as nn
@@ -207,14 +207,14 @@ Stack layers together into a network:
 ```python
 model = nn.Sequential(
     nn.Linear(2, 16),   # 2 inputs -> 16 hidden neurons
-    nn.ReLU(),           # activation function (Chapter 3)
+    nn.ReLU(),           # activation function — see below
     nn.Linear(16, 16),  # 16 -> 16
     nn.ReLU(),
     nn.Linear(16, 1),   # 16 -> 1 output
 )
 ```
 
-This is a three-layer neural network. The `ReLU` activations between layers are crucial — without them, stacking linear layers would just give you another linear layer ([Chapter 3](/neurons) explains why).
+This is a three-layer neural network. **ReLU** ("rectified linear unit") is just `max(0, x)` — it passes positive values through unchanged and clamps negative values to zero. It plays the same role as the sigmoid in [Chapter 3](/neurons): a nonlinear activation function applied after each weighted sum. Most modern networks use ReLU instead of sigmoid because it's faster and easier to train. The activations between linear layers are essential — without a nonlinearity in the middle, two stacked linear layers collapse mathematically into a single linear layer, no matter how many you stack.
 
 ## The Training Loop
 

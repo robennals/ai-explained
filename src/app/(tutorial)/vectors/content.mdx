@@ -78,7 +78,7 @@ Since vectors are just lists of numbers, you can add them — add each dimension
 On the **Blend** tab, pick two animals and drag the slider to see what's in between. On the **Modify** tab, start with a base animal and use the sliders to add or subtract properties. Try the presets — Paddington, Direwolf, Tiny Eagle — then invent your own.
 </VectorMixerWidget>
 
-This idea — building up complex descriptions by adding simpler vectors together — turns out to be fundamental to how neural networks work. In a later chapter, we'll see that deep inside a neural network, information flows through a running sum called a **residual stream**, and each layer *adds* its contribution to this stream. The entire architecture depends on the fact that vectors can be combined by addition.
+This idea — building up complex descriptions by adding simpler vectors together — turns out to be fundamental to how neural networks work. Deep inside a real model, every layer *adds* its contribution to a running sum, gradually refining what each token represents. The whole architecture depends on the fact that vectors can be combined by addition.
 
 We'll also see in the next chapter that learned word vectors have a famous property: **king − man + woman ≈ queen**. The direction from "man" to "woman" captures something about gender, and you can add that direction to other words. Vector addition isn't just a mathematical curiosity — it's one of the core operations of AI.
 
