@@ -121,7 +121,7 @@ Smallest, highest urgency. User-visible breakage today. Full spec: [notebook-syn
 
 ### Unit B — major reworks and dependent new notebooks
 
-Bulk of the writing. Each item gets its own brainstorm/plan within this unit.
+Bulk of the writing. Full spec: [notebook-sync-unit-b.md](notebook-sync-unit-b.md). Each item gets its own focused plan when picked up.
 
 1. `neurons.ipynb` — rework
 2. `embeddings.ipynb` — rework (after the Unit A GloVe fix)
