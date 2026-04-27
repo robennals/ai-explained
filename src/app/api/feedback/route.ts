@@ -37,7 +37,7 @@ export async function POST(request: Request) {
   const message = (body.message ?? "").trim();
   const name = (body.name ?? "").trim().slice(0, 100);
 
-  if (!email || !EMAIL_RE.test(email)) {
+  if (!email || email.length > 200 || !EMAIL_RE.test(email)) {
     return NextResponse.json(
       { error: "Valid email required." },
       { status: 400 },
