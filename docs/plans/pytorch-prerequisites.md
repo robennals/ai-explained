@@ -48,6 +48,10 @@ No forward references. Uses `torch.tensor`, `torch.dot`, basic arithmetic, and `
 | `nn.Linear` internals | Chapter 5 (the chapter itself) | Fully explained — the main point of this notebook section |
 | ReLU activation | Chapter 5 | Defined in notebook |
 
+### positions.ipynb
+
+No forward references. Uses `torch.tensor`, `torch.dot`, `math.cos`/`math.sin` for 2D rotations, `torch.softmax`, `torch.triu`, `masked_fill`, and matplotlib for the multi-speed RoPE curves. Reuses the toy attention setup from `attention.ipynb`.
+
 ## When adding a new notebook
 
 1. List any PyTorch concepts used before their chapter
