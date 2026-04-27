@@ -21,6 +21,9 @@ The chapter teaches the idea. The notebook proves it's real. Chapters can hand-w
 5. **Scope rule — real components only.**
    For each section of the chapter, ask: "is there a real AI component here, or is this intuition-building?" Real component (attention scoring, sigmoid neurons, next-word sampling) → demo it in code. Intuition-building (hockey-stick growth plots, historical anecdotes, pure analogies) → skip.
 
+5b. **Mirror the chapter section by section.**
+   Walk the chapter top-to-bottom and decide cell-by-cell. For each section that has a real mechanism (per principle 5), the notebook gets a cell that does the same thing the chapter's widget did, with the same examples, vocabulary, and toy data. Don't curate, reorder, or combine sections to be terse — let the notebook structurally follow the chapter so a reader can move between them and stay oriented. Principle 5 says *what to include*; this principle says *the order and structure*.
+
 6. **One new idea per cell.**
    Each code cell introduces at most one new concept. Reading cell N should feel like a tiny step from cell N−1. Never stack two unfamiliar things in one cell. Lead the reader gently.
 
