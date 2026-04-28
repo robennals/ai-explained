@@ -32,6 +32,8 @@ FILES=(
   "next-word-model/next-word-best.json"
   "next-word-model/next-word-best.weights.bin"
   "embeddings/embeddings.json"
+  "attention-model/model.json"
+  "attention-model/model.weights.bin"
 )
 
 # Check if an R2 object exists and return its size, or "" if missing.
