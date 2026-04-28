@@ -138,6 +138,24 @@ export const chapters: Chapter[] = [
   },
   {
     id: 14,
+    slug: "inference",
+    title: "Running Models Fast",
+    subtitle: "Inference and hardware",
+    prerequisites: [9],
+    description:
+      "GPUs, CUDA, FlashAttention, KV caching, speculative decoding, memory bandwidth — the engineering that makes inference cheap enough to use.",
+  },
+  {
+    id: 15,
+    slug: "interpretability",
+    title: "Looking Inside the Mind",
+    subtitle: "Interpretability",
+    prerequisites: [9],
+    description:
+      "Models aren't black boxes anymore. Sparse autoencoders, feature visualization, and circuit tracing reveal what individual neurons mean — sometimes finding a literal Golden Gate Bridge neuron inside.",
+  },
+  {
+    id: 16,
     slug: "reinforcement-learning",
     title: "Learning from Experience",
     subtitle: "Reinforcement learning",
@@ -146,34 +164,34 @@ export const chapters: Chapter[] = [
       "What if you don't have right answers, only rewards? RL learns from trial, error, and consequence — the algorithm behind robots that walk, agents that play games, and models that improve themselves.",
   },
   {
-    id: 15,
+    id: 17,
     slug: "self-play",
     title: "Getting Better by Beating Yourself",
     subtitle: "Self-play",
-    prerequisites: [14],
+    prerequisites: [16],
     description:
       "AlphaZero mastered chess and Go without ever seeing a human game — by playing itself, millions of times. The same idea now teaches reasoning models to think.",
   },
   {
-    id: 16,
+    id: 18,
     slug: "reasoning",
     title: "Thinking by Talking to Yourself",
     subtitle: "Reasoning models",
-    prerequisites: [9, 14],
+    prerequisites: [9, 16],
     description:
       "Standard LLMs answer in one shot with no scratch paper. Reasoning models use their own output as working memory, talking through problems before answering — and get dramatically smarter.",
   },
   {
-    id: 17,
+    id: 19,
     slug: "alignment",
     title: "Teaching AI Right from Wrong",
     subtitle: "Alignment",
-    prerequisites: [9, 14],
+    prerequisites: [9, 16],
     description:
       "RLHF transforms a text completer into a helpful assistant. But optimize too hard and the model learns to tell you what you want to hear, not what's true.",
   },
   {
-    id: 18,
+    id: 20,
     slug: "synthetic-data",
     title: "Models Teaching Models",
     subtitle: "Distillation and synthetic data",
@@ -182,7 +200,7 @@ export const chapters: Chapter[] = [
       "Train a small model to mimic a big one. Train a strong model on a weaker one's mistakes. Models can train models — and sometimes the student outgrows the teacher.",
   },
   {
-    id: 19,
+    id: 21,
     slug: "vision",
     title: "Teaching Machines to See",
     subtitle: "Image comprehension",
@@ -191,7 +209,7 @@ export const chapters: Chapter[] = [
       "Cut an image into patches, treat them like tokens, feed them to a transformer. CLIP, ViT, and the trick that lets the same architecture read text and see pictures.",
   },
   {
-    id: 20,
+    id: 22,
     slug: "image-generation",
     title: "Drawing Pictures",
     subtitle: "Image generation",
@@ -200,7 +218,16 @@ export const chapters: Chapter[] = [
       "Diffusion models start with pure noise and gradually paint a picture. Latent space is a map of all possible images — and you can walk between any two of them.",
   },
   {
-    id: 21,
+    id: 23,
+    slug: "world-models",
+    title: "Simulating Reality",
+    subtitle: "World models",
+    prerequisites: [22],
+    description:
+      "Sora and Veo don't just animate frames — they learn physics. Genie generates playable game worlds it has never seen. Generative video as a learned simulator of reality.",
+  },
+  {
+    id: 24,
     slug: "audio",
     title: "Listening, Speaking, and Singing",
     subtitle: "Audio",
@@ -209,16 +236,25 @@ export const chapters: Chapter[] = [
       "Sound is just numbers over time. Whisper transcribes any language. Voice cloning copies you from seconds. Music models compose. Audio fits into AI the same way text does — with surprises along the way.",
   },
   {
-    id: 22,
+    id: 25,
     slug: "agents",
     title: "Getting Things Done",
     subtitle: "Agents and tool use",
-    prerequisites: [9, 16],
+    prerequisites: [9, 18],
     description:
       "A model that just predicts text is a chatbot. A model that picks tools, runs loops, and uses a computer is an agent. From talker to doer.",
   },
   {
-    id: 23,
+    id: 26,
+    slug: "hallucination",
+    title: "Making Stuff Up",
+    subtitle: "Hallucination and grounding",
+    prerequisites: [9],
+    description:
+      "Models sound confident even when they're wrong. Next-word training all but guarantees it. Why hallucinations happen, why they're hard to detect, and what actually reduces them.",
+  },
+  {
+    id: 27,
     slug: "context",
     title: "Getting the Right Information",
     subtitle: "Context management",
@@ -227,7 +263,7 @@ export const chapters: Chapter[] = [
       "A model's intelligence depends as much on what you put in front of it as on its weights. Retrieval, prompt construction, memory systems — the art of feeding the right facts at the right time.",
   },
   {
-    id: 24,
+    id: 28,
     slug: "appendix-pytorch",
     title: "PyTorch from Scratch",
     subtitle: "A hands-on introduction to the code behind AI",
