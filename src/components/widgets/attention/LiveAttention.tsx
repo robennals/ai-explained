@@ -21,43 +21,31 @@ interface NamedHead {
   explanation: string;
 }
 
-// Coordinates and labels come from the Phase 1 trained-model inspection.
-// See docs/superpowers/reports/2026-04-28-attention-heads-phase1.md.
+// Coordinates and labels come from the Phase 1 trained-model inspection,
+// then re-validated against per-position behavior (cross-probe means hid
+// per-position decay, so this set is narrower than the original Phase 1
+// recommendations). See docs/superpowers/reports/2026-04-28-attention-heads-phase1.md.
 const NAMED_HEADS: NamedHead[] = [
   {
     label: "Induction",
     layer: 3,
     head: 3,
     explanation:
-      "When a phrase repeats, attention jumps back to whatever followed the earlier occurrence — a simple form of in-context learning.",
+      "When a phrase repeats, attention jumps back to whatever followed the earlier occurrence — a simple form of in-context learning. On non-repeated tokens this head mostly attends to itself.",
   },
   {
     label: "Previous token",
     layer: 0,
     head: 7,
     explanation:
-      "Each token looks at the one immediately before it. The cleanest single pattern in the model.",
+      "Each token looks at the one immediately before it. The cleanest single pattern in the model — works at every position.",
   },
   {
-    label: "First token",
-    layer: 4,
-    head: 6,
-    explanation:
-      "Every token attends back to the start of the sentence — a 'default sink' the model uses when it has nothing more specific to find.",
-  },
-  {
-    label: "Self / current",
-    layer: 0,
-    head: 1,
-    explanation:
-      "Each token attends mostly to itself. The model carries each word's identity forward without mixing in much else.",
-  },
-  {
-    label: "Recent noun",
+    label: "Punctuation",
     layer: 2,
-    head: 5,
+    head: 3,
     explanation:
-      "Pulls attention toward the most recent content noun — the closest the model has to coreference.",
+      "After a period or comma, this head pulls attention back to the punctuation mark — the model has learned where sentence boundaries are.",
   },
 ];
 
@@ -80,27 +68,19 @@ const EXAMPLES: Example[] = [
   },
   {
     label: "Previous token",
-    text: "Mary had a lamb. Mary had a",
+    text: "Mary had a little lamb",
     defaultHeadLabel: "Previous token",
-    defaultSelectedToken: 4, // "lamb"
+    defaultSelectedToken: 4, // "little" — clean diagonal demo
     hint:
-      "On the Previous token head, every token's attention slides one cell to the left — try clicking different words and watch the diagonal.",
+      "On the Previous token head, every token's attention slides one cell to the left. Try clicking different words and watch the diagonal hold.",
   },
   {
-    label: "BOS sink",
-    text: "red apple green apple blue apple",
-    defaultHeadLabel: "First token",
-    defaultSelectedToken: 4, // second "apple"
+    label: "Punctuation",
+    text: "She picked up the book. The book was heavy.",
+    defaultHeadLabel: "Punctuation",
+    defaultSelectedToken: 8, // "book" after the period
     hint:
-      'Click any token with the First token head selected. Almost all the attention drains back to "[BOS]" — a default attention with nothing else to do.',
-  },
-  {
-    label: "Self",
-    text: "Bob said hi. Bob said",
-    defaultHeadLabel: "Self / current",
-    defaultSelectedToken: 5, // second "bob"
-    hint:
-      "The Self head usually keeps the largest share of attention on the current token. Here the second “Bob” gives 39% to itself — flip to the Induction head to see it look back at the first “Bob” instead.",
+      'Click any token after the period — the Punctuation head pulls most of its attention back to "." even when the period is several words behind. The model learned where sentences end without anyone telling it.',
   },
 ];
 
