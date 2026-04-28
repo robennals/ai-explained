@@ -112,3 +112,7 @@ This solves the direction problem neatly. RoPE tells the model *how far apart* t
 We started with a problem: attention couldn't tell "the dog bit the man" from "the man bit the dog." The words were floating in a bag with no order. Now, by rotating each word's vector based on its position, the model can tell how far apart two words are — and each word gets to decide for itself whether to focus on its close neighbors, scan the whole sentence, or anything in between.
 
 Attention now knows three things: what each word *means* (from embeddings), which other words *matter* (from attention scores), and where each word *is* (from rotation). In the next chapter, we'll put all of these pieces together to build the **transformer** — the architecture behind ChatGPT, Claude, and every modern language model.
+
+<TryItInPyTorch notebook="positions">
+Demonstrate that toy attention is position-blind, build ALiBi from a linear distance penalty, derive RoPE from the rotation-invariance of the dot product, combine multiple rotation speeds for different attention-distance shapes, and apply causal masking with `torch.triu`.
+</TryItInPyTorch>

@@ -49,6 +49,9 @@ public/data/embeddings/
 
 # large data files (downloaded on demand by notebooks/scripts)
 notebooks/glove.*
+notebooks/text8
+notebooks/text8.zip
+notebooks/ts-tokenizer-4096.json
 
 # broomy
 .broomy/output/
