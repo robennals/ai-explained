@@ -25,7 +25,7 @@ from tokenizers import Tokenizer
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
-from _attention_model import CONFIG, TinyTransformer  # noqa: E402
+from _attention_model import TinyTransformer  # noqa: E402
 from test_weight_roundtrip import load_into_model  # noqa: E402
 
 MODEL_DIR = ROOT / "public" / "data" / "attention-model"
@@ -112,13 +112,15 @@ def score_self_attention(A: np.ndarray, *, _ids=None) -> float:
 
 
 def score_induction(A: np.ndarray, *, _ids: list[int]) -> float:
-    """For each occurrence of a token X at position i where X also appeared at
-    position j < i-1, attention from i should put weight on j+1 (the token
-    that followed the earlier X)."""
+    """For each occurrence of a token X at position i with at least one prior
+    occurrence at j <= i-2, score the attention A[i, j+1] from i to whatever
+    followed the *most recent* prior X. This is the canonical induction-head
+    behavior: look up the most recent past occurrence and attend to its
+    successor."""
     if _ids is None:
         return 0.0
     T = len(_ids)
-    hits = 0
+    hits = 0.0
     n = 0
     for i in range(2, T):
         x = _ids[i]
@@ -155,22 +157,35 @@ TEMPLATES = {
 
 
 def score_all_heads(model: TinyTransformer, tok: Tokenizer) -> dict:
+    """Run every probe through the model and return both the cross-probe
+    template means and the per-(probe, layer, head) attention matrices,
+    plus the per-(template, probe) per-head scores so heatmaps can pick the
+    most-relevant probe for each named head."""
     cfg = model.cfg
     L, H = cfg["num_layers"], cfg["num_heads"]
     sums = {name: np.zeros((L, H)) for name in TEMPLATES}
+    # per_probe_scores[name][probe_idx] = (L, H) matrix of per-head scores
+    # on that probe
+    per_probe_scores: dict[str, list[np.ndarray]] = {name: [] for name in TEMPLATES}
+    captured: dict[str, dict[tuple[int, int], np.ndarray]] = {}
     counts = 0
-    captured: dict[tuple[int, int, str], np.ndarray] = {}
     for sent in PROBE_SENTENCES:
         ids = tok.encode(sent).ids
         ids_t = torch.tensor([ids], dtype=torch.long)
-        _, attentions = forward_with_attentions(model, ids_t)
+        with torch.no_grad():
+            _, attentions = forward_with_attentions(model, ids_t)
+        per_head_score = {name: np.zeros((L, H)) for name in TEMPLATES}
+        captured[sent] = {}
         for l, layer_attn in enumerate(attentions):
             for h in range(H):
                 A = layer_attn[h].cpu().numpy()
+                captured[sent][(l, h)] = A
                 for name, fn in TEMPLATES.items():
-                    sums[name][l, h] += fn(A, _ids=ids)
-                if sent == PROBE_SENTENCES[0]:
-                    captured[(l, h, sent)] = A
+                    s = fn(A, _ids=ids)
+                    sums[name][l, h] += s
+                    per_head_score[name][l, h] = s
+        for name in TEMPLATES:
+            per_probe_scores[name].append(per_head_score[name])
         counts += 1
 
     means = {name: sums[name] / counts for name in TEMPLATES}
@@ -181,7 +196,18 @@ def score_all_heads(model: TinyTransformer, tok: Tokenizer) -> dict:
         flat.sort(reverse=True)
         ranked[name] = flat[:5]
 
-    return {"means": means, "ranked": ranked, "captured": captured}
+    return {
+        "means": means,
+        "ranked": ranked,
+        "captured": captured,
+        "per_probe_scores": per_probe_scores,
+    }
+
+
+def best_probe_for(per_probe_scores: list[np.ndarray], layer: int, head: int) -> int:
+    """Return the probe index where (layer, head) scored highest under this template."""
+    scores = [m[layer, head] for m in per_probe_scores]
+    return int(np.argmax(scores))
 
 
 def render_heatmap(A: np.ndarray, sentence_tokens: list[str], out_path: Path,
@@ -215,17 +241,21 @@ def main() -> None:
         json.dump(summary, f, indent=2)
     print(f"Wrote rankings to {summary_path}")
 
-    first_sent = PROBE_SENTENCES[0]
-    ids = tok.encode(first_sent).ids
-    tokens = tok.encode(first_sent).tokens
+    # Render top-3 heatmap per template on whichever probe best exercises it
+    # for that specific head, not always the first probe.
     for name, top in results["ranked"].items():
-        for rank, (score, l, h) in enumerate(top[:3]):
-            A = results["captured"][(l, h, first_sent)]
+        for rank, (mean_score, l, h) in enumerate(top[:3]):
+            probe_idx = best_probe_for(results["per_probe_scores"][name], l, h)
+            sent = PROBE_SENTENCES[probe_idx]
+            enc = tok.encode(sent)
+            A = results["captured"][sent][(l, h)]
+            local_score = float(results["per_probe_scores"][name][probe_idx][l, h])
             out = OUT_DIR / f"{name}_rank{rank + 1}_L{l}H{h}.png"
-            render_heatmap(A, tokens,
+            render_heatmap(A, enc.tokens,
                            out_path=out,
-                           title=f"{name} — L{l}H{h} (score={score:.3f})\n{first_sent}")
-            print(f"  wrote {out.name}")
+                           title=(f"{name} — L{l}H{h}  "
+                                  f"(mean={mean_score:.3f}, probe={local_score:.3f})\n{sent}"))
+            print(f"  wrote {out.name}  ({sent[:40]}…)")
 
     print("\nTop heads per template:")
     for name, top in results["ranked"].items():

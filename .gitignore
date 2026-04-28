@@ -60,3 +60,7 @@ notebooks/ts-tokenizer-4096.json
 # superpowers brainstorm scratch
 .superpowers/
 .env*.local
+
+# Python
+__pycache__/
+*.pyc
