@@ -58,6 +58,7 @@ export function NetworkOverview() {
     <WidgetContainer
       title="A Neural Network"
       description="Layers of neurons, connected together"
+      onReset={() => setSelected(null)}
     >
       <svg
         viewBox={`0 0 ${W} ${H}`}
