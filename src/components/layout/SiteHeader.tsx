@@ -8,9 +8,6 @@ export function SiteHeader() {
           <span className="text-lg">Learn AI Layer by Layer</span>
         </Link>
         <nav className="ml-auto flex items-center gap-6 text-sm text-muted">
-          <Link href="/" className="transition-colors hover:text-foreground">
-            Chapters
-          </Link>
           <a
             href="https://github.com/robennals/ai-explained"
             target="_blank"
