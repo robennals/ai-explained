@@ -238,15 +238,33 @@ Both paths are gitignored under `public/data/`. Local dev can either run the syn
 
 The existing BERT widget call-site in `src/app/(tutorial)/attention/content.mdx` (`<BertAttentionNoPositionWidget>`, in the "Attention in a Real Model" section) **stays where it is, with its prose unchanged**. (Note: `widgets.tsx` also exports a second `BertAttentionWidget` variant that's currently unused in the MDX — that export remains untouched.)
 
-The new widget gets a brand-new section, placed after "Where the Vectors Come From" and before "What We've Built" — i.e. once the reader has seen all the mechanisms (attention math, softmax, values, multi-head, QKV-from-embeddings), they get to play with the whole thing live before the chapter wraps up. The new section reads roughly:
+The new live widget is appended immediately after the BERT widget, **inside the same "Attention in a Real Model" section** — so the reader meets the curated BERT demo and the live playground back-to-back as two views of the same idea. A short bridging paragraph between them frames the contrast. The two call-sites end up looking like:
 
-> ## Try Attention Yourself
->
-> The BERT widget above showed curated heads from a strong model. Now here's the other side of that trade-off — a tiny transformer running live in your browser, trained on a small collection of children's stories. Its heads aren't as sophisticated as BERT's, but they're real, computed on whatever sentence you type, on demand.
->
-> [`<LiveAttentionWidget />`]
->
-> Try one of the repeated-phrase examples and switch to the "Induction" head. Watch how, when the model sees a phrase it's seen before, attention jumps back to whatever followed the earlier occurrence — that's a simple form of in-context learning, emerging from training without anyone designing it.
+```mdx
+## Attention in a Real Model
+
+…existing prose about BERT…
+
+<BertAttentionNoPositionWidget>
+…existing hint copy…
+</BertAttentionNoPositionWidget>
+
+…existing follow-up prose ("No one told these heads what patterns to learn…")…
+
+[NEW BRIDGING PARAGRAPH — see below]
+
+<LiveAttentionWidget>
+…hint copy pointing at induction…
+</LiveAttentionWidget>
+```
+
+The bridging paragraph reads roughly:
+
+> The BERT weights above are pre-recorded — extracted from a 110-million-parameter model in Python and shipped as a fixed table. Now here's the other side of that trade-off: a tiny transformer running live in your browser, trained on a small collection of children's stories. Its heads aren't as sophisticated as BERT's, but they're real, computed on whatever sentence you type, on demand.
+
+The hint copy inside `<LiveAttentionWidget>` then points at induction:
+
+> Try one of the repeated-phrase examples and switch to the "Induction" head. When the model sees a phrase it's seen before, attention jumps back to whatever followed the earlier occurrence — that's a simple form of in-context learning, emerging from training without anyone designing it.
 
 The exact wording is finalized once we've trained the model and seen which heads emerged. If the training run produces something other than induction as the most striking demo, the prose pivots to that.
 
@@ -259,7 +277,7 @@ The exact wording is finalized once we've trained the model and seen which heads
 | `src/components/widgets/attention/BertAttention.tsx` | **Unchanged.** |
 | `src/components/widgets/attention/LiveAttention.tsx` | **New.** Implements the live widget. |
 | `src/app/(tutorial)/attention/widgets.tsx` | Add `LiveAttentionWidget` export alongside the existing `BertAttention*` exports. |
-| `src/app/(tutorial)/attention/content.mdx` | Add a new "Try Attention Yourself" section between "Where the Vectors Come From" and "What We've Built", containing the `<LiveAttentionWidget />` call-site. The existing BERT call-site is not modified. |
+| `src/app/(tutorial)/attention/content.mdx` | Append a bridging paragraph and a `<LiveAttentionWidget>` call-site immediately after the existing BERT widget, inside the "Attention in a Real Model" section. The existing BERT call-site and its prose are not modified. |
 | `src/components/widgets/transformers/model-inference.ts` | Add optional int8 dequantization in the loader. The forward pass is unchanged. |
 | `scripts/train-attention-model.py` | **New.** Trains the model, exports JSON + binary weights. |
 | `scripts/inspect-attention-heads.py` | **New.** Probes the trained model to identify candidate named heads. |
