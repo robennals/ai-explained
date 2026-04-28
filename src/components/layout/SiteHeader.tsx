@@ -12,7 +12,7 @@ export function SiteHeader() {
             Chapters
           </Link>
           <a
-            href="https://github.com"
+            href="https://github.com/robennals/ai-explained"
             target="_blank"
             rel="noopener noreferrer"
             className="transition-colors hover:text-foreground"
