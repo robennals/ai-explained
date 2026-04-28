@@ -1,4 +1,5 @@
 import { ChapterNav } from "@/components/layout/ChapterNav";
+import { PolishingNotice } from "@/components/layout/PolishingNotice";
 import { getAdjacentChapters } from "@/lib/curriculum";
 import Content from "./content.mdx";
 import {
@@ -28,6 +29,7 @@ export default function Chapter07() {
 
   return (
     <article>
+      <PolishingNotice />
       <div className="prose prose-lg max-w-none">
         <Content
           components={{

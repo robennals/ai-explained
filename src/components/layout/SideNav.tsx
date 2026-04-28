@@ -36,7 +36,17 @@ function ChapterItem({ ch, isActive, label }: { ch: Chapter; isActive: boolean; 
         <span className="mt-0.5 shrink-0 w-5 text-right font-mono text-xs text-muted">
           {label}
         </span>
-        <span className="leading-snug">{ch.title}</span>
+        <span className="leading-snug">
+          {ch.title}
+          {ch.polishing && (
+            <span
+              title="I'm still polishing this chapter — it's good enough to read, but isn't yet at the point where my 11-year-old fully understands it."
+              className="ml-1.5 inline-flex items-center rounded-full bg-amber-50 px-1.5 py-0 text-[9px] font-semibold uppercase tracking-wide text-amber-800 ring-1 ring-inset ring-amber-200 align-middle"
+            >
+              Polishing
+            </span>
+          )}
+        </span>
       </Link>
     </li>
   );
