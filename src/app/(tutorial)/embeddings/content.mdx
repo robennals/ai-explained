@@ -1,85 +1,85 @@
 # From Words to Meanings
 
 <Lead>
-In the last chapter, we described animals with hand-picked properties like size and scariness. That worked because animals are one kind of thing. But words represent *everything* — and no single set of properties works for all of them. Modern AI solves this by giving up on the idea of universal properties, and instead putting similar words close to each other and letting directions mean different things in different places.
+In the last chapter, we described animals with hand-picked properties like size and scariness. That worked because animals are one kind of thing. But words represent *everything*, and no single set of properties works for all of them. Modern AI gives up on the idea of universal properties. Instead, it puts similar words close to each other and lets directions mean different things in different places.
 </Lead>
 
 ## The Problem with Hand-Picked Dimensions
 
 When we represented animals as vectors, we chose dimensions that made sense for animals: size, speed, danger. But what dimensions would you use for *all words*? "How big is the color blue?" doesn't make sense. "How fast is democracy?" There's no universal set of labeled dimensions that works for everything.
 
-AI solves this by giving up on universal dimensions entirely. Instead of asking "what properties describe everything?", it places words with similar meanings close together — and lets the dimensions mean different things in different parts of the space. Near "dog," the dimensions might capture size and domestication; near "cake," the same dimensions might capture sweetness and saltiness.
+AI gives up on universal dimensions entirely. Instead of asking "what properties describe everything?", it places words with similar meanings close together, and lets the dimensions mean different things in different parts of the space. Near "dog," the dimensions might capture size and domestication. Near "cake," the same dimensions might capture sweetness and saltiness.
 
-This is a somewhat tricky idea, so let's build up to it starting with just a single dimension. What if we use different *regions* of the number line for different categories, and order items *within* each region by a different property?
+This is a tricky idea. We'll build up to it starting with just a single dimension. What if we use different *regions* of the number line for different categories, and order items *within* each region by a different property?
 
 <CombinedNumberLineWidget>
-Try each preset. In "Animals + Foods", animals are on the left ordered by size, while foods are on the right ordered by sweetness. One number encodes the category AND a property within it. Try "Animals + Foods + Instruments" too — there's no two-category limit; you can keep carving the line into more regions.
+Try each preset. In "Animals + Foods", animals are on the left ordered by size, while foods are on the right ordered by sweetness. One number encodes the category AND a property within it. Try "Animals + Foods + Instruments" too. There's no two-category limit; you can keep carving the line into more regions.
 </CombinedNumberLineWidget>
 
-This is surprisingly expressive. One number tells you both *what category* something belongs to (which region it's in) and *something about it* (its position within that region). And nothing stops us from adding more regions — three, four, or more categories share the same line just fine.
+This is surprisingly expressive. One number tells you both *what category* something belongs to (which region it's in) and *something about it* (its position within that region). And nothing stops us from adding more regions. Three, four, or more categories share the same line just fine.
 
-But a single dimension has two hard limits. First, each region can only order its words by *one* property. Animals vary by size, but also by cuddliness, intelligence, and danger — one number within a region can't express all of those at once. Second, a line can't show any structure *between* categories. Some items belong to more than one at once — chicken is both an animal and a food — but a single line forces every item into exactly one region. And just as we want item positions *within* a category to carry meaning, we'd want the positions of categories *themselves* to carry meaning: animals and people are both living things; instruments and tools are both objects people use. On a single line there's no way to express any of that — every category is just its own chunk.
+But a single dimension has two hard limits. First, each region can only order its words by *one* property. Animals vary by size, but also by cuddliness, intelligence, and danger, and one number within a region can't express all of those at once. Second, a line can't show any structure *between* categories. Some items belong to more than one at once (chicken is both an animal and a food), but a single line forces every item into exactly one region. And just as we want item positions *within* a category to carry meaning, we'd want the positions of categories *themselves* to carry meaning: animals and people are both living things; instruments and tools are both objects people use. On a single line there's no way to express any of that. Every category is just its own chunk.
 
 ## Adding a Second Dimension
 
-What if we use *two* numbers? Now each word is a point on a 2D plane instead of a point on a line. This is dramatically more expressive — but still not enough.
+What if we use *two* numbers? Now each word is a point on a 2D plane instead of a point on a line. This is dramatically more expressive, but still not enough.
 
 <Simple2DScatterWidget>
-In "Animal or Food?" — chicken, salmon, and lamb appear in the overlap because they belong to both categories. Try "Four Distinct Categories" — animals, buildings, planets, and instruments sit in clean separate quadrants. Then try "Four Overlapping Categories" — wild, water, land, and domestic animals overlap in every direction, and two dimensions can't untangle them.
+In "Animal or Food?", chicken, salmon, and lamb appear in the overlap because they belong to both categories. Try "Four Distinct Categories": animals, buildings, planets, and instruments sit in clean separate quadrants. Then try "Four Overlapping Categories": wild, water, land, and domestic animals overlap in every direction, and two dimensions can't untangle them.
 </Simple2DScatterWidget>
 
-With just two numbers, we can represent overlapping categories like a Venn diagram, or separate four distinct groups into quadrants. But we can't distinguish everything — when categories overlap in complex ways, two dimensions aren't enough. We'd need more: "is it a pet?", "does it have strings?", "is it edible?"
+With just two numbers, we can represent overlapping categories like a Venn diagram, or separate four distinct groups into quadrants. But we can't distinguish everything. When categories overlap in complex ways, two dimensions aren't enough. We'd need more: "is it a pet?", "does it have strings?", "is it edible?"
 
 ## Beyond Two Dimensions
 
-Going from one dimension to two gave us dramatically more expressive power — more types of things, more ways they can differ, more ways categories can overlap. Adding more dimensions keeps making this better. With 50 or 100 dimensions, you can capture remarkably fine-grained distinctions.
+Going from one dimension to two gave us dramatically more expressive power: more types of things, more ways they can differ, more ways categories can overlap. Adding more dimensions keeps making this better. With 50 or 100 dimensions, you can capture very fine-grained distinctions.
 
-This is the idea we introduced earlier: don't worry about labeling dimensions. Just put similar things close together, and let directions mean different things in different parts of the space. With enough dimensions, this works remarkably well.
+This is the idea we introduced earlier: don't worry about labeling dimensions. Just put similar things close together, and let directions mean different things in different parts of the space. With enough dimensions, this works well.
 
-Representing something as a vector like this is called an **embedding**.
+Representing something as a vector like this is called an *embedding*.
 
 <KeyInsight>
-The dimensions don't need labels. What matters is that similar things are nearby and that directions encode meaningful relationships — even if the same direction means different things in different regions of the space.
+The dimensions don't need labels. What matters is that similar things are nearby and that directions encode meaningful relationships, even if the same direction means different things in different regions of the space.
 </KeyInsight>
 
 ## Exploring a Real Embedding
 
-Let's try a real embedding — GloVe, created by Stanford. Each word is a point in 300-dimensional space. The full embedding contains 400,000 words, which is too many to fit in the browser, so we're showing a subset of common nouns. We can't visualize 300 dimensions, but we *can* use [cosine similarity](/vectors) (from the previous chapter) to ask: what's nearby?
+Try a real embedding: GloVe, created by Stanford. Each word is a point in 300-dimensional space. The full embedding contains 400,000 words, which is too many to fit in the browser, so we're showing a subset of common nouns. We can't visualize 300 dimensions, but we *can* use [cosine similarity](/vectors) (from the previous chapter) to ask: what's nearby?
 
 <EmbeddingPlaygroundWidget>
-Start with "dog" — its neighbors are other animals and pets. Click on a neighbor to jump to it and browse around the space. Try "guitar" — you get other instruments. Try "queen" — notice it sits near royalty words. Type your own words and see what clusters together.
+Start with "dog". Its neighbors are other animals and pets. Click on a neighbor to jump to it and browse around the space. Try "guitar" and you get other instruments. Try "queen" and it sits near royalty words. Type your own words and see what clusters together.
 </EmbeddingPlaygroundWidget>
 
-Notice that the embedding groups words by meaning without being told what any word means. "Dog" is near "cat" and "puppy". "Guitar" is near "piano" and "bass". Similar words end up nearby — exactly the idea we described earlier.
+The embedding groups words by meaning without being told what any word means. "Dog" is near "cat" and "puppy". "Guitar" is near "piano" and "bass". Similar words end up nearby, exactly the idea we described earlier.
 
 ## Directions Have Meaning
 
-The embedding doesn't just group similar words together — *directions* in the space carry meaning too. The direction from "tiny" to "huge" captures size as a spectrum of adjectives. The direction from "rabbit" to "elephant" captures the same concept of size, this time through mammals. The direction from "salad" to "cake" captures a different axis: savory to sweet. Within regions where the embedding has organized words along a clear axis, the line between two words defines a meaningful spectrum.
+Grouping is only part of what the embedding does. *Directions* in the space carry meaning too. The direction from "tiny" to "huge" captures size as a spectrum of adjectives. The direction from "rabbit" to "elephant" captures the same concept of size, this time through mammals. The direction from "salad" to "cake" captures a different axis: savory to sweet. Within regions where the embedding has organized words along a clear axis, the line between two words defines a meaningful spectrum.
 
-The widget below tries to find words that genuinely lie on each direction — not just words similar to one endpoint, but words whose embedding sits close to the *line* connecting both. Pairs that vary along a meaningful axis produce a rich, cleanly-ordered spectrum. Pairs the embedding never had a reason to organize together produce nothing meaningful in between.
+The widget below tries to find words that genuinely lie on each direction. Not just words similar to one endpoint, but words whose embedding sits close to the *line* connecting both. Pairs that vary along a meaningful axis produce a rich, cleanly-ordered spectrum. Pairs the embedding never had a reason to organize together produce nothing meaningful in between.
 
 <WordPairSpectrumWidget>
-Try "tiny ↔ huge" — both are size adjectives, so the direction is pure and the line fills with size words. Try "rabbit ↔ elephant" for a size gradient through mammals: mouse, rat, pig, goat, cat, dog, deer, monkey, lion, rhino. Try "salad ↔ cake" for a clean savory-to-sweet food spectrum. Then try "man ↔ sausage" — words pile up near each endpoint with empty space in the middle, because there's no learned direction connecting people and sausages. The widget shows whatever the embedding learned, no padding.
+Try "tiny ↔ huge". Both are size adjectives, so the direction is pure and the line fills with size words. Try "rabbit ↔ elephant" for a size gradient through mammals: mouse, rat, pig, goat, cat, dog, deer, monkey, lion, rhino. Try "salad ↔ cake" for a clean savory-to-sweet food spectrum. Then try "man ↔ sausage". Words pile up near each endpoint with empty space in the middle, because there's no learned direction connecting people and sausages. The widget shows whatever the embedding learned, no padding.
 </WordPairSpectrumWidget>
 
-This is why unlabeled dimensions are powerful: concepts like size and sweetness exist as directions in the space even though no dimension is labeled. But directions only exist where the training has given the model a reason to organize words along them. Pick two words that vary along a meaningful axis — the embedding has a line for you. Pick two words that don't — you get empty space. The structure is real, but it's shaped by what the model was trained on, not by some idealized geometry of meaning.
+This is why unlabeled dimensions are powerful: concepts like size and sweetness exist as directions in the space even though no dimension is labeled. But directions only exist where the training has given the model a reason to organize words along them. Pick two words that vary along a meaningful axis, and the embedding has a line for you. Pick two words that don't, and you get empty space. The structure is real, but it's shaped by what the model was trained on, not by some idealized geometry of meaning.
 
 <KeyInsight>
-In a well-trained embedding, directions carry meaning. Concepts like size and sweetness exist as paths through the space — even though no dimension is labeled. But a direction only exists between two words if the training has given the model a reason to organize them along a shared axis.
+In a well-trained embedding, directions carry meaning. Concepts like size and sweetness exist as paths through the space, even though no dimension is labeled. But a direction only exists between two words if the training has given the model a reason to organize them along a shared axis.
 </KeyInsight>
 
 
 ## Adding Meaning
 
-If directions in embedding space carry meaning, then adding a vector to a word moves its meaning along that direction. Subtracting two words gives us the vector for the change between them: `elephant − mouse` is a "bigger animal" vector; add it to "rabbit" and you land near lion, giraffe, rhino. Other transformations work the same way — `paris − france` is "capital of," `woman − man` is "swap male for female," `walking − walk` is "present participle." Each is extracted by subtraction and applied by addition.
+If directions in embedding space carry meaning, then adding a vector to a word moves its meaning along that direction. Subtracting two words gives us the vector for the change between them. `elephant − mouse` is a "bigger animal" vector; add it to "rabbit" and you land near lion, giraffe, rhino. Other transformations work the same way: `paris − france` is "capital of," `woman − man` is "swap male for female," `walking − walk` is "present participle." Each is extracted by subtraction and applied by addition.
 
 <EmbeddingArithmeticWidget>
 Try each preset. Combine your own. Try nonsense like cat − dog + piano to see what happens when there's no learned transformation to extract.
 </EmbeddingArithmeticWidget>
 
-Like directions, these transformations only exist where the embedding has learned them. Our small GloVe embedding knows a few dozen clean ones; a frontier model like Claude encodes vastly more. And subtraction is just a detective's trick — we extract transformations this way so we can *see* them, but real neural networks learn transformation vectors directly as weights during training.
+Like directions, these transformations only exist where the embedding has learned them. Our small GloVe embedding knows a few dozen clean ones; a frontier model like Claude encodes vastly more. And subtraction is just a detective's trick: we extract transformations this way so we can *see* them, but real neural networks learn transformation vectors directly as weights during training.
 
-**This isn't a party trick.** It's how modern AI builds up complex meaning. In the chapter on [transformers](/transformers), we'll see that each layer of a transformer model adds vectors to deepen the model's understanding of what each word in a text is about.
+This is how modern AI builds up complex meaning. In the chapter on [transformers](/transformers), we'll see that each layer of a transformer model adds vectors to deepen the model's understanding of what each word in a text is about.
 
 <KeyInsight>
 You can apply transformations like "capital of" or "bigger animal" by adding a vector that encodes that transformation.
@@ -87,8 +87,7 @@ You can apply transformations like "capital of" or "bigger animal" by adding a v
 
 ## From Words to Tokens (Subwords)
 
-Real language models do **not** treat each full word as one unit.
-Instead, they break text into **tokens**.
+Real language models don't treat each full word as one unit. They break text into *tokens*.
 
 A token can be:
 - a whole word (`cat`)
@@ -97,33 +96,30 @@ A token can be:
 
 Why break words into parts?
 
-Because language has way too many possible words.
-People invent new words, spell things differently, and use rare words all the time. If we tried to create an embedding for every possible word then the data set would get impractically large, and rare words wouldn't have been seen enough times for the embedding to know what they meant.
+Because language has way too many possible words. People invent new words, spell things differently, and use rare words all the time. If we tried to create an embedding for every possible word, the data set would get impractically large, and rare words wouldn't have been seen enough times for the embedding to know what they meant.
 
-Take for example the word `treeishness`. You've probably never seen that word before, but you have a pretty good idea what it means because you can break it down into `tree`, `-ish`, and `-ness`.
+Take the word `treeishness`. You've probably never seen that word before, but you have a pretty good idea what it means because you can break it down into `tree`, `-ish`, and `-ness`.
 
 Modern language models solve the problem the same way. The most common words get their own token, but others get assembled out of smaller parts. Try it out below.
 
 <TokenizationPlaygroundWidget>
-Click "superman, superb, superlative" and look for repeated chunks.
-Then try a made-up word like "qwertyflorp" and see how it still gets broken into smaller known parts.
-Try punctuation too (`!`, `,`, `?`) and notice those are tokens as well.
+Click "superman, superb, superlative" and look for repeated chunks. Then try a made-up word like "qwertyflorp" and see how it still gets broken into smaller known parts. Try punctuation too (`!`, `,`, `?`) and see those are tokens as well.
 </TokenizationPlaygroundWidget>
 
 
 
 ## Where Do Embeddings Come From?
 
-In modern AIs, the embedding is just the first layer of the neural network. It has one input node for every possible token. When a token comes in, that input is set to 1 and every other input is set to 0 — like raising your hand in a crowd when someone calls your name. This is called **one-hot encoding**.
+In modern AIs, the embedding is just the first layer of the neural network. It has one input node for every possible token. When a token comes in, that input is set to 1 and every other input is set to 0, like raising your hand in a crowd when someone calls your name. This is called *one-hot encoding*.
 
 Each connection carries a weight. Since only one input word is "on," the output of the first layer is just the weights for that one word. Those weights *are* the embedding. Unlike the [neurons](/neurons) we saw in previous chapters, the embedding layer has no bias and no activation function.
 
-The network learns those weights through [gradient descent](/optimization), just like any other weights — naturally assigning each word the meaning that helps the network the most.
+The network learns those weights through [gradient descent](/optimization), just like any other weights, assigning each word the meaning that helps the network the most.
 
-Modern language models use even bigger embeddings than our 300-dimensional GloVe example: GPT-2 uses 768 dimensions, GPT-3 uses 12,288 dimensions.
+Modern language models use even bigger embeddings than our 300-dimensional GloVe example. GPT-2 uses 768 dimensions, GPT-3 uses 12,288 dimensions.
 
 <EmbeddingLayerDiagramWidget>
-Select different tokens from the dropdown. Notice how the selected token's input lights up with a 1, and all the others show 0 — that's one-hot encoding. The bright lines show the weights connecting that token to the embedding layer, and those weights become the embedding values on the right. The embedding then feeds into more layers of neurons — the rest of the network. Try selecting "dog" then "cat" — their embedding values look more similar to each other than to "car".
+Select different tokens from the dropdown. The selected token's input lights up with a 1, and all the others show 0. That's one-hot encoding. The bright lines show the weights connecting that token to the embedding layer, and those weights become the embedding values on the right. The embedding then feeds into more layers of neurons, the rest of the network. Try selecting "dog" then "cat". Their embedding values look more similar to each other than to "car".
 </EmbeddingLayerDiagramWidget>
 
 
@@ -131,24 +127,24 @@ Select different tokens from the dropdown. Notice how the selected token's input
 
 ## Beyond Words
 
-Embeddings are one of the most powerful ideas in modern AI. The pattern — take something discrete, map it to a point in continuous space, let training shape the geometry — applies far beyond words and tokens:
+Embeddings are one of the most powerful ideas in modern AI. The pattern (take something discrete, map it to a point in continuous space, let training shape the geometry) applies far beyond words and tokens:
 
-- **Image patches** in vision models
-- **Audio frames** in speech recognition
-- **Users and products** in recommendation systems
-- **Molecules** in drug discovery
+- Image patches in vision models
+- Audio frames in speech recognition
+- Users and products in recommendation systems
+- Molecules in drug discovery
 
 In every case, the same principle holds: similar things end up nearby, and the geometry of the space encodes meaningful relationships.
 
 <KeyInsight>
-An embedding is a learned mapping from discrete symbols to continuous geometry. The network discovers what dimensions to use and what structure to create — driven entirely by the need to perform its task well. This idea extends far beyond words to images, audio, molecules, and more.
+An embedding is a learned mapping from discrete symbols to continuous geometry. The network discovers what dimensions to use and what structure to create, driven by the need to perform its task well. This idea extends far beyond words to images, audio, molecules, and more.
 </KeyInsight>
 
 ## What's Next
 
-We've seen that embeddings turn words into lists of numbers — points in a high-dimensional space where proximity means similarity and directions encode relationships.
+We've seen that embeddings turn words into lists of numbers: points in a high-dimensional space where proximity means similarity and directions encode relationships.
 
-Now we have all the pieces we need to build a real language model. In the next chapter, we'll see that one surprisingly simple task — *predicting the next word in a sentence* — turns out to require everything an AI needs to know: grammar, facts, common sense, even emotions. We'll build up from naive word-counting to a neural network that uses embeddings to generalize, and discover why this single task is the foundation of every modern AI you've heard of.
+Now we have all the pieces we need to build a real language model. In the next chapter, we'll see that one surprisingly simple task, *predicting the next word in a sentence*, turns out to require everything an AI needs to know: grammar, facts, common sense, even emotions. We'll build up from naive word-counting to a neural network that uses embeddings to generalize, and see why this single task is the foundation of every modern AI you've heard of.
 
 <TryItInPyTorch notebook="embeddings">
 Build one-hot vectors, train your own word embeddings, explore real word analogies (king − man + woman = queen) with GloVe, and see how GPT-4 splits text into tokens.

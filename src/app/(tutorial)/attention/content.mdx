@@ -1,132 +1,132 @@
 # Paying Attention
 
 <Lead>
-In the last chapter, we saw that predicting the next word requires understanding — but our models could only look at a fixed window of recent words. What if the model could *choose* which earlier words to focus on? That idea, called attention, is the breakthrough that makes modern AI work. And it's built entirely from things you already know.
+In the last chapter, we saw that predicting the next word requires understanding, but our models could only look at a fixed window of recent words. What if the model could *choose* which earlier words to focus on? That idea, called attention, is the breakthrough that makes modern AI work. And it's built entirely from things you already know.
 </Lead>
 
 ## Some Words Need Other Words
 
-You often can't tell what a word means without looking at other words in the sentence. The word "bank" could be a place for money or the side of a river — you need to see the words around it to know which one. A pronoun like "it" makes no sense on its own — you have to look back and find what it refers to.
+You often can't tell what a word means without looking at other words in the sentence. The word "bank" could be a place for money or the side of a river. You need to see the words around it to know which. A pronoun like "it" makes no sense on its own. You have to look back and find what it refers to.
 
-This is something our fixed-window model from the last chapter can't do well. It sees the last few words and has no way to reach back and pick out the *specific* earlier words that matter.
+The fixed-window model from the last chapter can't do this well. It sees the last few words and has no way to reach back and pick out the *specific* earlier words that matter.
 
 <WhyAttentionMattersWidget>
-Each sentence has a highlighted word. Follow the arrows to see which other words you need to look at in order to understand it. Flip through the examples — each shows a different reason why "looking back selectively" is essential.
+Each sentence has a highlighted word. Follow the arrows to see which other words you need to look at in order to understand it. Flip through the examples. Each one shows a different reason why looking back selectively is essential.
 </WhyAttentionMattersWidget>
 
-Every one of these examples requires the same ability: given a word, *choose* which other words in the sentence are relevant to understanding it. Not the nearest words. Not a fixed window. The *right* words, wherever they happen to be.
+All of these examples require the same ability: given a word, choose which other words in the sentence are relevant to understanding it. Not the nearest words. Not a fixed window. The right words, wherever they happen to be.
 
-This is what **attention** does. It gives the model the ability to look at every word that came before and decide which ones matter for the word it's currently processing. Let's build up to how it works, step by step.
+This is what *attention* does. It lets the model look at every word that came before and decide which ones matter for the word it's currently processing. The next sections build up the mechanism step by step.
 
 ## Building Attention from Scratch
 
-So how do we actually build a mechanism that does this? We need each word to be able to "ask a question" and find the other words that answer it. Let's start with the simplest possible example.
+How do we build a mechanism that does this? Each word needs to be able to ask a question and find the other words that answer it. We'll start with the simplest possible example.
 
-Imagine a tiny vocabulary of just four tokens: **cat**, **dog**, **blah** (filler), and **it** (a pronoun). Our goal is to work out what noun **it** is referring to in any given sentence.
+Imagine a tiny vocabulary of just four tokens: *cat*, *dog*, *blah* (filler), and *it* (a pronoun). The goal is to work out which noun *it* refers to in any given sentence.
 
 Each token gets two vectors:
 
-- A **key** — what this token is *advertising*
-- A **query** — what this token is *looking for*
+- A *key*, which is what this token is advertising.
+- A *query*, which is what this token is looking for.
 
-Our keys and queries are just a single number representing "noun-ness" — how much this token is (or wants) a noun:
+The keys and queries are just a single number representing "noun-ness": how much this token is (or wants) a noun.
 
 <ToyVocabTableWidget />
 
-The interesting one is **it**: its key doesn't advertise anything — but its query says "I'm looking for a noun."
+The interesting case is *it*. Its key doesn't advertise anything, but its query says "I'm looking for a noun."
 
-To measure how well a query matches a key, we use the **dot product** from Chapter 4 — multiply corresponding numbers and add them up. A high dot product means a good match. Then we run the scores through a function called **softmax** that turns those scores into positive numbers that add up to 100% — we'll explore how softmax works in a moment.
+To measure how well a query matches a key, we use the dot product from Chapter 4: multiply corresponding numbers and add them up. A high dot product means a good match. Then we run the scores through a function called *softmax* that turns those scores into positive numbers that add up to 100%. The next section covers how softmax works.
 
 <ToyAttentionWidget>
-Click "it" to see its attention computed step by step — its query [3] matches each noun's key [3] (dot product = 9) but not filler's key [0] (dot product = 0). Try "cat blah dog it" — "it" splits attention between both nouns. Try "blah blah blah it" — with no nouns, attention spreads equally over filler. Then try "cat it dog it" — each "it" independently finds the nouns.
+Click "it" to see its attention computed step by step. Its query [3] matches each noun's key [3] (dot product = 9) but not filler's key [0] (dot product = 0). Try "cat blah dog it" and "it" splits attention between both nouns. Try "blah blah blah it" and with no nouns, attention spreads equally over filler. Then try "cat it dog it" and each "it" independently finds the nouns.
 </ToyAttentionWidget>
 
-Notice something crucial about **it** — it doesn't advertise anything — but it is looking for a noun. *What you advertise* isn't the same as *what you're looking for.* This is why we need separate queries and keys — a pronoun needs to find nouns without being mistaken for one itself.
+There's something crucial about *it*. It doesn't advertise anything, but it is looking for a noun. What you advertise isn't the same as what you're looking for. That's why we need separate queries and keys: a pronoun has to find nouns without being mistaken for one itself.
 
-In practice, real attention vectors have dozens or hundreds of dimensions, not just one. But the principle is the same — remember the "bear detector" from the vectors chapter, where a single dot product could check for complex things like "something similar to a bear". Attention queries and keys work the same way, just asking richer questions like "is this a noun that's the subject of a nearby verb?"
+In practice, real attention vectors have dozens or hundreds of dimensions rather than one. The principle is the same. Remember the "bear detector" from the vectors chapter, where a single dot product could check for complex things like "something similar to a bear". Attention queries and keys work the same way, just asking richer questions like "is this a noun that's the subject of a nearby verb?"
 
 ## Attention in a Real Model
 
-Our toy vocabulary has four tokens and one-dimensional vectors. Real language models have tens of thousands of tokens and vectors with hundreds of dimensions. But the mechanism is exactly the same — queries, keys, and dot products.
+The toy vocabulary above has four tokens and one-dimensional vectors. Real language models have tens of thousands of tokens and vectors with hundreds of dimensions. The mechanism is the same: queries, keys, and dot products.
 
-Below are real attention weights from **BERT**, a well-known language model. BERT has multiple attention heads, and each one has learned a different pattern. Click on any word and switch between heads to see what each one focuses on:
+Below are real attention weights from BERT, a well-known language model. BERT has multiple attention heads, and each one has learned a different pattern. Click on any word and switch between heads to see what each one focuses on.
 
 <BertAttentionNoPositionWidget>
-Click "it" and try the "Self / pronoun" head — notice how it splits attention among the nouns in the sentence, trying to figure out which ones matter. Then try the "Broad context" head to see a different pattern. These heads aren't always right (a single attention head can only do so much), but they've clearly learned something useful.
+Click "it" and try the "Self / pronoun" head. It splits attention among the nouns in the sentence, trying to figure out which ones matter. Then try the "Broad context" head to see a different pattern. These heads aren't always right (a single attention head can only do so much), but they've clearly learned something useful.
 </BertAttentionNoPositionWidget>
 
-No one told these heads what patterns to learn — each one discovered its role through training, because different kinds of attention are all useful for predicting language.
+No one told these heads what patterns to learn. Each one discovered its role through training, because different kinds of attention are all useful for predicting language.
 
 ## Softmax: Dividing Your Attention
 
-Earlier we said that we use **softmax** to turn raw dot-product scores into attention weights. But what does that actually mean, and why do we need it?
+Earlier we said that softmax turns raw dot-product scores into attention weights. What does that actually mean, and why do we need it?
 
-Here's the problem. Each token computes a dot product against every other token and gets back a list of raw scores — but those scores can be any numbers: large, small, negative, zero. What we need are *percentages*: each token has a fixed budget of attention — 100% — and needs to divide that budget among all the candidates. We need a way to turn arbitrary numbers into positive weights that add up to 100%.
+The problem is this. Each token computes a dot product against every other token and gets back a list of raw scores. Those scores can be any numbers: large, small, negative, zero. What we need are percentages. Each token has a fixed budget of attention (100%) and has to divide that budget among all the candidates. We need a way to turn arbitrary numbers into positive weights that add up to 100%.
 
-Softmax is that function. Think of it as a competition: what matters is **who's loudest relative to everyone else**. If one score is moderately high and the others are near zero, it wins by default. But if another score comes along much higher, it drowns out the moderate one and takes nearly all the weight. The *gaps* between scores matter more than the absolute values.
+Softmax is that function. Think of it as a competition. What matters is who's loudest relative to everyone else. If one score is moderately high and the others are near zero, it wins by default. But if another score comes along much higher, it drowns out the moderate one and takes nearly all the weight. The gaps between scores matter more than the absolute values.
 
 <SoftmaxExplorerWidget>
-Start with "All equal" — everyone gets 25%. Then try "Moderate, rest silent" — A isn't very loud, but it wins by default because nobody else is saying anything. Now click "Moderate meets loud" — B comes in much higher and completely drowns out A. That's the key dynamic: softmax is about *relative* loudness. Then try making all scores large but equal (like 8, 8, 8, 8) — still 25% each! It's the gaps that matter, not the magnitudes.
+Start with "All equal" and everyone gets 25%. Then try "Moderate, rest silent". A isn't very loud, but it wins by default because nobody else is saying anything. Now click "Moderate meets loud". B comes in much higher and completely drowns out A. That's the key dynamic: softmax is about *relative* loudness. Then try making all scores large but equal (like 8, 8, 8, 8) and you still get 25% each. The gaps matter, not the magnitudes.
 </SoftmaxExplorerWidget>
 
 ## Values: What Did You Find?
 
-So far attention tells us *where to look* — which tokens are relevant. But we also need to know *what information to gather* from those tokens.
+So far attention tells us where to look: which tokens are relevant. We also need to know what information to gather from those tokens.
 
-This is where the third vector comes in. In addition to a **key** (what I advertise) and a **query** (what I'm looking for), each token also gets a **value** — what it *provides* to any token whose query matches its key. Think of it this way: the key and query decide *who talks to whom*, and the value is *what gets said*.
+That's where the third vector comes in. Along with a key (what I advertise) and a query (what I'm looking for), each token also gets a *value*: what it provides to any token whose query matches its key. The key and query decide who talks to whom; the value is what gets said.
 
-For our pronoun example, the value encodes which animal the token represents. Cat's value says "I'm a cat," dog's value says "I'm a dog," and filler tokens have nothing to contribute:
+For the pronoun example, the value encodes which animal the token represents. Cat's value says "I'm a cat," dog's value says "I'm a dog," and filler tokens have nothing to contribute.
 
 <ToyValueTableWidget />
 
-Attention then blends these values using the attention weights as a recipe. If "it" pays 90% attention to "cat" and 10% to everything else, the result is 90% cat — the pronoun has figured out what it refers to.
+Attention then blends these values using the attention weights as a recipe. If "it" pays 90% attention to "cat" and 10% to everything else, the result is 90% cat. The pronoun has figured out what it refers to.
 
-The playground below uses the same key/query matching as before — "it" still finds nouns using the same dot products and softmax. But now we can see what happens with the values:
+The playground below uses the same key/query matching as before. "It" still finds nouns using the same dot products and softmax. But now you can see what happens with the values.
 
 <ToyAttentionValuesWidget>
-Click "it" to see how attention weights blend value vectors into a result. With "cat blah blah it," the result is nearly 100% cat. Try "cat blah dog it" — the result is a mix of both nouns. Try "blah blah blah it" — with no nouns, attention spreads equally everywhere (including back to "it" itself, since nothing matches better), and the result is empty.
+Click "it" to see how attention weights blend value vectors into a result. With "cat blah blah it," the result is nearly 100% cat. Try "cat blah dog it" and the result is a mix of both nouns. Try "blah blah blah it" and with no nouns, attention spreads equally everywhere (including back to "it" itself, since nothing matches better), and the result is empty.
 </ToyAttentionValuesWidget>
 
 ## Multi-Headed Attention
 
-An **attention head** is one full attention computation — one set of keys, queries, and values, learning one pattern of which words attend to which.
+An *attention head* is one full attention computation: one set of keys, queries, and values, learning one pattern of which words attend to which.
 
-Real models don't run just one head. They run many in parallel, each with its own keys, queries, and values, each free to learn a different pattern. This is called **multi-headed attention**. Each head produces its own new representation of every token; those per-head outputs are then combined into a single representation that gets passed on.
+Real models don't run just one head. They run many in parallel, each with its own keys, queries, and values, each free to learn a different pattern. This is called *multi-headed attention*. Each head produces its own new representation of every token. Those per-head outputs are then combined into a single representation that gets passed on.
 
 Why bother with more than one head? Understanding a sentence requires many kinds of questions at once: What does this pronoun refer to? What's the subject of this verb? What clause does this word belong to? Multi-headed attention lets the model ask all of these at the same time, with each head specializing in a different kind of relationship.
 
-That's what you saw with BERT earlier: one head specialized in pronouns, another in broader context — each found its role through training, without being told what to look for.
+That's what you saw with BERT earlier: one head specialized in pronouns, another in broader context. Each found its role through training, without being told what to look for.
 
 <KeyInsight>
-Multiple attention heads let the model ask many different questions in parallel. Each head has its own key, query, and value weights, so each learns to attend to a different kind of relationship — pronouns, grammar, structure, semantics. **The model doesn't need to choose one kind of attention; it gets all of them at once.**
+Multiple attention heads let the model ask many different questions in parallel. Each head has its own key, query, and value weights, so each learns to attend to a different kind of relationship: pronouns, grammar, structure, semantics. The model doesn't need to choose one kind of attention. It gets all of them at once.
 </KeyInsight>
 
 ## Where the Vectors Come From
 
-We've been talking about query, key, and value vectors — but where do they actually come from? The answer is surprisingly simple: **a single-layer neural network**, just like we saw in earlier chapters.
+We've been talking about query, key, and value vectors. Where do they actually come from? The answer is a single-layer neural network, just like the ones from earlier chapters.
 
-Each token starts as an embedding vector. To get the query, key, and value vectors, we feed that embedding through three separate single-layer networks — one for each vector. Each network takes the embedding as input and computes a weighted sum for each output, just like the neurons we saw before. The only difference is there's *no activation function* — just the weighted sums, nothing else.
+Each token starts as an embedding vector. To get the query, key, and value vectors, we feed that embedding through three separate single-layer networks, one for each vector. Each network takes the embedding as input and computes a weighted sum for each output, just like the neurons we saw before. The only difference is there's no activation function. Just the weighted sums, nothing else.
 
 <QKVProjectionWidget>
-Click different tokens to see how the same three networks produce different Q, K, V vectors for each token. Notice that "cat" and "dog" (similar embeddings) produce similar outputs, while "it" (very different embedding) produces very different vectors. Use the Focus buttons to highlight one network at a time — each has its own set of weighted connections. Thicker lines mean larger weights; dashed lines mean negative weights.
+Click different tokens to see how the same three networks produce different Q, K, V vectors for each token. "Cat" and "dog" (similar embeddings) produce similar outputs, while "it" (a very different embedding) produces very different vectors. Use the Focus buttons to highlight one network at a time. Each has its own set of weighted connections. Thicker lines mean larger weights; dashed lines mean negative weights.
 </QKVProjectionWidget>
 
-In a model with multiple attention heads, each head gets its own set of three networks with their own weights, so each head translates the same embedding into its own private Q, K, V vectors — this is how different heads learn to look for different things.
+In a model with multiple attention heads, each head gets its own set of three networks with their own weights. Each head translates the same embedding into its own private Q, K, V vectors. That's how different heads learn to look for different things.
 
 ## What We've Built
 
-Let's take stock. Attention is:
+A quick recap. Attention is:
 
-1. **Query, Key, Value** — Each word gets three representations, learned from embeddings
-2. **Dot products** — Measure how relevant each word is to each other word
-3. **Softmax** — Turn relevance scores into percentages
-4. **Weighted sum** — Blend values according to attention percentages
-5. **Multiple heads** — Run several attention patterns in parallel, each specializing in different relationships
+1. *Query, Key, Value*: each word gets three representations, learned from embeddings.
+2. *Dot products*: measure how relevant each word is to each other word.
+3. *Softmax*: turn relevance scores into percentages.
+4. *Weighted sum*: blend values according to attention percentages.
+5. *Multiple heads*: run several attention patterns in parallel, each specializing in different relationships.
 
-Every piece is something we already understood from earlier chapters. Attention is just a clever *wiring* of familiar operations.
+Every piece is something we already understood from earlier chapters. Attention is a particular wiring of familiar operations.
 
-But there's a problem we haven't solved. Did you notice? Our attention mechanism has no idea *where* words are — it only knows *what* they are. "The dog chased the cat" and "the cat chased the dog" produce identical attention scores. Worse, in a long document, a word at the other end of the book gets treated the same as a word in the same sentence — the model has no sense of proximity at all. In the next chapter, we'll fix this with an elegant trick involving rotation.
+But there's a problem we haven't solved. The attention mechanism has no idea where words are; it only knows what they are. "The dog chased the cat" and "the cat chased the dog" produce identical attention scores. Worse, in a long document, a word at the other end of the book gets treated the same as a word in the same sentence. The model has no sense of proximity at all. In the next chapter, we'll fix this with a trick involving rotation.
 
 <TryItInPyTorch notebook="attention">
-Compute dot-product attention from scratch, build query/key/value projections, visualize attention heatmaps on real sentences, implement multi-head attention, and see how scrambled word order doesn't change attention scores — a problem we'll solve in the next chapter.
+Compute dot-product attention from scratch, build query/key/value projections, visualize attention heatmaps on real sentences, implement multi-head attention, and see how scrambled word order doesn't change attention scores. The next chapter solves that.
 </TryItInPyTorch>
