@@ -8,7 +8,7 @@ interface ChapterNavProps {
 
 export function ChapterNav({ prev, next }: ChapterNavProps) {
   return (
-    <nav className="mt-16 flex items-stretch gap-4 border-t border-border pt-8">
+    <nav className="mt-16 flex flex-col items-stretch gap-3 border-t border-border pt-8 sm:flex-row sm:gap-4">
       {prev ? (
         <Link
           href={`/${prev.slug}`}
@@ -27,7 +27,7 @@ export function ChapterNav({ prev, next }: ChapterNavProps) {
       {next ? (
         <Link
           href={`/${next.slug}`}
-          className="group flex-1 rounded-lg border border-border p-4 text-right transition-colors hover:border-accent/40 hover:bg-accent/5"
+          className="group flex-1 rounded-lg border border-border p-4 transition-colors hover:border-accent/40 hover:bg-accent/5 sm:text-right"
         >
           <span className="text-xs font-medium uppercase tracking-wider text-muted">
             Next
