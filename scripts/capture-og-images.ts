@@ -11,6 +11,7 @@ import { chromium } from "@playwright/test";
 import { mkdir } from "node:fs/promises";
 import path from "node:path";
 import { getMainChapters, getAppendixChapters } from "../src/lib/curriculum";
+import { getOgDiagram } from "../src/lib/og-diagrams";
 
 const BASE_URL = process.env.OG_BASE_URL ?? "http://localhost:3000";
 const OUTPUT_DIR = path.resolve(process.cwd(), "public/og");
@@ -46,11 +47,14 @@ async function main() {
   // Site homepage variant.
   await captureOne(page, `${BASE_URL}/og/site`, path.join(OUTPUT_DIR, "site.png"));
 
-  // Each ready chapter.
-  const chapters = [...getMainChapters(), ...getAppendixChapters()].filter(
-    (c) => c.ready,
-  );
-  for (const ch of chapters) {
+  // Each ready chapter that has a curated OG diagram. Chapters without one
+  // fall back to /og/site.png in their metadata, so we skip them here.
+  const chaptersWithDiagrams = [
+    ...getMainChapters(),
+    ...getAppendixChapters(),
+  ].filter((c) => c.ready && getOgDiagram(c.slug) !== null);
+
+  for (const ch of chaptersWithDiagrams) {
     await captureOne(
       page,
       `${BASE_URL}/og/${ch.slug}`,
@@ -59,7 +63,9 @@ async function main() {
   }
 
   await browser.close();
-  console.log(`\nDone. ${chapters.length + 1} images written to public/og/.`);
+  console.log(
+    `\nDone. ${chaptersWithDiagrams.length + 1} images written to public/og/.`,
+  );
 }
 
 main().catch((err) => {

@@ -13,13 +13,7 @@ export default async function ChapterOgPage({
   if (!ch) notFound();
 
   const diagram = getOgDiagram(slug);
+  if (!diagram) notFound();
 
-  return (
-    <OgCard
-      title={ch.title}
-      subtitle={ch.subtitle}
-      number={ch.section === "appendix" ? "Appendix" : `Chapter ${ch.id}`}
-      diagram={diagram?.node ?? null}
-    />
-  );
+  return <OgCard>{diagram.node}</OgCard>;
 }

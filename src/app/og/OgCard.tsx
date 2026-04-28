@@ -1,15 +1,24 @@
 import type { ReactNode } from "react";
 
-interface OgCardProps {
-  title: string;
-  subtitle: string;
-  number: string;
-  diagram: ReactNode | null;
-}
+// Diagram-only OG frame: 1200×630 with the widget centered, no title or
+// brand chrome. The platform (Twitter / Slack / etc.) renders the page
+// title and description below the image, so we don't repeat them here.
+//
+// We also hide the WidgetContainer's header bar, "Go to Next Tab" footer,
+// and TryIt panel — none of those belong in a static share image.
 
-export function OgCard({ title, subtitle, number, diagram }: OgCardProps) {
+const HIDE_CHROME_CSS = `
+  .og-frame .widget-container { box-shadow: none; border: none; }
+  .og-frame .widget-container > div:first-child { display: none; }
+  .og-frame .widget-container > div.border-t { display: none; }
+  .og-frame .widget-container > div.p-5 > div.mt-10.justify-center { display: none; }
+  .og-frame .widget-container > div.p-5 { padding: 0; }
+`;
+
+export function OgCard({ children }: { children: ReactNode }) {
   return (
     <div
+      className="og-frame"
       style={{
         position: "fixed",
         inset: 0,
@@ -18,94 +27,28 @@ export function OgCard({ title, subtitle, number, diagram }: OgCardProps) {
         height: 630,
         background: "linear-gradient(135deg, #ffffff 0%, #eff6ff 100%)",
         display: "flex",
-        flexDirection: "column",
-        padding: 64,
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 48,
+        boxSizing: "border-box",
         fontFamily:
           'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
         color: "#1a1a2e",
-        boxSizing: "border-box",
       }}
     >
-      {/* Top brand bar */}
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <div
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: 8,
-            background: "#3b82f6",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "#ffffff",
-            fontWeight: 700,
-            fontSize: 18,
-          }}
-        >
-          AI
-        </div>
-        <div style={{ fontSize: 18, fontWeight: 600, color: "#374151" }}>
-          Learn AI Layer by Layer
-        </div>
-        {number && (
-          <div
-            style={{
-              marginLeft: "auto",
-              fontSize: 14,
-              fontWeight: 600,
-              textTransform: "uppercase",
-              letterSpacing: "0.08em",
-              color: "#6b7280",
-            }}
-          >
-            {number}
-          </div>
-        )}
+      <style dangerouslySetInnerHTML={{ __html: HIDE_CHROME_CSS }} />
+      <div
+        style={{
+          width: "100%",
+          maxWidth: 1100,
+          maxHeight: 530,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        {children}
       </div>
-
-      {/* Title block */}
-      <div style={{ marginTop: 56 }}>
-        <div
-          style={{
-            fontSize: 72,
-            fontWeight: 700,
-            lineHeight: 1.05,
-            letterSpacing: "-0.02em",
-            color: "#1a1a2e",
-            maxWidth: 1000,
-          }}
-        >
-          {title}
-        </div>
-        <div
-          style={{
-            marginTop: 20,
-            fontSize: 28,
-            fontWeight: 400,
-            lineHeight: 1.3,
-            color: "#4b5563",
-            maxWidth: 1000,
-          }}
-        >
-          {subtitle}
-        </div>
-      </div>
-
-      {/* Diagram (if any) */}
-      {diagram && (
-        <div
-          style={{
-            marginTop: "auto",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "flex-end",
-            maxHeight: 280,
-            overflow: "hidden",
-          }}
-        >
-          {diagram}
-        </div>
-      )}
     </div>
   );
 }
