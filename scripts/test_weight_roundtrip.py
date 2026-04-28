@@ -6,8 +6,6 @@ that running the same forward pass on a fixed input produces matching logits."""
 # dependencies = [
 #     "torch>=2.0",
 #     "numpy>=1.24",
-#     "tokenizers>=0.21",
-#     "datasets>=3.0",
 # ]
 # ///
 
@@ -21,7 +19,7 @@ import torch
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
-from train_attention_model import CONFIG, TinyTransformer  # noqa: E402
+from _attention_model import CONFIG, TinyTransformer  # noqa: E402
 
 MODEL_DIR = ROOT / "public" / "data" / "attention-model"
 
@@ -91,8 +89,11 @@ def main() -> None:
             logits_round = reloaded(ids)
         max_diff = (logits_orig - logits_round).abs().max().item()
         print(f"Max logit diff: {max_diff:.2e}")
-        assert max_diff < 1e-4, "Round-trip failed!"
-        print("Round-trip OK")
+        # The round-trip is PyTorch-fp32 -> bytes -> PyTorch-fp32 with no
+        # quantization. It must be bit-identical; any nonzero diff signals a
+        # real shape/order/dtype bug, not numerical noise.
+        assert max_diff == 0.0, f"Expected bit-identical round-trip, got {max_diff}"
+        print("Round-trip OK (bit-identical)")
     else:
         print(f"No {ckpt_path} found — shape check only.")
         print("Round-trip OK (shapes consistent)")
