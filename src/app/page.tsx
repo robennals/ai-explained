@@ -56,6 +56,14 @@ export default function HomePage() {
                     {ch.title}
                   </h2>
                   <p className="mt-0.5 text-xs text-muted">{ch.subtitle}</p>
+                  {ch.polishing && (
+                    <span
+                      title="I'm still polishing this chapter — it's good enough to read, but isn't yet at the point where my 11-year-old fully understands it."
+                      className="mt-1.5 inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-800 ring-1 ring-inset ring-amber-200"
+                    >
+                      Polishing
+                    </span>
+                  )}
                 </div>
               </div>
             </Link>

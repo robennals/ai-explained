@@ -6,6 +6,7 @@ export interface Chapter {
   prerequisites: number[];
   description: string;
   ready?: boolean;
+  polishing?: boolean;
   section?: "appendix";
 }
 
@@ -79,6 +80,7 @@ export const chapters: Chapter[] = [
     description:
       "Attention — letting each word choose which other words to focus on — is the breakthrough behind modern AI. Built from things you already know: embeddings, dot products, and neural networks.",
     ready: true,
+    polishing: true,
   },
   {
     id: 8,
@@ -89,6 +91,7 @@ export const chapters: Chapter[] = [
     description:
       "Attention is position-blind — it has no idea where words are in a sentence. Distance penalties, rotation tricks, and the elegant geometry of RoPE fix this.",
     ready: true,
+    polishing: true,
   },
   {
     id: 9,
@@ -99,6 +102,7 @@ export const chapters: Chapter[] = [
     description:
       "The transformer wires attention and neural networks together. Trained only to predict the next word, it learns grammar, narrative, and common sense — from nothing but prediction.",
     ready: true,
+    polishing: true,
   },
   {
     id: 10,
