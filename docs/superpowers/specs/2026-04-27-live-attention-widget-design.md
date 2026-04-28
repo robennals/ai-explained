@@ -1,15 +1,20 @@
-# Live Attention Widget — Replace Pre-recorded BERT With a Browser-trained Transformer
+# Live Attention Playground — A Browser-trained Transformer Alongside the BERT Widget
 
 **Status:** Design complete; ready for implementation plan.
-**Scope:** Replace `BertAttention.tsx` (which serves 8 hardcoded sentences × 4 hardcoded heads of pre-extracted `bert-base-uncased` weights) with a widget that runs a real, small transformer in the browser and exposes every layer × head of attention on user-typed sentences.
+**Scope:** Add a new live-inference widget to the attention chapter that runs a small custom transformer in the browser, letting readers type any sentence and inspect every layer × head of attention. Sits **alongside** the existing pre-recorded `BertAttention` widget (which is preserved unchanged) — readers see both the curated highlights of a real strong model and a sandbox for poking at a live, weaker one.
 
 ---
 
 ## Motivation
 
-The current "Real Attention Heads (BERT)" widget shows attention weights from `bert-base-uncased` — but the weights are pre-extracted with a Python script for a fixed list of sentences. The reader can't type their own input, can't poke at unfamiliar heads, and can't see how attention patterns shift across layers. The widget feels like a static figure dressed up as an interaction.
+The existing "Real Attention Heads (BERT)" widget shows attention weights from `bert-base-uncased` — beautifully curated heads on a strong model, but the weights are pre-extracted in Python for a fixed list of sentences. The reader can't type their own input, can't poke at unfamiliar heads, and can't see how attention patterns shift as a real model runs.
 
-This spec replaces it with a tiny custom transformer trained on TinyStories, running fully in the browser via the existing pure-JS inference engine, with every layer and head browsable on any sentence the reader types.
+The other side of that trade-off — a live model in the browser — is also worth showing, even if its heads are weaker. A live playground gives the reader:
+- **Authorship.** Type your own sentences and see attention happen.
+- **Surprise.** Browse heads that nobody curated. Find a pattern the chapter didn't tell you about.
+- **Reality.** Watch the same math the chapter just taught actually run on your machine.
+
+So instead of replacing the BERT widget, we add a second widget — a live tiny transformer — and let the two play complementary roles. The BERT widget is "here's what attention looks like in a real model" (curated, deep). The live widget is "here's attention happening live, on whatever you type" (interactive, shallow).
 
 ## Goals
 
@@ -19,14 +24,50 @@ This spec replaces it with a tiny custom transformer trained on TinyStories, run
 4. Model loads fast: under 10MB on the wire, ready to run within ~2 seconds on a typical connection.
 5. Reuse the project's existing infrastructure: `model-inference.ts`, `ts-tokenizer-4096.json`, R2 sync script, `LiveTransformer` loader pattern.
 6. Forward pass on a 16-token sentence completes in well under a second.
+7. **The BERT widget is preserved unchanged.** No code or copy in `BertAttention.tsx` is touched by this work.
 
 ## Non-goals
 
-- Pronoun-resolution heads. A 6M-param model trained on TinyStories is not large enough to develop them robustly. The chapter copy is updated to reflect the heads we actually get.
+- Replacing the BERT widget. It stays. The chapter ends up with two attention widgets — one pre-recorded, one live — sitting in different parts of the chapter and playing complementary roles.
+- Pronoun-resolution heads in the live model. A 6M-param model trained on TinyStories is not large enough to develop them robustly. The chapter handles this by *not promising* pronoun heads in the live widget — that demo stays the BERT widget's job.
 - WebGPU acceleration. Pure-JS is fast enough at this size; if it isn't, we shrink the model rather than add a runtime dependency.
 - Replacing the existing `LiveTransformer` (story-generation widget). That widget loads from the same R2 prefix but a different sub-path; the two models coexist.
-- Bidirectional attention. The new model is causal (decoder-style), matching the rest of the chapter and the existing `model-inference.ts` engine. The chapter's pronoun-example sentences still work because pronouns refer back, not forward.
+- Bidirectional attention. The new model is causal (decoder-style), matching the rest of the chapter and the existing `model-inference.ts` engine.
 - Training infrastructure improvements beyond what this widget needs. No general-purpose training library.
+
+---
+
+## Phased rollout with a hard checkpoint
+
+This work splits into two phases with a **gate between them**. Phase 2 only proceeds if Phase 1's results are interesting enough.
+
+### Phase 1 — Train and inspect
+
+1. Implement `train-attention-model.py` and run it to convergence.
+2. Implement `inspect-attention-heads.py` to score every head against interpretable templates (previous-token, induction, first-token, repeated-token, punctuation, content-token).
+3. Run inspection on a battery of probe sentences (induction probes like `"Bob said hi. Bob said"`, repetition probes like `"red apple green apple blue apple"`, sentences with mixed punctuation, plain narrative).
+4. For each candidate named head, save its attention matrix on the probe sentences as PNG heatmaps so they can be eyeballed without re-running the model.
+5. **Stop and report findings to the user.** The report includes:
+   - Which heads scored highly on which templates.
+   - Heatmaps for the top candidates.
+   - A subjective read on whether the heads look "fun to play with" — clean patterns, recognizable behavior on novel sentences, surprises worth highlighting.
+
+### Checkpoint — gate
+
+The user reviews the Phase 1 report and decides:
+- **Heads are good enough → proceed to Phase 2.**
+- **Heads are weak → iterate.** Try a different seed, more training tokens, slightly larger model (8L × 8H × 320 ≈ 12M params is the next step up). Re-inspect. Repeat until either the heads pass or we conclude the live-widget idea isn't worth it for this chapter.
+- **Heads are unsalvageable → abandon this work.** The BERT widget already exists and the chapter is fine without a second widget. No fallback widget gets built on top of weak heads.
+
+The acceptance bar is *qualitative* (does the demo feel fun?), not just quantitative — three named heads aren't worth shipping if none of them are visibly impressive on novel sentences.
+
+### Phase 2 — Build the widget (only after the gate passes)
+
+1. Implement `LiveAttention.tsx` against the trained model.
+2. Wire it into `widgets.tsx` and the new chapter section.
+3. Upload weights to R2 via `pnpm sync-r2:apply`.
+4. Test in dev, refine the curated examples and per-head copy based on what the actual heads do.
+5. Ship.
 
 ---
 
@@ -85,7 +126,7 @@ If int8 turns out to be lossy enough that named heads' patterns blur, fp16 is th
 
 ### Head-discovery script
 
-A second script: `scripts/inspect-attention-heads.py` (or just a Jupyter cell). After training:
+A second script: `scripts/inspect-attention-heads.py`. After training:
 
 1. Run forward passes on a battery of probe sentences (induction probes, repeated-token probes, sentences with clear punctuation, etc.).
 2. For each (layer, head), score it on a few **interpretable templates** — e.g., diagonal-shifted-by-1 ≈ previous-token, induction template ≈ matches at "second occurrence → token after first occurrence."
@@ -100,7 +141,7 @@ Expected named heads (the chapter beats):
 - **Repeated token** (attends to other instances of the same token; distinct from induction)
 - **Content tokens** (broad attention skipping function words; the "Broad context" analogue)
 
-We aim for 5–7 labeled heads. If fewer emerge cleanly, the curation simply lists fewer; the grid view always shows all 48 regardless. **Acceptance bar for shipping:** at least three named heads, one of which is induction. If we can't find a clear induction head after training, we retrain with a different seed or a slightly larger model rather than ship without it — induction is the headline demo.
+We aim for 5–7 labeled heads. The grid view always shows all 48 regardless. **The Phase 1 → Phase 2 gate (above) is what determines whether we ship at all** — the test is qualitative ("does this feel fun?"), not a fixed threshold count.
 
 ---
 
@@ -110,9 +151,8 @@ We aim for 5–7 labeled heads. If fewer emerge cleanly, the curation simply lis
 
 ```
 src/components/widgets/attention/
-  BertAttention.tsx              ← deleted
+  BertAttention.tsx              ← unchanged
   LiveAttention.tsx              ← new
-  attention-model-loader.ts      ← new (or extends model-inference.ts loader)
 
 scripts/
   train-attention-model.py       ← new
@@ -120,7 +160,7 @@ scripts/
   sync-r2.sh                     ← updated FILES list
 ```
 
-The two MDX call-sites (`<BertAttentionWidget>` and `<BertAttentionNoPositionWidget>`) both become `<LiveAttentionWidget>` (single component, no "exclude positional heads" variant — see the prose-update section).
+`BertAttention.tsx` and its MDX call-sites stay as they are. The new live widget is wired into the chapter at a different location (see "Chapter prose updates" below).
 
 ### Component shape
 
@@ -196,19 +236,19 @@ Both paths are gitignored under `public/data/`. Local dev can either run the syn
 
 ## Chapter prose updates
 
-The widget appears at one place in `src/app/(tutorial)/attention/content.mdx`:
+The existing BERT widget call-site in `src/app/(tutorial)/attention/content.mdx` (`<BertAttentionNoPositionWidget>`, in the "Attention in a Real Model" section) **stays where it is, with its prose unchanged**. (Note: `widgets.tsx` also exports a second `BertAttentionWidget` variant that's currently unused in the MDX — that export remains untouched.)
 
-> "Below are real attention weights from **BERT**, a well-known language model."
+The new widget gets a brand-new section, placed after "Where the Vectors Come From" and before "What We've Built" — i.e. once the reader has seen all the mechanisms (attention math, softmax, values, multi-head, QKV-from-embeddings), they get to play with the whole thing live before the chapter wraps up. The new section reads roughly:
 
-This becomes something like:
+> ## Try Attention Yourself
+>
+> The BERT widget above showed curated heads from a strong model. Now here's the other side of that trade-off — a tiny transformer running live in your browser, trained on a small collection of children's stories. Its heads aren't as sophisticated as BERT's, but they're real, computed on whatever sentence you type, on demand.
+>
+> [`<LiveAttentionWidget />`]
+>
+> Try one of the repeated-phrase examples and switch to the "Induction" head. Watch how, when the model sees a phrase it's seen before, attention jumps back to whatever followed the earlier occurrence — that's a simple form of in-context learning, emerging from training without anyone designing it.
 
-> "Below is a small transformer running live in your browser. It was trained on a tiny corpus of children's stories — small enough to download in a couple of seconds, big enough to develop interesting attention patterns. Type any sentence and watch what each head pays attention to."
-
-The sub-prose currently teasing the "Self / pronoun" head ("Click 'it' and try the 'Self / pronoun' head…") is rewritten to point at induction:
-
-> "Try one of the repeated-phrase examples and switch to the 'Induction' head. Watch how, when the model sees a phrase it's seen before, attention jumps back to whatever followed the earlier occurrence — that's how it can predict what's likely to come next."
-
-The MDX call-site that previously excluded positional heads (`BertAttentionNoPositionWidget`) becomes `<LiveAttentionWidget defaultHead="Induction" />` so its first impression is the headline demo, not a positional head. The other call-site (`<BertAttentionWidget>`) becomes `<LiveAttentionWidget />` with the default starter sentence.
+The exact wording is finalized once we've trained the model and seen which heads emerged. If the training run produces something other than induction as the most striking demo, the prose pivots to that.
 
 ---
 
@@ -216,17 +256,17 @@ The MDX call-site that previously excluded positional heads (`BertAttentionNoPos
 
 | File | Change |
 |---|---|
-| `src/components/widgets/attention/BertAttention.tsx` | **Delete.** |
-| `src/components/widgets/attention/LiveAttention.tsx` | **New.** Implements the widget. |
-| `src/app/(tutorial)/attention/widgets.tsx` | Replace `BertAttention` imports/exports with `LiveAttention`. Both call-site components (`BertAttentionWidget`, `BertAttentionNoPositionWidget`) become `LiveAttentionWidget` variants. |
-| `src/app/(tutorial)/attention/content.mdx` | Update prose at the BERT mention; update the per-widget hint copy. |
+| `src/components/widgets/attention/BertAttention.tsx` | **Unchanged.** |
+| `src/components/widgets/attention/LiveAttention.tsx` | **New.** Implements the live widget. |
+| `src/app/(tutorial)/attention/widgets.tsx` | Add `LiveAttentionWidget` export alongside the existing `BertAttention*` exports. |
+| `src/app/(tutorial)/attention/content.mdx` | Add a new "Try Attention Yourself" section between "Where the Vectors Come From" and "What We've Built", containing the `<LiveAttentionWidget />` call-site. The existing BERT call-site is not modified. |
 | `src/components/widgets/transformers/model-inference.ts` | Add optional int8 dequantization in the loader. The forward pass is unchanged. |
 | `scripts/train-attention-model.py` | **New.** Trains the model, exports JSON + binary weights. |
 | `scripts/inspect-attention-heads.py` | **New.** Probes the trained model to identify candidate named heads. |
 | `scripts/sync-r2.sh` | Add the two new file paths. |
-| `scripts/extract-bert-attention.py` | **Delete** (no longer used). |
+| `scripts/extract-bert-attention.py` | **Unchanged** (still owns the BERT widget's data). |
 
-The companion notebook `notebooks/attention.ipynb` does not change in this spec. The chapter still teaches the same mechanism; only the demo source changes. We can revisit whether the notebook should also load the same trained weights as a follow-up.
+The companion notebook `notebooks/attention.ipynb` does not change in this spec.
 
 ---
 
