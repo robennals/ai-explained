@@ -207,6 +207,9 @@ function LiveAttentionLoaded({
         const tokens = ["[BOS]", ...enc.tokens].slice(0, model.config.context_len);
         const inference = forward(model, ids);
         setResult({ tokens, inference });
+        // If the sentence shrank below the previously-selected token, clear
+        // the selection so the readout doesn't read past the new attention row.
+        setSelectedToken((prev) => (prev !== null && prev >= tokens.length ? null : prev));
       } finally {
         setRunning(false);
       }
@@ -233,6 +236,10 @@ function LiveAttentionLoaded({
       const h = NAMED_HEADS.find((nh) => nh.label === ex.defaultHeadLabel);
       if (h) setSelectedHead({ layer: h.layer, head: h.head });
     }
+    // Clear result so the readout disappears until the new forward pass
+    // completes — otherwise we briefly index the new head into the old
+    // attention matrix.
+    setResult(null);
     setSelectedToken(ex.defaultSelectedToken ?? null);
   }
 
