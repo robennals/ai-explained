@@ -100,7 +100,7 @@ const EXAMPLES: Example[] = [
     defaultHeadLabel: "Self / current",
     defaultSelectedToken: 5, // second "bob"
     hint:
-      "On the Self head, each token attends to itself — flip to the Induction head to see the second “Bob” look back instead.",
+      "The Self head usually keeps the largest share of attention on the current token. Here the second “Bob” gives 39% to itself — flip to the Induction head to see it look back at the first “Bob” instead.",
   },
 ];
 
