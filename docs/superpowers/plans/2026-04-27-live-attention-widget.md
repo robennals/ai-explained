@@ -466,21 +466,21 @@ git commit -m "Add weight export and round-trip test"
 
 ### Task 3: Run full training
 
-This step is **executed by the user on their own machine**, not by an automation agent. Training runs 2–6 hours on a laptop GPU or ~12 hours on CPU.
+Training runs ~2–4 hours on Apple Silicon MPS, ~1–2 hours on a CUDA GPU, or ~10+ hours on CPU. Run via `run_in_background: true` so the agent stays responsive and gets notified on completion.
 
-- [ ] **Step 1: Document expected runtime in script header**
-
-Already covered in the script docstring — no change needed; just confirm the user has read it.
-
-- [ ] **Step 2: User runs full training**
+- [ ] **Step 1: Kick off training in the background**
 
 ```bash
 uv run scripts/train_attention_model.py
 ```
 
-Expected: trains for ~3 epochs over ~50K stories, final loss should land in the 3.5–4.5 range (TinyStories at this scale is reasonably learnable). Outputs land in `public/data/attention-model/`.
+Run with `run_in_background: true`. The script auto-detects MPS / CUDA / CPU. While it runs, the agent can move on to Task 4 (drafting the head-inspection script). Wait for the completion notification before proceeding to Step 2.
 
-- [ ] **Step 3: User runs round-trip test on the trained model**
+- [ ] **Step 2: Verify training succeeded**
+
+Check the background task's output for the final loss line and the `Wrote ... model.json and ... model.weights.bin` message. Final loss should land in the 3.5–4.5 range. If loss is much higher (>5.5) or NaN, training failed — diagnose before continuing.
+
+- [ ] **Step 3: Run the round-trip test on the trained model**
 
 ```bash
 uv run scripts/test_weight_roundtrip.py
@@ -490,7 +490,7 @@ Expected: `Max logit diff: <1e-4>` and `Round-trip OK`.
 
 - [ ] **Step 4: Commit any script tweaks made during training**
 
-If the user discovered training-time issues (e.g. OOM, missing dependency), fix and:
+If training-time issues showed up (OOM, missing dep, MPS-specific bug), fix and:
 
 ```bash
 git add scripts/train_attention_model.py
