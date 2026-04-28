@@ -363,10 +363,11 @@ export function loadTransformerModel(baseUrl: string): Promise<TransformerModel>
       if (quantization === "int8") {
         const scale = view.getFloat32(offset, true);
         offset += 4;
+        // Int8Array view over the buffer — int8 alignment is trivial.
+        // Per-element JIT-friendly access beats DataView.getInt8 on large tensors.
+        const ints = new Int8Array(buf, offset, nElements);
         const out = new Float32Array(nElements);
-        for (let i = 0; i < nElements; i++) {
-          out[i] = view.getInt8(offset + i) * scale;
-        }
+        for (let i = 0; i < nElements; i++) out[i] = ints[i] * scale;
         offset += nElements;
         return out;
       } else {

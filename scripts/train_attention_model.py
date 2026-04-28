@@ -141,6 +141,8 @@ def write_tensor_int8(f, t: torch.Tensor) -> None:
     abs_max = float(np.abs(arr).max())
     scale = abs_max / 127.0 if abs_max > 0 else 1.0
     f.write(struct.pack("<f", scale))
+    # Clip to symmetric [-127, 127]; -128 has no positive counterpart and
+    # banker's rounding can occasionally emit it, which would overflow int8.
     quantized = np.clip(np.round(arr / scale), -127, 127).astype(np.int8)
     f.write(quantized.tobytes(order="C"))
 
