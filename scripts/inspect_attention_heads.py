@@ -54,7 +54,7 @@ def load_model() -> tuple[TinyTransformer, Tokenizer]:
     with open(config_path) as f:
         meta = json.load(f)
     model = TinyTransformer(meta["config"])
-    load_into_model(model, bin_path)
+    load_into_model(model, bin_path, quantized=meta["config"].get("quantization") == "int8")
     model.eval()
     tok = Tokenizer.from_file(str(TOKENIZER_PATH))
     return model, tok

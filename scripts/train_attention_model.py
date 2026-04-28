@@ -25,6 +25,7 @@ import struct
 import sys
 from pathlib import Path
 
+import numpy as np
 import torch
 import torch.nn.functional as F
 from datasets import load_dataset
@@ -131,9 +132,54 @@ def export_weights(model: TinyTransformer, vocab: list[str], out_dir: Path) -> N
     print(f"Wrote {config_path} and {bin_path} ({bin_path.stat().st_size / 1e6:.1f} MB)")
 
 
+def write_tensor_int8(f, t: torch.Tensor) -> None:
+    """Write a tensor in int8 quantized format with per-tensor scale."""
+    arr = t.detach().cpu().contiguous().to(torch.float32).numpy()
+    f.write(struct.pack("<I", arr.ndim))
+    for d in arr.shape:
+        f.write(struct.pack("<I", d))
+    abs_max = float(np.abs(arr).max())
+    scale = abs_max / 127.0 if abs_max > 0 else 1.0
+    f.write(struct.pack("<f", scale))
+    quantized = np.clip(np.round(arr / scale), -127, 127).astype(np.int8)
+    f.write(quantized.tobytes(order="C"))
+
+
+def export_weights_int8(model: TinyTransformer, vocab: list[str], out_dir: Path) -> None:
+    out_dir.mkdir(parents=True, exist_ok=True)
+    config_path = out_dir / "model.json"
+    bin_path = out_dir / "model.weights.bin"
+
+    with open(bin_path, "wb") as f:
+        write_tensor_int8(f, model.token_emb.weight)
+        write_tensor_int8(f, model.pos_emb.weight)
+        for layer in model.layers:
+            attn = layer["attn"]
+            ffn = layer["ffn"]
+            for tensor in [
+                attn.ln1.weight, attn.ln1.bias,
+                attn.qkv.weight, attn.qkv.bias,
+                attn.out.weight, attn.out.bias,
+                ffn.ln2.weight, ffn.ln2.bias,
+                ffn.fc1.weight, ffn.fc1.bias,
+                ffn.fc2.weight, ffn.fc2.bias,
+            ]:
+                write_tensor_int8(f, tensor)
+        write_tensor_int8(f, model.ln_final.weight)
+        write_tensor_int8(f, model.ln_final.bias)
+        write_tensor_int8(f, model.output.weight)
+        write_tensor_int8(f, model.output.bias)
+
+    config_with_quant = {**model.cfg, "quantization": "int8"}
+    with open(config_path, "w") as f:
+        json.dump({"config": config_with_quant, "vocab": vocab}, f)
+    print(f"Wrote int8 model: {bin_path.stat().st_size / 1e6:.1f} MB")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--smoke", action="store_true", help="Tiny smoke run.")
+    parser.add_argument("--quantize", action="store_true", help="Export int8 quantized.")
     args = parser.parse_args()
 
     device = "cuda" if torch.cuda.is_available() else (
@@ -159,7 +205,10 @@ def main() -> None:
     torch.save(model.state_dict(), OUTPUT_DIR / "checkpoint.pt")
     print(f"Saved checkpoint to {OUTPUT_DIR / 'checkpoint.pt'}")
     vocab = [tok.id_to_token(i) or f"<id_{i}>" for i in range(CONFIG["vocab_size"])]
-    export_weights(model, vocab, OUTPUT_DIR)
+    if args.quantize:
+        export_weights_int8(model, vocab, OUTPUT_DIR)
+    else:
+        export_weights(model, vocab, OUTPUT_DIR)
 
 
 if __name__ == "__main__":

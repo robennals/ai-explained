@@ -24,19 +24,24 @@ from _attention_model import CONFIG, TinyTransformer  # noqa: E402
 MODEL_DIR = ROOT / "public" / "data" / "attention-model"
 
 
-def read_tensor(f) -> np.ndarray:
+def read_tensor_quantized(f, quantized: bool) -> np.ndarray:
     raw = f.read(4)
     (ndims,) = struct.unpack("<I", raw)
     dims = [struct.unpack("<I", f.read(4))[0] for _ in range(ndims)]
     n = int(np.prod(dims))
-    arr = np.frombuffer(f.read(n * 4), dtype=np.float32).reshape(dims)
-    return arr.copy()  # break the read-only bind so torch can use it
+    if quantized:
+        (scale,) = struct.unpack("<f", f.read(4))
+        ints = np.frombuffer(f.read(n), dtype=np.int8).reshape(dims)
+        return (ints.astype(np.float32) * scale).copy()
+    else:
+        arr = np.frombuffer(f.read(n * 4), dtype=np.float32).reshape(dims)
+        return arr.copy()
 
 
-def load_into_model(model: TinyTransformer, bin_path: Path) -> None:
+def load_into_model(model: TinyTransformer, bin_path: Path, quantized: bool = False) -> None:
     with open(bin_path, "rb") as f:
-        model.token_emb.weight.data.copy_(torch.from_numpy(read_tensor(f)))
-        model.pos_emb.weight.data.copy_(torch.from_numpy(read_tensor(f)))
+        model.token_emb.weight.data.copy_(torch.from_numpy(read_tensor_quantized(f, quantized)))
+        model.pos_emb.weight.data.copy_(torch.from_numpy(read_tensor_quantized(f, quantized)))
         for layer in model.layers:
             attn = layer["attn"]
             ffn = layer["ffn"]
@@ -50,12 +55,12 @@ def load_into_model(model: TinyTransformer, bin_path: Path) -> None:
             ]:
                 root = attn if name[0] == "attn" else ffn
                 getattr(getattr(root, name[1]), name[2]).data.copy_(
-                    torch.from_numpy(read_tensor(f))
+                    torch.from_numpy(read_tensor_quantized(f, quantized))
                 )
-        model.ln_final.weight.data.copy_(torch.from_numpy(read_tensor(f)))
-        model.ln_final.bias.data.copy_(torch.from_numpy(read_tensor(f)))
-        model.output.weight.data.copy_(torch.from_numpy(read_tensor(f)))
-        model.output.bias.data.copy_(torch.from_numpy(read_tensor(f)))
+        model.ln_final.weight.data.copy_(torch.from_numpy(read_tensor_quantized(f, quantized)))
+        model.ln_final.bias.data.copy_(torch.from_numpy(read_tensor_quantized(f, quantized)))
+        model.output.weight.data.copy_(torch.from_numpy(read_tensor_quantized(f, quantized)))
+        model.output.bias.data.copy_(torch.from_numpy(read_tensor_quantized(f, quantized)))
         # Verify file is fully consumed
         leftover = f.read()
         assert len(leftover) == 0, f"Leftover bytes: {len(leftover)}"
@@ -69,12 +74,14 @@ def main() -> None:
     with open(config_path) as f:
         meta = json.load(f)
     cfg = meta["config"]
-    assert cfg == CONFIG, f"Config mismatch: {cfg} vs {CONFIG}"
+    quantized = cfg.get("quantization") == "int8"
+    cfg_no_quant = {k: v for k, v in cfg.items() if k != "quantization"}
+    assert cfg_no_quant == CONFIG, f"Config mismatch: {cfg_no_quant} vs {CONFIG}"
 
     # Build a fresh model and load weights from disk
     reloaded = TinyTransformer(CONFIG)
     reloaded.eval()
-    load_into_model(reloaded, bin_path)
+    load_into_model(reloaded, bin_path, quantized=quantized)
 
     # The training script must save its trained model to checkpoint.pt as well
     # so we can compare. If that file doesn't exist, just sanity-check shapes.
@@ -89,11 +96,13 @@ def main() -> None:
             logits_round = reloaded(ids)
         max_diff = (logits_orig - logits_round).abs().max().item()
         print(f"Max logit diff: {max_diff:.2e}")
-        # The round-trip is PyTorch-fp32 -> bytes -> PyTorch-fp32 with no
-        # quantization. It must be bit-identical; any nonzero diff signals a
-        # real shape/order/dtype bug, not numerical noise.
-        assert max_diff == 0.0, f"Expected bit-identical round-trip, got {max_diff}"
-        print("Round-trip OK (bit-identical)")
+        if quantized:
+            tol = 0.5
+            assert max_diff < tol, f"Quantized round-trip exceeded tolerance {tol}: {max_diff}"
+            print(f"Round-trip OK (int8, max diff {max_diff:.3f})")
+        else:
+            assert max_diff == 0.0, f"Expected bit-identical round-trip, got {max_diff}"
+            print("Round-trip OK (bit-identical)")
     else:
         print(f"No {ckpt_path} found — shape check only.")
         print("Round-trip OK (shapes consistent)")

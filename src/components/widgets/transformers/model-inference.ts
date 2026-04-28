@@ -15,6 +15,7 @@ export interface TransformerConfig {
   num_layers: number;
   ff_dim: number;
   context_len: number;
+  quantization?: "int8";  // optional; absence = fp32
 }
 
 export interface TransformerWeights {
@@ -347,6 +348,8 @@ export function loadTransformerModel(baseUrl: string): Promise<TransformerModel>
     const buf = await binResp.arrayBuffer();
     const view = new DataView(buf);
 
+    const quantization = (json.config as TransformerConfig).quantization;
+
     let offset = 0;
 
     function readTensor(): Float32Array {
@@ -357,9 +360,20 @@ export function loadTransformerModel(baseUrl: string): Promise<TransformerModel>
         nElements *= view.getUint32(offset, true);
         offset += 4;
       }
-      const data = new Float32Array(buf, offset, nElements);
-      offset += nElements * 4;
-      return data;
+      if (quantization === "int8") {
+        const scale = view.getFloat32(offset, true);
+        offset += 4;
+        const out = new Float32Array(nElements);
+        for (let i = 0; i < nElements; i++) {
+          out[i] = view.getInt8(offset + i) * scale;
+        }
+        offset += nElements;
+        return out;
+      } else {
+        const data = new Float32Array(buf, offset, nElements);
+        offset += nElements * 4;
+        return data;
+      }
     }
 
     const token_embedding = readTensor();
