@@ -1,4 +1,5 @@
 import { ChapterNav } from "@/components/layout/ChapterNav";
+import { chapterMetadata } from "@/lib/chapter-metadata";
 import { getAdjacentChapters } from "@/lib/curriculum";
 import Content from "./content.mdx";
 import {
@@ -16,11 +17,7 @@ import {
   DeepNetworkPlaygroundWidget,
 } from "./widgets";
 
-export const metadata = {
-  title: "Building a Brain — Learn AI Layer by Layer",
-  description:
-    "A neuron is a smooth logic gate. Stack them in layers and they can compute anything — and backpropagation lets you train all the weights at once.",
-};
+export const metadata = chapterMetadata("neurons");
 
 export default function Chapter03() {
   const { prev, next } = getAdjacentChapters("neurons");

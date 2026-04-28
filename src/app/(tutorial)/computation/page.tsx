@@ -1,4 +1,5 @@
 import { ChapterNav } from "@/components/layout/ChapterNav";
+import { chapterMetadata } from "@/lib/chapter-metadata";
 import { getAdjacentChapters } from "@/lib/curriculum";
 import Content from "./content.mdx";
 import {
@@ -8,11 +9,7 @@ import {
   LookupTableExplosionWidget,
 } from "./widgets";
 
-export const metadata = {
-  title: "Everything Is Numbers — Learn AI Layer by Layer",
-  description:
-    "Text, images, and sound are all numbers. Thinking is a function. The challenge: find the right one.",
-};
+export const metadata = chapterMetadata("computation");
 
 export default function Chapter01() {
   const { prev, next } = getAdjacentChapters("computation");
