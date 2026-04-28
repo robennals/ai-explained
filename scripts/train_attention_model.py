@@ -168,6 +168,49 @@ def train(model: TinyTransformer, data: torch.Tensor, *, epochs: int, batch_size
                 print(f"epoch {ep} step {step}/{n_steps}  loss={loss.item():.3f}")
 
 
+def write_tensor(f, t: torch.Tensor) -> None:
+    """Write a tensor in the JS engine's format: [ndims][dims...][float32 data]."""
+    arr = t.detach().cpu().contiguous().to(torch.float32).numpy()
+    f.write(struct.pack("<I", arr.ndim))
+    for d in arr.shape:
+        f.write(struct.pack("<I", d))
+    f.write(arr.tobytes(order="C"))
+
+
+def export_weights(model: TinyTransformer, vocab: list[str], out_dir: Path) -> None:
+    """Write model.json + model.weights.bin in the format model-inference.ts loads."""
+    out_dir.mkdir(parents=True, exist_ok=True)
+    config_path = out_dir / "model.json"
+    bin_path = out_dir / "model.weights.bin"
+
+    with open(bin_path, "wb") as f:
+        write_tensor(f, model.token_emb.weight)
+        write_tensor(f, model.pos_emb.weight)
+        for layer in model.layers:
+            attn = layer["attn"]
+            ffn = layer["ffn"]
+            write_tensor(f, attn.ln1.weight)
+            write_tensor(f, attn.ln1.bias)
+            write_tensor(f, attn.qkv.weight)
+            write_tensor(f, attn.qkv.bias)
+            write_tensor(f, attn.out.weight)
+            write_tensor(f, attn.out.bias)
+            write_tensor(f, ffn.ln2.weight)
+            write_tensor(f, ffn.ln2.bias)
+            write_tensor(f, ffn.fc1.weight)
+            write_tensor(f, ffn.fc1.bias)
+            write_tensor(f, ffn.fc2.weight)
+            write_tensor(f, ffn.fc2.bias)
+        write_tensor(f, model.ln_final.weight)
+        write_tensor(f, model.ln_final.bias)
+        write_tensor(f, model.output.weight)
+        write_tensor(f, model.output.bias)
+
+    with open(config_path, "w") as f:
+        json.dump({"config": model.cfg, "vocab": vocab}, f)
+    print(f"Wrote {config_path} and {bin_path} ({bin_path.stat().st_size / 1e6:.1f} MB)")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--smoke", action="store_true", help="Tiny smoke run.")
@@ -195,6 +238,8 @@ def main() -> None:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     torch.save(model.state_dict(), OUTPUT_DIR / "checkpoint.pt")
     print(f"Saved checkpoint to {OUTPUT_DIR / 'checkpoint.pt'}")
+    vocab = [tok.id_to_token(i) or f"<id_{i}>" for i in range(CONFIG["vocab_size"])]
+    export_weights(model, vocab, OUTPUT_DIR)
 
 
 if __name__ == "__main__":
