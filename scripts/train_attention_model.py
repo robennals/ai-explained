@@ -139,7 +139,7 @@ def load_data(tokenizer: Tokenizer, num_stories: int, ctx: int) -> torch.Tensor:
 
 
 def train(model: TinyTransformer, data: torch.Tensor, *, epochs: int, batch_size: int,
-          lr: float, device: str) -> None:
+          lr: float, device: str, log_every: int = 100) -> None:
     model.to(device)
     model.train()
     ctx = model.cfg["context_len"]
@@ -164,7 +164,7 @@ def train(model: TinyTransformer, data: torch.Tensor, *, epochs: int, batch_size
             opt.step()
             sched.step()
             step += 1
-            if step % 100 == 0:
+            if step == 1 or step % log_every == 0 or step == n_steps:
                 print(f"epoch {ep} step {step}/{n_steps}  loss={loss.item():.3f}")
 
 
@@ -181,16 +181,17 @@ def main() -> None:
     tok = Tokenizer.from_file(str(TOKENIZER_PATH))
     if args.smoke:
         data = load_data(tok, num_stories=200, ctx=CONFIG["context_len"])
-        epochs, batch_size, lr = 1, 16, 3e-4
+        epochs, batch_size, lr, log_every = 1, 16, 3e-4, 10
     else:
         data = load_data(tok, num_stories=50_000, ctx=CONFIG["context_len"])
-        epochs, batch_size, lr = 3, 64, 3e-4
+        epochs, batch_size, lr, log_every = 3, 64, 3e-4, 100
 
     model = TinyTransformer(CONFIG)
     n_params = sum(p.numel() for p in model.parameters())
     print(f"Model: {n_params:,} parameters")
 
-    train(model, data, epochs=epochs, batch_size=batch_size, lr=lr, device=device)
+    train(model, data, epochs=epochs, batch_size=batch_size, lr=lr, device=device,
+          log_every=log_every)
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     torch.save(model.state_dict(), OUTPUT_DIR / "checkpoint.pt")
     print(f"Saved checkpoint to {OUTPUT_DIR / 'checkpoint.pt'}")
