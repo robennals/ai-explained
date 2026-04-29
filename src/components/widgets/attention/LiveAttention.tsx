@@ -348,66 +348,73 @@ function LiveAttentionLoaded({
         )}
       </div>
 
-      {/* Token chips */}
+      {/* Single token row: each token is clickable AND shows attention weight
+          coming from the currently-selected token under the current head. */}
       {result && (
         <div>
           <div className="mb-1 text-xs font-medium text-muted">
-            Tokens ({result.tokens.length}){running ? " · running…" : ""}
+            {selectedToken !== null ? (
+              <>
+                Attention from{" "}
+                <span className="font-mono">{result.tokens[selectedToken]}</span> in head{" "}
+                <span className="font-mono">
+                  L{selectedHead.layer}H{selectedHead.head}
+                </span>
+                {namedHeadMatch ? <> · <span>{namedHeadMatch.label}</span></> : null}
+                {running ? " · running…" : ""}
+              </>
+            ) : (
+              <>Click any token below to see what it attends to{running ? " · running…" : ""}</>
+            )}
           </div>
-          <div className="flex flex-wrap gap-1">
-            {result.tokens.map((tok, i) => {
-              const isSelected = i === selectedToken;
-              return (
-                <button
-                  key={`${i}-${tok}`}
-                  onClick={() => setSelectedToken(isSelected ? null : i)}
-                  className={`rounded px-2 py-0.5 font-mono text-xs transition-colors ${
-                    isSelected
-                      ? "bg-accent text-white"
-                      : "bg-foreground/5 text-foreground hover:bg-foreground/10"
-                  }`}
-                >
-                  {tok}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Attention readout */}
-      {result && attentionRow !== null && (
-        <div>
-          <div className="mb-1 text-xs font-medium text-muted">
-            Attention from{" "}
-            <span className="font-mono">{result.tokens[selectedToken!]}</span> in head{" "}
-            <span className="font-mono">
-              L{selectedHead.layer}H{selectedHead.head}
-            </span>
-            {namedHeadMatch ? <> · <span>{namedHeadMatch.label}</span></> : null}
-          </div>
-          <div className="flex flex-wrap items-end gap-x-1 gap-y-3 rounded-lg border border-border bg-surface px-4 py-3">
+          <div className="flex flex-wrap items-end gap-x-1 gap-y-4 rounded-lg border border-border bg-surface px-5 py-5">
             {result.tokens.map((tok, j) => {
-              const w = attentionRow[j] ?? 0;
-              const alpha = w < 0.02 ? 0 : Math.min(0.12 + w * 0.73, 0.85);
+              const isSelected = j === selectedToken;
+              const w = attentionRow !== null ? (attentionRow[j] ?? 0) : 0;
+              const alpha =
+                attentionRow === null || w < 0.02
+                  ? 0
+                  : Math.min(0.12 + w * 0.73, 0.85);
               return (
-                <span key={j} className="inline-flex flex-col items-center">
-                  <span className="mb-0.5 font-mono text-[10px] leading-none text-muted">
-                    {w >= 0.02 ? `${Math.round(w * 100)}%` : "·"}
-                  </span>
-                  <span
-                    className="rounded px-1 py-0.5 font-mono text-xs"
+                <span key={j} className="relative inline-flex flex-col items-center">
+                  {attentionRow !== null && w >= 0.02 ? (
+                    <span
+                      className={`mb-1 font-mono text-[10px] font-bold leading-none ${
+                        isSelected ? "text-accent" : ""
+                      }`}
+                      style={
+                        !isSelected
+                          ? { color: w > 0.3 ? "rgb(99,102,241)" : "var(--color-muted)" }
+                          : undefined
+                      }
+                    >
+                      {Math.round(w * 100)}%
+                    </span>
+                  ) : (
+                    <span className="mb-1 text-[10px] leading-none text-transparent">·</span>
+                  )}
+                  <button
+                    onClick={() => setSelectedToken(isSelected ? null : j)}
+                    className="cursor-pointer px-1.5 py-1 font-mono text-sm transition-all"
                     style={
-                      alpha > 0
+                      isSelected
                         ? {
-                            backgroundColor: `rgba(99,102,241,${alpha})`,
-                            color: w > 0.4 ? "white" : undefined,
+                            borderRadius: 4,
+                            outline: "2.5px solid var(--color-accent)",
+                            outlineOffset: 2,
+                            fontWeight: 700,
                           }
-                        : undefined
+                        : alpha > 0
+                          ? {
+                              backgroundColor: `rgba(99,102,241,${alpha})`,
+                              color: w > 0.4 ? "white" : undefined,
+                              borderRadius: 4,
+                            }
+                          : undefined
                     }
                   >
                     {tok}
-                  </span>
+                  </button>
                 </span>
               );
             })}
