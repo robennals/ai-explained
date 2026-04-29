@@ -65,8 +65,10 @@ That's it. And this single algorithm is behind:
 
 What's striking about this approach: *you don't need to understand the system*. You don't need to know why a wing shape generates lift, or why a particular word order sounds natural, or why certain parameter values make a model work. You just need to **measure the error** and **make small changes**.
 
+Try this out in the playground yourself. See how much easier it is to find the best answer using incremental changes guided by an error signal, than if you have to just make blind guesses.
+
 <OptimizationGameWidget>
-Start in "Blind" mode and try to find the hidden target. All you learn from each guess is "not here". A little ✗ appears and you have zero idea whether your error is going up or down. After a dozen guesses, hit "Reveal target" and see how hopeless it was. Then switch to "With signal." Now each dot's size and color tells you how big the error is, and you're constrained to small steps near your last guess. Watch how quickly you zero in. Same problem, but the error signal makes all the difference.
+Start in "Blind" mode and try to find the hidden target. All you learn from each guess is "not here". A little ✗ appears and you have zero idea whether your error is going up or down. After a dozen guesses, hit "Reveal target" and see how hopeless it was. Then switch to "With error signal." Now each dot's size and color tells you how big the error is, and you're constrained to small steps near your last guess. Watch how quickly you zero in. Same problem, but the error signal makes all the difference.
 </OptimizationGameWidget>
 
 ## Smooth Functions Can Be Optimized

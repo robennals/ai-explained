@@ -29,10 +29,7 @@ How do we measure how similar two things are? There's a simple operation: **mult
 
 **dot product = (a₁ × b₁) + (a₂ × b₂) + … + (aₙ × bₙ)**
 
-The result is a single number that tells you how similar the two vectors are:
-- **1** means they're identical
-- **0** means they have nothing in common
-- **−1** means they're completely opposite
+The result is a single number that captures how similar the two vectors are. A large positive number means they share a lot of the same properties. A number near zero means they have little in common. A negative number means they pull in opposite directions.
 
 Why does multiply-and-add measure similarity? Look at the per-dimension math. When both vectors score high on the same property, multiplying those gives a big number, and that shared trait contributes a lot to the total. But if one scores high and the other low, multiplying gives almost nothing. Add up all these products, and you get a total that's high when the vectors agree and low when they don't.
 
@@ -56,7 +53,12 @@ To find the size of a vector (its **magnitude**), you square all the dimensions,
 
 To make a unit vector, divide every dimension by the magnitude. The result has magnitude 1, but the *proportions* between dimensions stay the same. A bear is still scarier than it is fast.
 
-All the animal, food, and instrument vectors we've been using are unit vectors. That's why the dot products give clean similarity scores between −1 and 1.
+For any two unit vectors, the dot product is always between −1 and 1, with a clean interpretation:
+- **1** means they're identical
+- **0** means they have nothing in common
+- **−1** means they're completely opposite
+
+All the animal, food, and instrument vectors we've been using are unit vectors, which is why their dot products gave such clean similarity scores.
 
 <UnitVectorExplorerWidget>
 Design your own animal. Adjusting one property automatically scales the others to keep the magnitude at 1.
@@ -78,9 +80,7 @@ Since vectors are just lists of numbers, you can add them. Add each dimension se
 On the **Blend** tab, pick two animals and drag the slider to see what's in between. On the **Modify** tab, start with a base animal and use the sliders to add or subtract properties. Try the presets (Paddington, Direwolf, Tiny Eagle), then invent your own.
 </VectorMixerWidget>
 
-This idea, building up complex descriptions by adding simpler vectors together, turns out to be central to how neural networks work. Deep inside a real model, every layer *adds* its contribution to a running sum, gradually refining what each token represents. The whole architecture depends on the fact that vectors can be combined by addition.
-
-We'll also see in the next chapter that learned word vectors have a famous property: **king − man + woman ≈ queen**. The direction from "man" to "woman" captures something about gender, and you can add that direction to other words. Vector addition is one of the core operations of AI.
+This idea, building up complex descriptions by adding simpler vectors together, turns out to be central to how neural networks work. This is something we'll return to in the chapter on embeddings and again for transformers.
 
 ## What and How Much
 
