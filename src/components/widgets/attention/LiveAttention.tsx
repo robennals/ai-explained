@@ -14,8 +14,9 @@ const MODEL_BASE =
   "https://pub-0f0bc2e5708e4f6b87d02e38956b7b72.r2.dev/data/attention-model/model";
 const TOKENIZER_URL = "/data/tokenizer/ts-tokenizer-4096.json";
 
-const DEFAULT_SENTENCE = "The big brown dog. The big brown";
-const DEFAULT_SELECTED_TOKEN = 8; // last "brown"
+const DEFAULT_SENTENCE =
+  "Once upon a time, a little girl walked into the woods. She saw a big bear.";
+const DEFAULT_SELECTED_TOKEN = 14; // "she" — pronoun, midway through the second sentence
 const DEFAULT_HEAD = { layer: 0, head: 0 };
 
 interface LoadState {

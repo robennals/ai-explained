@@ -22,7 +22,7 @@ test.describe("Attention chapter — Live Attention widget", () => {
     });
 
     // Default sentence and grid both rendered.
-    await expect(widget.locator("textarea")).toHaveValue(/the big brown/i);
+    await expect(widget.locator("textarea")).toHaveValue(/once upon a time/i);
     const grid = widget.locator('[title^="L"]');
     await expect(grid).toHaveCount(48, { timeout: 5_000 });
 
