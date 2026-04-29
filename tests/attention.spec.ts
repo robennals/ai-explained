@@ -36,10 +36,8 @@ test.describe("Attention chapter — Live Attention widget", () => {
     await prevTokenChip.click();
     await expect(widget.locator("text=/L\\s*0\\s*H\\s*7/")).toHaveCount(2, { timeout: 5_000 });
 
-    // Toggle into the all-heads grid and confirm a substantial grid rendered.
-    // The grid has 6 × 8 = 48 cells, each with a title attribute starting with
-    // "L" (either bare "L3H7" or named "Previous token (L0H7)").
-    await widget.getByRole("button", { name: "Show all heads" }).click();
+    // Switch to the All heads tab and confirm a 6×8 = 48 cell grid rendered.
+    await widget.getByRole("button", { name: /^All heads/ }).click();
     const grid = widget.locator('[title^="L"], [title*="(L"]');
     await expect(grid).toHaveCount(48, { timeout: 5_000 });
   });

@@ -19,6 +19,10 @@ interface NamedHead {
   layer: number;
   head: number;
   explanation: string;
+  // Each named head ships with a curated example that exercises it.
+  exampleText: string;
+  exampleSelectedToken: number;
+  exampleHint: string;
 }
 
 // Coordinates and labels come from the Phase 1 trained-model inspection,
@@ -32,6 +36,10 @@ const NAMED_HEADS: NamedHead[] = [
     head: 3,
     explanation:
       "When a phrase repeats, attention jumps back to whatever followed the earlier occurrence — a simple form of in-context learning. On non-repeated tokens this head mostly attends to itself.",
+    exampleText: "The dog chased the cat because it was angry",
+    exampleSelectedToken: 4, // second "the" (after [BOS] is prepended)
+    exampleHint:
+      'Click the second "the". Attention jumps to "dog" — the word that followed "the" earlier in the sentence.',
   },
   {
     label: "Previous token",
@@ -39,6 +47,10 @@ const NAMED_HEADS: NamedHead[] = [
     head: 7,
     explanation:
       "Each token looks at the one immediately before it. The cleanest single pattern in the model — works at every position.",
+    exampleText: "Mary had a little lamb",
+    exampleSelectedToken: 4, // "little"
+    exampleHint:
+      "Click any token. Its attention slides one cell to the left. Try every word and watch the diagonal hold.",
   },
   {
     label: "Punctuation",
@@ -46,41 +58,10 @@ const NAMED_HEADS: NamedHead[] = [
     head: 3,
     explanation:
       "After a period or comma, this head pulls attention back to the punctuation mark — the model has learned where sentence boundaries are.",
-  },
-];
-
-interface Example {
-  label: string;
-  text: string;
-  defaultHeadLabel?: string;
-  defaultSelectedToken?: number;
-  hint: string;
-}
-
-const EXAMPLES: Example[] = [
-  {
-    label: "Induction",
-    text: "The dog chased the cat because it was angry",
-    defaultHeadLabel: "Induction",
-    defaultSelectedToken: 4, // second "the" (after [BOS] is prepended)
-    hint:
-      'Click the second "the" with the Induction head selected. Attention jumps to "dog" — the word that followed "the" earlier in the sentence.',
-  },
-  {
-    label: "Previous token",
-    text: "Mary had a little lamb",
-    defaultHeadLabel: "Previous token",
-    defaultSelectedToken: 4, // "little" — clean diagonal demo
-    hint:
-      "On the Previous token head, every token's attention slides one cell to the left. Try clicking different words and watch the diagonal hold.",
-  },
-  {
-    label: "Punctuation",
-    text: "She picked up the book. The book was heavy.",
-    defaultHeadLabel: "Punctuation",
-    defaultSelectedToken: 8, // "book" after the period
-    hint:
-      'Click any token after the period — the Punctuation head pulls most of its attention back to "." even when the period is several words behind. The model learned where sentences end without anyone telling it.',
+    exampleText: "She picked up the book. The book was heavy.",
+    exampleSelectedToken: 8, // "book" after the period
+    exampleHint:
+      'Click any token after the period. Most of the attention pulls back to "." even when the period is several words behind.',
   },
 ];
 
@@ -91,7 +72,7 @@ interface LoadState {
   error: string | null;
 }
 
-const DEFAULT_EXAMPLE = EXAMPLES[0];
+const DEFAULT_HEAD = NAMED_HEADS[0];
 
 export function LiveAttention() {
   const [state, setState] = useState<LoadState>({
@@ -160,22 +141,20 @@ function LiveAttentionLoaded({
   model: TransformerModel;
   tokenizer: WordPieceTokenizer;
 }) {
-  const [input, setInput] = useState(DEFAULT_EXAMPLE.text);
+  const [input, setInput] = useState(DEFAULT_HEAD.exampleText);
   const [result, setResult] = useState<{
     tokens: string[];
     inference: InferenceResult;
   } | null>(null);
   const [running, setRunning] = useState(false);
   const [selectedToken, setSelectedToken] = useState<number | null>(
-    DEFAULT_EXAMPLE.defaultSelectedToken ?? null,
+    DEFAULT_HEAD.exampleSelectedToken,
   );
-  const initialHead =
-    NAMED_HEADS.find((h) => h.label === DEFAULT_EXAMPLE.defaultHeadLabel) ?? NAMED_HEADS[0];
   const [selectedHead, setSelectedHead] = useState<{ layer: number; head: number }>({
-    layer: initialHead.layer,
-    head: initialHead.head,
+    layer: DEFAULT_HEAD.layer,
+    head: DEFAULT_HEAD.head,
   });
-  const [viewMode, setViewMode] = useState<"named" | "grid">("named");
+  const [viewMode, setViewMode] = useState<"named" | "all">("named");
 
   // Debounce + run forward pass.
   useEffect(() => {
@@ -200,7 +179,6 @@ function LiveAttentionLoaded({
   const namedHeadMatch = NAMED_HEADS.find(
     (h) => h.layer === selectedHead.layer && h.head === selectedHead.head,
   );
-  const activeExample = EXAMPLES.find((ex) => ex.text === input);
   const seqLen = result?.tokens.length ?? 0;
   const headAttn = result
     ? result.inference.layerAttentions[selectedHead.layer]?.[selectedHead.head]
@@ -210,72 +188,42 @@ function LiveAttentionLoaded({
       ? Array.from({ length: seqLen }, (_, j) => headAttn[selectedToken * seqLen + j])
       : null;
 
-  function applyExample(ex: Example) {
-    setInput(ex.text);
-    if (ex.defaultHeadLabel) {
-      const h = NAMED_HEADS.find((nh) => nh.label === ex.defaultHeadLabel);
-      if (h) setSelectedHead({ layer: h.layer, head: h.head });
-    }
-    // Clear result so the readout disappears until the new forward pass
-    // completes — otherwise we briefly index the new head into the old
-    // attention matrix.
-    setResult(null);
-    setSelectedToken(ex.defaultSelectedToken ?? null);
+  function selectNamedHead(h: NamedHead) {
+    setSelectedHead({ layer: h.layer, head: h.head });
+    setInput(h.exampleText);
+    setResult(null); // hide stale readout until new forward pass completes
+    setSelectedToken(h.exampleSelectedToken);
   }
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Sentence tabs */}
-      <div className="flex flex-wrap gap-1.5">
-        {EXAMPLES.map((ex) => (
+      {/* Top-level view-mode tabs */}
+      <div className="flex gap-1 border-b border-border">
+        {(["named", "all"] as const).map((mode) => (
           <button
-            key={ex.label}
-            onClick={() => applyExample(ex)}
-            className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-              input === ex.text
-                ? "bg-accent text-white"
-                : "bg-foreground/5 text-muted hover:bg-foreground/10 hover:text-foreground"
+            key={mode}
+            onClick={() => setViewMode(mode)}
+            className={`-mb-px border-b-2 px-3 py-2 text-sm font-medium transition-colors ${
+              viewMode === mode
+                ? "border-accent text-accent"
+                : "border-transparent text-muted hover:text-foreground"
             }`}
           >
-            {ex.label}
+            {mode === "named" ? "Named heads" : `All heads (${model.config.num_layers}×${model.config.num_heads})`}
           </button>
         ))}
       </div>
 
-      {/* Free-text input */}
-      <div>
-        <label className="mb-1 block text-xs font-medium text-muted">Type any sentence</label>
-        <textarea
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          rows={2}
-          className="w-full rounded-md border border-border bg-surface px-3 py-2 font-mono text-sm"
-          placeholder="Type something…"
-        />
-      </div>
-
-      {/* Named-head chips + view toggle */}
-      <div>
-        <div className="mb-1 flex items-center justify-between">
-          <span className="text-xs font-medium text-muted">
-            {viewMode === "named" ? "Named heads" : "All heads"}
-          </span>
-          <button
-            onClick={() => setViewMode(viewMode === "named" ? "grid" : "named")}
-            className="text-xs text-accent underline-offset-2 hover:underline"
-          >
-            {viewMode === "named" ? "Show all heads" : "Show named heads"}
-          </button>
-        </div>
-
-        {viewMode === "named" ? (
+      {/* Head selector — chips in named mode, grid in all mode */}
+      {viewMode === "named" ? (
+        <div className="flex flex-col gap-2">
           <div className="flex flex-wrap gap-1.5">
             {NAMED_HEADS.map((h) => {
               const active = h.layer === selectedHead.layer && h.head === selectedHead.head;
               return (
                 <button
                   key={h.label}
-                  onClick={() => setSelectedHead({ layer: h.layer, head: h.head })}
+                  onClick={() => selectNamedHead(h)}
                   className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
                     active
                       ? "border-indigo-400 bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300"
@@ -287,65 +235,76 @@ function LiveAttentionLoaded({
               );
             })}
           </div>
-        ) : (
-          result && (
-            <div
-              className="grid gap-1"
-              style={{ gridTemplateColumns: `repeat(${model.config.num_heads}, minmax(0, 1fr))` }}
-            >
-              {Array.from({ length: model.config.num_layers }, (_, l) =>
-                Array.from({ length: model.config.num_heads }, (_, h) => {
-                  const named = NAMED_HEADS.find((nh) => nh.layer === l && nh.head === h);
-                  const active = selectedHead.layer === l && selectedHead.head === h;
-                  const cellAttn = result.inference.layerAttentions[l]?.[h];
-                  const cellRow: number[] =
-                    cellAttn && selectedToken !== null
-                      ? Array.from({ length: seqLen }, (_, j) => cellAttn[selectedToken * seqLen + j])
-                      : [];
-                  return (
-                    <button
-                      key={`${l}-${h}`}
-                      onClick={() => setSelectedHead({ layer: l, head: h })}
-                      title={named ? `${named.label} (L${l}H${h})` : `L${l}H${h}`}
-                      className={`relative flex h-12 flex-col items-stretch rounded border p-0.5 transition-colors ${
-                        active
-                          ? "border-indigo-500 bg-indigo-50/60 dark:bg-indigo-950/40"
-                          : named
-                            ? "border-indigo-300 bg-indigo-50/30 dark:border-indigo-700 dark:bg-indigo-950/20"
-                            : "border-border hover:border-foreground/30"
-                      }`}
-                    >
-                      <span className="text-[8px] leading-tight text-muted">
-                        L{l}H{h}
-                      </span>
-                      <div className="flex h-full items-end gap-px">
-                        {cellRow.length > 0
-                          ? cellRow.map((w, j) => (
-                              <div
-                                key={j}
-                                className="flex-1"
-                                style={{
-                                  height: `${Math.min(100, w * 100)}%`,
-                                  backgroundColor: "rgb(99,102,241)",
-                                  opacity: 0.7,
-                                }}
-                              />
-                            ))
-                          : null}
-                      </div>
-                    </button>
-                  );
-                }),
-              )}
+          {namedHeadMatch && (
+            <div className="rounded-lg border border-border bg-foreground/[0.02] px-3 py-2 text-xs text-muted">
+              {namedHeadMatch.explanation}
             </div>
-          )
-        )}
-
-        {namedHeadMatch && viewMode === "named" && (
-          <div className="mt-2 rounded-lg border border-border bg-foreground/[0.02] px-3 py-2 text-xs text-muted">
-            {namedHeadMatch.explanation}
+          )}
+        </div>
+      ) : (
+        result && (
+          <div
+            className="grid gap-1"
+            style={{ gridTemplateColumns: `repeat(${model.config.num_heads}, minmax(0, 1fr))` }}
+          >
+            {Array.from({ length: model.config.num_layers }, (_, l) =>
+              Array.from({ length: model.config.num_heads }, (_, h) => {
+                const named = NAMED_HEADS.find((nh) => nh.layer === l && nh.head === h);
+                const active = selectedHead.layer === l && selectedHead.head === h;
+                const cellAttn = result.inference.layerAttentions[l]?.[h];
+                const cellRow: number[] =
+                  cellAttn && selectedToken !== null
+                    ? Array.from({ length: seqLen }, (_, j) => cellAttn[selectedToken * seqLen + j])
+                    : [];
+                return (
+                  <button
+                    key={`${l}-${h}`}
+                    onClick={() => setSelectedHead({ layer: l, head: h })}
+                    title={named ? `${named.label} (L${l}H${h})` : `L${l}H${h}`}
+                    className={`relative flex h-12 flex-col items-stretch rounded border p-0.5 transition-colors ${
+                      active
+                        ? "border-indigo-500 bg-indigo-50/60 dark:bg-indigo-950/40"
+                        : named
+                          ? "border-indigo-300 bg-indigo-50/30 dark:border-indigo-700 dark:bg-indigo-950/20"
+                          : "border-border hover:border-foreground/30"
+                    }`}
+                  >
+                    <span className="text-[8px] leading-tight text-muted">
+                      L{l}H{h}
+                    </span>
+                    <div className="flex h-full items-end gap-px">
+                      {cellRow.length > 0
+                        ? cellRow.map((w, j) => (
+                            <div
+                              key={j}
+                              className="flex-1"
+                              style={{
+                                height: `${Math.min(100, w * 100)}%`,
+                                backgroundColor: "rgb(99,102,241)",
+                                opacity: 0.7,
+                              }}
+                            />
+                          ))
+                        : null}
+                    </div>
+                  </button>
+                );
+              }),
+            )}
           </div>
-        )}
+        )
+      )}
+
+      {/* Free-text input */}
+      <div>
+        <label className="mb-1 block text-xs font-medium text-muted">Sentence</label>
+        <textarea
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          rows={2}
+          className="w-full rounded-md border border-border bg-surface px-3 py-2 font-mono text-sm"
+          placeholder="Type any sentence…"
+        />
       </div>
 
       {/* Single token row: each token is clickable AND shows attention weight
@@ -422,10 +381,11 @@ function LiveAttentionLoaded({
         </div>
       )}
 
-      {/* Per-example hint */}
-      {activeExample && (
+      {/* Per-head hint (only when viewing a named head whose example sentence
+          is still loaded) */}
+      {namedHeadMatch && input === namedHeadMatch.exampleText && (
         <div className="rounded-lg border border-accent/20 bg-accent/5 px-4 py-2 text-xs text-muted">
-          <strong className="text-foreground">Try this:</strong> {activeExample.hint}
+          <strong className="text-foreground">Try this:</strong> {namedHeadMatch.exampleHint}
         </div>
       )}
     </div>

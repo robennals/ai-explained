@@ -57,10 +57,12 @@ Click "it" and try the "Self / pronoun" head — notice how it splits attention 
 
 No one told these heads what patterns to learn — each one discovered its role through training, because different kinds of attention are all useful for predicting language.
 
-The BERT weights above are pre-recorded — extracted from a 110-million-parameter model in Python and shipped as a fixed table. Here's the other side of that trade-off: a tiny transformer running live in your browser, trained on a small collection of children's stories. Its heads aren't as sophisticated as BERT's, but they're real, computed on whatever sentence you type.
+## A Live Attention Model
+
+The BERT widget above shows pre-recorded attention weights, extracted in Python and frozen into a table of canned sentences. Below is the opposite arrangement: a tiny transformer that runs live in your browser. It was trained on a small collection of children's stories, so its heads are simpler than BERT's. Every weight you see was computed on whatever sentence you typed, the moment you typed it.
 
 <LiveAttentionWidget>
-Try the Induction tab and click the second "the" — attention jumps back to "dog", the word that followed "the" earlier in the sentence. That's how the model uses past patterns to predict what comes next. Then flip to the Previous token head and watch attention slide one cell to the left for every word.
+Try the Induction tab and click the second "the". Attention jumps back to "dog", the word that followed "the" earlier in the sentence. That's how the model uses past patterns to predict what comes next. Then flip to the Previous token head and watch attention slide one cell to the left for every word.
 </LiveAttentionWidget>
 
 ## Softmax: Dividing Your Attention
