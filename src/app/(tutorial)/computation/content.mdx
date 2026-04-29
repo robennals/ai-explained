@@ -6,18 +6,14 @@ Modern AI does things that would have seemed impossible for a computer to do a f
 
 ## What Can AI Do?
 
-A few years ago, the things AI does routinely now would have read as science fiction. Image recognition. Translation between hundreds of languages. Generating a photorealistic image from a sentence like "a cat wearing a tiny hat on the moon." Holding a conversation that feels close to talking to a person.
-
-The strange thing is, all of these work the same way underneath.
-
-This tutorial explains how. Not at a "it's like a brain" level: the actual mechanism, in enough detail that you could build a small one yourself. By the end you'll understand how modern AI systems work, and why they work.
+A few years ago, the things AI does routinely now would have read as science fiction. It can translate between hundreds of languages, generate a photorealistic image from a descriptions, write complex computer programs from scratch, or perform expert tasks better than most experts. The goal of this tutorial is to give you a deep intuitive sense of how AI does these things. 
 
 The whole tutorial rests on four ideas that the rest of this chapter introduces:
 
-- Everything inside an AI is numbers. Words, images, sound.
-- An AI is a function: numbers go in, different numbers come out.
-- The function is itself made of numbers. Billions of them, called *parameters*.
-- Training an AI means finding the right values for those numbers.
+- **Everything inside an AI is numbers.** Words, images, sound.
+- **An AI is a function**: numbers go in, different numbers come out.
+- **The function is itself made of numbers.** Billions of them, called *parameters*.
+- **Training an AI means finding the right values for those numbers.**
 
 Most of the tutorial is spent on the fourth point, because that's where the interesting complications live.
 
@@ -25,10 +21,10 @@ Most of the tutorial is spent on the fourth point, because that's where the inte
 
 You probably think of a text message as letters, a photo as colors, a song as sound. Inside a computer, all of them are lists of numbers.
 
-- *Text* is numbers. Every character has a number assigned to it. The letter "H" is one number, "e" is another, the space between words is yet another. Your text message is a sequence of numbers.
-- *Colors* are numbers. Every color you've ever seen can be described by three numbers: how much red, green, and blue light to mix. (Or how much cyan, magenta, and yellow ink, if you're painting.) Change those three numbers and you get a different color.
-- *Images* are numbers. Every pixel is a color, and every color is three numbers. A photo is a giant grid of number-triplets.
-- *Sound* is numbers. A microphone samples the air pressure thousands of times per second. Each sample is one number. A three-minute song is about 8 million numbers.
+- **Text** is numbers. Every character has a number assigned to it. The letter "H" is one number, "e" is another, the space between words is yet another. Your text message is a sequence of numbers.
+- **Colors** are numbers. Every color you've ever seen can be described by three numbers: how much red, green, and blue light to mix. (Or how much cyan, magenta, and yellow ink, if you're painting.) Change those three numbers and you get a different color.
+- **Images** are numbers. Every pixel is a color, and every color is three numbers. A photo is a giant grid of number-triplets.
+- **Sound** is numbers. A microphone samples the air pressure thousands of times per second. Each sample is one number. A three-minute song is about 8 million numbers.
 
 Throughout this tutorial, the boxes that look like the one below are interactive *playgrounds*. Click the tabs, type things in, drag the sliders. The point is to mess around with them.
 
@@ -37,17 +33,17 @@ Type your name in the Text tab and watch each letter become a number. Mix a colo
 </NumbersEverywhereWidget>
 
 <KeyInsight>
-Every input a computer ever sees is a list of numbers. Every output it produces is also a list of numbers. So every kind of computer thinking is the act of turning one list of numbers into another.
+**Every input a computer ever sees is a list of numbers. Every output it produces is also a list of numbers.** So every kind of computer thinking is the act of turning one list of numbers into another.
 </KeyInsight>
 
 ## Thinking Is a Function
 
 Once you accept that everything is numbers, something useful follows. Every kind of intelligent behavior is a *function*: something that takes numbers in and produces numbers out.
 
-- *"Is this a cat?"* takes pixel values and returns a number representing how confident it is.
-- *"Translate to French"* takes English character codes and returns French character codes.
-- *"Write a poem about rain"* takes prompt characters and returns poem characters.
-- *"Generate an image of a sunset"* takes text and returns pixel values.
+- **"Is this a cat?"** takes pixel values and returns a number representing how confident it is.
+- **"Translate to French"** takes English character codes and returns French character codes.
+- **"Write a poem about rain"** takes prompt characters and returns poem characters.
+- **"Generate an image of a sunset"** takes text and returns pixel values.
 
 The shape is the same in every case: numbers in, numbers out.
 
@@ -76,7 +72,7 @@ Try to match the target curve by adjusting the sliders. Pay attention to how eac
 </ParameterPlaygroundWidget>
 
 <KeyInsight>
-A model is a machine with adjustable knobs. Different settings compute different functions. Finding the right function becomes a matter of finding the right knob settings. With four knobs, hand-tuning is already frustrating. Real AI models have *billions*. We'll need a way to set them automatically.
+**A model is a machine with adjustable knobs.** Different settings compute different functions. Finding the right function becomes a matter of finding the right knob settings. With four knobs, hand-tuning is already frustrating. Real AI models have *billions*. We'll need a way to set them automatically.
 </KeyInsight>
 
 ## Can One Machine Compute Everything?
@@ -109,11 +105,11 @@ The lookup table approach fails completely. Even for a tiny 8×8 grayscale image
 
 So here's where this leaves us:
 
-1. Everything is numbers. Text, images, sound, all of it.
-2. Thinking is a function. Every intelligent task is numbers in, numbers out.
-3. Models are machines with knobs. Different settings compute different functions.
-4. The right function exists. The Church-Turing thesis says so.
-5. Brute force is impossible. A lookup table would be bigger than the universe.
+1. **Everything is numbers.** Text, images, sound, all of it.
+2. **Thinking is a function.** Every intelligent task is numbers in, numbers out.
+3. **Models are machines with knobs.** Different settings compute different functions.
+4. **The right function exists.** The Church-Turing thesis says so.
+5. **Brute force is impossible.** A lookup table would be bigger than the universe.
 
 What's needed are models that *compress*: capture the right pattern with far fewer parameters than a lookup table would need entries. And a way to find the right parameter values automatically rather than by hand.
 
