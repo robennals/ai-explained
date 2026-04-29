@@ -36,10 +36,10 @@ const NAMED_HEADS: NamedHead[] = [
     head: 3,
     explanation:
       "When a phrase repeats, attention jumps back to whatever followed the earlier occurrence — a simple form of in-context learning. On non-repeated tokens this head mostly attends to itself.",
-    exampleText: "The dog chased the cat because it was angry",
-    exampleSelectedToken: 4, // second "the" (after [BOS] is prepended)
+    exampleText: "The big brown dog. The big brown",
+    exampleSelectedToken: 8, // last "brown" — the token whose next-word prediction is what we care about
     exampleHint:
-      'Click the second "the". Attention jumps to "dog" — the word that followed the first "the". Now swap "dog" and "cat" in the sentence: attention follows the swap. The head looks back at the prior occurrence of the same word and attends to its successor, whatever that word is.',
+      'The sentence is mid-repeat. What word should come next? The last "brown" is already selected — most of its attention pulls back to "dog", the word that came after "brown" the first time. The model uses that signal to predict "dog" as the most likely next token. Now edit the sentence to "The small brown bird. The small brown" and watch the attention follow.',
   },
   {
     label: "Previous token",

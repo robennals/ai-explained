@@ -21,7 +21,7 @@ test.describe("Attention chapter — Live Attention widget", () => {
 
     // Default sentence should produce token chips including a [BOS] chip.
     await expect(widget.getByRole("button", { name: "[BOS]" })).toBeVisible();
-    await expect(widget.locator("textarea")).toHaveValue(/the dog chased/i);
+    await expect(widget.locator("textarea")).toHaveValue(/the big brown/i);
 
     // Default selection (second "the" token, index 4) is pre-applied, so
     // an attention readout should already be visible. The readout is the
