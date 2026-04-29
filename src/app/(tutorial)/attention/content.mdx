@@ -45,17 +45,34 @@ Something crucial about **it**: it doesn't advertise anything, but it is looking
 
 In practice, real attention vectors have dozens or hundreds of dimensions, not just one. But the principle is the same. Remember the "bear detector" from the vectors chapter, where a single dot product could check for complex things like "something similar to a bear". Attention queries and keys work the same way, just asking richer questions like "is this a noun that's the subject of a nearby verb?"
 
+## Multi-Headed Attention
+
+Our toy mechanism solves one task, figuring out what a pronoun refers to. Real understanding means tracking many kinds of relationships at the same time:
+
+- Which noun does a pronoun point to?
+- Which verb is a noun the subject of?
+- Which adjective modifies which noun?
+- Where does one clause end and the next begin?
+- Which earlier word in the paragraph is this one a callback to?
+- Is this word the topic, or is it new information?
+
+A single set of keys and queries can only ask one kind of question. So real models run many attention computations in parallel, each one called an **attention head**, with its own keys and queries, free to learn its own pattern. The model doesn't have to choose which relationship to track; it tracks all of them at once.
+
+<KeyInsight>
+Each attention head asks a different kind of question. Pronouns, grammar, structure, long-range references: different heads specialize in different relationships, and the model uses all of them in parallel.
+</KeyInsight>
+
 ## Attention in a Real Model
 
 Our toy vocabulary has four tokens and one-dimensional vectors. Real language models have tens of thousands of tokens and vectors with hundreds of dimensions. But the mechanism is exactly the same: queries, keys, and dot products.
 
-Below are real attention weights from **BERT**, a well-known language model. BERT has multiple attention heads, and each one has learned a different pattern. Click on any word and switch between heads to see what each one focuses on:
+Below are real attention weights from **BERT**, a well-known language model. BERT has 144 attention heads, every one learned from scratch during training without being told what to look for. Most heads do something too subtle to describe in words, but a few follow patterns we can recognize. The widget below shows two of those. Click on any word and switch between heads to see what each one focuses on:
 
 <BertAttentionNoPositionWidget>
 Click "it" and try the "Self / pronoun" head. It splits attention among the nouns in the sentence, trying to figure out which ones matter. Then try the "Broad context" head to see a different pattern. These heads aren't always right (a single attention head can only do so much), but they've clearly learned something useful.
 </BertAttentionNoPositionWidget>
 
-No one told these heads what patterns to learn. Each one discovered its role through training, because different kinds of attention are all useful for predicting language.
+Remember, these are just two of BERT's 144 heads, picked because their patterns are easy to recognize. The other heads are doing their own things in parallel, each contributing to the model's overall understanding.
 
 ## Softmax: Dividing Your Attention
 
@@ -86,21 +103,6 @@ The playground below uses the same key/query matching as before. "it" still find
 <ToyAttentionValuesWidget>
 Click "it" to see how attention weights blend value vectors into a result. With "cat blah blah it," the result is nearly 100% cat. Try "cat blah dog it". The result is a mix of both nouns. Try "blah blah blah it". With no nouns, attention spreads equally everywhere (including back to "it" itself, since nothing matches better), and the result is empty.
 </ToyAttentionValuesWidget>
-
-## Multi-Headed Attention
-
-An **attention head** is one full attention computation: one set of keys, queries, and values, learning one pattern of which words attend to which.
-
-Real models don't run just one head. They run many in parallel, each with its own keys, queries, and values, each free to learn a different pattern. This is called **multi-headed attention**. Each head produces its own new representation of every token; those per-head outputs are then combined into a single representation that gets passed on.
-
-Why bother with more than one head? Understanding a sentence requires many kinds of questions at once: What does this pronoun refer to? What's the subject of this verb? What clause does this word belong to? Multi-headed attention lets the model ask all of these at the same time, with each head specializing in a different kind of relationship.
-
-
-That's what you saw with BERT earlier: one head specialized in pronouns, another in broader context. Each found its role through training, without being told what to look for.
-
-<KeyInsight>
-Multiple attention heads let the model ask many different questions in parallel. Each head has its own key, query, and value weights, so each learns to attend to a different kind of relationship: pronouns, grammar, structure, semantics. **The model doesn't need to choose one kind of attention; it gets all of them at once.**
-</KeyInsight>
 
 ## Where the Vectors Come From
 
