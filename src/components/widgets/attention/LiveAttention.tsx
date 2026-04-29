@@ -31,15 +31,15 @@ interface NamedHead {
 // recommendations). See docs/superpowers/reports/2026-04-28-attention-heads-phase1.md.
 const NAMED_HEADS: NamedHead[] = [
   {
-    label: "Induction",
-    layer: 3,
-    head: 3,
+    label: "Phrase echo",
+    layer: 5,
+    head: 4,
     explanation:
-      "When a phrase repeats, attention jumps back to whatever followed the earlier occurrence — a simple form of in-context learning. On non-repeated tokens this head mostly attends to itself.",
+      "When a phrase starts to repeat, this head pulls attention back to the content noun that ended the prior occurrence — the model's way of recalling \"the thing we were just talking about\".",
     exampleText: "The big brown dog. The big brown",
-    exampleSelectedToken: 8, // last "brown" — the token whose next-word prediction is what we care about
+    exampleSelectedToken: 8, // last "brown" — the token about to predict the next word
     exampleHint:
-      'The sentence is mid-repeat. What word should come next? The last "brown" is already selected — most of its attention pulls back to "dog", the word that came after "brown" the first time. The model uses that signal to predict "dog" as the most likely next token. Now edit the sentence to "The small brown bird. The small brown" and watch the attention follow.',
+      'The sentence is mid-repeat. The last "brown" is selected, and 94% of its attention pulls back to "dog" — the noun that ended the first phrase. Edit the noun (try "The big brown bear" or "The small green frog") and the attention follows. Edit the colors instead and attention stays on the noun, because the colors aren\'t what the model is recalling.',
   },
   {
     label: "Previous token",

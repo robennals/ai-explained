@@ -62,7 +62,7 @@ No one told these heads what patterns to learn — each one discovered its role 
 The BERT widget above shows pre-recorded attention weights, extracted in Python and frozen into a table of canned sentences. Below is the opposite arrangement: a tiny transformer that runs live in your browser. It was trained on a small collection of children's stories, so its heads are simpler than BERT's. Every weight you see was computed on whatever sentence you typed, the moment you typed it.
 
 <LiveAttentionWidget>
-Try the Induction tab. The sentence "The big brown dog. The big brown" is mid-repeat. What word do you think comes next? The last "brown" is selected, and the head pulls most of its attention to "dog" — the word that came after "brown" the first time. The model uses that signal to predict the next word. Edit the sentence to "The small brown bird. The small brown" and watch the attention follow.
+Try the Phrase echo tab. The sentence "The big brown dog. The big brown" is mid-repeat. The last "brown" is selected, and 94% of its attention pulls back to "dog" — the noun the model is recalling from the prior phrase. Edit the noun to "The big brown bear" and attention follows the swap. Edit a color instead and attention stays put, because color words aren't what the head is tracking.
 </LiveAttentionWidget>
 
 ## Softmax: Dividing Your Attention

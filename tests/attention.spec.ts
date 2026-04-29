@@ -27,8 +27,8 @@ test.describe("Attention chapter — Live Attention widget", () => {
     // an attention readout should already be visible. The readout is the
     // only place that text "Attention from" appears.
     await expect(widget.getByText(/Attention from/)).toBeVisible();
-    // The default head is Induction at L3H3 — check the readout's L/H label.
-    await expect(widget.locator("text=/L\\s*3\\s*H\\s*3/")).toHaveCount(2, { timeout: 5_000 });
+    // The default head is Phrase echo at L5H4 — check the readout's L/H label.
+    await expect(widget.locator("text=/L\\s*5\\s*H\\s*4/")).toHaveCount(2, { timeout: 5_000 });
 
     // Switch heads via the Previous token chip and confirm the readout
     // updates to point at L0H7.
