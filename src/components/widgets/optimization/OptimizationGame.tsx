@@ -56,8 +56,8 @@ function signalRadius(t: number, isLatest: boolean): number {
 }
 
 const GAME_TABS: { id: "blind" | "signal"; label: string }[] = [
-  { id: "blind", label: "Blind (no signal)" },
-  { id: "signal", label: "With signal" },
+  { id: "blind", label: "Blind (no error signal)" },
+  { id: "signal", label: "With error signal" },
 ];
 
 export function OptimizationGame() {
@@ -123,7 +123,7 @@ export function OptimizationGame() {
   return (
     <WidgetContainer
       title="Search: Blind vs. Guided"
-      description="Find a hidden target — compare searching with no signal vs. an incremental signal"
+      description="Search for a hidden target, with and without an error signal."
       onReset={reset}
     >
       {/* Mode tabs */}
