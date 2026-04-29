@@ -59,10 +59,10 @@ No one told these heads what patterns to learn — each one discovered its role 
 
 ## A Live Attention Model
 
-The BERT widget above shows pre-recorded attention weights, extracted in Python and frozen into a table of canned sentences. Below is the opposite arrangement: a tiny transformer that runs live in your browser. It was trained on a small collection of children's stories, so its heads are simpler than BERT's. Every weight you see was computed on whatever sentence you typed, the moment you typed it.
+The BERT widget above shows pre-recorded attention weights, extracted in Python and frozen into a table of canned sentences. Below is the opposite arrangement: a tiny transformer that runs live in your browser. It was trained on a small collection of children's stories. Every weight you see was computed on whatever sentence you typed, the moment you typed it.
 
 <LiveAttentionWidget>
-Try the Phrase echo tab. The sentence "The big brown dog. The big brown" is mid-repeat. The last "brown" is selected, and 94% of its attention pulls back to "dog" — the noun the model is recalling from the prior phrase. Edit the noun to "The big brown bear" and attention follows the swap. Edit a color instead and attention stays put, because color words aren't what the head is tracking.
+Each cell in the grid is one attention head — 48 heads in total, six layers of eight. Click around. Some heads' behavior is easy to name: one always attends to the previous word, another snaps to a recent period or comma. Others do something you can almost-but-not-quite describe. Some look like noise. That's the honest picture: these heads weren't designed, they were learned. The model kept whatever patterns turned out to be useful for predicting the next word, with no requirement that those patterns make sense to a human. Some happen to. Some don't.
 </LiveAttentionWidget>
 
 ## Softmax: Dividing Your Attention

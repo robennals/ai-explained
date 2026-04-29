@@ -14,56 +14,9 @@ const MODEL_BASE =
   "https://pub-0f0bc2e5708e4f6b87d02e38956b7b72.r2.dev/data/attention-model/model";
 const TOKENIZER_URL = "/data/tokenizer/ts-tokenizer-4096.json";
 
-interface NamedHead {
-  label: string;
-  layer: number;
-  head: number;
-  explanation: string;
-  // Each named head ships with a curated example that exercises it.
-  exampleText: string;
-  exampleSelectedToken: number;
-  exampleHint: string;
-}
-
-// Coordinates and labels come from the Phase 1 trained-model inspection,
-// then re-validated against per-position behavior (cross-probe means hid
-// per-position decay, so this set is narrower than the original Phase 1
-// recommendations). See docs/superpowers/reports/2026-04-28-attention-heads-phase1.md.
-const NAMED_HEADS: NamedHead[] = [
-  {
-    label: "Phrase echo",
-    layer: 5,
-    head: 4,
-    explanation:
-      "When a phrase starts to repeat, this head pulls attention back to the content noun that ended the prior occurrence — the model's way of recalling \"the thing we were just talking about\".",
-    exampleText: "The big brown dog. The big brown",
-    exampleSelectedToken: 8, // last "brown" — the token about to predict the next word
-    exampleHint:
-      'The sentence is mid-repeat. The last "brown" is selected, and 94% of its attention pulls back to "dog" — the noun that ended the first phrase. Edit the noun (try "The big brown bear" or "The small green frog") and the attention follows. Edit the colors instead and attention stays on the noun, because the colors aren\'t what the model is recalling.',
-  },
-  {
-    label: "Previous token",
-    layer: 0,
-    head: 7,
-    explanation:
-      "Each token looks at the one immediately before it. The cleanest single pattern in the model — works at every position.",
-    exampleText: "Mary had a little lamb",
-    exampleSelectedToken: 4, // "little"
-    exampleHint:
-      "Click any token. Its attention slides one cell to the left. Try every word and watch the diagonal hold.",
-  },
-  {
-    label: "Punctuation",
-    layer: 2,
-    head: 3,
-    explanation:
-      "After a period or comma, this head pulls attention back to the punctuation mark — the model has learned where sentence boundaries are.",
-    exampleText: "She picked up the book. The book was heavy.",
-    exampleSelectedToken: 8, // "book" after the period
-    exampleHint:
-      'Click any token after the period. Most of the attention pulls back to "." even when the period is several words behind.',
-  },
-];
+const DEFAULT_SENTENCE = "The big brown dog. The big brown";
+const DEFAULT_SELECTED_TOKEN = 8; // last "brown"
+const DEFAULT_HEAD = { layer: 0, head: 0 };
 
 interface LoadState {
   model: TransformerModel | null;
@@ -71,8 +24,6 @@ interface LoadState {
   loading: boolean;
   error: string | null;
 }
-
-const DEFAULT_HEAD = NAMED_HEADS[0];
 
 export function LiveAttention() {
   const [state, setState] = useState<LoadState>({
@@ -141,22 +92,15 @@ function LiveAttentionLoaded({
   model: TransformerModel;
   tokenizer: WordPieceTokenizer;
 }) {
-  const [input, setInput] = useState(DEFAULT_HEAD.exampleText);
+  const [input, setInput] = useState(DEFAULT_SENTENCE);
   const [result, setResult] = useState<{
     tokens: string[];
     inference: InferenceResult;
   } | null>(null);
   const [running, setRunning] = useState(false);
-  const [selectedToken, setSelectedToken] = useState<number | null>(
-    DEFAULT_HEAD.exampleSelectedToken,
-  );
-  const [selectedHead, setSelectedHead] = useState<{ layer: number; head: number }>({
-    layer: DEFAULT_HEAD.layer,
-    head: DEFAULT_HEAD.head,
-  });
-  const [viewMode, setViewMode] = useState<"named" | "all">("named");
+  const [selectedToken, setSelectedToken] = useState<number | null>(DEFAULT_SELECTED_TOKEN);
+  const [selectedHead, setSelectedHead] = useState<{ layer: number; head: number }>(DEFAULT_HEAD);
 
-  // Debounce + run forward pass.
   useEffect(() => {
     const handle = setTimeout(() => {
       setRunning(true);
@@ -166,8 +110,6 @@ function LiveAttentionLoaded({
         const tokens = ["[BOS]", ...enc.tokens].slice(0, model.config.context_len);
         const inference = forward(model, ids);
         setResult({ tokens, inference });
-        // If the sentence shrank below the previously-selected token, clear
-        // the selection so the readout doesn't read past the new attention row.
         setSelectedToken((prev) => (prev !== null && prev >= tokens.length ? null : prev));
       } finally {
         setRunning(false);
@@ -176,9 +118,6 @@ function LiveAttentionLoaded({
     return () => clearTimeout(handle);
   }, [input, model, tokenizer]);
 
-  const namedHeadMatch = NAMED_HEADS.find(
-    (h) => h.layer === selectedHead.layer && h.head === selectedHead.head,
-  );
   const seqLen = result?.tokens.length ?? 0;
   const headAttn = result
     ? result.inference.layerAttentions[selectedHead.layer]?.[selectedHead.head]
@@ -188,68 +127,33 @@ function LiveAttentionLoaded({
       ? Array.from({ length: seqLen }, (_, j) => headAttn[selectedToken * seqLen + j])
       : null;
 
-  function selectNamedHead(h: NamedHead) {
-    setSelectedHead({ layer: h.layer, head: h.head });
-    setInput(h.exampleText);
-    setResult(null); // hide stale readout until new forward pass completes
-    setSelectedToken(h.exampleSelectedToken);
-  }
-
   return (
     <div className="flex flex-col gap-4">
-      {/* Top-level view-mode tabs */}
-      <div className="flex gap-1 border-b border-border">
-        {(["named", "all"] as const).map((mode) => (
-          <button
-            key={mode}
-            onClick={() => setViewMode(mode)}
-            className={`-mb-px border-b-2 px-3 py-2 text-sm font-medium transition-colors ${
-              viewMode === mode
-                ? "border-accent text-accent"
-                : "border-transparent text-muted hover:text-foreground"
-            }`}
-          >
-            {mode === "named" ? "Named heads" : `All heads (${model.config.num_layers}×${model.config.num_heads})`}
-          </button>
-        ))}
+      {/* Sentence input */}
+      <div>
+        <label className="mb-1 block text-xs font-medium text-muted">Sentence</label>
+        <textarea
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          rows={2}
+          className="w-full rounded-md border border-border bg-surface px-3 py-2 font-mono text-sm"
+          placeholder="Type any sentence…"
+        />
       </div>
 
-      {/* Head selector — chips in named mode, grid in all mode */}
-      {viewMode === "named" ? (
-        <div className="flex flex-col gap-2">
-          <div className="flex flex-wrap gap-1.5">
-            {NAMED_HEADS.map((h) => {
-              const active = h.layer === selectedHead.layer && h.head === selectedHead.head;
-              return (
-                <button
-                  key={h.label}
-                  onClick={() => selectNamedHead(h)}
-                  className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
-                    active
-                      ? "border-indigo-400 bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300"
-                      : "border-border text-muted hover:border-foreground/20 hover:text-foreground"
-                  }`}
-                >
-                  {h.label} <span className="opacity-50">L{h.layer}H{h.head}</span>
-                </button>
-              );
-            })}
+      {/* All-heads grid */}
+      {result && (
+        <div>
+          <div className="mb-1 text-xs font-medium text-muted">
+            All heads ({model.config.num_layers} × {model.config.num_heads}) — click a cell to
+            inspect that head
           </div>
-          {namedHeadMatch && (
-            <div className="rounded-lg border border-border bg-foreground/[0.02] px-3 py-2 text-xs text-muted">
-              {namedHeadMatch.explanation}
-            </div>
-          )}
-        </div>
-      ) : (
-        result && (
           <div
             className="grid gap-1"
             style={{ gridTemplateColumns: `repeat(${model.config.num_heads}, minmax(0, 1fr))` }}
           >
             {Array.from({ length: model.config.num_layers }, (_, l) =>
               Array.from({ length: model.config.num_heads }, (_, h) => {
-                const named = NAMED_HEADS.find((nh) => nh.layer === l && nh.head === h);
                 const active = selectedHead.layer === l && selectedHead.head === h;
                 const cellAttn = result.inference.layerAttentions[l]?.[h];
                 const cellRow: number[] =
@@ -260,13 +164,11 @@ function LiveAttentionLoaded({
                   <button
                     key={`${l}-${h}`}
                     onClick={() => setSelectedHead({ layer: l, head: h })}
-                    title={named ? `${named.label} (L${l}H${h})` : `L${l}H${h}`}
+                    title={`L${l}H${h}`}
                     className={`relative flex h-12 flex-col items-stretch rounded border p-0.5 transition-colors ${
                       active
                         ? "border-indigo-500 bg-indigo-50/60 dark:bg-indigo-950/40"
-                        : named
-                          ? "border-indigo-300 bg-indigo-50/30 dark:border-indigo-700 dark:bg-indigo-950/20"
-                          : "border-border hover:border-foreground/30"
+                        : "border-border hover:border-foreground/30"
                     }`}
                   >
                     <span className="text-[8px] leading-tight text-muted">
@@ -292,23 +194,10 @@ function LiveAttentionLoaded({
               }),
             )}
           </div>
-        )
+        </div>
       )}
 
-      {/* Free-text input */}
-      <div>
-        <label className="mb-1 block text-xs font-medium text-muted">Sentence</label>
-        <textarea
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          rows={2}
-          className="w-full rounded-md border border-border bg-surface px-3 py-2 font-mono text-sm"
-          placeholder="Type any sentence…"
-        />
-      </div>
-
-      {/* Single token row: each token is clickable AND shows attention weight
-          coming from the currently-selected token under the current head. */}
+      {/* Token row with attention readout */}
       {result && (
         <div>
           <div className="mb-1 text-xs font-medium text-muted">
@@ -319,7 +208,6 @@ function LiveAttentionLoaded({
                 <span className="font-mono">
                   L{selectedHead.layer}H{selectedHead.head}
                 </span>
-                {namedHeadMatch ? <> · <span>{namedHeadMatch.label}</span></> : null}
                 {running ? " · running…" : ""}
               </>
             ) : (
@@ -378,14 +266,6 @@ function LiveAttentionLoaded({
               );
             })}
           </div>
-        </div>
-      )}
-
-      {/* Per-head hint (only when viewing a named head whose example sentence
-          is still loaded) */}
-      {namedHeadMatch && input === namedHeadMatch.exampleText && (
-        <div className="rounded-lg border border-accent/20 bg-accent/5 px-4 py-2 text-xs text-muted">
-          <strong className="text-foreground">Try this:</strong> {namedHeadMatch.exampleHint}
         </div>
       )}
     </div>
