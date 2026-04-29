@@ -39,7 +39,7 @@ const NAMED_HEADS: NamedHead[] = [
     exampleText: "The dog chased the cat because it was angry",
     exampleSelectedToken: 4, // second "the" (after [BOS] is prepended)
     exampleHint:
-      'Click the second "the". Attention jumps to "dog" — the word that followed "the" earlier in the sentence.',
+      'Click the second "the". Attention jumps to "dog" — the word that followed the first "the". Now swap "dog" and "cat" in the sentence: attention follows the swap. The head looks back at the prior occurrence of the same word and attends to its successor, whatever that word is.',
   },
   {
     label: "Previous token",
