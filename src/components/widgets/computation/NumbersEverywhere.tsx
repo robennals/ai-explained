@@ -88,7 +88,7 @@ function TextTab() {
   );
 }
 
-function ImageTab() {
+export function ImageTab() {
   const [grid, setGrid] = useState<string[][]>(createInitialGrid);
   const [selectedColor, setSelectedColor] = useState("#000000");
   const [hoveredCell, setHoveredCell] = useState<[number, number] | null>(null);

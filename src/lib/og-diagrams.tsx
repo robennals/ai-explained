@@ -2,18 +2,22 @@
 // The diagram mounts in its initial state; the OG route's CSS frames it.
 // Chapters without an entry get a clean text-only OG card.
 //
+// Each entry can wrap the widget in a container that scales it (CSS `zoom`)
+// to fill the 1200×630 canvas. Scale factors are tuned per-widget by visual
+// inspection of the captured PNG.
+//
 // To swap a chapter's OG diagram, edit its `case` below and re-run
-// `pnpm og:capture` (with the dev or prod server running).
+// `pnpm og:capture` (with the prod or dev server running).
 
 import type { ReactNode } from "react";
-import { NumbersEverywhereWidget } from "@/app/(tutorial)/computation/widgets";
-import { Gradient2DCurveWidget } from "@/app/(tutorial)/optimization/widgets";
-import { NetworkOverviewWidget } from "@/app/(tutorial)/neurons/widgets";
+import { ImageTab } from "@/components/widgets/computation/NumbersEverywhere";
+import { SmoothVsRuggedWidget } from "@/app/(tutorial)/optimization/widgets";
+import { NeuronFreePlayWidget } from "@/app/(tutorial)/neurons/widgets";
 import { AmplifiedAnimalExplorerWidget } from "@/app/(tutorial)/vectors/widgets";
-import { EmbeddingArithmeticWidget } from "@/app/(tutorial)/embeddings/widgets";
+import { EmbeddingClassifierWidget } from "@/app/(tutorial)/embeddings/widgets";
 import { BigramExplorerWidget } from "@/app/(tutorial)/next-word-prediction/widgets";
 import { ToyAttentionWidget } from "@/app/(tutorial)/attention/widgets";
-import { WordOrderMattersWidget } from "@/app/(tutorial)/positions/widgets";
+import { RotationToyTokensWidget } from "@/app/(tutorial)/positions/widgets";
 import { TransformerOverviewWidget } from "@/app/(tutorial)/transformers/widgets";
 
 export interface OgDiagram {
@@ -21,26 +25,63 @@ export interface OgDiagram {
   node: ReactNode;
 }
 
+// Wraps a widget in a CSS zoom container so it fills more of the 1200×630
+// canvas. Zoom is non-standard but works in Chromium (which Playwright uses).
+function zoomed(zoom: number, children: ReactNode): ReactNode {
+  return (
+    <div
+      style={{
+        zoom,
+        width: "100%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
 export function getOgDiagram(slug: string): OgDiagram | null {
   switch (slug) {
     case "computation":
-      return { node: <NumbersEverywhereWidget /> };
+      // Image tab from Numbers Everywhere — pixel grid is the visual hook.
+      return { node: zoomed(2.0, <ImageTab />) };
     case "optimization":
-      return { node: <Gradient2DCurveWidget /> };
+      // Two side-by-side landscapes — smooth vs. rugged.
+      return { node: zoomed(1.4, <SmoothVsRuggedWidget />) };
     case "neurons":
-      return { node: <NetworkOverviewWidget /> };
+      // Your First Neuron — the canonical perceptron playground.
+      return { node: zoomed(1.5, <NeuronFreePlayWidget />) };
     case "vectors":
-      return { node: <AmplifiedAnimalExplorerWidget /> };
+      // Animal trait sliders — squeezed narrower so the responsive widget
+      // reflows taller and fills more of the canvas.
+      return {
+        node: (
+          <div style={{ width: 720 }}>
+            <AmplifiedAnimalExplorerWidget />
+          </div>
+        ),
+      };
     case "embeddings":
-      return { node: <EmbeddingArithmeticWidget /> };
+      // Classifier heatmap — colorful + visual, less text-heavy than arithmetic.
+      return { node: zoomed(1.4, <EmbeddingClassifierWidget />) };
     case "next-word-prediction":
-      return { node: <BigramExplorerWidget /> };
+      // Probability bars — zoomed to fill canvas.
+      return { node: zoomed(1.6, <BigramExplorerWidget />) };
     case "attention":
+      // Toy attention — cat ← it arrow with KEY/QUERY values. No zoom:
+      // the SVG arc uses absolute coordinates that mis-align under CSS
+      // zoom. The crop script upscales the trimmed content to fill.
       return { node: <ToyAttentionWidget /> };
     case "positions":
-      return { node: <WordOrderMattersWidget /> };
+      // "Applying Rotation to a Dimension" — visual rotation of a single
+      // dimension pair, less wide than WordOrderMatters.
+      return { node: <RotationToyTokensWidget /> };
     case "transformers":
-      return { node: <TransformerOverviewWidget /> };
+      // Layer-by-layer overview of a small transformer.
+      return { node: zoomed(1.5, <TransformerOverviewWidget />) };
     default:
       return null;
   }
