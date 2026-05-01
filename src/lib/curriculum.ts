@@ -7,10 +7,21 @@ export interface Chapter {
   description: string;
   ready?: boolean;
   polishing?: boolean;
-  section?: "appendix";
+  section?: "appendix" | "intro";
 }
 
 export const chapters: Chapter[] = [
+  {
+    id: 0,
+    slug: "introduction",
+    title: "Introduction",
+    subtitle: "What this is and how to use it",
+    prerequisites: [],
+    description:
+      "An interactive tutorial about how modern AI actually works. The goal is a real, intuitive understanding, with no math or computer science background assumed.",
+    ready: true,
+    section: "intro",
+  },
   {
     id: 1,
     slug: "computation",
@@ -287,6 +298,10 @@ export function getMainChapters(): Chapter[] {
   return chapters.filter((c) => !c.section);
 }
 
+export function getIntroChapter(): Chapter | undefined {
+  return chapters.find((c) => c.section === "intro");
+}
+
 export function getAppendixChapters(): Chapter[] {
   return chapters.filter((c) => c.section === "appendix");
 }
@@ -302,8 +317,13 @@ export function getAdjacentChapters(slug: string): {
   next: Chapter | undefined;
 } {
   const chapter = chapters.find((c) => c.slug === slug);
-  // Navigate within the same section (main or appendix)
-  const pool = chapter?.section === "appendix" ? getAppendixChapters() : getMainChapters();
+  // Navigate within the same section. The intro chapter is paired with the
+  // main chapters so readers can move from the introduction into chapter 1
+  // and back, but appendix chapters navigate among themselves.
+  const pool =
+    chapter?.section === "appendix"
+      ? getAppendixChapters()
+      : [...(getIntroChapter() ? [getIntroChapter()!] : []), ...getMainChapters()];
   const readyPool = pool.filter((c) => c.ready);
   const idx = readyPool.findIndex((c) => c.slug === slug);
   return {

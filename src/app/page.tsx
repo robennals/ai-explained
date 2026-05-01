@@ -1,7 +1,13 @@
 import Link from "next/link";
-import { getMainChapters, getAppendixChapters, getAppendixLabel } from "@/lib/curriculum";
+import {
+  getIntroChapter,
+  getMainChapters,
+  getAppendixChapters,
+  getAppendixLabel,
+} from "@/lib/curriculum";
 
 export default function HomePage() {
+  const introChapter = getIntroChapter();
   const mainChapters = getMainChapters();
   const appendixChapters = getAppendixChapters();
 
@@ -40,7 +46,7 @@ export default function HomePage() {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        {mainChapters.map((ch) =>
+        {[...(introChapter ? [introChapter] : []), ...mainChapters].map((ch) =>
           ch.ready ? (
             <Link
               key={ch.id}
@@ -49,7 +55,7 @@ export default function HomePage() {
             >
               <div className="flex items-start gap-3">
                 <span className="mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-accent/10 font-mono text-xs font-bold text-accent group-hover:bg-accent/15">
-                  {ch.id}
+                  {ch.section === "intro" ? "" : ch.id}
                 </span>
                 <div className="min-w-0">
                   <h2 className="font-semibold text-foreground group-hover:text-accent-dark">
