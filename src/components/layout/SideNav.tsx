@@ -2,7 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { getMainChapters, getAppendixChapters, getAppendixLabel, type Chapter } from "@/lib/curriculum";
+import {
+  getIntroChapter,
+  getMainChapters,
+  getAppendixChapters,
+  getAppendixLabel,
+  type Chapter,
+} from "@/lib/curriculum";
 
 function ChapterItem({ ch, isActive, label }: { ch: Chapter; isActive: boolean; label: string }) {
   const href = `/${ch.slug}`;
@@ -54,6 +60,7 @@ function ChapterItem({ ch, isActive, label }: { ch: Chapter; isActive: boolean; 
 
 export function SideNav() {
   const pathname = usePathname();
+  const introChapter = getIntroChapter();
   const mainChapters = getMainChapters();
   const appendixChapters = getAppendixChapters();
 
@@ -63,6 +70,14 @@ export function SideNav() {
         Chapters
       </h2>
       <ul className="space-y-0.5">
+        {introChapter && (
+          <ChapterItem
+            key={introChapter.id}
+            ch={introChapter}
+            isActive={pathname === `/${introChapter.slug}`}
+            label=""
+          />
+        )}
         {mainChapters.map((ch) => (
           <ChapterItem
             key={ch.id}
