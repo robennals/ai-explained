@@ -2,64 +2,66 @@
 
 <Lead>
 The word "vector" sounds intimidating. It isn't. A vector is just a list of numbers.
-But this simple idea turns out to be the key to understanding what neurons actually do — and why stacking them in layers works at all.
+But this simple idea turns out to be the key to understanding what neurons actually do, and why stacking them in layers works at all.
 </Lead>
 
 ## Describing Things with Vectors
 
-You already use lists of numbers to describe things. Your position on the planet is two numbers: (latitude, longitude). A color on screen is three numbers: (red, green, blue). An RPG character has stats like (strength, magic, speed, defense). Each of these is a **vector** — a list of numbers that together describe something.
+You already use lists of numbers to describe things. Your position on the planet is two numbers: (latitude, longitude). A color on screen is three numbers: (red, green, blue). An RPG character has stats like (strength, magic, speed, defense). Each of these is a **vector**: a list of numbers that together describe something.
 
 We can use the same idea to describe almost anything. Take animals: rate each one from 0 to 1 on properties like big, scary, hairy, cuddly, fast, and fat, and you get a vector that captures what makes that animal distinctive.
 
 <VectorPropertyExplorerWidget>
-Switch between tabs to see different kinds of vectors. Click two items to compare their vectors side by side — green bars mean the values are similar, red bars mean they're different. Which pair is the most similar? Try all four tabs to see how the same idea applies to completely different things.
+Switch between tabs to see different kinds of vectors. Click two items to compare their vectors side by side. Green bars mean the values are similar, red bars mean they're different. Which pair is the most similar? Try all four tabs to see how the same idea applies to completely different things.
 </VectorPropertyExplorerWidget>
 
-The number of measurements is the vector's **dimension** — our animal vectors have 6 dimensions, one per property. More dimensions let you make finer distinctions. With just "big" and "scary," a bear and a dog might look similar. Add "cuddly" and they separate out.
+The number of measurements is the vector's **dimension**. Our animal vectors have 6 dimensions, one per property. More dimensions let you make finer distinctions. With just "big" and "scary," a bear and a dog might look similar. Add "cuddly" and they separate out.
 
-Notice something important: the vector captures what we *chose* to measure. If we'd picked different properties, the same items would get different vectors. **The choice of dimensions determines what the vector can distinguish.**
+The vector captures what we *chose* to measure. If we'd picked different properties, the same items would get different vectors. **The choice of dimensions determines what the vector can distinguish.**
 
 <KeyInsight>
-**A vector is a compact description.** It's a list of numbers that together describe something. More dimensions mean finer distinctions. Vectors can describe positions, colors, characters, animals, foods — anything you can capture with numbers.
+**A vector is a compact description.** It's a list of numbers that together describe something. More dimensions mean finer distinctions. Vectors can describe positions, colors, characters, animals, foods, anything you can capture with numbers.
 </KeyInsight>
 
 ## Measuring Similarity
 
-How do we measure how similar two things are? There's a beautifully simple operation: **multiply each matching pair of numbers, then add up all the results.** This is called the **dot product**:
+How do we measure how similar two things are? There's a simple operation: **multiply each matching pair of numbers, then add up all the results.** This is called the **dot product**:
 
 **dot product = (a₁ × b₁) + (a₂ × b₂) + … + (aₙ × bₙ)**
 
-The result is a single number that tells you how similar the two vectors are:
+The result is a single number that captures how similar the two vectors are. A large positive number means they share a lot of the same properties. A number near zero means they have little in common. A negative number means they pull in opposite directions.
+
+Why does multiply-and-add measure similarity? Look at the per-dimension math. When both vectors score high on the same property, multiplying those gives a big number, and that shared trait contributes a lot to the total. But if one scores high and the other low, multiplying gives almost nothing. Add up all these products, and you get a total that's high when the vectors agree and low when they don't.
+
+<DotProductComparisonWidget>
+Pick two items and compare their similarity. The multiply column shows what happens at each dimension. When both items score high on the same property, that contributes a lot to the total. When one scores high and the other low, it contributes almost nothing.
+</DotProductComparisonWidget>
+
+The similarity scores here fall cleanly between −1 and 1. That's because all the animal, food, and instrument vectors have been carefully scaled to the same size. The next section explains why that matters, and what goes wrong when vectors *aren't* the same size.
+
+## Unit Vectors: Solving the "Big in Everything" Problem
+
+What if we hadn't been careful about scaling? Imagine an animal that scored high on *every* property: big, scary, hairy, cuddly, fast, fat. Its dot product with *any* animal would be huge. It would look similar to everything, which is clearly wrong.
+
+The problem is that the dot product rewards having big numbers, not just agreeing on the same properties. We need a way to put all vectors on equal footing.
+
+The solution: scale every vector to the same size, specifically size 1. A vector with size 1 is called a **unit vector**.
+
+To find the size of a vector (its **magnitude**), you square all the dimensions, add them together, and take the square root. This is just the Pythagorean rule extended to any number of dimensions:
+
+**magnitude = √(v₁² + v₂² + … + vₙ²)**
+
+To make a unit vector, divide every dimension by the magnitude. The result has magnitude 1, but the *proportions* between dimensions stay the same. A bear is still scarier than it is fast.
+
+For any two unit vectors, the dot product is always between −1 and 1, with a clean interpretation:
 - **1** means they're identical
 - **0** means they have nothing in common
 - **−1** means they're completely opposite
 
-Why does multiply-and-add measure similarity? Look at the per-dimension math. When both vectors score high on the same property, multiplying those gives a big number — that shared trait contributes a lot to the total. But if one scores high and the other low, multiplying gives almost nothing. Add up all these products, and you get a total that's high when the vectors agree and low when they don't.
-
-<DotProductComparisonWidget>
-Pick two items and compare their similarity. The multiply column shows what happens at each dimension — when both items score high on the same property, that contributes a lot to the total. When one scores high and the other low, it contributes almost nothing.
-</DotProductComparisonWidget>
-
-You'll notice the similarity scores here fall cleanly between −1 and 1. That's because all the animal, food, and instrument vectors have been carefully scaled to the same size. The next section explains why that matters — and what goes wrong when vectors *aren't* the same size.
-
-## Unit Vectors: Solving the "Big in Everything" Problem
-
-What if we hadn't been careful about scaling? Imagine an animal that scored high on *every* property — big, scary, hairy, cuddly, fast, fat. Its dot product with *any* animal would be huge. It would look similar to everything, which is clearly wrong.
-
-The problem is that the dot product rewards having big numbers, not just agreeing on the same properties. We need a way to put all vectors on equal footing.
-
-The solution: scale every vector to the same size — specifically, size 1. A vector with size 1 is called a **unit vector**.
-
-To find the size of a vector — its **magnitude** — you square all the dimensions, add them together, and take the square root. This is just the Pythagorean rule extended to any number of dimensions:
-
-**magnitude = √(v₁² + v₂² + … + vₙ²)**
-
-To make a unit vector, divide every dimension by the magnitude. The result has magnitude 1, but the *proportions* between dimensions stay the same — a bear is still scarier than it is fast.
-
-All the animal, food, and instrument vectors we've been using are unit vectors. That's why the dot products give clean similarity scores between −1 and 1.
+All the animal, food, and instrument vectors we've been using are unit vectors, which is why their dot products gave such clean similarity scores.
 
 <UnitVectorExplorerWidget>
-Design your own animal — notice how adjusting one property automatically scales the others to keep the magnitude at 1.
+Design your own animal. Adjusting one property automatically scales the others to keep the magnitude at 1.
 </UnitVectorExplorerWidget>
 
 <KeyInsight>
@@ -68,38 +70,36 @@ Design your own animal — notice how adjusting one property automatically scale
 
 ## Combining Vectors
 
-Since vectors are just lists of numbers, you can add them — add each dimension separately. The result is a new vector that combines information from both inputs.
+Since vectors are just lists of numbers, you can add them. Add each dimension separately. The result is a new vector that combines information from both inputs.
 
-**Blending.** Add two animal vectors and normalize the result back to a unit vector, and you get an animal "in between" the two. Blend a bear and a rabbit and you get something medium-sized, moderately cuddly, and somewhat hairy. Check the similarity ranking — the blend often lands near an animal you'd expect.
+**Blending.** Add two animal vectors and normalize the result back to a unit vector, and you get an animal "in between" the two. Blend a bear and a rabbit and you get something medium-sized, moderately cuddly, and somewhat hairy. Check the similarity ranking; the blend often lands near an animal you'd expect.
 
-**Modifying.** You can also add a vector that pushes in a specific direction. Start with a bear and add "more cuddly, less scary, smaller" — you get something like Paddington Bear. Start with a dog and add "bigger, scarier" — you get a wolf. The result describes something that wasn't in our original list.
+**Modifying.** You can also add a vector that pushes in a specific direction. Start with a bear and add "more cuddly, less scary, smaller", and you get something like Paddington Bear. Start with a dog and add "bigger, scarier", and you get a wolf. The result describes something that wasn't in our original list.
 
 <VectorMixerWidget>
-On the **Blend** tab, pick two animals and drag the slider to see what's in between. On the **Modify** tab, start with a base animal and use the sliders to add or subtract properties. Try the presets — Paddington, Direwolf, Tiny Eagle — then invent your own.
+On the **Blend** tab, pick two animals and drag the slider to see what's in between. On the **Modify** tab, start with a base animal and use the sliders to add or subtract properties. Try the presets (Paddington, Direwolf, Tiny Eagle), then invent your own.
 </VectorMixerWidget>
 
-This idea — building up complex descriptions by adding simpler vectors together — turns out to be fundamental to how neural networks work. Deep inside a real model, every layer *adds* its contribution to a running sum, gradually refining what each token represents. The whole architecture depends on the fact that vectors can be combined by addition.
-
-We'll also see in the next chapter that learned word vectors have a famous property: **king − man + woman ≈ queen**. The direction from "man" to "woman" captures something about gender, and you can add that direction to other words. Vector addition isn't just a mathematical curiosity — it's one of the core operations of AI.
+This idea, building up complex descriptions by adding simpler vectors together, turns out to be central to how neural networks work. This is something we'll return to in the chapter on embeddings and again for transformers.
 
 ## What and How Much
 
 Any vector can be split into two parts: a **unit vector** and a **magnitude**.
 
-- The **unit vector** says *what kind of thing* it is — the pattern of properties, stripped of size.
+- The **unit vector** says *what kind of thing* it is, the pattern of properties, stripped of size.
 - The **magnitude** says *how much* of that thing there is.
 
-Think of a bear detector: the unit vector says "I'm looking for bear-like things," and the magnitude says "how sensitive is my detector to bears." A magnitude of 1 is the standard size. Double the magnitude, and the dot product with any input doubles too — the detector gets more sensitive without changing *what* it detects.
+Think of a bear detector: the unit vector says "I'm looking for bear-like things," and the magnitude says "how sensitive is my detector to bears." A magnitude of 1 is the standard size. Double the magnitude, and the dot product with any input doubles too. The detector gets more sensitive without changing *what* it detects.
 
 <AmplifiedAnimalExplorerWidget>
-Pick an animal and see what happens when you multiply its unit vector by different magnitudes. The proportions stay the same — only the size changes.
+Pick an animal and see what happens when you multiply its unit vector by different magnitudes. The proportions stay the same; only the size changes.
 </AmplifiedAnimalExplorerWidget>
 
-This decomposition — unit vector for *what*, magnitude for *how much* — is one of the most important ideas in the chapter. It's how neurons work, as we'll see next.
+This decomposition (unit vector for *what*, magnitude for *how much*) is one of the most important ideas in the chapter. It's how neurons work, as we'll see next.
 
 ## A Neuron Is a Dot Product
 
-Here's the connection that ties everything together. Remember from the previous chapter that a neuron computes a **weighted sum** of its inputs, adds a bias, then applies an activation function. That weighted sum is a dot product — the neuron has a **weight vector** and receives an **input vector**:
+Remember from the previous chapter that a neuron computes a **weighted sum** of its inputs, adds a bias, then applies an activation function. That weighted sum is a dot product. The neuron has a **weight vector** and receives an **input vector**:
 
 <Callout>
 **output = activation( w · x + bias )**
@@ -110,10 +110,10 @@ where **w** = (w₁, w₂, …, wₙ) is the weight vector and **x** = (x₁, x�
 The neuron is asking **"is this input what I'm looking for?"**.
 
 * **The unit vector** of the weights says *what kind of thing* the neuron detects.
-* **The magnitude** of the weights says *how sensitive* the neuron is — how much evidence it needs to get excited.
+* **The magnitude** of the weights says *how sensitive* the neuron is, how much evidence it needs to get excited.
 * **The bias** says how excited it is if it hasn't seen anything at all.
 
-Try the **Animals** tab and set the weight to "Bear" — now you have a bear detector! Feed it different animals as input and watch the output. A dog gets a high score because it shares many bear-like properties. A mouse scores low. You can do the same with any category — set the weight to "Pizza" on the **Foods** tab and you have a pizza detector.
+Try the **Animals** tab and set the weight to "Bear". Now you have a bear detector! Feed it different animals as input and watch the output. A dog gets a high score because it shares many bear-like properties. A mouse scores low. You can do the same with any category: set the weight to "Pizza" on the **Foods** tab and you have a pizza detector.
 
 <NeuronDotProductWidget>
 Try matching different animals, foods, or instruments as weights and inputs. What happens when you slide the weight magnitude up or down? What about the bias?
@@ -125,9 +125,9 @@ Try matching different animals, foods, or instruments as weights and inputs. Wha
 
 ## Seeing It in 2D
 
-Everything so far used lists of six numbers. But when a vector has just two dimensions, we can draw it as an arrow on a flat surface — and all the concepts we've learned become visible.
+Everything so far used lists of six numbers. But when a vector has just two dimensions, we can draw it as an arrow on a flat surface, and all the concepts we've learned become visible.
 
-A 2D vector like (0.8, 0.6) becomes an arrow from the origin to the point (0.8, 0.6). The **magnitude** is the length of the arrow. A **unit vector** sits on the unit circle — the circle of radius 1. And the unit vector × magnitude decomposition we learned earlier is literally visible: the unit vector shows *where* the arrow points, and the magnitude shows *how long* it is.
+A 2D vector like (0.8, 0.6) becomes an arrow from the origin to the point (0.8, 0.6). The **magnitude** is the length of the arrow. A **unit vector** sits on the unit circle (the circle of radius 1). And the unit vector × magnitude decomposition we learned earlier is literally visible: the unit vector shows *where* the arrow points, and the magnitude shows *how long* it is.
 
 <DirectionMagnitudeExplorerWidget>
 On the **Vector** tab, drag the arrow and see its x and y components as a vector card. On the **Unit Vector × Magnitude** tab, see how the same vector splits into a unit vector (always on the circle) times a magnitude.
@@ -136,18 +136,18 @@ On the **Vector** tab, drag the arrow and see its x and y components as a vector
 The dot product becomes geometric too. When two arrows point the same direction, their dot product is large and positive. When they're perpendicular, it's zero. When they point in opposite directions, it's negative. You can see this directly:
 
 <DotProduct2DWidget>
-Drag the two vectors around. The dot product gets big when both vectors are long and point the same way. It's zero when they're at right angles. It goes negative when they point in opposite directions. Try making one vector very short — the dot product shrinks even if they point the same way.
+Drag the two vectors around. The dot product gets big when both vectors are long and point the same way. It's zero when they're at right angles. It goes negative when they point in opposite directions. Try making one vector very short. The dot product shrinks even if they point the same way.
 </DotProduct2DWidget>
 
-This geometric picture will return in later chapters — especially when we look at how attention works and how positional information is encoded.
+This geometric picture will return in later chapters, especially when we look at how attention works and how positional information is encoded.
 
 ## What's Next
 
-A vector is just a list of numbers — but it's a remarkably powerful idea. We've seen how the dot product measures similarity, how unit vectors enable fair comparison, and how a neuron uses the dot product to detect patterns in its input.
+A vector is just a list of numbers, but it's a powerful idea. We've seen how the dot product measures similarity, how unit vectors enable fair comparison, and how a neuron uses the dot product to detect patterns in its input.
 
-But so far we've been describing things with *hand-picked* properties — big, scary, hairy. That works for animals, because animals are one kind of thing and we can choose sensible properties for them. But what about words? "Dog" and "democracy" and "purple" and "running" — there's no single set of properties that makes sense for all of them. "How scary is the color blue?" isn't a meaningful question.
+But so far we've been describing things with *hand-picked* properties: big, scary, hairy. That works for animals, because animals are one kind of thing and we can choose sensible properties for them. But what about words? "Dog" and "democracy" and "purple" and "running". There's no single set of properties that makes sense for all of them. "How scary is the color blue?" isn't a meaningful question.
 
-In the next chapter, we'll see how AI solves this problem: instead of choosing dimensions by hand, it *learns* vectors where similar words end up nearby and directions encode meaningful relationships — all without any human labeling.
+In the next chapter, we'll see how AI solves this problem: instead of choosing dimensions by hand, it *learns* vectors where similar words end up nearby and directions encode meaningful relationships, all without any human labeling.
 
 <TryItInPyTorch notebook="vectors">
 Create vectors in PyTorch, compute dot products and cosine similarity, and build a neuron as a dot product.

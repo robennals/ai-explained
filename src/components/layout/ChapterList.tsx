@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  getIntroChapter,
   getMainChapters,
   getAppendixChapters,
   getAppendixLabel,
@@ -74,6 +75,7 @@ interface ChapterListProps {
 
 export function ChapterList({ onNavigate }: ChapterListProps) {
   const pathname = usePathname();
+  const introChapter = getIntroChapter();
   const mainChapters = getMainChapters();
   const appendixChapters = getAppendixChapters();
 
@@ -83,6 +85,15 @@ export function ChapterList({ onNavigate }: ChapterListProps) {
         Chapters
       </h2>
       <ul className="space-y-0.5">
+        {introChapter && (
+          <ChapterItem
+            key={introChapter.id}
+            ch={introChapter}
+            isActive={pathname === `/${introChapter.slug}`}
+            label=""
+            onNavigate={onNavigate}
+          />
+        )}
         {mainChapters.map((ch) => (
           <ChapterItem
             key={ch.id}

@@ -1,14 +1,14 @@
 # One Architecture to Rule Them All
 
 <Lead>
-The transformer is the architecture behind every major AI you've heard of — ChatGPT, Claude, Gemini, Llama. It's the wiring that turns the pieces we've been building (embeddings, attention, positional encoding) into something that can read a sentence and tell you what comes next.
+The transformer is the architecture behind every major AI you've heard of: ChatGPT, Claude, Gemini, Llama. It's the wiring that turns the pieces we've been building (embeddings, attention, positional encoding) into something that can read a sentence and tell you what comes next.
 </Lead>
 
 ## A Transformer At a Glance
 
-The core idea behind the transformer is remarkably simple. We pass a passage of text through a sequence of layers. Each layer creates a better representation of each token by combining what is already known about the token with information from other tokens. The transformer uses attention to identify which other tokens have relevant information.
+The core idea behind the transformer is simple. We pass a passage of text through a sequence of layers. Each layer creates a better representation of each token by combining what is already known about the token with information from other tokens. The transformer uses attention to identify which other tokens have relevant information.
 
-The original paper that introduced transformers was called *"Attention Is All You Need"*, and indeed attention is where a lot of the magic is happening — identifying which other tokens have information relevant to the current token.
+The original paper that introduced transformers was called *"Attention Is All You Need"*, and indeed attention is where a lot of the work is happening, identifying which other tokens have information relevant to the current token.
 
 The picture below shows a very simple transformer doing its work on a tiny sentence. The final layer's embedding of the last token tells us enough to predict the next word.
 
@@ -16,9 +16,9 @@ The picture below shows a very simple transformer doing its work on a tiny sente
 Click any word-cell to see which earlier words fed into it. Click a layer's name on the left to see what that layer is doing.
 </TransformerOverviewWidget>
 
-Notice how the representation of each token gets more sophisticated at each layer, by bringing in information from the tokens it paid attention to.
+The representation of each token gets more sophisticated at each layer, by bringing in information from the tokens it paid attention to.
 
-This looks a lot like a regular [neural network](/neurons) — boxes in layers, connected by links whose weights control how strongly the signal flows. The big difference: in a normal neural network the wiring is fixed, learned once during training. Here, attention tells us which information should flow where. And, as you'll see later, each node actually has its own little neural network combining the information flowing in with what it already knows.
+This looks a lot like a regular [neural network](/neurons): boxes in layers, connected by links whose weights control how strongly the signal flows. The big difference: in a normal neural network the wiring is fixed, learned once during training. Here, attention tells us which information should flow where. And, as you'll see later, each node actually has its own little neural network combining the information flowing in with what it already knows.
 
 ## A Transformer In More Detail
 
@@ -28,7 +28,7 @@ The playground below shows a more detailed example with a longer sentence and mo
 Click **Next layer** to step through, or jump to any layer in the strip above the passage. **Previous-token** gives every word a copy of its predecessor. **Place in the scene** ties words to scene-locations. **Resolve pronouns** wires *her* to the astronaut. **Previous-token** (again) lets *blue* re-pull *her* with all the new context. **Find what verb acts on this** binds objects to their verbs. Click **Predict** to see the top guesses for the next word.
 </TransformerInActionWidget>
 
-The model never sees *Earth* spelled out. But by the last layer, *blue*'s representation says *a blue thing belonging to the astronaut on Mars, seen in the Martian sky* — and the embedding for *Earth* (a blue planet, home to humans, visible from other planets in our solar system) lines up almost exactly. That's where the prediction comes from.
+The model never sees *Earth* spelled out. But by the last layer, *blue*'s representation says *a blue thing belonging to the astronaut on Mars, seen in the Martian sky*, and the embedding for *Earth* (a blue planet, home to humans, visible from other planets in our solar system) lines up almost exactly. That's where the prediction comes from.
 
 ## Large Language Models are Very Large
 
@@ -38,7 +38,7 @@ Modern LLMs also use [embeddings](/embeddings) with thousands of [dimensions](/v
 
 ## Interpretability
 
-The examples given above have their representations written by hand rather than being generated by a real transformer. One of the weird things about real transformers is that we usually don't actually know what the intermediate representations of tokens mean, or even what a particular attention head or particular layer is trying to do. When we train a transformer, it isn't trying to produce layers, heads, or representations that make sense to humans. It is just trying to come up with representations that best help it complete its task — such as predicting the next word.
+The examples given above have their representations written by hand rather than being generated by a real transformer. One of the weird things about real transformers is that we usually don't actually know what the intermediate representations of tokens mean, or even what a particular attention head or particular layer is trying to do. When we train a transformer, it isn't trying to produce layers, heads, or representations that make sense to humans. It is just trying to come up with representations that best help it complete its task, such as predicting the next word.
 
 Trying to understand the inner thought processes of transformers is an area of active research.
 
@@ -48,10 +48,10 @@ We said at the beginning that each layer of a transformer creates a new represen
 
 The playground below gives more detail on how exactly a single layer of a transformer does that. Click on each box to see a description of what it does and how it does it.
 
-(One transformer layer is sometimes also called a *transformer block*. The two names mean the same thing — we'll stick with "layer" because that's how people describe model size: "GPT-3 has 96 layers".)
+(One transformer layer is sometimes also called a *transformer block*. The two names mean the same thing. We'll stick with "layer" because that's how people describe model size: "GPT-3 has 96 layers".)
 
 <TransformerBlockDiagramWidget>
-Click any box, or hit Next Block to step through. The grey box is one transformer layer — a real model stacks many of these (GPT-3 stacks 96).
+Click any box, or hit Next Block to step through. The grey box is one transformer layer. A real model stacks many of these (GPT-3 stacks 96).
 </TransformerBlockDiagramWidget>
 
 
@@ -59,15 +59,15 @@ Click any box, or hit Next Block to step through. The grey box is one transforme
 
 We've come a long way:
 
-1. **Everything is numbers** ([Chapter 1](/computation)) — text, images, sound, all just lists of numbers.
-2. **Small improvements add up** ([Chapter 2](/optimization)) — gradient descent finds good solutions step by step.
-3. **Neural networks learn patterns** ([Chapter 3](/neurons)) — layers of neurons can learn anything.
-4. **Vectors capture meaning** ([Chapter 4](/vectors)) — similar things end up with similar numbers.
-5. **Embeddings give words geometry** ([Chapter 5](/embeddings)) — words live in a space where closeness equals similarity.
-6. **Prediction requires understanding** ([Chapter 6](/next-word-prediction)) — to guess the next word, you have to *get* the sentence.
-7. **Attention lets words talk** ([Chapter 7](/attention)) — each word chooses which others to listen to.
-8. **Position encoding adds order** ([Chapter 8](/positions)) — so "dog bit man" isn't the same as "man bit dog".
-9. **The transformer wires it all together** (this chapter) — and meaning emerges from prediction.
+1. **Everything is numbers** ([Chapter 1](/computation)): text, images, sound, all just lists of numbers.
+2. **Small improvements add up** ([Chapter 2](/optimization)): gradient descent finds good solutions step by step.
+3. **Neural networks learn patterns** ([Chapter 3](/neurons)): layers of neurons can learn anything.
+4. **Vectors capture meaning** ([Chapter 4](/vectors)): similar things end up with similar numbers.
+5. **Embeddings give words geometry** ([Chapter 5](/embeddings)): words live in a space where closeness equals similarity.
+6. **Prediction requires understanding** ([Chapter 6](/next-word-prediction)): to guess the next word, you have to *get* the sentence.
+7. **Attention lets words talk** ([Chapter 7](/attention)): each word chooses which others to listen to.
+8. **Position encoding adds order** ([Chapter 8](/positions)): so "dog bit man" isn't the same as "man bit dog".
+9. **The transformer wires it all together** (this chapter): and meaning emerges from prediction.
 
 Same architecture, scaled up trillions of times, is what powers ChatGPT, Claude, and Gemini.
 
