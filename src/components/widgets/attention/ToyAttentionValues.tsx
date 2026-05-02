@@ -3,6 +3,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
 import { VectorCard } from "../vectors/VectorCard";
+import { dot, softmax, weightedSum } from "./toyMath";
 
 /* ------------------------------------------------------------------ */
 /*  Data                                                              */
@@ -48,37 +49,8 @@ const SENTENCES: Sentence[] = [
   { label: "cat blah blah it", tokens: [CAT, BLA, BLA, IT] },
   { label: "blah dog blah it", tokens: [BLA, DOG, BLA, IT] },
   { label: "cat blah dog it", tokens: [CAT, BLA, DOG, IT] },
-  { label: "blah blah blah it", tokens: [BLA, BLA, BLA, IT] },
-  { label: "cat it dog it", tokens: [CAT, IT, DOG, IT] },
+  { label: "dog blah dog it", tokens: [DOG, BLA, DOG, IT] },
 ];
-
-/* ------------------------------------------------------------------ */
-/*  Math                                                              */
-/* ------------------------------------------------------------------ */
-
-function dot(a: number[], b: number[]): number {
-  let sum = 0;
-  for (let i = 0; i < a.length; i++) sum += a[i] * b[i];
-  return sum;
-}
-
-function softmax(scores: number[]): number[] {
-  const max = Math.max(...scores);
-  const exps = scores.map((s) => Math.exp(s - max));
-  const sum = exps.reduce((a, b) => a + b, 0);
-  return exps.map((e) => e / sum);
-}
-
-function weightedSum(weights: number[], values: number[][]): number[] {
-  const dim = values[0].length;
-  const result = new Array(dim).fill(0);
-  for (let i = 0; i < weights.length; i++) {
-    for (let d = 0; d < dim; d++) {
-      result[d] += weights[i] * values[i][d];
-    }
-  }
-  return result;
-}
 
 /* ------------------------------------------------------------------ */
 /*  Formatting                                                        */
@@ -218,7 +190,7 @@ export function ToyAttentionValues() {
   return (
     <WidgetContainer
       title="Attention + Values"
-      description={'See how attention weights blend token values into a result.'}
+      description={'See how attention weights blend token values into a result. Try the two-dog sentence — the result is sharper than with one dog.'}
       onReset={handleReset}
     >
       <div className="flex flex-col gap-5">
@@ -387,6 +359,22 @@ export function ToyAttentionValues() {
             />
           </div>
         )}
+
+        {/* "Two of a kind" callout — fires only on dog-blah-dog-it (or similar) */}
+        {hasSelection && (() => {
+          const counts = tokens.reduce<Record<string, number>>((acc, t) => {
+            if (t.label === "cat" || t.label === "dog") acc[t.label] = (acc[t.label] ?? 0) + 1;
+            return acc;
+          }, {});
+          const repeated = Object.entries(counts).find(([, n]) => n >= 2);
+          if (!repeated) return null;
+          return (
+            <div className="rounded-lg border border-accent/30 bg-accent/5 px-4 py-3 text-sm text-foreground">
+              Two <strong>{repeated[0]}</strong>s in the sentence — the result is sharper than with just one
+              because softmax&apos;s denominator dilutes the leak. More matches → more confident.
+            </div>
+          );
+        })()}
 
         {/* Prompt when nothing selected */}
         {!hasSelection && (
