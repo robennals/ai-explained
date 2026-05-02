@@ -147,6 +147,7 @@ export function ToyAttentionScores() {
             <button
               key={i}
               onClick={() => handleSentenceChange(i)}
+              aria-pressed={i === sentIdx}
               className={`rounded-full px-3 py-1 font-mono text-xs font-medium transition-colors ${
                 i === sentIdx
                   ? "bg-accent text-white"
@@ -202,6 +203,7 @@ export function ToyAttentionScores() {
                       else cardRefs.current.delete(i);
                     }}
                     onClick={() => setSelected(isSelected ? null : i)}
+                    aria-pressed={isSelected}
                     className={`rounded-lg border-2 px-4 py-2 transition-all cursor-pointer ${
                       isSelected
                         ? "ring-2 ring-accent ring-offset-2 border-border bg-surface"
