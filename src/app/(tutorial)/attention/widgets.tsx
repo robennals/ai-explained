@@ -5,114 +5,47 @@ import { Suspense } from "react";
 import { TryItProvider } from "@/components/widgets/shared/WidgetContainer";
 
 const WhyAttentionMatters = dynamic(
-  () =>
-    import("@/components/widgets/attention/WhyAttentionMatters").then(
-      (m) => m.WhyAttentionMatters
-    ),
+  () => import("@/components/widgets/attention/WhyAttentionMatters").then((m) => m.WhyAttentionMatters),
   { ssr: false }
 );
 
-const ToyVocabTable = dynamic(
-  () =>
-    import("@/components/widgets/attention/ToyVocabTable").then(
-      (m) => m.ToyVocabTable
-    ),
+const ToyAttentionScores = dynamic(
+  () => import("@/components/widgets/attention/ToyAttentionScores").then((m) => m.ToyAttentionScores),
   { ssr: false }
 );
 
 const SoftmaxExplorer = dynamic(
-  () =>
-    import("@/components/widgets/attention/SoftmaxExplorer").then(
-      (m) => m.SoftmaxExplorer
-    ),
+  () => import("@/components/widgets/attention/SoftmaxExplorer").then((m) => m.SoftmaxExplorer),
   { ssr: false }
 );
 
-const ToyAttention = dynamic(
-  () =>
-    import("@/components/widgets/attention/ToyAttention").then(
-      (m) => m.ToyAttention
-    ),
+const ToyAttentionSoftmax = dynamic(
+  () => import("@/components/widgets/attention/ToyAttentionSoftmax").then((m) => m.ToyAttentionSoftmax),
   { ssr: false }
 );
 
 const ToyAttentionValues = dynamic(
-  () =>
-    import("@/components/widgets/attention/ToyAttentionValues").then(
-      (m) => m.ToyAttentionValues
-    ),
+  () => import("@/components/widgets/attention/ToyAttentionValues").then((m) => m.ToyAttentionValues),
   { ssr: false }
 );
 
-const ToyValues = dynamic(
-  () =>
-    import("@/components/widgets/attention/ToyValues").then(
-      (m) => m.ToyValues
-    ),
-  { ssr: false }
-);
-
-const ToyValueTable = dynamic(
-  () =>
-    import("@/components/widgets/attention/ToyValueTable").then(
-      (m) => m.ToyValueTable
-    ),
-  { ssr: false }
-);
-
-const AttentionPlayground = dynamic(
-  () =>
-    import("@/components/widgets/attention/AttentionPlayground").then(
-      (m) => m.AttentionPlayground
-    ),
+const ToyAttentionSink = dynamic(
+  () => import("@/components/widgets/attention/ToyAttentionSink").then((m) => m.ToyAttentionSink),
   { ssr: false }
 );
 
 const BertAttention = dynamic(
-  () =>
-    import("@/components/widgets/attention/BertAttention").then(
-      (m) => m.BertAttention
-    ),
+  () => import("@/components/widgets/attention/BertAttention").then((m) => m.BertAttention),
   { ssr: false }
 );
 
 const LiveAttention = dynamic(
-  () =>
-    import("@/components/widgets/attention/LiveAttention").then(
-      (m) => m.LiveAttention
-    ),
+  () => import("@/components/widgets/attention/LiveAttention").then((m) => m.LiveAttention),
   { ssr: false }
 );
 
 const QKVProjection = dynamic(
-  () =>
-    import("@/components/widgets/attention/QKVProjection").then(
-      (m) => m.QKVProjection
-    ),
-  { ssr: false }
-);
-
-const PatternAttention = dynamic(
-  () =>
-    import("@/components/widgets/attention/PatternAttention").then(
-      (m) => m.PatternAttention
-    ),
-  { ssr: false }
-);
-
-const AttentionStepThrough = dynamic(
-  () =>
-    import("@/components/widgets/attention/AttentionStepThrough").then(
-      (m) => m.AttentionStepThrough
-    ),
-  { ssr: false }
-);
-
-const MultiHead = dynamic(
-  () =>
-    import("@/components/widgets/attention/MultiHead").then(
-      (m) => m.MultiHead
-    ),
+  () => import("@/components/widgets/attention/QKVProjection").then((m) => m.QKVProjection),
   { ssr: false }
 );
 
@@ -140,10 +73,10 @@ export function WhyAttentionMattersWidget({ children }: { children?: React.React
   );
 }
 
-export function ToyVocabTableWidget({ children }: { children?: React.ReactNode }) {
+export function ToyAttentionScoresWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot tryIt={children}>
-      <ToyVocabTable />
+    <WidgetSlot tryIt={children} label="Explore it">
+      <ToyAttentionScores />
     </WidgetSlot>
   );
 }
@@ -156,10 +89,10 @@ export function SoftmaxExplorerWidget({ children }: { children?: React.ReactNode
   );
 }
 
-export function ToyAttentionWidget({ children }: { children?: React.ReactNode }) {
+export function ToyAttentionSoftmaxWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children} label="Explore it">
-      <ToyAttention />
+      <ToyAttentionSoftmax />
     </WidgetSlot>
   );
 }
@@ -172,50 +105,10 @@ export function ToyAttentionValuesWidget({ children }: { children?: React.ReactN
   );
 }
 
-export function ToyValuesWidget({ children }: { children?: React.ReactNode }) {
+export function ToyAttentionSinkWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot tryIt={children}>
-      <ToyValues />
-    </WidgetSlot>
-  );
-}
-
-export function ToyValueTableWidget({ children }: { children?: React.ReactNode }) {
-  return (
-    <WidgetSlot tryIt={children}>
-      <ToyValueTable />
-    </WidgetSlot>
-  );
-}
-
-export function AttentionPlaygroundWidget({ children }: { children?: React.ReactNode }) {
-  return (
-    <WidgetSlot tryIt={children}>
-      <AttentionPlayground />
-    </WidgetSlot>
-  );
-}
-
-export function PatternAttentionWidget({ children }: { children?: React.ReactNode }) {
-  return (
-    <WidgetSlot tryIt={children}>
-      <PatternAttention />
-    </WidgetSlot>
-  );
-}
-
-export function AttentionStepThroughWidget({ children }: { children?: React.ReactNode }) {
-  return (
-    <WidgetSlot tryIt={children}>
-      <AttentionStepThrough />
-    </WidgetSlot>
-  );
-}
-
-export function MultiHeadWidget({ children }: { children?: React.ReactNode }) {
-  return (
-    <WidgetSlot tryIt={children}>
-      <MultiHead />
+    <WidgetSlot tryIt={children} label="Explore it">
+      <ToyAttentionSink />
     </WidgetSlot>
   );
 }
@@ -251,4 +144,3 @@ export function LiveAttentionWidget({ children }: { children?: React.ReactNode }
     </WidgetSlot>
   );
 }
-
