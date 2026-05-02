@@ -117,9 +117,11 @@ Each cell in the grid is one attention head — 48 heads in total, six layers of
 
 ## Where the Vectors Come From
 
-We've been talking about query, key, and value vectors — but where do they actually come from? The answer is small: a set of learned weights, the same kind of weighted-sum layer we already met in Chapter 3.
+We've been talking about query, key, and value vectors — but where do they actually come from? 
 
-Each token starts as an embedding vector. To get the query, key, and value vectors, we feed that embedding through three separate sets of weights — one set for each vector. Each set takes the embedding as input and computes a weighted sum for each output. There's no activation function this time, just the weighted sums.
+The answer is the same answer we've run into many times before. The model uses gradient descent to learn the weights that make the model perform best and thus minimize its error.
+
+To be more precise, the model learns a simple one-layer neural network (without an activation function) that transforms the token's current embedding into query, key, and value vectors.
 
 In a model with multiple attention heads, each head gets its own three sets of weights, so each head translates the same embedding into its own private Q, K, V vectors. That's how different heads end up looking for different things.
 
@@ -130,7 +132,7 @@ Let's take stock. Attention is:
 1. **Match scores** — Each query and key combine via dot product to score how relevant each token is to each other token.
 2. **Softmax** — Turn relevance scores into percentages that add up to 100%.
 3. **Values** — A third vector from each token, blended together using the softmax weights.
-4. **The sink** — An extra dimension that gives attention somewhere honest to go when nothing relevant is around.
+4. **The sink** — A token that absorbs attention when nothing relevant is around, so off-task tokens have somewhere harmless to land.
 5. **Multiple heads** — Run many attention patterns in parallel, each specializing in a different relationship.
 
 Every piece is something we already understood from earlier chapters. Attention is just a clever wiring of familiar operations.
