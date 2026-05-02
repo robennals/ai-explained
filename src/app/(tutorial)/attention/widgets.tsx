@@ -34,18 +34,8 @@ const ToyAttentionSink = dynamic(
   { ssr: false }
 );
 
-const BertAttention = dynamic(
-  () => import("@/components/widgets/attention/BertAttention").then((m) => m.BertAttention),
-  { ssr: false }
-);
-
 const LiveAttention = dynamic(
   () => import("@/components/widgets/attention/LiveAttention").then((m) => m.LiveAttention),
-  { ssr: false }
-);
-
-const QKVProjection = dynamic(
-  () => import("@/components/widgets/attention/QKVProjection").then((m) => m.QKVProjection),
   { ssr: false }
 );
 
@@ -113,29 +103,6 @@ export function ToyAttentionSinkWidget({ children }: { children?: React.ReactNod
   );
 }
 
-export function QKVProjectionWidget({ children }: { children?: React.ReactNode }) {
-  return (
-    <WidgetSlot tryIt={children} label="Explore it">
-      <QKVProjection />
-    </WidgetSlot>
-  );
-}
-
-export function BertAttentionWidget({ children }: { children?: React.ReactNode }) {
-  return (
-    <WidgetSlot tryIt={children} label="Explore it">
-      <BertAttention />
-    </WidgetSlot>
-  );
-}
-
-export function BertAttentionNoPositionWidget({ children }: { children?: React.ReactNode }) {
-  return (
-    <WidgetSlot tryIt={children} label="Explore it">
-      <BertAttention excludeHeads={["Next word", "Previous word"]} />
-    </WidgetSlot>
-  );
-}
 
 export function LiveAttentionWidget({ children }: { children?: React.ReactNode }) {
   return (

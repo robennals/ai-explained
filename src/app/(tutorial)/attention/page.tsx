@@ -9,9 +9,6 @@ import {
   ToyAttentionSoftmaxWidget,
   ToyAttentionValuesWidget,
   ToyAttentionSinkWidget,
-  QKVProjectionWidget,
-  BertAttentionWidget,
-  BertAttentionNoPositionWidget,
   LiveAttentionWidget,
 } from "./widgets";
 
@@ -36,9 +33,6 @@ export default function Chapter07() {
             ToyAttentionSoftmaxWidget,
             ToyAttentionValuesWidget,
             ToyAttentionSinkWidget,
-            QKVProjectionWidget,
-            BertAttentionWidget,
-            BertAttentionNoPositionWidget,
             LiveAttentionWidget,
           }}
         />

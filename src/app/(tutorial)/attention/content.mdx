@@ -105,23 +105,11 @@ Multiple attention heads let the model ask many different questions in parallel.
 
 In real models, every head also has its own sink behavior, because no single head can apply to every token in every sentence. A pronoun-resolving head will be on-task for pronouns and idle for everything else. That idle behavior is what the sink is for.
 
-## Attention in a Real Model
-
-Below are real attention weights from **BERT**, a well-known language model. BERT has multiple attention heads, and each one has learned a different pattern. Click on any word and switch between heads to see what each one focuses on:
-
-<BertAttentionNoPositionWidget>
-Click "it" and try the "Self / pronoun" head — notice how it splits attention among the nouns, trying to figure out which one matters. Then try the "Broad context" head to see a different pattern.
-</BertAttentionNoPositionWidget>
-
-When a head isn't on-task for a particular token, it doesn't get to opt out. It still has to allocate 100% somewhere, so it parks attention on a sink. In the "Self / pronoun" head, the sink looks like *attend to yourself* for most tokens — the real pronoun-resolution behavior only kicks in when the token actually is a pronoun. The weird-looking patterns for non-pronoun tokens are the head being idle, not broken.
-
-No one told these heads what patterns to learn — each one discovered its role through training, because different kinds of attention are all useful for predicting language.
-
 ## A Live Attention Model
 
-The BERT widget above shows pre-recorded attention weights, extracted in Python and frozen into a table of canned sentences. We did it that way because the full BERT model is too large to easily run in your browser. In the widget below, we instead show a tiny model that runs live in your browser. It was trained to predict the next word in a small collection of children's stories. You can type whatever sentence you like and see what each of the 48 attention heads pays attention to for each word.
+The widget below shows a tiny real model running live in your browser. It was trained to predict the next word in a small collection of children's stories. You can type whatever sentence you like and see what each of the 48 attention heads pays attention to for each word.
 
-The model learned attention heads that helped it solve this task, rather than ones that make sense to humans, so its not obvious to us humans what most of these heads are doing. That's one of the weird things about AI models.
+The model learned attention heads that helped it solve this task, rather than ones that make sense to humans, so it's not obvious to us what most of these heads are doing. That's one of the weird things about AI models.
 
 <LiveAttentionWidget>
 Each cell in the grid is one attention head — 48 heads in total, six layers of eight. Click around. Some heads' behavior is easy to name: one always attends to the previous word, another snaps to a recent period or comma. Others do something you can almost-but-not-quite describe. Some look like noise. That's the honest picture: these heads weren't designed, they were learned. The model kept whatever patterns turned out to be useful for predicting the next word, with no requirement that those patterns make sense to a human. Some happen to. Some don't.
@@ -132,10 +120,6 @@ Each cell in the grid is one attention head — 48 heads in total, six layers of
 We've been talking about query, key, and value vectors — but where do they actually come from? The answer is small: a set of learned weights, the same kind of weighted-sum layer we already met in Chapter 3.
 
 Each token starts as an embedding vector. To get the query, key, and value vectors, we feed that embedding through three separate sets of weights — one set for each vector. Each set takes the embedding as input and computes a weighted sum for each output. There's no activation function this time, just the weighted sums.
-
-<QKVProjectionWidget>
-Click different tokens to see how the same three sets of weights produce different Q, K, V vectors for each token. Notice that "cat" and "dog" (similar embeddings) produce similar outputs, while "it" (very different embedding) produces very different vectors. Use the Focus buttons to highlight one set at a time. Thicker lines mean larger weights; dashed lines mean negative weights.
-</QKVProjectionWidget>
 
 In a model with multiple attention heads, each head gets its own three sets of weights, so each head translates the same embedding into its own private Q, K, V vectors. That's how different heads end up looking for different things.
 
