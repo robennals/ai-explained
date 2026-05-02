@@ -46,6 +46,7 @@ next-env.d.ts
 # model files (served from R2, not git)
 public/data/next-word-model/
 public/data/embeddings/
+public/data/attention-model/
 
 # large data files (downloaded on demand by notebooks/scripts)
 notebooks/glove.*
@@ -58,3 +59,8 @@ notebooks/ts-tokenizer-4096.json
 
 # superpowers brainstorm scratch
 .superpowers/
+.env*.local
+
+# Python
+__pycache__/
+*.pyc
