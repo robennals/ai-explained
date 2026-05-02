@@ -39,7 +39,7 @@ What you advertise isn't the same as what you're looking for. A pronoun needs to
 
 ## Step 2: Softmax — Dividing Your Attention
 
-Match scores are useful, but the model can't just keep piling them up. Each token has a fixed budget of attention — 100% — and needs to *divide* that budget among all the candidates. We need to turn raw scores into percentages that add up to 1.
+Match scores are useful, but the model can't just keep piling them up. Each token has a fixed budget of attention, 100%, and needs to *divide* that budget among all the candidates. We need to turn raw scores into percentages that add up to 1.
 
 The function for this is called **softmax**. Think of it as a competition: bigger numbers dominate, smaller numbers get squeezed, and the result is a set of percentages.
 
@@ -47,12 +47,12 @@ The function for this is called **softmax**. Think of it as a competition: bigge
 Drag the sliders. Try "All equal" — everyone gets 25%. Try "Moderate, rest silent" — A wins by default because nobody else is saying anything. Try "Moderate meets loud" — B drowns out A. The gaps between scores matter more than the absolute values. Softmax cares about who's loudest *relative to everyone else*.
 </SoftmaxExplorerWidget>
 
-Now apply softmax to the dot products from step 1. With keys and queries at 1/0, "it" against `cat blah blah it` gets scores `[1, 0, 0, 0]`, which softmax turns into roughly `[47%, 18%, 18%, 18%]`. That's the right shape — cat wins — but more than half the attention leaks to the filler tokens. Not great.
+Now apply softmax to the dot products from step 1. With keys and queries at 1/0, "it" against `cat blah blah it` gets scores `[1, 0, 0, 0]`, which softmax turns into roughly `[47%, 18%, 18%, 18%]`. That's the right shape, cat wins, but more than half the attention leaks to the filler tokens. Not great.
 
 The fix is to crank up the *query magnitude*. The keys still describe what each token is, but the asker is allowed to care more loudly. With "it"'s query at 3 instead of 1, the scores become `[3, 0, 0, 0]`, and softmax turns those into roughly `[87%, 4%, 4%, 4%]`. Much sharper.
 
 <ToyAttentionSoftmaxWidget>
-Toggle the query magnitude between 1 and 3. At 1, attention leaks all over the place. At 3, "it" puts most of its attention on the noun. There's still a small leak — softmax always allocates 100%, so a few percent always go to the losers. That tiny leak is honest and we'll come back to it.
+Toggle the query magnitude between 1 and 3. At 1, attention leaks all over the place. At 3, "it" puts most of its attention on the noun. There's still a small leak: softmax always allocates 100%, so a few percent always go to the losers. That tiny leak is honest and we'll come back to it.
 </ToyAttentionSoftmaxWidget>
 
 The leak isn't a bug. Softmax is *fuzzy*. Real attention is fuzzy. The model is never 100% sure of anything.
@@ -63,7 +63,7 @@ So far attention tells us *where to look* — which tokens are relevant. But we 
 
 Each token gets a third vector: a **value**. The key and query decide who talks to whom. The value is what gets said. For our pronoun example, the value encodes which animal the token represents: cat's value is `[1, 0]`, dog's value is `[0, 1]`, and filler tokens have nothing to share, so their value is `[0, 0]`.
 
-Attention then blends these values using the softmax weights as a recipe. If "it" pays 87% attention to "cat" and 4% to each filler, the result is roughly `[0.87, 0]` — strongly cat-flavored, with a small leak toward zero from the fillers.
+Attention then blends these values using the softmax weights as a recipe. If "it" pays 87% attention to "cat" and 4% to each filler, the result is roughly `[0.87, 0]`: strongly cat-flavored, with a small leak toward zero from the fillers.
 
 <ToyAttentionValuesWidget>
 Click "it" in `cat blah blah it` — the result is mostly cat. Try `cat blah dog it` — now the result is half cat, half dog, because "it" matched both nouns equally and the model can't tell which. Try `dog blah dog it` — *two* dogs, and the result is sharper than with just one dog: about 95% dog. More matches → more confident, because softmax's denominator dilutes the leak.
@@ -86,7 +86,7 @@ The fix is to give attention a sensible place to go when no real match is availa
 | blah | [0, 1] | [0, 1] | [0, 0, 1] |
 | it   | [0, 1] | [3, 1] | [0, 0, 1] |
 
-Now run attention on `blah blah blah it` again. With no nouns to match, every score is 1 (just the sink dimension), softmax goes uniform 25%, and the blended value is pure `[0, 0, 1]` — "no useful info gathered." Honest fallback. The same mechanism handles tokens that aren't asking the question: click "blah" and it gathers nothing too, because its query has no noun-component to rule out the sink.
+Now run attention on `blah blah blah it` again. With no nouns to match, every score is 1 (just the sink dimension), softmax goes uniform 25%, and the blended value is pure `[0, 0, 1]`: "no useful info gathered." Honest fallback. The same mechanism handles tokens that aren't asking the question: click "blah" and it gathers nothing too, because its query has no noun-component to rule out the sink.
 
 <ToyAttentionSinkWidget>
 Click any token, try any sentence. `cat blah blah it` → mostly cat with a small sink leak. `dog blah dog it` → sharper, because the second dog drowns out the sink. `blah blah blah it` → pure nothing. Click "blah" → idle, because this head doesn't apply to it. Every behavior the widget shows comes from the same dot-product-and-softmax mechanism we built up over the last three steps.
@@ -152,7 +152,7 @@ Let's take stock. Attention is:
 
 Every piece is something we already understood from earlier chapters. Attention is just a clever wiring of familiar operations.
 
-But there's a problem we haven't solved. Did you notice? Our attention mechanism has no idea *where* words are — it only knows *what* they are. "The dog chased the cat" and "the cat chased the dog" produce identical attention scores. Worse, in a long document, a word at the other end of the book gets treated the same as a word in the same sentence — the model has no sense of proximity at all. In the next chapter, we'll fix this with an elegant trick involving rotation.
+But there's a problem we haven't solved. Did you notice? Our attention mechanism has no idea *where* words are — it only knows *what* they are. "The dog chased the cat" and "the cat chased the dog" produce identical attention scores. Worse, in a long document, a word at the other end of the book gets treated the same as a word in the same sentence — the model has no sense of proximity at all. In the next chapter, we'll fix this with a trick involving rotation.
 
 <TryItInPyTorch notebook="attention">
 Compute dot-product attention from scratch, build query/key/value projections, visualize attention heatmaps on real sentences, implement multi-head attention, and see how scrambled word order doesn't change attention scores — a problem we'll solve in the next chapter.

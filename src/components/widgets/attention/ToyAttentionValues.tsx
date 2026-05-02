@@ -200,6 +200,7 @@ export function ToyAttentionValues() {
             <button
               key={i}
               onClick={() => handleSentenceChange(i)}
+              aria-pressed={i === sentIdx}
               className={`rounded-full px-3 py-1 font-mono text-xs font-medium transition-colors ${
                 i === sentIdx
                   ? "bg-accent text-white"
