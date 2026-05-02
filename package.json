@@ -9,7 +9,9 @@
     "lint": "eslint && bash scripts/lint-mdx-no-raw-p.sh",
     "sync-r2": "bash scripts/sync-r2.sh",
     "sync-r2:apply": "bash scripts/sync-r2.sh --apply",
-    "test:notebooks": "jupyter nbconvert --to notebook --execute --ExecutePreprocessor.timeout=300 notebooks/*.ipynb --output-dir /tmp/notebook-test-output"
+    "test:notebooks": "jupyter nbconvert --to notebook --execute --ExecutePreprocessor.timeout=300 notebooks/*.ipynb --output-dir /tmp/notebook-test-output",
+    "og:capture": "tsx scripts/capture-og-images.ts",
+    "og:crop": "tsx scripts/crop-og-images.ts"
   },
   "dependencies": {
     "@mdx-js/loader": "^3.1.1",
@@ -22,6 +24,7 @@
     "@tailwindcss/typography": "^0.5.19",
     "@types/d3": "^7.4.3",
     "@types/mdx": "^2.0.13",
+    "@vercel/analytics": "^2.0.1",
     "d3": "^7.9.0",
     "framer-motion": "^12.31.0",
     "katex": "^0.16.28",
@@ -41,7 +44,9 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "sharp": "^0.34.5",
     "tailwindcss": "^4",
+    "tsx": "^4.21.0",
     "typescript": "^5"
   }
 }

@@ -56,6 +56,7 @@ export function ToyValueTable() {
             className="text-xs"
             label="VALUE"
             footer={tok.footer}
+            mobileHideBar
           />
         </div>
       ))}

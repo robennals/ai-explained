@@ -1,4 +1,5 @@
 import { ChapterNav } from "@/components/layout/ChapterNav";
+import { chapterMetadata } from "@/lib/chapter-metadata";
 import { getAdjacentChapters } from "@/lib/curriculum";
 import Content from "./content.mdx";
 import {
@@ -12,11 +13,7 @@ import {
   DirectionMagnitudeExplorerWidget,
 } from "./widgets";
 
-export const metadata = {
-  title: "Describing the World with Numbers — Learn AI Layer by Layer",
-  description:
-    "A vector is just a list of numbers — but lists of numbers can describe animals, characters, food, and anything else. See how the dot product measures similarity and how neurons use it to detect patterns.",
-};
+export const metadata = chapterMetadata("vectors");
 
 export default function ChapterVectors() {
   const { prev, next } = getAdjacentChapters("vectors");

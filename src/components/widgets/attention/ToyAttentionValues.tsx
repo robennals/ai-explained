@@ -284,7 +284,13 @@ export function ToyAttentionValues() {
           )}
 
           {/* Token cards */}
-          <div className="flex justify-center gap-3" style={{ paddingTop: `${arcPad + 8}px` }}>
+          <div
+            className="grid gap-2 sm:flex sm:justify-center sm:gap-3"
+            style={{
+              gridTemplateColumns: `repeat(${tokens.length}, minmax(0, 1fr))`,
+              paddingTop: `${arcPad + 8}px`,
+            }}
+          >
             {tokens.map((tok, i) => {
               const isSelected = selected === i;
               const weight = weights?.[i];
@@ -292,7 +298,7 @@ export function ToyAttentionValues() {
               const isIt = tok.label === "it";
 
               return (
-                <div key={`${sentIdx}-${i}`} className="flex flex-col items-center" style={{ width: 130 }}>
+                <div key={`${sentIdx}-${i}`} className="flex min-w-0 flex-col items-center sm:w-[130px]">
                   {/* Token label — only "it" tokens are clickable */}
                   {isIt ? (
                     <button
@@ -357,6 +363,7 @@ export function ToyAttentionValues() {
                         className="text-xs w-full"
                         label="VALUE"
                         footer={tok.valueLabel}
+                        mobileHideBar
                       />
                     </div>
                   )}

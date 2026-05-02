@@ -1,4 +1,5 @@
 import { ChapterNav } from "@/components/layout/ChapterNav";
+import { chapterMetadata } from "@/lib/chapter-metadata";
 import { getAdjacentChapters } from "@/lib/curriculum";
 import Content from "./content.mdx";
 import {
@@ -12,11 +13,7 @@ import {
   TokenizationPlaygroundWidget,
 } from "./widgets";
 
-export const metadata = {
-  title: "From Words to Meanings — Learn AI Layer by Layer",
-  description:
-    "From one-hot to learned representations. Word analogies, semantic structure, and exploring the geometry of meaning.",
-};
+export const metadata = chapterMetadata("embeddings");
 
 export default function Chapter04() {
   const { prev, next } = getAdjacentChapters("embeddings");

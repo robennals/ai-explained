@@ -88,7 +88,7 @@ function TextTab() {
   );
 }
 
-function ImageTab() {
+export function ImageTab() {
   const [grid, setGrid] = useState<string[][]>(createInitialGrid);
   const [selectedColor, setSelectedColor] = useState("#000000");
   const [hoveredCell, setHoveredCell] = useState<[number, number] | null>(null);
@@ -784,17 +784,24 @@ const TABS: { id: Tab; label: string }[] = [
 
 export function NumbersEverywhere() {
   const [activeTab, setActiveTab] = useState<Tab>("text");
+  const [resetKey, setResetKey] = useState(0);
+
+  const handleReset = () => {
+    setActiveTab("text");
+    setResetKey((k) => k + 1);
+  };
 
   return (
     <WidgetContainer
       title="Numbers Everywhere"
       description="Everything a computer works with is just numbers"
+      onReset={handleReset}
     >
       <WidgetTabs tabs={TABS} activeTab={activeTab} onTabChange={setActiveTab} />
-      {activeTab === "text" && <TextTab />}
-      {activeTab === "image" && <ImageTab />}
-      {activeTab === "color" && <ColorTab />}
-      {activeTab === "sound" && <SoundTab />}
+      {activeTab === "text" && <TextTab key={resetKey} />}
+      {activeTab === "image" && <ImageTab key={resetKey} />}
+      {activeTab === "color" && <ColorTab key={resetKey} />}
+      {activeTab === "sound" && <SoundTab key={resetKey} />}
     </WidgetContainer>
   );
 }

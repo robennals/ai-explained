@@ -90,7 +90,7 @@ function DomainItemTab({ domain }: { domain: VectorDomain }) {
     <>
       <SimilarityReadout similarity={similarity} />
 
-      <div className="grid grid-cols-[1fr_1fr_auto] gap-2 items-start overflow-x-auto">
+      <div className="grid grid-cols-2 gap-2 items-start md:grid-cols-[1fr_1fr_auto]">
         {/* Row 1: selectors */}
         <div>
           <div className="mb-1 text-[10px] font-bold uppercase tracking-widest text-blue-500">A</div>
@@ -128,7 +128,8 @@ function DomainItemTab({ domain }: { domain: VectorDomain }) {
             ))}
           </div>
         </div>
-        <div>{/* empty cell above multiply column */}</div>
+        {/* empty cell above multiply column — desktop only */}
+        <div className="hidden md:block" />
 
         {/* Row 2: cards */}
         <VectorCard
@@ -141,7 +142,10 @@ function DomainItemTab({ domain }: { domain: VectorDomain }) {
           properties={domain.properties} values={vecB}
           barColor="#f59e0b" label="B" labelColor="#f59e0b"
         />
-        <ProductColumn vecA={vecA} vecB={vecB} properties={domain.properties} similarity={similarity} />
+        {/* Multiply column: own row spanning A+B on mobile, col 3 on desktop */}
+        <div className="col-span-2 mt-2 flex justify-center md:col-span-1 md:mt-0 md:justify-start">
+          <ProductColumn vecA={vecA} vecB={vecB} properties={domain.properties} similarity={similarity} />
+        </div>
       </div>
     </>
   );

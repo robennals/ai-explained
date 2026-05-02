@@ -105,6 +105,7 @@ export function FunctionMachine() {
     <WidgetContainer
       title="The Function Machine"
       description="Every kind of 'thinking' is turning one array of numbers into another"
+      onReset={() => setSelectedId("recognize")}
     >
       <WidgetTabs tabs={FUNCTION_TABS} activeTab={selectedId} onTabChange={setSelectedId} />
 

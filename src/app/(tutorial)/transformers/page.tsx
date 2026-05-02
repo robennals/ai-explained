@@ -1,5 +1,6 @@
 import { ChapterNav } from "@/components/layout/ChapterNav";
 import { PolishingNotice } from "@/components/layout/PolishingNotice";
+import { chapterMetadata } from "@/lib/chapter-metadata";
 import { getAdjacentChapters } from "@/lib/curriculum";
 import Content from "./content.mdx";
 import {
@@ -8,11 +9,7 @@ import {
   TransformerOverviewWidget,
 } from "./widgets";
 
-export const metadata = {
-  title: "One Architecture to Rule Them All — Learn AI Layer by Layer",
-  description:
-    "The transformer wires attention and neural networks together. Trained to predict the next word, it learns grammar and common sense from nothing but prediction.",
-};
+export const metadata = chapterMetadata("transformers");
 
 export default function Chapter09() {
   const { prev, next } = getAdjacentChapters("transformers");

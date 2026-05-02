@@ -198,6 +198,7 @@ export function DotProduct2D() {
               barColor="#3b82f6"
               label="a" labelColor="#3b82f6"
               className="flex-1 min-w-0"
+              labelWidth="w-3"
               signed signedMax={1.8}
               animate={false}
             />
@@ -208,6 +209,7 @@ export function DotProduct2D() {
               barColor="#f59e0b"
               label="b" labelColor="#f59e0b"
               className="flex-1 min-w-0"
+              labelWidth="w-3"
               signed signedMax={1.8}
               animate={false}
             />
