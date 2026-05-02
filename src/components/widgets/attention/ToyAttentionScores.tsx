@@ -93,6 +93,9 @@ export function ToyAttentionScores() {
     ? tokens.map((t) => dot(tokens[selected].query, t.key))
     : null;
   const hasSelection = selected !== null;
+  const askerHasAnyMatch = scores
+    ? scores.some((s, i) => s > 0 && i !== selected)
+    : false;
 
   // Compute arrows from selected token to others, weighted by score
   useEffect(() => {
@@ -196,7 +199,7 @@ export function ToyAttentionScores() {
               const score = scores?.[i];
 
               return (
-                <div key={`${sentIdx}-${i}`} className="flex flex-col items-center" style={{ width: 130 }}>
+                <div key={`${sentIdx}-${i}`} className="flex flex-col items-center" style={{ width: 145 }}>
                   <button
                     ref={(el) => {
                       if (el) cardRefs.current.set(i, el);
@@ -213,20 +216,9 @@ export function ToyAttentionScores() {
                     <span className={`text-lg font-bold ${tok.color}`}>{tok.label}</span>
                   </button>
 
-                  {/* Always show key + query for every token */}
+                  {/* Show query above key. Dim non-asker queries since they're idle this round.
+                      Outline the asker's query and any key that produced a match (score > 0). */}
                   <div className="mt-2 flex w-full flex-col items-center gap-1.5">
-                    <VectorCard
-                      name=""
-                      emoji=""
-                      properties={PROPS}
-                      values={tok.key}
-                      barMax={1}
-                      animate={false}
-                      labelWidth="w-10"
-                      barWidth="w-10"
-                      className="text-xs w-full"
-                      label="KEY"
-                    />
                     <VectorCard
                       name=""
                       emoji=""
@@ -236,20 +228,48 @@ export function ToyAttentionScores() {
                       barMax={1}
                       animate={false}
                       labelWidth="w-10"
-                      barWidth="w-10"
-                      className="text-xs w-full"
+                      barWidth="w-8"
+                      className={`text-xs w-full transition-colors ${
+                        hasSelection && !isSelected ? "opacity-30" : ""
+                      } ${
+                        isSelected && askerHasAnyMatch ? "!border-accent" : ""
+                      }`}
                       label="QUERY"
                       labelColor="var(--color-accent)"
                     />
+                    <VectorCard
+                      name=""
+                      emoji=""
+                      properties={PROPS}
+                      values={tok.key}
+                      barMax={1}
+                      animate={false}
+                      labelWidth="w-10"
+                      barWidth="w-8"
+                      className={`text-xs w-full transition-colors ${
+                        hasSelection && score != null && score > 0 && !isSelected
+                          ? "!border-accent"
+                          : ""
+                      }`}
+                      label="KEY"
+                    />
 
-                    {/* Score row — shown only when something is selected */}
+                    {/* Score — shown only when something is selected. Big and loud, colored if it matched.
+                        The multiplication line is bolded too when the product is non-zero. */}
                     {hasSelection && score != null && (
-                      <div className="text-center font-mono text-[10px] text-muted leading-tight">
-                        <span>[{tokens[selected!].query.join(", ")}]</span>
-                        {" · "}
-                        <span>[{tok.key.join(", ")}]</span>
-                        {" = "}
-                        <span className="font-bold text-foreground">{score}</span>
+                      <div className="flex flex-col items-center gap-0 text-center">
+                        <div className={`font-mono text-[10px] leading-tight ${
+                          score > 0 ? "font-bold text-foreground" : "text-muted"
+                        }`}>
+                          [{tokens[selected!].query.join(", ")}]
+                          {" · "}
+                          [{tok.key.join(", ")}] =
+                        </div>
+                        <div className={`font-mono text-2xl font-bold leading-tight ${
+                          score > 0 ? "text-accent" : "text-foreground/40"
+                        }`}>
+                          {score}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -259,13 +279,53 @@ export function ToyAttentionScores() {
           </div>
         </div>
 
-        {/* Explanation when nothing is asking */}
-        {hasSelection && tokens[selected!].query.every((q) => q === 0) && (
-          <div className="rounded-lg border border-border bg-foreground/[0.02] px-4 py-3 text-sm text-muted">
-            <span className="font-bold text-foreground">{tokens[selected!].label}</span> isn&apos;t asking
-            anything in this head — its query is all zeros. Every match score is 0.
-          </div>
-        )}
+        {/* Plain-English explanation of what just happened */}
+        {hasSelection && scores && (() => {
+          const asker = tokens[selected!];
+          const askingNothing = asker.query.every((q) => q === 0);
+
+          if (askingNothing) {
+            return (
+              <div className="rounded-lg border border-border bg-foreground/[0.02] px-4 py-3 text-sm text-muted">
+                <span className="font-bold text-foreground">&ldquo;{asker.label}&rdquo;</span> isn&apos;t asking anything
+                in this head. Its query is all zeros, so every match score is 0.
+              </div>
+            );
+          }
+
+          const matches = scores
+            .map((s, i) => ({ score: s, tok: tokens[i], i }))
+            .filter(({ score, i }) => score > 0 && i !== selected);
+
+          if (matches.length === 0) {
+            return (
+              <div className="rounded-lg border border-accent/30 bg-accent/5 px-4 py-3 text-sm text-foreground">
+                <span className="font-bold">&ldquo;{asker.label}&rdquo;</span> is looking for a noun, but there are no
+                nouns in this sentence. Every score is 0.
+              </div>
+            );
+          }
+
+          if (matches.length === 1) {
+            return (
+              <div className="rounded-lg border border-accent/30 bg-accent/5 px-4 py-3 text-sm text-foreground">
+                <span className="font-bold">&ldquo;{asker.label}&rdquo;</span> is looking for a noun. It found{" "}
+                <span className="font-bold">&ldquo;{matches[0].tok.label}&rdquo;</span>. The other tokens didn&apos;t match.
+              </div>
+            );
+          }
+
+          const labels = matches.map((m) => m.tok.label);
+          const quoted = labels.map((l) => `“${l}”`);
+          const phrase =
+            quoted.length === 2 ? `${quoted[0]} and ${quoted[1]}` : quoted.join(", ");
+          return (
+            <div className="rounded-lg border border-accent/30 bg-accent/5 px-4 py-3 text-sm text-foreground">
+              <span className="font-bold">&ldquo;{asker.label}&rdquo;</span> is looking for a noun. It found{" "}
+              <span className="font-bold">{phrase}</span>. The model can&apos;t tell which one matters yet.
+            </div>
+          );
+        })()}
       </div>
     </WidgetContainer>
   );

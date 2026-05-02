@@ -20,28 +20,30 @@ This is what **attention** does. It gives the model the ability to look at every
 
 ## Step 1: Match Scores
 
-We need each token to be able to ask a question and find the other tokens that answer it. Imagine a tiny vocabulary of just four tokens: **cat**, **dog**, **blah** (a filler word), and **it** (a pronoun). Our goal is to work out what noun **it** is referring to.
+We need each token to be able to ask a question and find the other tokens that answer it. The token isn't really asking anything; the model does the asking on the token's behalf. But it's easier to follow the math if we picture it from the token's point of view.
+
+Imagine a tiny vocabulary of just four tokens: **cat**, **dog**, **blah** (a filler word), and **it** (a pronoun). Our goal is to work out what noun **it** is referring to.
 
 Each token gets two vectors:
 
-- A **key** — what this token is *advertising* about itself.
+- A **key** — what this token is *offering* to other tokens.
 - A **query** — what this token is *looking for* in other tokens.
 
-Both vectors here are just one number: a 1 means "noun" or "looking for a noun", a 0 means "no". Cat and dog advertise themselves as nouns. Blah doesn't advertise anything. It is *looking for* a noun.
+Both vectors here are just one number: a 1 means "noun" or "looking for a noun", a 0 means "no". "cat" and "dog" offer themselves as nouns. "blah" offers nothing. "it" is *looking for* a noun.
 
-To score how well a query matches a key, multiply the matching numbers and add them up. That's the **dot product** from Chapter 4. A score of 1 means a match. A score of 0 means no match.
+Given a token, we can work out which other tokens it should be paying attention to by multiplying its query (what it is looking for) by the key of each of the other tokens. This is the **dot product** from Chapter 4. The bigger the score, the better the match.
 
 <ToyAttentionScoresWidget>
-Click any token to see its raw match scores against every key — including its own. Click "it" to see it match cat (score 1) and miss blah (score 0). Click "cat" to see something different: cat isn't asking anything, so every score is 0. The widget always shows both the key (what each token advertises) and the query (what each token is looking for).
+Click any token to see its raw match scores against every key — including its own. Click "it" to see it match "cat" (score 1) and miss "blah" (score 0). Click "cat" to see something different: "cat" isn't asking anything, so every score is 0. The widget always shows both the key (what each token offers) and the query (what each token is looking for).
 </ToyAttentionScoresWidget>
 
-What you advertise isn't the same as what you're looking for. A pronoun needs to find nouns without being mistaken for one itself. That's why keys and queries are separate.
+What you offer isn't the same as what you're looking for. A pronoun needs to find nouns without being mistaken for one itself. That's why keys and queries are separate.
 
 ## Step 2: Softmax — Dividing Your Attention
 
-Match scores are useful, but the model can't just keep piling them up. Each token has a fixed budget of attention, 100%, and needs to *divide* that budget among all the candidates. We need to turn raw scores into percentages that add up to 1.
+Match scores are useful, but the model can't just keep piling them up. Each token has a fixed budget of attention, 100%, and needs to *divide* that budget among all the candidates. We need to turn raw scores into percentages that add up to 1. You'll find out why the attention needs to add up to 100% later.
 
-The function for this is called **softmax**. Think of it as a competition: bigger numbers dominate, smaller numbers get squeezed, and the result is a set of percentages.
+The function usually used for this is called **softmax**. Think of it as a competition: bigger numbers dominate, smaller numbers get squeezed, and the result is a set of percentages.
 
 <SoftmaxExplorerWidget>
 Drag the sliders. Try "All equal" — everyone gets 25%. Try "Moderate, rest silent" — A wins by default because nobody else is saying anything. Try "Moderate meets loud" — B drowns out A. The gaps between scores matter more than the absolute values. Softmax cares about who's loudest *relative to everyone else*.
@@ -49,50 +51,45 @@ Drag the sliders. Try "All equal" — everyone gets 25%. Try "Moderate, rest sil
 
 Now apply softmax to the dot products from step 1. With keys and queries at 1/0, "it" against `cat blah blah it` gets scores `[1, 0, 0, 0]`, which softmax turns into roughly `[47%, 18%, 18%, 18%]`. That's the right shape, cat wins, but more than half the attention leaks to the filler tokens. Not great.
 
-The fix is to crank up the *query magnitude*. The keys still describe what each token is, but the asker is allowed to care more loudly. With "it"'s query at 3 instead of 1, the scores become `[3, 0, 0, 0]`, and softmax turns those into roughly `[87%, 4%, 4%, 4%]`. Much sharper.
+The fix is to crank up the *query magnitude*. The keys still describe what each token is, but the asker is cares more about about paying attention to the tokens that matched best. With "it"'s query at 10 instead of 1, the scores become `[10, 0, 0, 0]`, and softmax turns those into roughly `[99.99%, ≈0%, ≈0%, ≈0%]`. Nearly all the attention goes to the noun.
 
 <ToyAttentionSoftmaxWidget>
-Toggle the query magnitude between 1 and 3. At 1, attention leaks all over the place. At 3, "it" puts most of its attention on the noun. There's still a small leak: softmax always allocates 100%, so a few percent always go to the losers. That tiny leak is honest and we'll come back to it.
+Toggle the query magnitude between 1 and 10. At 1, attention leaks all over the place. At 10, "it" puts almost all of its attention on the noun. There's still a tiny leak — softmax always allocates 100%, so a fraction of a percent goes to every loser. That's honest and we'll come back to it.
 </ToyAttentionSoftmaxWidget>
 
-The leak isn't a bug. Softmax is *fuzzy*. Real attention is fuzzy. The model is never 100% sure of anything.
+But there's a bigger problem. Try clicking on "blah" in the widget above. "blah" doesn't have a noun-finding question — its query is just zero. So every score is zero, and softmax spreads attention evenly across all four tokens. The widget reports "blah pays 25% attention to itself, 25% to cat, 25% to the other blah, 25% to it" — which is meaningless. The same thing happens to "it" if there are no nouns in the sentence. Softmax has nothing to grab onto, so it spreads attention everywhere, with full confidence.
 
-## Step 3: Values — What Did You Find?
+## Step 3: Where Does Attention Go When Nothing Matches?
+
+Softmax always allocates 100% somewhere, even when no real match is available. We need a sensible place for the leftover attention to go.
+
+The first fix is to add a **sink** token whose only job is to absorb leftover attention. Give it a key that's *slightly* nounish — say, `[0.5]` — so it scores higher than zero, but lower than a real noun like `[1]`. When a real noun is around, the noun wins by a wide margin (because of the cranked-up query magnitude). When no noun is around, the sink wins by default — `0.5` is the only score above zero.
+
+That handles the "it can't find a noun" case. But there's still the other problem from Step 2: clicking on "blah" or "cat". Those tokens don't have a noun-finding query, so their scores are still all zero, and attention still spreads evenly.
+
+The second fix is to add a **"none"** dimension to every token's key and query, alongside the existing "noun" dimension. Tokens that aren't looking for a noun get queries pointing at the "none" dimension. The sink advertises in *both* dimensions — its key becomes `[0.5, 0.5]`, slightly nounish *and* a strong "none". So now off-task tokens have something to search for, and the sink is the only token that answers them.
+
+<ToyAttentionSinkWidget>
+Click "it" in `cat blah blah it` — almost all attention goes to "cat", with barely any leftover on the sink. Try `blah blah blah it` — there's no noun to find, and the sink wins ~97% of the attention. Try clicking "blah" — it isn't looking for a noun, so its attention parks on the sink (also ~97%). Every off-task token now has somewhere harmless to land.
+</ToyAttentionSinkWidget>
+
+Real models don't always use a dedicated sink token. Sometimes the model learns to use a punctuation mark as a sink, or a start-of-sentence token, or just have the token attend to itself. The idea is the same in every case: when this head doesn't have anything useful to do for a particular token, attention has to go somewhere harmless. We'll see this in BERT in a moment.
+
+## Step 4: Values — What Did You Find?
 
 So far attention tells us *where to look* — which tokens are relevant. But we also need *what to gather* from those tokens.
 
-Each token gets a third vector: a **value**. The key and query decide who talks to whom. The value is what gets said. For our pronoun example, the value encodes which animal the token represents: cat's value is `[1, 0]`, dog's value is `[0, 1]`, and filler tokens have nothing to share, so their value is `[0, 0]`.
+Each token gets a third vector: a **value**. The key and query decide who talks to whom. The value is what gets said. For our pronoun example, the value encodes which animal the token represents: cat's value is `[1, 0]`, dog's value is `[0, 1]`, and filler tokens (including the sink) have nothing to share, so their value is `[0, 0]`.
 
-Attention then blends these values using the softmax weights as a recipe. If "it" pays 87% attention to "cat" and 4% to each filler, the result is roughly `[0.87, 0]`: strongly cat-flavored, with a small leak toward zero from the fillers.
+Attention then blends these values using the softmax weights as a recipe. If "it" pays nearly 100% attention to "cat" and a fraction of a percent everywhere else, the result is roughly `[1, 0]` — almost pure cat.
 
 <ToyAttentionValuesWidget>
-Click "it" in `cat blah blah it` — the result is mostly cat. Try `cat blah dog it` — now the result is half cat, half dog, because "it" matched both nouns equally and the model can't tell which. Try `dog blah dog it` — *two* dogs, and the result is sharper than with just one dog: about 95% dog. More matches → more confident, because softmax's denominator dilutes the leak.
+Click "it" in `cat blah blah it` — the result is almost all cat. Try `cat blah dog it` — half cat, half dog, because "it" matched both nouns equally and the model can't tell which. Try `dog blah dog it` — *two* dogs, and the result is even sharper than with just one. Try `blah blah blah it` — there's no noun to find, attention falls on the sink, and the result vector is empty. That's exactly what "nothing useful gathered" looks like.
 </ToyAttentionValuesWidget>
 
-That last point matters. Two of the same noun produces a *more* confident answer than one, not a doubled one. Softmax-weighted blending stays in the same value-space as the input, no matter how many matches there are. Match dog twice, you get dog. Match dog and cat, you get half-dog-half-cat. The mechanism never produces "double dog."
+Two of the same noun produces a *more* confident answer than one, not a doubled one. Softmax-weighted blending stays in the same value-space as the input, no matter how many matches there are. Match dog twice, you get dog. Match dog and cat, you get half-dog-half-cat. The mechanism never produces "double dog."
 
-There are still two cases this doesn't handle. What if there's no noun to find at all (`blah blah blah it`)? And what about the tokens that *aren't* asking the noun-finding question — what does this mechanism do for them? We'll handle both in one move.
-
-## Step 4: When Nothing Matches — The Sink
-
-Softmax always allocates 100% somewhere. That's a problem when there's nothing to allocate it *to*. If "it" is in `blah blah blah it`, every dot product is 0, and softmax just spreads attention evenly across the fillers — gathering nothing useful but reporting full confidence in that nothing.
-
-The fix is to give attention a sensible place to go when no real match is available. We add an extra **sink** dimension to the keys and queries, and an extra **nothing** dimension to the values. Every token's key has a small constant in the sink dimension, every token's query is willing to fall back to it, and every token's value has a "nothing useful here" component the sink can deliver.
-
-| Token | Key (noun, sink) | Query (noun, sink) | Value (cat, dog, nothing) |
-|------|------|------|------|
-| cat  | [1, 1] | [0, 1] | [1, 0, 0] |
-| dog  | [1, 1] | [0, 1] | [0, 1, 0] |
-| blah | [0, 1] | [0, 1] | [0, 0, 1] |
-| it   | [0, 1] | [3, 1] | [0, 0, 1] |
-
-Now run attention on `blah blah blah it` again. With no nouns to match, every score is 1 (just the sink dimension), softmax goes uniform 25%, and the blended value is pure `[0, 0, 1]`: "no useful info gathered." Honest fallback. The same mechanism handles tokens that aren't asking the question: click "blah" and it gathers nothing too, because its query has no noun-component to rule out the sink.
-
-<ToyAttentionSinkWidget>
-Click any token, try any sentence. `cat blah blah it` → mostly cat with a small sink leak. `dog blah dog it` → sharper, because the second dog drowns out the sink. `blah blah blah it` → pure nothing. Click "blah" → idle, because this head doesn't apply to it. Every behavior the widget shows comes from the same dot-product-and-softmax mechanism we built up over the last three steps.
-</ToyAttentionSinkWidget>
-
-Real attention heads in real models can pick a different sink. Some attend to the previous word as a default. Some park on a special start-of-sentence token. Some park on punctuation. The idea is the same: when this head doesn't have anything useful to say about a token, attention has to go somewhere harmless. We'll see this in BERT in a moment.
+When attention falls on the sink (whose value is `[0, 0]`), the result is empty. That's a clean way to represent "this head had nothing useful to say." The "none" dimension on the keys and queries is what steers attention to the sink; the values themselves don't need a special "nothing" component, because an empty result vector is already its own answer.
 
 ## Multi-Headed Attention
 
@@ -123,6 +120,8 @@ No one told these heads what patterns to learn — each one discovered its role 
 ## A Live Attention Model
 
 The BERT widget above shows pre-recorded attention weights, extracted in Python and frozen into a table of canned sentences. We did it that way because the full BERT model is too large to easily run in your browser. In the widget below, we instead show a tiny model that runs live in your browser. It was trained to predict the next word in a small collection of children's stories. You can type whatever sentence you like and see what each of the 48 attention heads pays attention to for each word.
+
+The model learned attention heads that helped it solve this task, rather than ones that make sense to humans, so its not obvious to us humans what most of these heads are doing. That's one of the weird things about AI models.
 
 <LiveAttentionWidget>
 Each cell in the grid is one attention head — 48 heads in total, six layers of eight. Click around. Some heads' behavior is easy to name: one always attends to the previous word, another snaps to a recent period or comma. Others do something you can almost-but-not-quite describe. Some look like noise. That's the honest picture: these heads weren't designed, they were learned. The model kept whatever patterns turned out to be useful for predicting the next word, with no requirement that those patterns make sense to a human. Some happen to. Some don't.

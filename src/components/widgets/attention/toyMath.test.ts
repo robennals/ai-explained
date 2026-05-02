@@ -28,22 +28,6 @@ describe("softmax", () => {
     a.forEach((v, i) => expect(v).toBeCloseTo(b[i], 6));
   });
 
-  it("matches expected weights for [3, 0, 0, 0]", () => {
-    const result = softmax([3, 0, 0, 0]);
-    expect(result[0]).toBeCloseTo(0.870, 3);
-    expect(result[1]).toBeCloseTo(0.0433, 3);
-    expect(result[2]).toBeCloseTo(0.0433, 3);
-    expect(result[3]).toBeCloseTo(0.0433, 3);
-  });
-
-  it("matches expected weights for [3, 0, 3, 0] (two-match case)", () => {
-    const result = softmax([3, 0, 3, 0]);
-    expect(result[0]).toBeCloseTo(0.476, 3);
-    expect(result[1]).toBeCloseTo(0.0238, 3);
-    expect(result[2]).toBeCloseTo(0.476, 3);
-    expect(result[3]).toBeCloseTo(0.0238, 3);
-  });
-
   it("sums to 1 for any input", () => {
     const inputs = [
       [1, 2, 3],
@@ -63,6 +47,35 @@ describe("softmax", () => {
     expect(result[0]).toBeCloseTo(0.7311, 3);
     expect(result[1]).toBeCloseTo(0.2689, 3);
   });
+
+  it("matches expected step-2 weights for cat blah blah it (no sink, magnitude 10)", () => {
+    // it.q=[10], keys=[1,0,0,0]. scores = [10, 0, 0, 0]
+    const result = softmax([10, 0, 0, 0]);
+    expect(result[0]).toBeCloseTo(0.99986, 4);
+    expect(result[1]).toBeCloseTo(0.0000454, 6);
+    expect(result[2]).toBeCloseTo(0.0000454, 6);
+    expect(result[3]).toBeCloseTo(0.0000454, 6);
+  });
+
+  it("matches expected step-3 sink weights for cat blah blah it (sink + magnitude 10)", () => {
+    // tokens: [SINK, CAT, BLA, BLA, IT]
+    // SINK.key=[0.5], CAT.key=[1], BLA.key=[0], IT.key=[0]
+    // it.q=[10]; scores: [5, 10, 0, 0, 0]
+    const result = softmax([5, 10, 0, 0, 0]);
+    expect(result[0]).toBeCloseTo(0.00669, 4); // sink
+    expect(result[1]).toBeCloseTo(0.99319, 4); // cat dominates
+    expect(result[2]).toBeCloseTo(0.0000451, 6);
+  });
+
+  it("matches expected step-3 sink weights for blah blah blah it (no nouns)", () => {
+    // scores: [5, 0, 0, 0, 0]
+    const result = softmax([5, 0, 0, 0, 0]);
+    expect(result[0]).toBeCloseTo(0.9737, 3); // sink dominates
+    expect(result[1]).toBeCloseTo(0.00656, 4); // blahs
+    expect(result[2]).toBeCloseTo(0.00656, 4);
+    expect(result[3]).toBeCloseTo(0.00656, 4);
+    expect(result[4]).toBeCloseTo(0.00656, 4);
+  });
 });
 
 describe("weightedSum", () => {
@@ -75,24 +88,27 @@ describe("weightedSum", () => {
     expect(weightedSum(weights, values)).toEqual([0.5, 0.5]);
   });
 
-  it("matches expected step-3 result for cat blah blah it", () => {
-    // it.q=[3], keys=[1,0,0,0], values=[[1,0],[0,0],[0,0],[0,0]]
-    const w = softmax([3, 0, 0, 0]);
+  it("matches expected step-4 result for cat blah blah it (with sink, magnitude 10)", () => {
+    // weights from softmax([5, 10, 0, 0, 0])
+    // values: SINK=[0,0], CAT=[1,0], BLA=[0,0], BLA=[0,0], IT=[0,0]
+    const w = softmax([5, 10, 0, 0, 0]);
     const v = [
+      [0, 0],
       [1, 0],
       [0, 0],
       [0, 0],
       [0, 0],
     ];
     const result = weightedSum(w, v);
-    expect(result[0]).toBeCloseTo(0.870, 3);
+    expect(result[0]).toBeCloseTo(0.9932, 3); // ~99% cat
     expect(result[1]).toBeCloseTo(0, 6);
   });
 
-  it("matches expected step-3 result for dog blah dog it (two dogs)", () => {
-    // it.q=[3], keys=[1,0,1,0], values=[[0,1],[0,0],[0,1],[0,0]]
-    const w = softmax([3, 0, 3, 0]);
+  it("matches expected step-4 result for dog blah dog it (two dogs, magnitude 10)", () => {
+    // scores: [5, 10, 0, 10, 0] — sink + two dogs
+    const w = softmax([5, 10, 0, 10, 0]);
     const v = [
+      [0, 0],
       [0, 1],
       [0, 0],
       [0, 1],
@@ -100,22 +116,22 @@ describe("weightedSum", () => {
     ];
     const result = weightedSum(w, v);
     expect(result[0]).toBeCloseTo(0, 6);
-    expect(result[1]).toBeCloseTo(0.9526, 3);
+    expect(result[1]).toBeCloseTo(0.9966, 3); // ~99.7% dog
   });
 
-  it("matches expected step-4 sink result for blah blah blah it", () => {
-    // it.q=[3,1], all keys=[0,1] → scores=[1,1,1,1] → uniform 25%
-    // values: blah=[0,0,1], blah=[0,0,1], blah=[0,0,1], it=[0,0,1]
-    const w = softmax([1, 1, 1, 1]);
+  it("matches expected step-4 result for blah blah blah it (empty result)", () => {
+    // scores: [5, 0, 0, 0, 0] — sink wins
+    // all values are zero vectors → result is empty [0, 0]
+    const w = softmax([5, 0, 0, 0, 0]);
     const v = [
-      [0, 0, 1],
-      [0, 0, 1],
-      [0, 0, 1],
-      [0, 0, 1],
+      [0, 0],
+      [0, 0],
+      [0, 0],
+      [0, 0],
+      [0, 0],
     ];
     const result = weightedSum(w, v);
     expect(result[0]).toBeCloseTo(0, 6);
     expect(result[1]).toBeCloseTo(0, 6);
-    expect(result[2]).toBeCloseTo(1, 6);
   });
 });

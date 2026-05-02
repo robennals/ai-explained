@@ -3,15 +3,21 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
 import { VectorCard } from "../vectors/VectorCard";
-import { dot, softmax, weightedSum } from "./toyMath";
+import { dot, softmax } from "./toyMath";
+
+/* ------------------------------------------------------------------ */
+/*  Data — sink as a dedicated 5th token + a "none" key/query dim.    */
+/*  Every off-task token (cat, dog, blah, sink itself) has its query  */
+/*  pointing at the sink's "none" component, so attention always has  */
+/*  somewhere harmless to land. Only "it" has a noun-finding query —  */
+/*  which dominates when a real noun is around.                       */
+/* ------------------------------------------------------------------ */
 
 interface Token {
   label: string;
-  key: number[];     // [noun, sink]
-  query: number[];   // [noun, sink]
-  value: number[];   // [cat, dog, nothing]
+  key: number[];   // [noun, none]
+  query: number[]; // [noun, none]
   color: string;
-  hexColor: string;
 }
 
 interface Sentence {
@@ -19,35 +25,35 @@ interface Sentence {
   tokens: Token[];
 }
 
+const SINK: Token = {
+  label: "sink",
+  key: [0.5, 0.5], query: [0, 10],
+  color: "text-emerald-600 dark:text-emerald-400",
+};
 const CAT: Token = {
-  label: "cat",
-  key: [1, 1], query: [0, 1], value: [1, 0, 0],
-  color: "text-amber-600 dark:text-amber-400", hexColor: "#d97706",
+  label: "cat", key: [1, 0], query: [0, 10],
+  color: "text-amber-600 dark:text-amber-400",
 };
 const DOG: Token = {
-  label: "dog",
-  key: [1, 1], query: [0, 1], value: [0, 1, 0],
-  color: "text-blue-600 dark:text-blue-400", hexColor: "#2563eb",
+  label: "dog", key: [1, 0], query: [0, 10],
+  color: "text-blue-600 dark:text-blue-400",
 };
 const BLA: Token = {
-  label: "blah",
-  key: [0, 1], query: [0, 1], value: [0, 0, 1],
-  color: "text-foreground/40", hexColor: "#9ca3af",
+  label: "blah", key: [0, 0], query: [0, 10],
+  color: "text-foreground/40",
 };
 const IT: Token = {
-  label: "it",
-  key: [0, 1], query: [3, 1], value: [0, 0, 1],
-  color: "text-purple-600 dark:text-purple-400", hexColor: "#9333ea",
+  label: "it", key: [0, 0], query: [10, 0],
+  color: "text-purple-600 dark:text-purple-400",
 };
 
-const KQ_PROPS = ["noun", "sink"];
-const VALUE_PROPS = ["cat", "dog", "nothing"];
+const PROPS = ["noun", "none"];
 
 const SENTENCES: Sentence[] = [
-  { label: "cat blah blah it", tokens: [CAT, BLA, BLA, IT] },
-  { label: "cat blah dog it", tokens: [CAT, BLA, DOG, IT] },
-  { label: "dog blah dog it", tokens: [DOG, BLA, DOG, IT] },
-  { label: "blah blah blah it", tokens: [BLA, BLA, BLA, IT] },
+  { label: "cat blah blah it", tokens: [SINK, CAT, BLA, BLA, IT] },
+  { label: "cat blah dog it", tokens: [SINK, CAT, BLA, DOG, IT] },
+  { label: "dog blah dog it", tokens: [SINK, DOG, BLA, DOG, IT] },
+  { label: "blah blah blah it", tokens: [SINK, BLA, BLA, BLA, IT] },
 ];
 
 const HUE = 240;
@@ -68,15 +74,6 @@ function pct(n: number): string {
   return `${(n * 100).toFixed(1)}%`;
 }
 
-function describeOutput(v: number[]): string {
-  const [cat, dog, nothing] = v;
-  if (nothing > 0.85) return "no useful info gathered — pure fallback.";
-  if (cat > 0.7 && dog < 0.1) return `mostly cat, with about ${Math.round(nothing * 100)}% sink leak.`;
-  if (dog > 0.7 && cat < 0.1) return `mostly dog, with about ${Math.round(nothing * 100)}% sink leak.`;
-  if (cat > 0.3 && dog > 0.3) return `${Math.round(cat * 100)}% cat, ${Math.round(dog * 100)}% dog — the model isn't sure.`;
-  return `${Math.round(cat * 100)}% cat, ${Math.round(dog * 100)}% dog, ${Math.round(nothing * 100)}% nothing.`;
-}
-
 interface Arrow {
   fromX: number;
   fromY: number;
@@ -87,7 +84,7 @@ interface Arrow {
 
 export function ToyAttentionSink() {
   const [sentIdx, setSentIdx] = useState(0);
-  const [selected, setSelected] = useState<number | null>(3);
+  const [selected, setSelected] = useState<number | null>(4); // default: "it" (last token)
   const [arrows, setArrows] = useState<Arrow[]>([]);
 
   const rowRef = useRef<HTMLDivElement>(null);
@@ -98,20 +95,24 @@ export function ToyAttentionSink() {
 
   const handleReset = useCallback(() => {
     setSentIdx(0);
-    setSelected(3);
+    setSelected(4);
   }, []);
 
   const handleSentenceChange = (idx: number) => {
     setSentIdx(idx);
-    setSelected(SENTENCES[idx].tokens.length - 1); // default to last token
+    const newTokens = SENTENCES[idx].tokens;
+    const itIdx = newTokens.map((t, i) => (t.label === "it" ? i : -1)).filter((i) => i >= 0);
+    setSelected(itIdx.length > 0 ? itIdx[itIdx.length - 1] : newTokens.length - 1);
   };
 
   const scores = selected !== null
     ? tokens.map((t) => dot(tokens[selected].query, t.key))
     : null;
   const weights = scores ? softmax(scores) : null;
-  const output = weights ? weightedSum(weights, tokens.map((t) => t.value)) : null;
   const hasSelection = selected !== null;
+  const askerHasAnyMatch = scores
+    ? scores.some((s, i) => s > 0 && i !== selected)
+    : false;
 
   useEffect(() => {
     if (!hasSelection || !weights || !rowRef.current) {
@@ -155,7 +156,7 @@ export function ToyAttentionSink() {
   return (
     <WidgetContainer
       title="Attention with Sink"
-      description={'Click any token, try any sentence. The sink dimension gives attention somewhere to go when nothing matches.'}
+      description={'A dedicated sink token absorbs attention when no real match exists. Click any token, try any sentence.'}
       onReset={handleReset}
     >
       <div className="flex flex-col gap-5">
@@ -211,10 +212,13 @@ export function ToyAttentionSink() {
             {tokens.map((tok, i) => {
               const isSelected = selected === i;
               const weight = weights?.[i];
-              const isTarget = weight != null && weight > 0.01 && !isSelected;
+              // Highlight a token's key only when it actually won meaningful attention,
+              // not just because its raw score was non-zero. The sink's score is always
+              // positive but should only "light up" when it actually absorbed attention.
+              const isMatch = hasSelection && weight != null && weight > 0.05 && !isSelected;
 
               return (
-                <div key={`${sentIdx}-${i}`} className="flex flex-col items-center" style={{ width: 140 }}>
+                <div key={`${sentIdx}-${i}`} className="flex flex-col items-center" style={{ width: 145 }}>
                   <button
                     ref={(el) => {
                       if (el) cardRefs.current.set(i, el);
@@ -233,45 +237,42 @@ export function ToyAttentionSink() {
 
                   <div className="mt-2 flex w-full flex-col items-center gap-1.5">
                     <VectorCard
-                      name="" emoji="" properties={KQ_PROPS} values={tok.key}
-                      barMax={1} animate={false}
-                      labelWidth="w-12" barWidth="w-10" className="text-xs w-full" label="KEY"
-                    />
-                    <VectorCard
-                      name="" emoji="" properties={KQ_PROPS} values={tok.query}
+                      name="" emoji="" properties={PROPS} values={tok.query}
                       barColor="var(--color-accent)"
-                      barMax={3} animate={false}
-                      labelWidth="w-12" barWidth="w-10" className="text-xs w-full"
+                      barMax={10} animate={false}
+                      labelWidth="w-10" barWidth="w-8"
+                      className={`text-xs w-full transition-colors ${
+                        hasSelection && !isSelected ? "opacity-30" : ""
+                      } ${
+                        isSelected && askerHasAnyMatch ? "!border-accent" : ""
+                      }`}
                       label="QUERY"
                       labelColor="var(--color-accent)"
                     />
                     <VectorCard
-                      name="" emoji="" properties={VALUE_PROPS} values={tok.value}
-                      barColor={tok.hexColor}
+                      name="" emoji="" properties={PROPS} values={tok.key}
                       barMax={1} animate={false}
-                      labelWidth="w-12" barWidth="w-10" className="text-xs w-full"
-                      label="VALUE"
+                      labelWidth="w-10" barWidth="w-8"
+                      className={`text-xs w-full transition-colors ${
+                        isMatch ? "!border-accent" : ""
+                      }`}
+                      label="KEY"
                     />
 
-                    {hasSelection && scores && (
-                      <div className="text-center font-mono text-[10px] text-muted leading-tight">
-                        score = <span className="font-bold text-foreground">{scores[i]}</span>
-                      </div>
-                    )}
-
+                    {/* Big percentage */}
                     {weight != null && (
-                      isTarget ? (
-                        <span
-                          className="rounded-full px-2 py-0.5 font-mono text-[10px] font-bold text-white"
-                          style={{ backgroundColor: weightToPill(weight) }}
-                        >
-                          {pct(weight)}
-                        </span>
-                      ) : (
-                        <span className={`font-mono text-[10px] font-bold ${isSelected ? "text-accent" : "text-muted"}`}>
-                          {pct(weight)}
-                        </span>
-                      )
+                      <span
+                        className={`mt-0.5 rounded-full px-3 py-0.5 font-mono text-sm font-bold ${
+                          isMatch
+                            ? "text-white"
+                            : isSelected
+                            ? "text-accent"
+                            : "text-muted"
+                        }`}
+                        style={isMatch ? { backgroundColor: weightToPill(weight) } : undefined}
+                      >
+                        {pct(weight)}
+                      </span>
                     )}
                   </div>
                 </div>
@@ -280,30 +281,56 @@ export function ToyAttentionSink() {
           </div>
         </div>
 
-        {/* Result vector */}
-        {hasSelection && output && (
-          <div className="flex items-center justify-center gap-3 rounded-lg border border-border bg-surface px-4 py-3">
-            <span className="text-xs font-semibold uppercase text-muted">Result for &ldquo;{tokens[selected!].label}&rdquo;:</span>
-            <VectorCard
-              name="" emoji="" properties={VALUE_PROPS} values={output}
-              barColor="#059669"
-              barMax={1} animate={false}
-              labelWidth="w-12" barWidth="w-12" className="text-xs"
-              label="OUTPUT"
-              labelColor="#059669"
-            />
-          </div>
-        )}
-
         {/* Plain-English explanation */}
-        {hasSelection && output && (
-          <div className="rounded-lg border border-accent/30 bg-accent/5 px-4 py-3 text-sm text-foreground">
-            <strong>What this means: </strong>
-            {tokens[selected!].label === "it"
-              ? `it was looking for a noun. ${describeOutput(output)}`
-              : `${tokens[selected!].label} isn't asking the noun-finding question, so this head is idle for it. ${describeOutput(output)}`}
-          </div>
-        )}
+        {hasSelection && weights && (() => {
+          const asker = tokens[selected!];
+          const sinkWeight = weights[0]; // sink is always at position 0
+          const matches = weights
+            .map((w, i) => ({ w, tok: tokens[i], i }))
+            .filter(({ i, tok }) => i !== selected && i !== 0 && tok.label !== "blah" && weights[i] > 0.05);
+
+          if (asker.label !== "it") {
+            return (
+              <div className="rounded-lg border border-border bg-foreground/[0.02] px-4 py-3 text-sm text-muted">
+                <span className="font-bold text-foreground">&ldquo;{asker.label}&rdquo;</span> isn&apos;t looking
+                for a noun in this head — its query points at the &ldquo;none&rdquo; dimension instead, which
+                only the sink advertises. So almost all of its attention parks on the{" "}
+                <span className="font-bold text-emerald-600 dark:text-emerald-400">sink</span> ({pct(sinkWeight)}).
+                Off-task tokens have somewhere harmless to land.
+              </div>
+            );
+          }
+
+          if (matches.length === 0) {
+            return (
+              <div className="rounded-lg border border-accent/30 bg-accent/5 px-4 py-3 text-sm text-foreground">
+                <span className="font-bold">&ldquo;it&rdquo;</span> is looking for a noun, but there are no
+                nouns in this sentence. The <span className="font-bold text-emerald-600 dark:text-emerald-400">sink</span> token
+                wins by default ({pct(sinkWeight)}) because its key is the only thing that scores above zero.
+              </div>
+            );
+          }
+
+          if (matches.length === 1) {
+            return (
+              <div className="rounded-lg border border-accent/30 bg-accent/5 px-4 py-3 text-sm text-foreground">
+                <span className="font-bold">&ldquo;it&rdquo;</span> is looking for a noun. It found{" "}
+                <span className="font-bold">&ldquo;{matches[0].tok.label}&rdquo;</span> ({pct(matches[0].w)}).
+                The sink absorbs the small leftover ({pct(sinkWeight)}).
+              </div>
+            );
+          }
+
+          const labels = matches.map((m) => `“${m.tok.label}”`);
+          const phrase = labels.length === 2 ? `${labels[0]} and ${labels[1]}` : labels.join(", ");
+          return (
+            <div className="rounded-lg border border-accent/30 bg-accent/5 px-4 py-3 text-sm text-foreground">
+              <span className="font-bold">&ldquo;it&rdquo;</span> is looking for a noun. It found{" "}
+              <span className="font-bold">{phrase}</span> with roughly equal weight. The sink absorbs the
+              small leftover ({pct(sinkWeight)}).
+            </div>
+          );
+        })()}
       </div>
     </WidgetContainer>
   );
