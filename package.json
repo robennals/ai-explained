@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint && bash scripts/lint-mdx-no-raw-p.sh",
+    "test": "vitest run",
     "sync-r2": "bash scripts/sync-r2.sh",
     "sync-r2:apply": "bash scripts/sync-r2.sh --apply",
     "test:notebooks": "jupyter nbconvert --to notebook --execute --ExecutePreprocessor.timeout=300 notebooks/*.ipynb --output-dir /tmp/notebook-test-output"
@@ -42,6 +43,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.5"
   }
 }
