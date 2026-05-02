@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useContext, useEffect, useMemo } from "react";
+import { useState, useCallback, useContext, useEffect, useMemo, useRef } from "react";
 import { TabVisitContext } from "./WidgetContainer";
 
 interface Tab<T extends string> {
@@ -57,9 +57,30 @@ export function WidgetTabs<T extends string>({
     [onTabChange]
   );
 
+  // When the active tab changes (e.g. via "Go to Next Tab"), scroll the
+  // tablist horizontally so the active button is in view. We adjust
+  // scrollLeft directly so this never affects page scroll.
+  const tablistRef = useRef<HTMLDivElement>(null);
+  const buttonRefs = useRef(new Map<T, HTMLButtonElement | null>());
+  useEffect(() => {
+    const list = tablistRef.current;
+    const btn = buttonRefs.current.get(activeTab);
+    if (!list || !btn) return;
+    const btnLeft = btn.offsetLeft;
+    const btnRight = btnLeft + btn.offsetWidth;
+    const viewLeft = list.scrollLeft;
+    const viewRight = viewLeft + list.clientWidth;
+    const margin = 16;
+    if (btnLeft < viewLeft + margin) {
+      list.scrollTo({ left: Math.max(0, btnLeft - margin), behavior: "smooth" });
+    } else if (btnRight > viewRight - margin) {
+      list.scrollTo({ left: btnRight - list.clientWidth + margin, behavior: "smooth" });
+    }
+  }, [activeTab]);
+
   return (
     <div className="mb-8">
-      <div className="flex border-b-2 border-border" role="tablist">
+      <div ref={tablistRef} className="flex border-b-2 border-border overflow-x-auto overflow-y-clip" role="tablist">
         {tabs.map((tab, i) => {
           const isActive = activeTab === tab.id;
           const isVisited = visited.has(tab.id);
@@ -67,10 +88,11 @@ export function WidgetTabs<T extends string>({
           return (
             <button
               key={tab.id}
+              ref={(el) => { buttonRefs.current.set(tab.id, el); }}
               role="tab"
               aria-selected={isActive}
               onClick={() => handleTabClick(tab.id)}
-              className={`relative flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold transition-colors ${
+              className={`relative flex shrink-0 items-center gap-1.5 whitespace-nowrap px-4 py-2.5 text-sm font-semibold transition-colors ${
                 isActive
                   ? "text-accent"
                   : "text-muted hover:text-foreground"

@@ -81,6 +81,7 @@ export function ToyVocabTable() {
               barWidth="w-12"
               className="text-xs"
               footer={tok.keyMeaning}
+              mobileHideBar
             />
             <VectorCard
               name={`query for "${tok.label}"`}
@@ -94,6 +95,7 @@ export function ToyVocabTable() {
               animate={false}
               className="text-xs"
               footer={tok.queryMeaning}
+              mobileHideBar
             />
           </div>
         </div>

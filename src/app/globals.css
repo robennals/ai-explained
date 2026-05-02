@@ -81,6 +81,18 @@ body {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.04);
 }
 
+/* Below lg: bleed to viewport edges so widgets can use full screen width.
+   Negative margin matches the tutorial main's px-6 (24px) padding. */
+@media (max-width: 1023.98px) {
+  .widget-container {
+    margin-left: -1.5rem;
+    margin-right: -1.5rem;
+    border-left: 0;
+    border-right: 0;
+    border-radius: 0;
+  }
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 6px;

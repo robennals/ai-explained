@@ -2,11 +2,20 @@
 
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { WidgetContainer } from "@/components/widgets/shared/WidgetContainer";
+import { useMediaQuery } from "@/components/widgets/shared/useMediaQuery";
 import { simpleOverviewExample } from "./simple-example";
 import type { LayerId } from "@/components/widgets/transformers/TransformerInAction/types";
 import { Grid } from "./Grid";
 import { Popup } from "./Popup";
-import { layerRowY, LABEL_GUTTER_RIGHT_X, VIEW_WIDTH, VIEW_HEIGHT, previousLayer } from "./geometry";
+import {
+  layerRowY,
+  LABEL_GUTTER_RIGHT_X,
+  COMPACT_LABEL_GUTTER_RIGHT_X,
+  VIEW_WIDTH,
+  COMPACT_VIEW_WIDTH,
+  VIEW_HEIGHT,
+  previousLayer,
+} from "./geometry";
 import { LAYER_SUMMARIES } from "./layer-summaries";
 import { overviewEdges } from "./edges";
 
@@ -18,6 +27,9 @@ interface CellSelection {
 export function TransformerOverview() {
   const [selectedCell, setSelectedCell] = useState<CellSelection | null>(null);
   const [selectedLayer, setSelectedLayer] = useState<LayerId | null>(null);
+  const compact = useMediaQuery("(max-width: 767.98px)");
+  const labelGutterX = compact ? COMPACT_LABEL_GUTTER_RIGHT_X : LABEL_GUTTER_RIGHT_X;
+  const viewWidth = compact ? COMPACT_VIEW_WIDTH : VIEW_WIDTH;
 
   const handleCellClick = useCallback((tokenIndex: number, layer: LayerId) => {
     setSelectedCell({ tokenIndex, layer });
@@ -84,7 +96,7 @@ export function TransformerOverview() {
     const layerDef = simpleOverviewExample.layers.find((l) => l.id === selectedLayer);
     const layerLabel = layerDef ? layerDef.label : selectedLayer;
     return {
-      anchorX: LABEL_GUTTER_RIGHT_X,
+      anchorX: labelGutterX,
       anchorY: layerRowY(selectedLayer) + 11,
       title: (
         <span>
@@ -93,7 +105,7 @@ export function TransformerOverview() {
       ),
       body: LAYER_SUMMARIES[selectedLayer],
     };
-  }, [selectedLayer]);
+  }, [selectedLayer, labelGutterX]);
 
   const sourceCells = useMemo(() => {
     if (!selectedCell) return new Set<string>();
@@ -123,6 +135,7 @@ export function TransformerOverview() {
         onClick={(e) => { if (e.target === e.currentTarget) closeAll(); }}
       >
         <Grid
+          compact={compact}
           selectedCell={selectedCell}
           selectedLayer={selectedLayer}
           sourceCells={sourceCells}
@@ -134,7 +147,7 @@ export function TransformerOverview() {
             anchorX={layerPopup.anchorX}
             anchorY={layerPopup.anchorY}
             pointerDirection="above"
-            viewWidth={VIEW_WIDTH}
+            viewWidth={viewWidth}
             viewHeight={VIEW_HEIGHT}
             title={layerPopup.title}
             body={layerPopup.body}

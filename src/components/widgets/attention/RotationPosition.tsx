@@ -172,9 +172,10 @@ export function RotationPosition() {
       onReset={handleReset}
     >
       <div className="flex flex-col gap-4">
-        {/* Top row: sliders + dot product on left, gap table on right */}
-        <div className="flex flex-wrap items-start gap-6">
-          <div className="flex flex-1 min-w-0 flex-col gap-4">
+        {/* Top row: sliders + dot product on left, gap table on right.
+            Below md, the gap table wraps to its own row below the sliders/circle. */}
+        <div className="flex flex-col items-start gap-4 md:flex-row md:flex-wrap md:gap-6">
+          <div className="flex w-full min-w-0 flex-col gap-4 md:w-auto md:flex-1">
             {/* Sliders */}
             <div className="flex flex-col gap-2">
               <SliderControl

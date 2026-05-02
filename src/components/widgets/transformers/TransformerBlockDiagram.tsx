@@ -301,26 +301,167 @@ function ResidualPath({
 }
 
 // ---------------------------------------------------------------------------
+// Mobile popup: speech bubble anchored to the selected box.
+// ---------------------------------------------------------------------------
+
+function MobilePopup({
+  block,
+  tabIdx,
+  total,
+  boxY,
+  onPrev,
+  onNext,
+  onClose,
+}: {
+  block: BlockInfo;
+  tabIdx: number;
+  total: number;
+  boxY: number;
+  onPrev?: () => void;
+  onNext?: () => void;
+  onClose: () => void;
+}) {
+  // Box is in the upper half → popup appears below it (arrow on top).
+  // Box is in the lower half → popup appears above it (arrow on bottom).
+  const popupBelow = boxY < H / 2;
+  const anchorYView = popupBelow ? boxY + BH / 2 + 10 : boxY - BH / 2 - 10;
+  const anchorPct = (anchorYView / H) * 100;
+
+  return (
+    <div
+      className={`lg:hidden absolute left-1/2 z-10 w-[min(96%,340px)] -translate-x-1/2 ${
+        popupBelow ? "" : "-translate-y-full"
+      }`}
+      style={{ top: `${anchorPct}%` }}
+      role="region"
+      aria-label="Block details"
+    >
+      <div
+        className="relative rounded-lg border-2 bg-white p-3 shadow-lg"
+        style={{ borderColor: block.border }}
+      >
+        {/* Pointer triangle */}
+        <div
+          className={`absolute left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 bg-white ${
+            popupBelow ? "-top-[8px] border-l-2 border-t-2" : "-bottom-[8px] border-b-2 border-r-2"
+          }`}
+          style={{ borderColor: block.border }}
+          aria-hidden="true"
+        />
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <span
+            className="rounded-md px-2 py-0.5 text-xs font-bold"
+            style={{
+              backgroundColor: block.color,
+              color: block.border,
+              border: `1px solid ${block.border}`,
+            }}
+          >
+            {block.diagramLabel}
+          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] text-muted">
+              {tabIdx + 1} of {total}
+            </span>
+            <button
+              onClick={onClose}
+              aria-label="Close"
+              className="-mr-1 -mt-1 rounded-md p-1 text-muted transition-colors hover:bg-foreground/5 hover:text-foreground"
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 14 14"
+                aria-hidden="true"
+                className="block"
+              >
+                <path
+                  d="M3 3 L11 11 M11 3 L3 11"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                  fill="none"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+        {block.description.split(/\n\s*\n/).map((para, i) => (
+          <p key={i} className="mb-2 text-xs leading-relaxed text-foreground/80 last:mb-0">
+            {para}
+          </p>
+        ))}
+        {block.chapterLinks.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs">
+            {block.chapterLinks.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                className="font-medium text-accent underline decoration-accent/30 hover:decoration-accent"
+              >
+                {link.label}
+              </a>
+            ))}
+          </div>
+        )}
+        <div className="mt-3 flex items-center justify-between gap-2">
+          {onPrev ? (
+            <button
+              onClick={onPrev}
+              className="rounded-md bg-accent px-3 py-1.5 text-xs font-bold text-white shadow-sm transition-colors hover:bg-accent/90"
+            >
+              ← Previous
+            </button>
+          ) : (
+            <span />
+          )}
+          {onNext ? (
+            <button
+              onClick={onNext}
+              className="rounded-md bg-accent px-3 py-1.5 text-xs font-bold text-white shadow-sm transition-colors hover:bg-accent/90"
+            >
+              Next Block →
+            </button>
+          ) : (
+            <span />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Main component
 // ---------------------------------------------------------------------------
 
 export function TransformerBlockDiagram() {
   const [tabId, setTabId] = useState<string>(BLOCKS[0].id);
+  // Mobile popup is dismissable via its close icon; reopens whenever a box is clicked.
+  const [popupOpen, setPopupOpen] = useState(true);
 
   const tabIdx = BLOCKS.findIndex((b) => b.id === tabId);
   const block = BLOCKS[tabIdx >= 0 ? tabIdx : 0];
 
   const handleBoxClick = useCallback((id: string) => {
     setTabId(id);
+    setPopupOpen(true);
   }, []);
 
   // Clicking a residual path selects the corresponding Add Residual block
   const handleResidualClick = useCallback((id: string) => {
     setTabId(id === "res1" ? "addresidual1" : "addresidual2");
+    setPopupOpen(true);
   }, []);
 
   const handleReset = useCallback(() => {
     setTabId(BLOCKS[0].id);
+    setPopupOpen(true);
+  }, []);
+
+  const advanceTo = useCallback((id: string) => {
+    setTabId(id);
+    setPopupOpen(true);
   }, []);
 
   return (
@@ -330,11 +471,11 @@ export function TransformerBlockDiagram() {
       onReset={handleReset}
     >
       <div className="flex flex-col gap-6 lg:flex-row lg:gap-8">
-        {/* SVG diagram */}
-        <div className="flex justify-center lg:w-[420px] lg:shrink-0">
+        {/* SVG diagram (with mobile popup overlay anchored to selected box) */}
+        <div className="relative mx-auto w-full max-w-[420px] lg:mx-0 lg:shrink-0">
           <svg
             viewBox={`0 0 ${W} ${H}`}
-            className="w-full max-w-[420px]"
+            className="block w-full"
             style={{ height: "auto" }}
           >
             {/* ── Transformer block background ── */}
@@ -434,10 +575,23 @@ export function TransformerBlockDiagram() {
               &quot;The cat sat on the mat&quot;
             </text>
           </svg>
+
+          {/* Mobile-only popup: speech bubble pointing to the selected box */}
+          {popupOpen && (
+            <MobilePopup
+              block={block}
+              tabIdx={tabIdx}
+              total={BLOCKS.length}
+              boxY={Y[block.id]}
+              onPrev={tabIdx > 0 ? () => advanceTo(BLOCKS[tabIdx - 1].id) : undefined}
+              onNext={tabIdx < BLOCKS.length - 1 ? () => advanceTo(BLOCKS[tabIdx + 1].id) : undefined}
+              onClose={() => setPopupOpen(false)}
+            />
+          )}
         </div>
 
-        {/* Info panel */}
-        <div className="flex flex-1 flex-col">
+        {/* Info panel — desktop only */}
+        <div className="hidden flex-1 flex-col lg:flex">
           <div className="flex-1 rounded-lg border border-border bg-surface p-5">
             <div className="mb-1 text-sm text-muted">
               {tabIdx + 1} of {BLOCKS.length}
@@ -480,7 +634,7 @@ export function TransformerBlockDiagram() {
                   const prev = BLOCKS[tabIdx - 1];
                   if (prev) setTabId(prev.id);
                 }}
-                className="rounded-md bg-surface px-4 py-2.5 text-sm font-medium text-muted transition-colors hover:bg-foreground/5 hover:text-foreground"
+                className="rounded-lg bg-accent px-6 py-2.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-accent/90"
               >
                 ← Previous
               </button>

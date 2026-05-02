@@ -3,10 +3,12 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { ChapterList } from "./ChapterList";
+import { useHideOnScroll } from "./useHideOnScroll";
 
 export function MobileChapterNav() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const hidden = useHideOnScroll();
 
   // Close on route change.
   useEffect(() => {
@@ -41,7 +43,9 @@ export function MobileChapterNav() {
         onClick={() => setOpen(true)}
         aria-label="Open chapter list"
         aria-expanded={open}
-        className="fixed left-3 top-2.5 z-[55] flex h-9 w-9 items-center justify-center rounded-md text-muted hover:bg-surface hover:text-foreground lg:hidden"
+        className={`fixed left-3 top-2.5 z-[55] flex h-9 w-9 items-center justify-center rounded-md text-muted transition-transform duration-200 hover:bg-surface hover:text-foreground lg:hidden ${
+          hidden && !open ? "-translate-y-[calc(100%+0.625rem)]" : "translate-y-0"
+        }`}
       >
         <svg
           width="20"

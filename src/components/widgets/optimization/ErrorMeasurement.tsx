@@ -3,6 +3,7 @@
 import { useState, useCallback, useRef } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
 import { WidgetTabs } from "../shared/WidgetTabs";
+import { useSvgScale } from "../shared/useSvgScale";
 
 interface Example {
   id: string;
@@ -113,6 +114,8 @@ export function ErrorMeasurement() {
   );
   const [dragging, setDragging] = useState(false);
   const svgRef = useRef<SVGSVGElement>(null);
+  // Inverse-scale fontSize so text stays at ~11 CSS px on mobile.
+  const scale = useSvgScale(svgRef, SVG_WIDTH);
 
   const ex = EXAMPLES.find((e) => e.id === selectedId)!;
   const value = values[ex.id];
@@ -280,7 +283,7 @@ export function ErrorMeasurement() {
           x={Math.max(40, Math.min(SVG_WIDTH - 40, perfectBarX))}
           y={BAR_Y - 8}
           textAnchor={perfectBarX < 80 ? "start" : perfectBarX > SVG_WIDTH - 80 ? "end" : "middle"}
-          fontSize="10" fontWeight="600" fill={MUTED_COLOR}
+          fontSize={10 * scale} fontWeight="600" fill={MUTED_COLOR}
         >
           perfect ({ex.format(ex.perfect)})
         </text>
@@ -295,7 +298,7 @@ export function ErrorMeasurement() {
           x={Math.max(40, Math.min(SVG_WIDTH - 40, valueBarX))}
           y={BAR_Y + BAR_HEIGHT + 16}
           textAnchor={valueBarX < 80 ? "start" : valueBarX > SVG_WIDTH - 80 ? "end" : "middle"}
-          fontSize="10" fontWeight="600" fill={MUTED_COLOR}
+          fontSize={10 * scale} fontWeight="600" fill={MUTED_COLOR}
         >
           {ex.thing}: {ex.format(value)}
         </text>
@@ -314,9 +317,14 @@ export function ErrorMeasurement() {
           <text
             x={errorLabelX}
             y={ERROR_Y + 16}
-            textAnchor={errorAnchor} fontSize="11" fontWeight="700" fill={ERROR_COLOR}
+            textAnchor={errorAnchor} fontSize={11 * scale} fontWeight="700" fill={ERROR_COLOR}
           >
-            error: {Math.abs(error).toFixed(ex.step < 1 ? 1 : 0)} {ex.errorLabel}
+            <tspan x={errorLabelX} dy="0">
+              error: {Math.abs(error).toFixed(ex.step < 1 ? 1 : 0)}
+            </tspan>
+            <tspan x={errorLabelX} dy={11 * scale + 2}>
+              {ex.errorLabel}
+            </tspan>
           </text>
         </g>
       </svg>

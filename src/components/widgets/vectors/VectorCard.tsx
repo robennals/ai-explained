@@ -88,6 +88,7 @@ export function VectorCard({
   barMax,
   barWidth,
   footer,
+  mobileHideBar,
 }: {
   name: string;
   emoji: string;
@@ -105,6 +106,7 @@ export function VectorCard({
   barMax?: number;
   barWidth?: string;
   footer?: string;
+  mobileHideBar?: boolean;
 }) {
   return (
     <div className={`rounded-lg border border-foreground/10 bg-foreground/[0.02] overflow-hidden shrink-0 ${className ?? ""}`}>
@@ -120,25 +122,38 @@ export function VectorCard({
         {emoji} {name}
       </div>
       {properties.map((prop, i) => (
-        <div
-          key={prop}
-          className="flex items-center gap-2 py-1.5 px-3 border-b border-foreground/5 last:border-b-0 min-h-[28px]"
-        >
-          <span className={`${labelWidth ?? "w-16"} text-xs font-medium capitalize text-muted shrink-0 truncate`}>
-            {prop}
-          </span>
-          {signed ? (
-            <SignedPropBar value={values[i] ?? 0} animate={animate} max={signedMax} />
-          ) : (
-            <PropBar
-              value={values[i] ?? 0}
-              color={barColor}
-              highlight={highlight ? highlight(i) : undefined}
-              animate={animate}
-              max={barMax}
-              barWidth={barWidth}
-            />
+        <div key={prop} className="border-b border-foreground/5 last:border-b-0">
+          {/* Mobile-compact row: shown only when mobileHideBar is set, on small screens */}
+          {mobileHideBar && (
+            <div className="flex min-h-[28px] items-center justify-between gap-1 px-2 py-1 sm:hidden">
+              <span className="truncate text-[11px] font-medium capitalize text-muted">
+                {prop}
+              </span>
+              <span className="font-mono text-[11px] font-bold text-foreground tabular-nums">
+                {signed && (values[i] ?? 0) >= 0 ? " " : ""}{(values[i] ?? 0).toFixed(2)}
+              </span>
+            </div>
           )}
+          {/* Default row: hidden on mobile when mobileHideBar is set */}
+          <div
+            className={`${mobileHideBar ? "hidden sm:flex" : "flex"} items-center gap-2 py-1.5 px-3 min-h-[28px]`}
+          >
+            <span className={`${labelWidth ?? "w-16"} text-xs font-medium capitalize text-muted shrink-0 truncate`}>
+              {prop}
+            </span>
+            {signed ? (
+              <SignedPropBar value={values[i] ?? 0} animate={animate} max={signedMax} />
+            ) : (
+              <PropBar
+                value={values[i] ?? 0}
+                color={barColor}
+                highlight={highlight ? highlight(i) : undefined}
+                animate={animate}
+                max={barMax}
+                barWidth={barWidth}
+              />
+            )}
+          </div>
         </div>
       ))}
       {footer && (
