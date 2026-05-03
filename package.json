@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint && bash scripts/lint-mdx-no-raw-p.sh",
+    "lint": "eslint && bash scripts/lint-mdx-no-raw-p.sh && bash scripts/lint-no-conflict-markers.sh",
     "test": "vitest run",
     "sync-r2": "bash scripts/sync-r2.sh",
     "sync-r2:apply": "bash scripts/sync-r2.sh --apply",
