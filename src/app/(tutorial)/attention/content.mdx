@@ -1,22 +1,22 @@
 # Paying Attention
 
 <Lead>
-In the last chapter, we saw that predicting the next word requires understanding — but our models could only look at a fixed window of recent words. What if the model could *choose* which earlier words to focus on? That idea, called attention, is the breakthrough that makes modern AI work. And it's built entirely from things you already know.
+In the last chapter, we saw that predicting the next word requires understanding, but our models could only look at a fixed window of recent words. What if the model could *choose* which earlier words to focus on? That idea, called attention, is the breakthrough that makes modern AI work. And it's built entirely from things you already know.
 </Lead>
 
 ## Some Words Need Other Words
 
-You often can't tell what a word means without looking at other words in the sentence. The word "bank" could be a place for money or the side of a river — you need to see the words around it to know which one. A pronoun like "it" makes no sense on its own — you have to look back and find what it refers to.
+You often can't tell what a word means without looking at other words in the sentence. The word "bank" could be a place for money or the side of a river. You need to see the words around it to know which one. A pronoun like "it" makes no sense on its own. You have to look back and find what it refers to.
 
 This is something our fixed-window model from the last chapter can't do well. It sees the last few words and has no way to reach back and pick out the *specific* earlier words that matter.
 
 <WhyAttentionMattersWidget>
-Each sentence has a highlighted word. Follow the arrows to see which other words you need to look at in order to understand it. Flip through the examples — each shows a different reason why "looking back selectively" is essential.
+Each sentence has a highlighted word. Follow the arrows to see which other words you need to look at in order to understand it. Flip through the examples. Each shows a different reason why "looking back selectively" is essential.
 </WhyAttentionMattersWidget>
 
 Every one of these examples requires the same ability: given a word, *choose* which other words in the sentence are relevant to understanding it. Not the nearest words. Not a fixed window. The *right* words, wherever they happen to be.
 
-This is what **attention** does. It gives the model the ability to look at every word that came before and decide which ones matter for the word it's currently processing. Let's build it up one small step at a time.
+This is what **attention** does. It gives the model the ability to look at every word that came before and decide which ones matter for the word it's currently processing. We'll build up to how it works, step by step.
 
 ## Match Scores
 
@@ -138,5 +138,5 @@ Attention is:
 But our attention mechanism has no idea *where* words are — only *what* they are. "The dog chased the cat" and "the cat chased the dog" produce identical attention scores. In the next chapter, we'll fix this with a trick involving rotation.
 
 <TryItInPyTorch notebook="attention">
-Compute dot-product attention from scratch, build query/key/value projections, visualize attention heatmaps on real sentences, implement multi-head attention, and see how scrambled word order doesn't change attention scores — a problem we'll solve in the next chapter.
+Compute dot-product attention from scratch, build query/key/value projections, visualize attention heatmaps on real sentences, implement multi-head attention, and see how scrambled word order doesn't change attention scores, a problem we'll solve in the next chapter.
 </TryItInPyTorch>
