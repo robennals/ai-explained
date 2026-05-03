@@ -5,19 +5,12 @@ import { getAdjacentChapters } from "@/lib/curriculum";
 import Content from "./content.mdx";
 import {
   WhyAttentionMattersWidget,
-  ToyVocabTableWidget,
+  ToyAttentionScoresWidget,
   SoftmaxExplorerWidget,
-  ToyAttentionWidget,
-  ToyValuesWidget,
-  AttentionPlaygroundWidget,
-  BertAttentionNoPositionWidget,
-  LiveAttentionWidget,
+  ToyAttentionSoftmaxWidget,
   ToyAttentionValuesWidget,
-  ToyValueTableWidget,
-  PatternAttentionWidget,
-  AttentionStepThroughWidget,
-  MultiHeadWidget,
-  QKVProjectionWidget,
+  ToyAttentionSinkWidget,
+  LiveAttentionWidget,
 } from "./widgets";
 
 export const metadata = chapterMetadata("attention");
@@ -32,19 +25,12 @@ export default function Chapter07() {
         <Content
           components={{
             WhyAttentionMattersWidget,
-            ToyVocabTableWidget,
+            ToyAttentionScoresWidget,
             SoftmaxExplorerWidget,
-            ToyAttentionWidget,
-            ToyValuesWidget,
-            AttentionPlaygroundWidget,
-            BertAttentionNoPositionWidget,
-            LiveAttentionWidget,
+            ToyAttentionSoftmaxWidget,
             ToyAttentionValuesWidget,
-            ToyValueTableWidget,
-            PatternAttentionWidget,
-            AttentionStepThroughWidget,
-            MultiHeadWidget,
-            QKVProjectionWidget,
+            ToyAttentionSinkWidget,
+            LiveAttentionWidget,
           }}
         />
       </div>

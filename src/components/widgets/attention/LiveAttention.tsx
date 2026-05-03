@@ -130,18 +130,6 @@ function LiveAttentionLoaded({
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Sentence input */}
-      <div>
-        <label className="mb-1 block text-xs font-medium text-muted">Sentence</label>
-        <textarea
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          rows={2}
-          className="w-full rounded-md border border-border bg-surface px-3 py-2 font-mono text-sm"
-          placeholder="Type any sentence…"
-        />
-      </div>
-
       {/* All-heads grid */}
       {result && (
         <div>
@@ -197,6 +185,19 @@ function LiveAttentionLoaded({
           </div>
         </div>
       )}
+
+      {/* Sentence input — placed directly above the token row so it's
+          obvious the reader can edit the sentence. */}
+      <div>
+        <label className="mb-1 block text-xs font-medium text-muted">Sentence (edit me)</label>
+        <textarea
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          rows={2}
+          className="w-full rounded-md border border-border bg-surface px-3 py-2 font-mono text-sm"
+          placeholder="Type any sentence…"
+        />
+      </div>
 
       {/* Token row with attention readout */}
       {result && (
