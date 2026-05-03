@@ -34,11 +34,6 @@ const ToyAttentionSink = dynamic(
   { ssr: false }
 );
 
-const LiveAttention = dynamic(
-  () => import("@/components/widgets/attention/LiveAttention").then((m) => m.LiveAttention),
-  { ssr: false }
-);
-
 function WidgetSlot({ children, tryIt, label }: { children: React.ReactNode; tryIt?: React.ReactNode; label?: string }) {
   return (
     <Suspense
@@ -99,15 +94,6 @@ export function ToyAttentionSinkWidget({ children }: { children?: React.ReactNod
   return (
     <WidgetSlot tryIt={children} label="Explore it">
       <ToyAttentionSink />
-    </WidgetSlot>
-  );
-}
-
-
-export function LiveAttentionWidget({ children }: { children?: React.ReactNode }) {
-  return (
-    <WidgetSlot tryIt={children} label="Try it">
-      <LiveAttention />
     </WidgetSlot>
   );
 }

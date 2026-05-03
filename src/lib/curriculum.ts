@@ -91,7 +91,6 @@ export const chapters: Chapter[] = [
     description:
       "Attention — letting each word choose which other words to focus on — is the breakthrough behind modern AI. Built from things you already know: embeddings, dot products, and neural networks.",
     ready: true,
-    polishing: true,
   },
   {
     id: 8,
