@@ -95,7 +95,7 @@ export function SigmoidExplorer() {
         <svg
           ref={svgRef}
           viewBox={`0 0 ${W} ${H}`}
-          className="w-full max-w-[520px]"
+          className="w-full max-w-[520px] touch-none"
           style={{ cursor: dragging ? "grabbing" : undefined }}
         >
           {/* Reference lines */}

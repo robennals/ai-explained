@@ -232,14 +232,21 @@ export function ToyAttentionValues() {
             </svg>
           )}
 
-          <div className="flex justify-center gap-3" style={{ paddingTop: `${arcPad + 8}px` }}>
+          {/* Token cards. Grid on mobile (responsive layout from main), flex on desktop. */}
+          <div
+            className="grid gap-2 sm:flex sm:justify-center sm:gap-3"
+            style={{
+              gridTemplateColumns: `repeat(${tokens.length}, minmax(0, 1fr))`,
+              paddingTop: `${arcPad + 8}px`,
+            }}
+          >
             {tokens.map((tok, i) => {
               const isSelected = selected === i;
               const weight = weights?.[i];
               const isTarget = weight != null && weight > 0.01 && !isSelected;
 
               return (
-                <div key={`${sentIdx}-${i}`} className="flex flex-col items-center" style={{ width: 145 }}>
+                <div key={`${sentIdx}-${i}`} className="flex min-w-0 flex-col items-center sm:w-[145px]">
                   <button
                     ref={(el) => {
                       if (el) cardRefs.current.set(i, el);
@@ -263,6 +270,7 @@ export function ToyAttentionValues() {
                       barColor="var(--color-accent)"
                       barMax={10} animate={false}
                       labelWidth="w-10" barWidth="w-8"
+                      mobileHideBar
                       className={`text-xs w-full transition-colors ${
                         hasSelection && !isSelected ? "opacity-30" : ""
                       } ${
@@ -294,6 +302,7 @@ export function ToyAttentionValues() {
                       barColor={tok.hexColor}
                       barMax={1} animate={false}
                       labelWidth="w-10" barWidth="w-8"
+                      mobileHideBar
                       className={`text-xs w-full transition-colors ${
                         hasSelection && !isTarget && !isSelected ? "opacity-40" : ""
                       } ${

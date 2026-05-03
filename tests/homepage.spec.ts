@@ -1,16 +1,12 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Homepage", () => {
-  test("renders title and chapter list", async ({ page }) => {
+  test("renders title and intro", async ({ page }) => {
     await page.goto("/");
     await expect(page.locator("h1")).toContainText("Learn AI Layer by Layer");
     await expect(
-      page.getByText("An interactive guide to understanding AI")
+      page.getByText("An interactive guide to understanding AI"),
     ).toBeVisible();
-
-    // Should list all 17 chapters as cards (each is a link with chapter title)
-    const chapterCards = page.locator("main .grid a");
-    await expect(chapterCards).toHaveCount(17);
   });
 
   test("Start Learning button links to chapter 1", async ({ page }) => {
@@ -20,11 +16,25 @@ test.describe("Homepage", () => {
     await expect(startButton).toHaveAttribute("href", "/computation");
   });
 
-  test("chapter cards link to correct pages", async ({ page }) => {
+  test("first ready chapter card links to /computation", async ({ page }) => {
     await page.goto("/");
     const firstChapter = page.getByRole("link", {
-      name: /What Is Computation/,
+      name: /Everything Is Numbers/,
     });
     await expect(firstChapter).toHaveAttribute("href", "/computation");
+  });
+
+  test("chapter grid shows main chapters and at least one appendix", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    // Main chapter grid: 27 entries (some "ready", some "coming soon")
+    const mainGrid = page.locator("main > .grid").first();
+    await expect(mainGrid.locator("> *")).toHaveCount(27);
+
+    // Appendix section header
+    await expect(
+      page.getByRole("heading", { name: "Appendixes" }),
+    ).toBeVisible();
   });
 });

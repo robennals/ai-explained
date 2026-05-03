@@ -1,5 +1,6 @@
 import { ChapterNav } from "@/components/layout/ChapterNav";
 import { PolishingNotice } from "@/components/layout/PolishingNotice";
+import { chapterMetadata } from "@/lib/chapter-metadata";
 import { getAdjacentChapters } from "@/lib/curriculum";
 import Content from "./content.mdx";
 import {
@@ -12,11 +13,7 @@ import {
   LiveAttentionWidget,
 } from "./widgets";
 
-export const metadata = {
-  title: "Paying Attention — Learn AI Layer by Layer",
-  description:
-    "Attention lets each word choose which other words to focus on. Built from embeddings, dot products, and neural networks.",
-};
+export const metadata = chapterMetadata("attention");
 
 export default function Chapter07() {
   const { prev, next } = getAdjacentChapters("attention");

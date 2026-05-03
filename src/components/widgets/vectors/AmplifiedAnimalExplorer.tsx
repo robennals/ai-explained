@@ -44,7 +44,7 @@ export function AmplifiedAnimalExplorer() {
 
       <SliderControl label="magnitude" value={magnitude} min={0.1} max={5} step={0.1} onChange={setMagnitude} />
 
-      <div className="grid grid-cols-[1fr_1fr_auto] gap-2 items-start mt-3">
+      <div className="grid grid-cols-2 gap-2 items-start mt-3 md:grid-cols-[1fr_1fr_auto]">
         <VectorCard
           name={animal.name}
           emoji={animal.emoji}
@@ -64,22 +64,24 @@ export function AmplifiedAnimalExplorer() {
           barWidth="w-32"
           animate={false}
         />
-        {/* Multiplication math */}
-        <div className="rounded-lg border border-foreground/10 bg-foreground/[0.02] overflow-hidden shrink-0" style={{ maxWidth: "10rem" }}>
-          <div className="py-2 px-3 text-sm font-medium text-foreground border-b border-foreground/10 bg-foreground/[0.02]">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-muted">× {magnitude.toFixed(1)}</span>
-          </div>
-          {ANIMAL_DOMAIN.properties.map((prop, i) => (
-            <div key={prop} className="flex items-center py-1.5 px-3 border-b border-foreground/5 last:border-b-0 min-h-[28px]">
-              <span className="font-mono text-[10px] text-muted whitespace-nowrap">
-                <span className="text-blue-500">{animal.values[i].toFixed(2)}</span>
-                {" × "}
-                <span className="text-amber-500">{magnitude.toFixed(1)}</span>
-                {" = "}
-                <span className="font-semibold">{amplified[i].toFixed(2)}</span>
-              </span>
+        {/* Multiplication math: own row spanning both cards on mobile */}
+        <div className="col-span-2 mt-2 flex justify-center md:col-span-1 md:mt-0 md:justify-start">
+          <div className="rounded-lg border border-foreground/10 bg-foreground/[0.02] overflow-hidden shrink-0" style={{ maxWidth: "10rem" }}>
+            <div className="py-2 px-3 text-sm font-medium text-foreground border-b border-foreground/10 bg-foreground/[0.02]">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-muted">× {magnitude.toFixed(1)}</span>
             </div>
-          ))}
+            {ANIMAL_DOMAIN.properties.map((prop, i) => (
+              <div key={prop} className="flex items-center py-1.5 px-3 border-b border-foreground/5 last:border-b-0 min-h-[28px]">
+                <span className="font-mono text-[10px] text-muted whitespace-nowrap">
+                  <span className="text-blue-500">{animal.values[i].toFixed(2)}</span>
+                  {" × "}
+                  <span className="text-amber-500">{magnitude.toFixed(1)}</span>
+                  {" = "}
+                  <span className="font-semibold">{amplified[i].toFixed(2)}</span>
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </WidgetContainer>

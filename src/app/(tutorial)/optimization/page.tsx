@@ -1,4 +1,5 @@
 import { ChapterNav } from "@/components/layout/ChapterNav";
+import { chapterMetadata } from "@/lib/chapter-metadata";
 import { getAdjacentChapters } from "@/lib/curriculum";
 import Content from "./content.mdx";
 import {
@@ -10,11 +11,7 @@ import {
   Gradient2DCurveWidget,
 } from "./widgets";
 
-export const metadata = {
-  title: "The Power of Incremental Improvement — Learn AI Layer by Layer",
-  description:
-    "Evolution, the scientific method, and gradient descent are all the same algorithm. Reliable tiny improvements, repeated billions of times.",
-};
+export const metadata = chapterMetadata("optimization");
 
 export default function Chapter02() {
   const { prev, next } = getAdjacentChapters("optimization");

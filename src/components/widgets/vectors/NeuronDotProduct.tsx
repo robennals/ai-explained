@@ -202,7 +202,7 @@ function DomainNeuronTab({ domain, bias, onBiasChange, weightMag, onWeightMagCha
         <SliderControl label="weight magnitude" value={weightMag} min={0} max={Math.round(defaultMag * 2)} step={0.1} onChange={onWeightMagChange} />
       </div>
 
-      <div className="grid grid-cols-[1fr_1fr_auto] gap-2 items-start overflow-x-auto">
+      <div className="grid grid-cols-2 gap-2 items-start md:grid-cols-[1fr_1fr_auto]">
         {/* Row 1: selectors */}
         <div>
           <div className="mb-1 text-[10px] font-bold uppercase tracking-widest text-amber-500">Weight (Detects)</div>
@@ -240,7 +240,8 @@ function DomainNeuronTab({ domain, bias, onBiasChange, weightMag, onWeightMagCha
             ))}
           </div>
         </div>
-        <div>{/* empty cell above multiply column */}</div>
+        {/* empty cell above multiply column — desktop only */}
+        <div className="hidden md:block" />
 
         {/* Row 2: cards + product column */}
         <VectorCard
@@ -254,7 +255,10 @@ function DomainNeuronTab({ domain, bias, onBiasChange, weightMag, onWeightMagCha
           properties={domain.properties} values={inputItem.values}
           barColor="#3b82f6" label="input" labelColor="#3b82f6"
         />
-        <ProductColumn vecW={scaledWeightValues} vecX={inputItem.values} properties={domain.properties} dot={dot} />
+        {/* Multiply column: own row spanning weight+input on mobile */}
+        <div className="col-span-2 mt-2 flex justify-center md:col-span-1 md:mt-0 md:justify-start">
+          <ProductColumn vecW={scaledWeightValues} vecX={inputItem.values} properties={domain.properties} dot={dot} />
+        </div>
       </div>
     </>
   );
