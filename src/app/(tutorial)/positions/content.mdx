@@ -42,7 +42,7 @@ Different attention heads get different slopes *m*. Some heads have steep slopes
 
 ALiBi has a limitation: **the distance penalty is per-head, not per-query**. Every query in a given head gets the same distance falloff. The model can't decide "this particular word needs to look far back in the text". The slope is baked into the head.
 
-Consider: *"The president visited France. He said the treaty would be honored."* The pronoun "He" needs a steep distance falloff to latch onto the nearby "president." But "treaty" needs a gentle falloff to find its antecedent farther back. If both happen to land in the same attention head, they're stuck with the same slope, and one of them gets the wrong distance curve.
+Consider: *"The president visited France. He said the treaty would be honored."* The pronoun "He" needs a steep distance falloff to latch onto the nearby "president." But "treaty" needs a gentle falloff to look farther back to find where we said what the treaty was. If both happen to land in the same attention head, they're stuck with the same slope, and one of them gets the wrong distance curve.
 
 More importantly, ALiBi limits the distance penalty to being a linear slope. If a particular token would benefit from a different shape (e.g. sharp dropoff, then flat for a while) then ALiBi can't do that.
 
@@ -50,13 +50,13 @@ It turns out there is a different model, **RoPE**, that overcomes all of these l
 
 ## Rotation Encodes Distance
 
-There's a completely different way to measure how far apart two tokens are. It starts with a fact about dot products we haven't mentioned yet. **If you rotate two vectors by the same amount, their dot product doesn't change**. The dot product only cares about the angle *between* the vectors, not where they're pointing in absolute terms.
+There's another way to measure how far apart two tokens are. It starts with a fact about dot products we haven't mentioned yet. **If you rotate two vectors by the same amount, their dot product doesn't change**. The dot product of two vectors only cares about the angle *between* the vectors, not where they're pointing in absolute space.
 
 <RotationDotProductWidget>
 Try dragging the base angle slider. Both vectors spin around the circle together, their x and y values change completely, but the dot product doesn't budge. Now change the angle between them and watch the dot product respond. It only cares about the gap.
 </RotationDotProductWidget>
 
-Now imagine giving each token a pointer on a circle. The token at position 0 isn't rotated at all. Position 1 is rotated a little. Position 2 is rotated twice as much, position 3 three times as much, and so on. Tokens close together get rotated by similar amounts, so their pointers still nearly align and their dot product is high. Tokens far apart get rotated by very different amounts, so their pointers end up pointing in different directions and their dot product is low. The dot product depends only on the *gap*, not on the absolute positions.
+Now imagine giving each token a position around a circle, like the numbers around a clock. Tokens close together have a small angle between them, so their dot product is high. Tokens far apart have a larger angle between them, so their dot product is low. The dot product depends only on the distance between the two token positions, not on where in the sequence either token is.
 
 <RotationPositionWidget>
 Slide token A's position around while keeping the gap fixed. The x and y components change, but the dot product stays the same. Now change the gap and watch the dot product change.
