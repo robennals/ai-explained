@@ -105,16 +105,6 @@ Multiple attention heads let the model ask many different questions in parallel.
 
 In real models, every head also has its own sink behavior, because no single head can apply to every token in every sentence. A pronoun-resolving head will be on-task for pronouns and idle for everything else. That idle behavior is what the sink is for.
 
-## A Live Attention Model
-
-The widget below shows a tiny real model running live in your browser. It was trained to predict the next word in a small collection of children's stories. You can type whatever sentence you like and see what each of the 48 attention heads pays attention to for each word.
-
-The model learned attention heads that helped it solve this task, rather than ones that make sense to humans, so it's not obvious to us what most of these heads are doing. That's one of the weird things about AI models.
-
-<LiveAttentionWidget>
-Each cell in the grid is one attention head — 48 heads in total, six layers of eight. Click around. Some heads' behavior is easy to name: one always attends to the previous word, another snaps to a recent period or comma. Others do something you can almost-but-not-quite describe. Some look like noise. That's the honest picture: these heads weren't designed, they were learned. The model kept whatever patterns turned out to be useful for predicting the next word, with no requirement that those patterns make sense to a human. Some happen to. Some don't.
-</LiveAttentionWidget>
-
 ## Where the Vectors Come From
 
 We've been talking about query, key, and value vectors — but where do they actually come from? 
