@@ -8,7 +8,7 @@ The meaning of a sentence often depends on the *order* of the words, not just wh
 
 Think about "The dog bit the man" versus "The man bit the dog." Same words, completely different meaning, just from changing the order. Who's biting whom flips entirely.
 
-This isn't a weird edge case. Word order is how language works. Moving a single word can flip a sentence's meaning entirely.
+This isn't a weird edge case. Word order is how language works. Moving a single word can flip a sentence's meaning.
 
 <WordOrderMattersWidget>
 Try each example. Every rearrangement changes the meaning, sometimes subtly, sometimes dramatically. A system that can't tell word order apart would think all these versions mean the same thing.
@@ -30,7 +30,7 @@ The most obvious idea: just subtract a penalty from the attention score based on
 
 > **score = (query · key) − m × distance**
 
-This is called **ALiBi** (Attention with Linear Biases), and it's used by real models like BLOOM and MPT. It's simple and works: nearby tokens automatically get higher attention scores than distant ones.
+This is called **ALiBi** (Attention with Linear Biases), and it's used by models like BLOOM and MPT. It's simple and works: nearby tokens automatically get higher attention scores than distant ones.
 
 <ALiBiToyTokensWidget>
 Drag the slope around. At slope 0, both nouns get identical attention. The model is position-blind. Higher slopes make the closer noun win more decisively. Try the longer sentences to see the effect with bigger distance gaps.
@@ -42,7 +42,7 @@ Different attention heads get different slopes *m*. Some heads have steep slopes
 
 ALiBi has a limitation: **the distance penalty is per-head, not per-query**. Every query in a given head gets the same distance falloff. The model can't decide "this particular word needs to look far back in the text". The slope is baked into the head.
 
-Consider: *"The president visited France. He said the treaty would be honored."* The pronoun "He" needs needs to look at words very close by to see what person "he" is referring to. But "treaty" might need to look many pages back in order to find the details of the treaty. If both happen to land in the same attention head, then they are forced to have the same distance penalty.
+Consider: *"The president visited France. He said the treaty would be honored."* The pronoun "He" needs to look at words very close by to see what person "he" is referring to. But "treaty" might need to look many pages back in order to find the details of the treaty. If both happen to land in the same attention head, then they are forced to have the same distance penalty.
 
 ALiBi also limits the distance penalty to being a *linear slope* — the amount of attention each word gets always falls off in a straight line as words get farther away. But that's not the only useful shape. Different jobs want very different falloff patterns:
 
@@ -54,7 +54,7 @@ It turns out there is a different model, **RoPE**, that overcomes all of these l
 
 ## Rotation Encodes Distance
 
-Here's a more elegant way to give the model a sense of distance, leaning on a fact about [dot products](/vectors#measuring-similarity): **the dot product of two unit vectors only depends on the angle between them.** Picture two clock hands — if you rotate the whole clock by 30°, both hands turn together and the angle between them is unchanged, so the dot product is unchanged too. But if the two hands rotate by *different* amounts, the dot product changes by an amount that depends only on the gap.
+There's a neater way to give the model a sense of distance, leaning on a fact about [dot products](/vectors#measuring-similarity): **the dot product of two unit vectors only depends on the angle between them.** Picture two clock hands — if you rotate the whole clock by 30°, both hands turn together and the angle between them is unchanged, so the dot product is unchanged too. But if the two hands rotate by *different* amounts, the dot product changes by an amount that depends only on the gap.
 
 <RotationDotProductWidget>
 Try dragging the base angle slider. Both vectors spin around the circle together, their x and y values change completely, but the dot product doesn't budge. Now change the angle between them and watch the dot product respond. It only cares about the gap.
@@ -82,7 +82,7 @@ This is the core of **RoPE** (Rotary Position Embeddings). Instead of *adding* a
 
 In practice, RoPE always uses **multiple dimension pairs rotating at different speeds**. A 128-dimensional vector becomes 64 pairs, each rotating at its own rate. The first pair rotates fast (maybe 30° per position) while later pairs rotate progressively slower, down to fractions of a degree per position.
 
-The power of RoPE is that each token can specify an arbitrary distance penalty curve by choosing how much weight to put in dimension pairs that rotate at different speeds. Let's see what this looks like:
+The power of RoPE is that each token can specify an arbitrary distance penalty curve by choosing how much weight to put in dimension pairs that rotate at different speeds:
 
 <RoPEMultiSpeedWidget>
 The first three tabs show how zeroing out fast pairs widens the attention window, from a sharp spike to a broad spread. "Sharper medium" shows you can change the *shape* of the curve without changing its range. "Two-stage dropoff" combines fast and slow pairs for a quick initial drop followed by a long steady floor. Try adjusting the sliders yourself to create new shapes.
@@ -101,9 +101,9 @@ The dot product between two rotated vectors is the same whether the other word i
 
 ## Words in Order
 
-We started with a problem: attention couldn't tell "the dog bit the man" from "the man bit the dog." The words were floating in a bag with no order. Now, by rotating each word's vector based on its position, the model can tell how far apart two words are, and each word gets to decide for itself whether to focus on its close neighbors, scan the whole sentence, or anything in between.
+We started with a problem: attention couldn't tell "The dog bit the man" from "The man bit the dog." The words were floating in a bag with no order. Now, by rotating each word's vector based on its position, the model can tell how far apart two words are, and each word gets to decide for itself whether to focus on its close neighbors, scan the whole sentence, or anything in between.
 
-Attention now knows three things: what each word *means* (from embeddings), which other words *matter* (from attention scores), and where each word *is* (from rotation). In the next chapter, we'll put all of these pieces together to build the **transformer**, the architecture behind ChatGPT, Claude, and every modern language model.
+Attention now knows three things: what each word *means* (from embeddings), which other words *matter* (from attention scores), and where each word *is* (from rotation). In the next chapter, we'll put all of these pieces together to build the **transformer**, the architecture behind ChatGPT, Claude, and most modern language models.
 
 <TryItInPyTorch notebook="positions">
 Demonstrate that toy attention is position-blind, build ALiBi from a linear distance penalty, derive RoPE from the rotation-invariance of the dot product, combine multiple rotation speeds for different attention-distance shapes, and apply causal masking with `torch.triu`.
