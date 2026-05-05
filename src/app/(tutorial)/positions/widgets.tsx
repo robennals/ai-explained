@@ -44,6 +44,14 @@ const ALiBiToyTokens = dynamic(
   { ssr: false }
 );
 
+const DistancePenaltyShapes = dynamic(
+  () =>
+    import("@/components/widgets/positions/DistancePenaltyShapes").then(
+      (m) => m.DistancePenaltyShapes
+    ),
+  { ssr: false }
+);
+
 const RotationToyTokens = dynamic(
   () =>
     import("@/components/widgets/positions/RotationToyTokens").then(
@@ -120,6 +128,14 @@ export function ALiBiToyTokensWidget({ children }: { children?: React.ReactNode 
   return (
     <WidgetSlot tryIt={children}>
       <ALiBiToyTokens />
+    </WidgetSlot>
+  );
+}
+
+export function DistancePenaltyShapesWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <DistancePenaltyShapes />
     </WidgetSlot>
   );
 }

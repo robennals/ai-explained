@@ -44,7 +44,11 @@ ALiBi has a limitation: **the distance penalty is per-head, not per-query**. Eve
 
 Consider: *"The president visited France. He said the treaty would be honored."* The pronoun "He" needs needs to look at words very close by to see what person "he" is referring to. But "treaty" might need to look many pages back in order to find the details of the treaty. If both happen to land in the same attention head, then they are forced to have the same distance penalty.
 
-ALiBi limits the distance penalty to being a linear slope. If a particular token would benefit from a different shape (e.g. sharp dropoff, then flat for a while) then ALiBi can't do that.
+ALiBi also limits the distance penalty to being a *linear slope* — the amount of attention each word gets always falls off in a straight line as words get farther away. But that's not the only useful shape. Different jobs want very different falloff patterns:
+
+<DistancePenaltyShapesWidget>
+ALiBi can only produce the first shape — a straight line. The other three are useful for very different jobs, but ALiBi can't make any of them.
+</DistancePenaltyShapesWidget>
 
 It turns out there is a different model, **RoPE**, that overcomes all of these limits. Nearly every frontier model today (Llama, Mistral, Gemma, Qwen, DeepSeek) uses RoPE. Let's see why.
 
