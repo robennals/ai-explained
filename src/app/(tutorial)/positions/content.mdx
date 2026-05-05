@@ -54,7 +54,7 @@ It turns out there is a different model, **RoPE**, that overcomes all of these l
 
 ## Rotation Encodes Distance
 
-There's another way to measure how far apart two tokens are. It starts with a fact about dot products we haven't mentioned yet. **If you rotate two vectors by the same amount, their dot product doesn't change**. The dot product of two vectors only cares about the angle *between* the vectors, not where they're pointing in absolute space.
+Here's a more elegant way to give the model a sense of distance, leaning on a fact about [dot products](/vectors#measuring-similarity): **the dot product of two unit vectors only depends on the angle between them.** Picture two clock hands — if you rotate the whole clock by 30°, both hands turn together and the angle between them is unchanged, so the dot product is unchanged too. But if the two hands rotate by *different* amounts, the dot product changes by an amount that depends only on the gap.
 
 <RotationDotProductWidget>
 Try dragging the base angle slider. Both vectors spin around the circle together, their x and y values change completely, but the dot product doesn't budge. Now change the angle between them and watch the dot product respond. It only cares about the gap.

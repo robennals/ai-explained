@@ -19,7 +19,9 @@ const nextConfig: NextConfig = {
 };
 
 const withMDX = createMDX({
-  options: {},
+  options: {
+    rehypePlugins: [["rehype-slug", {}]],
+  },
 });
 
 export default withMDX(nextConfig);
