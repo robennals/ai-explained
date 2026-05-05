@@ -42,9 +42,9 @@ Different attention heads get different slopes *m*. Some heads have steep slopes
 
 ALiBi has a limitation: **the distance penalty is per-head, not per-query**. Every query in a given head gets the same distance falloff. The model can't decide "this particular word needs to look far back in the text". The slope is baked into the head.
 
-Consider: *"The president visited France. He said the treaty would be honored."* The pronoun "He" needs a steep distance falloff to latch onto the nearby "president." But "treaty" needs a gentle falloff to look farther back to find where we said what the treaty was. If both happen to land in the same attention head, they're stuck with the same slope, and one of them gets the wrong distance curve.
+Consider: *"The president visited France. He said the treaty would be honored."* The pronoun "He" needs needs to look at words very close by to see what person "he" is referring to. But "treaty" might need to look many pages back in order to find the details of the treaty. If both happen to land in the same attention head, then they are forced to have the same distance penalty.
 
-More importantly, ALiBi limits the distance penalty to being a linear slope. If a particular token would benefit from a different shape (e.g. sharp dropoff, then flat for a while) then ALiBi can't do that.
+ALiBi limits the distance penalty to being a linear slope. If a particular token would benefit from a different shape (e.g. sharp dropoff, then flat for a while) then ALiBi can't do that.
 
 It turns out there is a different model, **RoPE**, that overcomes all of these limits. Nearly every frontier model today (Llama, Mistral, Gemma, Qwen, DeepSeek) uses RoPE. Let's see why.
 
