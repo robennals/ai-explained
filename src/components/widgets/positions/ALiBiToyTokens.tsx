@@ -20,14 +20,15 @@ interface Sentence {
   tokens: Token[];
 }
 
-const S = 3;
-
+// Same toy values as the attention chapter's softmax kicker:
+// "it" sends a query of 10 in the noun dimension, nouns answer with key=1.
+// Dot product is 10 for noun matches, 0 otherwise.
 const CAT: Token = {
-  label: "cat", key: [S], query: [0],
+  label: "cat", key: [1], query: [0],
   color: "text-amber-600 dark:text-amber-400",
 };
 const DOG: Token = {
-  label: "dog", key: [S], query: [0],
+  label: "dog", key: [1], query: [0],
   color: "text-blue-600 dark:text-blue-400",
 };
 const BLA: Token = {
@@ -35,7 +36,7 @@ const BLA: Token = {
   color: "text-foreground/40",
 };
 const IT: Token = {
-  label: "it", key: [0], query: [S],
+  label: "it", key: [0], query: [10],
   color: "text-purple-600 dark:text-purple-400",
 };
 
@@ -119,12 +120,38 @@ export function ALiBiToyTokens() {
     setSlope(1);
   }, []);
 
-  // Compute attention scores for "it"
-  const penalizedScores = tokens.map((t, i) => {
-    const distance = itIdx - i;
-    return dot(tokens[selected].query, t.key) - slope * distance;
-  });
+  // Per-token math, broken out so we can render each row separately
+  const dots = tokens.map((t) => dot(tokens[selected].query, t.key));
+  const distances = tokens.map((_, i) => itIdx - i);
+  const penalties = distances.map((d) => slope * d);
+  const penalizedScores = tokens.map((_, i) => dots[i] - penalties[i]);
   const weights = softmax(penalizedScores);
+
+  // Find the two nouns for the description card
+  const nounInfo = tokens
+    .map((t, i) => ({ label: t.label, distance: itIdx - i, idx: i }))
+    .filter((t) => t.label === "cat" || t.label === "dog")
+    .sort((a, b) => a.distance - b.distance);
+  const closer = nounInfo[0];
+  const farther = nounInfo[1];
+
+  let description = "";
+  let descriptionTone: "neutral" | "low" | "medium" | "high" = "neutral";
+  if (closer && farther) {
+    if (slope < 0.05) {
+      description = `No distance penalty, so "it" pays equal attention to "${closer.label}" and "${farther.label}" even though "${closer.label}" is closer to "it".`;
+      descriptionTone = "low";
+    } else if (slope < 0.25) {
+      description = `Distance penalty is low, so "it" pays similar attention to "${closer.label}" and "${farther.label}".`;
+      descriptionTone = "low";
+    } else if (slope < 0.7) {
+      description = `Distance penalty is medium, so "it" pays a bit more attention to "${closer.label}" because "${closer.label}" is closer to "it" than "${farther.label}".`;
+      descriptionTone = "medium";
+    } else {
+      description = `Distance penalty is high, so "it" mostly pays attention to "${closer.label}" and ignores "${farther.label}".`;
+      descriptionTone = "high";
+    }
+  }
 
   // Measure card positions and compute arrows
   useEffect(() => {
@@ -195,7 +222,7 @@ export function ALiBiToyTokens() {
             label=""
             value={slope}
             min={0}
-            max={3}
+            max={1.5}
             step={0.1}
             onChange={setSlope}
             formatValue={(v) => v.toFixed(1)}
@@ -252,68 +279,169 @@ export function ALiBiToyTokens() {
               </svg>
             )}
 
-            {/* Token cards */}
-            <div className="flex justify-center gap-1.5" style={{ paddingTop: `${arcPad + 8}px` }}>
-            {tokens.map((tok, i) => {
-              const isSelected = i === selected;
-              const weight = weights[i];
-              const isTarget = weight > 0.01 && !isSelected;
-              const distance = itIdx - i;
-              const isNoun = tok.label === "cat" || tok.label === "dog";
-
-              return (
-                <div key={`${sentIdx}-${i}`} className="flex flex-col items-center" style={{ width: 56 }}>
-                  {/* Token label */}
-                  <div
-                    ref={(el) => {
-                      if (el) cardRefs.current.set(i, el);
-                      else cardRefs.current.delete(i);
-                    }}
-                    className={`rounded-md border px-2 py-1 ${
-                      isSelected
-                        ? "ring-2 ring-accent ring-offset-1 border-border bg-surface"
-                        : "border-border bg-surface"
-                    }`}
-                  >
-                    <span className={`text-sm font-bold ${tok.color}`}>{tok.label}</span>
+            {/* Grid: row labels on left, one column per token */}
+            <div
+              className="grid items-center gap-x-1 gap-y-1.5"
+              style={{
+                paddingTop: `${arcPad + 8}px`,
+                gridTemplateColumns: `minmax(110px, max-content) repeat(${tokens.length}, 72px)`,
+              }}
+            >
+              {/* Row 0: token labels */}
+              <div />
+              {tokens.map((tok, i) => {
+                const isSelected = i === selected;
+                return (
+                  <div key={`tok-${sentIdx}-${i}`} className="flex justify-center">
+                    <div
+                      ref={(el) => {
+                        if (el) cardRefs.current.set(i, el);
+                        else cardRefs.current.delete(i);
+                      }}
+                      className={`rounded-md border px-2 py-1.5 ${
+                        isSelected
+                          ? "ring-2 ring-accent ring-offset-1 border-border bg-surface"
+                          : "border-border bg-surface"
+                      }`}
+                    >
+                      <span className={`text-base font-bold ${tok.color}`}>
+                        {tok.label}
+                      </span>
+                    </div>
                   </div>
+                );
+              })}
 
-                  {/* Compact info below the token */}
-                  <div className="mt-1 flex flex-col items-center gap-0.5">
-                    {isSelected ? (
-                      <span className="text-[9px] font-bold text-accent uppercase">query</span>
-                    ) : (
-                      <>
-                        <span className="text-[9px] text-muted">
-                          {isNoun ? `key=${tok.key[0]}` : `key=${tok.key[0]}`}
-                        </span>
-                        {slope > 0 && distance > 0 && (
-                          <span className="text-[9px] text-red-500">
-                            −{(slope * distance).toFixed(1)}
-                          </span>
-                        )}
-                      </>
-                    )}
-                    {/* Attention weight pill */}
+              {/* Row label: Dot product */}
+              <div className="text-right text-sm font-semibold text-foreground/80 pr-2">
+                Dot product
+                <div className="text-[10px] font-normal text-muted leading-tight">
+                  query · key
+                </div>
+              </div>
+              {tokens.map((_, i) => (
+                <div
+                  key={`dot-${sentIdx}-${i}`}
+                  className="text-center font-mono text-base font-semibold text-foreground"
+                >
+                  {dots[i]}
+                </div>
+              ))}
+
+              {/* Row label: Distance */}
+              <div className="text-right text-sm font-semibold text-foreground/80 pr-2">
+                Distance
+                <div className="text-[10px] font-normal text-muted leading-tight">
+                  positions from &ldquo;it&rdquo;
+                </div>
+              </div>
+              {tokens.map((_, i) => (
+                <div
+                  key={`dist-${sentIdx}-${i}`}
+                  className="text-center font-mono text-base font-semibold text-foreground"
+                >
+                  {distances[i]}
+                </div>
+              ))}
+
+              {/* Row label: Distance penalty */}
+              <div className="text-right text-sm font-semibold text-red-600 dark:text-red-400 pr-2">
+                Distance penalty
+                <div className="text-[10px] font-normal text-muted leading-tight">
+                  − slope × distance
+                </div>
+              </div>
+              {tokens.map((_, i) => {
+                const p = penalties[i];
+                if (p < 0.05) {
+                  return (
+                    <div
+                      key={`pen-${sentIdx}-${i}`}
+                      className="text-center font-mono text-base text-muted"
+                    >
+                      0
+                    </div>
+                  );
+                }
+                return (
+                  <div
+                    key={`pen-${sentIdx}-${i}`}
+                    className="text-center font-mono text-base font-semibold text-red-500"
+                  >
+                    −{p.toFixed(1)}
+                  </div>
+                );
+              })}
+
+              {/* Row label: Score */}
+              <div className="text-right text-sm font-semibold text-foreground/80 pr-2">
+                Score
+                <div className="text-[10px] font-normal text-muted leading-tight">
+                  dot − penalty
+                </div>
+              </div>
+              {tokens.map((_, i) => (
+                <div
+                  key={`score-${sentIdx}-${i}`}
+                  className="text-center font-mono text-base font-bold text-foreground"
+                >
+                  {penalizedScores[i].toFixed(1)}
+                </div>
+              ))}
+
+              {/* Row label: Attention */}
+              <div className="text-right text-sm font-semibold text-accent pr-2">
+                Attention
+                <div className="text-[10px] font-normal text-muted leading-tight">
+                  after softmax
+                </div>
+              </div>
+              {tokens.map((_, i) => {
+                const isSelected = i === selected;
+                const weight = weights[i];
+                const isTarget = weight > 0.01 && !isSelected;
+                return (
+                  <div
+                    key={`att-${sentIdx}-${i}`}
+                    className="flex justify-center"
+                  >
                     {isTarget ? (
                       <span
-                        className="rounded-full px-1.5 py-0.5 font-mono text-[9px] font-bold text-white"
+                        className="rounded-full px-2 py-0.5 font-mono text-xs font-bold text-white"
                         style={{ backgroundColor: weightToPill(weight) }}
                       >
                         {pct(weight)}
                       </span>
                     ) : (
-                      <span className={`font-mono text-[9px] font-bold ${isSelected ? "text-accent" : "text-muted"}`}>
-                        {pct(weight)}
+                      <span
+                        className={`font-mono text-xs font-bold ${
+                          isSelected ? "text-accent" : "text-muted"
+                        }`}
+                      >
+                        {isSelected ? "query" : pct(weight)}
                       </span>
                     )}
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
           </div>
         </div>
+
+        {/* Plain-language description that adapts to slope */}
+        {description && (
+          <div
+            className={`rounded-lg border px-4 py-3 text-sm leading-relaxed ${
+              descriptionTone === "low"
+                ? "border-border bg-surface text-foreground"
+                : descriptionTone === "medium"
+                ? "border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100"
+                : "border-blue-300 bg-blue-50 text-blue-900 dark:border-blue-800 dark:bg-blue-950/30 dark:text-blue-100"
+            }`}
+          >
+            {description}
+          </div>
+        )}
       </div>
     </WidgetContainer>
   );
