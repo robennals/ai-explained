@@ -75,9 +75,6 @@ export function Grid({ compact, selectedCell, selectedLayer, sourceCells, onCell
       aria-label="Stacked transformer layers showing attention and residual edges across the sentence."
     >
       <defs>
-        <marker id="ov-att" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto">
-          <path d="M0,0 L10,5 L0,10 z" fill={ATT_COLOR} />
-        </marker>
         <marker id="ov-res" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto">
           <path d="M0,0 L10,5 L0,10 z" fill={RES_COLOR} />
         </marker>
@@ -122,13 +119,13 @@ export function Grid({ compact, selectedCell, selectedLayer, sourceCells, onCell
         );
       })}
 
-      {/* Residual edges */}
+      {/* Residual edges: point up in the direction of computation flow. */}
       {overviewEdges.residuals.map((e, i) => {
         const x = columnX(e.tokenIndex, firstColX);
-        const yEnd = layerRowY(e.toLayer) + CELL_HEIGHT + 1; // arrow tip at bottom of consumer cell
+        const yEnd = layerRowY(e.toLayer) + CELL_HEIGHT + 1;
         const fromLayer = previousLayer(e.toLayer);
         if (!fromLayer) return null;
-        const yStart = layerRowY(fromLayer); // top of source cell
+        const yStart = layerRowY(fromLayer);
         return (
           <line
             key={`res-${i}`}
@@ -143,7 +140,9 @@ export function Grid({ compact, selectedCell, selectedLayer, sourceCells, onCell
         );
       })}
 
-      {/* Attention edges */}
+      {/* Attention edges: undirected arcs. The cell highlighting and the meaning box
+          convey which cell pulled from which — adding arrowheads here would clash with
+          the up-pointing residuals on the same canvas. */}
       {overviewEdges.attention.map((e, i) => {
         const xFrom = columnX(e.fromTokenIndex, firstColX);
         const xTo = columnX(e.toTokenIndex, firstColX);
@@ -160,7 +159,6 @@ export function Grid({ compact, selectedCell, selectedLayer, sourceCells, onCell
             stroke={ATT_COLOR}
             strokeWidth={Math.max(1, e.weight * 2.4)}
             fill="none"
-            markerEnd="url(#ov-att)"
           />
         );
       })}

@@ -24,8 +24,19 @@ interface CellSelection {
   layer: LayerId;
 }
 
+// Guided tour through the most interesting cells, starting at "dog" on the
+// Previous-token row (the first cell where attention actually pulls something).
+const TOUR: CellSelection[] = [
+  { tokenIndex: 1, layer: "L1" },
+  { tokenIndex: 2, layer: "L1" },
+  { tokenIndex: 3, layer: "L1" },
+  { tokenIndex: 3, layer: "L2" },
+  { tokenIndex: 3, layer: "Predict" },
+];
+const INITIAL_SELECTION: CellSelection = TOUR[0];
+
 export function TransformerOverview() {
-  const [selectedCell, setSelectedCell] = useState<CellSelection | null>(null);
+  const [selectedCell, setSelectedCell] = useState<CellSelection | null>(INITIAL_SELECTION);
   const [selectedLayer, setSelectedLayer] = useState<LayerId | null>(null);
   const compact = useMediaQuery("(max-width: 767.98px)");
   const labelGutterX = compact ? COMPACT_LABEL_GUTTER_RIGHT_X : LABEL_GUTTER_RIGHT_X;
@@ -42,7 +53,7 @@ export function TransformerOverview() {
   }, []);
 
   const handleReset = useCallback(() => {
-    setSelectedCell(null);
+    setSelectedCell(INITIAL_SELECTION);
     setSelectedLayer(null);
   }, []);
 
@@ -50,6 +61,23 @@ export function TransformerOverview() {
     setSelectedCell(null);
     setSelectedLayer(null);
   }, []);
+
+  const tourIndex = useMemo(() => {
+    if (!selectedCell) return -1;
+    return TOUR.findIndex(
+      (t) => t.tokenIndex === selectedCell.tokenIndex && t.layer === selectedCell.layer
+    );
+  }, [selectedCell]);
+
+  const nextTourCell: CellSelection | null =
+    tourIndex >= 0 && tourIndex < TOUR.length - 1 ? TOUR[tourIndex + 1] : null;
+
+  const handleNextToken = useCallback(() => {
+    if (nextTourCell) {
+      setSelectedCell(nextTourCell);
+      setSelectedLayer(null);
+    }
+  }, [nextTourCell]);
 
   useEffect(() => {
     if (!selectedCell && !selectedLayer) return;
@@ -156,16 +184,31 @@ export function TransformerOverview() {
         )}
       </div>
       <div
-        className="mt-4 rounded-md border border-foreground/10 bg-foreground/[0.03] px-4 py-3 text-sm"
+        className="mt-4 rounded-lg border-l-4 border-amber-500 bg-amber-50 px-4 py-4 shadow-sm dark:bg-amber-900/20"
         aria-live="polite"
       >
         {repBox.label ? (
-          <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted">
+          <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-amber-900 dark:text-amber-300">
             {repBox.label}
           </div>
-        ) : null}
-        <div className="text-foreground">{repBox.body}</div>
+        ) : (
+          <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-amber-900 dark:text-amber-300">
+            What this token means
+          </div>
+        )}
+        <div className="text-base text-foreground">{repBox.body}</div>
       </div>
+      {nextTourCell && (
+        <div className="mt-4 flex justify-end">
+          <button
+            type="button"
+            onClick={handleNextToken}
+            className="rounded-lg bg-accent px-6 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-accent-dark"
+          >
+            Next token →
+          </button>
+        </div>
+      )}
     </WidgetContainer>
   );
 }
