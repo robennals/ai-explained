@@ -129,10 +129,10 @@ export function RotationDotProduct() {
           />
         </div>
 
-        {/* Circle + calculation side by side */}
-        <div className="flex flex-wrap items-start justify-center gap-6">
+        {/* Circle + calculation: stacked on mobile, side by side on desktop */}
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
           {/* Circle */}
-          <div className="flex justify-center">
+          <div className="flex justify-center md:flex-shrink-0">
             <svg
               ref={svgRef}
               width={size}
@@ -242,8 +242,8 @@ export function RotationDotProduct() {
             </svg>
           </div>
 
-          {/* Calculation panel */}
-          <div className="flex flex-col gap-3 min-w-[220px]">
+          {/* Calculation panel — column on right on desktop, full-width below on mobile */}
+          <div className="flex flex-col gap-3 w-full md:w-[260px] md:flex-shrink-0">
             {/* Vector components */}
             <div className="rounded-lg border border-border bg-surface text-xs">
               <div className="px-3 py-2 border-b border-border font-medium text-muted">
@@ -269,10 +269,10 @@ export function RotationDotProduct() {
               </div>
             </div>
 
-            {/* Dot product calculation */}
-            <div className="rounded-lg border border-border bg-surface text-xs">
-              <div className="px-3 py-2 border-b border-border font-medium text-muted">
-                Dot product (multiply &amp; add)
+            {/* Dot product calculation — the headline result */}
+            <div className="rounded-lg border-2 border-accent/60 bg-accent/5 text-xs shadow-sm">
+              <div className="px-3 py-2 border-b border-accent/30 font-semibold uppercase tracking-wide text-accent text-[11px]">
+                Dot product
               </div>
               <div className="px-3 py-2 space-y-1.5 font-mono text-[12px]">
                 {["x", "y"].map((dim, i) => (
@@ -285,9 +285,13 @@ export function RotationDotProduct() {
                     <span className="font-semibold">{products[i].toFixed(3)}</span>
                   </div>
                 ))}
-                <div className="border-t border-border pt-1.5">
-                  <span className="text-muted">{products[0].toFixed(3)} + {products[1].toFixed(3)} = </span>
-                  <span className="font-bold text-accent text-sm">{dot.toFixed(4)}</span>
+                <div className="border-t border-accent/30 pt-1.5 text-muted">
+                  {products[0].toFixed(3)} + {products[1].toFixed(3)} =
+                </div>
+              </div>
+              <div className="px-3 pb-3 pt-1 text-center">
+                <div className="font-mono text-3xl font-bold tabular-nums text-accent leading-none">
+                  {dot.toFixed(4)}
                 </div>
               </div>
             </div>
