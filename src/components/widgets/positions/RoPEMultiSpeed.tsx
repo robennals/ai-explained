@@ -124,6 +124,8 @@ export function RoPEMultiSpeed() {
   const [activeTab, setActiveTab] = useState(PRESETS[0].id);
   const [weights, setWeights] = useState<number[]>([...PRESETS[0].weights]);
   const [isCustom, setIsCustom] = useState(false);
+  // Which pair the user is currently hovering or interacting with (slider focus / drag)
+  const [hoveredPair, setHoveredPair] = useState<number | null>(null);
 
   const handleReset = useCallback(() => {
     setActiveTab(PRESETS[0].id);
@@ -171,36 +173,49 @@ export function RoPEMultiSpeed() {
   const plotW = chartWidth - pad.left - pad.right;
   const plotH = chartHeight - pad.top - pad.bottom;
 
-  // Curve scale
-  const curveMin = useMemo(() => Math.min(...curvePoints.map((p) => p.score)), [curvePoints]);
-  const curveMax = useMemo(() => Math.max(...curvePoints.map((p) => p.score)), [curvePoints]);
-  const curveRange = Math.max(curveMax - curveMin, 0.01);
+  // Fixed Y axis from -1 to 1 so every cosine fills full height.
+  // Combined curve is rescaled so its peak amplitude lands on 1 (still centered on 0).
+  // Helper: map a value in [-1, 1] to a y coordinate.
+  const yFromValue = useCallback(
+    (v: number) => pad.top + plotH - ((v + 1) / 2) * plotH,
+    [pad.top, plotH]
+  );
+
+  const combinedScale = useMemo(() => {
+    let maxAbs = 0;
+    for (const p of curvePoints) {
+      if (Math.abs(p.score) > maxAbs) maxAbs = Math.abs(p.score);
+    }
+    return maxAbs > 0.001 ? 1 / maxAbs : 1;
+  }, [curvePoints]);
 
   const curvePath = useMemo(() => {
     return curvePoints
       .map((p, i) => {
         const x = pad.left + (p.d / WINDOW_SIZE) * plotW;
-        const y = pad.top + plotH - ((p.score - curveMin) / curveRange) * plotH;
+        const y = yFromValue(p.score * combinedScale);
         return `${i === 0 ? "M" : "L"} ${x} ${y}`;
       })
       .join(" ");
-  }, [curvePoints, plotW, plotH, curveMin, curveRange, pad.left, pad.top]);
+  }, [curvePoints, plotW, combinedScale, pad.left, yFromValue]);
 
-  // Per-pair contribution curves (faint)
+  // Per-pair contribution curves — weighted by w², then visually scaled to
+  // 1/4 height so they don't dominate the combined curve. Pairs with low weight
+  // still shrink, but no individual curve takes more than ~25% of the plot.
+  const SUB_CURVE_SCALE = 0.25;
   const pairCurves = useMemo(() => {
     return SPEEDS.map((spd, i) => {
       const w = weights[i];
-      if (w < 0.01) return null; // skip invisible pairs
       const pts: string[] = [];
       for (let d = 0; d <= WINDOW_SIZE; d += 0.5) {
-        const score = w * w * Math.cos((d * spd * Math.PI) / 180);
+        const score = SUB_CURVE_SCALE * w * w * Math.cos((d * spd * Math.PI) / 180);
         const x = pad.left + (d / WINDOW_SIZE) * plotW;
-        const y = pad.top + plotH - ((score - curveMin) / curveRange) * plotH;
+        const y = yFromValue(score);
         pts.push(`${pts.length === 0 ? "M" : "L"} ${x} ${y}`);
       }
       return pts.join(" ");
     });
-  }, [weights, plotW, plotH, curveMin, curveRange, pad.left, pad.top]);
+  }, [weights, plotW, pad.left, yFromValue]);
 
   // Bar chart
   const barChartH = 100;
@@ -222,10 +237,20 @@ export function RoPEMultiSpeed() {
       <WidgetTabs tabs={TABS} activeTab={activeTab} onTabChange={handleTabChange} />
 
       <div className="flex flex-col gap-5">
-        {/* Pair weight sliders */}
+        {/* Pair weight sliders. Hovering or focusing a row highlights that
+            frequency's curve in the chart below. */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1">
           {SPEEDS.map((spd, i) => (
-            <div key={i} className="flex items-center gap-2">
+            <div
+              key={i}
+              className="flex items-center gap-2 rounded px-1 -mx-1 transition-colors"
+              style={hoveredPair === i ? { backgroundColor: `${pairColor(i)}15` } : undefined}
+              onMouseEnter={() => setHoveredPair(i)}
+              onMouseLeave={() => setHoveredPair((h) => (h === i ? null : h))}
+              onFocus={() => setHoveredPair(i)}
+              onBlur={() => setHoveredPair((h) => (h === i ? null : h))}
+              onPointerDown={() => setHoveredPair(i)}
+            >
               <span
                 className="inline-block h-2 w-2 shrink-0 rounded-full"
                 style={{ backgroundColor: pairColor(i) }}
@@ -252,54 +277,70 @@ export function RoPEMultiSpeed() {
           ))}
         </div>
 
-        {/* Continuous curve */}
-        <div>
+        {/* Two charts side by side on desktop (lg+), stacked on smaller screens
+            so both the raw scores and the softmax weights are visible without scrolling. */}
+        <div className="flex flex-col lg:flex-row gap-5 lg:gap-4 lg:items-start">
+        <div className="flex-1 min-w-0">
           <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-muted">
             Raw dot-product score vs distance
           </div>
           <div className="flex justify-center">
             <svg
               viewBox={`0 0 ${chartWidth} ${chartHeight}`}
-              className="w-full max-w-2xl"
+              className="w-full"
               preserveAspectRatio="xMidYMid meet"
             >
-              {/* Zero line */}
-              {curveMin < 0 && curveMax > 0 && (
-                <line
-                  x1={pad.left}
-                  y1={pad.top + plotH - ((0 - curveMin) / curveRange) * plotH}
-                  x2={pad.left + plotW}
-                  y2={pad.top + plotH - ((0 - curveMin) / curveRange) * plotH}
-                  stroke="currentColor"
-                  strokeWidth={0.5}
-                  opacity={0.2}
-                  strokeDasharray="4 3"
-                />
-              )}
+              {/* Zero line (Y axis fixed at -1..1, so 0 is always the midpoint) */}
+              <line
+                x1={pad.left}
+                y1={yFromValue(0)}
+                x2={pad.left + plotW}
+                y2={yFromValue(0)}
+                stroke="currentColor"
+                strokeWidth={0.5}
+                opacity={0.2}
+                strokeDasharray="4 3"
+              />
 
-              {/* Y gridlines */}
-              {[0, 0.25, 0.5, 0.75, 1.0].map((frac) => {
-                const val = curveMin + frac * curveRange;
-                const y = pad.top + plotH - frac * plotH;
+              {/* Y gridlines (no numeric labels — the combined curve's peak is always 1) */}
+              {[-1, -0.5, 0, 0.5, 1].map((val) => {
+                const y = yFromValue(val);
                 return (
-                  <g key={frac}>
-                    <line x1={pad.left} y1={y} x2={pad.left + plotW} y2={y} stroke="currentColor" strokeWidth={0.5} opacity={0.08} />
-                    <text x={pad.left - 4} y={y} textAnchor="end" dominantBaseline="middle" fontSize={9} fill="currentColor" opacity={0.35}>
-                      {val.toFixed(1)}
-                    </text>
-                  </g>
+                  <line
+                    key={val}
+                    x1={pad.left}
+                    y1={y}
+                    x2={pad.left + plotW}
+                    y2={y}
+                    stroke="currentColor"
+                    strokeWidth={0.5}
+                    opacity={0.08}
+                  />
                 );
               })}
 
-              {/* Per-pair curves (faint) */}
-              {pairCurves.map((path, i) =>
-                path ? (
-                  <path key={i} d={path} fill="none" stroke={pairColor(i)} strokeWidth={1} opacity={0.25} />
-                ) : null
-              )}
+              {/* Per-pair curves — faint by default; the hovered/active pair brightens
+                  but keeps its rainbow color and stays thinner than the combined curve. */}
+              {pairCurves.map((path, i) => {
+                const isHovered = hoveredPair === i;
+                const w = weights[i];
+                const baseOpacity = w >= 0.01 ? 0.22 : 0;
+                return (
+                  <path
+                    key={i}
+                    d={path}
+                    fill="none"
+                    stroke={pairColor(i)}
+                    strokeWidth={isHovered ? 1.75 : 1}
+                    opacity={isHovered ? 1 : baseOpacity}
+                    style={{ transition: "opacity 120ms, stroke-width 120ms" }}
+                  />
+                );
+              })}
 
-              {/* Combined curve */}
-              <path d={curvePath} fill="none" stroke="#3b82f6" strokeWidth={2.5} />
+              {/* Combined curve (rescaled so its peak amplitude is 1).
+                  Drawn last and thickest so it always dominates the highlighted pair. */}
+              <path d={curvePath} fill="none" stroke="#3b82f6" strokeWidth={4} />
 
               {/* X-axis */}
               <line x1={pad.left} y1={pad.top + plotH} x2={pad.left + plotW} y2={pad.top + plotH} stroke="currentColor" strokeWidth={1} opacity={0.15} />
@@ -318,14 +359,14 @@ export function RoPEMultiSpeed() {
         </div>
 
         {/* Discrete attention bars */}
-        <div>
+        <div className="flex-1 min-w-0">
           <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-muted">
             Attention weight after softmax (per position)
           </div>
           <div className="flex justify-center">
             <svg
               viewBox={`0 0 ${chartWidth} ${barTotalH}`}
-              className="w-full max-w-2xl"
+              className="w-full"
               preserveAspectRatio="xMidYMid meet"
             >
               {Array.from({ length: WINDOW_SIZE + 1 }, (_, d) => {
@@ -347,6 +388,7 @@ export function RoPEMultiSpeed() {
               })}
             </svg>
           </div>
+        </div>
         </div>
 
         {/* Description */}
