@@ -96,19 +96,7 @@ This works because rotation preserves the *length* of each pair (√(x² + y²) 
 
 ## Causal Masking: Only Look Backward
 
-The dot product between two rotated vectors is the same whether word A is 3 positions *before* or 3 positions *after* word B. RoPE encodes *distance* but not *direction*.
-
-This turns out to be fine, because generative language models have another mechanism called **causal masking** that handles direction for us.
-
-Think about how a [language model generates text](/next-word-prediction): it produces one token at a time, each one based on the tokens that came before. When the model generates the word "dragon," the words that will come *after* "dragon" don't exist yet; they haven't been generated. So each token can only attend to tokens at earlier positions. Future tokens are **masked out**. Their attention scores are set to negative infinity so they contribute zero attention weight.
-
-This is called "causal" masking because it enforces a causal relationship: earlier tokens can influence later ones, but not the other way around. It's the same idea as not being able to see the future. Each token only has access to its past.
-
-<CausalMaskingWidget>
-Click "Generate" to watch tokens appear one at a time. The attention matrix is triangular. Each row only has values in columns to its left. The upper-right triangle is all masked out. Click any generated token to see its attention pattern.
-</CausalMaskingWidget>
-
-This solves the direction problem. RoPE tells the model *how far apart* two tokens are, and causal masking ensures a token only ever attends *backward*. Together, they give the model a complete sense of position.
+The dot product between two rotated vectors is the same whether the other word is 3 positions before *or* 3 positions after — RoPE encodes *distance* but not *direction*. The simple fix most models use is **causal masking**: each token is only allowed to attend to tokens that came before it. Future tokens are blocked out entirely, so the question of direction never comes up.
 
 
 ## Words in Order

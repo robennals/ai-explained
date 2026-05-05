@@ -11,7 +11,6 @@ import {
   RotationToyTokensWidget,
   RoPEDistanceSensitivityWidget,
   RoPEMultiSpeedWidget,
-  CausalMaskingWidget,
   WordOrderMattersWidget,
 } from "./widgets";
 
@@ -34,7 +33,6 @@ export default function ChapterPositions() {
             RotationToyTokensWidget,
             RoPEDistanceSensitivityWidget,
             RoPEMultiSpeedWidget,
-            CausalMaskingWidget,
           }}
         />
       </div>
