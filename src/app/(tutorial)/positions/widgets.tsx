@@ -44,6 +44,14 @@ const ALiBiToyTokens = dynamic(
   { ssr: false }
 );
 
+const DistancePenaltyShapes = dynamic(
+  () =>
+    import("@/components/widgets/positions/DistancePenaltyShapes").then(
+      (m) => m.DistancePenaltyShapes
+    ),
+  { ssr: false }
+);
+
 const RotationToyTokens = dynamic(
   () =>
     import("@/components/widgets/positions/RotationToyTokens").then(
@@ -72,14 +80,6 @@ const RoPEMultiSpeed = dynamic(
   () =>
     import("@/components/widgets/positions/RoPEMultiSpeed").then(
       (m) => m.RoPEMultiSpeed
-    ),
-  { ssr: false }
-);
-
-const CausalMasking = dynamic(
-  () =>
-    import("@/components/widgets/positions/CausalMasking").then(
-      (m) => m.CausalMasking
     ),
   { ssr: false }
 );
@@ -120,6 +120,14 @@ export function ALiBiToyTokensWidget({ children }: { children?: React.ReactNode 
   return (
     <WidgetSlot tryIt={children}>
       <ALiBiToyTokens />
+    </WidgetSlot>
+  );
+}
+
+export function DistancePenaltyShapesWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <DistancePenaltyShapes />
     </WidgetSlot>
   );
 }
@@ -172,10 +180,3 @@ export function RoPEMultiSpeedWidget({ children }: { children?: React.ReactNode 
   );
 }
 
-export function CausalMaskingWidget({ children }: { children?: React.ReactNode }) {
-  return (
-    <WidgetSlot tryIt={children}>
-      <CausalMasking />
-    </WidgetSlot>
-  );
-}

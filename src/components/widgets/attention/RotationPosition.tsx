@@ -10,6 +10,14 @@ function rotateVector(position: number, degPerPos: number): [number, number] {
   return [Math.cos(angle), Math.sin(angle)];
 }
 
+// 24 words of a sample sentence — placed one word per position around the circle.
+const SENTENCE = [
+  "The", "dog", "ran", "fast", "and", "the",
+  "small", "girl", "saw", "it", "dash", "past",
+  "her", "on", "the", "road", "near", "the",
+  "old", "red", "barn", "at", "dawn", "today",
+];
+
 export function RotationPosition() {
   const [posA, setPosA] = useState(1);
   const [posB, setPosB] = useState(4);
@@ -19,12 +27,15 @@ export function RotationPosition() {
   const maxGap = Math.floor(180 / degPerPos);
   // Max position on circle: just before wrapping back to 0° (360°)
   const maxPosOnCircle = Math.ceil(360 / degPerPos) - 1;
-  // B's max depends on A: can go up to A + maxGap, but not past the circle
-  const maxPosB = Math.min(posA + maxGap, maxPosOnCircle);
-  // A can go anywhere on the circle (with gap 0, B = A)
-  const maxPosA = maxPosOnCircle;
+  // Cap positions to the sentence length so every position has a word
+  const sentenceMaxPos = SENTENCE.length - 1;
+  const effectiveMaxPos = Math.min(maxPosOnCircle, sentenceMaxPos);
+  // B's max depends on A: can go up to A + maxGap, but not past sentence
+  const maxPosB = Math.min(posA + maxGap, effectiveMaxPos);
+  // A can go anywhere on the sentence (with gap 0, B = A)
+  const maxPosA = effectiveMaxPos;
   // Current effective max gap for the gap slider
-  const currentMaxGap = Math.min(maxGap, maxPosOnCircle - posA);
+  const currentMaxGap = Math.min(maxGap, effectiveMaxPos - posA);
 
   const handleReset = useCallback(() => {
     setPosA(1);
@@ -46,12 +57,11 @@ export function RotationPosition() {
   const angleBetween = Math.abs(angleB - angleA);
   const dotProduct = Math.cos(gap * radPerPos);
 
-  // SVG config
-  const size = 340;
+  // SVG config — extra room around the circle so the sentence words extend outward without clipping
+  const size = 380;
   const cx = size / 2;
   const cy = size / 2;
   const radius = 110;
-  const labelRadius = radius + 18;
 
   // Convert to SVG coordinates (y-axis flipped)
   const aEndX = cx + vecA[0] * radius;
@@ -125,8 +135,8 @@ export function RotationPosition() {
     const dy = -(svgY - cy);
     const angleDeg = (Math.atan2(dy, dx) * 180) / Math.PI;
     const pos = Math.round(((angleDeg % 360) + 360) % 360 / degPerPos);
-    return Math.max(0, Math.min(maxPosOnCircle, pos));
-  }, [degPerPos, maxPosOnCircle, cx, cy]);
+    return Math.max(0, Math.min(effectiveMaxPos, pos));
+  }, [degPerPos, effectiveMaxPos, cx, cy]);
 
   const handlePointerDown = useCallback((which: "A" | "B") => (e: React.PointerEvent) => {
     dragging.current = which;
@@ -141,29 +151,30 @@ export function RotationPosition() {
     if (dragging.current === "A") {
       const currentGap = posB - posA;
       const newB = newPos + currentGap;
-      if (newPos >= 0 && newB >= 0 && newB <= maxPosOnCircle && currentGap <= maxGap) {
+      if (newPos >= 0 && newB >= 0 && newB <= effectiveMaxPos && currentGap <= maxGap) {
         setPosA(newPos);
         setPosB(newB);
       }
     } else {
       const newGap = newPos - posA;
-      if (newGap >= 0 && newGap <= maxGap && newPos <= maxPosOnCircle) {
+      if (newGap >= 0 && newGap <= maxGap && newPos <= effectiveMaxPos) {
         setPosB(newPos);
       }
     }
-  }, [posA, posB, angleToPos, maxPosOnCircle, maxGap]);
+  }, [posA, posB, angleToPos, effectiveMaxPos, maxGap]);
 
   const handlePointerUp = useCallback(() => {
     dragging.current = null;
   }, []);
 
-  // When speed changes, clamp positions to stay in range
+  // When speed changes, clamp positions to stay in range (and within sentence)
   const handleSpeedChange = useCallback((newSpeed: number) => {
     setDegPerPos(newSpeed);
     const newMaxCircle = Math.ceil(360 / newSpeed) - 1;
-    setPosA((prev) => Math.min(prev, newMaxCircle));
-    setPosB((prev) => Math.min(prev, newMaxCircle));
-  }, []);
+    const newEffective = Math.min(newMaxCircle, sentenceMaxPos);
+    setPosA((prev) => Math.min(prev, newEffective));
+    setPosB((prev) => Math.min(prev, newEffective));
+  }, [sentenceMaxPos]);
 
   return (
     <WidgetContainer
@@ -186,13 +197,13 @@ export function RotationPosition() {
                 step={1}
                 onChange={(v) => {
                   const currentGap = posB - posA;
-                  // Keep gap, but clamp B to not cross 0 on the circle
-                  const maxA = maxPosOnCircle - currentGap;
+                  // Keep gap, but clamp B to stay within the sentence
+                  const maxA = effectiveMaxPos - currentGap;
                   const clampedA = Math.max(0, Math.min(maxA, v));
                   setPosA(clampedA);
                   setPosB(clampedA + currentGap);
                 }}
-                formatValue={(v) => String(v)}
+                formatValue={(v) => SENTENCE[v] ?? String(v)}
               />
               <SliderControl
                 label="Gap"
@@ -203,11 +214,11 @@ export function RotationPosition() {
                 onChange={(g) => {
                   const clampedGap = Math.min(g, maxGap);
                   const newB = posA + clampedGap;
-                  if (newB <= maxPosOnCircle) {
+                  if (newB <= effectiveMaxPos) {
                     setPosB(newB);
                   } else {
-                    // Push A down so B doesn't cross 0
-                    const newA = maxPosOnCircle - clampedGap;
+                    // Push A down so B doesn't cross sentence end
+                    const newA = effectiveMaxPos - clampedGap;
                     setPosA(Math.max(0, newA));
                     setPosB(Math.max(0, newA) + clampedGap);
                   }
@@ -257,38 +268,54 @@ export function RotationPosition() {
                   opacity={0.1}
                 />
 
-                {/* Position numbers around the circle */}
-                {Array.from({ length: maxPosOnCircle + 1 }, (_, p) => {
-                  const rad = -(p * degPerPos * Math.PI) / 180;
-                  const tickInner = radius - 3;
-                  const tickOuter = radius + 3;
-                  const isActive = p === posA || p === posB;
-                  return (
-                    <g key={p}>
-                      <line
-                        x1={cx + Math.cos(rad) * tickInner}
-                        y1={cy + Math.sin(rad) * tickInner}
-                        x2={cx + Math.cos(rad) * tickOuter}
-                        y2={cy + Math.sin(rad) * tickOuter}
-                        stroke="currentColor"
-                        strokeWidth={isActive ? 1.5 : 0.5}
-                        opacity={isActive ? 0.5 : 0.2}
-                      />
-                      <text
-                        x={cx + Math.cos(rad) * labelRadius}
-                        y={cy + Math.sin(rad) * labelRadius}
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                        fontSize={9}
-                        fill="currentColor"
-                        opacity={isActive ? 0.8 : 0.25}
-                        fontWeight={isActive ? "bold" : "normal"}
-                      >
-                        {p}
-                      </text>
-                    </g>
-                  );
-                })}
+                {/* Sentence words around the circle — each word's baseline points
+                    radially outward (in the direction of a clock hand at that position).
+                    Font scales with degPerPos: bigger when words are angularly far apart,
+                    smaller when slow speeds pack them close together so they'd overlap. */}
+                {(() => {
+                  const wordFontSize = Math.min(14, Math.max(9, degPerPos));
+                  return Array.from({ length: effectiveMaxPos + 1 }, (_, p) => {
+                    const word = SENTENCE[p];
+                    if (!word) return null;
+                    const angleDeg = p * degPerPos;
+                    const rad = -(angleDeg * Math.PI) / 180;
+                    const tickInner = radius - 3;
+                    const tickOuter = radius + 3;
+                    const wordAnchorR = radius + 8;
+                    const wx = cx + Math.cos(rad) * wordAnchorR;
+                    const wy = cy + Math.sin(rad) * wordAnchorR;
+                    const isA = p === posA;
+                    const isB = p === posB;
+                    const isActive = isA || isB;
+                    const color = isA ? "#3b82f6" : isB ? "#10b981" : "currentColor";
+                    return (
+                      <g key={p}>
+                        <line
+                          x1={cx + Math.cos(rad) * tickInner}
+                          y1={cy + Math.sin(rad) * tickInner}
+                          x2={cx + Math.cos(rad) * tickOuter}
+                          y2={cy + Math.sin(rad) * tickOuter}
+                          stroke={isActive ? color : "currentColor"}
+                          strokeWidth={isActive ? 1.5 : 0.5}
+                          opacity={isActive ? 0.7 : 0.2}
+                        />
+                        <text
+                          x={wx}
+                          y={wy}
+                          textAnchor="start"
+                          dominantBaseline="middle"
+                          fontSize={wordFontSize}
+                          fill={color}
+                          opacity={isActive ? 1 : 0.55}
+                          fontWeight={isActive ? "bold" : "normal"}
+                          transform={`rotate(${-angleDeg} ${wx} ${wy})`}
+                        >
+                          {word}
+                        </text>
+                      </g>
+                    );
+                  });
+                })()}
 
                 {/* Axes */}
                 <line
@@ -429,18 +456,6 @@ export function RotationPosition() {
                   cursor="grab"
                   onPointerDown={handlePointerDown("A")}
                 />
-                <text
-                  x={cx + vecA[0] * (labelRadius + 14)}
-                  y={cy - vecA[1] * (labelRadius + 14)}
-                  textAnchor="middle"
-                  dominantBaseline="middle"
-                  fontSize={12}
-                  fontWeight="bold"
-                  fill="#3b82f6"
-                  style={{ pointerEvents: "none" }}
-                >
-                  A
-                </text>
 
                 {/* Vector B */}
                 <line
@@ -462,18 +477,6 @@ export function RotationPosition() {
                   cursor="grab"
                   onPointerDown={handlePointerDown("B")}
                 />
-                <text
-                  x={cx + vecB[0] * (labelRadius + 14)}
-                  y={cy - vecB[1] * (labelRadius + 14)}
-                  textAnchor="middle"
-                  dominantBaseline="middle"
-                  fontSize={12}
-                  fontWeight="bold"
-                  fill="#10b981"
-                  style={{ pointerEvents: "none" }}
-                >
-                  B
-                </text>
 
                 {/* Origin dot */}
                 <circle cx={cx} cy={cy} r={3} fill="currentColor" opacity={0.3} />
@@ -481,34 +484,44 @@ export function RotationPosition() {
             </div>
           </div>
 
-          {/* Dot product by gap table */}
-          <div ref={tableContainerRef} className="rounded-lg border border-border bg-surface shrink-0 max-h-[400px] overflow-y-auto">
-            <div className="px-3 py-2 border-b border-border sticky top-0 bg-surface">
+          {/* Dot product by gap table — words from the sentence, click to set the gap */}
+          <div ref={tableContainerRef} className="rounded-lg border border-border bg-surface shrink-0 max-h-[400px] overflow-y-auto min-w-[240px]">
+            <div className="px-3 py-2 border-b border-border sticky top-0 bg-surface z-10">
               <span className="text-[10px] font-bold uppercase tracking-wider text-muted">
                 Dot product for each gap
               </span>
+              <div className="text-[10px] text-muted mt-0.5 normal-case">
+                from <span className="font-bold text-blue-500">{SENTENCE[posA]}</span> at position {posA}
+              </div>
             </div>
-            <table className="text-xs font-mono">
+            <table className="w-full text-xs font-mono">
               <thead>
                 <tr className="text-[10px] uppercase text-muted">
                   <th className="px-3 py-1.5 text-left font-medium">Gap</th>
+                  <th className="px-3 py-1.5 text-left font-medium">Word</th>
                   <th className="px-3 py-1.5 text-right font-medium">A · B</th>
                 </tr>
               </thead>
               <tbody>
-                {Array.from({ length: maxGap + 1 }, (_, g) => {
+                {Array.from({ length: Math.min(maxGap, effectiveMaxPos - posA) + 1 }, (_, g) => {
+                  const targetPos = posA + g;
+                  const word = SENTENCE[targetPos];
+                  if (word === undefined) return null;
                   const d = Math.cos(g * radPerPos);
                   const isCurrent = g === gap;
                   return (
                     <tr
                       key={g}
                       ref={isCurrent ? activeRowRef : undefined}
-                      className={isCurrent
-                        ? "bg-accent/10 font-bold text-accent"
-                        : "text-muted"
-                      }
+                      onClick={() => setPosB(targetPos)}
+                      className={`cursor-pointer transition-colors ${
+                        isCurrent
+                          ? "bg-accent/10 font-bold text-accent"
+                          : "text-muted hover:bg-foreground/5"
+                      }`}
                     >
                       <td className="px-3 py-0.5">{g}</td>
+                      <td className="px-3 py-0.5">{word}</td>
                       <td className="px-3 py-0.5 text-right">{d.toFixed(4)}</td>
                     </tr>
                   );
@@ -521,7 +534,7 @@ export function RotationPosition() {
         {/* Vector cards + dot product computation */}
         <div className="flex flex-wrap items-start justify-center gap-3">
           <VectorCard
-            name={`position ${posA}`}
+            name={`"${SENTENCE[posA]}" (pos ${posA})`}
             emoji=""
             properties={["x", "y"]}
             values={[vecA[0], vecA[1]]}
@@ -530,11 +543,11 @@ export function RotationPosition() {
             labelColor="#3b82f6"
             signed
             signedMax={1}
-            className="text-xs w-36"
+            className="text-xs w-40"
             labelWidth="w-6"
           />
           <VectorCard
-            name={`position ${posB}`}
+            name={`"${SENTENCE[posB]}" (pos ${posB})`}
             emoji=""
             properties={["x", "y"]}
             values={[vecB[0], vecB[1]]}
@@ -543,7 +556,7 @@ export function RotationPosition() {
             labelColor="#10b981"
             signed
             signedMax={1}
-            className="text-xs w-36"
+            className="text-xs w-40"
             labelWidth="w-6"
           />
 
