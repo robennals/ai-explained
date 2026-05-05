@@ -19,11 +19,8 @@ export default function HomePage() {
         </h1>
         <p className="mx-auto mt-4 max-w-2xl text-lg leading-relaxed text-muted">
           An interactive guide to understanding AI from first principles.
-          Tinker with real models, break things on purpose, and discover why
-          modern AI models work the way they do.
         </p>
         <div className="mx-auto mt-6 max-w-md rounded-lg border border-accent/20 bg-accent/5 px-5 py-3 text-sm">
-          <p className="font-semibold text-foreground">Work in progress</p>
           <p className="mt-1 text-muted">
             Subscribe to{" "}
             <a
