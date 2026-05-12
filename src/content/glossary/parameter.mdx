@@ -1,0 +1,16 @@
+---
+term: parameter
+aliases: [parameters]
+short: One of the adjustable numbers inside a model.
+firstAppearance: computation
+---
+
+A **parameter** is one of the adjustable numbers inside a [model](/glossary#model). Each parameter is one number you can change; together they decide what the model does.
+
+- **bigger(x) = x · m** — `m` is the parameter.
+- **lineY(x) = m · x + c** — `m` and `c` are two parameters.
+- **curveY(x) = a + b · x + c · x² + d · x³** — four parameters: `a`, `b`, `c`, `d`.
+- Every weight in a small neural network — typically thousands or millions of parameters.
+- The numbers inside ChatGPT — about a trillion parameters.
+
+Training is the process of finding good values for all of them, automatically.

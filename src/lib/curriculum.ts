@@ -285,6 +285,17 @@ export const chapters: Chapter[] = [
     section: "appendix",
     ready: true,
   },
+  {
+    id: 29,
+    slug: "glossary",
+    title: "Glossary",
+    subtitle: "Words this tutorial uses, in one place",
+    prerequisites: [],
+    description:
+      "Every technical word the tutorial uses, with a short definition and links to the chapters where it appears.",
+    section: "appendix",
+    ready: true,
+  },
 ];
 
 export function getChapter(slug: string): Chapter | undefined {

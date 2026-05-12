@@ -3,9 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "node scripts/build-glossary-index.mjs && next dev",
+    "build": "node scripts/build-glossary-index.mjs && next build",
     "start": "next start",
+    "glossary:build": "node scripts/build-glossary-index.mjs",
+    "glossary:audit": "node scripts/audit-glossary.mjs",
     "lint": "eslint && bash scripts/lint-mdx-no-raw-p.sh && bash scripts/lint-no-conflict-markers.sh",
     "test": "vitest run",
     "sync-r2": "bash scripts/sync-r2.sh",
@@ -19,6 +21,7 @@
     "@mdx-js/react": "^3.1.1",
     "@next/mdx": "^16.1.6",
     "@next/third-parties": "^16.2.6",
+    "@radix-ui/react-popover": "^1.1.15",
     "@radix-ui/react-slider": "^1.3.6",
     "@radix-ui/react-tabs": "^1.1.13",
     "@radix-ui/react-toggle": "^1.1.10",
@@ -29,6 +32,7 @@
     "@vercel/analytics": "^2.0.1",
     "d3": "^7.9.0",
     "framer-motion": "^12.31.0",
+    "gray-matter": "^4.0.3",
     "katex": "^0.16.28",
     "next": "16.1.6",
     "react": "19.2.3",
@@ -36,6 +40,7 @@
     "rehype-katex": "^7.0.1",
     "rehype-pretty-code": "^0.14.1",
     "rehype-slug": "^6.0.0",
+    "remark-frontmatter": "^5.0.0",
     "remark-math": "^6.0.0",
     "shiki": "^3.22.0"
   },
@@ -51,6 +56,7 @@
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
     "typescript": "^5",
+    "unist-util-visit": "^5.1.0",
     "vitest": "^4.1.5"
   }
 }

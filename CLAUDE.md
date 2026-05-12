@@ -77,6 +77,20 @@ Every term must be defined before it's used in the notebook — either with a br
 
 Test notebooks: `pnpm test:notebooks` (requires `pip install torch matplotlib jupyter tiktoken`). Note: notebook 04 downloads ~66MB of GloVe embeddings on first run.
 
+## Glossary
+
+Glossary entries live in `src/content/glossary/{term}.mdx`. The build-time remark plugin (`scripts/remark-glossary.cjs`) auto-wraps occurrences of any entry's term/aliases in chapter MDX with a `<g>` popover trigger — authors don't manually wrap. To silence a false positive, wrap the occurrence in `<nog>…</nog>`. The plugin skips files under `src/content/glossary/` so entries cross-link with plain Markdown links instead.
+
+After editing an entry's frontmatter, run `pnpm glossary:build` to regenerate `src/lib/glossary/index.generated.ts` (gitignored). `pnpm glossary:audit` lists every auto-wrap occurrence with context for false-positive review.
+
+**Writing conventions for entries:**
+
+1. Frontmatter requires `term`, `aliases`, `short`, `firstAppearance`. `aliases` includes plurals/derived forms.
+2. The body's first sentence MUST match `short` verbatim, prefixed with "A [term] is …". The collapsed glossary card shows `short`; when expanded the body opens with the same content so there is no duplication or drift.
+3. **Always give concrete examples**, ranging from crazy-simple to impressively-complex. A bulleted list right after the opening sentence works well.
+4. Cross-reference related terms with plain Markdown links to `/glossary#other-term`. Do *not* use `<g>` inside an entry — popovers would nest.
+5. Keep entries brief. Aim for a definition, a list of examples, and at most one closing line.
+
 ## MDX Gotchas
 
 - **Never use raw `<p>` tags in MDX files.** MDX wraps paragraph text in its own `<p>`, so a raw `<p>text</p>` becomes `<p><p>text</p></p>` — invalid HTML that causes React hydration errors. Use `<Lead>` for intro paragraphs or `<div>` if you need a block wrapper. The `pnpm lint` command includes a check for this (`scripts/lint-mdx-no-raw-p.sh`).

@@ -66,3 +66,6 @@ notebooks/ts-tokenizer-4096.json
 # Python
 __pycache__/
 *.pyc
+
+# glossary build artifact
+src/lib/glossary/index.generated.ts
