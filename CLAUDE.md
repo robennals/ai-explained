@@ -77,20 +77,6 @@ Every term must be defined before it's used in the notebook — either with a br
 
 Test notebooks: `pnpm test:notebooks` (requires `pip install torch matplotlib jupyter tiktoken`). Note: notebook 04 downloads ~66MB of GloVe embeddings on first run.
 
-## Glossary
-
-Glossary entries live in `src/content/glossary/{term}.mdx`. The build-time remark plugin (`scripts/remark-glossary.cjs`) auto-wraps occurrences of any entry's term/aliases in chapter MDX with a `<g>` popover trigger — authors don't manually wrap. To silence a false positive, wrap the occurrence in `<nog>…</nog>`. The plugin skips files under `src/content/glossary/` so entries cross-link with plain Markdown links instead.
-
-After editing an entry's frontmatter, run `pnpm glossary:build` to regenerate `src/lib/glossary/index.generated.ts` (gitignored). `pnpm glossary:audit` lists every auto-wrap occurrence with context for false-positive review.
-
-**Writing entries:** see `docs/glossary-style.md` for the full style guide. The short version:
-
-1. Frontmatter requires `term`, `aliases`, `short`, `firstAppearance`. `aliases` includes plurals/derived forms.
-2. The body's first sentence MUST match `short` verbatim, prefixed with "A [term] is …".
-3. **Always include a bulleted example list**, ranging from crazy-simple to ChatGPT-scale, written in `name(input) = expression` form. Bold the function definitions (code-quote misaligns the bullet).
-4. Cross-reference related terms with plain Markdown links to `/glossary#other-term`. Never use `<g>` inside an entry.
-5. Don't make universal claims that don't hold in our domain (e.g., "deterministic" — LLMs sample).
-
 ## MDX Gotchas
 
 - **Never use raw `<p>` tags in MDX files.** MDX wraps paragraph text in its own `<p>`, so a raw `<p>text</p>` becomes `<p><p>text</p></p>` — invalid HTML that causes React hydration errors. Use `<Lead>` for intro paragraphs or `<div>` if you need a block wrapper. The `pnpm lint` command includes a check for this (`scripts/lint-mdx-no-raw-p.sh`).
