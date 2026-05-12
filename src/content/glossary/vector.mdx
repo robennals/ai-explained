@@ -1,16 +1,16 @@
 ---
 term: vector
 aliases: [vectors]
-short: A list of numbers.
+short: A list of numbers, where each number describes a different aspect of one thing.
 firstAppearance: vectors
 ---
 
-A **vector** is a list of numbers.
+A **vector** is a list of numbers, where each number describes a different aspect of one thing.
 
-- **[3, 1]** — a 2D point: 3 east, 1 north.
-- **[255, 128, 0]** — a colour: red 255, green 128, blue 0 (so, orange).
-- **[2, 5, 1, 3]** — a grocery list by quantity: 2 apples, 5 oranges, 1 bread, 3 milks.
-- **[0.21, −0.43, 0.07, …, 0.55]** (300 numbers) — a word's embedding in a small model.
-- A vector of 12 288 numbers — one token's representation inside GPT-3.
+- **A point in 2D space** — captured by two numbers: how far east and how far north. `(0.8, 0.6)` means 0.8 east, 0.6 north.
+- **A colour on a screen** — captured by three numbers: the amounts of red, green, and blue light to mix. `(255, 128, 0)` is orange.
+- **An animal** — captured by rating it from 0 to 1 on properties like big, scary, hairy, cuddly, fast, fat. A bear and a rabbit end up with very different vectors; a bear and a dog end up similar.
+- **A word's meaning** — captured by a vector of hundreds of numbers learned by a [model](/glossary#model), so that words with similar meanings end up with similar vectors.
+- **A single token inside GPT-3** — captured by a vector of 12 288 numbers, each one carrying some learned aspect of the word's role.
 
-What makes vectors useful isn't just storing numbers — you can compare them, add them, and measure distances between them, all with simple arithmetic.
+The order matters: the first number means the same thing in every vector of a given kind. That's what makes vectors comparable — you can multiply matching numbers, add vectors together, and measure distances between them.

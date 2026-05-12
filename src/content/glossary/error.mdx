@@ -1,0 +1,16 @@
+---
+term: error
+aliases: [errors, loss, losses, "loss function", "loss functions"]
+short: A number that says how far off something is from where we want it to be.
+firstAppearance: optimization
+---
+
+An **error** is a number that says how far off something is from where we want it to be.
+
+- **A student's test score** — got 72 out of 100, target is 100, error is 28 points.
+- **A runner's time** — finished a race in 14.2 seconds, target is 0 (impossible, but smaller is always better), error is 14.2.
+- **A restaurant's rating** — got 3.2 stars, target is 5, error is 1.8 stars.
+- **A photo classifier** — the answer is "cat", but the [model](/glossary#model) only gave "cat" 30% probability. The error is high; the model should have been more confident.
+- **A next-word predictor** — the next word in "The cat sat on the ___" is "mat". The model gave "mat" only 1% probability. The error is huge: the model was very surprised by the truth.
+
+[Training](/glossary#training) is the process of making the error — also called the **loss** — as small as possible.
