@@ -2,94 +2,110 @@
 
 Principles for writing glossary entries. The audience is an 11-year-old who has *not* read the chapters or any other glossary entry.
 
-The first batch (`function`, `model`, `parameter`) happened to all be function-shaped concepts, so several conventions below are written as "do X when the term admits it." Don't force them onto terms where they don't fit — examples for *neuron*, *vector*, *training*, *embedding*, etc. will all look different.
+The single highest-leverage rule: **stay grounded in the chapters**. Use the examples, framings, and vocabulary the tutorial already established. Don't invent fresh analogies; readers should feel like the glossary reinforces what the chapters teach, not a parallel version.
 
 ## 1. Voice and length
 
-- **Be brief.** Aim for: one defining sentence, a list of examples, and at most one closing line. If you need more, you are probably explaining the chapter, not the term.
+- **Be brief.** Aim for: one defining sentence, a list of examples, and one short closing line. If you need more, you are probably explaining the chapter, not the term.
 - **Write for an 11-year-old who lands on this entry cold.** Don't assume they've read related entries — each entry must stand alone.
-- **The body's first sentence must match `short` verbatim, prefixed with "A [term] is …"**. The collapsed card shows `short`; when expanded, the body opens with the same sentence so nothing competes for the "title" role.
+- **The body's first sentence must match `short` verbatim, with the appropriate article in front.** Use "A [term] is …" for countable nouns, "An [term] is …" before a vowel, and just "[Term] is …" for uncountable mass nouns like *training*, *attention*, *inference*. The collapsed card shows `short`; when expanded, the body opens with the same sentence so nothing competes for the "title" role.
 
 ## 2. Defining the term
 
 - **Pick the simplest accurate definition.** Resist adding technical caveats that don't universally hold in our domain. Example: don't define a function as "same input, same output, every time" — LLMs sample, so the claim isn't true for terms the reader will encounter later.
-- **Use connected vocabulary across entries.** If you have a chain like *parameter* → *model* → *function*, reusing the same words across all three lets readers build a coherent mental model. Look at how related entries phrase things and stay consistent unless you have a reason not to.
+- **Reuse the chapter's framing and vocabulary.** If the chapter calls it "error" rather than "loss", the glossary entry should too (with "loss" as an alias for matching). Skim the chapters that use the term before writing.
+- **Use connected vocabulary across entries.** *parameter* sits inside a *model*; *model* is a *function*; *training* shrinks the *error*. Following one chain of links should feel coherent.
 - **Don't restate what the examples already show.** If the bullets make a distinction obvious, don't paraphrase it in prose.
 
 ## 3. Examples
 
-Every entry must include a list of concrete examples. This is where most of the learning happens. The universal rules:
+Every entry must include a list of concrete examples. This is where most of the learning happens.
+
+### Universal rules
 
 - **Always include examples.** No exceptions.
+- **Use the chapters' own examples first.** If the chapter's introduction of "error" uses a test score, race time, and restaurant rating, your glossary entry should reuse those. Don't reach for spam filters or other off-tutorial standbys.
 - **Make them concrete.** Pick specific cases, not categories. "ChatGPT" beats "a large language model."
-- **Range from simple to complex when the concept admits a ladder.** When there's a natural progression from one-parameter to trillion-parameter (or one-dimension to high-dimensional, or one-step to many-step), use it — the spread is part of the lesson. Some concepts don't ladder this way; in those cases, pick examples that show *variety* instead (different shapes, different uses).
-- **Make each bullet's subject the example itself, not a subordinate clause about it.** Bad: *"The `m` in `bigger(x) = x · m` — a single parameter."* Good: *"**bigger(x) = x · m** — `m` is the parameter."* Whatever is being illustrated should lead the bullet.
-- **One sentence per bullet is usually enough.** If a bullet needs more, ask whether the example is doing too much work.
+- **Build up by complexity of explanation, not just by scale.** "Complexity" here means how far the example is from something the reader already understands. The first bullet must be super-approachable; later bullets can introduce more abstraction or more dimensions or more math.
+- **The bold lead should be the thing the bullet is illustrating, not the data structure.** For *vector*, bold "A point in 2D space", not "[3, 1]"; for *function*, bold the function definition (because *that's* the thing being illustrated).
+- **Make the example the bullet's subject, not a subordinate clause.** Bad: *"The `m` in `bigger(x) = x · m` — a single parameter."* Good: *"**bigger(x) = x · m** — `m` is the parameter."*
+- **One sentence per bullet is usually enough.**
 
 ### When the term is function-shaped
 
-For terms that are themselves functions or operate on functions (`function`, `model`, `parameter`, eventually `loss`, `gradient`, `neuron`, …), use math notation:
+For terms that are themselves functions or operate on functions (*function*, *model*, *parameter*, *loss/error* as a function, …), math notation works well:
 
-- Write each example as `name(input) = expression`. This is more rigorous than English and trains the reader on the notation used in chapter prose.
+- Write each example as `name(input) = expression`. Trains the reader on the notation used in chapter prose.
 - Name the function so the output's role is obvious: prefer `lineY(x)` over `line(x)`, `chatReply(messages)` over `chat(message)`.
 - Use plural inputs when the real-world case is plural (`chatReply(messages)`, not `chatReply(message)`).
-- For cases where the RHS can't honestly be spelled out, write `= something complex`. Don't sketch a fake neural-net expression — it will mislead. The consistent `name(input) = …` shape conveys "this is also a function" without lying about the math.
+- For cases where the RHS can't honestly be spelled out, write `= something complex`. Don't sketch a fake neural-net expression — it will mislead.
 
-### When the term is *not* function-shaped
+### When the term has multiple useful framings
 
-The function-notation rule doesn't fit, e.g., for *vector*, *neuron*, *embedding*, *training loop*. Pick the most natural concrete form:
+For terms the chapter explains from several angles (a *neuron* is "a building block in a network", "a smooth logic gate", "a pattern detector", "a weighted sum + activation"), the example list can be those framings rather than scaled-up versions:
 
-- A vector: a literal list like `[3, 1, 4]`, then `[red=255, green=128, blue=0]`, then a 768-dim word embedding.
-- A neuron: a small picture or a tiny `output = activation(w₁·x₁ + w₂·x₂ + b)` sketch.
-- A training step: a short sequence ("see input → compute output → measure error → nudge parameters").
+- Lead with the most everyday framing ("In words — the neuron looks at its inputs and decides how strongly to fire").
+- Move through the chapter's analogies ("As a smooth logic gate", "As a pattern detector").
+- End with the precise form ("As math: `output = activation(w · x + b)`").
 
-The point of the rule is *show, don't describe*. The format is whatever makes the show land.
+The math is the *last* framing, never the first.
+
+### When the term is a data structure
+
+For *vector*, *embedding*, and similar list-shaped concepts, the chapter introduces them as ways of describing things. Mirror that: the bold lead is the *thing being described*; the rest of the bullet explains how the data structure captures it.
+
+### When the term is a process
+
+For *training*, *optimization*, *inference*, *backpropagation*, the chapter usually has a recipe ("measure error → take a small step → repeat"). The example bullets walk a reader through that recipe applied to concrete cases of increasing complexity, ending at the AI use.
 
 ## 4. Notation (when math is involved)
 
 - **Bold** the lead expression of an example (`**bigger(x) = x · m**`). Do not use code-quoting (` `` `) for the lead — the inline code box's padding misaligns bullet points.
 - Single-letter variable references *inside body sentences* can use code style (`` `m` is the parameter ``) — mid-sentence, they don't disrupt bullet alignment.
 - Use `·` for multiplication, not `*`.
-- Subscripts (₁, ₂, …) for indexed series; superscripts (², ³) for powers. These read better than `^` or `_` syntax.
+- Subscripts (₁, ₂, …) for indexed series; superscripts (², ³) for powers.
 
-If the entry has no math, skip this section's rules entirely.
+If the entry has no math, skip this section entirely.
 
 ## 5. Cross-references
 
 - Link to other glossary terms via plain Markdown anchor links: `[function](/glossary#function)`.
-- **Never use `<g>` inside an entry.** The auto-wrap plugin already skips files under `src/content/glossary/`; nested popovers would be bad UX.
-- Link sparingly. Link the first occurrence of a related term where reading would benefit from following the chain; subsequent mentions stay plain.
+- **Never use `<g>` inside an entry.** The auto-wrap plugin skips files under `src/content/glossary/`; nested popovers would be bad UX.
+- Link sparingly. First mention of a related term gets a link; subsequent mentions stay plain.
+- **Speculative links to unwritten glossary entries are fine** when the entry is on the planned list (e.g., *gradient descent*, *optimization*). The popover navigator falls back gracefully; the link will start working as soon as the entry lands.
 
 ## 6. Structure template
 
 ```mdx
 ---
 term: <canonical-lowercase>
-aliases: [<plural>, <other-forms>]
-short: <one-sentence summary — will match the body's opening sentence verbatim>
+aliases: [<plural>, <other-forms-the-chapter-uses>]
+short: <one-sentence summary — body opens with this verbatim>
 firstAppearance: <chapter-slug-where-introduced>
 ---
 
-A **<term>** is <short verbatim>.
+<A | An | (nothing)> **<term>** <short verbatim>.
 
-- <first example — simplest case, in whatever notation fits>
-- <middle example — adds a wrinkle>
-- <last example — most complex / most familiar to the reader>
+- <first example — most approachable, in whatever form fits>
+- <middle example — adds a wrinkle or moves a step toward AI>
+- <last example — most AI-scale or most formal>
 
-<Optional one-line closing — e.g., naming a notation, or pointing to a tightly-related concept.>
+<Optional one-line closing — naming a notation, linking to a tightly-related concept, etc.>
 ```
 
 ## 7. What not to do
 
 - **Don't claim universal properties that aren't.** No "deterministic," no "always returns a number," no "the same every time."
-- **Don't repeat or paraphrase `short` in the body.** The opening sentence *is* the short with "A [term] is " in front.
+- **Don't invent examples the chapters don't use.** Spam filters are a textbook standby and aren't part of this tutorial; don't reach for them. Use the chapter's examples (race times, restaurant ratings, animal-property vectors, next-word prediction) and extend them naturally if you need more.
+- **Don't repeat or paraphrase `short` in the body.** The opening sentence *is* the short with the article in front.
 - **Don't add separate subsections** ("How it works", "Why it matters", "History"). The chapter explains; the glossary defines.
-- **Don't list synonyms loosely.** True synonyms (matched in chapter prose) belong in `aliases`. Related-but-different concepts get their own entry.
-- **Don't reference unpublished chapters.** The /glossary backlinks already filter to ready chapters, but a hand-written link in the body to a 404 chapter is on you.
+- **Don't list synonyms loosely.** True synonyms used in chapter prose belong in `aliases`. Related-but-different concepts get their own entry.
+- **Don't reference unpublished chapters in body links.** Glossary backlinks already filter to ready chapters; a hand-written link to a 404 chapter is on you.
 
 ## 8. Workflow
 
-- Edit the entry MDX under `src/content/glossary/`.
+- Read the relevant chapter(s) before writing — the chapter is the source of truth for examples and framing.
+- Edit the entry MDX under `src/content/glossary/`. Filename matches the canonical term.
 - If frontmatter changed (`term`, `aliases`, `short`, `firstAppearance`), run `pnpm glossary:build` to regenerate the index, and restart the dev server.
 - Body edits hot-reload.
 - `pnpm glossary:audit` lists every place the new aliases would auto-wrap across chapter MDX. Scan for false positives; silence specific occurrences with `<nog>…</nog>` in the chapter.
