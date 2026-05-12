@@ -83,13 +83,13 @@ Glossary entries live in `src/content/glossary/{term}.mdx`. The build-time remar
 
 After editing an entry's frontmatter, run `pnpm glossary:build` to regenerate `src/lib/glossary/index.generated.ts` (gitignored). `pnpm glossary:audit` lists every auto-wrap occurrence with context for false-positive review.
 
-**Writing conventions for entries:**
+**Writing entries:** see `docs/glossary-style.md` for the full style guide. The short version:
 
 1. Frontmatter requires `term`, `aliases`, `short`, `firstAppearance`. `aliases` includes plurals/derived forms.
-2. The body's first sentence MUST match `short` verbatim, prefixed with "A [term] is …". The collapsed glossary card shows `short`; when expanded the body opens with the same content so there is no duplication or drift.
-3. **Always give concrete examples**, ranging from crazy-simple to impressively-complex. A bulleted list right after the opening sentence works well.
-4. Cross-reference related terms with plain Markdown links to `/glossary#other-term`. Do *not* use `<g>` inside an entry — popovers would nest.
-5. Keep entries brief. Aim for a definition, a list of examples, and at most one closing line.
+2. The body's first sentence MUST match `short` verbatim, prefixed with "A [term] is …".
+3. **Always include a bulleted example list**, ranging from crazy-simple to ChatGPT-scale, written in `name(input) = expression` form. Bold the function definitions (code-quote misaligns the bullet).
+4. Cross-reference related terms with plain Markdown links to `/glossary#other-term`. Never use `<g>` inside an entry.
+5. Don't make universal claims that don't hold in our domain (e.g., "deterministic" — LLMs sample).
 
 ## MDX Gotchas
 
