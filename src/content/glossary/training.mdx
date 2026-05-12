@@ -1,0 +1,14 @@
+---
+term: training
+aliases: [train, trains, trained]
+short: The process of finding good parameter values for a model.
+firstAppearance: optimization
+---
+
+**Training** is the process of finding good [parameter](/glossary#parameter) values for a [model](/glossary#model).
+
+- **Fitting `bigger(x) = x · m` to a few examples** — try `m = 1`, see how wrong; try `m = 2`, less wrong; settle on the best `m`. Done in seconds.
+- **Training a spam filter** — start with random word weights, show it thousands of emails labelled spam-or-not, nudge each weight whenever the filter gets one wrong. Done in minutes.
+- **Training ChatGPT** — same idea, nudging a trillion parameters on most of the public internet. Done in months on tens of thousands of GPUs.
+
+The recipe is the same at every scale: random start, measure wrongness, nudge in a better direction, repeat.

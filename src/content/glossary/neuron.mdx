@@ -1,0 +1,14 @@
+---
+term: neuron
+aliases: [neurons]
+short: A small unit that combines its inputs as a weighted sum.
+firstAppearance: neurons
+---
+
+A **neuron** is a small unit that combines its inputs as a weighted sum.
+
+- **output = w · x + b** — a neuron with one input. One weight, one bias.
+- **output = w₁·x₁ + w₂·x₂ + … + w₁₀·x₁₀ + b** — ten inputs. Ten weights, one bias.
+- **output = w₁·x₁ + w₂·x₂ + … + b** — thousands of inputs (inside ChatGPT, 12 288 of them per neuron). Billions of neurons stacked into layers, with a squashing function applied between layers so the layers can do nonlinear things.
+
+The weights and bias are [parameters](/glossary#parameter); training adjusts all of them.
