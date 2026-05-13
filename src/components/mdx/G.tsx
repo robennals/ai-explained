@@ -5,11 +5,14 @@ import Link from "next/link";
 import { Children, useState, type MouseEvent, type ReactNode } from "react";
 import {
   glossaryAliasMap,
-  glossaryByTerm,
+  glossaryBySlug,
 } from "@/lib/glossary/index.generated";
 
 interface GProps {
-  /** Canonical term id. If omitted, the children text is used (lowercased). */
+  /**
+   * Glossary slug (URL-safe id) OR display term. If omitted, the child text is
+   * used. Resolved to a slug via the alias map / direct slug match.
+   */
   term?: string;
   children: ReactNode;
 }
@@ -22,30 +25,38 @@ function extractText(children: ReactNode): string {
   return out.trim();
 }
 
-/** Pulls the canonical term out of an href like "/glossary#model". */
-function termFromHref(href: string | null): string | null {
+function resolveSlug(input: string): string | null {
+  const lookup = input.toLowerCase();
+  if (glossaryBySlug[lookup]) return lookup;
+  const viaAlias = glossaryAliasMap[lookup];
+  if (viaAlias && glossaryBySlug[viaAlias]) return viaAlias;
+  return null;
+}
+
+/** Pulls the entry slug out of an href like "/glossary#parameter". */
+function slugFromHref(href: string | null): string | null {
   if (!href || !href.startsWith("/glossary#")) return null;
-  const t = decodeURIComponent(href.slice("/glossary#".length));
-  return glossaryByTerm[t] ? t : null;
+  const s = decodeURIComponent(href.slice("/glossary#".length));
+  return glossaryBySlug[s] ? s : null;
 }
 
 interface NavigatorProps {
-  initialTerm: string;
+  initialSlug: string;
 }
 
-function PopoverNavigator({ initialTerm }: NavigatorProps) {
-  const [history, setHistory] = useState<string[]>([initialTerm]);
-  const currentTerm = history[history.length - 1];
-  const previousTerm = history.length > 1 ? history[history.length - 2] : null;
-  const entry = glossaryByTerm[currentTerm];
+function PopoverNavigator({ initialSlug }: NavigatorProps) {
+  const [history, setHistory] = useState<string[]>([initialSlug]);
+  const currentSlug = history[history.length - 1];
+  const previousSlug = history.length > 1 ? history[history.length - 2] : null;
+  const entry = glossaryBySlug[currentSlug];
   const Body = entry.Body;
 
   function handleBodyClick(e: MouseEvent<HTMLDivElement>) {
     const target = e.target as HTMLElement;
     const a = target.closest("a");
     if (!a) return;
-    const next = termFromHref(a.getAttribute("href"));
-    if (!next || next === currentTerm) return;
+    const next = slugFromHref(a.getAttribute("href"));
+    if (!next || next === currentSlug) return;
     e.preventDefault();
     setHistory((h) => [...h, next]);
   }
@@ -56,12 +67,12 @@ function PopoverNavigator({ initialTerm }: NavigatorProps) {
 
   return (
     <div className="glossary-popover-inner">
-      {previousTerm && (
+      {previousSlug && (
         <button
           type="button"
           onClick={goBack}
           className="glossary-popover-back"
-          aria-label={`Back to ${previousTerm}`}
+          aria-label={`Back to ${glossaryBySlug[previousSlug].term}`}
         >
           <span aria-hidden="true">←</span>
         </button>
@@ -71,7 +82,7 @@ function PopoverNavigator({ initialTerm }: NavigatorProps) {
           <Body />
         </div>
         <p className="glossary-popover-outlink">
-          <Link href={`/glossary#${currentTerm}`}>Open in glossary →</Link>
+          <Link href={`/glossary#${currentSlug}`}>Open in glossary →</Link>
         </p>
       </div>
     </div>
@@ -79,13 +90,13 @@ function PopoverNavigator({ initialTerm }: NavigatorProps) {
 }
 
 export function G({ term, children }: GProps) {
-  const lookup = (term ?? extractText(children)).toLowerCase();
-  const canonical = term ?? glossaryAliasMap[lookup];
-  const entry = canonical ? glossaryByTerm[canonical] : undefined;
+  const input = term ?? extractText(children);
+  const slug = resolveSlug(input);
+  const entry = slug ? glossaryBySlug[slug] : undefined;
 
   if (!entry) {
     if (process.env.NODE_ENV !== "production") {
-      console.warn(`<G>: no glossary entry for "${lookup}"`);
+      console.warn(`<G>: no glossary entry for "${input}"`);
     }
     return <>{children}</>;
   }
@@ -109,7 +120,7 @@ export function G({ term, children }: GProps) {
           collisionPadding={16}
           className="glossary-popover"
         >
-          <PopoverNavigator initialTerm={entry.term} />
+          <PopoverNavigator initialSlug={entry.slug} />
           <Popover.Arrow className="glossary-popover-arrow" />
         </Popover.Content>
       </Popover.Portal>

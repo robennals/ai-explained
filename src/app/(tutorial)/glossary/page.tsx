@@ -41,8 +41,8 @@ export default function GlossaryPage() {
           const others = readyChapters.filter((s) => s !== introduced);
           return (
             <details
-              key={entry.term}
-              id={entry.term}
+              key={entry.slug}
+              id={entry.slug}
               className="glossary-card scroll-mt-20"
             >
               <summary className="glossary-card-summary">

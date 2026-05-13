@@ -1,11 +1,13 @@
 import type { ComponentType } from "react";
 
 export interface GlossaryEntryMeta {
-  /** Canonical id used in <g term="..."> and as the URL anchor on /glossary. */
+  /** Display name. May contain spaces ("activation function"). */
   term: string;
-  /** Alternate spellings/plurals matched case-insensitively by the lint script. */
+  /** URL-safe kebab-case identifier — used in /glossary#<slug> and DOM ids. */
+  slug: string;
+  /** Alternate spellings/plurals matched case-insensitively by the auto-wrap plugin. */
   aliases: string[];
-  /** One-line summary shown at the top of the popover. */
+  /** One-line summary shown on the collapsed glossary card. */
   short: string;
   /** Chapter slug where this term is introduced. */
   firstAppearance: string;

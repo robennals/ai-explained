@@ -37,6 +37,7 @@ function parseFrontmatter(raw) {
 }
 
 function loadAliasMap() {
+  // alias.toLowerCase() -> entry slug (URL-safe identifier from filename).
   const map = new Map();
   let files = [];
   try {
@@ -45,11 +46,12 @@ function loadAliasMap() {
     return map;
   }
   for (const f of files) {
+    const slug = f.replace(/\.mdx$/, "");
     const raw = readFileSync(join(ENTRIES_DIR, f), "utf-8");
     const data = parseFrontmatter(raw);
     if (!data.term) continue;
     const all = [data.term, ...(Array.isArray(data.aliases) ? data.aliases : [])];
-    for (const a of all) map.set(String(a).toLowerCase(), data.term);
+    for (const a of all) map.set(String(a).toLowerCase(), slug);
   }
   return map;
 }

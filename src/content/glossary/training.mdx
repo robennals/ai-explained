@@ -6,6 +6,8 @@ firstAppearance: optimization
 
 **Training** is the process of adjusting a [model](/glossary#model)'s [parameters](/glossary#parameter) so it makes the smallest [error](/glossary#error) on the data we give it.
 
+Some examples, the same recipe at different scales:
+
 - **Finding the best stride for a runner** — try a stride length, time the race. A shorter time means a better stride. Adjust the stride toward whatever made the time go down. Repeat until you find the stride that gives the best time.
 - **Fitting `curveY(x) = a + b·x + c·x² + d·x³` to a set of points** — pick values for `a, b, c, d`, measure how far the curve is from each point. A smaller total distance means a better fit. Adjust the parameters toward whatever shrinks the distance. Repeat until the curve is as close as possible.
 - **Training a next-word predictor** — show it real sentences. For each one, see how unlikely the model thought the actual next word was. A model is good if it gives the right words high probability. Nudge the parameters until the right words become less surprising. Repeat over billions of sentences.

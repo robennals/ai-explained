@@ -1,0 +1,18 @@
+---
+term: weight
+aliases: [weights]
+firstAppearance: neurons
+---
+
+A **weight** is a number inside a [neuron](/glossary#neuron) that controls how much one of its inputs matters.
+
+A neuron multiplies each input by its weight before adding them together — a large weight makes that input strongly affect the output; a weight near zero makes it almost ignored; a negative weight pushes the output the other way.
+
+Some examples, from a single weight to billions:
+
+- **One input** — `output = w · x + b`. The single weight `w` controls how much `x` matters.
+- **A small neuron with three inputs** — weights `(2, 0.1, −1)` mean the neuron cares a lot about the first input, barely cares about the second, and gets pushed in the opposite direction by the third.
+- **A neural-network layer** — every connection from one layer to the next has its own weight. Stack a few of these and you have thousands of weights.
+- **GPT-3** — about 175 billion weights, each one nudged during [training](/glossary#training) until the model is good at predicting the next word.
+
+Weights, together with biases, are the [parameters](/glossary#parameter) of a [model](/glossary#model).

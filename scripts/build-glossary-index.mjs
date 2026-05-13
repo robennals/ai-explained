@@ -120,10 +120,10 @@ function maskMdx(text) {
 
 function buildBacklinks(entries, chapterFiles) {
   if (entries.length === 0) return new Map();
-  const aliasMap = new Map(); // alias.toLowerCase() -> canonical term
+  const aliasMap = new Map(); // alias.toLowerCase() -> entry slug
   for (const e of entries) {
-    aliasMap.set(e.term.toLowerCase(), e.term);
-    for (const a of e.aliases) aliasMap.set(String(a).toLowerCase(), e.term);
+    aliasMap.set(e.term.toLowerCase(), e.slug);
+    for (const a of e.aliases) aliasMap.set(String(a).toLowerCase(), e.slug);
   }
   const sorted = [...aliasMap.keys()].sort((a, b) => b.length - a.length);
   const escaped = sorted.map((a) => a.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
@@ -132,15 +132,15 @@ function buildBacklinks(entries, chapterFiles) {
     "gi",
   );
 
-  const map = new Map(); // canonical -> Set<chapterSlug>
-  for (const e of entries) map.set(e.term, new Set());
+  const map = new Map(); // entry slug -> Set<chapterSlug>
+  for (const e of entries) map.set(e.slug, new Set());
   for (const { slug, text } of chapterFiles) {
     const masked = maskMdx(text);
     let m;
     regex.lastIndex = 0;
     while ((m = regex.exec(masked)) !== null) {
-      const canon = aliasMap.get(m[0].toLowerCase());
-      map.get(canon).add(slug);
+      const entrySlug = aliasMap.get(m[0].toLowerCase());
+      map.get(entrySlug).add(slug);
     }
   }
   return map;
@@ -158,9 +158,10 @@ function emit(entries, backlinks) {
   lines.push("");
   lines.push("export const glossaryEntries: GlossaryEntry[] = [");
   for (const e of entries) {
-    const appeared = JSON.stringify([...(backlinks.get(e.term) ?? new Set())].sort());
+    const appeared = JSON.stringify([...(backlinks.get(e.slug) ?? new Set())].sort());
     lines.push("  {");
     lines.push(`    term: ${JSON.stringify(e.term)},`);
+    lines.push(`    slug: ${JSON.stringify(e.slug)},`);
     lines.push(`    aliases: ${JSON.stringify(e.aliases)},`);
     lines.push(`    short: ${JSON.stringify(e.short)},`);
     lines.push(`    firstAppearance: ${JSON.stringify(e.firstAppearance)},`);
@@ -173,13 +174,14 @@ function emit(entries, backlinks) {
   }
   lines.push("];");
   lines.push("");
-  lines.push("export const glossaryByTerm: Record<string, GlossaryEntry> =");
-  lines.push("  Object.fromEntries(glossaryEntries.map((e) => [e.term, e]));");
+  lines.push("export const glossaryBySlug: Record<string, GlossaryEntry> =");
+  lines.push("  Object.fromEntries(glossaryEntries.map((e) => [e.slug, e]));");
   lines.push("");
+  // alias.toLowerCase() -> entry slug (the URL anchor / lookup key).
   lines.push("export const glossaryAliasMap: Record<string, string> = {");
   for (const e of entries) {
     for (const a of [e.term, ...e.aliases]) {
-      lines.push(`  ${JSON.stringify(a.toLowerCase())}: ${JSON.stringify(e.term)},`);
+      lines.push(`  ${JSON.stringify(a.toLowerCase())}: ${JSON.stringify(e.slug)},`);
     }
   }
   lines.push("};");

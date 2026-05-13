@@ -8,7 +8,7 @@ The single highest-leverage rule: **stay grounded in the chapters**. Use the exa
 
 - **Be brief.** Aim for: one defining sentence, a list of examples, and one short closing line. If you need more, you are probably explaining the chapter, not the term.
 - **Write for an 11-year-old who lands on this entry cold.** Don't assume they've read related entries — each entry must stand alone.
-- **The body's first sentence is the card summary.** The collapsed `/glossary` card and the popover header are auto-derived from the body's first sentence by the build script — `short` is *not* a frontmatter field. Write the opening sentence as `A **<term>** is …` (countable), `An **<term>** is …` (vowel), or `**<Term>** is …` (uncountable mass nouns like *training*, *attention*). The script strips the article + bolded term + "is" and uses the rest. A second sentence of context can follow; only the first is used for the card.
+- **The body's first sentence is the card summary, and it stands alone as its own paragraph.** The collapsed `/glossary` card and the popover header are auto-derived from the body's first sentence by the build script — `short` is *not* a frontmatter field. Write the opening sentence as `A **<term>** is …` (countable), `An **<term>** is …` (vowel), or `**<Term>** is …` (uncountable mass nouns like *training*, *attention*). The script strips the article + bolded term + "is" and uses the rest. **Always put a blank line after the opening sentence** so it's structurally its own paragraph — additional context goes in a separate paragraph below.
 
 ## 2. Defining the term
 
@@ -24,9 +24,11 @@ Every entry must include a list of concrete examples. This is where most of the 
 ### Universal rules
 
 - **Always include examples.** No exceptions.
+- **Introduce the list with one short sentence saying what it is.** "Some examples:" / "Things you can describe with a vector:" / "There are several ways to think about a neuron:" / "Some common activation functions:". A bare bullet list dropped in after a paragraph leaves the reader guessing whether it's a definition, a categorisation, or examples.
 - **Use the chapters' own examples first.** If the chapter's introduction of "error" uses a test score, race time, and restaurant rating, your glossary entry should reuse those. Don't reach for spam filters or other off-tutorial standbys.
 - **Make them concrete.** Pick specific cases, not categories. "ChatGPT" beats "a large language model."
 - **Build up by complexity of explanation, not just by scale.** "Complexity" here means how far the example is from something the reader already understands. The first bullet must be super-approachable; later bullets can introduce more abstraction or more dimensions or more math.
+- **The ladder should track the reader's progress through the tutorial, not just abstract complexity.** Bullet 1 should make sense to someone who hasn't started the tutorial. Later bullets can use ideas from progressively later chapters: pre-tutorial intuition → early-chapter examples (chapter 1 polynomials, optimisation analogies) → mid-tutorial examples (neurons, vectors, embeddings) → late-tutorial / frontier-model scale (transformers, GPT-3 dimensions, ChatGPT). A reader can stop at the bullet where the concepts outrun their progress and return as they cover more chapters. The spread itself is part of the lesson: *"this same idea applies all the way up."*
 - **The bold lead should be the thing the bullet is illustrating, not the data structure.** For *vector*, bold "A point in 2D space", not "[3, 1]"; for *function*, bold the function definition (because *that's* the thing being illustrated).
 - **Make the example the bullet's subject, not a subordinate clause.** Bad: *"The `m` in `bigger(x) = x · m` — a single parameter."* Good: *"**bigger(x) = x · m** — `m` is the parameter."*
 - **One sentence per bullet is usually enough.**
@@ -91,12 +93,14 @@ If the entry has no math, skip this section entirely.
 
 ```mdx
 ---
-term: <canonical-lowercase>
+term: <display name — may contain spaces, e.g. "activation function">
 aliases: [<plural>, <other-forms-the-chapter-uses>]
 firstAppearance: <chapter-slug-where-introduced>
 ---
 
-<A | An | (nothing)> **<term>** is <one-sentence definition — this is the card summary>.<Optional second sentence of context.>
+<A | An | (nothing)> **<term>** is <one-sentence definition — this is the card summary>.
+
+<Optional second paragraph of context.>
 
 - <first example — most approachable, in whatever form fits>
 - <middle example — adds a wrinkle or moves a step toward AI>
@@ -104,6 +108,8 @@ firstAppearance: <chapter-slug-where-introduced>
 
 <Optional one-line closing — naming a notation, linking to a tightly-related concept, etc.>
 ```
+
+The **filename** is the entry's URL slug (kebab-case): `activation-function.mdx` → `/glossary#activation-function`. For single-word terms, filename and `term` match; for multi-word terms, the filename is the slug form and `term` keeps the natural spacing.
 
 ### Redirect entry
 
