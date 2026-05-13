@@ -13,7 +13,7 @@ The single highest-leverage rule: **stay grounded in the chapters**. Use the exa
 ## 2. Defining the term
 
 - **Pick the simplest accurate definition.** Resist adding technical caveats that don't universally hold in our domain. Example: don't define a function as "same input, same output, every time" — LLMs sample, so the claim isn't true for terms the reader will encounter later.
-- **Reuse the chapter's framing and vocabulary.** If the chapter calls it "error" rather than "loss", the glossary entry should too (with "loss" as an alias for matching). Skim the chapters that use the term before writing.
+- **Reuse the chapter's framing and vocabulary.** If the chapter calls it "error" rather than "loss", the glossary entry should be under "error". For a true synonym like "loss" that readers will still encounter in other materials, give it its *own* redirect entry (see §3 below) rather than burying it as an alias.
 - **Use connected vocabulary across entries.** *parameter* sits inside a *model*; *model* is a *function*; *training* shrinks the *error*. Following one chain of links should feel coherent.
 - **Don't restate what the examples already show.** If the bullets make a distinction obvious, don't paraphrase it in prose.
 
@@ -58,6 +58,17 @@ For *vector*, *embedding*, and similar list-shaped concepts, the chapter introdu
 
 For *training*, *optimization*, *inference*, *backpropagation*, the chapter usually has a recipe ("measure error → take a small step → repeat"). The example bullets walk a reader through that recipe applied to concrete cases of increasing complexity, ending at the AI use.
 
+### Redirect entries (for true synonyms)
+
+When two terms mean the same thing (e.g., *loss* ≡ *error*, *AGI* ≡ *artificial general intelligence*), give the canonical one a full entry and the synonym a tiny **redirect entry** — the index-style "*see also*" pattern. The redirect entry is exempt from the examples rule. Its whole job is:
+
+1. State that it's another name for the canonical term, with a link.
+2. Optionally, one short line on why both words exist (e.g., textbooks use one, this tutorial uses the other).
+
+That's it. Readers get a clear "you clicked X, X = Y" signal without the popover misleadingly displaying Y's full content as if X were Y. They can click through to the canonical entry for examples and details, and the popover navigator will cycle there with a back button.
+
+Use redirect entries for *synonyms*. Plurals, inflections, and casual variants (`function`/`functions`, `train`/`trains`/`trained`, `loss function`) are still just `aliases` on whichever entry owns the term — readers aren't confused that "vectors" and "vector" point to the same place.
+
 ## 4. Notation (when math is involved)
 
 - **Bold** the lead expression of an example (`**bigger(x) = x · m**`). Do not use code-quoting (` `` `) for the lead — the inline code box's padding misaligns bullet points.
@@ -74,7 +85,9 @@ If the entry has no math, skip this section entirely.
 - Link sparingly. First mention of a related term gets a link; subsequent mentions stay plain.
 - **Speculative links to unwritten glossary entries are fine** when the entry is on the planned list (e.g., *gradient descent*, *optimization*). The popover navigator falls back gracefully; the link will start working as soon as the entry lands.
 
-## 6. Structure template
+## 6. Structure templates
+
+### Full entry
 
 ```mdx
 ---
@@ -84,7 +97,7 @@ short: <one-sentence summary — body opens with this verbatim>
 firstAppearance: <chapter-slug-where-introduced>
 ---
 
-<A | An | (nothing)> **<term>** <short verbatim>.
+<A | An | (nothing)> **<term>** is <short verbatim>.
 
 - <first example — most approachable, in whatever form fits>
 - <middle example — adds a wrinkle or moves a step toward AI>
@@ -93,13 +106,28 @@ firstAppearance: <chapter-slug-where-introduced>
 <Optional one-line closing — naming a notation, linking to a tightly-related concept, etc.>
 ```
 
+### Redirect entry
+
+```mdx
+---
+term: <synonym>
+aliases: [<word-variants-of-the-synonym>]
+short: Another name for <canonical>.
+firstAppearance: <chapter-slug>
+---
+
+**<Synonym>** is another name for [<canonical>](/glossary#<canonical>).
+
+<Optional one-line: why both words exist.>
+```
+
 ## 7. What not to do
 
 - **Don't claim universal properties that aren't.** No "deterministic," no "always returns a number," no "the same every time."
 - **Don't invent examples the chapters don't use.** Spam filters are a textbook standby and aren't part of this tutorial; don't reach for them. Use the chapter's examples (race times, restaurant ratings, animal-property vectors, next-word prediction) and extend them naturally if you need more.
 - **Don't repeat or paraphrase `short` in the body.** The opening sentence *is* the short with the article in front.
 - **Don't add separate subsections** ("How it works", "Why it matters", "History"). The chapter explains; the glossary defines.
-- **Don't list synonyms loosely.** True synonyms used in chapter prose belong in `aliases`. Related-but-different concepts get their own entry.
+- **Don't bury synonyms as aliases.** Word-variants (plurals, inflections, casual forms like `loss function`) belong in `aliases`. *True synonyms* (different word, same concept — `loss` ≡ `error`) get their own redirect entry (§3) so the popover doesn't show one term's content under another term's label.
 - **Don't reference unpublished chapters in body links.** Glossary backlinks already filter to ready chapters; a hand-written link to a 404 chapter is on you.
 
 ## 8. Workflow
