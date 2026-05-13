@@ -1,13 +1,12 @@
 ---
 term: neuron
 aliases: [neurons]
-short: A small function that combines its inputs (often the outputs of a previous layer of neurons) into one output.
+short: A function that multiplies its inputs by weights and applies an activation function.
 firstAppearance: neurons
 ---
 
-A **neuron** is a small [function](/glossary#function) that combines its inputs (often the outputs of a previous layer of neurons) into one output.
+A **neuron** is a [function](/glossary#function) that multiplies its inputs by weights and applies an activation function. Neurons are loosely inspired by the brain, and they're typically wired up in layers — each neuron taking its inputs from the outputs of the previous layer.
 
-- **In words** — the neuron looks at all its inputs together and decides how strongly to fire. It does this by deciding how much each input matters (a *weight*), totting them all up, adding a small adjustment (the *bias*), and squashing the result.
 - **As a smooth logic gate** — with the right weights, a single neuron behaves like AND, OR, or NOT. Unlike a real logic gate, its output changes smoothly as you adjust the weights, which is what makes it trainable.
 - **As a pattern detector** — the weights describe *what* the neuron is looking for; the bias decides how much evidence it needs before firing. A neuron with bear-like weights, fed an animal vector as input, asks "is this bear-like?"
 - **As math** — `output = activation(w₁·x₁ + w₂·x₂ + … + wₙ·xₙ + b)`. The weights `w` decide what the neuron looks for; the bias `b` shifts the threshold; the activation function squashes the result into a useful range.
