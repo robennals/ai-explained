@@ -13,7 +13,7 @@ The single highest-leverage rule: **stay grounded in the chapters**. Use the exa
 ## 2. Defining the term
 
 - **Pick the simplest accurate definition.** Resist adding technical caveats that don't universally hold in our domain. Example: don't define a function as "same input, same output, every time" — LLMs sample, so the claim isn't true for terms the reader will encounter later.
-- **Reuse the chapter's framing and vocabulary.** If the chapter calls it "error" rather than "loss", the glossary entry should be under "error". For a true synonym like "loss" that readers will still encounter in other materials, give it its *own* redirect entry (see §3 below) rather than burying it as an alias.
+- **Reuse the chapter's framing and vocabulary.** Skim the chapters that use the term before writing — the entry should sit comfortably alongside the chapter's wording, not invent a parallel framing. For terms that look like synonyms but actually carry a useful distinction in this tutorial's framing (e.g., *error* = per-example, *loss* = aggregate), give each its own entry and cross-reference them.
 - **Use connected vocabulary across entries.** *parameter* sits inside a *model*; *model* is a *function*; *training* shrinks the *error*. Following one chain of links should feel coherent.
 - **Don't restate what the examples already show.** If the bullets make a distinction obvious, don't paraphrase it in prose.
 
@@ -60,14 +60,14 @@ For *training*, *optimization*, *inference*, *backpropagation*, the chapter usua
 
 ### Redirect entries (for true synonyms)
 
-When two terms mean the same thing (e.g., *loss* ≡ *error*, *AGI* ≡ *artificial general intelligence*), give the canonical one a full entry and the synonym a tiny **redirect entry** — the index-style "*see also*" pattern. The redirect entry is exempt from the examples rule. Its whole job is:
+When two terms genuinely mean the same thing (e.g., *AGI* ≡ *artificial general intelligence*, *MLP* ≡ *feed-forward layer*), give the canonical one a full entry and the synonym a tiny **redirect entry** — the index-style "*see also*" pattern. The redirect entry is exempt from the examples rule. Its whole job is:
 
 1. State that it's another name for the canonical term, with a link.
-2. Optionally, one short line on why both words exist (e.g., textbooks use one, this tutorial uses the other).
+2. Optionally, one short line on why both words exist (e.g., one is the acronym, one is the full name).
 
-That's it. Readers get a clear "you clicked X, X = Y" signal without the popover misleadingly displaying Y's full content as if X were Y. They can click through to the canonical entry for examples and details, and the popover navigator will cycle there with a back button.
+That's it. Readers get a clear "you clicked X, X = Y" signal without the popover misleadingly displaying Y's full content as if X were Y. They can click through to the canonical entry; the popover navigator cycles there with a back button.
 
-Use redirect entries for *synonyms*. Plurals, inflections, and casual variants (`function`/`functions`, `train`/`trains`/`trained`, `loss function`) are still just `aliases` on whichever entry owns the term — readers aren't confused that "vectors" and "vector" point to the same place.
+Use redirect entries *only* for true synonyms. Plurals, inflections, and casual variants (`function`/`functions`, `train`/`trains`/`trained`) belong in `aliases` on the owning entry. Terms that look synonymous but actually carry a useful distinction (e.g., *error* per-example vs. *loss* aggregate) deserve full entries that reference each other — not a redirect.
 
 ## 4. Notation (when math is involved)
 
@@ -125,7 +125,7 @@ firstAppearance: <chapter-slug>
 - **Don't invent examples the chapters don't use.** Spam filters are a textbook standby and aren't part of this tutorial; don't reach for them. Use the chapter's examples (race times, restaurant ratings, animal-property vectors, next-word prediction) and extend them naturally if you need more.
 - **Don't add a `short:` frontmatter field.** The build script derives it from the body's first sentence; declaring it manually is the kind of duplicate-source-of-truth that drifts.
 - **Don't add separate subsections** ("How it works", "Why it matters", "History"). The chapter explains; the glossary defines.
-- **Don't bury synonyms as aliases.** Word-variants (plurals, inflections, casual forms like `loss function`) belong in `aliases`. *True synonyms* (different word, same concept — `loss` ≡ `error`) get their own redirect entry (§3) so the popover doesn't show one term's content under another term's label.
+- **Don't bury synonyms as aliases.** Word-variants (plurals, inflections, casual forms) belong in `aliases`. *True synonyms* (different word, same concept) get their own redirect entry (§3) so the popover doesn't show one term's content under another term's label. Before assuming two words are synonyms, check whether they actually carry a distinction worth teaching — *error* and *loss* read as synonyms in casual ML usage but are split here into per-example vs. aggregate.
 - **Don't reference unpublished chapters in body links.** Glossary backlinks already filter to ready chapters; a hand-written link to a 404 chapter is on you.
 
 ## 8. Workflow

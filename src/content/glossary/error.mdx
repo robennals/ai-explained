@@ -4,12 +4,11 @@ aliases: [errors]
 firstAppearance: optimization
 ---
 
-An **error** is a number that says how far off something is from perfect.
+An **error** is a number that says how far off something is from perfect on one try.
 
 - **A student's test score** — got 72 out of 100, target is 100. Error = 100 − 72 = 28 points.
-- **A runner's time** — finished in 14.2 seconds, target is 0 (impossible, but smaller is always better). Error = 14.2 − 0 = 14.2.
-- **A restaurant's rating** — got 3.2 stars, target is 5. Error = 5 − 3.2 = 1.8 stars.
-- **A photo classifier** — the answer is "cat", we want the [model](/glossary#model) to say 100% chance "cat", but it only said 30%. Error = 100% − 30% = 70%.
-- **A next-word predictor** — the next word in "The cat sat on the ___" is "mat", but the model gave "mat" only 1% probability. The error formula `−log(probability of the right word)` turns this into ≈ 4.6 (very bad), whereas a 99% guess would have given ≈ 0.01 (very good).
+- **A runner's time** — finished a race in 14.2 seconds, target is 0 (impossible, but smaller is always better). Error = 14.2 − 0 = 14.2.
+- **A photo classifier** — the answer is "cat", but the [model](/glossary#model) only gave "cat" 30% probability. Error = 100% − 30% = 70%.
+- **A next-word predictor** — the next word in "The cat sat on the ___" is "mat", but the model gave "mat" only 1% probability. The error formula `−log(probability of the right word)` turns this into ≈ 4.6 (very bad); a 99% guess would have given ≈ 0.01 (very good).
 
-[Training](/glossary#training) is the process of making the error — also called the [loss](/glossary#loss) — as small as possible.
+Averaged across many examples, the error becomes the [loss](/glossary#loss) — the number [training](/glossary#training) tries to make small.
