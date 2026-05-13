@@ -4,10 +4,10 @@ aliases: [losses, loss function, loss functions]
 firstAppearance: optimization
 ---
 
-A **loss** is a single number that summarises the [error](/glossary#error) across a set of examples — usually the average.
+A **loss** is a number that says how badly a [model](/glossary#model) performs overall — calculated from its [errors](/glossary#error) across many examples (usually the average).
 
-- **A runner's average time over 10 races** — each race has its own error; the loss is the average of those 10 errors.
-- **A photo classifier on 10 000 photos** — average error across every photo. A loss of 0.05 means the model is confidently right almost everywhere.
-- **A next-word predictor on a billion sentences** — average `−log(probability of the right word)` across every position in every sentence. This is the number [training](/glossary#training) shrinks.
+- **A runner over 10 races** — each race has its own error. The runner's loss is the average of those 10 errors: a verdict on the runner, not on any single race.
+- **A photo classifier on 10 000 photos** — each photo contributes one error. The classifier's loss is the average; a loss of 0.05 means the classifier is confidently right almost everywhere.
+- **A next-word predictor on a billion sentences** — each position contributes one error (`−log(probability of the right word)`). The predictor's loss is the average across every position. This is the number [training](/glossary#training) shrinks.
 
-The point of training is to find [parameter](/glossary#parameter) values that make the loss as small as possible.
+The point of training is to find [parameter](/glossary#parameter) values that make the model's loss as small as possible.
