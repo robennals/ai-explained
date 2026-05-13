@@ -32,21 +32,50 @@ function listChapterMdxFiles() {
   return out;
 }
 
+/**
+ * Derive the card-summary `short` from the body's first paragraph by
+ * stripping the leading "A **term** is " (or "An …", or just "**Term** is")
+ * and resolving Markdown links and inline emphasis. Lets each entry be a
+ * single source of truth — author writes the opening sentence, the card
+ * summary follows automatically.
+ */
+function deriveShort(content) {
+  const para = content.split(/\n\s*\n/)[0]?.trim() ?? "";
+  if (!para) return "";
+  // Take only the first sentence (up to a sentence-ending punctuation
+  // followed by whitespace+capital, or end of paragraph).
+  const sentMatch = /^.*?[.!?](?=\s+[A-Z]|\s*$)/.exec(para);
+  let s = sentMatch ? sentMatch[0] : para;
+  // Drop leading article + bolded term + " is ".
+  s = s.replace(/^(?:An?\s+)?\*\*[^*]+\*\*\s+is\s+/i, "");
+  // [text](url) -> text
+  s = s.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
+  // **bold** -> bold, *italic* -> italic
+  s = s.replace(/\*\*([^*]+)\*\*/g, "$1").replace(/\*([^*]+)\*/g, "$1");
+  return s.length > 0 ? s[0].toUpperCase() + s.slice(1) : "";
+}
+
 function parseEntries() {
   const files = readdirSync(ENTRIES_DIR).filter((f) => f.endsWith(".mdx"));
   return files
     .map((f) => {
       const raw = readFileSync(join(ENTRIES_DIR, f), "utf-8");
-      const { data } = matter(raw);
+      const { data, content } = matter(raw);
       if (!data.term) throw new Error(`${f}: missing 'term' in frontmatter`);
-      if (!data.short) throw new Error(`${f}: missing 'short' in frontmatter`);
       if (!data.firstAppearance) {
         throw new Error(`${f}: missing 'firstAppearance' in frontmatter`);
+      }
+      const short = data.short || deriveShort(content);
+      if (!short) {
+        throw new Error(
+          `${f}: could not derive 'short' from body. Ensure the body opens with ` +
+            `"A **${data.term}** is …" (or "An …" / just "**${data.term}** is …").`,
+        );
       }
       return {
         term: data.term,
         aliases: Array.isArray(data.aliases) ? data.aliases : [],
-        short: data.short,
+        short,
         firstAppearance: data.firstAppearance,
         illustration: data.illustration,
         importName: data.term.replace(/[^a-zA-Z0-9]/g, "_") + "Body",

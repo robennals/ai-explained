@@ -204,6 +204,9 @@ body {
   font-size: 0.9rem;
   flex: 1;
   min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .glossary-card-chevron {
   width: 0.6rem;

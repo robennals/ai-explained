@@ -8,7 +8,7 @@ The single highest-leverage rule: **stay grounded in the chapters**. Use the exa
 
 - **Be brief.** Aim for: one defining sentence, a list of examples, and one short closing line. If you need more, you are probably explaining the chapter, not the term.
 - **Write for an 11-year-old who lands on this entry cold.** Don't assume they've read related entries — each entry must stand alone.
-- **The body's first sentence must match `short` verbatim, with the appropriate article in front.** Use "A [term] is …" for countable nouns, "An [term] is …" before a vowel, and just "[Term] is …" for uncountable mass nouns like *training*, *attention*, *inference*. The collapsed card shows `short`; when expanded, the body opens with the same sentence so nothing competes for the "title" role.
+- **The body's first sentence is the card summary.** The collapsed `/glossary` card and the popover header are auto-derived from the body's first sentence by the build script — `short` is *not* a frontmatter field. Write the opening sentence as `A **<term>** is …` (countable), `An **<term>** is …` (vowel), or `**<Term>** is …` (uncountable mass nouns like *training*, *attention*). The script strips the article + bolded term + "is" and uses the rest. A second sentence of context can follow; only the first is used for the card.
 
 ## 2. Defining the term
 
@@ -93,11 +93,10 @@ If the entry has no math, skip this section entirely.
 ---
 term: <canonical-lowercase>
 aliases: [<plural>, <other-forms-the-chapter-uses>]
-short: <one-sentence summary — body opens with this verbatim>
 firstAppearance: <chapter-slug-where-introduced>
 ---
 
-<A | An | (nothing)> **<term>** is <short verbatim>.
+<A | An | (nothing)> **<term>** is <one-sentence definition — this is the card summary>.<Optional second sentence of context.>
 
 - <first example — most approachable, in whatever form fits>
 - <middle example — adds a wrinkle or moves a step toward AI>
@@ -112,7 +111,6 @@ firstAppearance: <chapter-slug-where-introduced>
 ---
 term: <synonym>
 aliases: [<word-variants-of-the-synonym>]
-short: Another name for <canonical>.
 firstAppearance: <chapter-slug>
 ---
 
@@ -125,7 +123,7 @@ firstAppearance: <chapter-slug>
 
 - **Don't claim universal properties that aren't.** No "deterministic," no "always returns a number," no "the same every time."
 - **Don't invent examples the chapters don't use.** Spam filters are a textbook standby and aren't part of this tutorial; don't reach for them. Use the chapter's examples (race times, restaurant ratings, animal-property vectors, next-word prediction) and extend them naturally if you need more.
-- **Don't repeat or paraphrase `short` in the body.** The opening sentence *is* the short with the article in front.
+- **Don't add a `short:` frontmatter field.** The build script derives it from the body's first sentence; declaring it manually is the kind of duplicate-source-of-truth that drifts.
 - **Don't add separate subsections** ("How it works", "Why it matters", "History"). The chapter explains; the glossary defines.
 - **Don't bury synonyms as aliases.** Word-variants (plurals, inflections, casual forms like `loss function`) belong in `aliases`. *True synonyms* (different word, same concept — `loss` ≡ `error`) get their own redirect entry (§3) so the popover doesn't show one term's content under another term's label.
 - **Don't reference unpublished chapters in body links.** Glossary backlinks already filter to ready chapters; a hand-written link to a 404 chapter is on you.
@@ -134,6 +132,6 @@ firstAppearance: <chapter-slug>
 
 - Read the relevant chapter(s) before writing — the chapter is the source of truth for examples and framing.
 - Edit the entry MDX under `src/content/glossary/`. Filename matches the canonical term.
-- If frontmatter changed (`term`, `aliases`, `short`, `firstAppearance`), run `pnpm glossary:build` to regenerate the index, and restart the dev server.
+- If frontmatter changed (`term`, `aliases`, `firstAppearance`) or the body's first sentence changed, run `pnpm glossary:build` to regenerate the index, and restart the dev server.
 - Body edits hot-reload.
 - `pnpm glossary:audit` lists every place the new aliases would auto-wrap across chapter MDX. Scan for false positives; silence specific occurrences with `<nog>…</nog>` in the chapter.
