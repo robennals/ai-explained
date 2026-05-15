@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ChapterNav } from "@/components/layout/ChapterNav";
+import { GlossaryRenderProvider } from "@/components/mdx/G";
 import { chapterMetadata } from "@/lib/chapter-metadata";
 import { chapters, getAdjacentChapters } from "@/lib/curriculum";
 import { glossaryEntries } from "@/lib/glossary/index.generated";
@@ -51,7 +52,9 @@ export default function GlossaryPage() {
                 <span className="glossary-card-chevron" aria-hidden="true" />
               </summary>
               <div className="glossary-card-body prose max-w-none">
-                <Body />
+                <GlossaryRenderProvider currentSlug={entry.slug}>
+                  <Body />
+                </GlossaryRenderProvider>
                 {introduced && (
                   <p className="glossary-card-refs">
                     <span className="font-medium">Introduced in: </span>

@@ -4,7 +4,7 @@ aliases: [neurons]
 firstAppearance: neurons
 ---
 
-A **neuron** is a [function](/glossary#function) that multiplies its inputs by [weights](/glossary#weight) and applies an [activation function](/glossary#activation-function).
+A **neuron** is a function that multiplies its inputs by weights and applies an activation function.
 
 Neurons are loosely inspired by the brain, and they're typically wired up in layers — each neuron taking its inputs from the outputs of the previous layer.
 
@@ -15,4 +15,4 @@ There are several ways to think about a neuron:
 - **As a pattern detector** — the weights describe *what* the neuron is looking for; the bias decides how much evidence it needs before firing. A neuron with bear-like weights, fed an animal vector as input, asks "is this bear-like?"
 - **As math** — `output = activation(w₁·x₁ + w₂·x₂ + … + wₙ·xₙ + b)`. The weights `w` decide what the neuron looks for; the bias `b` shifts the threshold; the activation function squashes the result into a useful range.
 
-The weights and bias are [parameters](/glossary#parameter); [training](/glossary#training) adjusts all of them.
+The weights and bias are parameters; training adjusts all of them.

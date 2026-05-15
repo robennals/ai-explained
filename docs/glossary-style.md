@@ -82,10 +82,10 @@ If the entry has no math, skip this section entirely.
 
 ## 5. Cross-references
 
-- Link to other glossary terms via plain Markdown anchor links: `[function](/glossary#function)`.
-- **Never use `<g>` inside an entry.** The auto-wrap plugin skips files under `src/content/glossary/`; nested popovers would be bad UX.
-- Link sparingly. First mention of a related term gets a link; subsequent mentions stay plain.
-- **Speculative links to unwritten glossary entries are fine** when the entry is on the planned list (e.g., *gradient descent*, *optimization*). The popover navigator falls back gracefully; the link will start working as soon as the entry lands.
+- **You don't write cross-links by hand.** The auto-wrap plugin runs on entry bodies the same way it runs on chapter prose. Just write the term naturally; it becomes a cross-link automatically on its first occurrence in the file. Inside a popover, clicking cycles the navigator to the target entry; on `/glossary`, clicking expands the target card.
+- **Self-references stay plain.** The word "function" inside the function entry's body doesn't link back to itself.
+- **Manual `[term](/glossary#slug)` links still work** as overrides if you need fine control — to link a specific later occurrence rather than the first, or to point to a planned-but-unwritten entry. A manual link "claims" the first occurrence so the auto-wrap won't double-link.
+- **Never use `<g>` inside an entry.** That's only for chapter prose; in entries the auto-wrap handles it, and `<g>` would render as a nested popover.
 
 ## 6. Structure templates
 

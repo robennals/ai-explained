@@ -4,16 +4,16 @@ aliases: [activation functions]
 firstAppearance: neurons
 ---
 
-An **activation function** is the function applied at the end of a [neuron](/glossary#neuron) to turn its weighted sum into a final output.
+An **activation function** is the function applied at the end of a neuron to turn its weighted sum into a final output.
 
-Without one, stacking [neurons](/glossary#neuron) in layers would collapse mathematically into a single linear model — you'd get nothing extra from depth. The activation function is what makes deep networks more powerful than shallow ones.
+Without one, stacking neurons in layers would collapse mathematically into a single linear model — you'd get nothing extra from depth. The activation function is what makes deep networks more powerful than shallow ones.
 
 Some common activation functions:
 
-- **sigmoid** — smoothly squashes any number into the range 0 to 1. Big positive inputs become close to 1, big negative inputs become close to 0, with a smooth slope in between. The classic activation, used in the [neurons](/glossary#neuron) chapter's examples.
+- **sigmoid** — smoothly squashes any number into the range 0 to 1. Big positive inputs become close to 1, big negative inputs become close to 0, with a smooth slope in between. The classic activation, used in the neurons chapter's examples.
 - **ReLU** — `max(0, x)`. Passes positive numbers through unchanged; turns negatives into 0. Simpler than sigmoid and very widely used.
 - **Swish** (also called **SiLU**) — `x · sigmoid(x)`. Like ReLU for positive values, but with a small dip below zero on the negative side. Neurons that want to switch "off" settle at the bottom of the dip rather than drifting into ReLU's flat dead zone — which is why most frontier models prefer Swish.
 - **tanh** — like sigmoid but ranges from −1 to 1 instead of 0 to 1.
 - **softmax** — applied at the very end of a classifier to turn raw scores into probabilities that sum to 1.
 
-All activation functions share one critical property: they're smooth enough that [training](/glossary#training) can use small parameter nudges to improve the model.
+All activation functions share one critical property: they're smooth enough that training can use small parameter nudges to improve the model.

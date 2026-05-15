@@ -2,7 +2,14 @@
 
 import * as Popover from "@radix-ui/react-popover";
 import Link from "next/link";
-import { Children, useState, type MouseEvent, type ReactNode } from "react";
+import {
+  Children,
+  createContext,
+  useContext,
+  useState,
+  type MouseEvent,
+  type ReactNode,
+} from "react";
 import {
   glossaryAliasMap,
   glossaryBySlug,
@@ -15,6 +22,36 @@ interface GProps {
    */
   term?: string;
   children: ReactNode;
+}
+
+interface GlossaryRenderInfo {
+  /** True when we're rendering inside a glossary surface (popover body or /glossary card). */
+  inside: boolean;
+  /** Slug of the entry being rendered, so we can suppress self-references. */
+  currentSlug?: string;
+}
+
+const GlossaryRenderContext = createContext<GlossaryRenderInfo>({ inside: false });
+
+/**
+ * Wraps content that's being rendered as part of a glossary entry — either
+ * inside a popover or on the /glossary appendix page. Causes `<G>` instances
+ * inside to render as plain inline links rather than popover triggers (so we
+ * don't get nested popovers), and to render as plain text when they reference
+ * the entry currently being viewed.
+ */
+export function GlossaryRenderProvider({
+  currentSlug,
+  children,
+}: {
+  currentSlug?: string;
+  children: ReactNode;
+}) {
+  return (
+    <GlossaryRenderContext.Provider value={{ inside: true, currentSlug }}>
+      {children}
+    </GlossaryRenderContext.Provider>
+  );
 }
 
 function extractText(children: ReactNode): string {
@@ -79,7 +116,9 @@ function PopoverNavigator({ initialSlug }: NavigatorProps) {
       )}
       <div className="glossary-popover-body prose prose-sm max-w-none">
         <div onClick={handleBodyClick}>
-          <Body />
+          <GlossaryRenderProvider currentSlug={currentSlug}>
+            <Body />
+          </GlossaryRenderProvider>
         </div>
         <p className="glossary-popover-outlink">
           <Link href={`/glossary#${currentSlug}`}>Open in glossary →</Link>
@@ -93,6 +132,7 @@ export function G({ term, children }: GProps) {
   const input = term ?? extractText(children);
   const slug = resolveSlug(input);
   const entry = slug ? glossaryBySlug[slug] : undefined;
+  const ctx = useContext(GlossaryRenderContext);
 
   if (!entry) {
     if (process.env.NODE_ENV !== "production") {
@@ -101,6 +141,19 @@ export function G({ term, children }: GProps) {
     return <>{children}</>;
   }
 
+  // Inside an entry's own context: don't link to ourselves.
+  if (ctx.inside && entry.slug === ctx.currentSlug) {
+    return <>{children}</>;
+  }
+
+  // Inside any glossary surface: render as a plain inline link. In a popover,
+  // the navigator intercepts the click and cycles to the target entry; on
+  // /glossary, the hash opener expands and scrolls to the target card.
+  if (ctx.inside) {
+    return <a href={`/glossary#${entry.slug}`}>{children}</a>;
+  }
+
+  // Chapter prose context: render as popover trigger.
   return (
     <Popover.Root>
       <Popover.Trigger asChild>

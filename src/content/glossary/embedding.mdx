@@ -1,0 +1,18 @@
+---
+term: embedding
+aliases: [embeddings]
+firstAppearance: embeddings
+---
+
+An **embedding** is a vector of numbers that represents the meaning of an item (e.g. a word), where similar items have similar vectors.
+
+Embeddings are how AI models turn things — words, tokens, images, sounds — into the kind of numerical data they can do math on. 
+
+Some examples:
+
+- **A hand-picked animal vector** — properties chosen by humans: big, scary, hairy, etc. The same shape as an embedding, but with axes humans decided rather than learned.
+- **A 300-dimensional GloVe word embedding** — learned from huge amounts of text so that "king" and "queen" end up close, and "king − man + woman ≈ queen" works as vector arithmetic.
+- **A 768-dimensional GPT-2 token embedding** — each token gets a vector that captures both its meaning and how it's being used.
+- **A 12 288-dimensional GPT-3 token embedding** — much more room to encode subtle distinctions.
+
+Once items live in the same vector space, the dot product between two embeddings measures how related they are — and sometimes arithmetic on embeddings ("king − man + woman") corresponds to meaningful operations on the underlying meanings.

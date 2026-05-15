@@ -1,0 +1,19 @@
+---
+term: dimension
+aliases: [dimensions]
+firstAppearance: vectors
+---
+
+A **dimension** is one of the properties a vector measures.
+
+A colour vector like `(1, 0.5, 0)` has 3 dimensions — red, green, and blue — and the numbers `(1, 0.5, 0)` are the *values* along those dimensions. The total count of dimensions is also called the vector's *dimension*, so this is a "3-dimensional" vector. A 768-dimensional embedding has 768 dimensions, each capturing one (learned) aspect of meaning.
+
+Some examples:
+
+- **2 dimensions** — a point on a map: how far east, how far north.
+- **3 dimensions** — a colour on a screen: how much red, green, blue.
+- **6 dimensions** — the animal vectors from the chapter: big, scary, hairy, cuddly, fast, fat.
+- **300 dimensions** — a GloVe word embedding, learned to capture meaning.
+- **12 288 dimensions** — one token inside GPT-3, capturing meaning and context.
+
+More dimensions let a vector make finer distinctions, at the cost of more storage and computation. Modern AI models lean on very high-dimensional vectors precisely because that's where the meaning fits.

@@ -72,7 +72,24 @@ const SKIP_NODE_TYPES = new Set([
   "math",
   "inlineMath",
   "heading",
+  // Don't descend into manual Markdown links — their text is already
+  // claimed as the cross-reference; we just track them in a pre-pass so
+  // subsequent plain-text occurrences don't double up.
+  "link",
 ]);
+
+function collectManualGlossaryLinks(node, slugs) {
+  if (!node) return;
+  if (node.type === "link" && typeof node.url === "string") {
+    const url = node.url;
+    if (url.startsWith("/glossary#")) {
+      slugs.add(url.slice("/glossary#".length));
+    }
+  }
+  if (Array.isArray(node.children)) {
+    for (const child of node.children) collectManualGlossaryLinks(child, slugs);
+  }
+}
 
 function isSkippedJsx(node) {
   if (
@@ -126,18 +143,14 @@ function remarkGlossary() {
   const aliasMap = loadAliasMap();
   const regex = buildAliasRegex([...aliasMap.keys()]);
 
-  return (tree, file) => {
+  return (tree) => {
     if (!regex) return;
-    // Skip glossary entry sources — they cross-link with plain markdown links
-    // so popovers never nest. Detect via the vfile path (whichever shape the
-    // tooling exposes).
-    const path =
-      (file && (file.path || (file.history && file.history[0]) || file.cwd)) || "";
-    const normalized = String(path).replace(/\\/g, "/");
-    if (normalized.includes("/src/content/glossary/")) return;
 
-    // Per-file tally: each term gets wrapped on its first occurrence only.
+    // Pre-pass: any term already linked manually via [text](/glossary#slug)
+    // counts as its first occurrence, so we won't auto-wrap a later plain-text
+    // mention of the same term.
     const seenTerms = new Set();
+    collectManualGlossaryLinks(tree, seenTerms);
 
     function walk(node) {
       if (!node || !Array.isArray(node.children)) return;

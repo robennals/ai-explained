@@ -1,0 +1,18 @@
+---
+term: layer
+aliases: [layers]
+firstAppearance: neurons
+---
+
+A **layer** is a group of neurons that all process the same inputs at the same time, whose outputs become the inputs of the next layer.
+
+Each layer combines the previous layer's outputs into something more complex. Early layers detect simple patterns (edges, colours); deeper layers combine those into parts (eyes, ears); the deepest layers combine those into whole concepts (cat, dog). Depth is what lets neural networks learn complex things.
+
+Some examples:
+
+- **One layer** — inputs → one row of neurons → output. Limited to simple problems; famously, a single layer can't solve XOR.
+- **Two layers** — the minimum needed to solve XOR. The first layer computes intermediate facts; the second combines them into the answer.
+- **Modern image classifiers** — typically 50 to 150 layers, each detecting progressively higher-level features.
+- **GPT-3** — 96 layers; frontier language models have even more.
+
+[Backpropagation](/glossary#backpropagation) is what makes training every layer practical — it flows the error signal backward through every layer so every weight gets a gradient.

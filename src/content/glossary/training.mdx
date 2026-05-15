@@ -4,7 +4,7 @@ aliases: [train, trains, trained]
 firstAppearance: optimization
 ---
 
-**Training** is the process of adjusting a [model](/glossary#model)'s [parameters](/glossary#parameter) so it makes the smallest [error](/glossary#error) on the data we give it.
+**Training** is the process of adjusting a model's parameters so it makes the smallest error on the data we give it.
 
 Some examples, the same recipe at different scales:
 
@@ -12,4 +12,4 @@ Some examples, the same recipe at different scales:
 - **Fitting `curveY(x) = a + b·x + c·x² + d·x³` to a set of points** — pick values for `a, b, c, d`, measure how far the curve is from each point. A smaller total distance means a better fit. Adjust the parameters toward whatever shrinks the distance. Repeat until the curve is as close as possible.
 - **Training a next-word predictor** — show it real sentences. For each one, see how unlikely the model thought the actual next word was. A model is good if it gives the right words high probability. Nudge the parameters until the right words become less surprising. Repeat over billions of sentences.
 
-In practice, training uses [gradient descent](/glossary#gradient-descent): instead of guessing which parameter to nudge, it calculates which direction shrinks the error fastest, then takes a small step that way. This works only because the model is built to be **smooth** — small parameter changes give small, predictable changes in the error. Training is [optimization](/glossary#optimization) applied to a model's parameters.
+In practice, training uses gradient descent: instead of guessing which parameter to nudge, it calculates which direction shrinks the error fastest, then takes a small step that way. This works only because the model is built to be **smooth** — small parameter changes give small, predictable changes in the error. Training is optimization applied to a model's parameters.
