@@ -1,0 +1,18 @@
+---
+term: generalisation
+aliases: [generalization, generalize, generalise, generalizes, generalises, generalized, generalised, generalizing, generalising]
+firstAppearance: next-word-prediction
+---
+
+**Generalisation** is when a model makes good predictions on inputs it has never seen before, because it has learned the underlying patterns rather than just memorising its training data.
+
+A bigram model can't generalise — it knows only the word sequences it has literally counted. A neural network *can* generalise: by working with embeddings, it treats similar inputs similarly. If it has learned that "the cat sat on the ___" usually predicts "mat", it'll make a similar prediction for "the dog sat on the ___", even if that exact sentence never appeared in its training data.
+
+Some examples:
+
+- **A bigram model** — zero generalisation. If it never saw a sequence, it has no prediction.
+- **A neural-network language model** — generalises through embeddings: similar words have similar vectors, so similar contexts produce similar predictions.
+- **An image classifier** — generalises by learning features (edges, textures) that apply to photos it has never seen; that's why a cat detector still works on a brand-new cat photo.
+- **A model that overfits** — learned the training set so precisely that it predicts well on training data but poorly on anything new. The opposite of useful generalisation.
+
+Generalisation is the whole point of training. A model that can only repeat its training data hasn't really learned anything; a model that generalises well is the one that's actually useful.

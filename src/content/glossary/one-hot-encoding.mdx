@@ -1,0 +1,17 @@
+---
+term: one-hot encoding
+aliases: [one-hot, one-hot vector, one-hot vectors, one-hot encodings]
+firstAppearance: embeddings
+---
+
+A **one-hot encoding** is a vector with a single 1 in the slot for the item being represented, and 0s everywhere else.
+
+For a vocabulary of, say, 50 000 tokens, every token gets a 50 000-dimensional one-hot vector — its own slot is 1, every other slot is 0. It's a way of representing discrete things (which item out of many) using numbers a neural network can read, without claiming anything about how the items relate to each other.
+
+Some examples:
+
+- **3-token vocabulary `[cat, dog, fish]`** — cat is `(1, 0, 0)`, dog is `(0, 1, 0)`, fish is `(0, 0, 1)`.
+- **The alphabet** — each letter is a 26-dimensional vector with a single 1.
+- **A language model's input layer** — each token is a one-hot vector with one slot per token, often tens of thousands of slots long. Feeding this through the embedding layer turns it into the token's learned embedding.
+
+One-hot vectors are sparse and uninformative on their own — every pair of one-hot vectors has dot product 0 — so models almost always pass them through an embedding layer to get a denser, meaningful representation.

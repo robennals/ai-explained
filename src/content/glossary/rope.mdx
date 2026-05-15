@@ -1,0 +1,17 @@
+---
+term: RoPE
+aliases: [rotary position embeddings, rotary positional embeddings, rotary position embedding]
+firstAppearance: positions
+---
+
+**RoPE** (Rotary Position Embeddings) is a positional encoding that gives each token a sense of position by rotating its query and key vectors by an angle proportional to where it sits in the sequence.
+
+The clever part: when two rotated vectors are matched by dot product, the result depends only on the *angle between them* — which depends only on the tokens' *distance apart*, not on their absolute positions. Tokens close together produce a high dot product; tokens far apart produce a low one, automatically. Each attention head can adjust how quickly the rotation accumulates with position, giving it control over how sharply attention falls off with distance.
+
+Some examples:
+
+- **Speed 30° per position** — neighbouring tokens have similar angles (high dot product), but a token 12 positions away has rotated 360°, so its dot product drops sharply.
+- **Multiple rotation speeds** — RoPE uses many pairs of dimensions rotating at different rates; fast pairs handle short-range attention, slow pairs handle long-range, and each head can mix them however it likes.
+- **Used in Llama, Mistral, Gemma, Qwen, DeepSeek** — nearly every frontier open-weight model today uses RoPE.
+
+RoPE encodes distance but not direction, so it's almost always paired with causal masking (each token attends only to tokens before it).

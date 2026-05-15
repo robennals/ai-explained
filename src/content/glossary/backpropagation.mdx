@@ -1,0 +1,17 @@
+---
+term: backpropagation
+aliases: [backprop]
+firstAppearance: neurons
+---
+
+**Backpropagation** is the algorithm that calculates the gradient for every parameter in a neural network at once, by flowing the error signal backward through each layer.
+
+Without backpropagation, you'd have to figure out how each parameter contributes to the final error one parameter at a time — impossible when there are millions of weights and biases buried deep inside a network. Backpropagation computes the gradient for every parameter efficiently in a single backward pass, so gradient descent can update all of them together.
+
+Some examples:
+
+- **A small two-layer network** — start from the output error, work backward layer by layer; each connection gets a gradient that says how its weight should change.
+- **A modern image classifier with 50+ layers** — backpropagation still works the same way, just with more layers to flow the error through.
+- **GPT-3 training** — backpropagation through 96 layers and 175 billion parameters, repeated trillions of times.
+
+Without backpropagation, training networks deeper than two or three layers would be effectively impossible. With it, modern frontier models become feasible.

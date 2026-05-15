@@ -1,0 +1,17 @@
+---
+term: ALiBi
+aliases: []
+firstAppearance: positions
+---
+
+**ALiBi** (Attention with Linear Biases) is a positional encoding that gives an attention model a sense of position by subtracting a linear penalty from attention scores based on how far apart two tokens are.
+
+The formula is `score = (query · key) − m × distance`, where `m` is a per-head slope. Different heads use different slopes, so some heads attend very locally (steep slope, only nearby tokens matter) and others attend broadly (gentle slope, distant tokens still count). It's a simple, easy-to-implement positional encoding that just works.
+
+Some examples:
+
+- **A short-range head** with steep slope — only the last few tokens get meaningful attention; further away the penalty crushes the score.
+- **A long-range head** with gentle slope — distant tokens stay in the running, just slightly reduced. Useful for tracking a topic across paragraphs.
+- **Used in BLOOM and MPT** — these models adopted ALiBi for its simplicity.
+
+ALiBi works, but it has limits: the penalty is *per-head, not per-query*, so a single head can't decide that a particular word needs to look far back. RoPE overcomes that limit by encoding distance into the vectors themselves rather than penalising scores after the fact.

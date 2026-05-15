@@ -1,0 +1,18 @@
+---
+term: query
+aliases: [queries]
+firstAppearance: attention
+---
+
+A **query** is a vector each token produces in the attention mechanism, representing *what that token is looking for* in other tokens.
+
+The query is matched against every other token's key using a dot product. A high match means that other token is relevant; a low match means ignore it. Each attention head has its own query weights, so different heads learn to look for different things — one head's queries might hunt for nouns, another's might hunt for verbs.
+
+Some examples:
+
+- **A pronoun's query** — "she" asks "where's a recent female noun?". Words like "the woman" answer with matching keys.
+- **A verb's query** — "chased" might ask "who is the subject?". Nouns before it answer with their keys.
+- **A filler word's query** — "blah" isn't looking for anything specific; its query points at a "none" direction so attention parks harmlessly on a sink token.
+- **Inside ChatGPT** — every token at every layer produces queries (and keys, and values) that drive how information flows.
+
+Query, key, and value are the three vectors at the heart of the attention mechanism — query asks, key offers, value shares.

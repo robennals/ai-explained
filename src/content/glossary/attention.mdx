@@ -1,0 +1,18 @@
+---
+term: attention
+aliases: [attentions]
+firstAppearance: attention
+---
+
+**Attention** is the mechanism that lets each token in a sequence choose which other tokens to focus on, instead of being stuck looking at a fixed window of nearby words.
+
+Before attention, language models had to read a fixed number of recent words and predict from there. Attention solves this by giving each token three vectors — a query (what it's looking for), a key (what it offers), and a value (what it shares). Each token's query is matched against every other token's key by dot product; the highest-scoring matches contribute their values most strongly. The token's new representation is the weighted blend.
+
+Some examples:
+
+- **A pronoun resolving itself** — "she" looks back through the sentence with a query for "female noun"; the key on "the woman" matches; "she" pulls in the value to know who's being referred to.
+- **Disambiguating "bank"** — in "she made a deposit at the bank", "bank" asks "is there a money word nearby?"; "deposit" answers yes; "bank" updates toward the financial meaning rather than the river one.
+- **A pronoun resolved across paragraphs** — a novel introduces "John" once at the start; thousands of words later, "John picked up the scalpel" — attention can reach back to the original introduction. No fixed window can do this.
+- **Inside ChatGPT** — every token in your prompt and the model's response uses attention to gather information from every previous token, in parallel, at every layer.
+
+Attention is the single biggest reason modern AI works as well as it does — it's the *A* in *Attention Is All You Need*, the paper that introduced the transformer.

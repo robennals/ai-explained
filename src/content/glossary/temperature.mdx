@@ -1,0 +1,18 @@
+---
+term: temperature
+aliases: [temperatures]
+firstAppearance: next-word-prediction
+---
+
+A **temperature** is a number that controls how random a language model's next-word predictions are.
+
+At low temperature, the model almost always picks the single most likely word — its output becomes safe, predictable, and often repetitive. At high temperature, the model picks more evenly from its options — its output becomes more varied and creative, but also more error-prone. Temperature is the dial you turn to trade reliability for creativity.
+
+Some examples:
+
+- **Temperature 0** — always pick the top prediction. The model becomes deterministic: same prompt → same output. Useful when you want consistent, factual answers.
+- **Temperature 0.7** — a common default. The model usually picks one of the top few options, with mild randomness for variety.
+- **Temperature 1** — pick from options in proportion to their probabilities, with no extra sharpening or smoothing.
+- **Temperature 2** — heavily flattened distribution; even low-probability words get a real chance. Used for highly creative or wild generations.
+
+Generating the same prompt twice at high temperature gives you different outputs each time — that's the temperature dial at work.

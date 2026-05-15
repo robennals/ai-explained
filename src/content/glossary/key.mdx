@@ -1,0 +1,18 @@
+---
+term: key
+aliases: [keys]
+firstAppearance: attention
+---
+
+A **key** is a vector each token produces in the attention mechanism, representing *what that token is offering* to other tokens — the kind of information it has on hand.
+
+When another token's query matches this key (via a high dot product), this token becomes a top target for attention. The key describes what the token *is*, while the query describes what the token is *looking for*. They're deliberately separate so a pronoun can hunt for nouns without itself being mistaken for one.
+
+Some examples:
+
+- **A noun's key** — "the woman" says "I am a female noun"; pronoun queries searching for that pattern match strongly.
+- **A verb's key** — "ran" says "I am a past-tense action"; queries asking about verbs match.
+- **Filler tokens** — "blah", "um", commas all have keys that offer nothing of interest, so most queries don't match them.
+- **A sink token** — a special token whose key matches partially against almost any query, so leftover attention has somewhere to land when no real match exists.
+
+Together with the query and the value, the key is one of the three vectors at the heart of the attention mechanism — query asks, key offers, value shares.

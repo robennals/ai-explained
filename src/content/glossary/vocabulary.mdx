@@ -1,0 +1,18 @@
+---
+term: vocabulary
+aliases: [vocabularies]
+firstAppearance: embeddings
+---
+
+A **vocabulary** is the full set of distinct tokens a language model knows about — every word, word fragment, and punctuation symbol it can read or produce.
+
+The size of the vocabulary is a design choice. A bigger vocabulary means common words each get their own token (faster, cleaner sequences) but the embedding layer needs more parameters. A smaller vocabulary means more words have to be split into fragments, with longer sequences as a result. Modern language models typically have vocabularies of around 30 000 to 200 000 tokens.
+
+Some examples:
+
+- **GPT-2** — 50 257 tokens.
+- **GPT-3** — 50 257 tokens (same tokeniser as GPT-2).
+- **GPT-4** — about 100 000 tokens, with better handling of code and non-English languages.
+- **Llama 3** — 128 000 tokens, optimised for many languages.
+
+Every token in the vocabulary has its own row in the embedding layer's weight matrix — that's how the model converts an incoming token into a vector it can do math on.

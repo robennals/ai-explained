@@ -1,0 +1,18 @@
+---
+term: n-gram
+aliases: [n-grams, bigram, bigrams, bigram model, trigram, trigrams]
+firstAppearance: next-word-prediction
+---
+
+An **n-gram** is a sequence of *n* consecutive words (or tokens), used by simple next-word predictors that look up "what usually follows" for each such sequence.
+
+Early language models worked by counting n-grams in a giant pile of text and building a giant lookup table: given the last n−1 words, what's the most common next word? Simple and fast — but limited, because the number of possible n-grams explodes with n. A vocabulary of 50 000 words has more 10-grams than there are atoms in the observable universe.
+
+Some examples:
+
+- **bigram (n = 2)** — predict from one previous word: "of" → "the" 33% of the time, "he" → "was" frequently. Each pair sounds fine, but stringing them together produces nonsense.
+- **trigram (n = 3)** — predict from two previous words. More context, much bigger table.
+- **5-gram** — already needs more entries than the entire internet contains.
+- **10-gram** — the number of possibilities exceeds the atoms in the universe.
+
+The fundamental problem with n-grams is that they can't generalise — they only predict for sequences they've literally seen before. Neural-network language models replaced them by working with continuous embeddings instead, so similar sentences automatically produce similar predictions.
