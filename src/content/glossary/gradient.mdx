@@ -4,15 +4,17 @@ aliases: [gradients]
 firstAppearance: optimization
 ---
 
-A **gradient** is a number for each parameter of a model, telling you which way to nudge that parameter to reduce the model's loss fastest.
+A **gradient** is a number for each parameter of a model, telling you which way to nudge that parameter to reduce the loss fastest from where the model currently is.
 
-There's one such number per parameter — that's the gradient *for* that parameter. Take the gradients of every parameter in the model together, and you can think of them as a single vector pointing in the direction of fastest loss reduction across the whole model. That vector is what gradient descent follows.
+The "from where the model currently is" matters: a gradient isn't a fixed property of a parameter. It depends on the current values of *every* parameter, plus the training data being looked at. As soon as gradient descent takes a step and the parameters shift, all the gradients change. The gradient only says "*right now, given this state, here's the direction to move*"; once you've moved, the gradient has to be recomputed before the next step.
+
+Take the gradients of every parameter together and you can think of them as a single vector pointing in the direction of fastest loss reduction across the whole model. That vector is what gradient descent follows — for one step.
 
 Some examples:
 
-- **A one-parameter model** — the gradient is a single number: the slope of the loss curve at the current parameter setting. It says how much the loss changes when you nudge the parameter, and in which direction.
-- **A two-parameter model** — the gradient is two numbers, together forming an arrow on a 2D loss landscape. The arrow points in the steepest downhill direction.
-- **A million-parameter network** — a million numbers, one per parameter, computed efficiently by [backpropagation](/glossary#backpropagation). Each one says how that parameter should change to shrink the loss.
+- **A one-parameter model** — the gradient is a single number: the slope of the loss curve at the parameter's current value. Move the parameter and the slope changes.
+- **A two-parameter model** — the gradient is two numbers, forming an arrow on a 2D loss landscape that points in the steepest downhill direction *from where you are*. Take a step and the arrow tilts.
+- **A million-parameter network** — a million numbers, one per parameter, computed efficiently by [backpropagation](/glossary#backpropagation). After every training step, they all get recomputed.
 - **The gradient inside ChatGPT** — about a trillion numbers, recomputed at every training step.
 
-Training is, mechanically, the loop of *compute the gradient, take a small step in its direction, repeat.*
+Training is, mechanically, the loop of *compute the gradient, take a small step in its direction, repeat* — and the reason it has to be a loop is that the gradient changes every time you take a step.

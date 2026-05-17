@@ -6,6 +6,8 @@ import {
   Children,
   createContext,
   useContext,
+  useEffect,
+  useRef,
   useState,
   type MouseEvent,
   type ReactNode,
@@ -87,6 +89,13 @@ function PopoverNavigator({ initialSlug }: NavigatorProps) {
   const previousSlug = history.length > 1 ? history[history.length - 2] : null;
   const entry = glossaryBySlug[currentSlug];
   const Body = entry.Body;
+  const bodyRef = useRef<HTMLDivElement>(null);
+
+  // Reset scroll to top whenever we navigate to a different entry — otherwise
+  // the new entry opens scrolled to wherever the previous one was.
+  useEffect(() => {
+    if (bodyRef.current) bodyRef.current.scrollTop = 0;
+  }, [currentSlug]);
 
   function handleBodyClick(e: MouseEvent<HTMLDivElement>) {
     const target = e.target as HTMLElement;
@@ -114,7 +123,7 @@ function PopoverNavigator({ initialSlug }: NavigatorProps) {
           <span aria-hidden="true">←</span>
         </button>
       )}
-      <div className="glossary-popover-body prose prose-sm max-w-none">
+      <div ref={bodyRef} className="glossary-popover-body prose prose-sm max-w-none">
         <div onClick={handleBodyClick}>
           <GlossaryRenderProvider currentSlug={currentSlug}>
             <Body />
