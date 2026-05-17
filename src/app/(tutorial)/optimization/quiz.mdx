@@ -24,7 +24,7 @@ What does the *gradient* tell you?
 <Feedback>
 The gradient is an arrow pointing in the steepest downhill direction across all parameters at once. It says which way to nudge each knob.
 
-*Gotcha:* (A) describes the *error*, not the gradient. The gradient adds direction on top of magnitude — and that's what makes optimizing millions of knobs at once even possible.
+(A) describes the *error*, not the gradient. The gradient adds direction on top of magnitude — and that's what makes optimizing millions of knobs at once even possible.
 </Feedback>
 </Question>
 
@@ -37,7 +37,7 @@ The chapter says the human eye, the Wright brothers' airplane, and the iPhone we
 <Choice>Complex things always take billions of years to develop</Choice>
 
 <Feedback>
-Each of these — biological organisms, airplanes, smartphones — was built up through generations of tiny tweaks tested against reality. The chapter argues this is universal: complex things almost never come from one brilliant design.
+Each of these — biological organisms, airplanes, smartphones — was built up through generations of tiny tweaks tested against reality. The pattern is universal: complex things almost never come from one brilliant design.
 </Feedback>
 </Question>
 
@@ -52,7 +52,7 @@ Why doesn't the chapter's "try a small change, keep it if it helped" algorithm w
 <Feedback>
 A password checker is *non-smooth*: any guess that isn't exactly right comes back as "wrong", telling you nothing about how close you were. Without a "warmer/colder" signal, small tweaks give you nothing to follow.
 
-*Gotcha:* (D) is tempting — the search space *is* huge — but the chapter already showed huge search spaces are fine when the function is smooth. The killer is the missing signal, not the size.
+(D) is tempting — the search space *is* huge — but huge search spaces are fine when the function is smooth. The killer here is the missing signal, not the size.
 </Feedback>
 </Question>
 
@@ -67,7 +67,7 @@ Someone argues: "For AI to do something impressive — like writing a story — 
 <Feedback>
 Nobody writes down "the rules of good writing" for the model. Training just shows it lots of examples and adjusts parameters incrementally until the output is good — the model picks up the patterns of good writing on its own, without ever being told what those patterns are.
 
-*Gotcha:* (A) is a common stance, but the chapter isn't arguing about AI's current quality. It's arguing about how AI is *built*. Even when AI does something impressive, the impressive part wasn't designed in; it was learned.
+(A) is a common stance, but the issue isn't AI's current quality — it's how AI is *built*. Even when AI does something impressive, the impressive part wasn't designed in; it was learned.
 </Feedback>
 </Question>
 
@@ -80,9 +80,7 @@ According to the chapter, what enabled modern AI to finally work — given that 
 <Choice>Quantum computers running thousands of times faster</Choice>
 
 <Feedback>
-The chapter's claim is that the basic algorithm — incremental optimization on smooth models — has been around for decades. What changed was having enough data to measure error on, enough compute to run billions of tiny adjustments, and models that have gradually improved through many small architectural tweaks.
-
-*Gotcha:* New architectures (like transformers) absolutely matter — but they're incremental refinements within the same paradigm of gradient descent on smooth functions, not a brand-new principle of learning.
+The basic algorithm — incremental optimization on smooth models — has been around for decades. What changed recently was having enough data to measure error on, enough compute to run billions of tiny adjustments, and models that have gradually improved through many small architectural tweaks. New architectures (like transformers) absolutely matter — but they're incremental refinements within the same paradigm of gradient descent on smooth functions, not a brand-new principle of learning.
 </Feedback>
 </Question>
 
