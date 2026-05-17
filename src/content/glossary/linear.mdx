@@ -1,0 +1,18 @@
+---
+term: linear
+aliases: [linearity, linearly, nonlinear, non-linear, non-linearity, nonlinearity, non-linearly, nonlinearly]
+firstAppearance: optimization
+---
+
+A **linear** function is one whose output is a weighted sum of its inputs — no curves, no thresholds, no surprises. Anything else is **nonlinear**.
+
+Plotted on a graph, a one-input linear function is a straight line; with two inputs, a flat plane; with more inputs, the higher-dimensional equivalent.
+
+Some examples:
+
+- **`f(x) = 3x + 2`** — a straight line. Linear.
+- **`f(x, y) = 2x + 5y`** — a flat plane in 3D space. Linear.
+- **A neural-network layer with no activation function** — just a weighted sum of inputs, so linear.
+- **A neuron's activation function (sigmoid, ReLU, Swish)** — nonlinear. Sigmoid bends; ReLU has a kink at zero.
+
+If you stacked linear layers without any nonlinear activation function between them, the whole stack would collapse mathematically into a single linear function — depth would buy you nothing. Activation functions exist to break that, so that deep networks can model curves and thresholds, not just straight lines.

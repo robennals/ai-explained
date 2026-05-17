@@ -4,9 +4,9 @@ aliases: [multi-headed attention, multihead attention]
 firstAppearance: attention
 ---
 
-**Multi-head attention** is running many attention heads in parallel, each with its own query, key, and value weights, so the model can learn many different relationships at once.
+**Multi-head attention** is running the attention computation several times in parallel at the same layer, each copy with its own query, key, and value weights, so the model can learn many different relationships between tokens at once.
 
-Understanding a sentence requires asking several kinds of question at the same time: what does this pronoun refer to? What's the subject of this verb? Which clause does this word belong to? Each attention head specialises in one of these questions; together, multi-head attention lets the model handle all of them in a single layer.
+Understanding a sentence requires asking several kinds of question at the same time: what does this pronoun refer to? What's the subject of this verb? Which clause does this word belong to? A single attention computation can only learn one of these patterns, so transformers run several side-by-side at each layer and combine the results. Each one of these parallel runs is called an **attention head**.
 
 Some examples:
 

@@ -1,0 +1,18 @@
+---
+term: language model
+aliases: [language models]
+firstAppearance: neurons
+---
+
+A **language model** is a model that takes some text as input and predicts what text would come next.
+
+Feed it "the cat sat on the ___" and a good language model assigns higher probability to "mat" than to "elephant". To generate longer text, pick one of the likely next tokens, add it to the input, and repeat. That's how ChatGPT writes paragraph-long answers one token at a time.
+
+Some examples:
+
+- **Autocomplete on your phone** — a tiny language model trained to suggest the next word as you type.
+- **A bigram model** — counts how often each pair of words appears in training data, then predicts the next word from the previous one only.
+- **GPT-2** — a transformer-based language model with 1.5 billion parameters; the first model that wrote convincingly long passages.
+- **Frontier chat LLMs (ChatGPT, Claude, Gemini)** — transformer-based language models with hundreds of billions of parameters, trained on large amounts of text (including all the data on the internet), then tuned to behave like helpful assistants.
+
+Every chatbot, every code-completion tool, every "AI that writes things" is some flavour of language model — they differ mostly in size and training.

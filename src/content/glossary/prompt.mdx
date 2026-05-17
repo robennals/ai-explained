@@ -1,0 +1,18 @@
+---
+term: prompt
+aliases: [prompts, prompting, prompted]
+firstAppearance: computation
+---
+
+A **prompt** is the text you give a language model as input.
+
+In a chat model like ChatGPT, the prompt is everything before the model starts replying — your current message, any earlier messages in the conversation, and any "system" instructions the developer set up to steer the model's behaviour. By default, what's in the prompt is the model's only working knowledge of the current conversation.
+
+Some examples:
+
+- **A simple question** — "What's the capital of France?" The model reads this and predicts the next tokens, which happen to spell out "Paris".
+- **A code completion** — your half-written code is the prompt; the model predicts what comes next.
+- **A multi-turn chat** — every message in the history (yours and the model's) is concatenated into one big prompt for predicting the next response.
+- **A system prompt** — developers can put detailed instructions in front of every user message ("You are a helpful coding assistant…") so the model behaves consistently across users.
+
+Most of what a language model "knows" about the current conversation lives in the prompt — change the prompt and the response changes.

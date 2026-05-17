@@ -1,0 +1,18 @@
+---
+term: label
+aliases: [labels, labelled, labeled, labelling, labeling]
+firstAppearance: vectors
+---
+
+A **label** is the correct answer attached to a training example, telling the model what the right output should be.
+
+Every training example comes with a label — the "right answer" the model is supposed to produce. Training compares the model's prediction to the label, measures the error, and adjusts parameters to bring the two closer together. Without labels there's nothing to compare predictions against.
+
+Some examples:
+
+- **An image's class label** — "cat" attached to a photo of a cat. The model is trained to output "cat" when shown that photo.
+- **A next-word example** — given "the cat sat on the", the label is the actual word that came next in the training text ("mat", say).
+- **A sentiment label** — given a movie review, the label is "positive" or "negative".
+- **A bounding-box label** — for object detection, the label is a rectangle around each object plus what kind of object it is.
+
+Collecting labelled data — usually by paying humans to label examples one at a time — is often the most expensive and slowest part of training a new model.
