@@ -66,6 +66,21 @@ Consider two examples: today's largest language models have roughly as many para
 </Question>
 
 <Question>
+A neuron with two inputs (each 0 or 1) uses a sigmoid: the activation maps a big positive number to near 1, and a big negative number to near 0. Which weights and bias make it compute the AND gate (output near 1 only when both inputs are 1)?
+
+<Choice>weights = (10, 10), bias = −5</Choice>
+<Choice correct>weights = (10, 10), bias = −15</Choice>
+<Choice>weights = (−10, −10), bias = 15</Choice>
+<Choice>weights = (−10, 0), bias = 5</Choice>
+
+<Feedback>
+For AND, the sum should be positive only when both inputs are 1. With weights (10, 10), the sum is the bias when nothing fires, bias + 10 when one input fires, and bias + 20 when both fire. Bias = −15 makes the both-inputs sum = 5 (clearly positive → near 1) but the one-input sum = −5 (clearly negative → near 0). The big magnitudes make the sigmoid fire crisply — its output is very close to 0 or 1 rather than wishy-washy in the middle.
+
+The other choices are real logic gates, just not AND. (A) bias = −5 fires whenever any input is 1 — that's OR. (C) weights = (−10, −10), bias = 15 fires *unless* both inputs are 1 — that's NAND. (D) weights = (−10, 0), bias = 5 ignores the second input and flips the first — that's NOT applied to the first input.
+</Feedback>
+</Question>
+
+<Question>
 The chapter shows three neurons in two layers solving XOR, while a single neuron can't. What does the second layer let you do that one layer alone can't?
 
 <Choice>Train faster on the same data</Choice>
