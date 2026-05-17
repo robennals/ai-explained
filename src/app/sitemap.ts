@@ -1,12 +1,19 @@
 import type { MetadataRoute } from "next";
-import { getMainChapters, getAppendixChapters } from "@/lib/curriculum";
+import {
+  getIntroChapter,
+  getMainChapters,
+  getAppendixChapters,
+} from "@/lib/curriculum";
 import { SITE_URL } from "@/lib/site-url";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
-  const ready = [...getMainChapters(), ...getAppendixChapters()].filter(
-    (c) => c.ready,
-  );
+  const intro = getIntroChapter();
+  const ready = [
+    ...(intro ? [intro] : []),
+    ...getMainChapters(),
+    ...getAppendixChapters(),
+  ].filter((c) => c.ready);
   return [
     {
       url: SITE_URL,

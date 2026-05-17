@@ -13,6 +13,9 @@ export function chapterMetadata(slug: string): Metadata {
   return {
     title: ch.title,
     description: ch.description,
+    alternates: {
+      canonical: `/${slug}`,
+    },
     openGraph: {
       title: ch.title,
       description: ch.description,
