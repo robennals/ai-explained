@@ -4,14 +4,10 @@ aliases: [backprop]
 firstAppearance: neurons
 ---
 
-**Backpropagation** is the algorithm that calculates the gradient for every parameter in a neural network at once, by flowing the error signal backward through each layer.
+**Backpropagation** is an efficient algorithm for calculating the gradient of every parameter in a multi-layer neural network.
 
-Without backpropagation, you'd have to figure out how each parameter contributes to the final error one parameter at a time — impossible when there are millions of weights and biases buried deep inside a network. Backpropagation computes the gradient for every parameter efficiently in a single backward pass, so gradient descent can update all of them together.
+To train a model with gradient descent, you need to know each parameter's gradient — how much to nudge it, and in which direction, to reduce the loss. Every parameter has a gradient, even one buried several layers deep: in principle you could find it by nudging that parameter up and down a tiny amount and watching how the loss changes. But doing that one parameter at a time would mean a full forward pass through the model for every single parameter — completely impractical when a network has billions of them.
 
-Some examples:
+This is really just calculus. If you have a function that depends on many variables (here the loss depends on all the model's parameters), you can differentiate it with respect to any one of those variables to get that variable's gradient. Backpropagation is just how that differentiation works out in a neural network.
 
-- **A small two-layer network** — start from the output error, work backward layer by layer; each connection gets a gradient that says how its weight should change.
-- **A modern image classifier with 50+ layers** — backpropagation still works the same way, just with more layers to flow the error through.
-- **GPT-3 training** — backpropagation through 96 layers and 175 billion parameters, repeated trillions of times.
-
-Without backpropagation, training networks deeper than two or three layers would be effectively impossible. With it, modern frontier models become feasible.
+The trick is to start at the output and work *back* through the layers. A parameter's gradient depends on everything between it and the output, so once you know the gradients of the layer just *after* a parameter, the chain rule of calculus gives you that parameter's gradient almost for free. Starting at the output and stepping one layer back at a time, each layer's gradients fall out of the gradients of the layer in front of it — one backward pass through the network and every parameter's gradient is computed.
