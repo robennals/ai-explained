@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import {
   getIntroChapter,
@@ -5,6 +6,12 @@ import {
   getAppendixChapters,
   getAppendixLabel,
 } from "@/lib/curriculum";
+
+export const metadata: Metadata = {
+  alternates: {
+    canonical: "/",
+  },
+};
 
 export default function HomePage() {
   const introChapter = getIntroChapter();
