@@ -1,0 +1,18 @@
+---
+term: optimization
+aliases: [optimisation, optimisations, optimizations, optimise, optimises, optimised, optimising, optimize, optimizes, optimized, optimizing]
+firstAppearance: optimization
+---
+
+**Optimization** is the process of making something better step by step — measure how far it is from perfect, make a small change, keep it if it helped, repeat.
+
+This same loop appears almost anywhere complex things get built. The chapter calls it *incremental optimization*: nothing is designed perfectly in one shot; you reach a good solution by accumulating reliable tiny improvements.
+
+Some examples:
+
+- **Natural evolution** — random changes, tested by survival, kept or eliminated. The original incremental optimizer.
+- **The scientific method** — propose a hypothesis, run an experiment, accept or reject, refine.
+- **The Wright brothers' wings** — built and tested hundreds of wing designs, measured which generated more lift, kept what worked. The airplane was iterated into existence.
+- **Training a neural network** — measure the loss, calculate the gradient (the direction of fastest improvement), nudge every parameter that way, repeat over billions of steps.
+
+Training a model is just optimization applied to its parameters, with the loss as the number to minimize. The "small change" step uses gradient descent, which is what makes training fast enough to work in practice — without it, you'd be optimizing by random guesses.

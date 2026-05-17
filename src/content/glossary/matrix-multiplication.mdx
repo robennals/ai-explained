@@ -1,0 +1,18 @@
+---
+term: matrix multiplication
+aliases: [matrix multiplications, matrix multiply, matmul]
+firstAppearance: matrix-math
+---
+
+**Matrix multiplication** is an operation that combines two matrices to produce a new matrix.
+
+Each cell in the result is the dot product of one row from the first matrix and one column from the second. Sounds fiddly, but it's the most common operation in a neural network — every layer's forward pass is mostly matrix multiplications.
+
+Some examples:
+
+- **A 2×2 times a 2×2** — four dot products, one for each cell of the resulting 2×2 matrix.
+- **A neural-network layer** — multiply the input vector (treated as a 1×N matrix) by the layer's N×M weight matrix to get the 1×M output.
+- **An attention head** — comparing every token's query with every other token's key is one big matrix multiplication.
+- **Training GPT-3** — trillions of matrix multiplications, repeated for every forward pass and every backward pass during training.
+
+GPUs exist mainly to do matrix multiplications fast in parallel — that's why running modern AI requires them.

@@ -1,0 +1,19 @@
+---
+term: softmax
+aliases: []
+firstAppearance: attention
+---
+
+**Softmax** is a function that turns a list of numbers into a list of percentages that add up to 100%.
+
+Think of it as a competition: bigger numbers dominate, smaller numbers get squeezed almost to zero, and the result is a probability distribution. Softmax cares about *relative* sizes, not absolute ones — making one score bigger doesn't change the output unless it's bigger *relative to the others*.
+
+Some examples:
+
+- **Equal scores `[1, 1, 1, 1]`** — softmax gives `[25%, 25%, 25%, 25%]`. No one stands out.
+- **One clear winner `[10, 0, 0, 0]`** — softmax gives roughly `[99.99%, ≈0%, ≈0%, ≈0%]`. The big number takes almost everything.
+- **Moderate gap `[2, 1, 0]`** — softmax gives roughly `[65%, 24%, 11%]`. The gaps between scores matter more than their absolute values.
+- **Attention scores** — raw match scores from the dot product are passed through softmax to decide how to divide each token's attention budget of 100%.
+- **A classifier's output** — raw scores for cat, dog, bird get softmaxed into class probabilities (e.g., 80% cat, 15% dog, 5% bird).
+
+Softmax appears everywhere in modern AI — anywhere a model needs to turn "raw scores" into "percentages that compete for a fixed budget of 100%".

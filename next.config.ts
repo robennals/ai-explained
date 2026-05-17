@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 import createMDX from "@next/mdx";
 import { execSync } from "child_process";
+import { resolve } from "path";
 
 function getGitBranch(): string {
   if (process.env.NODE_ENV === "production") return "main";
@@ -20,6 +21,12 @@ const nextConfig: NextConfig = {
 
 const withMDX = createMDX({
   options: {
+    // Pass plugins as absolute path strings so Turbopack can serialize them
+    // and the @next/mdx loader can require() them from its own location.
+    remarkPlugins: [
+      ["remark-frontmatter", ["yaml"]],
+      [resolve(__dirname, "scripts/remark-glossary.cjs"), {}],
+    ],
     rehypePlugins: [["rehype-slug", {}]],
   },
 });

@@ -1,0 +1,25 @@
+---
+term: vocabulary
+aliases: [vocabularies]
+firstAppearance: embeddings
+---
+
+A **vocabulary** is the set of tokens a tokeniser can output.
+
+You might imagine the vocabulary as just *all the words* — but that doesn't work. There are too many words in English alone, and the model also needs to handle misspelled words, made-up names, French, Chinese, Python code, emoji, and ASCII art. Putting every possible word from every possible context into the vocabulary would mean millions of entries, and the model would need to learn an embedding for each one — there isn't enough training data to figure out what every rare word means.
+
+So tokenisers break text into smaller pieces instead. Common words still get their own token, but rare or unfamiliar words get split into fragments (`-ing`, `super-`, individual characters) that the model already knows. Any word — even one the tokeniser has never seen — can be assembled from pieces.
+
+This sets up a tradeoff:
+
+- **A bigger vocabulary** — common words and patterns get represented as single tokens, so sequences are shorter and the model processes text faster. But the embedding layer needs more parameters, and rare tokens may not appear in training data often enough for the model to learn good embeddings for them.
+- **A smaller vocabulary** — fewer parameters, and every token gets seen often during training. But common words get split into multiple tokens, so sequences are longer and the model has to do more work.
+
+Some examples:
+
+- **GPT-2** — 50 257 tokens, optimised for English text.
+- **GPT-3** — 50 257 tokens (same tokeniser as GPT-2).
+- **GPT-4** — about 100 000 tokens, with much better handling of code and non-English languages.
+- **Llama 3** — 128 000 tokens, optimised across many languages.
+
+Every token in the vocabulary has its own row in the embedding layer's weight matrix — that's how the model turns a token into a vector it can do math on.

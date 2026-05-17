@@ -1,0 +1,18 @@
+---
+term: generalisation
+aliases: [generalization, generalize, generalise, generalizes, generalises, generalized, generalised, generalizing, generalising]
+firstAppearance: next-word-prediction
+---
+
+**Generalisation** is when a model makes good predictions on inputs it has never seen before, because it has learned the underlying patterns rather than just memorising its training data.
+
+The thing that genuinely *can't* generalise is pure memorisation — a lookup table that needs the exact input it was trained on. Anything that extracts a pattern and reuses it can generalise to some degree; the interesting question is *how* it generalises and *how far*.
+
+Different models generalise in different ways:
+
+- **A bigram model** — generalises by assuming only the previous word matters. It can score any sentence where the individual word-to-word transitions appeared in training, even if it has never seen the whole sentence. What it *can't* do is generalise across word similarity: it has no idea that "cat" and "kitten" are related, so seeing one teaches it nothing about the other.
+- **A neural-network language model** — generalises further through embeddings: similar words have similar vectors, so similar contexts produce similar predictions. It can answer "the kitten sat on the ___" sensibly even if its training only ever mentioned cats, because "kitten" and "cat" sit near each other in embedding space.
+- **An image classifier** — generalises by learning features (edges, textures, shapes) that apply to photos it has never seen; that's why a cat detector still works on a brand-new cat photo.
+- **A model that overfits** — has tuned itself so closely to the training set that it predicts well on training data but poorly on anything new. Memorisation has crowded out useful generalisation.
+
+Generalisation is the whole point of training. A model that can only repeat its training data hasn't really learned anything; a model that generalises well is the one that's actually useful.

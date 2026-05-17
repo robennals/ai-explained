@@ -1,0 +1,18 @@
+---
+term: dot product
+aliases: [dot products]
+firstAppearance: vectors
+---
+
+A **dot product** is the number you get by multiplying matching pairs of numbers from two vectors and adding the results.
+
+For two 2D vectors: `(a, b) · (c, d) = a×c + b×d`. For longer vectors, the pattern is the same — multiply matching numbers, then sum.
+
+What that single number actually means takes a few passes to unpack:
+
+- **For two 1-dimensional vectors** (just numbers) — the dot product is plain multiplication: `5 · 3 = 15`.
+- **For two unit vectors** (each scaled to size 1) — the dot product says how much the two vectors point in the same direction, or, equivalently, describe the same thing. The result lands between 1 (identical), 0 (unrelated), and −1 (opposite). This clean version is sometimes called *cosine similarity*.
+- **For non-unit vectors** — the dot product still rewards agreement on which dimensions matter, but it also grows with the magnitudes of the two vectors. A vector that scores high on *every* property would give a huge dot product with anything, even unrelated things; that's why we usually scale to unit length first when we want a fair similarity comparison.
+- **Inside a neuron** — the weighted sum is a dot product between the input vector and the weight vector. The weight vector's *direction* (its unit vector) says what the neuron is looking for; its *magnitude* says how sensitive the neuron is.
+
+The dot product turns up everywhere in modern AI — it's how neurons recognise patterns, how attention decides which words to focus on, and how embeddings compare meanings.

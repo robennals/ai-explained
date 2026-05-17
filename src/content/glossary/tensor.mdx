@@ -1,0 +1,23 @@
+---
+term: tensor
+aliases: [tensors]
+firstAppearance: computation
+---
+
+A **tensor** is a generalisation of vectors and matrices to arbitrarily shaped blocks of numbers.
+
+An N-dimensional vector has N numbers in it — its **shape** is `(N,)`. An N × M matrix has N × M numbers laid out in a grid of rows and columns — shape `(N, M)`. A tensor generalises both: its shape can have any number of values — `(N, M, K)`, `(N, M, K, J)`, and so on — describing how big the tensor is along each axis.
+
+The **shape** notation comes from numpy and PyTorch: a vector might have shape `(768,)`, a transformer's weight matrix might have shape `(768, 768)`, and a batch of images might have shape `(32, 3, 224, 224)`.
+
+In popular usage, "tensor" often just means "a matrix stored in GPU memory" — because most tensors inside a neural network actually are matrices, and what distinguishes them from regular matrices in your code is that they live on the GPU.
+
+Some examples:
+
+- **`5`** — shape `()`. A single number; the smallest possible tensor.
+- **`[1, 2, 3]`** — shape `(3,)`. A 3-dimensional vector.
+- **A black-and-white photo** — shape `(height, width)`. A matrix.
+- **A colour photo** — shape `(height, width, 3)`. The extra axis holds the three colour channels.
+- **A batch of 32 colour photos** — shape `(32, height, width, 3)`. 32 photos arranged so the model can process them all at once.
+
+"Tensor" sounds fancy but in practice it just means "a block of numbers with a given shape, stored on the GPU".

@@ -61,6 +61,13 @@ body {
   border-radius: 0.25rem;
   border: 1px solid var(--color-border);
 }
+/* The @tailwindcss/typography plugin injects literal backticks around inline
+   code via ::before/::after. The styled box already reads as code, so suppress
+   them. */
+.prose code::before,
+.prose code::after {
+  content: none;
+}
 
 .prose pre code {
   background: none;
@@ -134,4 +141,176 @@ body {
 
 .scrollbar-autohide:hover {
   scrollbar-color: var(--color-border) transparent;
+}
+
+/* Glossary terms — dotted underline + click-to-popover affordance */
+.glossary-term {
+  font: inherit;
+  font-weight: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  padding: 0 0.05em;
+  margin: 0;
+  cursor: help;
+  text-decoration: underline dotted var(--color-muted);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: background-color 0.15s, text-decoration-color 0.15s;
+}
+.glossary-term:hover,
+.glossary-term:focus-visible {
+  background-color: color-mix(in srgb, var(--color-accent) 10%, transparent);
+  text-decoration-color: var(--color-accent);
+  outline: none;
+  border-radius: 0.2rem;
+}
+.glossary-term:focus-visible {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent) 35%, transparent);
+}
+
+/* Glossary appendix — collapsed cards (native <details>) */
+.glossary-card {
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  background: var(--color-background);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.glossary-card[open] {
+  border-color: color-mix(in srgb, var(--color-accent) 35%, var(--color-border));
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+.glossary-card-summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  user-select: none;
+}
+.glossary-card-summary::-webkit-details-marker { display: none; }
+.glossary-card-summary::marker { content: ""; }
+.glossary-card-summary:hover { background: var(--color-surface); border-radius: 0.5rem; }
+.glossary-card[open] .glossary-card-summary:hover { border-radius: 0.5rem 0.5rem 0 0; }
+.glossary-card-term {
+  font-weight: 600;
+  text-transform: capitalize;
+  color: var(--color-foreground);
+  flex-shrink: 0;
+}
+.glossary-card-short {
+  color: var(--color-muted);
+  font-size: 0.9rem;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.glossary-card-chevron {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-right: 2px solid var(--color-muted);
+  border-bottom: 2px solid var(--color-muted);
+  transform: rotate(-45deg);
+  transition: transform 0.15s;
+  flex-shrink: 0;
+  align-self: center;
+  margin-left: auto;
+}
+.glossary-card[open] .glossary-card-chevron {
+  transform: rotate(45deg);
+}
+.glossary-card[open] .glossary-card-short {
+  display: none;
+}
+.glossary-card-body {
+  padding: 0.5rem 1rem 1rem;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.95rem;
+}
+.glossary-card-body > :first-child { margin-top: 0.75rem; }
+.glossary-card-refs {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--color-border);
+  font-size: 0.8125rem;
+  color: var(--color-muted);
+}
+.glossary-card-refs a { color: var(--color-accent-dark); }
+.glossary-card-refs a:hover { text-decoration: underline; }
+
+/* Linked-from-elsewhere highlight: brief pulse when arriving via #term */
+.glossary-card-highlight {
+  animation: glossary-card-pulse 1.4s ease-out;
+}
+@keyframes glossary-card-pulse {
+  0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-accent) 55%, transparent); }
+  25%  { box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-accent) 35%, transparent); }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+.glossary-popover {
+  z-index: 50;
+  width: min(360px, calc(100vw - 2rem));
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08), 0 4px 10px rgba(0, 0, 0, 0.06);
+  animation: glossary-pop-in 120ms ease-out;
+}
+@keyframes glossary-pop-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.glossary-popover-inner {
+  display: flex;
+  flex-direction: column;
+  max-height: min(70vh, 28rem);
+}
+.glossary-popover-back {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.8125rem;
+  color: var(--color-muted);
+  background: var(--color-surface);
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+  text-transform: capitalize;
+  cursor: pointer;
+  text-align: left;
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+}
+.glossary-popover-back:hover {
+  color: var(--color-foreground);
+  background: color-mix(in srgb, var(--color-accent) 8%, var(--color-surface));
+}
+.glossary-popover-body {
+  padding: 0.85rem 1rem;
+  overflow-y: auto;
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+.glossary-popover-body > :first-child { margin-top: 0; }
+.glossary-popover-body > :last-child { margin-bottom: 0; }
+.glossary-popover-outlink {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--color-border);
+  font-size: 0.8125rem;
+}
+.glossary-popover-outlink a {
+  color: var(--color-accent-dark);
+  font-weight: 500;
+}
+.glossary-popover-outlink a:hover { text-decoration: underline; }
+.glossary-popover-arrow {
+  fill: var(--color-background);
+  stroke: var(--color-border);
+  stroke-width: 1;
 }

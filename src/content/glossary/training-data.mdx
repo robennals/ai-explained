@@ -1,0 +1,17 @@
+---
+term: training data
+aliases: [training set, training sets]
+firstAppearance: optimization
+---
+
+**Training data** is the set of examples a model is shown during training.
+
+Each example is one input paired with its correct answer. The model makes a guess for the input, an error is computed against the correct answer, and the parameters are nudged to shrink the loss — the average error across the whole training set.
+
+Some examples:
+
+- **A handful of test questions and their answer keys** — enough to fit a curve, not enough to train anything large.
+- **Hundreds of thousands of labelled photos** (like ImageNet) — used to train classifiers that recognise cats, dogs, planes, and so on.
+- **Billions of sentences from books and the web** — used to train next-word predictors like GPT-3, where each sentence offers a next-word prediction at every position.
+
+Some examples are deliberately held back from the training data as **test data**, so we can check the model on inputs it has never seen. The loss on this held-out set is the **test loss** — a model that has memorised its training data will have low training loss but high test loss, which is how we catch the problem.

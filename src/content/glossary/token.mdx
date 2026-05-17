@@ -1,0 +1,19 @@
+---
+term: token
+aliases: [tokens]
+firstAppearance: embeddings
+---
+
+A **token** is the smallest unit of text a language model works with — usually a whole word, a piece of a word, or a piece of punctuation.
+
+Language models don't process text one character at a time, or one full word at a time. They split text into tokens of an in-between size that strikes a good balance: common words become their own token, while rare or invented words are assembled from smaller known pieces. That way the model can handle "treeishness" (split into `tree`, `-ish`, `-ness`) without ever having seen it before.
+
+Some examples:
+
+- **A whole word** — `cat`, `the`, `running`. Common words usually get their own token.
+- **A word fragment** — `-ing`, `super-`, `-ness`. Less common words are built from pieces.
+- **Punctuation and symbols** — `!`, `,`, `?`, even spaces are each tokens.
+- **An invented word** — "qwertyflorp" gets broken into known subword pieces; the model can still process it.
+- **Inside GPT-3** — each token is represented by a 12 288-dimensional embedding; the model sees only the tokens, never the original characters.
+
+Splitting text into tokens (a process called *tokenisation*) is the first thing any language model does to its input, and the last thing it un-does to produce its output.

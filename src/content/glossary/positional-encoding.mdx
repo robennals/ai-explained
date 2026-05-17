@@ -1,0 +1,18 @@
+---
+term: positional encoding
+aliases: [positional encodings, position encoding, position encodings]
+firstAppearance: positions
+---
+
+A **positional encoding** is the technique used to give an attention-based model a sense of where each token is in the sequence, since attention by itself is position-blind.
+
+Without a positional encoding, "the dog bit the man" and "the man bit the dog" would produce identical attention patterns — the model would see which words are present but not which came first. Positional encoding fixes this so word order matters. The two main approaches used in practice are ALiBi (linear distance penalties added to attention scores) and RoPE (rotating each token's query and key vectors by an angle proportional to position).
+
+Some examples:
+
+- **No positional encoding** — attention treats the words as a bag with no order; "dog bit man" = "man bit dog". Broken for language.
+- **ALiBi** — subtract a small penalty from each attention score proportional to the distance between tokens. Used by BLOOM and MPT.
+- **RoPE** — rotate each token's query and key vectors by an angle proportional to position; the dot product then naturally falls off with distance. Used by Llama, Mistral, Gemma, Qwen, DeepSeek.
+- **Combined with causal masking** — positional encoding handles *distance*; causal masking handles *direction* (each token can only attend to earlier tokens).
+
+Positional encoding is one of the under-appreciated pieces of modern transformers — without it, attention couldn't tell a sentence from a bag of words.

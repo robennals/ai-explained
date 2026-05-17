@@ -1,0 +1,18 @@
+---
+term: overfitting
+aliases: [overfit, overfits, overfitted]
+firstAppearance: next-word-prediction
+---
+
+**Overfitting** is when a model has learned its training data so precisely that it predicts well on examples it has seen, but poorly on anything new.
+
+A model that overfits has memorised quirks of the training set instead of learning the underlying patterns. It's the opposite of useful generalisation: training error keeps falling, but real-world performance gets worse.
+
+Some examples:
+
+- **A student who memorises past exam papers** — aces those exact questions but gets stuck on anything slightly different. Same shape as overfitting.
+- **A bigram model trained on a tiny corpus** — assigns high probability only to the exact word pairs it saw, and is helpless when new sentences contain unseen pairs.
+- **A neural network with too many parameters for too little training data** — fits every training example exactly, including the noise, and generalises poorly.
+- **A frontier model trained too long on a narrow slice of data** — starts reproducing specific training examples verbatim rather than generalising from the patterns in them.
+
+The opposite is *underfitting* — a model that hasn't even managed to fit the training data well. The sweet spot is in between: fit the patterns, ignore the noise.

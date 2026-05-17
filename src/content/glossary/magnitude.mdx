@@ -1,0 +1,19 @@
+---
+term: magnitude
+aliases: [magnitudes]
+firstAppearance: vectors
+---
+
+A **magnitude** is the size (or length) of a vector.
+
+You calculate it by squaring each number in the vector, adding them up, and taking the square root — the Pythagorean rule extended to any number of dimensions. For a 2D vector `(a, b)`, the magnitude is `√(a² + b²)`. For more dimensions, just keep adding the squared terms before taking the root.
+
+Some examples:
+
+- **A regular number (1-dimensional vector)** — the same formula applied to one number. Magnitude of `5` = √(5²) = √25 = 5. Magnitude of `−5` = √((−5)²) = √25 = 5. Squaring removes the sign, so the magnitude of a single number is just its absolute value.
+- **`(3, 4)`** — magnitude = √(9 + 16) = √25 = 5. The classic 3-4-5 right triangle.
+- **`(1, 0, 0)`** — magnitude = √1 = 1. A unit vector along one axis.
+- **`(1, 1, 1, 1)`** — magnitude = √4 = 2. Four equal components in 4D.
+- **A neuron's weight vector** — its magnitude says how *sensitive* the neuron is. Two neurons can look for the same pattern (same direction); the one with larger magnitude reacts more strongly to matching inputs.
+
+Splitting a vector into a unit vector (its direction) plus a magnitude (its size) separates *what* a vector represents from *how much* of it there is — one of the most useful tricks in the vectors chapter.

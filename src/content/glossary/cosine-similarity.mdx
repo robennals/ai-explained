@@ -1,0 +1,18 @@
+---
+term: cosine similarity
+aliases: []
+firstAppearance: vectors
+---
+
+**Cosine similarity** is the dot product of two unit vectors — a single number from −1 to 1 measuring how similar the two vectors are.
+
+Because both vectors are scaled to size 1, the dot product depends only on the direction they point: 1 if they point the same way, 0 if they're at right angles, −1 if they point in opposite directions. Vector sizes can't sneak in to distort the comparison.
+
+Some examples:
+
+- **A vector compared with itself** — cosine similarity = 1. Same direction exactly.
+- **Two vectors at right angles** — cosine similarity = 0. They share nothing.
+- **A bear vector and a dog vector** — cosine similarity high (≈ 0.8) because they share many properties. A bear and a mouse is much lower.
+- **Two word embeddings** — "cat" and "dog" have high cosine similarity because they appear in similar contexts and the embedding has placed them nearby. "Cat" and "democracy" sit nearly perpendicular.
+
+Cosine similarity is how AI models compare meaning at scale — search, recommendation, clustering, and retrieval all ultimately ask "how close is this vector to that one?" and answer with cosine similarity.

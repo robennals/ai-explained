@@ -1,0 +1,18 @@
+---
+term: sigmoid
+aliases: [sigmoids]
+firstAppearance: neurons
+---
+
+A **sigmoid** is an S-shaped function that smoothly squashes any number into the range 0 to 1.
+
+Large positive inputs become close to 1; large negative inputs become close to 0; everything in between gets a smooth, graded value — like a dimmer switch instead of a light switch. Sigmoid functions appear all over maths, biology, and economics, anywhere you need to map an unbounded number into a bounded range. In AI, the sigmoid is one of the classic activation functions used in neurons.
+
+Some examples:
+
+- **sigmoid(0) = 0.5** — exactly halfway; the input is on the fence.
+- **sigmoid(10) ≈ 0.9999** — strongly positive input → nearly 1.
+- **sigmoid(−10) ≈ 0.00005** — strongly negative input → nearly 0.
+- **Inside a neuron** — the sigmoid runs after the weighted sum, turning the raw score into a fire-strength between 0 and 1.
+
+The sigmoid's smoothness is what makes it useful in neural networks — small changes to the inputs give small, predictable changes to the output, providing a gradient the optimizer can follow during training.

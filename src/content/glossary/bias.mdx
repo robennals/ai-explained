@@ -1,0 +1,17 @@
+---
+term: bias
+aliases: [biases]
+firstAppearance: neurons
+---
+
+A **bias** is a constant a neuron adds to its weighted sum to control how easily it fires.
+
+A large positive bias makes the neuron easy to activate — it fires even with weak input. A negative bias makes it stubborn — it stays quiet unless the inputs strongly argue for firing.
+
+Some examples:
+
+- **bias = 0** — the neuron flips around the zero crossing of its weighted sum; no built-in preference for firing or staying quiet.
+- **bias = +5** — the neuron leans toward firing; it activates unless the inputs strongly argue against it.
+- **bias = −5** — the neuron leans against firing; it stays quiet unless the inputs strongly support firing.
+
+Every neuron in a network has one bias of its own — millions across a typical mid-size model, hundreds of millions in large language models. Together with weights, biases are the parameters of a neural network; training adjusts all of them.
