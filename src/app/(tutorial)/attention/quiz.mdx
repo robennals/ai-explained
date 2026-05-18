@@ -1,0 +1,94 @@
+<Quiz slug="attention">
+
+<Question>
+What does *attention* let a model do?
+
+<Choice>Translate any sentence into another language</Choice>
+<Choice correct>Pick out which earlier words matter</Choice>
+<Choice>Predict the next word using a fixed window</Choice>
+<Choice>Count how many times each word appears</Choice>
+
+<Feedback>
+Attention lets a model look at every word that came before and *choose* which ones are relevant to the word it's currently processing. The pronoun "it" can reach back to find the noun it refers to, however far away that noun is. No fixed window — the model dynamically picks what matters.
+</Feedback>
+</Question>
+
+<Question>
+In attention, what does a token's *query* vector represent?
+
+<Choice>The token's position in the sentence</Choice>
+<Choice correct>What the token is looking for</Choice>
+<Choice>The token's output value</Choice>
+<Choice>The token's softmax probability</Choice>
+
+<Feedback>
+Each token has three vectors. The *query* says what the token is looking for (e.g., a pronoun asking "where's the noun I refer to?"). The *key* says what each token has to offer ("I'm a noun"). The *value* says what gets shared when there's a match. A dot product of a query with each key gives the match scores.
+</Feedback>
+</Question>
+
+<Question>
+Why does each token have a *separate* query and key, rather than just one vector?
+
+<Choice>To make the math run faster</Choice>
+<Choice correct>What you offer differs from what you seek</Choice>
+<Choice>Each vector encodes a different word</Choice>
+<Choice>Queries are used for math; keys for display</Choice>
+
+<Feedback>
+A pronoun like "it" is looking for a noun, but isn't itself a noun. If query and key were the same vector, "it" would advertise itself as a noun while also seeking one. Separating *query* (what you're looking for) from *key* (what you're offering) lets each token honestly describe both ends of the match.
+</Feedback>
+</Question>
+
+<Question>
+Three tokens have keys: A=(1, 0), B=(0, 1), C=(1, 1). A query of (1, 0) is fired. Which token gets the highest attention score (before softmax)?
+
+<Choice>Only token A</Choice>
+<Choice>Only token B</Choice>
+<Choice correct>A and C tie</Choice>
+<Choice>C wins by a lot</Choice>
+
+<Feedback>
+The attention score is just the dot product from the Vectors chapter — multiply matching dimensions and add. (1, 0) · (1, 0) = 1 (token A). (1, 0) · (0, 1) = 0 (token B). (1, 0) · (1, 1) = 1 (token C). A and C tie at 1 because both have a 1 where the query has a 1; the query's 0 in the second dimension wipes out anything in that slot. After softmax, A and C split most of the attention while B gets very little.
+</Feedback>
+</Question>
+
+<Question>
+Why does the chapter introduce a *sink* token?
+
+<Choice>To make attention scores larger overall</Choice>
+<Choice>To save memory when storing keys</Choice>
+<Choice correct>To absorb attention when nothing matches</Choice>
+<Choice>To replace tokens that aren't useful</Choice>
+
+<Feedback>
+Softmax always allocates 100% of attention to *something*, even when no real match exists. Without a sink, a pronoun in a sentence with no nouns would still spread attention everywhere, with full confidence. The sink gives leftover attention a harmless place to land — when nothing real matches, the sink wins by default.
+</Feedback>
+</Question>
+
+<Question>
+In the chapter's toy example, keys and queries are simple 0/1 values like "is this a noun?" Are real attention heads' Q, K, V vectors really that simple?
+
+<Choice>Yes — they're always 0 or 1 in practice</Choice>
+<Choice>Yes, with dimensions like noun/verb/adverb</Choice>
+<Choice correct>No — they're learned vectors with no fixed meanings</Choice>
+<Choice>No — they're just bigger one-hot vectors</Choice>
+
+<Feedback>
+The toy example uses 1D keys and queries to show the mechanics. Real models learn high-dimensional, dense Q/K/V vectors through gradient descent. Each dimension doesn't correspond to a clean human concept like "noun" — it's some combination of patterns the model found useful. The result is hard for humans to read directly: meaning lives in the geometry, not in any one dimension (just like in embeddings).
+</Feedback>
+</Question>
+
+<Question>
+With attention as described in the chapter, "The dog chased the cat" and "The cat chased the dog" would produce *identical* attention scores. Why?
+
+<Choice>The model has memorized these specific sentences</Choice>
+<Choice correct>Attention scores ignore the order of words</Choice>
+<Choice>The dot product treats every word equally</Choice>
+<Choice>Softmax always gives the same percentages</Choice>
+
+<Feedback>
+The attention mechanism matches tokens by *what they are*, not *where they sit*. Rearrange the words and each token's query, key, and value stay the same — so the attention scores between them stay the same too. "The dog chased the cat" and "the cat chased the dog" look identical to attention as built so far. The next chapter fixes this with a trick that rotates each token's vector by an amount based on its position.
+</Feedback>
+</Question>
+
+</Quiz>
