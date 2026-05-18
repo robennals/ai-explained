@@ -1,0 +1,94 @@
+<Quiz slug="next-word-prediction">
+
+<Question>
+What does the chapter claim is required to accurately predict the next word in a sentence?
+
+<Choice>A very large dictionary of all English words</Choice>
+<Choice correct>Real understanding — grammar, facts, common sense</Choice>
+<Choice>The exact sentence to have appeared in training</Choice>
+<Choice>A long memory for storing previous sentences</Choice>
+
+<Feedback>
+Predicting "The capital of France is ___" requires knowing that France's capital is Paris. Predicting what someone did after opening a letter requires understanding human emotions. Predicting "two plus two equals ___" requires arithmetic. The better you predict, the more you must understand — prediction REQUIRES understanding.
+</Feedback>
+</Question>
+
+<Question>
+What is a *bigram* model?
+
+<Choice>A model that processes two languages at once</Choice>
+<Choice correct>A model that predicts based on the previous word</Choice>
+<Choice>A model with exactly two neural network layers</Choice>
+<Choice>A model that compares two sentences for similarity</Choice>
+
+<Feedback>
+A bigram model looks at the one previous word and predicts what's likely to come next, based on word-pair frequencies in a big collection of text. "Of" is most often followed by "the"; "he" is often followed by "was". Individual predictions sound reasonable, but stringing them together produces nonsense — the model has no memory beyond the most recent word.
+</Feedback>
+</Question>
+
+<Question>
+A bigram model's individual word-to-word predictions sound reasonable, but the sentences it generates are nonsense. Why?
+
+<Choice>It uses arithmetic that's too simple</Choice>
+<Choice correct>It can only see the single previous word</Choice>
+<Choice>It picks words completely at random</Choice>
+<Choice>It uses the wrong dictionary of English words</Choice>
+
+<Feedback>
+A bigram model has no memory beyond the most recent word. "The cat sat on" means nothing to it — it only sees "on". So each new word is locally reasonable but globally disconnected. To produce coherent sentences, the model needs to see more context, which is what bigger n-grams and neural networks try to provide.
+</Feedback>
+</Question>
+
+<Question>
+Why can't we just use bigger and bigger n-grams (5 words of context, 10 words, etc.) to get better predictions?
+
+<Choice>Computers can't store sequences longer than 5 words</Choice>
+<Choice correct>The possible sequences explode beyond any data</Choice>
+<Choice>Longer histories need a different kind of math</Choice>
+<Choice>The English language doesn't have enough words</Choice>
+
+<Feedback>
+A 10-word context with a 50,000-word vocabulary has 50,000¹⁰ possible sequences — a number with 47 digits, far more than every word ever written. Most sequences the model encounters will be ones it has never seen before. It can't predict what follows "The curious elephant carefully examined the ancient" if it has never seen that exact sequence. This is the same lookup-table problem from Chapter 1, all over again.
+</Feedback>
+</Question>
+
+<Question>
+How do neural networks with embeddings solve the n-gram explosion problem?
+
+<Choice>They store every possible sentence in a database</Choice>
+<Choice>They use much faster hardware than n-gram models</Choice>
+<Choice correct>Similar words have similar embeddings, so predictions generalize</Choice>
+<Choice>They make predictions based on guesses rather than data</Choice>
+
+<Feedback>
+Embeddings capture meaning: "cat" and "dog" have similar vectors because they appear in similar contexts. A network that learns "the cat ___" → "was" automatically generalizes to "the dog ___" → "was", because the inputs look almost the same. The network doesn't have to see every possible sequence — it learns patterns over the continuous space of meanings.
+</Feedback>
+</Question>
+
+<Question>
+A reader dismisses: "LLMs aren't really intelligent — they just predict the next word." What's the chapter's main response?
+
+<Choice>LLMs don't actually predict words at all</Choice>
+<Choice correct>How they learn, not what they do</Choice>
+<Choice>The reader is right; LLMs aren't intelligent</Choice>
+<Choice>Prediction is a different process than thinking</Choice>
+
+<Feedback>
+Modern LLMs use next-word prediction as a *training* task — that's how they learn to extract knowledge from vast amounts of text. But once trained, they're then taught (with techniques covered in later chapters) to apply that knowledge productively. It's like a soccer player who learns ball control through drills, then applies it in a real game.
+</Feedback>
+</Question>
+
+<Question>
+Even neural networks with embeddings share a limitation with simple n-grams: they only see a fixed window of recent words. Why is that a problem for understanding text?
+
+<Choice>Computers can't read more than a few words at once</Choice>
+<Choice correct>Meaning often depends on text from far earlier</Choice>
+<Choice>Embeddings only work for the most recent word</Choice>
+<Choice>Neural networks fail with too much input</Choice>
+
+<Feedback>
+A fixed window can't see arbitrarily far back. A novel might spend a chapter establishing that "John" is a disgraced surgeon trying to redeem himself — and then, thousands of words later, "John picked up the scalpel" carries all that meaning, but only if the model can still see it. The next chapter, on attention, introduces a way to break out of fixed-window limits by letting the model dynamically choose which earlier words matter.
+</Feedback>
+</Question>
+
+</Quiz>
