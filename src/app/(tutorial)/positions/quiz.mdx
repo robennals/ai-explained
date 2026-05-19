@@ -1,0 +1,94 @@
+<Quiz slug="positions">
+
+<Question>
+Why does attention need position information added to it?
+
+<Choice>Because faster compute requires it</Choice>
+<Choice correct>Because word order changes meaning</Choice>
+<Choice>Because attention scores are too small</Choice>
+<Choice>Because the embedding layer can't handle long text</Choice>
+
+<Feedback>
+"The dog bit the man" vs "the man bit the dog" have the same words in different orders, and the meaning flips entirely. Attention as built so far can't tell these apart — the embedding for "cat" is the same whether it's the first word or the last.
+</Feedback>
+</Question>
+
+<Question>
+What is *ALiBi* (Attention with Linear Biases)?
+
+<Choice>A method that rotates token vectors by position</Choice>
+<Choice correct>A distance penalty applied to attention scores</Choice>
+<Choice>A model with no attention mechanism</Choice>
+<Choice>A way to make embeddings larger</Choice>
+
+<Feedback>
+ALiBi subtracts a penalty from each attention score equal to slope × distance. Nearby tokens are barely affected; distant tokens are heavily penalized. Different heads use different slopes, giving the model a range of distance sensitivities — but each head's slope applies uniformly to every query in that head.
+</Feedback>
+</Question>
+
+<Question>
+How does rotating each token's vector by its position help the model understand distance between words?
+
+<Choice>Far-apart tokens end up pointing in opposite directions</Choice>
+<Choice correct>Their dot product depends on their position gap</Choice>
+<Choice>Rotation makes the math simpler than ALiBi</Choice>
+<Choice>Rotating shrinks vectors so they're easier to compare</Choice>
+
+<Feedback>
+The dot product of unit vectors only depends on the angle between them. If you rotate each token's vector by its position, the angle between two tokens reflects the gap between their positions. So the dot product between two rotated tokens naturally tells you how far apart they are — near words get a high dot product, far words get a low one. Position is baked into the attention math, no extra penalty needed.
+</Feedback>
+</Question>
+
+<Question>
+Two tokens have a dot product of 5. They're 3 positions apart, and ALiBi's slope *m* is 0.5. What's their ALiBi-adjusted attention score?
+
+<Choice>5</Choice>
+<Choice correct>3.5</Choice>
+<Choice>5.5</Choice>
+<Choice>2</Choice>
+
+<Feedback>
+ALiBi subtracts a penalty equal to slope × distance: 5 − 0.5 × 3 = 3.5. The slope *m* controls how steeply attention falls off with distance.
+</Feedback>
+</Question>
+
+<Question>
+What's a limitation of ALiBi that RoPE fixes?
+
+<Choice>ALiBi can't run on modern GPUs</Choice>
+<Choice>ALiBi requires more memory</Choice>
+<Choice correct>ALiBi only produces linear distance falloffs</Choice>
+<Choice>ALiBi can only handle short sentences</Choice>
+
+<Feedback>
+ALiBi subtracts a fixed slope × distance from each score, so the attention penalty always falls off as a straight line. But the right shape isn't always linear — sometimes you want a sharp drop at very short distance, sometimes a long flat tail, sometimes a two-stage falloff. RoPE produces any of these shapes by combining many rotation speeds; ALiBi is stuck with one straight line per head.
+</Feedback>
+</Question>
+
+<Question>
+What goes wrong if a RoPE model uses *only* fast-rotating dimension pairs and no slow ones?
+
+<Choice>Attention would always equal zero</Choice>
+<Choice>The model would lose all ability to focus locally</Choice>
+<Choice correct>Distant tokens look identical to nearby ones</Choice>
+<Choice>The model could only handle very short sentences</Choice>
+
+<Feedback>
+Fast-rotating pairs make small position gaps create big angle differences — great for distinguishing nearby tokens. But rotation is periodic: after 360°, you're back where you started. With only fast pairs, far-apart tokens can end up at the same angle as nearby tokens and become indistinguishable. The slow-rotating pairs (whose periods are longer than any expected sequence) are what give the model a unique long-range signal and prevent that wrap-around. Real RoPE combines fast pairs (for sharp local distinctions) with slow pairs (to avoid wrap).
+</Feedback>
+</Question>
+
+<Question>
+In RoPE, what does *zeroing out the FAST-rotating dimension pairs* (keeping only slow ones) produce?
+
+<Choice>A sharp, narrow focus on the nearest token</Choice>
+<Choice correct>A broad, gradual spread across many tokens</Choice>
+<Choice>Attention that ignores distance entirely</Choice>
+<Choice>Periodic attention that repeats every few tokens</Choice>
+
+<Feedback>
+Slow-rotating pairs barely change angle as distance grows, so the dot product stays high even across long distances. Zeroing out the fast pairs removes the sharp-cutoff signal — what's left is broad, gradual attention that reaches far. Combined with the previous question: only fast → wrap-around, only slow → no local sharpness. That's why real RoPE combines both, and why even sharp local focus needs weight on slow pairs too (to prevent the wrap-around from happening).
+</Feedback>
+</Question>
+
+</Quiz>

@@ -1,0 +1,96 @@
+<Quiz slug="embeddings">
+
+<Question>
+An *embedding* is:
+
+<Choice>A label assigned by a human to each word</Choice>
+<Choice correct>A vector representation of something like a word</Choice>
+<Choice>A list of all possible words in the language</Choice>
+<Choice>A rule for spelling unusual words</Choice>
+
+<Feedback>
+An embedding is a learned vector — a list of numbers — that represents something (often a word, but the same idea works for images, audio, even molecules). Similar things end up near each other in the space; the dimensions aren't labeled with specific properties like in last chapter's animal vectors.
+</Feedback>
+</Question>
+
+<Question>
+What is *one-hot encoding*?
+
+<Choice>A compressed format for storing common words</Choice>
+<Choice>A way to turn an embedding into text</Choice>
+<Choice correct>A vector with one 1 and rest zeros</Choice>
+<Choice>A method for combining two embeddings together</Choice>
+
+<Feedback>
+Each token has its own position in the one-hot vector. To represent a token, you set that one position to 1 and everything else to 0 — like raising your hand in a crowd when your name is called. This becomes the input to a network's first layer; the weights from that layer are the embedding.
+</Feedback>
+</Question>
+
+<Question>
+Animal vectors used hand-picked dimensions (size, scariness, etc.). Why don't embeddings work the same way for words?
+
+<Choice>There aren't enough words to label</Choice>
+<Choice correct>No properties work for all words</Choice>
+<Choice>Computers can't handle labeled dimensions</Choice>
+<Choice>Labels make the math too slow</Choice>
+
+<Feedback>
+Animal vectors worked because all animals could be rated on the same properties: size, speed, danger. But words include everything — colors, abstract ideas, actions. "How big is the color blue?" isn't a meaningful question. Embeddings sidestep this by letting the dimensions emerge from training rather than being labeled by hand.
+</Feedback>
+</Question>
+
+<Question>
+In a well-trained embedding, you compute *elephant − mouse + rabbit*. What does the result land near?
+
+<Choice>A point with no clear meaning</Choice>
+<Choice correct>Near a large animal like 'lion'</Choice>
+<Choice>Near the general word 'mammal'</Choice>
+<Choice>A point midway between elephant and rabbit</Choice>
+
+<Feedback>
+Subtracting *mouse* from *elephant* extracts a "bigger animal" vector. Adding it to *rabbit* applies that transformation, landing near larger animals like lion, giraffe, or rhino. This is the famous embedding-arithmetic phenomenon: directions encode relationships, and you can move along them by adding vectors.
+</Feedback>
+</Question>
+
+<Question>
+Why do real language models break text into subword *tokens* (like "tree", "-ish", "-ness") instead of using full words?
+
+<Choice>To speed up the math</Choice>
+<Choice correct>To handle rare or unseen words</Choice>
+<Choice>To save memory in the dictionary</Choice>
+<Choice>To match how humans pronounce words</Choice>
+
+<Feedback>
+If you had one token per English word, you'd run out — people invent new words, use misspellings, and combine roots constantly. Breaking words into subword tokens lets the model handle any new combination by composing pieces it already knows. A model that's never seen "treeishness" can still understand it from "tree", "-ish", and "-ness".
+</Feedback>
+</Question>
+
+<Question>
+A reader argues: "For an embedding to work, engineers must hand-design each word's vector position so similar words end up nearby." What's wrong with this view?
+
+<Choice>Yes — that's why building embeddings is so hard</Choice>
+<Choice correct>Positions are found by training, not engineers</Choice>
+<Choice>Programmers design only the most common words</Choice>
+<Choice>Each language requires its own design team</Choice>
+
+<Feedback>
+Embeddings are just the weights of the network's first layer. They start out random and are shaped by gradient descent during training — the network naturally moves similar words near each other because doing so helps it predict better. Nobody tells it where "dog" or "happy" should go; the geometry is discovered, not designed.
+</Feedback>
+</Question>
+
+<Question>
+A direction in an embedding might encode "bigger" near animal words (it takes you from "mouse" to "elephant"). If you take this same direction and add it to a color word like "red", what happens?
+
+<Choice>It always gives a darker shade of red</Choice>
+<Choice correct>It depends on what training learned for colors</Choice>
+<Choice>It always produces a different color</Choice>
+<Choice>It returns the average of all colors</Choice>
+
+<Feedback>
+The magic of embeddings is that they don't require dimensions to mean specific things. They only require that similar things end up near each other; directions take on whatever meanings the model could learn from its training data.
+
+Sometimes the analogy does carry over: humans say "a big idea" or "a big deal" all the time, so the "bigger" direction can naturally extend to abstract ideas. Colors might not work the same way. If training never linked colors to size in any consistent way, the "bigger" vector applied to "red" lands somewhere without a clean meaning — the same direction simply has no learned story in that region of the space.
+</Feedback>
+</Question>
+
+</Quiz>

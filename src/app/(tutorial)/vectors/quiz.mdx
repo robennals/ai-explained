@@ -1,0 +1,81 @@
+<Quiz slug="vectors">
+
+<Question>
+A *vector* is best described as:
+
+<Choice correct>A list of numbers describing something</Choice>
+<Choice>A neuron that can distinguish things</Choice>
+<Choice>A pattern stored inside a neural network</Choice>
+<Choice>An algorithm for classifying inputs</Choice>
+
+<Feedback>
+A vector is just a list of numbers that together describe something. Your position on Earth is a 2-number vector (latitude, longitude). A color is a 3-number vector (red, green, blue). An animal can be described by ratings on properties like big, scary, cuddly. Anything you can measure with numbers can be a vector.
+</Feedback>
+</Question>
+
+<Question>
+For two *unit vectors*, what does the dot product compute?
+
+<Choice correct>A measure of how similar they are</Choice>
+<Choice>The sum of the two vectors' magnitudes</Choice>
+<Choice>A new vector from multiplying matching numbers</Choice>
+<Choice>A new vector from adding matching numbers</Choice>
+
+<Feedback>
+The dot product multiplies matching pairs of numbers and adds the results — producing a single number, not a vector. For two unit vectors, that number is biggest (close to 1) when they point in the same direction, smallest (close to −1) when they point opposite, and around 0 when they share little. That makes it a clean similarity score.
+</Feedback>
+</Question>
+
+<Question>
+Imagine an animal vector that scores high on *every* property — big, scary, hairy, cuddly, fast, fat. Without any scaling, what goes wrong when you compare it with other animals?
+
+<Choice>Nothing — this is fine</Choice>
+<Choice correct>It looks similar to everything</Choice>
+<Choice>It can't be compared with smaller animals</Choice>
+<Choice>It uses too much memory to store</Choice>
+
+<Feedback>
+The dot product naturally rewards big numbers. An animal scoring high on every property has a huge dot product with anything, so it appears similar to everything — which is obviously wrong. The fix is to scale every vector to magnitude 1 (a *unit vector*), so similarity comparisons depend on the *direction* of the vector rather than its size.
+</Feedback>
+</Question>
+
+<Question>
+You have unit vectors for *dog* and *cat*. To get a vector representing an animal "in between" the two, what should you compute?
+
+<Choice>Multiply the two vectors element by element</Choice>
+<Choice correct>Take the average of the two vectors</Choice>
+<Choice>Take the dot product of the two vectors</Choice>
+<Choice>Subtract one vector from the other</Choice>
+
+<Feedback>
+Averaging two vectors element-by-element gives a new vector that combines information from both. The result lands "in between" the originals — average a bear vector and a rabbit vector and you get something medium-sized, moderately cuddly, sharing properties of each.
+</Feedback>
+</Question>
+
+<Question>
+Neuron A has weights (0.5, 0.5, 0.0). Neuron B has weights (1.0, 1.0, 0.0). What's the relationship between them?
+
+<Choice>They are identical — only direction matters</Choice>
+<Choice>They detect different patterns from each other</Choice>
+<Choice correct>Same pattern detected, with different sensitivity</Choice>
+<Choice>The smaller vector is invalid for use as weights</Choice>
+
+<Feedback>
+Both weight vectors point in the same direction — they're proportional. The unit vector (the direction) tells you *what* a neuron detects; the magnitude tells you *how sensitive* it is. So these neurons detect the same pattern, but neuron B (with magnitude √2) gets twice as excited when it matches as neuron A (with magnitude ~0.7).
+</Feedback>
+</Question>
+
+<Question>
+Why can a single neuron be called a "pattern detector"?
+
+<Choice>Because it stores patterns in its weights as memory</Choice>
+<Choice correct>Its dot product is largest when input matches its weights</Choice>
+<Choice>Because it remembers the most common input it has seen</Choice>
+<Choice>Because it labels each input with its category</Choice>
+
+<Feedback>
+A neuron's weighted sum is a dot product between its weight vector and the input vector. The dot product is biggest when the two vectors point in the same direction — that is, when the input looks like the pattern stored in the weights. So a neuron "fires" (produces a large output) precisely when it sees its target pattern.
+</Feedback>
+</Question>
+
+</Quiz>

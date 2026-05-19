@@ -7,6 +7,7 @@ import { NoG } from "@/components/mdx/NoG";
 import { TensorDisplay } from "@/components/mdx/TensorDisplay";
 import { TryIt } from "@/components/mdx/TryIt";
 import { TryItInPyTorch } from "@/components/mdx/TryItInPyTorch";
+import { Choice, Feedback, Question, Quiz } from "@/components/quiz/Quiz";
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {
@@ -20,6 +21,10 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     TensorDisplay,
     TryIt,
     TryItInPyTorch,
+    Quiz,
+    Question,
+    Choice,
+    Feedback,
     ...components,
   };
 }

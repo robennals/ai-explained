@@ -1,0 +1,85 @@
+<Quiz slug="computation">
+
+<Question>
+According to the chapter, every color you've ever seen can be described by:
+
+<Choice correct>Three numbers</Choice>
+<Choice>One number</Choice>
+<Choice>Two numbers</Choice>
+<Choice>A million numbers</Choice>
+
+<Feedback>
+Every color can be described by three numbers: how much red, green, and blue light to mix. (Or three numbers for cyan/magenta/yellow if you're painting.) Change the three numbers and you get a different color — a foundational example of *everything inside a computer is numbers*.
+</Feedback>
+</Question>
+
+<Question>
+The chapter describes an AI model as a "machine with knobs." What's the technical name for those knobs?
+
+<Choice>Functions</Choice>
+<Choice correct>Parameters</Choice>
+<Choice>Algorithms</Choice>
+<Choice>Tokens</Choice>
+
+<Feedback>
+The adjustable numbers inside a model are called *parameters*. Different parameter settings make the same model compute different functions, so the whole game of AI becomes "find the right knob settings." (Algorithms, functions, and tokens are all real AI words, but only *parameter* means a knob you can adjust.)
+</Feedback>
+</Question>
+
+<Question>
+Three very different tasks — recognizing whether a photo shows a cat, translating English to French, and generating a sunset image from a prompt — have something deep in common according to this chapter. What?
+
+<Choice correct>They all have the same shape: numbers go in, numbers come out</Choice>
+<Choice>They all require AGI (artificial general intelligence)</Choice>
+<Choice>They all need a giant lookup table to work</Choice>
+<Choice>They all involve text somewhere</Choice>
+
+<Feedback>
+Every kind of intelligent task is a *function*: numbers in, numbers out. The inputs and outputs look totally different from the outside (pixels vs. words vs. audio), but inside the computer they're all just numbers, and the problem is always the same shape: find the right function from in-numbers to out-numbers.
+</Feedback>
+</Question>
+
+<Question>
+Tuning a model with just 4 parameters by hand was already hard. Real AI models have *billions* of parameters. According to the chapter, what follows?
+
+<Choice>Most real AI models actually use far fewer parameters in practice</Choice>
+<Choice correct>The parameters must be set by an automatic process, not by humans</Choice>
+<Choice>Real models only solve simple problems where billions of knobs are manageable</Choice>
+<Choice>Real AI models don't have parameters at all; they use a different approach</Choice>
+
+<Feedback>
+Tuning four knobs by hand is already frustrating. Tuning billions is unimaginable, so we need an *automatic* process to find the right knob settings. That automatic process is what *optimization* is about.
+</Feedback>
+</Question>
+
+<Question>
+Why can't we just build a giant lookup table for image recognition — every possible image paired with its correct label?
+
+<Choice>Looking up the answer in such a table would be too slow to be useful</Choice>
+<Choice>Lookup tables can hold only text, not images or sound</Choice>
+<Choice correct>The table would need too many entries to ever build</Choice>
+<Choice>There's no actual function that maps images to labels</Choice>
+
+<Feedback>
+Even for a tiny 8×8 grayscale image, the number of possible inputs is 256⁶⁴, far more than the atoms in the observable universe. The lookup table works *in principle* but is impossible *in practice* because the number of combinations is too big.
+
+(A) sounds plausible — yes, searching that table would be slow — but the actual killer is that the table can't even be *built*. (D) is tempting too, but the function does exist in principle: there is some assignment of labels to images that would be correct; we just couldn't write them all down.
+</Feedback>
+</Question>
+
+<Question>
+A friend argues: "The Church-Turing thesis says that if all intellectual tasks a human can do are computable functions (and we believe they are), then any sufficiently powerful computer can compute all of them. So building any AI is just a matter of getting more compute." What's the most important thing this argument misses?
+
+<Choice>Some tasks (like emotion) might simply be impossible for a computer</Choice>
+<Choice>Computers will never be fast enough to match what a human brain does</Choice>
+<Choice correct>Even if the function is computable, we still need to find the right one</Choice>
+<Choice>The Church-Turing thesis only applies to math problems, not to language</Choice>
+
+<Feedback>
+Church-Turing tells us a sufficiently powerful computer *could* compute the function. But we still have to find *which* function — out of all the functions a model with billions of knobs could compute, which is the one that recognizes cats, or translates French, or writes poems? That search problem is what training is all about.
+
+(A) and (B) reject ideas we should accept — thinking *is* computation, and in principle computers can match minds. (D) is just false; the thesis covers any function, not only mathematical ones.
+</Feedback>
+</Question>
+
+</Quiz>
