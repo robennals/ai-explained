@@ -52,11 +52,11 @@ The problem: a 10-gram model needs to have seen every possible sequence of 10 wo
 
 Most 10-word sequences the model encounters will be ones it has *never seen before*. It can't predict what comes after "The curious elephant carefully examined the ancient" if it's never seen that exact sequence in its training data.
 
-We need a model that can **generalize**, that can make reasonable predictions for word combinations it's never encountered. Sound familiar? This is exactly the problem we solved with [neural networks](/neurons) and [embeddings](/embeddings).
+We need a model that can **generalize**, that can make reasonable predictions for word combinations it's never encountered. Sound familiar? This is exactly the problem we solved with neural networks and embeddings.
 
 ## Neural Networks to the Rescue
 
-The idea: instead of a lookup table, use a neural network. Feed it the [*embeddings*](/embeddings) of the previous few words, pass them through a [neural network](/neurons), and have it output a prediction for the next word.
+The idea: instead of a lookup table, use a neural network. Feed it the *embeddings* of the previous few words, pass them through a neural network, and have it output a prediction for the next word.
 
 Why would this work? Because embeddings capture *meaning*. "Cat" and "dog" have similar embeddings because they appear in similar contexts. So a neural network that learns "the cat ___" → "was" will automatically generalize to "the dog ___" → "was", because the inputs look almost the same!
 

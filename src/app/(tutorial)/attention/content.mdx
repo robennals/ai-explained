@@ -31,7 +31,7 @@ Each token gets two vectors:
 
 Both vectors here are just one number: a 1 means "noun" or "looking for a noun", a 0 means "no". "cat" and "dog" offer themselves as nouns. "blah" offers nothing. "it" is *looking for* a noun.
 
-Given a token, we can work out which other tokens it should be paying attention to by multiplying its query (what it is looking for) by the key of each of the other tokens. This is the [**dot product**](/vectors) from the Vectors chapter. The bigger the score, the better the match.
+Given a token, we can work out which other tokens it should be paying attention to by multiplying its query (what it is looking for) by the key of each of the other tokens. This is the **dot product** from the Vectors chapter. The bigger the score, the better the match.
 
 <ToyAttentionScoresWidget>
 Click any token to see its raw match scores against every key — including its own. Click "it" to see it match "cat" (score 1) and miss "blah" (score 0). Click "cat" to see something different: "cat" isn't asking anything, so every score is 0. The widget always shows both the key (what each token offers) and the query (what each token is looking for).
@@ -109,9 +109,9 @@ In real models, every head also has its own sink behavior, because no single hea
 
 We've been talking about query, key, and value vectors — but where do they actually come from? 
 
-The answer is the same answer we've run into many times before. The model uses [gradient descent](/optimization) to learn the [weights](/neurons) that make the model perform best and thus minimize its error.
+The answer is the same answer we've run into many times before. The model uses gradient descent to learn the weights that make the model perform best and thus minimize its error.
 
-To be more precise, the model learns a simple one-layer [neural network](/neurons) (without an activation function) that transforms the token's current [embedding](/embeddings) into query, key, and value vectors.
+To be more precise, the model learns a simple one-layer neural network (without an activation function) that transforms the token's current embedding into query, key, and value vectors.
 
 In a model with multiple attention heads, each head gets its own three sets of weights, so each head translates the same embedding into its own private Q, K, V vectors. That's how different heads end up looking for different things.
 

@@ -44,7 +44,7 @@ The dimensions don't need labels. What matters is that similar things are nearby
 
 ## Exploring a Real Embedding
 
-A real embedding: GloVe, created by Stanford. Each word is a point in 300-dimensional space. The full embedding contains 400,000 words, which is too many to fit in the browser, so we're showing a subset of common nouns. We can't visualize 300 dimensions, but we *can* use [cosine similarity](/vectors) (from the previous chapter) to ask: what's nearby?
+A real embedding: GloVe, created by Stanford. Each word is a point in 300-dimensional space. The full embedding contains 400,000 words, which is too many to fit in the browser, so we're showing a subset of common nouns. We can't visualize 300 dimensions, but we *can* use cosine similarity (from the previous chapter) to ask: what's nearby?
 
 <EmbeddingPlaygroundWidget>
 Start with "dog". Its neighbors are other animals and pets. Click on a neighbor to jump to it and browse around the space. Try "guitar" and you get other instruments. Try "queen" and it sits near royalty words. Type your own words and see what clusters together.
@@ -116,9 +116,9 @@ Try punctuation too (`!`, `,`, `?`); those are tokens as well.
 
 In modern AIs, the embedding is just the first layer of the neural network. It has one input node for every possible token. When a token comes in, that input is set to 1 and every other input is set to 0, like raising your hand in a crowd when someone calls your name. This is called **one-hot encoding**.
 
-Each connection carries a weight. Since only one input word is "on," the output of the first layer is just the weights for that one word. Those weights *are* the embedding. Unlike the [neurons](/neurons) we saw in previous chapters, the embedding layer has no bias and no activation function.
+Each connection carries a weight. Since only one input word is "on," the output of the first layer is just the weights for that one word. Those weights *are* the embedding. Unlike the neurons we saw in previous chapters, the embedding layer has no bias and no activation function.
 
-The network learns those weights through [gradient descent](/optimization), just like any other weights, naturally assigning each word the meaning that helps the network the most.
+The network learns those weights through gradient descent, just like any other weights, naturally assigning each word the meaning that helps the network the most.
 
 Modern language models use even bigger embeddings than our 300-dimensional GloVe example: GPT-2 uses 768 dimensions, GPT-3 uses 12,288 dimensions.
 
