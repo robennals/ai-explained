@@ -123,6 +123,16 @@ Try matching different animals, foods, or instruments as weights and inputs. Wha
 **A neuron is a pattern detector.** It computes the dot product of its input vector with its weight vector, adds a bias to shift the threshold, and squashes the result through an activation function. The weight vector's unit vector defines *what* the neuron looks for; its magnitude defines *how sensitive* it is.
 </KeyInsight>
 
+### Bias and Magnitude Do Different Jobs
+
+You just had two knobs to play with, bias and weight magnitude, and they can feel like they do the same thing: both make the neuron fire on more or fewer inputs. But they reshape the neuron's response in different ways. To see this, plot the output against *how bear-like the input is*.
+
+The **magnitude** sets how *steeply* the curve rises while the **bias** *slides* the curve sideways.
+
+<NeuronResponseCurveWidget>
+Drag the bias: the whole curve slides sideways, moving the decision boundary while the steepness stays put. Now drag the weight magnitude: the curve steepens, and notice the boundary drifts too. That's the real difference between them: bias only moves the boundary, while magnitude *also* changes how sharp the switch is. Try the presets to jump between a wishy-washy detector and a hard, decisive one.
+</NeuronResponseCurveWidget>
+
 ## Seeing It in 2D
 
 Everything so far used lists of six numbers. But when a vector has just two dimensions, we can draw it as an arrow on a flat surface, and all the concepts we've learned become visible.
