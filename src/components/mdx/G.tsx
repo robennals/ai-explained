@@ -36,6 +36,22 @@ interface GlossaryRenderInfo {
 const GlossaryRenderContext = createContext<GlossaryRenderInfo>({ inside: false });
 
 /**
+ * Signals that `<G>` is rendering inside an interactive element (e.g. a quiz
+ * answer button). Both the popover trigger and the inline link are themselves
+ * interactive, and nesting interactive content inside a `<button>` is invalid
+ * HTML that triggers a hydration error — so here `<G>` renders as plain text.
+ */
+const GlossaryPlainContext = createContext(false);
+
+export function GlossaryPlainProvider({ children }: { children: ReactNode }) {
+  return (
+    <GlossaryPlainContext.Provider value={true}>
+      {children}
+    </GlossaryPlainContext.Provider>
+  );
+}
+
+/**
  * Wraps content that's being rendered as part of a glossary entry — either
  * inside a popover or on the /glossary appendix page. Causes `<G>` instances
  * inside to render as plain inline links rather than popover triggers (so we
@@ -142,6 +158,13 @@ export function G({ term, children }: GProps) {
   const slug = resolveSlug(input);
   const entry = slug ? glossaryBySlug[slug] : undefined;
   const ctx = useContext(GlossaryRenderContext);
+  const plain = useContext(GlossaryPlainContext);
+
+  // Inside an interactive element (e.g. a quiz answer button) — render plain
+  // text, since neither a nested button nor a nested link is valid HTML.
+  if (plain) {
+    return <>{children}</>;
+  }
 
   if (!entry) {
     if (process.env.NODE_ENV !== "production") {
