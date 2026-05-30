@@ -14,6 +14,7 @@ import {
   type ReactElement,
   type ReactNode,
 } from "react";
+import { GlossaryPlainProvider } from "@/components/mdx/G";
 
 // ───────────────────────────────────────────────────────────────────────────
 // localStorage-backed persistence (via useSyncExternalStore so it survives the
@@ -455,7 +456,9 @@ export function Question({ children }: QuestionProps) {
                 aria-pressed={isThisPicked}
               >
                 <span className={badgeClass}>{badgeContent}</span>
-                <span className="flex-1">{cp.children}</span>
+                <span className="flex-1">
+                  <GlossaryPlainProvider>{cp.children}</GlossaryPlainProvider>
+                </span>
               </button>
             </li>
           );

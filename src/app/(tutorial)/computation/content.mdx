@@ -65,7 +65,7 @@ Here's a concrete example. The model below has four parameters (a, b, c, d) and 
 
 **y = a + b·x + c·x² + d·x³**
 
-There's a target curve (the blue one) we want the model to match. Your job is to adjust the four knobs so the red curve sits on top of the blue one.
+There's a target curve (the blue one) we want the model to match. Your job is to adjust the four knobs so the red curve sits on top of the blue one. The error shows how different the curves currently are.
 
 <ParameterPlaygroundWidget>
 Try to match the target curve by adjusting the sliders. Pay attention to how each parameter changes the shape. Then hit "Reveal best fit" to see the answer. Even with four parameters, hand-tuning is harder than you might expect.
@@ -74,6 +74,12 @@ Try to match the target curve by adjusting the sliders. Pay attention to how eac
 <KeyInsight>
 **A model is a machine with adjustable knobs.** Different settings compute different functions. Finding the right function becomes a matter of finding the right knob settings. With four knobs, hand-tuning is already frustrating. Real AI models have *billions*. We'll need a way to set them automatically.
 </KeyInsight>
+
+## Where Models Come From
+
+It's worth being clear about who does what, because it's a common point of confusion. *Designing the model* (deciding what knobs the machine has and how they combine the input) is (currently) a human job. The automatic process doesn't invent the function or pick it from a catalogue of every possible function. It only turns the knobs on a machine a person already built. A human chose the cubic shape above; only then could tuning a, b, c, and d make it fit.
+
+So where do good models come from? At least for now, people design them. Much of the rest of this tutorial tours the designs that turned out to work remarkably well: neural networks, then attention and the transformer. Optimization tunes a model; it doesn't invent one.
 
 ## Can One Machine Compute Everything?
 
@@ -115,7 +121,7 @@ What's needed are models that *compress*: capture the right pattern with far few
 
 That process of automatically finding the right knob settings is called *learning*, and the rest of this tutorial is about how it works.
 
-In the next chapter we'll see the surprising answer: you don't need to design the solution. You only need a way to make reliable tiny improvements, and then to make a lot of them, very fast. The same algorithm behind biological evolution, A/B testing, and the scientific method can find the right parameter values automatically. It's called *incremental optimization*, and it's the engine behind all of modern AI.
+In the next chapter we'll see the surprising answer: you don't need to work out the knob settings by hand. You only need a way to make reliable tiny improvements, and then to make a lot of them, very fast. The same algorithm behind biological evolution, A/B testing, and the scientific method can find the right parameter values automatically. It's called *incremental optimization*, and it's the engine behind all of modern AI.
 
 <TryItInPyTorch notebook="computation">
 Encode text, images, and sound as PyTorch tensors, visualize a parameterized function with different knob settings, and calculate why lookup tables are impossibly large.
