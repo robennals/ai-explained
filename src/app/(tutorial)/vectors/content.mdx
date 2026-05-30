@@ -37,7 +37,10 @@ Why does multiply-and-add measure similarity? Look at the per-dimension math. Wh
 Pick two items and compare their similarity. The multiply column shows what happens at each dimension. When both items score high on the same property, that contributes a lot to the total. When one scores high and the other low, it contributes almost nothing.
 </DotProductComparisonWidget>
 
+Note that if two animals are zero in a dimension then that dimension contributes nothing. That is because we think of each dimension as being something **notable** about the animals. "Hairy = 1" means hair is one of this animal's defining features. "Hairy = 0" means hair isn't really worth mentioning. If we cared about what animals were notably hairless, we could add a "hairless" dimension, or have negative values of "hairy".
+
 The similarity scores here fall cleanly between −1 and 1. That's because all the animal, food, and instrument vectors have been carefully scaled to the same size. The next section explains why that matters, and what goes wrong when vectors *aren't* the same size.
+
 
 ## Unit Vectors: Solving the "Big in Everything" Problem
 
