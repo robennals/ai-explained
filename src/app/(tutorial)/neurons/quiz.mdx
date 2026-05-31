@@ -3,8 +3,8 @@
 <Question>
 According to the chapter, a single neuron does just two things. They are:
 
-<Choice>Memorizes facts and recalls them on demand</Choice>
 <Choice correct>Weighted sum followed by an activation function</Choice>
+<Choice>Memorizes facts and recalls them on demand</Choice>
 <Choice>Compares two inputs and picks the larger one</Choice>
 <Choice>Multiplies all its inputs together</Choice>
 
@@ -17,8 +17,8 @@ A neuron does two operations: multiply each input by a weight, sum them up (plus
 In this chapter, the *sigmoid* is described as:
 
 <Choice>A function that doubles its input</Choice>
-<Choice correct>A curve that squashes numbers into 0–1</Choice>
 <Choice>A way to randomly initialize the weights</Choice>
+<Choice correct>A curve that squashes numbers into 0–1</Choice>
 <Choice>The error signal that flows backward through layers</Choice>
 
 <Feedback>
@@ -30,9 +30,9 @@ The sigmoid is an S-shape that smoothly turns any input number into something be
 The chapter says hidden layers in a deep network might detect, in order: edges → shapes → eyes/ears → whole cats. What's the pattern?
 
 <Choice>The network re-reads the original input at each layer</Choice>
-<Choice correct>Each layer builds richer features from the previous</Choice>
 <Choice>Hidden layers store memories from previous inputs</Choice>
 <Choice>Layers reduce the number of weights needed</Choice>
+<Choice correct>Each layer builds richer features from the previous</Choice>
 
 <Feedback>
 Each layer takes the previous layer's outputs and combines them into something more complex. Early layers detect simple things like edges; middle layers combine those into parts like eyes; later layers combine those into whole objects. Depth is what lets a network build up from simple features to complex concepts.
@@ -42,9 +42,9 @@ Each layer takes the previous layer's outputs and combines them into something m
 <Question>
 Why can't you train a network of logic gates using the optimization methods from Chapter 2?
 
+<Choice correct>Their outputs jump all-or-nothing with no smooth gradient</Choice>
 <Choice>Logic gates are too small to add weights to</Choice>
 <Choice>Logic gates can't compute non-binary arithmetic operations</Choice>
-<Choice correct>Their outputs jump all-or-nothing with no smooth gradient</Choice>
 <Choice>There aren't enough logic gates in modern computers</Choice>
 
 <Feedback>
@@ -56,8 +56,8 @@ Logic gates jump from 0 to 1 with nothing in between, so there's no smooth gradi
 A reader argues: "The bigger a neural network, the smarter it is. Just keep adding connections." How does the chapter complicate this view?
 
 <Choice>Real AI hasn't actually become smarter recently</Choice>
-<Choice>Bigger networks can't be trained with gradient descent</Choice>
 <Choice correct>The quality of the weights matters most</Choice>
+<Choice>Bigger networks can't be trained with gradient descent</Choice>
 <Choice>Bigger networks always become unstable during training</Choice>
 
 <Feedback>
@@ -69,8 +69,8 @@ Consider two examples: today's largest language models have roughly as many para
 A neuron with two inputs (each 0 or 1) uses a sigmoid: the activation maps a big positive number to near 1, and a big negative number to near 0. Which weights and bias make it compute the AND gate (output near 1 only when both inputs are 1)?
 
 <Choice>weights = (10, 10), bias = −5</Choice>
-<Choice correct>weights = (10, 10), bias = −15</Choice>
 <Choice>weights = (−10, −10), bias = 15</Choice>
+<Choice correct>weights = (10, 10), bias = −15</Choice>
 <Choice>weights = (−10, 0), bias = 5</Choice>
 
 <Feedback>
@@ -90,7 +90,7 @@ Recall what the neuron computes: multiply each input by its weight, add the bias
 
 The output is near 1 only when both inputs are 1 — that's AND. The big weight magnitudes push the sum far from zero, so the sigmoid lands crisply near 0 or 1 instead of hovering in the wishy-washy middle.
 
-The other choices are real logic gates, just not AND. (A) bias = −5 fires whenever any input is 1 — that's OR. (C) weights = (−10, −10), bias = 15 fires *unless* both inputs are 1 — that's NAND. (D) weights = (−10, 0), bias = 5 ignores the second input and flips the first — that's NOT applied to the first input.
+The other choices are real logic gates, just not AND. (A) bias = −5 fires whenever any input is 1 — that's OR. (B) weights = (−10, −10), bias = 15 fires *unless* both inputs are 1 — that's NAND. (D) weights = (−10, 0), bias = 5 ignores the second input and flips the first — that's NOT applied to the first input.
 </Feedback>
 </Question>
 
@@ -99,8 +99,8 @@ The chapter shows three neurons in two layers solving XOR, while a single neuron
 
 <Choice>Train faster on the same data</Choice>
 <Choice>Use a different activation function</Choice>
-<Choice correct>Combine facts computed by hidden neurons</Choice>
 <Choice>Reduce the number of weights needed</Choice>
+<Choice correct>Combine facts computed by hidden neurons</Choice>
 
 <Feedback>
 A single neuron is limited to one weighted sum followed by one activation — too simple for XOR. With two layers, the hidden neurons compute *intermediate facts* (say, OR and NAND), which the output neuron then combines. The output doesn't have to solve XOR on its own — it just needs to AND together what the hidden neurons figured out. That's what depth buys you.

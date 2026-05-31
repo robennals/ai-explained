@@ -3,8 +3,8 @@
 <Question>
 A *transformer* is:
 
-<Choice correct>Stacked layers using attention to share info across tokens</Choice>
 <Choice>An embedding layer mapping words to vectors of numbers</Choice>
+<Choice correct>Stacked layers using attention to share info across tokens</Choice>
 <Choice>A specialized model trained only on translation tasks</Choice>
 <Choice>A neural network with no attention, just feedforward layers</Choice>
 
@@ -17,8 +17,8 @@ A transformer is a stack of layers. Each layer uses attention to let each token 
 What's inside a single transformer layer?
 
 <Choice>A single attention head only</Choice>
-<Choice correct>Attention plus a small neural network</Choice>
 <Choice>A complete copy of the entire model</Choice>
+<Choice correct>Attention plus a small neural network</Choice>
 <Choice>Just the embedding lookup</Choice>
 
 <Feedback>
@@ -30,9 +30,9 @@ Each transformer layer combines attention (to gather context from other tokens) 
 How does a transformer's wiring differ from a regular neural network's?
 
 <Choice>Transformers use no weights of any kind</Choice>
-<Choice correct>Attention picks which info flows where</Choice>
 <Choice>Transformers run fewer layers than NNs</Choice>
 <Choice>Transformers process one token at a time</Choice>
+<Choice correct>Attention picks which info flows where</Choice>
 
 <Feedback>
 In a regular neural network, the connections between neurons are fixed during training — the wiring is decided once. In a transformer, attention dynamically chooses which other tokens to listen to for each input. The same model can route information very differently for different inputs, which is what makes transformers so flexible.
@@ -42,8 +42,8 @@ In a regular neural network, the connections between neurons are fixed during tr
 <Question>
 In the chapter's example, the model predicts "Earth" from the surrounding description, even though the word "Earth" never appears in the input. How?
 
-<Choice>The model looks up "Earth" in a fixed dictionary</Choice>
 <Choice correct>Layers build a representation matching Earth's embedding</Choice>
+<Choice>The model looks up "Earth" in a fixed dictionary</Choice>
 <Choice>The model memorized common children's stories</Choice>
 <Choice>Attention rotates the input vectors into the answer</Choice>
 
@@ -69,9 +69,9 @@ GPT-3 has 96 layers with 96 attention heads on each layer. About how many attent
 A reader claims: "For each transformer layer, we can read what its attention heads are doing — like 'this head finds pronouns, that head finds verbs.'" What's wrong?
 
 <Choice>Heads are too small to inspect</Choice>
-<Choice correct>Heads' internal patterns are usually opaque</Choice>
 <Choice>There's only one head per layer in real models</Choice>
 <Choice>Heads only ever compute predictions</Choice>
+<Choice correct>Heads' internal patterns are usually opaque</Choice>
 
 <Feedback>
 When a transformer is trained, it isn't aiming to produce layers, heads, or representations that make sense to humans. It's just trying to come up with whatever helps it do its training task. The result is internal workings that aren't directly human-readable, even though they consistently produce useful behavior. Understanding what individual heads do is the focus of an active research area called *interpretability*.
@@ -81,9 +81,9 @@ When a transformer is trained, it isn't aiming to produce layers, heads, or repr
 <Question>
 In a transformer layer, the output of attention is *added back to* the original token representation (a "residual connection"), rather than replacing it. Why?
 
+<Choice correct>To add new info without losing the old</Choice>
 <Choice>To save memory during the forward pass</Choice>
 <Choice>To make the model run somewhat faster</Choice>
-<Choice correct>To add new info without losing the old</Choice>
 <Choice>To compress the token representations down</Choice>
 
 <Feedback>

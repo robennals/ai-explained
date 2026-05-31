@@ -3,9 +3,9 @@
 <Question>
 A *vector* is best described as:
 
-<Choice correct>A list of numbers describing something</Choice>
 <Choice>A neuron that can distinguish things</Choice>
 <Choice>A pattern stored inside a neural network</Choice>
+<Choice correct>A list of numbers describing something</Choice>
 <Choice>An algorithm for classifying inputs</Choice>
 
 <Feedback>
@@ -30,9 +30,9 @@ The dot product multiplies matching pairs of numbers and adds the results — pr
 Imagine an animal vector that scores high on *every* property — big, scary, hairy, cuddly, fast, fat. Without any scaling, what goes wrong when you compare it with other animals?
 
 <Choice>Nothing — this is fine</Choice>
-<Choice correct>It looks similar to everything</Choice>
 <Choice>It can't be compared with smaller animals</Choice>
 <Choice>It uses too much memory to store</Choice>
+<Choice correct>It looks similar to everything</Choice>
 
 <Feedback>
 The dot product naturally rewards big numbers. An animal scoring high on every property has a huge dot product with anything, so it appears similar to everything — which is obviously wrong. The fix is to scale every vector to magnitude 1 (a *unit vector*), so similarity comparisons depend on the *direction* of the vector rather than its size.
@@ -57,8 +57,8 @@ Neuron A has weights (0.5, 0.5, 0.0). Neuron B has weights (1.0, 1.0, 0.0). What
 
 <Choice>They are identical — only direction matters</Choice>
 <Choice>They detect different patterns from each other</Choice>
-<Choice correct>Same pattern detected, with different sensitivity</Choice>
 <Choice>The smaller vector is invalid for use as weights</Choice>
+<Choice correct>Same pattern detected, with different sensitivity</Choice>
 
 <Feedback>
 Both weight vectors point in the same direction — they're proportional. The unit vector (the direction) tells you *what* a neuron detects; the magnitude tells you *how sensitive* it is. So these neurons detect the same pattern, but neuron B (with magnitude √2) gets twice as excited when it matches as neuron A (with magnitude ~0.7).
@@ -69,8 +69,8 @@ Both weight vectors point in the same direction — they're proportional. The un
 Why can a single neuron be called a "pattern detector"?
 
 <Choice>Because it stores patterns in its weights as memory</Choice>
-<Choice correct>Its dot product is largest when input matches its weights</Choice>
 <Choice>Because it remembers the most common input it has seen</Choice>
+<Choice correct>Its dot product is largest when input matches its weights</Choice>
 <Choice>Because it labels each input with its category</Choice>
 
 <Feedback>

@@ -4,9 +4,9 @@
 Why does attention need position information added to it?
 
 <Choice>Because faster compute requires it</Choice>
-<Choice correct>Because word order changes meaning</Choice>
 <Choice>Because attention scores are too small</Choice>
 <Choice>Because the embedding layer can't handle long text</Choice>
+<Choice correct>Because word order changes meaning</Choice>
 
 <Feedback>
 "The dog bit the man" vs "the man bit the dog" have the same words in different orders, and the meaning flips entirely. Attention as built so far can't tell these apart — the embedding for "cat" is the same whether it's the first word or the last.
@@ -16,8 +16,8 @@ Why does attention need position information added to it?
 <Question>
 What is *ALiBi* (Attention with Linear Biases)?
 
-<Choice>A method that rotates token vectors by position</Choice>
 <Choice correct>A distance penalty applied to attention scores</Choice>
+<Choice>A method that rotates token vectors by position</Choice>
 <Choice>A model with no attention mechanism</Choice>
 <Choice>A way to make embeddings larger</Choice>
 
@@ -30,8 +30,8 @@ ALiBi subtracts a penalty from each attention score equal to slope × distance. 
 How does rotating each token's vector by its position help the model understand distance between words?
 
 <Choice>Far-apart tokens end up pointing in opposite directions</Choice>
-<Choice correct>Their dot product depends on their position gap</Choice>
 <Choice>Rotation makes the math simpler than ALiBi</Choice>
+<Choice correct>Their dot product depends on their position gap</Choice>
 <Choice>Rotating shrinks vectors so they're easier to compare</Choice>
 
 <Feedback>
@@ -57,8 +57,8 @@ What's a limitation of ALiBi that RoPE fixes?
 
 <Choice>ALiBi can't run on modern GPUs</Choice>
 <Choice>ALiBi requires more memory</Choice>
-<Choice correct>ALiBi only produces linear distance falloffs</Choice>
 <Choice>ALiBi can only handle short sentences</Choice>
+<Choice correct>ALiBi only produces linear distance falloffs</Choice>
 
 <Feedback>
 ALiBi subtracts a fixed slope × distance from each score, so the attention penalty always falls off as a straight line. But the right shape isn't always linear — sometimes you want a sharp drop at very short distance, sometimes a long flat tail, sometimes a two-stage falloff. RoPE produces any of these shapes by combining many rotation speeds; ALiBi is stuck with one straight line per head.
@@ -68,9 +68,9 @@ ALiBi subtracts a fixed slope × distance from each score, so the attention pena
 <Question>
 What goes wrong if a RoPE model uses *only* fast-rotating dimension pairs and no slow ones?
 
+<Choice correct>Distant tokens look identical to nearby ones</Choice>
 <Choice>Attention would always equal zero</Choice>
 <Choice>The model would lose all ability to focus locally</Choice>
-<Choice correct>Distant tokens look identical to nearby ones</Choice>
 <Choice>The model could only handle very short sentences</Choice>
 
 <Feedback>
