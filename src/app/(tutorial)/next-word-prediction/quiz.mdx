@@ -4,9 +4,9 @@
 What does the chapter claim is required to accurately predict the next word in a sentence?
 
 <Choice>A very large dictionary of all English words</Choice>
-<Choice correct>Real understanding — grammar, facts, common sense</Choice>
 <Choice>The exact sentence to have appeared in training</Choice>
 <Choice>A long memory for storing previous sentences</Choice>
+<Choice correct>Real understanding — grammar, facts, common sense</Choice>
 
 <Feedback>
 Predicting "The capital of France is ___" requires knowing that France's capital is Paris. Predicting what someone did after opening a letter requires understanding human emotions. Predicting "two plus two equals ___" requires arithmetic. The better you predict, the more you must understand — prediction REQUIRES understanding.
@@ -16,8 +16,8 @@ Predicting "The capital of France is ___" requires knowing that France's capital
 <Question>
 What is a *bigram* model?
 
-<Choice>A model that processes two languages at once</Choice>
 <Choice correct>A model that predicts based on the previous word</Choice>
+<Choice>A model that processes two languages at once</Choice>
 <Choice>A model with exactly two neural network layers</Choice>
 <Choice>A model that compares two sentences for similarity</Choice>
 
@@ -30,8 +30,8 @@ A bigram model looks at the one previous word and predicts what's likely to come
 A bigram model's individual word-to-word predictions sound reasonable, but the sentences it generates are nonsense. Why?
 
 <Choice>It uses arithmetic that's too simple</Choice>
-<Choice correct>It can only see the single previous word</Choice>
 <Choice>It picks words completely at random</Choice>
+<Choice correct>It can only see the single previous word</Choice>
 <Choice>It uses the wrong dictionary of English words</Choice>
 
 <Feedback>
@@ -57,8 +57,8 @@ How do neural networks with embeddings solve the n-gram explosion problem?
 
 <Choice>They store every possible sentence in a database</Choice>
 <Choice>They use much faster hardware than n-gram models</Choice>
-<Choice correct>Similar words have similar embeddings, so predictions generalize</Choice>
 <Choice>They make predictions based on guesses rather than data</Choice>
+<Choice correct>Similar words have similar embeddings, so predictions generalize</Choice>
 
 <Feedback>
 Embeddings capture meaning: "cat" and "dog" have similar vectors because they appear in similar contexts. A network that learns "the cat ___" → "was" automatically generalizes to "the dog ___" → "was", because the inputs look almost the same. The network doesn't have to see every possible sequence — it learns patterns over the continuous space of meanings.
@@ -82,8 +82,8 @@ Modern LLMs use next-word prediction as a *training* task — that's how they le
 Even neural networks with embeddings share a limitation with simple n-grams: they only see a fixed window of recent words. Why is that a problem for understanding text?
 
 <Choice>Computers can't read more than a few words at once</Choice>
-<Choice correct>Meaning often depends on text from far earlier</Choice>
 <Choice>Embeddings only work for the most recent word</Choice>
+<Choice correct>Meaning often depends on text from far earlier</Choice>
 <Choice>Neural networks fail with too much input</Choice>
 
 <Feedback>

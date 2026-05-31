@@ -4,8 +4,8 @@
 An *embedding* is:
 
 <Choice>A label assigned by a human to each word</Choice>
-<Choice correct>A vector representation of something like a word</Choice>
 <Choice>A list of all possible words in the language</Choice>
+<Choice correct>A vector representation of something like a word</Choice>
 <Choice>A rule for spelling unusual words</Choice>
 
 <Feedback>
@@ -16,9 +16,9 @@ An embedding is a learned vector — a list of numbers — that represents somet
 <Question>
 What is *one-hot encoding*?
 
+<Choice correct>A vector with one 1 and rest zeros</Choice>
 <Choice>A compressed format for storing common words</Choice>
 <Choice>A way to turn an embedding into text</Choice>
-<Choice correct>A vector with one 1 and rest zeros</Choice>
 <Choice>A method for combining two embeddings together</Choice>
 
 <Feedback>
@@ -30,9 +30,9 @@ Each token has its own position in the one-hot vector. To represent a token, you
 Animal vectors used hand-picked dimensions (size, scariness, etc.). Why don't embeddings work the same way for words?
 
 <Choice>There aren't enough words to label</Choice>
-<Choice correct>No properties work for all words</Choice>
 <Choice>Computers can't handle labeled dimensions</Choice>
 <Choice>Labels make the math too slow</Choice>
+<Choice correct>No properties work for all words</Choice>
 
 <Feedback>
 Animal vectors worked because all animals could be rated on the same properties: size, speed, danger. But words include everything — colors, abstract ideas, actions. "How big is the color blue?" isn't a meaningful question. Embeddings sidestep this by letting the dimensions emerge from training rather than being labeled by hand.
@@ -43,8 +43,8 @@ Animal vectors worked because all animals could be rated on the same properties:
 In a well-trained embedding, you compute *elephant − mouse + rabbit*. What does the result land near?
 
 <Choice>A point with no clear meaning</Choice>
-<Choice correct>Near a large animal like 'lion'</Choice>
 <Choice>Near the general word 'mammal'</Choice>
+<Choice correct>Near a large animal like 'lion'</Choice>
 <Choice>A point midway between elephant and rabbit</Choice>
 
 <Feedback>
@@ -69,9 +69,9 @@ If you had one token per English word, you'd run out — people invent new words
 A reader argues: "For an embedding to work, engineers must hand-design each word's vector position so similar words end up nearby." What's wrong with this view?
 
 <Choice>Yes — that's why building embeddings is so hard</Choice>
-<Choice correct>Positions are found by training, not engineers</Choice>
 <Choice>Programmers design only the most common words</Choice>
 <Choice>Each language requires its own design team</Choice>
+<Choice correct>Positions are found by training, not engineers</Choice>
 
 <Feedback>
 Embeddings are just the weights of the network's first layer. They start out random and are shaped by gradient descent during training — the network naturally moves similar words near each other because doing so helps it predict better. Nobody tells it where "dog" or "happy" should go; the geometry is discovered, not designed.

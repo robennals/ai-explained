@@ -3,8 +3,8 @@
 <Question>
 In this chapter, "error" means:
 
-<Choice>A typo or mistake in the model's output</Choice>
 <Choice correct>The distance from what you have to perfect</Choice>
+<Choice>A typo or mistake in the model's output</Choice>
 <Choice>A computer crash during a training run</Choice>
 <Choice>A parameter set to the wrong value</Choice>
 
@@ -17,8 +17,8 @@ In this chapter, "error" means:
 What does the *gradient* tell you?
 
 <Choice>How far off you are from the right answer</Choice>
-<Choice correct>Which direction reduces the error fastest</Choice>
 <Choice>The total number of parameters in the model</Choice>
+<Choice correct>Which direction reduces the error fastest</Choice>
 <Choice>Roughly how long training will take</Choice>
 
 <Feedback>
@@ -45,29 +45,29 @@ Each of these — biological organisms, airplanes, smartphones — was built up 
 Why doesn't the chapter's "try a small change, keep it if it helped" algorithm work for guessing a 6-character password?
 
 <Choice>Passwords are randomly chosen, so optimization can't help</Choice>
-<Choice correct>You can't tell if a tweak brings you closer</Choice>
 <Choice>Passwords are encrypted before being stored on disk</Choice>
 <Choice>Each character has too many possibilities to try</Choice>
+<Choice correct>You can't tell if a tweak brings you closer</Choice>
 
 <Feedback>
 A password checker is *non-smooth*: any guess that isn't exactly right comes back as "wrong", telling you nothing about how close you were. Without a "warmer/colder" signal, small tweaks give you nothing to follow.
 
-(D) is tempting — the search space *is* huge — but huge search spaces are fine when the function is smooth. The killer here is the missing signal, not the size.
+(C) is tempting — the search space *is* huge — but huge search spaces are fine when the function is smooth. The killer here is the missing signal, not the size.
 </Feedback>
 </Question>
 
 <Question>
 Someone argues: "For AI to do something impressive — like writing a story — engineers must have figured out the rules of good writing and programmed them in." What does the chapter say is wrong?
 
-<Choice>AI can't actually write good stories yet</Choice>
 <Choice correct>The model learns to do it without being explicitly taught</Choice>
+<Choice>AI can't actually write good stories yet</Choice>
 <Choice>AI uses a separate, secret algorithm for writing tasks</Choice>
 <Choice>Stories follow simpler rules than people think</Choice>
 
 <Feedback>
 Nobody writes down "the rules of good writing" for the model. Training just shows it lots of examples and adjusts parameters incrementally until the output is good — the model picks up the patterns of good writing on its own, without ever being told what those patterns are.
 
-(A) is a common stance, but the issue isn't AI's current quality — it's how AI is *built*. Even when AI does something impressive, the impressive part wasn't designed in; it was learned.
+(B) is a common stance, but the issue isn't AI's current quality — it's how AI is *built*. Even when AI does something impressive, the impressive part wasn't designed in; it was learned.
 </Feedback>
 </Question>
 
