@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, Fragment } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
 import { ANIMAL_DOMAIN } from "@/components/widgets/vectors/vectorData";
 
 const DEFAULT_ROW_NAMES = ["Bear", "Eagle", "Snake"];
-const MAX_ROWS = 6;
+const MAX_ROWS = ANIMAL_DOMAIN.properties.length;
 const MIN_ROWS = 1;
 
 // Compact horizontal bar: value in [0, 1]
@@ -41,7 +41,7 @@ function ChipSelector({
           return (
             <button
               key={item.name}
-              onClick={() => !disabled && onToggle(item.name)}
+              onClick={() => onToggle(item.name)}
               disabled={disabled}
               className={`rounded-md border px-2.5 py-1 text-xs font-medium transition-colors ${
                 selected
@@ -118,10 +118,9 @@ export function MatrixGrid() {
           {rowNames.map((name) => {
             const item = ANIMAL_DOMAIN.items.find((it) => it.name === name)!;
             return (
-              <>
+              <Fragment key={name}>
                 {/* Row label — part of the boxed row */}
                 <div
-                  key={`${name}-label`}
                   className="flex flex-col justify-center gap-0.5 rounded-l-lg border-y border-l border-border bg-surface px-3 py-2.5"
                 >
                   <div className="flex items-center gap-1.5">
@@ -152,7 +151,7 @@ export function MatrixGrid() {
                     </div>
                   );
                 })}
-              </>
+              </Fragment>
             );
           })}
         </div>
