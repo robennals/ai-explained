@@ -50,7 +50,7 @@ Start with six good reference animals and watch the inverse recover the original
 
 ## A Layer of a Neural Network Is a Matrix (Plus a Bend)
 
-A layer of a neural network takes an input vector and produces an output vector. It does this by running a stack of weighted sums, one per output. A weighted sum is a dot product. A stack of dot products is a matrix multiply. So a layer is a matrix multiply, the same operation from §1.
+A layer of a neural network takes an input vector and produces an output vector. It does this by running a stack of weighted sums, one per output. A weighted sum is a dot product. A stack of dot products is a matrix multiply. So a layer is a matrix multiply, the same operation you ran by hand at the start of the chapter.
 
 There's one difference from the bear-eagle-snake matrix. We hand-picked those detectors. A neural network learns its own during training. It works out for itself which reference concepts are worth detecting, and those learned detectors become the rows of its weight matrix. Nobody tells it to build a bear detector. It builds whatever detectors make the next layer's job easier.
 
@@ -64,7 +64,7 @@ Flip on "Apply activation (ReLU)" below the detectors. Each score now has its th
 
 Stack two matrix multiplies back to back with nothing between them and something deflating happens. You can multiply the two matrices together first and get a single matrix that does both at once. Two layers collapse into one. So pure matrix layers buy you no extra power from depth: a hundred of them stacked is still just one matrix in disguise.
 
-This is why the bend from §3 earns its place. Put a nonlinear activation function between two matrix layers and they can no longer be merged. The bend is what lets a deep network do things no single matrix could.
+This is why the bend from the previous section earns its place. Put a nonlinear activation function between two matrix layers and they can no longer be merged. The bend is what lets a deep network do things no single matrix could.
 
 <MatrixCompositionWidget>
 Edit the numbers in matrices A and B and watch the product matrix C update. C does the work of both A and B in a single step. Now flip on "Put an activation between them." C grays out, because once there's a bend in the middle, no single matrix can stand in for the pair.
@@ -78,7 +78,7 @@ Edit the numbers in matrices A and B and watch the product matrix C update. C do
 
 The Attention chapter had the word "it" looking back through a sentence for a noun to attach to. The way it scored each candidate was a dot product: the query of "it" against the key of every other token.
 
-Run that for all the candidates at once and you have a detector stack. Stack the other tokens' keys as the rows of a matrix, multiply by this token's query vector, and out come the match scores, one per token. It's the same picture as §1. The keys are the detectors and the query is the input. One matrix times a vector, per token, per head.
+Run that for all the candidates at once and you have a detector stack. Stack the other tokens' keys as the rows of a matrix, multiply by this token's query vector, and out come the match scores, one per token. It's the same picture as the detector stack from the start of the chapter. The keys are the detectors and the query is the input. One matrix times a vector, per token, per head.
 
 The query, key, and value vectors are themselves produced by matrix multiplies, and blending the chosen values together is one more. Attention is matrix multiplication the whole way down.
 
@@ -95,7 +95,7 @@ Every frame of a 3D game does this to every vertex of every model: multiply by a
 Then neural networks turned out to be mostly matrix multiplication as well. The same chips built to spin dragons were already perfect for running detector stacks by the million. The hardware for games became the hardware for AI. That's the answer to the puzzle from the top of the chapter.
 
 <Transform2D3DWidget>
-On the **2D** tab, spin and shear the cat with the presets. Switch to the **3D** tab to tumble a chicken or a shiba. Back on the 2D tab, flip on "Apply activation (sigmoid)" and watch the straight lines bow into curves. That bending is the §3 and §4 nonlinearity, made visible: a matrix alone keeps straight lines straight, and the activation is what bends them.
+On the **2D** tab, spin and shear the cat with the presets. Switch to the **3D** tab to tumble a chicken or a shiba. Back on the 2D tab, flip on "Apply activation (sigmoid)" and watch the straight lines bow into curves. That bending is the same nonlinearity from the layer sections, made visible: a matrix alone keeps straight lines straight, and the activation is what bends them.
 </Transform2D3DWidget>
 
 ## What's Next
