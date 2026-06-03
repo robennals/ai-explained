@@ -6,21 +6,35 @@ The graphics card that runs ChatGPT was invented to make videogames look good. T
 
 ## You Already Know This
 
-A matrix sounds like a new and scary object. It isn't. A matrix is several dot products written out at once.
+A matrix sounds like a new and scary object. It isn't. A matrix is just a list of weight-vectors, one detector each, and you dot-product the input against every one of them.
 
 Remember the bear detector from the Vectors chapter. You take an animal's property-vector (big, scary, hairy, cuddly, fast, fat) and dot it with a "bear" weight-vector. Out comes a single number: how bear-like this animal is. One dot product, one detector.
 
-Now suppose you want a bear detector *and* an eagle detector *and* a snake detector, all at once. Stack their weight-vectors as the rows of a grid. Multiply an animal by that grid and every row runs its own dot product in a single shot. The animal goes in as six properties and comes out re-described as a handful of scores, maybe "0.8 bear-like, 0.4 eagle-like, 0.2 snake-like."
+Written with a dot, `bear · cat` means the dot product: multiply each matching property and add up the results, giving a single number for how bear-like the cat is. That dot is the same similarity score from the Vectors chapter, now with a shorter name.
 
-That grid is a **matrix**. Multiplying a vector by it is **matrix multiplication**. There is nothing in it you haven't already done by hand. Each row is a detector, and the matrix just asks all your questions at the same time.
+Now suppose you want a bear detector *and* an eagle detector *and* a snake detector, all at once. Keep them as a list of three weight-vectors and run each one's dot product against the same input animal. The animal goes in as six properties and comes out re-described as a handful of scores, maybe "0.8 bear-like, 0.4 eagle-like, 0.2 snake-like." That list of detectors is a **matrix**, and running every detector against an input is **matrix multiplication**. There is nothing in it you haven't already done by hand. Each detector is one dot product, and the matrix just asks all your questions at the same time.
 
 <DetectorStackWidget>
-Pick an input animal at the top. Each row is one detector, a reference animal acting as a weight-vector. Add or remove detector rows and watch each row compute its own dot product with the input. The bars on the right are the output: a fresh vector that describes the input in terms of how much it matches each detector.
+Pick an input animal from the buttons at the top. Then choose some animals to compare against; each one acts as a detector, a weight-vector dotted with your input. Read each line as `Animal · YourAnimal = score`, where the dot is the dot product. Click a row to expand the full working and see every matching property multiplied and added up. The scores together are the output: a fresh vector describing your animal by how much it matches each detector.
 </DetectorStackWidget>
 
 <KeyInsight>
-**A matrix is a stack of detectors.** Each row is a weight-vector, the same kind you used to build a single detector. One matrix multiply runs every detector at once and re-describes the input as a list of match scores.
+**A matrix is a stack of detectors.** Each one is a weight-vector, the same kind you used to build a single detector. One matrix multiply runs every detector at once and re-describes the input as a list of match scores.
 </KeyInsight>
+
+## Writing the Matrix as a Grid
+
+You've now seen a matrix do its job: a list of detectors, each dot-producted with the input. The next thing to settle is how to write that list down, because the standard notation is what every later chapter uses.
+
+Start from the pieces. An animal is a vector, a row of property numbers (big, scary, hairy, cuddly, fast, fat) shown as the same bars you've already seen. A detector is just an animal's vector too, used as a weight-vector instead of as an input.
+
+To write several detectors together, stack each one as a **row**. The result is a **grid of numbers**, and that grid is the matrix. Each row is one animal you match against, and the six columns are the six properties. Nothing computes here; this is only the standard way to lay the detectors out on the page.
+
+<MatrixGridWidget>
+Choose which animals to match against and watch the grid gain or lose a labelled, boxed row. Each row is one detector, an animal's property vector laid out across the six columns, and the whole grid is the matrix.
+</MatrixGridWidget>
+
+From here on, "the matrix" means exactly this: a grid of stacked detector-vectors, one detector per row.
 
 ## Can You Get the Original Back?
 

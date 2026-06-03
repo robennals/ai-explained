@@ -12,6 +12,14 @@ const DetectorStack = dynamic(
   { ssr: false }
 );
 
+const MatrixGrid = dynamic(
+  () =>
+    import("@/components/widgets/matrices/MatrixGrid").then(
+      (m) => m.MatrixGrid
+    ),
+  { ssr: false }
+);
+
 const MatrixComposition = dynamic(
   () =>
     import("@/components/widgets/matrices/MatrixComposition").then(
@@ -56,6 +64,14 @@ export function RoundTripWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children} label="Explore it">
       <DetectorStack mode="round-trip" />
+    </WidgetSlot>
+  );
+}
+
+export function MatrixGridWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children} label="Explore it">
+      <MatrixGrid />
     </WidgetSlot>
   );
 }
