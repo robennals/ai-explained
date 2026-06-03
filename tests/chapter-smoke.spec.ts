@@ -49,6 +49,11 @@ const CHAPTERS: ChapterCase[] = [
     widgetTitles: ["Word Order Changes Meaning"],
   },
   {
+    slug: "matrices",
+    h1Contains: "A Thousand Questions at Once",
+    widgetTitles: ["A Matrix Is Many Dot Products"],
+  },
+  {
     slug: "appendix-pytorch",
     h1Contains: "PyTorch",
     widgetTitles: [],
