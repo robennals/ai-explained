@@ -170,9 +170,9 @@ function adjustColor(hex: string, brightness: number): string {
 
 type OpType = "rotate" | "scale" | "shear" | "flatten" | null;
 
-// --- Component ---
+// --- Transform3DBody ---
 
-export function Transform3D() {
+export function Transform3DBody() {
   const [matrix, setMatrix] = useState<number[][]>([
     [1, 0, 0],
     [0, 1, 0],
@@ -305,11 +305,7 @@ export function Transform3D() {
   const modelIds = Object.keys(MODELS) as ModelId[];
 
   return (
-    <WidgetContainer
-      title="3D Matrix Transformation"
-      description="Nine numbers control where three basis vectors land — and all of 3D space follows"
-      onReset={handleReset}
-    >
+    <>
       {/* Model selector */}
       {modelIds.length > 1 && (
         <div className="mb-3 flex flex-wrap items-center gap-2">
@@ -337,7 +333,7 @@ export function Transform3D() {
       >
         <defs>
           {AXIS_COLORS.map((color, i) => (
-            <marker key={i} id={`arrow${i}`} viewBox="0 0 10 10" refX="8" refY="5"
+            <marker key={i} id={`t3d-arrow${i}`} viewBox="0 0 10 10" refX="8" refY="5"
               markerWidth="6" markerHeight="6" orient="auto-start-reverse">
               <path d="M 0 0 L 10 5 L 0 10 z" fill={color} />
             </marker>
@@ -358,7 +354,7 @@ export function Transform3D() {
           <g key={`ax${i}`}>
             <line x1={origin.x} y1={origin.y} x2={end.x} y2={end.y}
               stroke={AXIS_COLORS[i]} strokeWidth={2.5} opacity={0.9}
-              markerEnd={`url(#arrow${i})`} />
+              markerEnd={`url(#t3d-arrow${i})`} />
             <text x={end.x + 6} y={end.y - 6} fill={AXIS_COLORS[i]} fontSize={12} fontWeight="bold">
               {AXIS_LABELS[i]}
             </text>
@@ -532,6 +528,24 @@ export function Transform3D() {
       <div className="mt-2 text-center text-[10px] text-muted">
         {model.attribution}
       </div>
+    </>
+  );
+}
+
+export function Transform3D() {
+  const [resetNonce, setResetNonce] = useState(0);
+
+  const handleReset = useCallback(() => {
+    setResetNonce((n) => n + 1);
+  }, []);
+
+  return (
+    <WidgetContainer
+      title="3D Matrix Transformation"
+      description="Nine numbers control where three basis vectors land — and all of 3D space follows"
+      onReset={handleReset}
+    >
+      <Transform3DBody key={resetNonce} />
     </WidgetContainer>
   );
 }
