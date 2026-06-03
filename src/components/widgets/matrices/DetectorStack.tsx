@@ -5,7 +5,6 @@ import { WidgetContainer } from "../shared/WidgetContainer";
 import { SelectControl } from "../shared/SelectControl";
 import {
   ANIMAL_DOMAIN,
-  vecDot,
   type VectorDomain,
 } from "../vectors/vectorData";
 import { matVecMul } from "./matrixMath";
@@ -17,6 +16,12 @@ export interface DetectorStackProps {
   mode?: "detectors" | "round-trip" | "attention";
   title?: string;
   description?: string;
+}
+
+function scoreColor(score: number): string {
+  if (score >= 0.7) return "#22c55e";
+  if (score >= 0.45) return "#f59e0b";
+  return "#94a3b8";
 }
 
 const DEFAULT_INPUT = "Cat";
@@ -67,7 +72,7 @@ function PropertyBars({
 function ScoreBar({ score }: { score: number }) {
   const pct = Math.max(0, Math.min(1, score)) * 100;
   // Color: green for high, amber for mid, gray for low
-  const color = score > 0.7 ? "#22c55e" : score > 0.45 ? "#f59e0b" : "#94a3b8";
+  const color = scoreColor(score);
   return (
     <div className="flex items-center gap-2 min-w-0">
       <div
@@ -203,9 +208,6 @@ export function DetectorStack(props: DetectorStackProps) {
           {rowNames.map((refName, i) => {
             const refItem = domain.items.find((it) => it.name === refName)!;
             const score = output[i];
-            // Verify: score must equal vecDot(refItem.values, input)
-            const _check = vecDot(refItem.values, input);
-            void _check; // used only for correctness sanity
             return (
               <div
                 key={refName}
@@ -258,8 +260,7 @@ export function DetectorStack(props: DetectorStackProps) {
             {rowNames.map((refName, i) => {
               const refItem = domain.items.find((it) => it.name === refName)!;
               const score = output[i];
-              const color =
-                score > 0.7 ? "#22c55e" : score > 0.45 ? "#f59e0b" : "#94a3b8";
+              const color = scoreColor(score);
               return (
                 <div key={refName} className="flex items-center gap-1.5">
                   <span className="font-mono text-sm font-bold" style={{ color }}>
