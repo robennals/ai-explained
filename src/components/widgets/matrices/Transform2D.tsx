@@ -113,7 +113,6 @@ function interpolateVerts(
 
 interface CanvasWarpProps {
   src: string;
-  imgSvg: { x: number; y: number; width: number; height: number };
   e1x: number; e1y: number; e2x: number; e2y: number;
   mathX: number; mathY: number; mathW: number; mathH: number;
   svgSize: number;
@@ -592,7 +591,6 @@ export function Transform2DBody({ activation = false }: Transform2DBodyProps) {
           <div className="absolute inset-0 w-full" style={{ aspectRatio: "1" }}>
             <CanvasWarpImage
               src={imageConfig.src}
-              imgSvg={imgSvg}
               e1x={e1x}
               e1y={e1y}
               e2x={e2x}
