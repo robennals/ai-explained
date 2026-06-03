@@ -65,10 +65,12 @@ function MatrixGrid({
                     />
                   ) : (
                     <div
-                      className={`flex h-8 w-10 items-center justify-center rounded border font-mono text-sm font-bold ${
+                      className={`flex h-8 min-w-[2.75rem] items-center justify-center rounded border font-mono text-sm font-bold ${
                         highlighted
                           ? "border-accent/40 bg-accent/10 text-accent"
-                          : "border-border bg-surface text-foreground"
+                          : dimmed
+                            ? "border-border bg-surface text-muted line-through"
+                            : "border-border bg-surface text-foreground"
                       }`}
                     >
                       {val}
@@ -142,24 +144,8 @@ export function MatrixComposition() {
 
         {activationOn ? (
           <div className="flex flex-col items-center gap-1.5">
-            <span className="font-mono text-sm font-bold text-foreground">C</span>
-            <div className="flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-border bg-surface p-4 opacity-50">
-              <div className="flex flex-col gap-1">
-                {matC.map((row, r) => (
-                  <div key={r} className="flex gap-1">
-                    {row.map((val, c) => (
-                      <div
-                        key={c}
-                        className="flex h-8 w-10 items-center justify-center rounded border border-border font-mono text-sm font-bold text-muted line-through"
-                      >
-                        {val}
-                      </div>
-                    ))}
-                  </div>
-                ))}
-              </div>
-            </div>
-            <span className="rounded-full border border-red-400 bg-red-500/10 px-2.5 py-0.5 text-xs font-semibold text-red-500">
+            <MatrixGrid matrix={matC} label="C" dimmed />
+            <span className="rounded-full border border-error bg-error/10 px-2.5 py-0.5 text-xs font-semibold text-error">
               ✗ can&apos;t collapse
             </span>
           </div>
