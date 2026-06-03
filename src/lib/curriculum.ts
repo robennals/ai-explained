@@ -114,12 +114,12 @@ export const chapters: Chapter[] = [
   },
   {
     id: 10,
-    slug: "matrix-math",
-    title: "Thinking by Rotating",
-    subtitle: "Matrix math",
-    prerequisites: [4],
+    slug: "matrices",
+    title: "A Thousand Questions at Once",
+    subtitle: "Matrices",
+    prerequisites: [7],
     description:
-      "Every layer is a transformation in space — a rotation, a stretch, a fold. The geometry of high-dimensional space is how neural networks reshape vectors of meaning.",
+      "A matrix is just many dot products at once — a stack of detectors. That single idea is a neural-network layer, it's attention, and it's the 3D-rotation math GPUs were built for, which is why the chips made for videogames ended up running AI.",
   },
   {
     id: 11,

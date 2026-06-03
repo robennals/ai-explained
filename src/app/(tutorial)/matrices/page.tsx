@@ -11,10 +11,10 @@ import {
   ActivationEffectWidget,
 } from "./widgets";
 
-export const metadata = chapterMetadata("matrix-math");
+export const metadata = chapterMetadata("matrices");
 
 export default function Chapter05() {
-  const { prev, next } = getAdjacentChapters("matrix-math");
+  const { prev, next } = getAdjacentChapters("matrices");
 
   return (
     <article>
