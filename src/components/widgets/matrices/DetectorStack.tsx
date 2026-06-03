@@ -353,73 +353,86 @@ function DetectorsView({
                   )}
                 </button>
 
-                {/* Expanded detail — per-dimension working */}
-                {isExpanded && (
-                  <div className="border-t border-border px-3 py-3 bg-foreground/2">
-                    <div className="flex flex-wrap items-start gap-x-4 gap-y-2">
-                      {/* Reference animal bars */}
-                      <div>
-                        <div className="mb-1 text-[9px] font-bold uppercase tracking-widest text-muted">
-                          {refItem.emoji} {refItem.name} (row)
-                        </div>
-                        <PropertyBars
-                          values={refItem.values}
-                          properties={domain.properties}
-                          color="#6366f1"
-                        />
-                      </div>
-
-                      {/* × operator */}
-                      <div className="flex items-end pb-3">
-                        <span className="text-sm font-bold text-muted">×</span>
-                      </div>
-
-                      {/* Input animal bars */}
-                      <div>
-                        <div className="mb-1 text-[9px] font-bold uppercase tracking-widest text-muted">
-                          {inputItem.emoji} {inputItem.name} (input)
-                        </div>
-                        <PropertyBars
-                          values={input}
-                          properties={domain.properties}
-                          color="#f59e0b"
-                        />
-                      </div>
-
-                      {/* = score */}
-                      <div className="flex items-end pb-3">
-                        <span className="text-sm font-bold text-muted">=</span>
-                      </div>
-
-                      <div className="flex items-end pb-1">
-                        <ScoreBar score={score} />
-                      </div>
-                    </div>
-
-                    {/* Per-dimension products */}
-                    <div className="mt-2 flex flex-wrap gap-x-3 gap-y-0.5">
-                      {domain.properties.map((prop, pi) => {
-                        const product = refItem.values[pi] * input[pi];
-                        return (
-                          <span key={prop} className="text-[10px] font-mono text-muted">
-                            {refItem.values[pi].toFixed(2)} × {input[pi].toFixed(2)}{" "}
-                            <span className="text-foreground/60">[{prop}]</span>{" "}
-                            ={" "}
-                            <span className="text-foreground font-bold">
-                              {product.toFixed(2)}
-                            </span>
-                          </span>
-                        );
-                      })}
-                      <span className="text-[10px] font-mono text-muted">
-                        sum ={" "}
-                        <span className="font-bold" style={{ color: scoreCol }}>
-                          {score.toFixed(2)}
+                {/* Expanded detail — multiplication table */}
+                {isExpanded && (() => {
+                  // Round each product to 3dp, then sum the rounded values so
+                  // a reader adding the products column gets exactly the shown total.
+                  const roundedProducts = domain.properties.map((_, pi) =>
+                    Math.round(refItem.values[pi] * input[pi] * 1000) / 1000
+                  );
+                  const displayedTotal = roundedProducts.reduce((a, b) => a + b, 0);
+                  const displayedTotalStr = displayedTotal.toFixed(3);
+                  return (
+                    <div className="border-t border-border px-3 py-3 bg-foreground/2">
+                      {/* CSS grid: property | ref value | × | input value | = | product */}
+                      <div
+                        className="font-mono text-xs"
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "5rem 4.5rem auto 4.5rem auto 4rem",
+                          rowGap: "2px",
+                          columnGap: "4px",
+                          alignItems: "center",
+                        }}
+                      >
+                        {/* Header row */}
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-muted not-italic" style={{ fontFamily: "inherit" }}></span>
+                        <span
+                          className="text-right text-[10px] font-bold uppercase tracking-widest"
+                          style={{ color: "#6366f1", fontFamily: "inherit" }}
+                        >
+                          {refItem.emoji} {refItem.name}
                         </span>
-                      </span>
+                        <span></span>
+                        <span
+                          className="text-right text-[10px] font-bold uppercase tracking-widest"
+                          style={{ color: "#b45309", fontFamily: "inherit" }}
+                        >
+                          {inputItem.emoji} {inputItem.name}
+                        </span>
+                        <span></span>
+                        <span className="text-right text-[10px] font-bold uppercase tracking-widest text-muted" style={{ fontFamily: "inherit" }}>product</span>
+
+                        {/* One row per property */}
+                        {domain.properties.map((prop, pi) => {
+                          const product = roundedProducts[pi];
+                          return [
+                            <span key={`${prop}-label`} className="text-muted" style={{ fontFamily: "inherit" }}>{prop}</span>,
+                            <span key={`${prop}-ref`} className="text-right" style={{ color: "#6366f1" }}>
+                              {refItem.values[pi].toFixed(2)}
+                            </span>,
+                            <span key={`${prop}-times`} className="text-center text-muted">×</span>,
+                            <span key={`${prop}-inp`} className="text-right" style={{ color: "#b45309" }}>
+                              {input[pi].toFixed(2)}
+                            </span>,
+                            <span key={`${prop}-eq`} className="text-center text-muted">=</span>,
+                            <span key={`${prop}-prod`} className="text-right text-foreground">
+                              {product.toFixed(3)}
+                            </span>,
+                          ];
+                        })}
+
+                        {/* Horizontal rule — spans all 6 columns, visible only under product column */}
+                        <span style={{ gridColumn: "1 / span 5" }}></span>
+                        <hr className="border-foreground/30 my-0.5" />
+
+                        {/* Total row */}
+                        <span
+                          className="text-right text-[10px] text-muted"
+                          style={{ gridColumn: "1 / span 5", fontFamily: "inherit" }}
+                        >
+                          dot product =
+                        </span>
+                        <span
+                          className="text-right font-bold"
+                          style={{ color: scoreCol }}
+                        >
+                          {displayedTotalStr}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  );
+                })()}
               </div>
             );
           })}
