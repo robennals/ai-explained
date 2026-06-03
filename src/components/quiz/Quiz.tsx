@@ -413,7 +413,7 @@ export function Question({ children }: QuestionProps) {
   const body = (
     <>
       <div className="prose prose-lg max-w-none [&>p:first-child]:mt-0 [&>p:last-child]:mb-0">
-        {stem}
+        <GlossaryPlainProvider>{stem}</GlossaryPlainProvider>
       </div>
       <ul className="mt-5 list-none space-y-2 p-0">
         {choices.map((choice, i) => {
