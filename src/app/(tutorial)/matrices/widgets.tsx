@@ -4,50 +4,26 @@ import dynamic from "next/dynamic";
 import { Suspense } from "react";
 import { TryItProvider } from "@/components/widgets/shared/WidgetContainer";
 
-const Transform1D = dynamic(
+const DetectorStack = dynamic(
   () =>
-    import("@/components/widgets/matrices/Transform1D").then(
-      (m) => m.Transform1D
+    import("@/components/widgets/matrices/DetectorStack").then(
+      (m) => m.DetectorStack
     ),
   { ssr: false }
 );
 
-const Transform2D = dynamic(
+const MatrixComposition = dynamic(
   () =>
-    import("@/components/widgets/matrices/Transform2D").then(
-      (m) => m.Transform2D
+    import("@/components/widgets/matrices/MatrixComposition").then(
+      (m) => m.MatrixComposition
     ),
   { ssr: false }
 );
 
-const BasisVectorView = dynamic(
+const Transform2D3D = dynamic(
   () =>
-    import("@/components/widgets/matrices/BasisVectorView").then(
-      (m) => m.BasisVectorView
-    ),
-  { ssr: false }
-);
-
-const DimensionProjection = dynamic(
-  () =>
-    import("@/components/widgets/matrices/DimensionProjection").then(
-      (m) => m.DimensionProjection
-    ),
-  { ssr: false }
-);
-
-const NeuronVsMatrix = dynamic(
-  () =>
-    import("@/components/widgets/matrices/NeuronVsMatrix").then(
-      (m) => m.NeuronVsMatrix
-    ),
-  { ssr: false }
-);
-
-const ActivationEffect = dynamic(
-  () =>
-    import("@/components/widgets/matrices/ActivationEffect").then(
-      (m) => m.ActivationEffect
+    import("@/components/widgets/matrices/Transform2D3D").then(
+      (m) => m.Transform2D3D
     ),
   { ssr: false }
 );
@@ -68,50 +44,42 @@ function WidgetSlot({ children, tryIt, label }: { children: React.ReactNode; try
   );
 }
 
-export function Transform1DWidget({ children }: { children?: React.ReactNode }) {
+export function DetectorStackWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children}>
-      <Transform1D />
+      <DetectorStack />
     </WidgetSlot>
   );
 }
 
-export function Transform2DWidget({ children }: { children?: React.ReactNode }) {
-  return (
-    <WidgetSlot tryIt={children}>
-      <Transform2D />
-    </WidgetSlot>
-  );
-}
-
-export function BasisVectorViewWidget({ children }: { children?: React.ReactNode }) {
+export function RoundTripWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children} label="Explore it">
-      <BasisVectorView />
+      <DetectorStack mode="round-trip" />
     </WidgetSlot>
   );
 }
 
-export function DimensionProjectionWidget({ children }: { children?: React.ReactNode }) {
+export function MatrixCompositionWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children}>
-      <DimensionProjection />
+      <MatrixComposition />
     </WidgetSlot>
   );
 }
 
-export function NeuronVsMatrixWidget({ children }: { children?: React.ReactNode }) {
+export function AttentionMatmulWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children}>
-      <NeuronVsMatrix />
+      <DetectorStack mode="attention" />
     </WidgetSlot>
   );
 }
 
-export function ActivationEffectWidget({ children }: { children?: React.ReactNode }) {
+export function Transform2D3DWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot tryIt={children} label="Explore it">
-      <ActivationEffect />
+    <WidgetSlot tryIt={children}>
+      <Transform2D3D />
     </WidgetSlot>
   );
 }

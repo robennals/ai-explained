@@ -3,12 +3,11 @@ import { chapterMetadata } from "@/lib/chapter-metadata";
 import { getAdjacentChapters } from "@/lib/curriculum";
 import Content from "./content.mdx";
 import {
-  Transform1DWidget,
-  Transform2DWidget,
-  BasisVectorViewWidget,
-  DimensionProjectionWidget,
-  NeuronVsMatrixWidget,
-  ActivationEffectWidget,
+  DetectorStackWidget,
+  RoundTripWidget,
+  MatrixCompositionWidget,
+  AttentionMatmulWidget,
+  Transform2D3DWidget,
 } from "./widgets";
 
 export const metadata = chapterMetadata("matrices");
@@ -21,12 +20,11 @@ export default function Chapter05() {
       <div className="prose prose-lg max-w-none">
         <Content
           components={{
-            Transform1DWidget,
-            Transform2DWidget,
-            BasisVectorViewWidget,
-            DimensionProjectionWidget,
-            NeuronVsMatrixWidget,
-            ActivationEffectWidget,
+            DetectorStackWidget,
+            RoundTripWidget,
+            MatrixCompositionWidget,
+            AttentionMatmulWidget,
+            Transform2D3DWidget,
           }}
         />
       </div>

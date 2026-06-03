@@ -1,136 +1,93 @@
-# Neural Networks as Geometry
+# A Thousand Questions at Once
 
 <Lead>
-What does a neural network actually *do* to your data as it passes through each
-layer? It multiplies and adds, and that operation has a name: matrix
-multiplication. It also has a geometric meaning. Each layer is a
-transformation of space itself.
+The graphics card that runs ChatGPT was invented to make videogames look good. The same operation that spins a 3D dragon across your screen is the operation a neural network uses to think. It's called matrix multiplication. By the end of this chapter you'll see why one kind of chip does both jobs.
 </Lead>
 
-## Starting Simple: One Dimension
+## You Already Know This
 
-Before we tackle the full complexity of matrices, start with the simplest possible case: one dimension.
+A matrix sounds like a new and scary object. It isn't. A matrix is several dot products written out at once.
 
-In one dimension, a "matrix" is just a single number. You multiply every input by that number. Multiply by 2, and everything stretches away from zero. Multiply by 0.5, and everything contracts toward zero. Multiply by &minus;1, and everything flips to the other side.
+Remember the bear detector from the Vectors chapter. You take an animal's property-vector (big, scary, hairy, cuddly, fast, fat) and dot it with a "bear" weight-vector. Out comes a single number: how bear-like this animal is. One dot product, one detector.
 
-<Transform1DWidget>
-Drag the slider to different values. What happens when you multiply by 0? By &minus;1? By a number between 0 and 1? Zero itself never moves, no matter what you multiply by. It's a **fixed point** of every linear transformation.
-</Transform1DWidget>
+Now suppose you want a bear detector *and* an eagle detector *and* a snake detector, all at once. Stack their weight-vectors as the rows of a grid. Multiply an animal by that grid and every row runs its own dot product in a single shot. The animal goes in as six properties and comes out re-described as "0.8 bear-like, 0.1 eagle-like, 0.3 snake-like."
 
-A simple but important idea: in 1D, the number "1" is a **basis vector**. Think of it as a building block arrow that you stretch or shrink to reach any other number. Every other number is just some multiple of 1. When you multiply by 2, you're saying "take the basis vector 1, and stretch it to 2." That single number tells you where the basis vector lands after the transformation, and *everything else follows automatically*.
+That grid is a **matrix**. Multiplying a vector by it is **matrix multiplication**. There is nothing in it you haven't already done by hand. Each row is a detector, and the matrix just asks all your questions at the same time.
 
-In 1D, there's not much a "matrix" can do: stretch, shrink, flip, or collapse to a point. One number, one effect. Now add a dimension.
-
-## Two Dimensions: Where It Gets Interesting
-
-In 1D we had one basis vector (one building block arrow). In 2D we have **two**: one pointing right along the x-axis, and one pointing up along the y-axis. Every point in 2D is some combination of "go right" and "go up". It's built from those two building blocks.
-
-A 2&times;2 matrix tells you where each basis vector lands. That takes **four numbers**, arranged in a grid:
-
-<div className="my-6 flex justify-center">
-<div className="inline-block rounded-lg border border-border bg-surface px-6 py-3 font-mono text-lg">
-<div className="flex items-center gap-1"><span className="text-xl text-muted">[</span> <span className="w-8 text-center" style={{color: "#ef4444"}}>a</span> <span className="w-8 text-center" style={{color: "#22c55e"}}>b</span> <span className="text-xl text-muted">]</span></div>
-<div className="flex items-center gap-1"><span className="text-xl text-muted">[</span> <span className="w-8 text-center" style={{color: "#ef4444"}}>c</span> <span className="w-8 text-center" style={{color: "#22c55e"}}>d</span> <span className="text-xl text-muted">]</span></div>
-</div>
-</div>
-
-The <span style={{color: "#ef4444"}}>first column</span> (a, c) tells you where the x-axis basis vector ends up. The <span style={{color: "#22c55e"}}>second column</span> (b, d) tells you where the y-axis basis vector ends up. Everything else (every point in the entire plane) just follows along.
-
-Four numbers. That's it. But watch what they can do:
-
-<Transform2DWidget>
-Switch to the **Cat** and try the presets. Hit **Rotate 90&deg;**. The cat spins a quarter turn. **Shear**. The cat leans over like it's dodging something. **Reflect**. Mirror-image cat! **Collapse**. The cat gets squished into a line (poor cat). Now switch to the **Mona Lisa** and try **Rotate 45&deg;**. Can you tell she's tilted? Try making your own transformation: can you make the Mona Lisa twice as wide but the same height? (Hint: drag *a* to 2. You're stretching the x-axis basis vector to twice its length.)
-</Transform2DWidget>
+<DetectorStackWidget>
+Pick an input animal at the top. Each row is one detector, a reference animal acting as a weight-vector. Add or remove detector rows and watch each row compute its own dot product with the input. The bars on the right are the output: a fresh vector that describes the input in terms of how much it matches each detector.
+</DetectorStackWidget>
 
 <KeyInsight>
-A 2&times;2 matrix is completely defined by four numbers. Those four numbers control every possible 2D linear transformation: rotation, scaling, shearing, reflection, and collapse. The first column tells you where the x-axis basis vector goes. The second tells you where the y-axis basis vector goes. Everything else follows.
+**A matrix is a stack of detectors.** Each row is a weight-vector, the same kind you used to build a single detector. One matrix multiply runs every detector at once and re-describes the input as a list of match scores.
 </KeyInsight>
 
-## Another Way to See It: New Axes
+## Can You Get the Original Back?
 
-Don't worry if this section doesn't fully click right away. The main point is that there are two useful ways to read what a matrix does.
+Re-describing an animal as "how bear-like, how eagle-like, how snake-like" throws away the original properties and replaces them with match scores. Is that a one-way trip, or can you recover the animal you started with?
 
-There's a second way to read a matrix. Instead of thinking "where do the old basis vectors end up?" (the columns), think about the **rows**: each row defines a new basis vector in terms of the old ones.
+It depends on how many detectors you used. Pick as many varied reference animals as there are properties, and the new description holds onto everything. To prove it, build the matrix that runs the re-description backwards. That matrix is called the **inverse**, and applying it recovers the exact original animal. The whole thing was a change of vocabulary, like translating to another language and back. Nothing was lost.
 
-The <span style={{color: "#ef4444"}}>first row</span> says: "my new x-axis is made of this much old-x and this much old-y." The <span style={{color: "#22c55e"}}>second row</span> does the same for the new y-axis. You're defining a new coordinate system by pointing arrows in the old space and saying "measure along *these* directions instead."
+Use fewer reference animals than there are properties and there's no way back. Six properties squeezed into three numbers means three numbers got dropped, and no inverse can guess what they were. The detail is gone. That lossy squeeze is exactly what a neural-network layer does when it shrinks a representation, and it's the seed of how embeddings pack meaning into a smaller space.
 
-The left panel below shows the original image with the new axes drawn on top. The faint colored grid lines show where integer values of each new coordinate fall. The right panel shows the result of re-measuring the image using those new axes.
+<RoundTripWidget>
+Start with six good reference animals and watch the inverse recover the original exactly. Now drop down to three. The squeeze leaves only three numbers to describe a six-property animal, and the original is unrecoverable. Try different small sets to see which animals become confusable.
+</RoundTripWidget>
 
-<BasisVectorViewWidget>
-Start with **Identity**. The new axes match the old ones, so nothing changes. Now hit **Rotate 90&deg;**. The red arrow (new x-axis) now points down and the green arrow (new y-axis) points right. The cat rotates because we're measuring along different directions. Try **Shear**. The red arrow tilts, mixing in some old-y into the new x-measurement, and the cat leans. Try **Collapse**. The green arrow shrinks to nothing, destroying the y-measurement entirely.
+## A Layer of a Neural Network Is a Matrix (Plus a Bend)
 
-The faint grid lines on the left are perpendicular to the arrows. They mark where each new coordinate equals 0, 1, 2, etc. The arrow tells you *which direction* you're measuring along.
-</BasisVectorViewWidget>
+A layer of a neural network takes an input vector and produces an output vector. It does this by running a stack of weighted sums, one per output. A weighted sum is a dot product. A stack of dot products is a matrix multiply. So a layer is a matrix multiply, the same operation from §1.
 
-This dual interpretation ("where do old axes land?" via columns vs. "what are my new measurement directions?" via rows) is the same math read two ways. Both are useful. In neural networks, the row view is especially natural: each output neuron computes a **dot product** (multiply matching pairs of numbers together and add them up) with one row of the weight matrix, measuring how much the input aligns with that row's direction.
+There's one difference from the bear-eagle-snake matrix. We hand-picked those detectors. A neural network learns its own during training. It works out for itself which reference concepts are worth detecting, and those learned detectors become the rows of its weight matrix. Nobody tells it to build a bear detector. It builds whatever detectors make the next layer's job easier.
 
-## Changing Dimensions
+A layer is not *only* a matrix, though. After the matrix produces its output vector, the layer applies an **activation function** to that whole vector at once: it subtracts a bias and then bends each value, zeroing out the weak matches. So a layer is a matrix multiply, then a bend. The next section is about why the bend has to be there.
 
-So far our matrices have been square, 2&times;2 matrices mapping 2D to 2D. But matrices don't have to be square. A **1&times;2 matrix** takes a 2D point and produces a single number. It *projects* two dimensions down to one.
+<DetectorStackWidget>
+Flip on "Apply activation (ReLU)" below the detectors. Each score now has its threshold subtracted, and anything that lands at or below zero gets clipped to zero. Drag the threshold up and watch more detectors fall silent. The strong matches survive; the weak ones are cut. (ReLU and sigmoid are covered properly in the Training chapter.)
+</DetectorStackWidget>
 
-This is dimension reduction, and it's everywhere in neural networks. A layer with 768 inputs and 64 outputs is a 64&times;768 matrix. It takes a high-dimensional representation and squishes it down to a smaller one, keeping (hopefully) the important information and discarding the rest.
+## Why the Bend Can't Be Dropped
 
-Below, you can see 2D points being projected onto a line. Each colored point has a letter so you can track where it lands. Rotate the line and watch the points slide along it.
+Stack two matrix multiplies back to back with nothing between them and something deflating happens. You can multiply the two matrices together first and get a single matrix that does both at once. Two layers collapse into one. So pure matrix layers buy you no extra power from depth: a hundred of them stacked is still just one matrix in disguise.
 
-<DimensionProjectionWidget>
-Start with the **Arrow** shape. At **0&deg;** (horizontal line), you're only keeping each point's x-coordinate, and the arrow gets squished onto the x-axis. Switch to **90&deg;** (vertical) and you keep only the y-coordinate. Now try **45&deg;**. You get a mix of both.
+This is why the bend from §3 earns its place. Put a nonlinear activation function between two matrix layers and they can no longer be merged. The bend is what lets a deep network do things no single matrix could.
 
-Some directions preserve the shape's structure better than others. At 0&deg;, points B and C land in almost the same spot. They're "confused." At 45&deg;, all the points spread out more evenly. Finding the direction that preserves the most information is a key idea in data science.
-</DimensionProjectionWidget>
-
-When the matrix has **more rows than columns**, it does the opposite. It *embeds* a lower dimension into a higher one. A 768&times;1 matrix takes a single number and places it into a 768-dimensional space. Neural networks do both: expanding dimensions to create richer representations, then compressing them back down.
-
-## The Neural Network Connection
-
-A single layer in a neural network does three things in sequence:
-
-1. **Matrix multiply**: multiply the inputs by a weight matrix (rotate and stretch the space)
-2. **Add bias**: shift everything by a fixed offset (translate the space)
-3. **Apply activation function**: bend the space non-linearly (e.g., clip all negative values to zero (an operation called **ReLU**, a fancy name for a simple idea))
-
-The matrix part is everything we've been exploring. The bias is a simple shift; it moves the origin. And the activation function is the crucial non-linear ingredient that lets neural networks learn things that pure matrices can't.
-
-Without activation functions, stacking layers would be pointless: a matrix times a matrix is just another matrix. Two rotations compose into one rotation. But add a non-linear bend between each layer, and suddenly you can build arbitrarily complex transformations.
-
-<NeuronVsMatrixWidget>
-Adjust the weight sliders and watch both views update at the same time. The neuron diagram on the left and the geometric view on the right are showing the **exact same math**, just drawn differently! Try **Rotate 90&deg;**. The neuron weights become [0, &minus;1, 1, 0] and the colored dots spin a quarter turn. Try **Collapse to line**. One output neuron goes dead and the dots all squish onto a single line.
-</NeuronVsMatrixWidget>
-
-This dual interpretation is profound:
-
-- In the **neuron view**, we think: *"Each output computes a weighted sum of inputs."*
-- In the **matrix view**, we think: *"The layer rotates and stretches the input space."*
-
-Both are true simultaneously. They're just two ways of seeing the same math.
+<MatrixCompositionWidget>
+Edit the numbers in matrices A and B and watch the product matrix C update. C does exactly what A then B would do, in one step. Now flip on "Put an activation between them." C grays out, because once there's a bend in the middle, no single matrix can stand in for the pair.
+</MatrixCompositionWidget>
 
 <KeyInsight>
-A neural network layer and a matrix transformation are the same thing, drawn differently. When we train a neural network, we're learning the right matrix at each layer: the right geometric transformation to apply to the data. Real neural networks work in hundreds or thousands of dimensions. A single layer in a typical language model transforms a 768-dimensional space, with over half a million matrix entries, but the math is identical to our 2D examples. Just... bigger.
+**Matrix times matrix is just one matrix.** Depth alone buys nothing. A nonlinear bend between the layers is what makes stacking worthwhile.
 </KeyInsight>
 
-## But Wait, We Forgot the Activation Function
+## Attention Is a Matrix Multiply Too
 
-In the previous section, we said a neural network layer is a matrix multiplication. That's almost true, but we left out two ingredients. After the matrix transforms the space, the network adds a **bias** (a fixed shift) and then applies an **activation function** to every output value.
+The Attention chapter had the word "it" looking back through a sentence for a noun to attach to. The way it scored each candidate was a dot product: the query of "it" against the key of every other token.
 
-Once again we'll be using the **sigmoid** activation function, which squashes every value into the range 0 to 1. The bias shifts the data before the sigmoid acts on it, controlling *where* in the sigmoid's curve each value lands. What do these extra steps look like geometrically? A matrix transformation preserves straight lines. It can rotate, stretch, and shear, but a straight line always stays straight. The sigmoid breaks that rule. It *warps* the space, bending straight edges into curves and crushing everything into a small box.
+Run that for all the candidates at once and you have a detector stack. Stack the other tokens' keys as the rows of a matrix, multiply by this token's query vector, and out come the match scores, one per token. It's the same picture as §1. The keys are the detectors and the query is the input. One matrix times a vector, per token, per head.
 
-<ActivationEffectWidget>
-Start with **Identity**. The arrow looks normal because sigmoid undoes itself when the matrix doesn't change anything. Now try **Stretch 3&times;**. The arrow warps and squashes because the sigmoid clips values far from zero, bending straight edges into curves. **Spin &amp; grow**. A big rotation gets warped into a blob. **Shift up** keeps the matrix at identity but adds a positive bias to the y-output, pushing everything toward the top of the sigmoid's range. **Funhouse** combines skewed weights with uneven biases for an asymmetric distortion. Try switching to **Cat** or **Mona Lisa** to see the warping effect on a real image.
-</ActivationEffectWidget>
+The query, key, and value vectors are themselves produced by matrix multiplies, and blending the chosen values together is one more. Attention is matrix multiplication the whole way down.
 
-This is why activation functions matter so much. Without them, every layer would just be another matrix, and stacking matrices just gives you one big matrix. With activation functions bending the space between each layer, the network can fold and warp its input into shapes that no single matrix could produce.
+<AttentionMatmulWidget>
+This is the worked example from the Attention chapter. The keys of "cat", "dog", and the filler "blah" are stacked as rows. Multiplying by the query for "it" gives a match score for each: the nouns score high, the filler scores low. Same operation as the detector stack, with keys for rows and a query for the input.
+</AttentionMatmulWidget>
 
-## Training Is Geometry
+## The Same Math Spins 2D and 3D Worlds
 
-When you train a neural network, you're searching for the right sequence of geometric transformations. Each layer rotates, stretches, and (with activation functions) bends the input space, gradually reshaping it until the data is arranged in a way that makes the answer obvious.
+Time to close the loop on the cold open. The exact same multiply-and-add that re-describes an animal also re-describes a point's position in space. Feed a point's coordinates through the right matrix and it comes out rotated.
 
-Imagine data points from two classes tangled together in a spiral. No single straight line can separate them. But a matrix transformation can stretch and rotate the spiral, and an activation function can fold it. Stack enough of these transform-and-fold operations, and you can untangle any pattern into neatly separated clusters.
+Every frame of a 3D game does this to every vertex of every model: multiply by a matrix to spin the world, tilt the camera, and pose the character. A single frame is millions of these multiply-adds. So chipmakers built graphics cards that do millions of them in parallel, all for the sake of games.
 
-That's what training discovers: the right sequence of rotations, stretches, and folds to make the problem simple.
+Then neural networks turned out to be mostly matrix multiplication as well. The same chips built to spin dragons were already perfect for running detector stacks by the million. The hardware for games became the hardware for AI. That's the answer to the puzzle from the top of the chapter.
+
+<Transform2D3DWidget>
+On the **2D** tab, spin and shear the cat with the presets. Switch to the **3D** tab to tumble a chicken or a shiba. Back on the 2D tab, flip on "Apply activation (sigmoid)" and watch the straight lines bow into curves. That bending is the §3 and §4 nonlinearity, made visible: a matrix alone keeps straight lines straight, and the activation is what bends them.
+</Transform2D3DWidget>
 
 ## What's Next
 
-We've seen that every neural network layer is a matrix transformation, a geometric reshaping of space. But how does the network actually *find* the right matrices? In future chapters, we'll see how gradient descent rolls downhill through a landscape with millions of dimensions, automatically discovering the transformations that untangle data.
+A neural network is a stack of these matrices, one per layer, with a bend after each. Its whole skill lives in the numbers inside those matrices, the learned detectors. Training is the search for the right numbers. The next chapters are about how that search works: how gradient descent feels its way downhill to the matrices that solve the problem.
 
 <TryItInPyTorch notebook="matrices">
-Apply rotation, stretch, and shear matrices to shapes, prove that nn.Linear is just matrix multiplication, compare ReLU and sigmoid, and see why activation functions prevent layers from collapsing.
+Build a matrix as a stack of dot products, confirm that nn.Linear is a matrix multiply, watch attention score keys against a query, and check for yourself that matrix times matrix is just one matrix.
 </TryItInPyTorch>
