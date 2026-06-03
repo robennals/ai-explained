@@ -126,7 +126,7 @@ export function MatrixGrid() {
                     key={`${name}-${properties[vi]}`}
                     className="flex items-center justify-center rounded-md border border-border bg-surface px-2 py-2.5"
                   >
-                    <span className="font-mono text-[12px] text-foreground tabular-nums">
+                    <span className="font-mono text-xs text-foreground tabular-nums">
                       {val.toFixed(2)}
                     </span>
                   </div>

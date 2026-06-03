@@ -188,7 +188,7 @@ function PillCell({
         {value.toFixed(2)}
       </div>
       {caption != null && (
-        <span className="text-[9px] text-muted leading-none text-center max-w-[3rem] truncate">
+        <span className="text-[9px] text-muted leading-none text-center max-w-[4.5rem] truncate">
           {caption}
         </span>
       )}
@@ -249,7 +249,7 @@ function DetectorProductColumn({
       <div className="py-1.5 px-3 border-t-2 border-foreground/15 bg-foreground/[0.02]">
         <div className="font-mono text-[10px] font-bold">
           {products.map((p, idx) => (
-            <span key={idx}>
+            <span key={properties[idx]}>
               {idx > 0 && <span className="text-muted">{" + "}</span>}
               <span style={{ color: productColor(p, maxProduct) }}>{p.toFixed(2)}</span>
             </span>
