@@ -182,7 +182,6 @@ function DetectorsView({
   setInputName: (n: string) => void;
   rowNames: string[];
   toggleRow: (n: string) => void;
-  inputOptions: { value: string; label: string }[];
   expandedRows: Set<string>;
   setExpandedRows: (rows: Set<string>) => void;
   activationOn: boolean;
@@ -301,7 +300,8 @@ function DetectorsView({
                 {/* Collapsed summary row — always visible, clickable */}
                 <button
                   onClick={() => toggleExpanded(refName)}
-                  className="w-full flex items-center gap-2 px-3 py-2.5 text-left cursor-pointer hover:bg-foreground/4 transition-colors"
+                  aria-expanded={isExpanded}
+                  className="w-full flex items-center gap-2 px-3 py-2.5 text-left hover:bg-foreground/4 transition-colors"
                 >
                   {/* Chevron */}
                   <span className="text-[10px] text-muted shrink-0 w-3">
@@ -848,7 +848,6 @@ export function DetectorStack(props: DetectorStackProps) {
           setInputName={setInputName}
           rowNames={rowNames}
           toggleRow={toggleRow}
-          inputOptions={inputOptions}
           expandedRows={expandedRows}
           setExpandedRows={setExpandedRows}
           activationOn={activationOn}
