@@ -20,6 +20,28 @@ export interface DetectorStackProps {
   description?: string;
 }
 
+// ─── Attention mode data ────────────────────────────────────────────────────────
+
+// The context tokens whose KEY vectors form the rows of the keys matrix.
+// "it" is the querying token — its query vector lives separately as IT_QUERY.
+const TOKEN_DOMAIN: VectorDomain = {
+  id: "tokens",
+  label: "Tokens",
+  properties: ["noun", "none"],
+  items: [
+    { name: "cat",  emoji: "🐱", values: [1, 0] }, // key: a noun
+    { name: "dog",  emoji: "🐕", values: [1, 0] }, // key: a noun
+    { name: "blah", emoji: "💬", values: [0, 1] }, // key: not a noun (filler)
+    { name: "it",   emoji: "🔎", values: [0, 0] }, // the asker; query lives in IT_QUERY
+  ],
+};
+
+// "it" is looking for a noun — its query matches anything with a high "noun" value.
+const IT_QUERY = [1, 0];
+
+// The context tokens that act as keys (everything except "it" itself).
+const CONTEXT_TOKEN_NAMES = ["cat", "dog", "blah"];
+
 function scoreColor(score: number): string {
   if (score >= 0.7) return "#22c55e";
   if (score >= 0.45) return "#f59e0b";
@@ -534,6 +556,133 @@ function RoundTripView({
   );
 }
 
+// ─── Attention mode ────────────────────────────────────────────────────────────
+
+function AttentionView() {
+  // Build the keys matrix: one row per context token
+  const keysMatrix = useMemo(
+    () =>
+      CONTEXT_TOKEN_NAMES.map(
+        (name) => TOKEN_DOMAIN.items.find((it) => it.name === name)!.values
+      ),
+    []
+  );
+
+  // scores[i] = dot(keysMatrix[i], IT_QUERY) — one match score per context token
+  const scores = useMemo(() => matVecMul(keysMatrix, IT_QUERY), [keysMatrix]);
+
+  return (
+    <>
+      {/* Query description */}
+      <div className="mb-4 rounded-lg border border-border bg-surface px-4 py-2.5">
+        <div className="mb-1 text-[10px] font-bold uppercase tracking-widest text-muted">
+          Query &mdash; &ldquo;it&rdquo; is looking for a noun
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="text-xl leading-none">🔎</span>
+          <div>
+            <div className="text-xs font-semibold text-foreground mb-1">it — query vector</div>
+            <PropertyBars
+              values={IT_QUERY}
+              properties={TOKEN_DOMAIN.properties}
+              color="#f59e0b"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Keys × query = scores */}
+      <div className="space-y-2 mb-4">
+        {/* Column headers */}
+        <div
+          className="grid items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted"
+          style={{ gridTemplateColumns: "9rem 1fr auto 1fr" }}
+        >
+          <span>Token key (row)</span>
+          <span>Key vector</span>
+          <span className="text-center px-1">× 🔎 query</span>
+          <span>Match score</span>
+        </div>
+
+        {CONTEXT_TOKEN_NAMES.map((name, i) => {
+          const token = TOKEN_DOMAIN.items.find((it) => it.name === name)!;
+          const score = scores[i];
+          return (
+            <div
+              key={name}
+              className="grid items-center gap-2 rounded-lg border border-border bg-surface px-3 py-2"
+              style={{ gridTemplateColumns: "9rem 1fr auto 1fr" }}
+            >
+              {/* Token label */}
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span className="text-base leading-none">{token.emoji}</span>
+                <span className="text-xs font-semibold text-foreground truncate">
+                  {token.name}
+                </span>
+              </div>
+
+              {/* Key vector bars */}
+              <PropertyBars
+                values={token.values}
+                properties={TOKEN_DOMAIN.properties}
+                color="#6366f1"
+              />
+
+              {/* Multiply operator + query bars */}
+              <div className="flex flex-col items-center gap-1">
+                <span className="text-xs font-bold text-muted">×</span>
+                <PropertyBars
+                  values={IT_QUERY}
+                  properties={TOKEN_DOMAIN.properties}
+                  color="#f59e0b"
+                />
+              </div>
+
+              {/* Match score */}
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs text-muted">=</span>
+                <ScoreBar score={score} />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Output scores summary card */}
+      <div className="mb-4 rounded-lg border border-border bg-surface px-4 py-3">
+        <div className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted">
+          Match scores (output vector)
+        </div>
+        <div className="flex flex-wrap gap-x-6 gap-y-1.5">
+          {CONTEXT_TOKEN_NAMES.map((name, i) => {
+            const token = TOKEN_DOMAIN.items.find((it) => it.name === name)!;
+            const score = scores[i];
+            const color = scoreColor(score);
+            return (
+              <div key={name} className="flex items-center gap-1.5">
+                <span className="text-sm">{token.emoji}</span>
+                <span className="font-mono text-sm font-bold" style={{ color }}>
+                  {score.toFixed(2)}
+                </span>
+                <span className="text-sm text-muted">match for {token.name}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Explanatory prose */}
+      <div className="rounded-lg border border-border bg-surface px-4 py-3 text-sm text-foreground leading-relaxed">
+        Attention&apos;s match step is the same picture: stack the other tokens&apos; keys as
+        rows, multiply by this token&apos;s query, and out come the match scores — one matrix ×
+        vector per token, per head. (The query, key, and value vectors are themselves made by
+        matrix multiplies, and blending the values is one more — attention is matrix
+        multiplication through and through.)
+      </div>
+    </>
+  );
+}
+
 // ─── Main component ─────────────────────────────────────────────────────────────
 
 const DEFAULT_THRESHOLD = 0.5;
@@ -584,22 +733,32 @@ export function DetectorStack(props: DetectorStackProps) {
   const title =
     mode === "round-trip"
       ? (props.title ?? "Can You Get the Original Back?")
-      : (props.title ?? "A Matrix Is Many Dot Products");
+      : mode === "attention"
+        ? (props.title ?? "Attention Is a Matrix Multiply")
+        : (props.title ?? "A Matrix Is Many Dot Products");
 
   const description =
     mode === "round-trip"
       ? (props.description ??
           "Enough good reference animals and the inverse matrix recovers the original exactly.")
-      : (props.description ??
-          "Each row is one detector. One multiply runs them all.");
+      : mode === "attention"
+        ? (props.description ??
+            "Stack the context tokens' keys as rows, multiply by the query — out come match scores.")
+        : (props.description ??
+            "Each row is one detector. One multiply runs them all.");
+
+  // Attention mode is a fixed worked example — no interactive state to reset.
+  const onReset = mode === "attention" ? undefined : resetToDefaults;
 
   return (
     <WidgetContainer
       title={title}
       description={description}
-      onReset={resetToDefaults}
+      onReset={onReset}
     >
-      {mode === "round-trip" ? (
+      {mode === "attention" ? (
+        <AttentionView />
+      ) : mode === "round-trip" ? (
         <RoundTripView
           domain={domain}
           inputName={inputName}
