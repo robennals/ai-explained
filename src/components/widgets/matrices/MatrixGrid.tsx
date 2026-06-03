@@ -8,18 +8,6 @@ const DEFAULT_ROW_NAMES = ["Bear", "Eagle", "Snake"];
 const MAX_ROWS = ANIMAL_DOMAIN.properties.length;
 const MIN_ROWS = 1;
 
-// Compact horizontal bar: value in [0, 1]
-function MiniBar({ value }: { value: number }) {
-  const width = 36;
-  const barW = Math.max(0, Math.min(1, value)) * width;
-  return (
-    <svg width={width} height={10} style={{ display: "block" }}>
-      <rect x={0} y={2} width={width} height={6} rx={2} fill="#e5e7eb" />
-      <rect x={0} y={2} width={barW} height={6} rx={2} fill="#6366f1" />
-    </svg>
-  );
-}
-
 function ChipSelector({
   rowNames,
   onToggle,
@@ -98,17 +86,17 @@ export function MatrixGrid() {
         <div
           className="inline-grid min-w-full"
           style={{
-            gridTemplateColumns: `minmax(10rem, auto) repeat(${properties.length}, 1fr)`,
-            rowGap: "0.5rem",
-            columnGap: "0",
+            gridTemplateColumns: `minmax(10rem, auto) repeat(${properties.length}, minmax(3.5rem, 1fr))`,
+            rowGap: "0.375rem",
+            columnGap: "0.375rem",
           }}
         >
           {/* Column headers */}
-          <div className="px-3 pb-1" />
+          <div className="px-1 pb-1" />
           {properties.map((prop) => (
             <div
               key={prop}
-              className="px-2 pb-1 text-center text-[10px] font-bold uppercase tracking-widest text-muted"
+              className="px-1 pb-1 text-center text-[10px] font-bold uppercase tracking-widest text-muted"
             >
               {prop}
             </div>
@@ -119,10 +107,8 @@ export function MatrixGrid() {
             const item = ANIMAL_DOMAIN.items.find((it) => it.name === name)!;
             return (
               <Fragment key={name}>
-                {/* Row label — part of the boxed row */}
-                <div
-                  className="flex flex-col justify-center gap-0.5 rounded-l-lg border-y border-l border-border bg-surface px-3 py-2.5"
-                >
+                {/* Row label */}
+                <div className="flex flex-col justify-center gap-0.5 rounded-md border border-border bg-surface px-3 py-2.5">
                   <div className="flex items-center gap-1.5">
                     <span className="text-base leading-none">{item.emoji}</span>
                     <span className="text-xs font-semibold text-foreground">
@@ -134,23 +120,17 @@ export function MatrixGrid() {
                   </div>
                 </div>
 
-                {/* Property value cells */}
-                {item.values.map((val, vi) => {
-                  const isLast = vi === item.values.length - 1;
-                  return (
-                    <div
-                      key={`${name}-${properties[vi]}`}
-                      className={`flex flex-col items-center justify-center gap-1 border-y border-r-0 border-l-0 border-border bg-surface px-2 py-2.5 ${
-                        isLast ? "rounded-r-lg border-r" : ""
-                      }`}
-                    >
-                      <MiniBar value={val} />
-                      <span className="font-mono text-[11px] text-foreground tabular-nums">
-                        {val.toFixed(2)}
-                      </span>
-                    </div>
-                  );
-                })}
+                {/* Property value cells — each value in its own boxed cell */}
+                {item.values.map((val, vi) => (
+                  <div
+                    key={`${name}-${properties[vi]}`}
+                    className="flex items-center justify-center rounded-md border border-border bg-surface px-2 py-2.5"
+                  >
+                    <span className="font-mono text-[12px] text-foreground tabular-nums">
+                      {val.toFixed(2)}
+                    </span>
+                  </div>
+                ))}
               </Fragment>
             );
           })}
