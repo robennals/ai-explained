@@ -3,11 +3,13 @@
 import { useState, useCallback, useMemo } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
 import { SelectControl } from "../shared/SelectControl";
+import { ToggleControl } from "../shared/ToggleControl";
+import { SliderControl } from "../shared/SliderControl";
 import {
   ANIMAL_DOMAIN,
   type VectorDomain,
 } from "../vectors/vectorData";
-import { matVecMul, invert } from "./matrixMath";
+import { matVecMul, invert, relu, applyActivation } from "./matrixMath";
 
 export interface DetectorStackProps {
   /** Domain whose `properties` label the input dimensions and whose `items` are pickable. Defaults to ANIMAL_DOMAIN. */
@@ -147,6 +149,10 @@ function DetectorsView({
   rowNames,
   toggleRow,
   inputOptions,
+  activationOn,
+  setActivationOn,
+  threshold,
+  setThreshold,
 }: {
   domain: VectorDomain;
   inputName: string;
@@ -154,6 +160,10 @@ function DetectorsView({
   rowNames: string[];
   toggleRow: (n: string) => void;
   inputOptions: { value: string; label: string }[];
+  activationOn: boolean;
+  setActivationOn: (v: boolean) => void;
+  threshold: number;
+  setThreshold: (v: number) => void;
 }) {
   const inputItem = useMemo(
     () => domain.items.find((i) => i.name === inputName)!,
@@ -167,6 +177,21 @@ function DetectorsView({
   );
 
   const output = useMemo(() => matVecMul(matrix, input), [matrix, input]);
+
+  const preActivation = useMemo(
+    () => output.map((s) => s - threshold),
+    [output, threshold]
+  );
+
+  const activated = useMemo(
+    () => applyActivation(preActivation, relu),
+    [preActivation]
+  );
+
+  // Grid template changes when activation is on — add an extra column
+  const gridCols = activationOn
+    ? "9rem 1fr auto 1fr auto 1fr"
+    : "9rem 1fr auto 1fr";
 
   return (
     <>
@@ -187,6 +212,26 @@ function DetectorsView({
         label={`Detectors (matrix rows) — pick up to ${domain.properties.length}:`}
       />
 
+      {/* Activation controls */}
+      <div className="mb-4 flex flex-col gap-2">
+        <ToggleControl
+          label="Apply activation (ReLU)"
+          checked={activationOn}
+          onChange={setActivationOn}
+        />
+        {activationOn && (
+          <SliderControl
+            label="Threshold (bias)"
+            value={threshold}
+            min={0}
+            max={1}
+            step={0.05}
+            onChange={setThreshold}
+            formatValue={(v) => v.toFixed(2)}
+          />
+        )}
+      </div>
+
       {rowNames.length === 0 ? (
         <div className="rounded-lg border border-border bg-surface px-4 py-6 text-center text-sm text-muted">
           Pick at least one detector above.
@@ -196,22 +241,27 @@ function DetectorsView({
           {/* Column headers */}
           <div
             className="grid items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted"
-            style={{ gridTemplateColumns: "9rem 1fr auto 1fr" }}
+            style={{ gridTemplateColumns: gridCols }}
           >
             <span>Detector (row)</span>
             <span>Row weights</span>
             <span className="text-center px-1">×&nbsp;{inputItem.emoji}&nbsp;input</span>
             <span>Score</span>
+            {activationOn && <span className="text-center px-1">− threshold</span>}
+            {activationOn && <span>After ReLU</span>}
           </div>
 
           {rowNames.map((refName, i) => {
             const refItem = domain.items.find((it) => it.name === refName)!;
             const score = output[i];
+            const pre = preActivation[i];
+            const act = activated[i];
+            const fired = activationOn && pre > 0;
             return (
               <div
                 key={refName}
                 className="grid items-center gap-2 rounded-lg border border-border bg-surface px-3 py-2"
-                style={{ gridTemplateColumns: "9rem 1fr auto 1fr" }}
+                style={{ gridTemplateColumns: gridCols }}
               >
                 {/* Detector label */}
                 <div className="flex items-center gap-1.5 min-w-0">
@@ -243,6 +293,40 @@ function DetectorsView({
                   <span className="text-xs text-muted">=</span>
                   <ScoreBar score={score} />
                 </div>
+
+                {/* Threshold subtraction */}
+                {activationOn && (
+                  <div className="flex flex-col items-center gap-0.5">
+                    <span className="text-[10px] font-mono text-muted">
+                      − {threshold.toFixed(2)}
+                    </span>
+                    <span
+                      className="text-xs font-mono font-bold"
+                      style={{ color: pre > 0 ? "#f59e0b" : "#ef4444" }}
+                    >
+                      = {pre.toFixed(2)}
+                    </span>
+                  </div>
+                )}
+
+                {/* After ReLU */}
+                {activationOn && (
+                  <div className="flex items-center gap-1.5">
+                    <div
+                      className="rounded px-2 py-0.5 text-xs font-mono font-bold"
+                      style={
+                        fired
+                          ? { background: "#dcfce7", color: "#16a34a" }
+                          : { background: "#fee2e2", color: "#dc2626" }
+                      }
+                    >
+                      {fired ? act.toFixed(2) : "0  (clipped)"}
+                    </div>
+                    <span className="text-[10px] text-muted">
+                      {fired ? "fired" : "silent"}
+                    </span>
+                  </div>
+                )}
               </div>
             );
           })}
@@ -253,17 +337,21 @@ function DetectorsView({
       {rowNames.length > 0 && (
         <div className="mt-5 rounded-lg border border-border bg-surface px-4 py-3">
           <div className="mb-2 text-xs font-bold uppercase tracking-widest text-muted">
-            Output vector
+            {activationOn ? "Output vector (after activation)" : "Output vector"}
           </div>
           <div className="flex flex-wrap gap-x-6 gap-y-1.5">
             {rowNames.map((refName, i) => {
               const refItem = domain.items.find((it) => it.name === refName)!;
-              const score = output[i];
-              const color = scoreColor(score);
+              const displayScore = activationOn ? activated[i] : output[i];
+              const color = activationOn
+                ? activated[i] > 0
+                  ? "#16a34a"
+                  : "#dc2626"
+                : scoreColor(output[i]);
               return (
                 <div key={refName} className="flex items-center gap-1.5">
                   <span className="font-mono text-sm font-bold" style={{ color }}>
-                    {score.toFixed(2)}
+                    {displayScore.toFixed(2)}
                   </span>
                   <span className="text-sm text-muted">
                     {refItem.name.toLowerCase()}-like
@@ -272,6 +360,13 @@ function DetectorsView({
               );
             })}
           </div>
+        </div>
+      )}
+
+      {/* Activation explainer */}
+      {activationOn && (
+        <div className="mt-3 rounded-md bg-surface px-3 py-2 text-xs text-muted border border-border">
+          A neural-network layer is exactly this: the matrix, then a bias and an activation function applied to the whole output vector at once. ReLU zeros out the weak matches.
         </div>
       )}
     </>
@@ -441,6 +536,8 @@ function RoundTripView({
 
 // ─── Main component ─────────────────────────────────────────────────────────────
 
+const DEFAULT_THRESHOLD = 0.5;
+
 export function DetectorStack(props: DetectorStackProps) {
   const domain = props.domain ?? ANIMAL_DOMAIN;
   const mode = props.mode ?? "detectors";
@@ -451,9 +548,16 @@ export function DetectorStack(props: DetectorStackProps) {
   const [inputName, setInputName] = useState(DEFAULT_INPUT);
   const [rowNames, setRowNames] = useState<string[]>(defaultRows);
 
+  // Activation state is only meaningful in detectors mode; lifted here so
+  // the parent-owned reset button can clear it alongside inputName/rowNames.
+  const [activationOn, setActivationOn] = useState(false);
+  const [threshold, setThreshold] = useState(DEFAULT_THRESHOLD);
+
   const resetToDefaults = useCallback(() => {
     setInputName(DEFAULT_INPUT);
     setRowNames(defaultRows);
+    setActivationOn(false);
+    setThreshold(DEFAULT_THRESHOLD);
   }, [defaultRows]);
 
   // Toggle a name in/out of rowNames, capping at domain.properties.length
@@ -512,6 +616,10 @@ export function DetectorStack(props: DetectorStackProps) {
           rowNames={rowNames}
           toggleRow={toggleRow}
           inputOptions={inputOptions}
+          activationOn={activationOn}
+          setActivationOn={setActivationOn}
+          threshold={threshold}
+          setThreshold={setThreshold}
         />
       )}
     </WidgetContainer>
