@@ -10,7 +10,7 @@ A matrix sounds like a new and scary object. It isn't. A matrix is several dot p
 
 Remember the bear detector from the Vectors chapter. You take an animal's property-vector (big, scary, hairy, cuddly, fast, fat) and dot it with a "bear" weight-vector. Out comes a single number: how bear-like this animal is. One dot product, one detector.
 
-Now suppose you want a bear detector *and* an eagle detector *and* a snake detector, all at once. Stack their weight-vectors as the rows of a grid. Multiply an animal by that grid and every row runs its own dot product in a single shot. The animal goes in as six properties and comes out re-described as "0.8 bear-like, 0.1 eagle-like, 0.3 snake-like."
+Now suppose you want a bear detector *and* an eagle detector *and* a snake detector, all at once. Stack their weight-vectors as the rows of a grid. Multiply an animal by that grid and every row runs its own dot product in a single shot. The animal goes in as six properties and comes out re-described as a handful of scores, maybe "0.8 bear-like, 0.4 eagle-like, 0.2 snake-like."
 
 That grid is a **matrix**. Multiplying a vector by it is **matrix multiplication**. There is nothing in it you haven't already done by hand. Each row is a detector, and the matrix just asks all your questions at the same time.
 
@@ -53,7 +53,7 @@ Stack two matrix multiplies back to back with nothing between them and something
 This is why the bend from §3 earns its place. Put a nonlinear activation function between two matrix layers and they can no longer be merged. The bend is what lets a deep network do things no single matrix could.
 
 <MatrixCompositionWidget>
-Edit the numbers in matrices A and B and watch the product matrix C update. C does exactly what A then B would do, in one step. Now flip on "Put an activation between them." C grays out, because once there's a bend in the middle, no single matrix can stand in for the pair.
+Edit the numbers in matrices A and B and watch the product matrix C update. C does the work of both A and B in a single step. Now flip on "Put an activation between them." C grays out, because once there's a bend in the middle, no single matrix can stand in for the pair.
 </MatrixCompositionWidget>
 
 <KeyInsight>
