@@ -16,6 +16,10 @@ describe("matMul", () => {
   it("composes two 2x2 matrices", () => {
     expect(matMul([[1, 2], [3, 4]], [[5, 6], [7, 8]])).toEqual([[19, 22], [43, 50]]);
   });
+  it("multiplies non-square matrices (2x3 by 3x2)", () => {
+    // [[1,2,3],[4,5,6]] (2x3) times [[7,8],[9,10],[11,12]] (3x2) = [[58,64],[139,154]]
+    expect(matMul([[1, 2, 3], [4, 5, 6]], [[7, 8], [9, 10], [11, 12]])).toEqual([[58, 64], [139, 154]]);
+  });
 });
 
 describe("invert", () => {

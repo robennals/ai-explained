@@ -8,6 +8,9 @@ export function matVecMul(matrix: number[][], vec: number[]): number[] {
 
 /** Standard matrix product. `a` is m×n, `b` is n×p, result is m×p. */
 export function matMul(a: number[][], b: number[][]): number[][] {
+  if (a[0].length !== b.length) {
+    throw new Error(`matMul: inner dimensions mismatch (${a[0].length} vs ${b.length})`);
+  }
   const m = a.length;
   const n = b.length;
   const p = b[0].length;
