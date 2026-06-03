@@ -8,7 +8,9 @@ import { SliderControl } from "../shared/SliderControl";
 import {
   ANIMAL_DOMAIN,
   type VectorDomain,
+  productColor,
 } from "../vectors/vectorData";
+import { VectorCard } from "../vectors/VectorCard";
 import { matVecMul, invert, relu, applyActivation } from "./matrixMath";
 
 export interface DetectorStackProps {
@@ -164,6 +166,103 @@ function ChipSelector({
 
 // ─── Detectors mode ────────────────────────────────────────────────────────────
 
+/**
+ * PillCell — a small rounded number display used by both the input vector row
+ * and the output vector row, so they're identically formatted.
+ */
+function PillCell({
+  value,
+  caption,
+  tint,
+}: {
+  value: number;
+  caption?: React.ReactNode;
+  tint?: string;
+}) {
+  return (
+    <div className="flex flex-col items-center gap-0.5">
+      <div
+        className="rounded-md border bg-surface px-1.5 py-1 font-mono text-xs font-bold tabular-nums"
+        style={{ borderColor: tint ?? "var(--color-border)", color: tint ?? "var(--color-foreground)" }}
+      >
+        {value.toFixed(2)}
+      </div>
+      {caption != null && (
+        <span className="text-[9px] text-muted leading-none text-center max-w-[3rem] truncate">
+          {caption}
+        </span>
+      )}
+    </div>
+  );
+}
+
+/**
+ * ProductColumn — mirrors DotProductComparison's local ProductColumn exactly,
+ * reimplemented here without importing that component.
+ * vecA = detector (blue), vecB = input (amber).
+ */
+function DetectorProductColumn({
+  vecA,
+  vecB,
+  properties,
+  score,
+  scoreCol,
+}: {
+  vecA: number[];
+  vecB: number[];
+  properties: string[];
+  score: number;
+  scoreCol: string;
+}) {
+  const products = vecA.map((a, i) => a * vecB[i]);
+  const maxProduct = Math.max(...products, 0.001);
+
+  return (
+    <div
+      className="rounded-lg border border-foreground/10 bg-foreground/[0.02] overflow-hidden shrink-0"
+      style={{ maxWidth: "10rem" }}
+    >
+      <div className="py-2 px-3 text-sm font-medium text-foreground border-b border-foreground/10 bg-foreground/[0.02]">
+        <span className="text-[10px] font-bold uppercase tracking-widest text-muted">
+          Multiply
+        </span>
+      </div>
+      {properties.map((prop, i) => {
+        const product = products[i];
+        return (
+          <div
+            key={prop}
+            className="flex items-center py-1.5 px-3 border-b border-foreground/5 last:border-b-0 min-h-[28px]"
+          >
+            <span className="font-mono text-[10px] text-muted whitespace-nowrap">
+              <span style={{ color: "#3b82f6" }}>{vecA[i].toFixed(2)}</span>
+              {" × "}
+              <span style={{ color: "#f59e0b" }}>{vecB[i].toFixed(2)}</span>
+              {" = "}
+              <span className="font-bold" style={{ color: productColor(product, maxProduct) }}>
+                {product.toFixed(2)}
+              </span>
+            </span>
+          </div>
+        );
+      })}
+      <div className="py-1.5 px-3 border-t-2 border-foreground/15 bg-foreground/[0.02]">
+        <div className="font-mono text-[10px] font-bold">
+          {products.map((p, idx) => (
+            <span key={idx}>
+              {idx > 0 && <span className="text-muted">{" + "}</span>}
+              <span style={{ color: productColor(p, maxProduct) }}>{p.toFixed(2)}</span>
+            </span>
+          ))}
+        </div>
+        <div className="font-mono text-sm font-bold mt-0.5" style={{ color: scoreCol }}>
+          = {score.toFixed(2)}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function DetectorsView({
   domain,
   inputName,
@@ -226,8 +325,8 @@ function DetectorsView({
 
   return (
     <>
-      {/* Input animal — row of single-select buttons */}
-      <div className="mb-5">
+      {/* 1. Input animal — row of single-select buttons */}
+      <div className="mb-4">
         <div className="mb-1.5 text-xs font-medium text-muted">Input animal</div>
         <div className="flex flex-wrap gap-1.5">
           {domain.items.map((item) => {
@@ -249,6 +348,24 @@ function DetectorsView({
         </div>
       </div>
 
+      {/* 2. Input vector as horizontal pill row */}
+      <div className="mb-5">
+        <div className="mb-1.5 text-xs font-medium text-muted">
+          {inputItem.emoji} {inputItem.name} as a vector
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {domain.properties.map((prop, i) => (
+            <PillCell
+              key={prop}
+              value={input[i]}
+              caption={prop}
+              tint="#f59e0b"
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* 3. Chip selector */}
       <ChipSelector
         domain={domain}
         rowNames={rowNames}
@@ -277,6 +394,7 @@ function DetectorsView({
         )}
       </div>
 
+      {/* 4. List of detectors */}
       {rowNames.length === 0 ? (
         <div className="rounded-lg border border-border bg-surface px-4 py-6 text-center text-sm text-muted">
           Pick at least one animal to compare against above.
@@ -314,7 +432,7 @@ function DetectorsView({
                     {refItem.name}
                   </span>
 
-                  {/* Middle dot */}
+                  {/* Middle dot — dot product */}
                   <span className="text-xs text-muted">·</span>
 
                   {/* Input emoji + name */}
@@ -353,99 +471,63 @@ function DetectorsView({
                   )}
                 </button>
 
-                {/* Expanded detail — multiplication table */}
-                {isExpanded && (() => {
-                  // Round each product to 3dp, then sum the rounded values so
-                  // a reader adding the products column gets exactly the shown total.
-                  const roundedProducts = domain.properties.map((_, pi) =>
-                    Math.round(refItem.values[pi] * input[pi] * 1000) / 1000
-                  );
-                  const displayedTotal = roundedProducts.reduce((a, b) => a + b, 0);
-                  const displayedTotalStr = displayedTotal.toFixed(3);
-                  return (
-                    <div className="border-t border-border px-3 py-3 bg-foreground/2">
-                      {/* CSS grid: property | ref value | × | input value | = | product */}
-                      <div
-                        className="font-mono text-xs"
-                        style={{
-                          display: "grid",
-                          gridTemplateColumns: "5rem 4.5rem auto 4.5rem auto 4rem",
-                          rowGap: "2px",
-                          columnGap: "4px",
-                          alignItems: "center",
-                        }}
-                      >
-                        {/* Header row */}
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-muted not-italic" style={{ fontFamily: "inherit" }}></span>
-                        <span
-                          className="text-right text-[10px] font-bold uppercase tracking-widest"
-                          style={{ color: "#6366f1", fontFamily: "inherit" }}
-                        >
-                          {refItem.emoji} {refItem.name}
-                        </span>
-                        <span></span>
-                        <span
-                          className="text-right text-[10px] font-bold uppercase tracking-widest"
-                          style={{ color: "#b45309", fontFamily: "inherit" }}
-                        >
-                          {inputItem.emoji} {inputItem.name}
-                        </span>
-                        <span></span>
-                        <span className="text-right text-[10px] font-bold uppercase tracking-widest text-muted" style={{ fontFamily: "inherit" }}>product</span>
-
-                        {/* One row per property */}
-                        {domain.properties.map((prop, pi) => {
-                          const product = roundedProducts[pi];
-                          return [
-                            <span key={`${prop}-label`} className="text-muted" style={{ fontFamily: "inherit" }}>{prop}</span>,
-                            <span key={`${prop}-ref`} className="text-right" style={{ color: "#6366f1" }}>
-                              {refItem.values[pi].toFixed(2)}
-                            </span>,
-                            <span key={`${prop}-times`} className="text-center text-muted">×</span>,
-                            <span key={`${prop}-inp`} className="text-right" style={{ color: "#b45309" }}>
-                              {input[pi].toFixed(2)}
-                            </span>,
-                            <span key={`${prop}-eq`} className="text-center text-muted">=</span>,
-                            <span key={`${prop}-prod`} className="text-right text-foreground">
-                              {product.toFixed(3)}
-                            </span>,
-                          ];
-                        })}
-
-                        {/* Horizontal rule — spans all 6 columns, visible only under product column */}
-                        <span style={{ gridColumn: "1 / span 5" }}></span>
-                        <hr className="border-foreground/30 my-0.5" />
-
-                        {/* Total row */}
-                        <span
-                          className="text-right text-[10px] text-muted"
-                          style={{ gridColumn: "1 / span 5", fontFamily: "inherit" }}
-                        >
-                          dot product =
-                        </span>
-                        <span
-                          className="text-right font-bold"
-                          style={{ color: scoreCol }}
-                        >
-                          {displayedTotalStr}
-                        </span>
+                {/* Expanded detail — VectorCards + multiply column */}
+                {isExpanded && (
+                  <div className="border-t border-border px-3 py-3 bg-foreground/2">
+                    <div className="grid grid-cols-2 gap-2 items-start md:grid-cols-[1fr_1fr_auto]">
+                      {/* Detector card (blue) */}
+                      <VectorCard
+                        name={refItem.name}
+                        emoji={refItem.emoji}
+                        properties={domain.properties}
+                        values={refItem.values}
+                        barColor="#3b82f6"
+                        label="DETECTOR"
+                        labelColor="#3b82f6"
+                      />
+                      {/* Input card (amber) */}
+                      <VectorCard
+                        name={inputItem.name}
+                        emoji={inputItem.emoji}
+                        properties={domain.properties}
+                        values={input}
+                        barColor="#f59e0b"
+                        label="INPUT"
+                        labelColor="#f59e0b"
+                      />
+                      {/* Multiply column — own row spanning both on mobile, col 3 on desktop */}
+                      <div className="col-span-2 mt-2 flex justify-center md:col-span-1 md:mt-0 md:justify-start">
+                        <DetectorProductColumn
+                          vecA={refItem.values}
+                          vecB={input}
+                          properties={domain.properties}
+                          score={score}
+                          scoreCol={scoreCol}
+                        />
                       </div>
                     </div>
-                  );
-                })()}
+                  </div>
+                )}
               </div>
             );
           })}
         </div>
       )}
 
-      {/* Output vector summary card */}
+      {/* One-line caption tying it together */}
       {rowNames.length > 0 && (
-        <div className="mt-5 rounded-lg border border-border bg-surface px-4 py-3">
-          <div className="mb-2 text-xs font-bold uppercase tracking-widest text-muted">
-            {activationOn ? "Output vector (after activation)" : "Output vector"}
+        <div className="mt-4 text-xs text-muted text-center">
+          One vector goes in. Each detector is one dot product. The scores come out as a new vector.
+        </div>
+      )}
+
+      {/* 5. Output vector as horizontal pill row */}
+      {rowNames.length > 0 && (
+        <div className="mt-3">
+          <div className="mb-1.5 text-xs font-medium text-muted">
+            {activationOn ? "Output vector — after activation" : "Output vector — how much it matches each detector"}
           </div>
-          <div className="flex flex-wrap gap-x-6 gap-y-1.5">
+          <div className="flex flex-wrap gap-1.5">
             {rowNames.map((refName, i) => {
               const refItem = domain.items.find((it) => it.name === refName)!;
               const displayScore = activationOn ? activated[i] : output[i];
@@ -455,14 +537,12 @@ function DetectorsView({
                   : "#dc2626"
                 : scoreColor(output[i]);
               return (
-                <div key={refName} className="flex items-center gap-1.5">
-                  <span className="font-mono text-sm font-bold" style={{ color }}>
-                    {displayScore.toFixed(2)}
-                  </span>
-                  <span className="text-sm text-muted">
-                    {refItem.name.toLowerCase()}-like
-                  </span>
-                </div>
+                <PillCell
+                  key={refName}
+                  value={displayScore}
+                  caption={<>{refItem.emoji} {refItem.name}</>}
+                  tint={color}
+                />
               );
             })}
           </div>
