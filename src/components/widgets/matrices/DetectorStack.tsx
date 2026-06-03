@@ -170,7 +170,8 @@ function DetectorsView({
   setInputName,
   rowNames,
   toggleRow,
-  inputOptions,
+  expandedRows,
+  setExpandedRows,
   activationOn,
   setActivationOn,
   threshold,
@@ -182,11 +183,25 @@ function DetectorsView({
   rowNames: string[];
   toggleRow: (n: string) => void;
   inputOptions: { value: string; label: string }[];
+  expandedRows: Set<string>;
+  setExpandedRows: (rows: Set<string>) => void;
   activationOn: boolean;
   setActivationOn: (v: boolean) => void;
   threshold: number;
   setThreshold: (v: number) => void;
 }) {
+  const toggleExpanded = useCallback((name: string) => {
+    setExpandedRows((() => {
+      const next = new Set(expandedRows);
+      if (next.has(name)) {
+        next.delete(name);
+      } else {
+        next.add(name);
+      }
+      return next;
+    })());
+  }, [expandedRows, setExpandedRows]);
+
   const inputItem = useMemo(
     () => domain.items.find((i) => i.name === inputName)!,
     [domain, inputName]
@@ -210,20 +225,29 @@ function DetectorsView({
     [preActivation]
   );
 
-  // Grid template changes when activation is on — add an extra column
-  const gridCols = activationOn
-    ? "9rem 1fr auto 1fr auto 1fr"
-    : "9rem 1fr auto 1fr";
-
   return (
     <>
-      <div className="mb-4">
-        <SelectControl
-          label="Input animal"
-          value={inputName}
-          options={inputOptions}
-          onChange={setInputName}
-        />
+      {/* Input animal — row of single-select buttons */}
+      <div className="mb-5">
+        <div className="mb-1.5 text-xs font-medium text-muted">Input animal</div>
+        <div className="flex flex-wrap gap-1.5">
+          {domain.items.map((item) => {
+            const selected = item.name === inputName;
+            return (
+              <button
+                key={item.name}
+                onClick={() => setInputName(item.name)}
+                className={`rounded-md border px-2.5 py-1 text-xs font-medium transition-colors ${
+                  selected
+                    ? "border-accent bg-accent/10 text-accent"
+                    : "border-border text-muted hover:bg-surface hover:text-foreground"
+                }`}
+              >
+                {item.emoji} {item.name}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <ChipSelector
@@ -231,7 +255,7 @@ function DetectorsView({
         rowNames={rowNames}
         onToggle={toggleRow}
         minRows={1}
-        label={`Detectors (matrix rows) — pick up to ${domain.properties.length}:`}
+        label="Animals to compare against:"
       />
 
       {/* Activation controls */}
@@ -256,97 +280,144 @@ function DetectorsView({
 
       {rowNames.length === 0 ? (
         <div className="rounded-lg border border-border bg-surface px-4 py-6 text-center text-sm text-muted">
-          Pick at least one detector above.
+          Pick at least one animal to compare against above.
         </div>
       ) : (
-        <div className="space-y-2">
-          {/* Column headers */}
-          <div
-            className="grid items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted"
-            style={{ gridTemplateColumns: gridCols }}
-          >
-            <span>Detector (row)</span>
-            <span>Row weights</span>
-            <span className="text-center px-1">×&nbsp;{inputItem.emoji}&nbsp;input</span>
-            <span>Score</span>
-            {activationOn && <span className="text-center px-1">− threshold</span>}
-            {activationOn && <span>After ReLU</span>}
-          </div>
-
+        <div className="space-y-1.5">
           {rowNames.map((refName, i) => {
             const refItem = domain.items.find((it) => it.name === refName)!;
             const score = output[i];
             const pre = preActivation[i];
             const act = activated[i];
             const fired = activationOn && pre > 0;
+            const isExpanded = expandedRows.has(refName);
+            const scoreCol = scoreColor(score);
+
             return (
               <div
                 key={refName}
-                className="grid items-center gap-2 rounded-lg border border-border bg-surface px-3 py-2"
-                style={{ gridTemplateColumns: gridCols }}
+                className="rounded-lg border border-border bg-surface overflow-hidden"
               >
-                {/* Detector label */}
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <span className="text-base leading-none">{refItem.emoji}</span>
-                  <span className="text-xs font-semibold text-foreground truncate">
+                {/* Collapsed summary row — always visible, clickable */}
+                <button
+                  onClick={() => toggleExpanded(refName)}
+                  className="w-full flex items-center gap-2 px-3 py-2.5 text-left cursor-pointer hover:bg-foreground/4 transition-colors"
+                >
+                  {/* Chevron */}
+                  <span className="text-[10px] text-muted shrink-0 w-3">
+                    {isExpanded ? "▾" : "▸"}
+                  </span>
+
+                  {/* Ref emoji + name */}
+                  <span className="text-sm leading-none">{refItem.emoji}</span>
+                  <span className="text-xs font-semibold text-foreground">
                     {refItem.name}
                   </span>
-                </div>
 
-                {/* Row weight bars */}
-                <PropertyBars
-                  values={refItem.values}
-                  properties={domain.properties}
-                  color="#6366f1"
-                />
+                  {/* Middle dot */}
+                  <span className="text-xs text-muted">·</span>
 
-                {/* Multiply operator + input bars */}
-                <div className="flex flex-col items-center gap-1">
-                  <span className="text-xs font-bold text-muted">×</span>
-                  <PropertyBars
-                    values={input}
-                    properties={domain.properties}
-                    color="#f59e0b"
-                  />
-                </div>
+                  {/* Input emoji + name */}
+                  <span className="text-sm leading-none">{inputItem.emoji}</span>
+                  <span className="text-xs font-semibold text-foreground">
+                    {inputItem.name}
+                  </span>
 
-                {/* Score */}
-                <div className="flex items-center gap-1.5">
-                  <span className="text-xs text-muted">=</span>
-                  <ScoreBar score={score} />
-                </div>
+                  {/* = score */}
+                  <span className="text-xs text-muted ml-0.5">=</span>
+                  <span
+                    className="font-mono text-sm font-bold"
+                    style={{ color: scoreCol }}
+                  >
+                    {score.toFixed(2)}
+                  </span>
 
-                {/* Threshold subtraction */}
-                {activationOn && (
-                  <div className="flex flex-col items-center gap-0.5">
-                    <span className="text-[10px] font-mono text-muted">
-                      − {threshold.toFixed(2)}
-                    </span>
-                    <span
-                      className="text-xs font-mono font-bold"
-                      style={{ color: pre > 0 ? "#f59e0b" : "#ef4444" }}
-                    >
-                      = {pre.toFixed(2)}
-                    </span>
-                  </div>
-                )}
+                  {/* Activation result inline */}
+                  {activationOn && (
+                    <>
+                      <span className="text-xs text-muted">→</span>
+                      <span
+                        className="font-mono text-xs font-bold px-1.5 py-0.5 rounded"
+                        style={
+                          fired
+                            ? { background: "#dcfce7", color: "#16a34a" }
+                            : { background: "#fee2e2", color: "#dc2626" }
+                        }
+                      >
+                        {fired ? act.toFixed(2) : "0"}
+                      </span>
+                      <span className="text-[10px] text-muted">
+                        {fired ? "fired" : "silent"}
+                      </span>
+                    </>
+                  )}
+                </button>
 
-                {/* After ReLU */}
-                {activationOn && (
-                  <div className="flex items-center gap-1.5">
-                    <div
-                      className="rounded px-2 py-0.5 text-xs font-mono font-bold"
-                      style={
-                        fired
-                          ? { background: "#dcfce7", color: "#16a34a" }
-                          : { background: "#fee2e2", color: "#dc2626" }
-                      }
-                    >
-                      {fired ? act.toFixed(2) : "0  (clipped)"}
+                {/* Expanded detail — per-dimension working */}
+                {isExpanded && (
+                  <div className="border-t border-border px-3 py-3 bg-foreground/2">
+                    <div className="flex flex-wrap items-start gap-x-4 gap-y-2">
+                      {/* Reference animal bars */}
+                      <div>
+                        <div className="mb-1 text-[9px] font-bold uppercase tracking-widest text-muted">
+                          {refItem.emoji} {refItem.name} (row)
+                        </div>
+                        <PropertyBars
+                          values={refItem.values}
+                          properties={domain.properties}
+                          color="#6366f1"
+                        />
+                      </div>
+
+                      {/* × operator */}
+                      <div className="flex items-end pb-3">
+                        <span className="text-sm font-bold text-muted">×</span>
+                      </div>
+
+                      {/* Input animal bars */}
+                      <div>
+                        <div className="mb-1 text-[9px] font-bold uppercase tracking-widest text-muted">
+                          {inputItem.emoji} {inputItem.name} (input)
+                        </div>
+                        <PropertyBars
+                          values={input}
+                          properties={domain.properties}
+                          color="#f59e0b"
+                        />
+                      </div>
+
+                      {/* = score */}
+                      <div className="flex items-end pb-3">
+                        <span className="text-sm font-bold text-muted">=</span>
+                      </div>
+
+                      <div className="flex items-end pb-1">
+                        <ScoreBar score={score} />
+                      </div>
                     </div>
-                    <span className="text-[10px] text-muted">
-                      {fired ? "fired" : "silent"}
-                    </span>
+
+                    {/* Per-dimension products */}
+                    <div className="mt-2 flex flex-wrap gap-x-3 gap-y-0.5">
+                      {domain.properties.map((prop, pi) => {
+                        const product = refItem.values[pi] * input[pi];
+                        return (
+                          <span key={prop} className="text-[10px] font-mono text-muted">
+                            {refItem.values[pi].toFixed(2)} × {input[pi].toFixed(2)}{" "}
+                            <span className="text-foreground/60">[{prop}]</span>{" "}
+                            ={" "}
+                            <span className="text-foreground font-bold">
+                              {product.toFixed(2)}
+                            </span>
+                          </span>
+                        );
+                      })}
+                      <span className="text-[10px] font-mono text-muted">
+                        sum ={" "}
+                        <span className="font-bold" style={{ color: scoreCol }}>
+                          {score.toFixed(2)}
+                        </span>
+                      </span>
+                    </div>
                   </div>
                 )}
               </div>
@@ -701,12 +772,15 @@ export function DetectorStack(props: DetectorStackProps) {
   // the parent-owned reset button can clear it alongside inputName/rowNames.
   const [activationOn, setActivationOn] = useState(false);
   const [threshold, setThreshold] = useState(DEFAULT_THRESHOLD);
+  // Expanded rows state lifted here so reset can collapse all rows
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
   const resetToDefaults = useCallback(() => {
     setInputName(DEFAULT_INPUT);
     setRowNames(defaultRows);
     setActivationOn(false);
     setThreshold(DEFAULT_THRESHOLD);
+    setExpandedRows(new Set());
   }, [defaultRows]);
 
   // Toggle a name in/out of rowNames, capping at domain.properties.length
@@ -775,6 +849,8 @@ export function DetectorStack(props: DetectorStackProps) {
           rowNames={rowNames}
           toggleRow={toggleRow}
           inputOptions={inputOptions}
+          expandedRows={expandedRows}
+          setExpandedRows={setExpandedRows}
           activationOn={activationOn}
           setActivationOn={setActivationOn}
           threshold={threshold}
