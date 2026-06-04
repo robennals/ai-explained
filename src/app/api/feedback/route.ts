@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 
 const POSTMARK_ENDPOINT = "https://api.postmarkapp.com/email";
+const RESEND_ENDPOINT = "https://api.resend.com/emails";
 const RECIPIENT = "rob.ennals@gmail.com";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -12,15 +13,63 @@ type Payload = {
   website?: string;
 };
 
-export async function POST(request: Request) {
+type Email = {
+  replyTo: string;
+  subject: string;
+  text: string;
+};
+
+// EMAIL_PROVIDER chooses "resend" (default) or "postmark".
+// Each sender returns null when its env vars aren't configured.
+async function sendWithResend(email: Email): Promise<Response | null> {
+  const token = process.env.RESEND_API_KEY;
+  const from = process.env.RESEND_FROM;
+  if (!token || !from) return null;
+
+  return fetch(RESEND_ENDPOINT, {
+    method: "POST",
+    headers: {
+      authorization: `Bearer ${token}`,
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      from,
+      to: [RECIPIENT],
+      cc: [email.replyTo],
+      reply_to: [email.replyTo],
+      subject: email.subject,
+      text: email.text,
+    }),
+  });
+}
+
+async function sendWithPostmark(email: Email): Promise<Response | null> {
   const token = process.env.POSTMARK_TOKEN;
   const from = process.env.POSTMARK_FROM;
-  if (!token || !from) {
-    return NextResponse.json(
-      { error: "Feedback is temporarily unavailable. Please try again later." },
-      { status: 503 },
-    );
-  }
+  if (!token || !from) return null;
+
+  return fetch(POSTMARK_ENDPOINT, {
+    method: "POST",
+    headers: {
+      "X-Postmark-Server-Token": token,
+      "content-type": "application/json",
+      accept: "application/json",
+    },
+    body: JSON.stringify({
+      From: from,
+      To: RECIPIENT,
+      Cc: email.replyTo,
+      ReplyTo: email.replyTo,
+      Subject: email.subject,
+      TextBody: email.text,
+      MessageStream: "outbound",
+    }),
+  });
+}
+
+export async function POST(request: Request) {
+  const provider =
+    process.env.EMAIL_PROVIDER === "postmark" ? "postmark" : "resend";
 
   let body: Payload;
   try {
@@ -57,33 +106,28 @@ export async function POST(request: Request) {
     oneLine.slice(0, 60) +
     (oneLine.length > 60 ? "…" : "");
 
-  const textBody =
+  const text =
     `${message}\n\n` +
     `---\n` +
     `From: ${name || "(no name given)"} <${email}>\n` +
     `Page: ${referer}\n`;
 
-  const postmarkRes = await fetch(POSTMARK_ENDPOINT, {
-    method: "POST",
-    headers: {
-      "X-Postmark-Server-Token": token,
-      "content-type": "application/json",
-      accept: "application/json",
-    },
-    body: JSON.stringify({
-      From: from,
-      To: RECIPIENT,
-      Cc: email,
-      ReplyTo: email,
-      Subject: subject,
-      TextBody: textBody,
-      MessageStream: "outbound",
-    }),
-  });
+  const outgoing: Email = { replyTo: email, subject, text };
+  const sendRes =
+    provider === "postmark"
+      ? await sendWithPostmark(outgoing)
+      : await sendWithResend(outgoing);
 
-  if (!postmarkRes.ok) {
-    const detail = await postmarkRes.text();
-    console.error("Postmark error", postmarkRes.status, detail);
+  if (!sendRes) {
+    return NextResponse.json(
+      { error: "Feedback is temporarily unavailable. Please try again later." },
+      { status: 503 },
+    );
+  }
+
+  if (!sendRes.ok) {
+    const detail = await sendRes.text();
+    console.error(`${provider} error`, sendRes.status, detail);
     return NextResponse.json(
       { error: "Couldn't send your message. Please try again." },
       { status: 502 },
