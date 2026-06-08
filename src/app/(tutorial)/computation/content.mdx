@@ -51,15 +51,15 @@ The shape is the same in every case: numbers in, numbers out.
 Click through the different tasks. Despite doing wildly different things (recognizing images, translating text, generating art), they all have the same shape. A list of numbers goes in, a list of numbers comes out. The only thing that changes is what the function does in the middle.
 </FunctionMachineWidget>
 
-So all of AI reduces to one problem: find the right function.
+So all of AI reduces to one problem: build the right function.
 
-If you could find the function that maps photo pixels to the word "cat", that's image recognition. If you could find the function that maps English to French, that's translation. If you could find the function that maps prompts to good answers, that's a chatbot.
+If you could build the function that maps photo pixels to the word "cat", that's image recognition. If you could build the function that maps English to French, that's translation. If you could build the function that maps prompts to good answers, that's a chatbot.
 
-But how do you find a function?
+But how do you build a function?
 
-## Machines with Knobs
+## Functions with Knobs
 
-The trick is to build a *model*: a machine with adjustable knobs (called *parameters*). Different knob settings make the machine compute different functions. Finding the function you want becomes a matter of finding the right knob settings.
+The trick is to start with a *model*: a general purpose function whose behavior you can change using adjustable knobs called *parameters*. Change the knob settings and you get a function that does something different. 
 
 Here's a concrete example. The model below has four parameters (a, b, c, d) and computes:
 
@@ -72,22 +72,18 @@ Try to match the target curve by adjusting the sliders. Pay attention to how eac
 </ParameterPlaygroundWidget>
 
 <KeyInsight>
-**A model is a machine with adjustable knobs.** Different settings compute different functions. Finding the right function becomes a matter of finding the right knob settings. With four knobs, hand-tuning is already frustrating. Real AI models have *billions*. We'll need a way to set them automatically.
+**A model is a function with adjustable knobs.** Different settings compute different functions, and building the function you want becomes a matter of finding the right knob settings. With four knobs, hand-tuning is already frustrating. Real AI models have *billions*. We'll need a way to set them automatically.
 </KeyInsight>
 
-## Where Models Come From
+## Can One Model Compute Everything?
 
-It's worth being clear about who does what, because it's a common point of confusion. *Designing the model* (deciding what knobs the machine has and how they combine the input) is (currently) a human job. The automatic process doesn't invent the function or pick it from a catalogue of every possible function. It only turns the knobs on a machine a person already built. A human chose the cubic shape above; only then could tuning a, b, c, and d make it fit.
+Before going further, a question worth asking: is it possible to create a model that can build any function we might possibly want?
 
-So where do good models come from? At least for now, people design them. Much of the rest of this tutorial tours the designs that turned out to work remarkably well: neural networks, then attention and the transformer. Optimization tunes a model; it doesn't invent one.
+In 1936, two mathematicians, Alan Turing and Alonzo Church, independently came up with two models, the *Turing machine* and the *lambda calculus*, that they claimed could compute any function that can be computed at all. Not just math. Anything. This claim is called the *Church-Turing thesis*. It can't be formally proven, but no one has ever found anything computable that these models cannot. We call a model that can compute any computable function a *universal model*.
 
-## Can One Machine Compute Everything?
+The simple cubic model we gave above is not a universal model, and is very limited in what it can compute. But some of the models we use in AI are universal models. If you allow them to become big enough, and run long enough, and find the right parameters, they really can compute anything that can be computed.
 
-Before going further, a question worth asking: are there limits to what functions a machine can compute?
-
-In 1936, two mathematicians, Alan Turing and Alonzo Church, independently arrived at the same answer. You can build a machine capable of computing any function that can be computed at all. Not just math. Anything. This idea is called the *Church-Turing thesis*. It can't be formally proven, but no one has ever found a counterexample.
-
-So if "thinking" is computation (turning numbers into numbers), then a computer can in principle do anything a human mind can do. The question isn't whether the right function exists. The question is whether we can find it.
+So if "thinking" is computation (turning numbers into numbers), then a computer can in principle do anything a human mind can do. The question isn't whether the right function exists. The question is whether we can find the right parameters.
 
 ## The Lazy Solution: A Giant Lookup Table
 
@@ -113,7 +109,7 @@ So here's where this leaves us:
 
 1. **Everything is numbers.** Text, images, sound, all of it.
 2. **Thinking is a function.** Every intelligent task is numbers in, numbers out.
-3. **Models are machines with knobs.** Different settings compute different functions.
+3. **Models are functions with knobs.** Different settings compute different functions.
 4. **The right function exists.** The Church-Turing thesis says so.
 5. **Brute force is impossible.** A lookup table would be bigger than the universe.
 
