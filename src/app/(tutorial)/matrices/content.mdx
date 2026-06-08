@@ -15,7 +15,7 @@ Written with a dot, `bear · cat` means the dot product: multiply each matching 
 Now suppose you want a bear detector *and* an eagle detector *and* a snake detector, all at once. Keep them as a list of three weight-vectors and run each one's dot product against the same input animal. The animal goes in as six properties and comes out re-described as a handful of scores, maybe "0.8 bear-like, 0.4 eagle-like, 0.2 snake-like." That list of detectors is a **matrix**, and running every detector against an input is **matrix multiplication**. There is nothing in it you haven't already done by hand. Each detector is one dot product, and the matrix just asks all your questions at the same time.
 
 <DetectorStackWidget>
-Pick an input animal from the buttons at the top. Then choose some animals to compare against; each one acts as a detector, a weight-vector dotted with your input. Read each line as `Animal · YourAnimal = score`, where the dot is the dot product. Click a row to expand the full working and see every matching property multiplied and added up. The scores together are the output: a fresh vector describing your animal by how much it matches each detector.
+First choose some animals to compare against; each one acts as a detector, a weight-vector dotted with your input. Then pick an input animal from the dropdown. Read each line as `Animal · YourAnimal = score`, where the dot is the dot product. Click a row to expand the full working and see every matching property multiplied and added up. The scores together are the output: a fresh vector describing your animal by how much it matches each detector.
 </DetectorStackWidget>
 
 <KeyInsight>
