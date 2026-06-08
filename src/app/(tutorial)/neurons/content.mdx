@@ -120,35 +120,11 @@ Click each neuron to see its weights. Click the input nodes to toggle them betwe
 In 1969, Minsky and Papert published *Perceptrons*, proving that single-layer networks can't solve XOR. This was taken as proof that neural networks were a dead end, and it killed most neural network research for over a decade: the "AI winter." The fix was always sitting there, obvious in hindsight: use more than one layer.
 </Callout>
 
-## What Hidden Layers Compute
+## Layers of Abstraction
 
-To solve complex problems, you often need to compute intermediate things first. You can't jump straight from raw pixels to "that's a cat." You need stepping stones.
+XOR needed a single hidden layer computing intermediate facts. Harder problems need many. You can't jump straight from raw pixels to "that's a cat," so you build up through stepping stones. The first hidden layer might detect simple patterns: edges, color patches, textures. The next combines those into parts: eyes, ears, fur. A later layer combines *those* into whole objects: "cat" or "dog." Real networks have lots of layers, allowing them to think very deeply. GPT-3 has 96 layers and frontier models today likely have more.
 
-That's what hidden layers provide. Each layer takes the previous layer's outputs and combines them into something more complex. The first hidden layer might detect simple patterns: edges, color patches, textures. The next layer combines those into parts: eyes, ears, fur. A later layer combines *those* into whole objects: "cat" or "dog."
-
-This is why depth matters. A single layer can only combine the raw inputs in simple ways. But with multiple layers, each one adds another level of abstraction, building up from simple features to complex concepts. The network learns *what* to compute at each layer during training. We don't have to tell it to look for edges or eyes. It figures that out on its own.
-
-## Deeper Networks
-
-If three neurons in two layers can solve XOR, what happens when we keep adding more? Each neuron you add contributes another piece of the computation. Each layer lets the network combine results from the previous layer into something more complex.
-
-The widget below lets you build networks of different sizes and explore them by hand. Try adjusting the architecture and clicking neurons to poke at their weights.
-
-<DeepNetworkPlaygroundWidget>
-Use the sliders to build a network with 4 inputs, 3 hidden layers of 5 neurons each, and 1 output. Click any neuron to select it. You'll see sliders for its weights. Click an input node to adjust its value. Try to make the output go to 1, then to 0. Now imagine setting hundreds of weights by hand to do something useful. That's why we need training.
-</DeepNetworkPlaygroundWidget>
-
-The point is: this would be *impossible* to do by hand for anything interesting. That's why we need to find values by training on real data, which we'll learn about in later chapters.
-
-How big do real networks get? GPT-3 has 96 layers, and frontier models today have even more. Even AI models that run on your smartphone have 20+ layers. The architecture is simple: the same building block repeated millions of times. The hard part is finding the right weights.
-
-## Training Deep Networks
-
-But how do we train the weights in all these hidden layers? It turns out to be surprisingly straightforward. Every weight in the network, even ones buried deep inside, contributes to the final output. And if it contributes to the output, it contributes to the error. That means every weight has a **gradient** (as we saw in the optimization chapter), telling us which direction to nudge it to reduce the error. So we can use gradient descent on **every weight at once**. The algorithm that makes this practical is called **backpropagation**. It efficiently computes the gradient for every weight by flowing the error signal backward through each layer.
-
-<KeyInsight>
-**Stacking neurons in layers lets you compute anything.** Each layer combines the previous layer's outputs into something more complex. Backpropagation lets you train all the weights at once by flowing the error signal backward through every layer. A network with ten thousand weights is no harder to train *in principle* than one with ten. It just takes more computation.
-</KeyInsight>
+No human decides what new things each layer computes. The AI learns that as part of its training. So how do we train weights buried deep inside the network? Surprisingly straightforwardly. Every weight contributes to the final output, so it contributes to the error, which means every weight has a **gradient** (as we saw in the optimization chapter) telling us which direction to nudge it. We run gradient descent on **every weight at once**, using an algorithm called **backpropagation** that computes those gradients efficiently by flowing the error signal backward through each layer.
 
 ## What's Next
 
