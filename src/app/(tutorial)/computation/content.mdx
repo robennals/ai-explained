@@ -79,13 +79,11 @@ Try to match the target curve by adjusting the sliders. Pay attention to how eac
 
 Before going further, a question worth asking: is it possible to create a model that can build any function we might possibly want?
 
-In 1936, two mathematicians, Alan Turing and Alonzo Church, independently came up with two models, the *Turing machine* and the *lambda calculus*, that they claimed could be set up to compute any function that can be computed at all. Not just math. Anything. This claim is called the *Church-Turing thesis*. It can't be formally proven, but no one has ever found a function their models can't handle, and the many other models invented since appear to compute anything too, given the right parameters.
+In 1936, two mathematicians, Alan Turing and Alonzo Church, independently came up with two models, the *Turing machine* and the *lambda calculus*, that they claimed could compute any function that can be computed at all. Not just math. Anything. This claim is called the *Church-Turing thesis*. It can't be formally proven, but no one has ever found a function that can be computed at all that these models cannot. We call a model that can compute any computable function a *universal model*.
 
-The models Turing and Church came up with were quite different from the ones we use today in AI. In particular, the knobs you set were descriptions of computer programs, rather than lists of numbers. But the same idea applies: choose the settings and you choose the function.
+The simple cubic model we gave above is not a universal model, and is very limited in what it can compute. But some of the models we use in AI are universal models. If you allow them to become big enough, and run long enough, and find the right parameters, they really can compute anything that can be computed.
 
-So if "thinking" is computation (turning numbers into numbers), then a computer can in principle do anything a human mind can do. The question isn't whether the right function exists. The question is whether we can build it.
-
-The simple cubic model we gave above is very limited in what it can compute, but there are other models, like the neural networks we'll discuss later, that are universal: they genuinely can compute anything. You just need to find the right settings for their parameters.
+So if "thinking" is computation (turning numbers into numbers), then a computer can in principle do anything a human mind can do. The question isn't whether the right function exists. The question is whether we can find the right parameters.
 
 ## The Lazy Solution: A Giant Lookup Table
 
