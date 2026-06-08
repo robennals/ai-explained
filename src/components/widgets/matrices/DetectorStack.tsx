@@ -20,6 +20,8 @@ export interface DetectorStackProps {
   mode?: "detectors" | "round-trip" | "attention";
   title?: string;
   description?: string;
+  /** Show the activation (ReLU) toggle, threshold slider, and inline fired/silent results. Default false. */
+  showActivation?: boolean;
 }
 
 // ─── Attention mode data ────────────────────────────────────────────────────────
@@ -124,12 +126,14 @@ function ChipSelector({
   rowNames,
   onToggle,
   minRows,
+  maxRows,
   label,
 }: {
   domain: VectorDomain;
   rowNames: string[];
   onToggle: (name: string) => void;
   minRows: number;
+  maxRows: number;
   label: string;
 }) {
   return (
@@ -140,7 +144,7 @@ function ChipSelector({
           const selected = rowNames.includes(item.name);
           const wouldRemove = selected && rowNames.length <= minRows;
           const disabled =
-            (!selected && rowNames.length >= domain.properties.length) ||
+            (!selected && rowNames.length >= maxRows) ||
             wouldRemove;
           return (
             <button
@@ -172,26 +176,17 @@ function ChipSelector({
  */
 function PillCell({
   value,
-  caption,
   tint,
 }: {
   value: number;
-  caption?: React.ReactNode;
   tint?: string;
 }) {
   return (
-    <div className="flex flex-col items-center gap-0.5">
-      <div
-        className="rounded-md border bg-surface px-1.5 py-1 font-mono text-xs font-bold tabular-nums"
-        style={{ borderColor: tint ?? "var(--color-border)", color: tint ?? "var(--color-foreground)" }}
-      >
-        {value.toFixed(2)}
-      </div>
-      {caption != null && (
-        <span className="text-[9px] text-muted leading-none text-center max-w-[4.5rem] truncate">
-          {caption}
-        </span>
-      )}
+    <div
+      className="rounded-md border bg-surface px-1.5 py-1 font-mono text-xs font-bold tabular-nums"
+      style={{ borderColor: tint ?? "var(--color-border)", color: tint ?? "var(--color-foreground)" }}
+    >
+      {value.toFixed(2)}
     </div>
   );
 }
@@ -275,6 +270,7 @@ function DetectorsView({
   setActivationOn,
   threshold,
   setThreshold,
+  showActivation,
 }: {
   domain: VectorDomain;
   inputName: string;
@@ -287,6 +283,7 @@ function DetectorsView({
   setActivationOn: (v: boolean) => void;
   threshold: number;
   setThreshold: (v: number) => void;
+  showActivation: boolean;
 }) {
   const toggleExpanded = useCallback((name: string) => {
     setExpandedRows((() => {
@@ -305,6 +302,11 @@ function DetectorsView({
     [domain, inputName]
   );
   const input = inputItem.values;
+
+  const inputOptions = useMemo(
+    () => domain.items.map((item) => ({ value: item.name, label: `${item.emoji} ${item.name}` })),
+    [domain]
+  );
 
   const matrix = useMemo(
     () => rowNames.map((n) => domain.items.find((i) => i.name === n)!.values),
@@ -325,74 +327,63 @@ function DetectorsView({
 
   return (
     <>
-      {/* 1. Input animal — row of single-select buttons */}
-      <div className="mb-4">
-        <div className="mb-1.5 text-xs font-medium text-muted">Input animal</div>
-        <div className="flex flex-wrap gap-1.5">
-          {domain.items.map((item) => {
-            const selected = item.name === inputName;
-            return (
-              <button
-                key={item.name}
-                onClick={() => setInputName(item.name)}
-                className={`rounded-md border px-2.5 py-1 text-xs font-medium transition-colors ${
-                  selected
-                    ? "border-accent bg-accent/10 text-accent"
-                    : "border-border text-muted hover:bg-surface hover:text-foreground"
-                }`}
-              >
-                {item.emoji} {item.name}
-              </button>
-            );
-          })}
-        </div>
+      {/* 1. Chip selector — FIRST */}
+      <ChipSelector
+        domain={domain}
+        rowNames={rowNames}
+        onToggle={toggleRow}
+        minRows={1}
+        maxRows={domain.items.length}
+        label="Animals to compare against:"
+      />
+
+      {/* 2. Input animal — dropdown */}
+      <div className="mb-5">
+        <SelectControl
+          label="Input animal"
+          value={inputName}
+          options={inputOptions}
+          onChange={setInputName}
+        />
       </div>
 
-      {/* 2. Input vector as horizontal pill row */}
+      {/* 3. Input vector — boxed, no per-dimension captions */}
       <div className="mb-5">
         <div className="mb-1.5 text-xs font-medium text-muted">
-          {inputItem.emoji} {inputItem.name} as a vector
+          Input vector ({inputItem.emoji} {inputItem.name})
         </div>
-        <div className="flex flex-wrap gap-1.5">
+        <div className="inline-flex flex-wrap gap-1.5 rounded-lg border border-border bg-surface px-3 py-2.5">
           {domain.properties.map((prop, i) => (
             <PillCell
               key={prop}
               value={input[i]}
-              caption={prop}
               tint="#f59e0b"
             />
           ))}
         </div>
       </div>
 
-      {/* 3. Chip selector */}
-      <ChipSelector
-        domain={domain}
-        rowNames={rowNames}
-        onToggle={toggleRow}
-        minRows={1}
-        label="Animals to compare against:"
-      />
-
-      {/* Activation controls */}
-      <div className="mb-4 flex flex-col gap-2">
-        <ToggleControl
-          label="Apply activation (ReLU)"
-          checked={activationOn}
-          onChange={setActivationOn}
-        />
-        {activationOn && (
-          <SliderControl
-            label="Threshold (bias)"
-            value={threshold}
-            min={0}
-            max={1}
-            step={0.05}
-            onChange={setThreshold}
-            formatValue={(v) => v.toFixed(2)}
+      {/* Activation controls — only when showActivation */}
+      {showActivation && (
+        <div className="mb-4 flex flex-col gap-2">
+          <ToggleControl
+            label="Apply activation (ReLU)"
+            checked={activationOn}
+            onChange={setActivationOn}
           />
-        )}
-      </div>
+          {activationOn && (
+            <SliderControl
+              label="Threshold (bias)"
+              value={threshold}
+              min={0}
+              max={1}
+              step={0.05}
+              onChange={setThreshold}
+              formatValue={(v) => v.toFixed(2)}
+            />
+          )}
+        </div>
+      )}
 
       {/* 4. List of detectors */}
       {rowNames.length === 0 ? (
@@ -406,7 +397,7 @@ function DetectorsView({
             const score = output[i];
             const pre = preActivation[i];
             const act = activated[i];
-            const fired = activationOn && pre > 0;
+            const fired = showActivation && activationOn && pre > 0;
             const isExpanded = expandedRows.has(refName);
             const scoreCol = scoreColor(score);
 
@@ -421,8 +412,8 @@ function DetectorsView({
                   aria-expanded={isExpanded}
                   className="w-full flex items-center gap-2 px-3 py-2.5 text-left hover:bg-foreground/4 transition-colors"
                 >
-                  {/* Chevron */}
-                  <span className="text-[10px] text-muted shrink-0 w-3">
+                  {/* Chevron — larger for clear affordance */}
+                  <span className="text-base text-muted shrink-0 w-4 leading-none">
                     {isExpanded ? "▾" : "▸"}
                   </span>
 
@@ -432,8 +423,8 @@ function DetectorsView({
                     {refItem.name}
                   </span>
 
-                  {/* Middle dot — dot product */}
-                  <span className="text-xs text-muted">·</span>
+                  {/* Middle dot — dot product operator, larger */}
+                  <span className="text-xl text-muted leading-none">·</span>
 
                   {/* Input emoji + name */}
                   <span className="text-sm leading-none">{inputItem.emoji}</span>
@@ -450,8 +441,8 @@ function DetectorsView({
                     {score.toFixed(2)}
                   </span>
 
-                  {/* Activation result inline */}
-                  {activationOn && (
+                  {/* Activation result inline — only when showActivation and toggle is on */}
+                  {showActivation && activationOn && (
                     <>
                       <span className="text-xs text-muted">→</span>
                       <span
@@ -521,17 +512,16 @@ function DetectorsView({
         </div>
       )}
 
-      {/* 5. Output vector as horizontal pill row */}
+      {/* 5. Output vector — boxed, no per-dimension captions */}
       {rowNames.length > 0 && (
         <div className="mt-3">
           <div className="mb-1.5 text-xs font-medium text-muted">
-            {activationOn ? "Output vector — after activation" : "Output vector — how much it matches each detector"}
+            {showActivation && activationOn ? "Output vector — after activation" : "Output vector"}
           </div>
-          <div className="flex flex-wrap gap-1.5">
+          <div className="inline-flex flex-wrap gap-1.5 rounded-lg border border-border bg-surface px-3 py-2.5">
             {rowNames.map((refName, i) => {
-              const refItem = domain.items.find((it) => it.name === refName)!;
-              const displayScore = activationOn ? activated[i] : output[i];
-              const color = activationOn
+              const displayScore = showActivation && activationOn ? activated[i] : output[i];
+              const color = showActivation && activationOn
                 ? activated[i] > 0
                   ? "#16a34a"
                   : "#dc2626"
@@ -540,7 +530,6 @@ function DetectorsView({
                 <PillCell
                   key={refName}
                   value={displayScore}
-                  caption={<>{refItem.emoji} {refItem.name}</>}
                   tint={color}
                 />
               );
@@ -549,8 +538,8 @@ function DetectorsView({
         </div>
       )}
 
-      {/* Activation explainer */}
-      {activationOn && (
+      {/* Activation explainer — only when showActivation */}
+      {showActivation && activationOn && (
         <div className="mt-3 rounded-md bg-surface px-3 py-2 text-xs text-muted border border-border">
           A neural-network layer is exactly this: the matrix, then a bias and an activation function applied to the whole output vector at once. ReLU zeros out the weak matches.
         </div>
@@ -644,6 +633,7 @@ function RoundTripView({
         rowNames={rowNames}
         onToggle={toggleRow}
         minRows={3}
+        maxRows={domain.properties.length}
         label={`Reference animals (matrix rows) — pick 3–${domain.properties.length}:`}
       />
 
@@ -854,6 +844,7 @@ const DEFAULT_THRESHOLD = 0.5;
 export function DetectorStack(props: DetectorStackProps) {
   const domain = props.domain ?? ANIMAL_DOMAIN;
   const mode = props.mode ?? "detectors";
+  const showActivation = props.showActivation ?? false;
 
   const defaultRows =
     mode === "round-trip" ? DEFAULT_ROWS_ROUNDTRIP : DEFAULT_ROWS_DETECTORS;
@@ -876,20 +867,23 @@ export function DetectorStack(props: DetectorStackProps) {
     setExpandedRows(new Set());
   }, [defaultRows]);
 
-  // Toggle a name in/out of rowNames, capping at domain.properties.length
+  // Toggle a name in/out of rowNames.
+  // For detectors mode: uncapped (up to all domain items).
+  // For round-trip mode: capped at domain.properties.length (square matrix required for inverse).
+  const maxRows = mode === "round-trip" ? domain.properties.length : domain.items.length;
   const toggleRow = useCallback(
     (name: string) => {
       setRowNames((prev) => {
         if (prev.includes(name)) {
           return prev.filter((n) => n !== name);
         }
-        if (prev.length >= domain.properties.length) {
+        if (prev.length >= maxRows) {
           return prev;
         }
         return [...prev, name];
       });
     },
-    [domain.properties.length]
+    [maxRows]
   );
 
   const inputOptions = domain.items.map((item) => ({
@@ -947,6 +941,7 @@ export function DetectorStack(props: DetectorStackProps) {
           setActivationOn={setActivationOn}
           threshold={threshold}
           setThreshold={setThreshold}
+          showActivation={showActivation}
         />
       )}
     </WidgetContainer>

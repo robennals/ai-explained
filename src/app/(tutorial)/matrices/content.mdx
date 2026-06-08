@@ -56,9 +56,9 @@ There's one difference from the bear-eagle-snake matrix. We hand-picked those de
 
 A layer is not *only* a matrix, though. After the matrix produces its output vector, the layer applies an **activation function** to that whole vector at once: it subtracts a bias and then bends each value, zeroing out the weak matches. So a layer is a matrix multiply, then a bend. The next section is about why the bend has to be there.
 
-<DetectorStackWidget>
+<LayerDetectorWidget>
 Flip on "Apply activation (ReLU)" below the detectors. Each score now has its threshold subtracted, and anything that lands at or below zero gets clipped to zero. Drag the threshold up and watch more detectors fall silent. The strong matches survive; the weak ones are cut. (ReLU and sigmoid are covered properly in the Training chapter.)
-</DetectorStackWidget>
+</LayerDetectorWidget>
 
 ## Why the Bend Can't Be Dropped
 

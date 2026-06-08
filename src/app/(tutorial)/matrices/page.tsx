@@ -4,6 +4,7 @@ import { getAdjacentChapters } from "@/lib/curriculum";
 import Content from "./content.mdx";
 import {
   DetectorStackWidget,
+  LayerDetectorWidget,
   MatrixGridWidget,
   RoundTripWidget,
   MatrixCompositionWidget,
@@ -22,6 +23,7 @@ export default function Chapter05() {
         <Content
           components={{
             DetectorStackWidget,
+            LayerDetectorWidget,
             MatrixGridWidget,
             RoundTripWidget,
             MatrixCompositionWidget,
