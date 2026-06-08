@@ -1,0 +1,17 @@
+---
+term: hidden neuron
+aliases: [hidden neurons]
+firstAppearance: neurons
+---
+
+A **hidden neuron** is a neuron in a middle layer of a network, one that neither reads the raw inputs directly nor produces the final output, but computes an intermediate result.
+
+They're called "hidden" because their outputs aren't seen from outside the network. The network's inputs hold the data and its final layer gives the answer; everything in between is hidden. Hidden neurons are where the real work happens, each one computing some intermediate fact that later neurons build on.
+
+Some examples:
+
+- **In the XOR network** — two hidden neurons compute OR and NAND, and the output neuron ANDs them together to make XOR.
+- **In an image classifier** — early hidden neurons detect edges, later ones detect eyes and ears, building up to "cat".
+- **In a large language model** — billions of hidden neurons, spread across dozens of layers, gradually build up each word's meaning from the words around it.
+
+A layer made of hidden neurons is called a **hidden layer**. Stacking hidden layers is what gives a network its depth, and depth is what lets it learn complex things.
