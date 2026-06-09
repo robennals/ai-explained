@@ -171,36 +171,6 @@ function ChipSelector({
 // ─── Detectors mode ────────────────────────────────────────────────────────────
 
 /**
- * PillCell — a small rounded number display used by both the input vector row
- * and the output vector row, so they're identically formatted.
- */
-function PillCell({
-  value,
-  tint,
-  caption,
-}: {
-  value: number;
-  tint?: string;
-  caption?: React.ReactNode;
-}) {
-  return (
-    <div className="flex flex-col items-center gap-0.5">
-      <div
-        className="rounded-md border bg-surface px-1.5 py-1 font-mono text-xs font-bold tabular-nums"
-        style={{ borderColor: tint ?? "var(--color-border)", color: tint ?? "var(--color-foreground)" }}
-      >
-        {value.toFixed(2)}
-      </div>
-      {caption != null && (
-        <span className="text-[9px] text-muted leading-none text-center max-w-[4.5rem] truncate">
-          {caption}
-        </span>
-      )}
-    </div>
-  );
-}
-
-/**
  * ProductColumn — mirrors DotProductComparison's local ProductColumn exactly,
  * reimplemented here without importing that component.
  * vecA = detector (blue), vecB = input (amber).
@@ -271,8 +241,6 @@ function DetectorsView({
   domain,
   inputName,
   setInputName,
-  rowNames,
-  toggleRow,
   expandedRows,
   setExpandedRows,
   activationOn,
@@ -284,8 +252,9 @@ function DetectorsView({
   domain: VectorDomain;
   inputName: string;
   setInputName: (n: string) => void;
-  rowNames: string[];
-  toggleRow: (n: string) => void;
+  // rowNames and toggleRow are no longer used in detectors mode (all rows always shown)
+  rowNames?: string[];
+  toggleRow?: (n: string) => void;
   expandedRows: Set<string>;
   setExpandedRows: (rows: Set<string>) => void;
   activationOn: boolean;
@@ -317,9 +286,12 @@ function DetectorsView({
     [domain]
   );
 
+  // All domain items are always matrix rows
+  const allRowItems = domain.items;
+
   const matrix = useMemo(
-    () => rowNames.map((n) => domain.items.find((i) => i.name === n)!.values),
-    [domain, rowNames]
+    () => allRowItems.map((item) => item.values),
+    [allRowItems]
   );
 
   const output = useMemo(() => matVecMul(matrix, input), [matrix, input]);
@@ -334,36 +306,20 @@ function DetectorsView({
     [preActivation]
   );
 
+  // Grid template: label col + 6 property cols + output col
+  const numProps = domain.properties.length;
+  const gridTemplate = `minmax(8rem, auto) repeat(${numProps}, minmax(2.75rem, 1fr)) minmax(4rem, auto)`;
+
   return (
     <>
-      {/* 1. Chip selector — FIRST */}
-      <ChipSelector
-        domain={domain}
-        rowNames={rowNames}
-        onToggle={toggleRow}
-        minRows={1}
-        maxRows={domain.items.length}
-        label="Animals to compare against:"
-      />
-
-      {/* 2. Input vector — dropdown to pick animal, box of numbers below */}
-      <div className="mb-5">
+      {/* Input vector dropdown */}
+      <div className="mb-4">
         <SelectControl
           label="Input vector"
           value={inputName}
           options={inputOptions}
           onChange={setInputName}
         />
-        <div className="mt-2 inline-flex flex-wrap gap-1.5 rounded-lg border border-border bg-surface px-3 py-2.5">
-          {domain.properties.map((prop, i) => (
-            <PillCell
-              key={prop}
-              value={input[i]}
-              tint="#f59e0b"
-              caption={prop}
-            />
-          ))}
-        </div>
       </div>
 
       {/* Activation controls — only when showActivation */}
@@ -388,98 +344,154 @@ function DetectorsView({
         </div>
       )}
 
-      {/* 4. List of detectors */}
-      {rowNames.length === 0 ? (
-        <div className="rounded-lg border border-border bg-surface px-4 py-6 text-center text-sm text-muted">
-          Pick at least one animal to compare against above.
-        </div>
-      ) : (
-        <div className="space-y-1.5">
-          {rowNames.map((refName, i) => {
-            const refItem = domain.items.find((it) => it.name === refName)!;
+      {/* Matrix × vector grid */}
+      <div className="overflow-x-auto">
+        <div
+          className="inline-grid min-w-full"
+          style={{
+            gridTemplateColumns: gridTemplate,
+            rowGap: "0.375rem",
+            columnGap: "0.375rem",
+          }}
+        >
+          {/* ── Header row ── */}
+          {/* Empty label cell */}
+          <div className="px-1 pb-1" />
+          {/* Property column headers */}
+          {domain.properties.map((prop) => (
+            <div
+              key={prop}
+              className="px-1 pb-1 text-center text-[10px] font-bold uppercase tracking-widest text-muted"
+            >
+              {prop}
+            </div>
+          ))}
+          {/* Output column header */}
+          <div className="px-1 pb-1 text-center text-[10px] font-bold uppercase tracking-widest text-muted">
+            {showActivation && activationOn ? "output" : "output"}
+          </div>
+
+          {/* ── Input row (amber) ── */}
+          {/* Input label cell */}
+          <div
+            className="flex flex-col justify-center gap-0.5 rounded-md border bg-surface px-3 py-2.5"
+            style={{ borderColor: "#f59e0b" }}
+          >
+            <div className="flex items-center gap-1.5">
+              <span className="text-base leading-none">{inputItem.emoji}</span>
+              <span className="text-xs font-semibold" style={{ color: "#f59e0b" }}>
+                {inputItem.name}
+              </span>
+            </div>
+            <div className="text-[9px] leading-none" style={{ color: "#f59e0b" }}>
+              input vector
+            </div>
+          </div>
+          {/* Input property value cells — amber */}
+          {input.map((val, vi) => (
+            <div
+              key={`input-${domain.properties[vi]}`}
+              className="flex items-center justify-center rounded-md border bg-surface px-2 py-2.5"
+              style={{ borderColor: "#f59e0b" }}
+            >
+              <span
+                className="font-mono text-xs tabular-nums font-bold"
+                style={{ color: "#f59e0b" }}
+              >
+                {val.toFixed(2)}
+              </span>
+            </div>
+          ))}
+          {/* Output cell for input row — blank */}
+          <div className="rounded-md border border-border bg-surface px-2 py-2.5" />
+
+          {/* Divider spanning all columns */}
+          <div
+            style={{ gridColumn: `1 / -1` }}
+            className="h-px bg-border"
+          />
+
+          {/* ── Matrix rows — one per animal ── */}
+          {allRowItems.map((rowItem, i) => {
             const score = output[i];
             const pre = preActivation[i];
             const act = activated[i];
             const fired = showActivation && activationOn && pre > 0;
-            const isExpanded = expandedRows.has(refName);
-            const scoreCol = scoreColor(score);
+            const isExpanded = expandedRows.has(rowItem.name);
+            const scoreCol = showActivation && activationOn
+              ? fired ? "#16a34a" : "#dc2626"
+              : scoreColor(score);
+            const displayScore = showActivation && activationOn
+              ? (fired ? act : 0)
+              : score;
 
             return (
-              <div
-                key={refName}
-                className="rounded-lg border border-border bg-surface overflow-hidden"
-              >
-                {/* Collapsed summary row — always visible, clickable */}
+              <React.Fragment key={rowItem.name}>
+                {/* Row label cell — clickable */}
                 <button
-                  onClick={() => toggleExpanded(refName)}
+                  onClick={() => toggleExpanded(rowItem.name)}
                   aria-expanded={isExpanded}
-                  className="w-full flex items-center gap-2 px-3 py-2.5 text-left hover:bg-foreground/4 transition-colors"
+                  className="flex flex-col justify-center gap-0.5 rounded-md border border-border bg-surface px-3 py-2.5 text-left hover:bg-foreground/4 transition-colors"
                 >
-                  {/* Chevron — larger for clear affordance */}
-                  <span className="text-base text-muted shrink-0 w-4 leading-none">
-                    {isExpanded ? "▾" : "▸"}
-                  </span>
-
-                  {/* Ref emoji + name */}
-                  <span className="text-sm leading-none">{refItem.emoji}</span>
-                  <span className="text-xs font-semibold text-foreground">
-                    {refItem.name}
-                  </span>
-
-                  {/* Middle dot — dot product operator, larger */}
-                  <span className="text-xl text-muted leading-none">·</span>
-
-                  {/* Input emoji + name */}
-                  <span className="text-sm leading-none">{inputItem.emoji}</span>
-                  <span className="text-xs font-semibold text-foreground">
-                    {inputItem.name}
-                  </span>
-
-                  {/* = score */}
-                  <span className="text-xs text-muted ml-0.5">=</span>
-                  <span
-                    className="font-mono text-sm font-bold"
-                    style={{ color: scoreCol }}
-                  >
-                    {score.toFixed(2)}
-                  </span>
-
-                  {/* Activation result inline — only when showActivation and toggle is on */}
-                  {showActivation && activationOn && (
-                    <>
-                      <span className="text-xs text-muted">→</span>
-                      <span
-                        className="font-mono text-xs font-bold px-1.5 py-0.5 rounded"
-                        style={
-                          fired
-                            ? { background: "#dcfce7", color: "#16a34a" }
-                            : { background: "#fee2e2", color: "#dc2626" }
-                        }
-                      >
-                        {fired ? act.toFixed(2) : "0"}
-                      </span>
-                      <span className="text-[10px] text-muted">
-                        {fired ? "fired" : "silent"}
-                      </span>
-                    </>
-                  )}
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-base text-muted shrink-0 w-3.5 leading-none">
+                      {isExpanded ? "▾" : "▸"}
+                    </span>
+                    <span className="text-base leading-none">{rowItem.emoji}</span>
+                    <span className="text-xs font-semibold text-foreground">
+                      {rowItem.name}
+                    </span>
+                  </div>
                 </button>
 
-                {/* Expanded detail — VectorCards + multiply column */}
+                {/* Property value cells — blue tint */}
+                {rowItem.values.map((val, vi) => (
+                  <div
+                    key={`${rowItem.name}-${domain.properties[vi]}`}
+                    className="flex items-center justify-center rounded-md border border-border bg-surface px-2 py-2.5"
+                  >
+                    <span className="font-mono text-xs text-foreground tabular-nums">
+                      {val.toFixed(2)}
+                    </span>
+                  </div>
+                ))}
+
+                {/* Output cell — dot product result colored by score */}
+                <div className="flex items-center justify-center rounded-md border border-border bg-surface px-2 py-2.5">
+                  <span
+                    className="font-mono text-xs font-bold tabular-nums"
+                    style={{ color: scoreCol }}
+                  >
+                    {displayScore.toFixed(2)}
+                  </span>
+                  {showActivation && activationOn && (
+                    <span
+                      className="ml-1 text-[9px] font-semibold"
+                      style={{ color: scoreCol }}
+                    >
+                      {fired ? "✓" : "✗"}
+                    </span>
+                  )}
+                </div>
+
+                {/* Expand panel — full-width, inserted between rows */}
                 {isExpanded && (
-                  <div className="border-t border-border px-3 py-3 bg-foreground/2">
+                  <div
+                    style={{ gridColumn: "1 / -1" }}
+                    className="border border-border rounded-lg bg-foreground/2 px-3 py-3"
+                  >
                     <div className="grid grid-cols-2 gap-2 items-start md:grid-cols-[1fr_1fr_auto]">
-                      {/* Detector card (blue) */}
+                      {/* Row animal card (blue = detector/row) */}
                       <VectorCard
-                        name={refItem.name}
-                        emoji={refItem.emoji}
+                        name={rowItem.name}
+                        emoji={rowItem.emoji}
                         properties={domain.properties}
-                        values={refItem.values}
+                        values={rowItem.values}
                         barColor="#3b82f6"
-                        label="DETECTOR"
+                        label="ROW"
                         labelColor="#3b82f6"
                       />
-                      {/* Input card (amber) */}
+                      {/* Input animal card (amber) */}
                       <VectorCard
                         name={inputItem.name}
                         emoji={inputItem.emoji}
@@ -489,59 +501,29 @@ function DetectorsView({
                         label="INPUT"
                         labelColor="#f59e0b"
                       />
-                      {/* Multiply column — own row spanning both on mobile, col 3 on desktop */}
+                      {/* Multiply column */}
                       <div className="col-span-2 mt-2 flex justify-center md:col-span-1 md:mt-0 md:justify-start">
                         <DetectorProductColumn
-                          vecA={refItem.values}
+                          vecA={rowItem.values}
                           vecB={input}
                           properties={domain.properties}
                           score={score}
-                          scoreCol={scoreCol}
+                          scoreCol={scoreColor(score)}
                         />
                       </div>
                     </div>
                   </div>
                 )}
-              </div>
+              </React.Fragment>
             );
           })}
         </div>
-      )}
+      </div>
 
-      {/* One-line caption tying it together */}
-      {rowNames.length > 0 && (
-        <div className="mt-4 text-xs text-muted text-center">
-          One vector goes in. Each detector is one dot product. The scores come out as a new vector.
-        </div>
-      )}
-
-      {/* 5. Output vector — boxed, no per-dimension captions */}
-      {rowNames.length > 0 && (
-        <div className="mt-3">
-          <div className="mb-1.5 text-xs font-medium text-muted">
-            {showActivation && activationOn ? "Output vector — after activation" : "Output vector"}
-          </div>
-          <div className="inline-flex flex-wrap gap-1.5 rounded-lg border border-border bg-surface px-3 py-2.5">
-            {rowNames.map((refName, i) => {
-              const displayScore = showActivation && activationOn ? activated[i] : output[i];
-              const color = showActivation && activationOn
-                ? activated[i] > 0
-                  ? "#16a34a"
-                  : "#dc2626"
-                : scoreColor(output[i]);
-              const refItem = domain.items.find((it) => it.name === refName)!;
-              return (
-                <PillCell
-                  key={refName}
-                  value={displayScore}
-                  tint={color}
-                  caption={`${refItem.emoji} ${refItem.name}`}
-                />
-              );
-            })}
-          </div>
-        </div>
-      )}
+      {/* One-line caption */}
+      <div className="mt-4 text-xs text-muted text-center">
+        Multiplying a vector by a matrix takes the dot product of the input with every row, giving one output number per row.
+      </div>
 
       {/* Activation explainer — only when showActivation */}
       {showActivation && activationOn && (
