@@ -255,7 +255,7 @@ and aren't fully understood. Pointer onward to the next chapter.
 | NormalizationPlayground | 3 | playground — layer vs batch norm on vectors | new |
 | OptimizerRace | 4 | playground — SGD/momentum/Adam on a loss surface (2D heat-map / 3D toggle) | new |
 | Overfitting | 5 | playground — fit noisy data, dropout + weight-decay sliders | new |
-| Residual-stream diagram | 1 | static (optional, if the widget + prose aren't enough) | optional |
+| Residual-stream diagram | 1 | static — layers adding into a shared stream | new |
 
 Widgets live in `src/components/widgets/training/`. Follow the existing pattern: `"use client"`,
 wrapped in `<WidgetContainer>`, dynamically imported with `{ ssr: false }` and `<Suspense>` via
@@ -310,11 +310,12 @@ tooltips (per recent repo change).
 - Small-batch noise as regularization: deferred / skipped (confusing here).
 - Mixed precision, distributed training, optimizer bias-correction math: not covered.
 
-## Open questions for the author
+## Resolved decisions
 
-1. **Activation-function ordering.** Clusters 1 and 3 lean on sigmoid saturation plus a one-
-   paragraph ReLU peek. Recommendation: keep training as ch 11 and give only the peek, with the
-   full activation-function treatment in the following chapter. Flag if you'd rather swap the
-   order so activations come first.
-2. **Confirm** the chapter stays at slug `training` with title "Why Training Almost Doesn't Work".
-3. **Residual-stream static diagram:** build it, or rely on the ChainSensitivity widget + prose?
+- **Activation-function ordering:** training stays ch 11. Activation functions get only short
+  peeks here (sigmoid saturation in cluster 1, ReLU's unboundedness in cluster 3); the full
+  treatment is the following chapter.
+- **Plan scope:** one implementation plan covers the whole chapter end to end — content.mdx (all
+  five clusters), all five playgrounds, the residual-stream diagram, the quiz, and the notebook.
+- **Residual-stream diagram:** build it as a static diagram alongside the cluster 1 prose.
+- **Slug / title:** `training` / "Why Training Almost Doesn't Work" (unchanged).
