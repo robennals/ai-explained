@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
 import { SelectControl } from "../shared/SelectControl";
 import { ToggleControl } from "../shared/ToggleControl";
@@ -177,16 +177,25 @@ function ChipSelector({
 function PillCell({
   value,
   tint,
+  caption,
 }: {
   value: number;
   tint?: string;
+  caption?: React.ReactNode;
 }) {
   return (
-    <div
-      className="rounded-md border bg-surface px-1.5 py-1 font-mono text-xs font-bold tabular-nums"
-      style={{ borderColor: tint ?? "var(--color-border)", color: tint ?? "var(--color-foreground)" }}
-    >
-      {value.toFixed(2)}
+    <div className="flex flex-col items-center gap-0.5">
+      <div
+        className="rounded-md border bg-surface px-1.5 py-1 font-mono text-xs font-bold tabular-nums"
+        style={{ borderColor: tint ?? "var(--color-border)", color: tint ?? "var(--color-foreground)" }}
+      >
+        {value.toFixed(2)}
+      </div>
+      {caption != null && (
+        <span className="text-[9px] text-muted leading-none text-center max-w-[4.5rem] truncate">
+          {caption}
+        </span>
+      )}
     </div>
   );
 }
@@ -337,27 +346,21 @@ function DetectorsView({
         label="Animals to compare against:"
       />
 
-      {/* 2. Input animal — dropdown */}
+      {/* 2. Input vector — dropdown to pick animal, box of numbers below */}
       <div className="mb-5">
         <SelectControl
-          label="Input animal"
+          label="Input vector"
           value={inputName}
           options={inputOptions}
           onChange={setInputName}
         />
-      </div>
-
-      {/* 3. Input vector — boxed, no per-dimension captions */}
-      <div className="mb-5">
-        <div className="mb-1.5 text-xs font-medium text-muted">
-          Input vector ({inputItem.emoji} {inputItem.name})
-        </div>
-        <div className="inline-flex flex-wrap gap-1.5 rounded-lg border border-border bg-surface px-3 py-2.5">
+        <div className="mt-2 inline-flex flex-wrap gap-1.5 rounded-lg border border-border bg-surface px-3 py-2.5">
           {domain.properties.map((prop, i) => (
             <PillCell
               key={prop}
               value={input[i]}
               tint="#f59e0b"
+              caption={prop}
             />
           ))}
         </div>
@@ -526,11 +529,13 @@ function DetectorsView({
                   ? "#16a34a"
                   : "#dc2626"
                 : scoreColor(output[i]);
+              const refItem = domain.items.find((it) => it.name === refName)!;
               return (
                 <PillCell
                   key={refName}
                   value={displayScore}
                   tint={color}
+                  caption={`${refItem.emoji} ${refItem.name}`}
                 />
               );
             })}
