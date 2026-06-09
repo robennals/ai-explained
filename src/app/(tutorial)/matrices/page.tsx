@@ -9,6 +9,7 @@ import {
   MatrixCompositionWidget,
   AttentionMatmulWidget,
   Transform2D3DWidget,
+  VectorOrientationWidget,
 } from "./widgets";
 
 export const metadata = chapterMetadata("matrices");
@@ -27,6 +28,7 @@ export default function Chapter05() {
             MatrixCompositionWidget,
             AttentionMatmulWidget,
             Transform2D3DWidget,
+            VectorOrientationWidget,
           }}
         />
       </div>

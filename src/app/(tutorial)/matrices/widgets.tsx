@@ -36,6 +36,14 @@ const Transform2D3D = dynamic(
   { ssr: false }
 );
 
+const VectorOrientation = dynamic(
+  () =>
+    import("@/components/widgets/matrices/VectorOrientation").then(
+      (m) => m.VectorOrientation
+    ),
+  { ssr: false }
+);
+
 function WidgetSlot({ children, tryIt, label }: { children: React.ReactNode; tryIt?: React.ReactNode; label?: string }) {
   return (
     <Suspense
@@ -96,6 +104,14 @@ export function Transform2D3DWidget({ children }: { children?: React.ReactNode }
   return (
     <WidgetSlot tryIt={children}>
       <Transform2D3D />
+    </WidgetSlot>
+  );
+}
+
+export function VectorOrientationWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children} label="Explore it">
+      <VectorOrientation />
     </WidgetSlot>
   );
 }
