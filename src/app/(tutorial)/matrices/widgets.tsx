@@ -68,14 +68,6 @@ export function LayerDetectorWidget({ children }: { children?: React.ReactNode }
   );
 }
 
-export function RoundTripWidget({ children }: { children?: React.ReactNode }) {
-  return (
-    <WidgetSlot tryIt={children} label="Explore it">
-      <DetectorStack mode="round-trip" />
-    </WidgetSlot>
-  );
-}
-
 export function MatrixGridWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children} label="Explore it">

@@ -4,53 +4,39 @@
 The graphics card that runs ChatGPT was invented to make videogames look good. The same operation that spins a 3D dragon across your screen is the operation a neural network uses to think. It's called matrix multiplication. By the end of this chapter you'll see why one kind of chip does both jobs.
 </Lead>
 
-## You Already Know This
+## A Matrix Is a Grid of Vectors
 
-A matrix sounds like a new and scary object. It isn't. A matrix is just a list of weight-vectors, one detector each, and you dot-product the input against every one of them.
+In the Vectors chapter, an animal was a vector: a row of property numbers (big, scary, hairy, cuddly, fast, fat). A cat is one such row, a bear is another, an eagle another.
 
-Remember the bear detector from the Vectors chapter. You take an animal's property-vector (big, scary, hairy, cuddly, fast, fat) and dot it with a "bear" weight-vector. Out comes a single number: how bear-like this animal is. One dot product, one detector.
+Stack several of those vectors on top of each other, one animal per row, and you get a grid of numbers. That grid is a **matrix**. Each row is one animal, and each column is one property, so the cat's "scary" number sits in the same column as the bear's. A matrix built from a list of animals is just their vectors written out together.
 
-Written with a dot, `bear · cat` means the dot product: multiply each matching property and add up the results, giving a single number for how bear-like the cat is. That dot is the same similarity score from the Vectors chapter, now with a shorter name.
+<MatrixGridWidget>
+Choose which animals go in the matrix and watch the grid gain or lose a labelled, boxed row. Each row is one animal's property vector laid out across the six property columns, and the whole grid, all the rows together, is the matrix.
+</MatrixGridWidget>
 
-Now suppose you want a bear detector *and* an eagle detector *and* a snake detector, all at once. Keep them as a list of three weight-vectors and run each one's dot product against the same input animal. The animal goes in as six properties and comes out re-described as a handful of scores, maybe "0.8 bear-like, 0.4 eagle-like, 0.2 snake-like." That list of detectors is a **matrix**, and running every detector against an input is **matrix multiplication**. There is nothing in it you haven't already done by hand. Each detector is one dot product, and the matrix just asks all your questions at the same time.
+<KeyInsight>
+**A matrix is a grid of vectors.** Stack a list of vectors as rows and the grid you get is a matrix. Here each row is an animal and each column is a property.
+</KeyInsight>
+
+## Multiplying a Vector by a Matrix
+
+Now that the animals are stacked into a matrix, you can multiply a vector by it. Multiplying a vector by a matrix means taking the **dot product** of the input vector with every row of the matrix and collecting the results into a new output vector.
+
+The dot product is from the Vectors chapter. Written with a dot, `bear · cat` means: multiply each matching property and add up the results, giving a single number for how bear-like the cat is. Each row of the matrix acts as a detector. Its dot product with the input says how much the input matches that row.
+
+So one matrix multiply runs every row's dot product at once. Feed in a cat and the bear row scores it for bear-likeness, the eagle row for eagle-likeness, the snake row for snake-likeness. The input vector of six properties comes out re-described as a new output vector, one match score per row.
 
 <DetectorStackWidget>
-First choose some animals to compare against; each one acts as a detector, a weight-vector dotted with your input. Then pick an input animal from the dropdown. Read each line as `Animal · YourAnimal = score`, where the dot is the dot product. Click a row to expand the full working and see every matching property multiplied and added up. The scores together are the output: a fresh vector describing your animal by how much it matches each detector.
+Pick an input animal from the "Input vector" dropdown; it appears as the amber row across the top, aligned to the property columns. Read down the output column on the right to see each animal-row's dot product with your input, one match score per row. Click any row to expand the full working and watch that dot product computed property by property, every matching pair multiplied and added up.
 </DetectorStackWidget>
 
 <KeyInsight>
-**A matrix is a stack of detectors.** Each one is a weight-vector, the same kind you used to build a single detector. One matrix multiply runs every detector at once and re-describes the input as a list of match scores.
+**Matrix multiplication is a stack of dot products.** A vector goes in, and the dot product of that input with each row comes out as one number, so the result is a new vector with one score per row.
 </KeyInsight>
-
-## Writing the Matrix as a Grid
-
-You've now seen a matrix do its job: a list of detectors, each dot-producted with the input. The next thing to settle is how to write that list down, because the standard notation is what every later chapter uses.
-
-Start from the pieces. An animal is a vector, a row of property numbers (big, scary, hairy, cuddly, fast, fat) shown as the same bars you've already seen. A detector is just an animal's vector too, used as a weight-vector instead of as an input.
-
-To write several detectors together, stack each one as a **row**. The result is a **grid of numbers**, and that grid is the matrix. Each row is one animal you match against, and the six columns are the six properties. Nothing computes here; this is only the standard way to lay the detectors out on the page.
-
-<MatrixGridWidget>
-Choose which animals to match against and watch the grid gain or lose a labelled, boxed row. Each row is one detector, an animal's property vector laid out across the six columns, and the whole grid is the matrix.
-</MatrixGridWidget>
-
-From here on, "the matrix" means exactly this: a grid of stacked detector-vectors, one detector per row.
-
-## Can You Get the Original Back?
-
-Re-describing an animal as "how bear-like, how eagle-like, how snake-like" throws away the original properties and replaces them with match scores. Is that a one-way trip, or can you recover the animal you started with?
-
-It depends on how many detectors you used. Pick as many varied reference animals as there are properties, and the new description holds onto everything. To prove it, build the matrix that runs the re-description backwards. That matrix is called the **inverse**, and applying it recovers the exact original animal. The whole thing was a change of vocabulary, like translating to another language and back. Nothing was lost.
-
-Use fewer reference animals than there are properties and there's no way back. Six properties squeezed into three numbers means three numbers got dropped, and no inverse can guess what they were. The detail is gone. That lossy squeeze is exactly what a neural-network layer does when it shrinks a representation, and it's the seed of how embeddings pack meaning into a smaller space.
-
-<RoundTripWidget>
-Start with six good reference animals and watch the inverse recover the original exactly. Now drop down to three. The squeeze leaves only three numbers to describe a six-property animal, and the original is unrecoverable. Try different small sets to see which animals become confusable.
-</RoundTripWidget>
 
 ## A Layer of a Neural Network Is a Matrix (Plus a Bend)
 
-A layer of a neural network takes an input vector and produces an output vector. It does this by running a stack of weighted sums, one per output. A weighted sum is a dot product. A stack of dot products is a matrix multiply. So a layer is a matrix multiply, the same operation you ran by hand at the start of the chapter.
+A layer of a neural network takes an input vector and produces an output vector. It does this by running a stack of weighted sums, one per output. A weighted sum is a dot product. A stack of dot products is a matrix multiply. So a layer is a matrix multiply, the same operation from the previous section.
 
 There's one difference from the bear-eagle-snake matrix. We hand-picked those detectors. A neural network learns its own during training. It works out for itself which reference concepts are worth detecting, and those learned detectors become the rows of its weight matrix. Nobody tells it to build a bear detector. It builds whatever detectors make the next layer's job easier.
 
