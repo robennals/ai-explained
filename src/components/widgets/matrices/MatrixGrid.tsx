@@ -76,7 +76,7 @@ export function MatrixGrid() {
   return (
     <WidgetContainer
       title="Writing the Matrix as a Grid"
-      description="Each row is one animal you match against. Stack the rows and you have written a matrix."
+      description="Each row is one animal's vector of properties. Stack the rows and you have written a matrix."
       onReset={resetToDefaults}
     >
       <ChipSelector rowNames={rowNames} onToggle={toggleRow} />
@@ -115,9 +115,6 @@ export function MatrixGrid() {
                       {item.name}
                     </span>
                   </div>
-                  <div className="text-[9px] text-muted leading-none">
-                    detector for {item.name}
-                  </div>
                 </div>
 
                 {/* Property value cells — each value in its own boxed cell */}
@@ -139,7 +136,7 @@ export function MatrixGrid() {
 
       {/* Caption */}
       <div className="mt-4 text-xs text-muted leading-relaxed">
-        Each row is one animal&apos;s vector — one detector. Stack them and the grid is your matrix.
+        Each row is one animal&apos;s vector of properties. Stack them and the grid is your matrix.
       </div>
     </WidgetContainer>
   );
