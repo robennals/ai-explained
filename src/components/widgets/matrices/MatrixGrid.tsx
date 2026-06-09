@@ -18,7 +18,7 @@ function ChipSelector({
   return (
     <div className="mb-5">
       <div className="mb-1.5 text-xs font-medium text-muted">
-        Animals to match against
+        Animals in the matrix
       </div>
       <div className="flex flex-wrap gap-1.5">
         {ANIMAL_DOMAIN.items.map((item) => {
