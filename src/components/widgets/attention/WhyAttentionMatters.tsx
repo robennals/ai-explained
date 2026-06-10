@@ -19,9 +19,44 @@ interface SentenceExample {
   explanation: string;
   /** Richer meaning we can derive for the selected word once we gather info from the target words */
   enrichedMeaning: string;
+  /** The question the highlighted word is asking */
+  query: string;
+  /** What the matched word advertises about itself */
+  keyText: string;
+  /** What the highlighted word gathers from the match */
+  value: string;
 }
 
 const SENTENCES: SentenceExample[] = [
+  {
+    label: "What does it refer to?",
+    words: [
+      "I", "dropped", "the", "glass", "and", "it", "broke", ".",
+    ],
+    selectedWord: 5,
+    targets: { 3: 0.95 },
+    explanation:
+      'What does "it" refer to? You have to look back to "glass," the thing that was dropped.',
+    enrichedMeaning: "the glass",
+    query: "What thing was just mentioned?",
+    keyText: "I'm a thing that was just mentioned.",
+    value: "glass",
+  },
+  {
+    label: "Who did it?",
+    words: [
+      "The", "chef", "who", "won", "the", "competition",
+      "opened", "a", "restaurant", ".",
+    ],
+    selectedWord: 6,
+    targets: { 1: 0.95 },
+    explanation:
+      'Who opened a restaurant? The chef, not the competition. You have to skip over the whole "who won the competition" clause to connect "opened" back to "chef."',
+    enrichedMeaning: "opened by the chef",
+    query: "Who performed this action?",
+    keyText: "I'm someone who acts.",
+    value: "chef",
+  },
   {
     label: "What does it mean?",
     words: [
@@ -33,29 +68,9 @@ const SENTENCES: SentenceExample[] = [
     explanation:
       '"bank" could mean a place for money or the side of a river. You need to see "river" to know which meaning is intended.',
     enrichedMeaning: "the bank of a river",
-  },
-  {
-    label: "What does it refer to?",
-    words: [
-      "I", "dropped", "the", "glass", "and", "it", "broke", ".",
-    ],
-    selectedWord: 5,
-    targets: { 3: 0.95 },
-    explanation:
-      'What does "it" refer to? You have to look back to "glass" — the thing that was dropped.',
-    enrichedMeaning: "the glass",
-  },
-  {
-    label: "Who did it?",
-    words: [
-      "The", "chef", "who", "won", "the", "competition",
-      "opened", "a", "restaurant", ".",
-    ],
-    selectedWord: 6,
-    targets: { 1: 0.95 },
-    explanation:
-      'Who opened a restaurant? The chef — not the competition. You have to skip over the whole "who won the competition" clause to connect "opened" back to "chef."',
-    enrichedMeaning: "opened by the chef",
+    query: "Is there a river nearby?",
+    keyText: "I'm a river.",
+    value: "river",
   },
 ];
 
@@ -89,6 +104,9 @@ export function WhyAttentionMatters() {
   const sentence = SENTENCES[sentenceIdx];
   const selectedWord = sentence.selectedWord;
   const targets = sentence.targets;
+  const targetIdx = Number(Object.keys(targets)[0]);
+  const selectedWordText = sentence.words[selectedWord];
+  const targetWordText = sentence.words[targetIdx];
 
   // Measure word positions and compute arrows after layout settles
   useEffect(() => {
@@ -144,7 +162,7 @@ export function WhyAttentionMatters() {
   return (
     <WidgetContainer
       title="Which Words Matter?"
-      description="The highlighted word needs help from specific other words. Follow the arrows."
+      description="The highlighted word asks a question (its query), finds the word whose key matches, and gathers a value. Follow the arrow."
       onReset={handleReset}
     >
       <div className="flex flex-col gap-5">
@@ -254,6 +272,28 @@ export function WhyAttentionMatters() {
             )}
             {/* Spacer to reserve height for the absolute box */}
             <div className="h-14" aria-hidden />
+          </div>
+        </div>
+
+        {/* Query / key / value breakdown */}
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+          <div className="rounded-lg border border-accent/40 bg-accent/5 px-3 py-2 text-sm">
+            <div className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-accent">
+              Query · {selectedWordText}
+            </div>
+            <div className="text-foreground">{sentence.query}</div>
+          </div>
+          <div className="rounded-lg border border-indigo-400/50 bg-indigo-50 px-3 py-2 text-sm dark:bg-indigo-950/40">
+            <div className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-300">
+              Key · {targetWordText}
+            </div>
+            <div className="text-foreground">{sentence.keyText}</div>
+          </div>
+          <div className="rounded-lg border border-border bg-surface px-3 py-2 text-sm">
+            <div className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-muted">
+              Value gathered
+            </div>
+            <div className="font-medium text-foreground">{sentence.value}</div>
           </div>
         </div>
 
