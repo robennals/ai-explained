@@ -5,6 +5,10 @@ import Content from "./content.mdx";
 import { QuizContent } from "./QuizContent";
 import {
   WhyAttentionMattersWidget,
+  WordsAskQuestionsWidget,
+  AskingQuestionsWidget,
+  DotProductMatchWidget,
+  PartialMatchesWidget,
   ToyAttentionScoresWidget,
   SoftmaxExplorerWidget,
   ToyAttentionSoftmaxWidget,
@@ -23,6 +27,10 @@ export default function Chapter07() {
         <Content
           components={{
             WhyAttentionMattersWidget,
+            WordsAskQuestionsWidget,
+            AskingQuestionsWidget,
+            DotProductMatchWidget,
+            PartialMatchesWidget,
             ToyAttentionScoresWidget,
             SoftmaxExplorerWidget,
             ToyAttentionSoftmaxWidget,

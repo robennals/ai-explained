@@ -19,10 +19,13 @@ interface SentenceExample {
   explanation: string;
   /** Richer meaning we can derive for the selected word once we gather info from the target words */
   enrichedMeaning: string;
-  /** The question the highlighted word is asking */
-  query: string;
-  /** What the matched word advertises about itself */
-  keyText: string;
+  /**
+   * The thing the highlighted word is asking about, in the SAME form as the
+   * matched word's key. The query is just this phrase with a "?"; the key is
+   * this phrase as a statement. Keeping them identical sets up dot-product
+   * matching: a query and a key match when they describe the same thing.
+   */
+  matchPhrase: string;
   /** What the highlighted word gathers from the match */
   value: string;
 }
@@ -38,8 +41,7 @@ const SENTENCES: SentenceExample[] = [
     explanation:
       'What does "it" refer to? You have to look back to "glass," the thing that was dropped.',
     enrichedMeaning: "the glass",
-    query: "What thing was just mentioned?",
-    keyText: "I'm a thing that was just mentioned.",
+    matchPhrase: "thing we just mentioned",
     value: "glass",
   },
   {
@@ -53,8 +55,7 @@ const SENTENCES: SentenceExample[] = [
     explanation:
       'Who opened a restaurant? The chef, not the competition. You have to skip over the whole "who won the competition" clause to connect "opened" back to "chef."',
     enrichedMeaning: "opened by the chef",
-    query: "Who performed this action?",
-    keyText: "I'm someone who acts.",
+    matchPhrase: "did the action",
     value: "chef",
   },
   {
@@ -68,8 +69,7 @@ const SENTENCES: SentenceExample[] = [
     explanation:
       '"bank" could mean a place for money or the side of a river. You need to see "river" to know which meaning is intended.',
     enrichedMeaning: "the bank of a river",
-    query: "Is there a river nearby?",
-    keyText: "I'm a river.",
+    matchPhrase: "relates to a river",
     value: "river",
   },
 ];
@@ -93,7 +93,7 @@ interface Arrow {
   weight: number;
 }
 
-export function WhyAttentionMatters() {
+export function WhyAttentionMatters({ showQKV = false }: { showQKV?: boolean } = {}) {
   const [sentenceIdx, setSentenceIdx] = useState(0);
   const [arrows, setArrows] = useState<Arrow[]>([]);
   const [boxAnchorX, setBoxAnchorX] = useState<number | null>(null);
@@ -162,7 +162,11 @@ export function WhyAttentionMatters() {
   return (
     <WidgetContainer
       title="Which Words Matter?"
-      description="The highlighted word asks a question (its query), finds the word whose key matches, and gathers a value. Follow the arrow."
+      description={
+        showQKV
+          ? "The highlighted word asks a question (its query), finds the word whose key matches, and gathers a value. Follow the arrow."
+          : "The highlighted word needs help from specific other words. Follow the arrow."
+      }
       onReset={handleReset}
     >
       <div className="flex flex-col gap-5">
@@ -275,27 +279,30 @@ export function WhyAttentionMatters() {
           </div>
         </div>
 
-        {/* Query / key / value breakdown */}
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-          <div className="rounded-lg border border-accent/40 bg-accent/5 px-3 py-2 text-sm">
-            <div className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-accent">
-              Query · {selectedWordText}
+        {/* Query / key / value breakdown. Query and key are the SAME phrase;
+            the query just ends in "?". This previews dot-product matching. */}
+        {showQKV && (
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+            <div className="rounded-lg border border-accent/40 bg-accent/5 px-3 py-2 text-sm">
+              <div className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-accent">
+                Query · {selectedWordText}
+              </div>
+              <div className="text-foreground">{sentence.matchPhrase}<span className="font-bold text-accent">?</span></div>
             </div>
-            <div className="text-foreground">{sentence.query}</div>
-          </div>
-          <div className="rounded-lg border border-indigo-400/50 bg-indigo-50 px-3 py-2 text-sm dark:bg-indigo-950/40">
-            <div className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-300">
-              Key · {targetWordText}
+            <div className="rounded-lg border border-indigo-400/50 bg-indigo-50 px-3 py-2 text-sm dark:bg-indigo-950/40">
+              <div className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-300">
+                Key · {targetWordText}
+              </div>
+              <div className="text-foreground">{sentence.matchPhrase}</div>
             </div>
-            <div className="text-foreground">{sentence.keyText}</div>
-          </div>
-          <div className="rounded-lg border border-border bg-surface px-3 py-2 text-sm">
-            <div className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-muted">
-              Value gathered
+            <div className="rounded-lg border border-border bg-surface px-3 py-2 text-sm">
+              <div className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-muted">
+                Value gathered
+              </div>
+              <div className="font-medium text-foreground">{sentence.value}</div>
             </div>
-            <div className="font-medium text-foreground">{sentence.value}</div>
           </div>
-        </div>
+        )}
 
         {/* Explanation */}
         <div className="rounded-lg border border-accent/30 bg-accent/5 px-4 py-3 text-sm text-foreground">

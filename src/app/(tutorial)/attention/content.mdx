@@ -10,59 +10,61 @@ You often can't tell what a word means without looking at other words in the sen
 
 This is something our fixed-window model from the last chapter can't do well. It sees the last few words and has no way to reach back and pick out the *specific* earlier words that matter.
 
-Each of these cases needs the same ability: given a word, *choose* which other words in the sentence are relevant to understanding it. Not the nearest words. Not a fixed window. The *right* words, wherever they happen to be.
-
-This is what **attention** does. It gives the model the ability to look at every word that came before and decide which ones matter for the word it's currently processing. Before we build it out of vectors, it helps to see that you already do this kind of thing all the time.
-
-## Looking Things Up
-
-Think about what you do when you need to find something out. You have a question in mind, and you go looking for a source that can answer it.
-
-Say you want to know how tall Mount Everest is. You might pull one book off the shelf, the one whose spine says "Mountains of the World." You picked it by its cover, without reading every page of every book in the house. Or you type "height of Everest" into a search engine, which checks what it has on file about each page and hands back the one that fits. Or you ask the friend you know is into hiking.
-
-Every version of this has the same three parts:
-
-- **The query** is what you're looking for. Your question.
-- **The key** is what each source advertises about itself. The title on the spine, the words a search engine keeps on file for a page, the topic a friend is known for.
-- **The value** is what you actually get once you pick a source. The words inside the book, the page that loads, what your friend tells you.
-
-You match your **query** against each **key** to decide where to look, then you collect the **value** from whatever matched best.
-
-|  | Query (what you're looking for) | Key (what each source advertises) | Value (what you get back) |
-| --- | --- | --- | --- |
-| **A book** | the answer you need | the title and cover | what's written inside |
-| **A web search** | the words you type | what the engine has on file for each page | the page that comes back |
-| **A friend** | your question | what they're known for knowing | everything they could tell you |
-
-The query and the key are different kinds of thing, and that difference matters. What you're looking for is a question. What a book advertises is a topic. You never mix the two up. Attention keeps them separate for the same reason.
-
-## Words Look Things Up Too
-
-A word in a sentence does the same thing. To pin down what it means, it has a question it needs answered, and it goes looking through the other words for the answer.
-
-Take "I dropped the glass and it broke." The word "it" needs to know what it stands for. So "it" carries a query, roughly "what thing was just mentioned?" The word "glass" carries a key that says "I'm a thing that was just mentioned." Those match. The value "it" collects from "glass" is the glass itself, so now "it" knows what it means.
-
-Or "The chef who won the competition opened a restaurant." The word "opened" needs to know who did the opening. Its query is "who performed this action?" The word "chef" advertises a key, "I'm someone who acts," and "competition" does not. So "opened" pulls its answer from "chef."
-
-Each time, the word asks one question, finds the word whose key fits, and gathers a value. The result is a fuller understanding of the asking word: "it" filled in with "glass," "opened" tied to "chef."
-
 <WhyAttentionMattersWidget>
-Each highlighted word has a question it needs answered. Follow the arrow to the word whose key matches, and read the value it gathers. Flip between the examples to see the same query, key, and value pattern each time.
+Each sentence has a highlighted word. Follow the arrow to see which other word you need to look at in order to understand it. Flip through the examples. Each shows a different reason why "looking back selectively" is essential.
 </WhyAttentionMattersWidget>
 
-That is the whole idea of attention. Everything left is making "asks a question" and "the key fits" precise enough for a computer to run. For that, we go back to vectors.
+Every one of these examples needs the same ability: given a word, *choose* which other words in the sentence are relevant to understanding it. Not the nearest words. Not a fixed window. The *right* words, wherever they happen to be.
 
-## Matching Queries with Keys
+This is what **attention** does. It lets the model look at every word that came before and decide which ones matter for the word it's working on right now.
 
-We can make "asks a question" exact with a tool from the Vectors chapter: the **dot product**, which measures how much two vectors agree.
+## Asking Questions
 
-Write each token's query as a vector and each token's key as a vector. To score how well a query matches a key, take their dot product. A big score means a strong match. A score near zero means no match. (The token isn't literally asking anything; the model does the asking on its behalf. The math is just easier to follow from the token's point of view.)
+You already do this kind of thing whenever you look something up. You have a question in mind, and you go find whoever, or whatever, can answer it.
 
-This is the same idea as the detector from the Vectors chapter. A query is a detector that says "I'm looking for this kind of thing." A key describes what a token is. The dot product measures how strongly the key sets off the detector.
+Each place you might look advertises what it's about: a book by its cover, a web page by its title, a friend by what they're known for. You match your question against those advertisements, pick the one that fits, and read what it says.
 
-In a real model the keys and queries are vectors with many dimensions, one for each kind of thing a word might look for or advertise. To watch the machinery without drowning in numbers, we'll shrink it to the simplest possible case: a single dimension that means "noun." A key of 1 means "I am a noun," a key of 0 means "I'm not." A query of 1 means "I'm looking for a noun." Real queries and keys hunt for many things at once. This one looks for exactly one.
+<AskingQuestionsWidget>
+Pick the source whose key matches your question, and read its value. Try the wrong ones too. A source that advertises the wrong thing has nothing useful to say, no matter what's inside it.
+</AskingQuestionsWidget>
 
-Imagine a tiny vocabulary of four tokens: **cat**, **dog**, **blah** (a filler word), and **it** (a pronoun). "cat" and "dog" offer themselves as nouns. "blah" offers nothing. "it" is looking for a noun. Multiply "it"'s query by each token's key and you get a match score for each one. The bigger the score, the better the match.
+That gives us three pieces, and they're the whole of attention: the **query** (what you're looking for), the **key** (what each source advertises), and the **value** (what you get when you pick one).
+
+## Words Ask Questions
+
+Words do the same thing to each other. To pin down what it means, a word asks a question, and the word that answers hands something back.
+
+So each word gets a **query** (what it's asking), a **key** (what it advertises), and a **value** (what it hands over). The query and the key are written the *same way* here. The only difference is the query ends in a question mark. "it" asks `thing we just mentioned?` and "glass" answers `thing we just mentioned`. Writing them the same is what lets us match them, next.
+
+<WordsAskQuestionsWidget>
+Flip through the examples. In each one, the highlighted word's query is the same phrase as the matching word's key, just with a "?" on the end. That shared phrase is the match.
+</WordsAskQuestionsWidget>
+
+## Enter the Dot Product
+
+To match a query against a key, multiply them dimension by dimension and add up the result. That's the **dot product** from the Vectors chapter. Think of the query as a detector: the dot product measures how strongly a key sets it off.
+
+The same operation works at any level of detail, from a single yes/no dimension up to a long list of learned numbers.
+
+<DotProductMatchWidget>
+Start on the left tab and work right. With one "noun" dimension the dot product is a single multiplication. Add named dimensions and a query can look for several things at once. In a real embedding the dimensions have no names at all, but the operation never changes.
+</DotProductMatchWidget>
+
+## Partial Matches
+
+A query and a key don't have to line up exactly. A query can ask about several things at once, and a key can answer several. They match on whatever they share.
+
+That's why "bank" can answer a question about a river *and* a question about money: its key advertises both. The score just counts how much the question and the answer overlap.
+
+<PartialMatchesWidget>
+Click the parts of your question on and off and watch the score. Switch the key between "bank" and "river" with the same question to see one query land differently on two words. A bigger overlap means a bigger score.
+</PartialMatchesWidget>
+
+## Match Scores
+
+Now run that matching for real: one word against every other word in a tiny sentence. We'll use the simplest keys and queries, a single "noun" dimension, so the numbers stay easy to read.
+
+Imagine a vocabulary of four tokens: **cat**, **dog**, **blah** (a filler word), and **it** (a pronoun). "cat" and "dog" offer themselves as nouns. "blah" offers nothing. "it" is looking for a noun.
 
 <ToyAttentionScoresWidget>
 Click any token to see its raw match scores against every key, including its own. Click "it" to see it match "cat" (score 1) and miss "blah" (score 0). Click "cat" to see something different: "cat" isn't asking anything, so every score is 0. The widget always shows both the key (what each token offers) and the query (what each token is looking for).
