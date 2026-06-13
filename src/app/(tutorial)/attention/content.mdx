@@ -11,54 +11,38 @@ You often can't tell what a word means without looking at other words in the sen
 This is something our fixed-window model from the last chapter can't do well. It sees the last few words and has no way to reach back and pick out the *specific* earlier words that matter.
 
 <WhyAttentionMattersWidget>
-Each sentence has a highlighted word. Follow the arrow to see which other word you need to look at in order to understand it. Flip through the examples. Each shows a different reason why "looking back selectively" is essential.
+Each sentence has a highlighted word. Follow the arrow to the other word you need in order to understand it. Flip through the examples. The thing a word needs can be a pronoun's referent, the doer of an action, the scene a word sits in, or a name mentioned long ago.
 </WhyAttentionMattersWidget>
 
-Every one of these examples needs the same ability: given a word, *choose* which other words in the sentence are relevant to understanding it. Not the nearest words. Not a fixed window. The *right* words, wherever they happen to be.
+The kind of information a word needs is different every time. "it" needs the thing it stands for. "opened" needs whoever did the opening. "sky" needs the planet it hangs over. "treaty" needs a name from far back in the passage. There's no fixed rule for what to look at, or for how far back it sits.
 
-This is what **attention** does. It lets the model look at every word that came before and decide which ones matter for the word it's working on right now.
+That makes this a general and surprisingly deep problem: take a word, work out what it's missing, and go find the other words that have it. Doing it well is most of what makes a model understand a sentence. That is what **attention** does. It lets a word reach back over every earlier word, decide which ones hold what it needs, and pull that information in.
 
 ## Asking Questions
 
-You already do this kind of thing whenever you look something up. You have a question in mind, and you go find whoever, or whatever, can answer it.
-
-Each place you might look advertises what it's about: a book by its cover, a web page by its title, a friend by what they're known for. You match your question against those advertisements, pick the one that fits, and read what it says.
-
-<AskingQuestionsWidget>
-Pick the source whose key matches your question, and read its value. Try the wrong ones too. A source that advertises the wrong thing has nothing useful to say, no matter what's inside it.
-</AskingQuestionsWidget>
-
-That gives us three pieces, and they're the whole of attention: the **query** (what you're looking for), the **key** (what each source advertises), and the **value** (what you get when you pick one).
-
-## Words Ask Questions
-
-Words do the same thing to each other. To pin down what it means, a word asks a question, and the word that answers hands something back.
-
-So each word gets a **query** (what it's asking), a **key** (what it advertises), and a **value** (what it hands over). The query and the key are written the *same way* here. The only difference is the query ends in a question mark. "it" asks `thing we just mentioned?` and "glass" answers `thing we just mentioned`. Writing them the same is what lets us match them, next.
+One way to picture that: a word **asks a question** and sees if any other word has the answer. "What noun are we talking about?" "Are we talking about a river or money?" "Who has been mentioned that might have done something?" The word that can answer hands its answer back.
 
 <WordsAskQuestionsWidget>
-Flip through the examples. In each one, the highlighted word's query is the same phrase as the matching word's key, just with a "?" on the end. That shared phrase is the match.
+The highlighted word asks a question. Another word answers it. No vectors yet, just plain English. Flip through the examples and read each question and the answer it gets back.
 </WordsAskQuestionsWidget>
 
-## Enter the Dot Product
+This might feel familiar, because you ask questions to find things out all the time. Sometimes you ask a person, sometimes you check a book, sometimes you type into a search engine. Every time, you have a question, you find the source that can answer it, and you take what it says.
 
-To match a query against a key, multiply them dimension by dimension and add up the result. That's the **dot product** from the Vectors chapter. Think of the query as a detector: the dot product measures how strongly a key sets it off.
+<AskingQuestionsWidget>
+Pick the source whose advertised topic matches your question, and read its answer. Try the wrong ones too. A source about the wrong thing has nothing useful to say, no matter what's inside it.
+</AskingQuestionsWidget>
 
-The same operation works at any level of detail, from a single yes/no dimension up to a long list of learned numbers.
+## Questions, Keys, and Values
 
-<DotProductMatchWidget>
-Start on the left tab and work right. With one "noun" dimension the dot product is a single multiplication. Add named dimensions and a query can look for several things at once. In a real embedding the dimensions have no names at all, but the operation never changes.
-</DotProductMatchWidget>
+Now give those roles their real names. The question a word asks is its **query**. The question a word can answer is its **key**. The answer it hands over is its **value**. A word's query gets matched against every other word's key, and wherever the match is strong, that word's value is pulled in.
 
-## Partial Matches
+How do we score the match between a query and a key? With the **dot product** from the Vectors chapter, which measures how much two things line up. The match doesn't have to be exact. "Are we talking about a river or money?" lines up well enough with "Are we talking about a river?", so it scores high, and the answer comes back: "We're talking about a river."
 
-A query and a key don't have to line up exactly. A query can ask about several things at once, and a key can answer several. They match on whatever they share.
+<MatchingQuestionsWidget>
+The same examples, now labeled. The query is the question being asked, the key is the question the matched word can answer, and the value is the answer. The score says how well the query and key line up. The "bank" example is a loose match and still wins.
+</MatchingQuestionsWidget>
 
-That's why "bank" can answer a question about a river *and* a question about money: its key advertises both. The score just counts how much the question and the answer overlap.
-
-<PartialMatchesWidget>
-Click the parts of your question on and off and watch the score. Switch the key between "bank" and "river" with the same question to see one query land differently on two words. A bigger overlap means a bigger score.
-</PartialMatchesWidget>
+We're writing the questions in English and making up the scores by eye. Underneath, each query and key is a vector, and the score is their dot product, the same similarity measure you built in the Vectors chapter.
 
 ## Match Scores
 

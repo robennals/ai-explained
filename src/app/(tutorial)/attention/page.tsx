@@ -6,9 +6,8 @@ import { QuizContent } from "./QuizContent";
 import {
   WhyAttentionMattersWidget,
   WordsAskQuestionsWidget,
+  MatchingQuestionsWidget,
   AskingQuestionsWidget,
-  DotProductMatchWidget,
-  PartialMatchesWidget,
   ToyAttentionScoresWidget,
   SoftmaxExplorerWidget,
   ToyAttentionSoftmaxWidget,
@@ -28,9 +27,8 @@ export default function Chapter07() {
           components={{
             WhyAttentionMattersWidget,
             WordsAskQuestionsWidget,
+            MatchingQuestionsWidget,
             AskingQuestionsWidget,
-            DotProductMatchWidget,
-            PartialMatchesWidget,
             ToyAttentionScoresWidget,
             SoftmaxExplorerWidget,
             ToyAttentionSoftmaxWidget,

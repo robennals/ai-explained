@@ -14,16 +14,6 @@ const AskingQuestions = dynamic(
   { ssr: false }
 );
 
-const DotProductMatch = dynamic(
-  () => import("@/components/widgets/attention/DotProductMatch").then((m) => m.DotProductMatch),
-  { ssr: false }
-);
-
-const PartialMatches = dynamic(
-  () => import("@/components/widgets/attention/PartialMatches").then((m) => m.PartialMatches),
-  { ssr: false }
-);
-
 const ToyAttentionScores = dynamic(
   () => import("@/components/widgets/attention/ToyAttentionScores").then((m) => m.ToyAttentionScores),
   { ssr: false }
@@ -76,7 +66,15 @@ export function WhyAttentionMattersWidget({ children }: { children?: React.React
 export function WordsAskQuestionsWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children} label="Explore it">
-      <WhyAttentionMatters showQKV />
+      <WhyAttentionMatters mode="qa" />
+    </WidgetSlot>
+  );
+}
+
+export function MatchingQuestionsWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children} label="Explore it">
+      <WhyAttentionMatters mode="qkv" />
     </WidgetSlot>
   );
 }
@@ -85,22 +83,6 @@ export function AskingQuestionsWidget({ children }: { children?: React.ReactNode
   return (
     <WidgetSlot tryIt={children} label="Explore it">
       <AskingQuestions />
-    </WidgetSlot>
-  );
-}
-
-export function DotProductMatchWidget({ children }: { children?: React.ReactNode }) {
-  return (
-    <WidgetSlot tryIt={children} label="Explore it">
-      <DotProductMatch />
-    </WidgetSlot>
-  );
-}
-
-export function PartialMatchesWidget({ children }: { children?: React.ReactNode }) {
-  return (
-    <WidgetSlot tryIt={children} label="Explore it">
-      <PartialMatches />
     </WidgetSlot>
   );
 }

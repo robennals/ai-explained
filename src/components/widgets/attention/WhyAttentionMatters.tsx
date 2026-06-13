@@ -5,8 +5,14 @@ import { WidgetContainer } from "../shared/WidgetContainer";
 import { WidgetTabs } from "../shared/WidgetTabs";
 
 /* ------------------------------------------------------------------ */
-/*  Data: hand-curated attention examples                             */
+/*  Modes                                                              */
+/*  - basic: just which words matter (arrows + enriched meaning)       */
+/*  - qa:    each word asks a plain-English question, another answers  */
+/*  - qkv:   the question becomes a query/key, the answer a value,     */
+/*           matched by a (made-up) dot-product score                  */
 /* ------------------------------------------------------------------ */
+
+type Mode = "basic" | "qa" | "qkv";
 
 interface SentenceExample {
   label: string;
@@ -17,65 +23,91 @@ interface SentenceExample {
   targets: Record<number, number>;
   /** Explanation shown below */
   explanation: string;
-  /** Richer meaning we can derive for the selected word once we gather info from the target words */
+  /** Richer meaning the selected word gets once it gathers info from the target */
   enrichedMeaning: string;
-  /**
-   * The thing the highlighted word is asking about, in the SAME form as the
-   * matched word's key. The query is just this phrase with a "?"; the key is
-   * this phrase as a statement. Keeping them identical sets up dot-product
-   * matching: a query and a key match when they describe the same thing.
-   */
-  matchPhrase: string;
-  /** What the highlighted word gathers from the match */
+  /** The question the highlighted word is asking (its query). */
+  query: string;
+  /** The question the matched word can answer (its key). */
+  keyQuestion: string;
+  /** What the matched word hands back, written as a full statement (its value). */
   value: string;
+  /** A made-up match score between the query and the matched key, 0-10. */
+  matchScore: number;
+  /** True when the query and key overlap without being identical. */
+  inexact?: boolean;
 }
 
 const SENTENCES: SentenceExample[] = [
   {
     label: "What does it refer to?",
-    words: [
-      "I", "dropped", "the", "glass", "and", "it", "broke", ".",
-    ],
+    words: ["I", "dropped", "the", "glass", "and", "it", "broke", "."],
     selectedWord: 5,
     targets: { 3: 0.95 },
     explanation:
       'What does "it" refer to? You have to look back to "glass," the thing that was dropped.',
     enrichedMeaning: "the glass",
-    matchPhrase: "thing we just mentioned",
-    value: "glass",
+    query: "What thing are we talking about?",
+    keyQuestion: "What thing are we talking about?",
+    value: "We're talking about the glass.",
+    matchScore: 9,
   },
   {
     label: "Who did it?",
-    words: [
-      "The", "chef", "who", "won", "the", "competition",
-      "opened", "a", "restaurant", ".",
-    ],
+    words: ["The", "chef", "who", "won", "the", "competition", "opened", "a", "restaurant", "."],
     selectedWord: 6,
     targets: { 1: 0.95 },
     explanation:
       'Who opened a restaurant? The chef, not the competition. You have to skip over the whole "who won the competition" clause to connect "opened" back to "chef."',
     enrichedMeaning: "opened by the chef",
-    matchPhrase: "did the action",
-    value: "chef",
+    query: "Who performed the action?",
+    keyQuestion: "Who performed the action?",
+    value: "The chef performed it.",
+    matchScore: 9,
+  },
+  {
+    label: "Where is this?",
+    words: ["On", "Mars", ",", "the", "astronaut", "looked", "up", "at", "the", "sky", "."],
+    selectedWord: 9,
+    targets: { 1: 0.95 },
+    explanation:
+      'Which sky? The Martian one. "sky" has to reach back to "Mars" to become "the sky of Mars," not the sky on Earth.',
+    enrichedMeaning: "the sky of Mars",
+    query: "Where is this scene set?",
+    keyQuestion: "Where is this scene set?",
+    value: "The scene is set on Mars.",
+    matchScore: 8,
+  },
+  {
+    label: "Which one?",
+    words: ["The", "Treaty", "of", "Versailles", "was", "signed", "in", "1919", "…", "the", "treaty", "reshaped", "Europe", "."],
+    selectedWord: 10,
+    targets: { 3: 0.95 },
+    explanation:
+      'Which treaty reshaped Europe? You have to reach all the way back across the gap to "Versailles" to know. The word that matters can be far away.',
+    enrichedMeaning: "the Treaty of Versailles",
+    query: "Which specific treaty is this?",
+    keyQuestion: "Which treaty am I?",
+    value: "It's the Treaty of Versailles.",
+    matchScore: 8,
   },
   {
     label: "What does it mean?",
-    words: [
-      "The", "bank", "by", "the", "river", "was",
-      "covered", "in", "wildflowers", ".",
-    ],
+    words: ["The", "bank", "by", "the", "river", "was", "covered", "in", "wildflowers", "."],
     selectedWord: 1,
     targets: { 4: 0.95 },
     explanation:
       '"bank" could mean a place for money or the side of a river. You need to see "river" to know which meaning is intended.',
     enrichedMeaning: "the bank of a river",
-    matchPhrase: "relates to a river",
-    value: "river",
+    query: "Are we talking about a river or money?",
+    keyQuestion: "Are we talking about a river?",
+    value: "We're talking about a river.",
+    matchScore: 6,
+    inexact: true,
   },
 ];
 
 /* ------------------------------------------------------------------ */
-/*  Component                                                         */
+/*  Component                                                          */
 /* ------------------------------------------------------------------ */
 
 const HIGHLIGHT_HUE = 240;
@@ -93,7 +125,7 @@ interface Arrow {
   weight: number;
 }
 
-export function WhyAttentionMatters({ showQKV = false }: { showQKV?: boolean } = {}) {
+export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
   const [sentenceIdx, setSentenceIdx] = useState(0);
   const [arrows, setArrows] = useState<Arrow[]>([]);
   const [boxAnchorX, setBoxAnchorX] = useState<number | null>(null);
@@ -159,23 +191,18 @@ export function WhyAttentionMatters({ showQKV = false }: { showQKV?: boolean } =
   // SVG padding above words for arcs
   const arcPad = 60;
 
+  const description =
+    mode === "qkv"
+      ? "The highlighted word's question becomes a query and a key; the answer becomes a value. They match by a score."
+      : mode === "qa"
+        ? "Each highlighted word asks a question. Another word in the sentence answers it. Follow the arrow."
+        : "The highlighted word needs help from specific other words. Follow the arrow.";
+
   return (
-    <WidgetContainer
-      title="Which Words Matter?"
-      description={
-        showQKV
-          ? "The highlighted word asks a question (its query), finds the word whose key matches, and gathers a value. Follow the arrow."
-          : "The highlighted word needs help from specific other words. Follow the arrow."
-      }
-      onReset={handleReset}
-    >
+    <WidgetContainer title="Which Words Matter?" description={description} onReset={handleReset}>
       <div className="flex flex-col gap-5">
         {/* Sentence selector tabs */}
-        <WidgetTabs
-          tabs={TABS}
-          activeTab={String(sentenceIdx)}
-          onTabChange={handleTabChange}
-        />
+        <WidgetTabs tabs={TABS} activeTab={String(sentenceIdx)} onTabChange={handleTabChange} />
 
         {/* Word display with arrow overlay */}
         <div className="relative rounded-lg border border-border bg-surface" ref={containerRef}>
@@ -186,25 +213,13 @@ export function WhyAttentionMatters({ showQKV = false }: { showQKV?: boolean } =
               style={{ zIndex: 10 }}
             >
               <defs>
-                <marker
-                  id="arrowhead"
-                  markerWidth="6"
-                  markerHeight="5"
-                  refX="5"
-                  refY="2.5"
-                  orient="auto"
-                >
-                  <polygon
-                    points="0 0, 6 2.5, 0 5"
-                    fill={`hsla(${HIGHLIGHT_HUE}, 75%, 55%, 0.7)`}
-                  />
+                <marker id="arrowhead" markerWidth="6" markerHeight="5" refX="5" refY="2.5" orient="auto">
+                  <polygon points="0 0, 6 2.5, 0 5" fill={`hsla(${HIGHLIGHT_HUE}, 75%, 55%, 0.7)`} />
                 </marker>
               </defs>
               {arrows.map((a, i) => {
-                // Arc height based on horizontal distance
                 const dx = Math.abs(a.toX - a.fromX);
                 const arcHeight = Math.min(arcPad + dx * 0.15, 100);
-                // Control point is above midpoint
                 const midX = (a.fromX + a.toX) / 2;
                 const midY = Math.min(a.fromY, a.toY) - arcHeight;
                 const strokeWidth = 1.5 + a.weight * 1.5;
@@ -250,56 +265,78 @@ export function WhyAttentionMatters({ showQKV = false }: { showQKV?: boolean } =
             })}
           </div>
 
-          {/* Enriched-meaning box — positioned horizontally under the selected word */}
-          <div className="relative px-5 pb-5 pt-2">
-            {boxAnchorX !== null && (
-              <div
-                className="pointer-events-none absolute text-sm"
-                style={{
-                  left: `${boxAnchorX}px`,
-                  top: 0,
-                  transform: "translateX(-50%)",
-                  maxWidth: "calc(100% - 24px)",
-                }}
-              >
-                <div className="mx-auto mb-1 h-3 w-px bg-indigo-400/60 dark:bg-indigo-400/40" />
-                <div className="rounded-md border border-indigo-400/60 bg-indigo-50 px-3 py-1.5 shadow-sm dark:border-indigo-400/40 dark:bg-indigo-950/40">
-                  <span className="font-semibold text-indigo-700 dark:text-indigo-300">
-                    {sentence.words[selectedWord]}
-                  </span>
-                  <span className="text-muted">: </span>
-                  <span className="italic text-foreground">
-                    {sentence.enrichedMeaning}
-                  </span>
+          {/* Enriched-meaning box (basic mode only) */}
+          {mode === "basic" ? (
+            <div className="relative px-5 pb-5 pt-2">
+              {boxAnchorX !== null && (
+                <div
+                  className="pointer-events-none absolute text-sm"
+                  style={{ left: `${boxAnchorX}px`, top: 0, transform: "translateX(-50%)", maxWidth: "calc(100% - 24px)" }}
+                >
+                  <div className="mx-auto mb-1 h-3 w-px bg-indigo-400/60 dark:bg-indigo-400/40" />
+                  <div className="rounded-md border border-indigo-400/60 bg-indigo-50 px-3 py-1.5 shadow-sm dark:border-indigo-400/40 dark:bg-indigo-950/40">
+                    <span className="font-semibold text-indigo-700 dark:text-indigo-300">{selectedWordText}</span>
+                    <span className="text-muted">: </span>
+                    <span className="italic text-foreground">{sentence.enrichedMeaning}</span>
+                  </div>
                 </div>
-              </div>
-            )}
-            {/* Spacer to reserve height for the absolute box */}
-            <div className="h-14" aria-hidden />
-          </div>
+              )}
+              <div className="h-14" aria-hidden />
+            </div>
+          ) : (
+            <div className="pb-3" aria-hidden />
+          )}
         </div>
 
-        {/* Query / key / value breakdown. Query and key are the SAME phrase;
-            the query just ends in "?". This previews dot-product matching. */}
-        {showQKV && (
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+        {/* Plain-English question and answer (qa mode) */}
+        {mode === "qa" && (
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <div className="rounded-lg border border-accent/40 bg-accent/5 px-3 py-2 text-sm">
               <div className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-accent">
-                Query · {selectedWordText}
+                {selectedWordText} asks
               </div>
-              <div className="text-foreground">{sentence.matchPhrase}<span className="font-bold text-accent">?</span></div>
+              <div className="text-foreground">{sentence.query}</div>
             </div>
             <div className="rounded-lg border border-indigo-400/50 bg-indigo-50 px-3 py-2 text-sm dark:bg-indigo-950/40">
               <div className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-300">
-                Key · {targetWordText}
+                {targetWordText} answers
               </div>
-              <div className="text-foreground">{sentence.matchPhrase}</div>
+              <div className="text-foreground">{sentence.value}</div>
             </div>
-            <div className="rounded-lg border border-border bg-surface px-3 py-2 text-sm">
-              <div className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-muted">
-                Value gathered
+          </div>
+        )}
+
+        {/* Query / key / value + match score (qkv mode) */}
+        {mode === "qkv" && (
+          <div className="flex flex-col gap-2">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+              <div className="rounded-lg border border-accent/40 bg-accent/5 px-3 py-2 text-sm">
+                <div className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-accent">
+                  Query · {selectedWordText}
+                </div>
+                <div className="text-foreground">{sentence.query}</div>
               </div>
-              <div className="font-medium text-foreground">{sentence.value}</div>
+              <div className="rounded-lg border border-indigo-400/50 bg-indigo-50 px-3 py-2 text-sm dark:bg-indigo-950/40">
+                <div className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-300">
+                  Key · {targetWordText}
+                </div>
+                <div className="text-foreground">{sentence.keyQuestion}</div>
+              </div>
+              <div className="rounded-lg border border-border bg-surface px-3 py-2 text-sm">
+                <div className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-muted">
+                  Value
+                </div>
+                <div className="font-medium text-foreground">{sentence.value}</div>
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-foreground/[0.02] px-3 py-2 text-sm">
+              <span className="text-muted">Query · Key match score</span>
+              <span className="font-mono text-xl font-bold text-accent">{sentence.matchScore}</span>
+              <span className="text-muted">
+                {sentence.inexact
+                  ? "— a loose match: the question asks about more than the key answers, but they overlap enough to win."
+                  : "— a strong match: the question and the key line up."}
+              </span>
             </div>
           </div>
         )}
