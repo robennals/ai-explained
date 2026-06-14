@@ -9,8 +9,8 @@ const WhyAttentionMatters = dynamic(
   { ssr: false }
 );
 
-const AskingQuestions = dynamic(
-  () => import("@/components/widgets/attention/AskingQuestions").then((m) => m.AskingQuestions),
+const QuestionVectors = dynamic(
+  () => import("@/components/widgets/attention/QuestionVectors").then((m) => m.QuestionVectors),
   { ssr: false }
 );
 
@@ -79,10 +79,10 @@ export function MatchingQuestionsWidget({ children }: { children?: React.ReactNo
   );
 }
 
-export function AskingQuestionsWidget({ children }: { children?: React.ReactNode }) {
+export function QuestionVectorsWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children} label="Explore it">
-      <AskingQuestions />
+      <QuestionVectors />
     </WidgetSlot>
   );
 }

@@ -83,7 +83,7 @@ const SENTENCES: SentenceExample[] = [
     selectedWord: 10,
     targets: { 3: 0.95 },
     explanation:
-      'Which treaty reshaped Europe? You have to reach all the way back across the gap to "Versailles" to know. The word that matters can be far away.',
+      'Which treaty reshaped Europe? You have to reach back across the gap to "Versailles" to know. Once a model has been through several transformer layers, "Versailles" itself may already carry that it means the treaty, not the city, along with the treaty\'s details. The Transformers chapter shows how.',
     enrichedMeaning: "the Treaty of Versailles",
     query: "Which specific treaty is this?",
     keyQuestion: "Which treaty am I?",
