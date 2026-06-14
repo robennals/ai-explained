@@ -50,9 +50,9 @@ The sentence examples again, labeled query, key, and value. The score says how w
 
 ## Match Scores
 
-Now run that matching for real: one word against every other word in a tiny sentence. We'll use the simplest keys and queries, a single "noun" dimension, so the numbers stay easy to read.
+Now run that matching across a whole tiny sentence: one word against every other word. We'll write each query and key as a short question and make up a plausible match score, the way we did above. Underneath they're still vectors and dot products.
 
-Imagine a vocabulary of four tokens: **cat**, **dog**, **blah** (a filler word), and **it** (a pronoun). "cat" and "dog" offer themselves as nouns. "blah" offers nothing. "it" is looking for a noun.
+Imagine a vocabulary of four tokens: **cat**, **dog**, **blah** (a filler word), and **it** (a pronoun). "it" asks for a noun. "cat" and "dog" each offer to answer that. "blah" offers nothing.
 
 <ToyAttentionScoresWidget>
 Click any token to see its raw match scores against every key, including its own. Click "it" to see it match "cat" (score 1) and miss "blah" (score 0). Click "cat" to see something different: "cat" isn't asking anything, so every score is 0. The widget always shows both the key (what each token offers) and the query (what each token is looking for).
@@ -70,7 +70,7 @@ The function usually used for this is called **softmax**. Think of it as a compe
 Drag the sliders. Try "All equal" — everyone gets 25%. Try "Moderate, rest silent" — A wins by default because nobody else is saying anything. Try "Moderate meets loud" — B drowns out A. The gaps between scores matter more than the absolute values. Softmax cares about who's loudest *relative to everyone else*.
 </SoftmaxExplorerWidget>
 
-Now apply softmax to the dot products we computed above. With keys and queries at 1/0, "it" against `cat blah blah it` gets scores `[1, 0, 0, 0]`, which softmax turns into roughly `[47.5%, 17.5%, 17.5%, 17.5%]`. That's the right shape, cat wins, but more than half the attention leaks to the filler tokens. Not great.
+Now apply softmax to the match scores from above. With a plain noun match scoring 1 and everything else 0, "it" against `cat blah blah it` gets scores `[1, 0, 0, 0]`, which softmax turns into roughly `[47.5%, 17.5%, 17.5%, 17.5%]`. That's the right shape, cat wins, but more than half the attention leaks to the filler tokens. Not great.
 
 The fix is to crank up the *query magnitude*. This is the detector-sensitivity lever from the Vectors chapter: a longer query vector is a more sensitive detector, so the gap between a match and a miss grows. The keys still describe what each token is, but the asker now cares much more about the tokens that matched best. With "it"'s query at 10 instead of 1, the scores become `[10, 0, 0, 0]`, and softmax turns those into roughly `[99.99%, ≈0%, ≈0%, ≈0%]`. Nearly all the attention goes to the noun.
 
@@ -84,7 +84,7 @@ But there's a bigger problem. Try clicking on "blah" in the widget above. "blah"
 
 Softmax always allocates 100% somewhere, even when no real match is available. We need a sensible place for the leftover attention to go.
 
-The fix is to add a **sink** token whose only job is to absorb leftover attention. Give it a key that's *slightly* nounish — say, `[0.5]` — so it scores higher than zero, but lower than a real noun like `[1]`. When a real noun is around, the noun wins by a wide margin, because of the cranked-up query magnitude. When no noun is around, the sink wins by default, since `0.5` is the only score above zero.
+The fix is to add a **sink** token whose only job is to absorb leftover attention. Give it a key that's *slightly* nounish, enough to score above nothing but well below a real noun. When a real noun is around, the noun wins by a wide margin, because of the cranked-up query magnitude. When no noun is around, the sink wins by default, since it's the only thing scoring above zero.
 
 That handles the case where "it" can't find a noun. The other case, an off-task word like "blah" that isn't searching for a noun at all, needs one more touch: the sink also advertises a generic "nothing in particular" signal, and off-task words point their query at exactly that. So a word with no real question still has somewhere harmless to land, and the sink is the only token that answers it.
 

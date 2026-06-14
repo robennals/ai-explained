@@ -2,17 +2,22 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
-import { VectorCard } from "../vectors/VectorCard";
 import { dot } from "./toyMath";
 
 /* ------------------------------------------------------------------ */
-/*  Data — step 1: 1-dim keys/queries, 1/0 values                     */
+/*  Data — each token's query and key are questions (shown as words).  */
+/*  Underneath each is a vector; the match score is their dot product, */
+/*  which we make up rather than print a fake one-dimensional vector.  */
 /* ------------------------------------------------------------------ */
 
 interface Token {
   label: string;
   key: number[];
   query: number[];
+  /** The question this token asks (its query), in words. */
+  queryText: string;
+  /** The question this token offers to answer (its key), in words. */
+  keyText: string;
   color: string;
 }
 
@@ -21,24 +26,25 @@ interface Sentence {
   tokens: Token[];
 }
 
+const NOUN_Q = "What noun are we talking about?";
+const NOUN_K = "a noun";
+
 const CAT: Token = {
-  label: "cat", key: [1], query: [0],
+  label: "cat", key: [1], query: [0], queryText: "—", keyText: NOUN_K,
   color: "text-amber-600 dark:text-amber-400",
 };
 const DOG: Token = {
-  label: "dog", key: [1], query: [0],
+  label: "dog", key: [1], query: [0], queryText: "—", keyText: NOUN_K,
   color: "text-blue-600 dark:text-blue-400",
 };
 const BLA: Token = {
-  label: "blah", key: [0], query: [0],
+  label: "blah", key: [0], query: [0], queryText: "—", keyText: "nothing",
   color: "text-foreground/40",
 };
 const IT: Token = {
-  label: "it", key: [0], query: [1],
+  label: "it", key: [0], query: [1], queryText: NOUN_Q, keyText: "nothing",
   color: "text-purple-600 dark:text-purple-400",
 };
-
-const PROPS = ["noun"];
 
 const SENTENCES: Sentence[] = [
   { label: "cat blah blah it", tokens: [CAT, BLA, BLA, IT] },
@@ -93,9 +99,6 @@ export function ToyAttentionScores() {
     ? tokens.map((t) => dot(tokens[selected].query, t.key))
     : null;
   const hasSelection = selected !== null;
-  const askerHasAnyMatch = scores
-    ? scores.some((s, i) => s > 0 && i !== selected)
-    : false;
 
   // Compute arrows from selected token to others, weighted by score
   useEffect(() => {
@@ -140,7 +143,7 @@ export function ToyAttentionScores() {
   return (
     <WidgetContainer
       title="Match Scores"
-      description={'Click any token to see its raw match scores against every key. No percentages yet.'}
+      description={'Click a token to see how well the question it asks matches what every other token offers to answer. No percentages yet.'}
       onReset={handleReset}
     >
       <div className="flex flex-col gap-5">
@@ -216,60 +219,24 @@ export function ToyAttentionScores() {
                     <span className={`text-lg font-bold ${tok.color}`}>{tok.label}</span>
                   </button>
 
-                  {/* Show query above key. Dim non-asker queries since they're idle this round.
-                      Outline the asker's query and any key that produced a match (score > 0). */}
-                  <div className="mt-2 flex w-full flex-col items-center gap-1.5">
-                    <VectorCard
-                      name=""
-                      emoji=""
-                      properties={PROPS}
-                      values={tok.query}
-                      barColor="var(--color-accent)"
-                      barMax={1}
-                      animate={false}
-                      labelWidth="w-10"
-                      barWidth="w-8"
-                      className={`text-xs w-full transition-colors ${
-                        hasSelection && !isSelected ? "opacity-30" : ""
-                      } ${
-                        isSelected && askerHasAnyMatch ? "!border-accent" : ""
-                      }`}
-                      label="QUERY"
-                      labelColor="var(--color-accent)"
-                    />
-                    <VectorCard
-                      name=""
-                      emoji=""
-                      properties={PROPS}
-                      values={tok.key}
-                      barMax={1}
-                      animate={false}
-                      labelWidth="w-10"
-                      barWidth="w-8"
-                      className={`text-xs w-full transition-colors ${
-                        hasSelection && score != null && score > 0 && !isSelected
-                          ? "!border-accent"
-                          : ""
-                      }`}
-                      label="KEY"
-                    />
-
-                    {/* Score — shown only when something is selected. Big and loud, colored if it matched.
-                        The multiplication line is bolded too when the product is non-zero. */}
+                  {/* Query and key as words. The asker's question shows on the
+                      selected token; every token shows the question it offers to
+                      answer, plus the made-up match score. */}
+                  <div className="mt-2 flex w-full flex-col items-center gap-1 text-center">
+                    {isSelected && tok.queryText !== "—" && (
+                      <div className="text-[11px] leading-tight text-accent">
+                        <span className="font-semibold">asks:</span> {tok.queryText}
+                      </div>
+                    )}
+                    <div className="text-[11px] leading-tight text-muted">
+                      <span className="font-semibold uppercase tracking-wide">offers:</span> {tok.keyText}
+                    </div>
                     {hasSelection && score != null && (
-                      <div className="flex flex-col items-center gap-0 text-center">
-                        <div className={`font-mono text-[10px] leading-tight ${
-                          score > 0 ? "font-bold text-foreground" : "text-muted"
-                        }`}>
-                          [{tokens[selected!].query.join(", ")}]
-                          {" · "}
-                          [{tok.key.join(", ")}] =
-                        </div>
-                        <div className={`font-mono text-2xl font-bold leading-tight ${
-                          score > 0 ? "text-accent" : "text-foreground/40"
-                        }`}>
+                      <div className="mt-0.5 flex flex-col items-center leading-tight">
+                        <span className="text-[10px] uppercase tracking-wide text-muted">match</span>
+                        <span className={`font-mono text-2xl font-bold ${score > 0 ? "text-accent" : "text-foreground/40"}`}>
                           {score}
-                        </div>
+                        </span>
                       </div>
                     )}
                   </div>

@@ -2,21 +2,24 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
-import { VectorCard } from "../vectors/VectorCard";
 import { dot, softmax } from "./toyMath";
 
 /* ------------------------------------------------------------------ */
-/*  Data — sink as a dedicated 5th token + a "none" key/query dim.    */
-/*  Every off-task token (cat, dog, blah, sink itself) has its query  */
-/*  pointing at the sink's "none" component, so attention always has  */
-/*  somewhere harmless to land. Only "it" has a noun-finding query —  */
-/*  which dominates when a real noun is around.                       */
+/*  Data — a dedicated sink token. Underneath, queries and keys are    */
+/*  vectors; we show them as the questions they stand for. "it" asks   */
+/*  for a noun; every off-task token asks for "nothing in particular," */
+/*  which only the sink offers to answer, so attention always has      */
+/*  somewhere harmless to land.                                        */
 /* ------------------------------------------------------------------ */
 
 interface Token {
   label: string;
   key: number[];   // [noun, none]
   query: number[]; // [noun, none]
+  /** The question this token asks (its query), in words. */
+  queryText: string;
+  /** The question this token offers to answer (its key), in words. */
+  keyText: string;
   color: string;
 }
 
@@ -25,29 +28,30 @@ interface Sentence {
   tokens: Token[];
 }
 
+const NOUN_Q = "What noun are we talking about?";
+const NONE_Q = "Nothing in particular";
+
 const SINK: Token = {
   label: "sink",
-  key: [0.5, 0.5], query: [0, 10],
+  key: [0.5, 0.5], query: [0, 10], queryText: "—", keyText: "the catch-all",
   color: "text-emerald-600 dark:text-emerald-400",
 };
 const CAT: Token = {
-  label: "cat", key: [1, 0], query: [0, 10],
+  label: "cat", key: [1, 0], query: [0, 10], queryText: NONE_Q, keyText: "a noun",
   color: "text-amber-600 dark:text-amber-400",
 };
 const DOG: Token = {
-  label: "dog", key: [1, 0], query: [0, 10],
+  label: "dog", key: [1, 0], query: [0, 10], queryText: NONE_Q, keyText: "a noun",
   color: "text-blue-600 dark:text-blue-400",
 };
 const BLA: Token = {
-  label: "blah", key: [0, 0], query: [0, 10],
+  label: "blah", key: [0, 0], query: [0, 10], queryText: NONE_Q, keyText: "nothing",
   color: "text-foreground/40",
 };
 const IT: Token = {
-  label: "it", key: [0, 0], query: [10, 0],
+  label: "it", key: [0, 0], query: [10, 0], queryText: NOUN_Q, keyText: "nothing",
   color: "text-purple-600 dark:text-purple-400",
 };
-
-const PROPS = ["noun", "none"];
 
 const SENTENCES: Sentence[] = [
   { label: "cat blah blah it", tokens: [SINK, CAT, BLA, BLA, IT] },
@@ -110,9 +114,6 @@ export function ToyAttentionSink() {
     : null;
   const weights = scores ? softmax(scores) : null;
   const hasSelection = selected !== null;
-  const askerHasAnyMatch = scores
-    ? scores.some((s, i) => s > 0 && i !== selected)
-    : false;
 
   useEffect(() => {
     if (!hasSelection || !weights || !rowRef.current) {
@@ -235,29 +236,15 @@ export function ToyAttentionSink() {
                     <span className={`text-lg font-bold ${tok.color}`}>{tok.label}</span>
                   </button>
 
-                  <div className="mt-2 flex w-full flex-col items-center gap-1.5">
-                    <VectorCard
-                      name="" emoji="" properties={PROPS} values={tok.query}
-                      barColor="var(--color-accent)"
-                      barMax={10} animate={false}
-                      labelWidth="w-10" barWidth="w-8"
-                      className={`text-xs w-full transition-colors ${
-                        hasSelection && !isSelected ? "opacity-30" : ""
-                      } ${
-                        isSelected && askerHasAnyMatch ? "!border-accent" : ""
-                      }`}
-                      label="QUERY"
-                      labelColor="var(--color-accent)"
-                    />
-                    <VectorCard
-                      name="" emoji="" properties={PROPS} values={tok.key}
-                      barMax={1} animate={false}
-                      labelWidth="w-10" barWidth="w-8"
-                      className={`text-xs w-full transition-colors ${
-                        isMatch ? "!border-accent" : ""
-                      }`}
-                      label="KEY"
-                    />
+                  <div className="mt-2 flex w-full flex-col items-center gap-1 text-center">
+                    {isSelected && tok.queryText !== "—" && (
+                      <div className="text-[11px] leading-tight text-accent">
+                        <span className="font-semibold">asks:</span> {tok.queryText}
+                      </div>
+                    )}
+                    <div className="text-[11px] leading-tight text-muted">
+                      <span className="font-semibold uppercase tracking-wide">offers:</span> {tok.keyText}
+                    </div>
 
                     {/* Big percentage */}
                     {weight != null && (
@@ -293,8 +280,8 @@ export function ToyAttentionSink() {
             return (
               <div className="rounded-lg border border-border bg-foreground/[0.02] px-4 py-3 text-sm text-muted">
                 <span className="font-bold text-foreground">&ldquo;{asker.label}&rdquo;</span> isn&apos;t looking
-                for a noun in this head — its query points at the &ldquo;none&rdquo; dimension instead, which
-                only the sink advertises. So almost all of its attention parks on the{" "}
+                for a noun in this head. It asks for nothing in particular, and only the sink offers to answer
+                that. So almost all of its attention parks on the{" "}
                 <span className="font-bold text-emerald-600 dark:text-emerald-400">sink</span> ({pct(sinkWeight)}).
                 Off-task tokens have somewhere harmless to land.
               </div>

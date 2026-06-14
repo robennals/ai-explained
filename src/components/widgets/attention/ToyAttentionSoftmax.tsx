@@ -2,13 +2,16 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
-import { VectorCard } from "../vectors/VectorCard";
 import { dot, softmax } from "./toyMath";
 
 interface Token {
   label: string;
   key: number[];
   baseQuery: number[]; // 0 or 1, scaled by query magnitude when computing
+  /** The question this token asks (its query), in words. */
+  queryText: string;
+  /** The question this token offers to answer (its key), in words. */
+  keyText: string;
   color: string;
 }
 
@@ -17,24 +20,25 @@ interface Sentence {
   tokens: Token[];
 }
 
+const NOUN_Q = "What noun are we talking about?";
+const NOUN_K = "a noun";
+
 const CAT: Token = {
-  label: "cat", key: [1], baseQuery: [0],
+  label: "cat", key: [1], baseQuery: [0], queryText: "—", keyText: NOUN_K,
   color: "text-amber-600 dark:text-amber-400",
 };
 const DOG: Token = {
-  label: "dog", key: [1], baseQuery: [0],
+  label: "dog", key: [1], baseQuery: [0], queryText: "—", keyText: NOUN_K,
   color: "text-blue-600 dark:text-blue-400",
 };
 const BLA: Token = {
-  label: "blah", key: [0], baseQuery: [0],
+  label: "blah", key: [0], baseQuery: [0], queryText: "—", keyText: "nothing",
   color: "text-foreground/40",
 };
 const IT: Token = {
-  label: "it", key: [0], baseQuery: [1],
+  label: "it", key: [0], baseQuery: [1], queryText: NOUN_Q, keyText: "nothing",
   color: "text-purple-600 dark:text-purple-400",
 };
-
-const PROPS = ["noun"];
 
 const SENTENCES: Sentence[] = [
   { label: "cat blah blah it", tokens: [CAT, BLA, BLA, IT] },
@@ -102,9 +106,6 @@ export function ToyAttentionSoftmax() {
     : null;
   const weights = scores ? softmax(scores) : null;
   const hasSelection = selected !== null;
-  const askerHasAnyMatch = scores
-    ? scores.some((s, i) => s > 0 && i !== selected)
-    : false;
 
   useEffect(() => {
     if (!hasSelection || !weights || !rowRef.current) {
@@ -224,7 +225,6 @@ export function ToyAttentionSoftmax() {
               const isSelected = selected === i;
               const weight = weights?.[i];
               const isTarget = weight != null && weight > 0.01 && !isSelected;
-              const queryShown = isSelected ? scaledQuery(tok) : tok.baseQuery;
 
               return (
                 <div key={`${sentIdx}-${i}`} className="flex flex-col items-center" style={{ width: 145 }}>
@@ -244,29 +244,15 @@ export function ToyAttentionSoftmax() {
                     <span className={`text-lg font-bold ${tok.color}`}>{tok.label}</span>
                   </button>
 
-                  <div className="mt-2 flex w-full flex-col items-center gap-1.5">
-                    <VectorCard
-                      name="" emoji="" properties={PROPS} values={queryShown}
-                      barColor="var(--color-accent)"
-                      barMax={10} animate={false}
-                      labelWidth="w-10" barWidth="w-8"
-                      className={`text-xs w-full transition-colors ${
-                        hasSelection && !isSelected ? "opacity-30" : ""
-                      } ${
-                        isSelected && askerHasAnyMatch ? "!border-accent" : ""
-                      }`}
-                      label="QUERY"
-                      labelColor="var(--color-accent)"
-                    />
-                    <VectorCard
-                      name="" emoji="" properties={PROPS} values={tok.key}
-                      barMax={1} animate={false}
-                      labelWidth="w-10" barWidth="w-8"
-                      className={`text-xs w-full transition-colors ${
-                        isTarget ? "!border-accent" : ""
-                      }`}
-                      label="KEY"
-                    />
+                  <div className="mt-2 flex w-full flex-col items-center gap-1 text-center">
+                    {isSelected && tok.queryText !== "—" && (
+                      <div className="text-[11px] leading-tight text-accent">
+                        <span className="font-semibold">asks:</span> {tok.queryText}
+                      </div>
+                    )}
+                    <div className="text-[11px] leading-tight text-muted">
+                      <span className="font-semibold uppercase tracking-wide">offers:</span> {tok.keyText}
+                    </div>
 
                     {/* Big percentage */}
                     {weight != null && (

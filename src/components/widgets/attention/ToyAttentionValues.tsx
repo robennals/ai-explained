@@ -17,6 +17,10 @@ interface Token {
   query: number[]; // [noun, none]
   value: number[]; // [cat, dog]
   valueLabel: string;
+  /** The question this token asks (its query), in words. */
+  queryText: string;
+  /** The question this token offers to answer (its key), in words. */
+  keyText: string;
   color: string;
   hexColor: string;
 }
@@ -26,29 +30,36 @@ interface Sentence {
   tokens: Token[];
 }
 
+const NOUN_Q = "What noun are we talking about?";
+const NONE_Q = "Nothing in particular";
+
 const SINK: Token = {
   label: "sink",
   key: [0.5, 0.5], query: [0, 10], value: [0, 0], valueLabel: "–",
+  queryText: "—", keyText: "the catch-all",
   color: "text-emerald-600 dark:text-emerald-400", hexColor: "#059669",
 };
 const CAT: Token = {
   label: "cat", key: [1, 0], query: [0, 10], value: [1, 0], valueLabel: "cat",
+  queryText: NONE_Q, keyText: "a noun",
   color: "text-amber-600 dark:text-amber-400", hexColor: "#d97706",
 };
 const DOG: Token = {
   label: "dog", key: [1, 0], query: [0, 10], value: [0, 1], valueLabel: "dog",
+  queryText: NONE_Q, keyText: "a noun",
   color: "text-blue-600 dark:text-blue-400", hexColor: "#2563eb",
 };
 const BLA: Token = {
   label: "blah", key: [0, 0], query: [0, 10], value: [0, 0], valueLabel: "–",
+  queryText: NONE_Q, keyText: "nothing",
   color: "text-foreground/40", hexColor: "#9ca3af",
 };
 const IT: Token = {
   label: "it", key: [0, 0], query: [10, 0], value: [0, 0], valueLabel: "–",
+  queryText: NOUN_Q, keyText: "nothing",
   color: "text-purple-600 dark:text-purple-400", hexColor: "#9333ea",
 };
 
-const QUERY_PROPS = ["noun", "none"];
 const VALUE_PROPS = ["cat", "dog"];
 
 const SENTENCES: Sentence[] = [
@@ -134,9 +145,6 @@ export function ToyAttentionValues() {
   const weights = scores ? softmax(scores) : null;
   const output = weights ? weightedSum(weights, tokens.map((t) => t.value)) : null;
   const hasSelection = selected !== null;
-  const askerHasAnyMatch = scores
-    ? scores.some((s, i) => s > 0 && i !== selected)
-    : false;
 
   useEffect(() => {
     if (!hasSelection || !weights || !rowRef.current) {
@@ -263,22 +271,16 @@ export function ToyAttentionValues() {
                     <span className={`text-lg font-bold ${tok.color}`}>{tok.label}</span>
                   </button>
 
-                  <div className="mt-2 flex w-full flex-col items-center gap-1.5">
-                    {/* QUERY card — same pattern as the other widgets */}
-                    <VectorCard
-                      name="" emoji="" properties={QUERY_PROPS} values={tok.query}
-                      barColor="var(--color-accent)"
-                      barMax={10} animate={false}
-                      labelWidth="w-10" barWidth="w-8"
-                      mobileHideBar
-                      className={`text-xs w-full transition-colors ${
-                        hasSelection && !isSelected ? "opacity-30" : ""
-                      } ${
-                        isSelected && askerHasAnyMatch ? "!border-accent" : ""
-                      }`}
-                      label="QUERY"
-                      labelColor="var(--color-accent)"
-                    />
+                  <div className="mt-2 flex w-full flex-col items-center gap-1 text-center">
+                    {/* Query and key as words */}
+                    {isSelected && tok.queryText !== "—" && (
+                      <div className="text-[11px] leading-tight text-accent">
+                        <span className="font-semibold">asks:</span> {tok.queryText}
+                      </div>
+                    )}
+                    <div className="text-[11px] leading-tight text-muted">
+                      <span className="font-semibold uppercase tracking-wide">offers:</span> {tok.keyText}
+                    </div>
 
                     {/* Big percentage */}
                     {weight != null && (
