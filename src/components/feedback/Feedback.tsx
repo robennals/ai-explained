@@ -19,7 +19,8 @@ export function Feedback() {
       name: String(data.get("name") ?? ""),
       email: String(data.get("email") ?? ""),
       message: String(data.get("message") ?? ""),
-      website: String(data.get("website") ?? ""),
+      // Honeypot — see the hidden field below for why it isn't named "website".
+      hp_referrer: String(data.get("hp_referrer") ?? ""),
     };
 
     try {
@@ -57,9 +58,16 @@ export function Feedback() {
         </p>
       ) : (
         <form onSubmit={handleSubmit} className="mt-4 grid gap-4">
+          {/*
+            Spam honeypot: hidden from humans, but bots fill every field.
+            The name must NOT match a browser autofill token (website, url,
+            email, name, tel, …) or password managers fill it and silently
+            flag real users as bots. "hp_referrer" matches no autofill
+            heuristic.
+          */}
           <input
             type="text"
-            name="website"
+            name="hp_referrer"
             tabIndex={-1}
             autoComplete="off"
             aria-hidden="true"

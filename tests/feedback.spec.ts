@@ -27,7 +27,7 @@ test.describe("Chapter Feedback Form", () => {
   test("submitting a valid form shows the thank-you message", async ({
     page,
   }) => {
-    // Mock /api/feedback so this test does not call Postmark.
+    // Mock /api/feedback so this test does not call Resend.
     await page.route("**/api/feedback", (route) =>
       route.fulfill({
         status: 200,
@@ -57,7 +57,7 @@ test.describe("Chapter Feedback Form", () => {
       route.fulfill({
         status: 500,
         contentType: "application/json",
-        body: JSON.stringify({ error: "Postmark exploded" }),
+        body: JSON.stringify({ error: "Email service exploded" }),
       })
     );
 
@@ -69,7 +69,7 @@ test.describe("Chapter Feedback Form", () => {
     await page.getByLabel("Message").fill("trigger error");
     await page.getByRole("button", { name: /send/i }).click();
 
-    await expect(page.getByRole("alert").filter({ hasText: "Postmark exploded" })).toContainText("Postmark exploded");
+    await expect(page.getByRole("alert").filter({ hasText: "Email service exploded" })).toContainText("Email service exploded");
     await expect(page.getByRole("button", { name: /send/i })).toBeVisible();
   });
 });
