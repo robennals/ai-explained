@@ -10,7 +10,9 @@ type Payload = {
   name?: string;
   email?: string;
   message?: string;
-  website?: string;
+  // Honeypot — kept in sync with the hidden field in Feedback.tsx. Not named
+  // after a browser autofill token, or password managers trip it for real users.
+  hp_referrer?: string;
 };
 
 type Email = {
@@ -78,7 +80,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 
-  if (body.website && body.website.trim().length > 0) {
+  if (body.hp_referrer && body.hp_referrer.trim().length > 0) {
     return NextResponse.json({ ok: true });
   }
 
