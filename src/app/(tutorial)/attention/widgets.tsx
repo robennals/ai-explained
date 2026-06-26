@@ -9,11 +9,6 @@ const WhyAttentionMatters = dynamic(
   { ssr: false }
 );
 
-const QuestionVectors = dynamic(
-  () => import("@/components/widgets/attention/QuestionVectors").then((m) => m.QuestionVectors),
-  { ssr: false }
-);
-
 const ToyAttentionScores = dynamic(
   () => import("@/components/widgets/attention/ToyAttentionScores").then((m) => m.ToyAttentionScores),
   { ssr: false }
@@ -71,18 +66,18 @@ export function WordsAskQuestionsWidget({ children }: { children?: React.ReactNo
   );
 }
 
-export function MatchingQuestionsWidget({ children }: { children?: React.ReactNode }) {
+export function AnsweringQuestionsWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children} label="Explore it">
-      <WhyAttentionMatters mode="qkv" />
+      <WhyAttentionMatters mode="answering" />
     </WidgetSlot>
   );
 }
 
-export function QuestionVectorsWidget({ children }: { children?: React.ReactNode }) {
+export function MatchingQuestionsWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children} label="Explore it">
-      <QuestionVectors />
+      <WhyAttentionMatters mode="qkv" />
     </WidgetSlot>
   );
 }

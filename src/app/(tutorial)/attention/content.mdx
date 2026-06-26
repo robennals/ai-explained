@@ -1,14 +1,12 @@
 # Paying Attention
 
 <Lead>
-In the last chapter, we saw that predicting the next word requires understanding, but our models could only look at a fixed window of recent words. What if the model could *choose* which earlier words to focus on? That idea, called attention, is the breakthrough that makes modern AI work. And it's built entirely from things you already know.
+In the last chapter, we saw that predicting the next word requires understanding, but our models could only look at a fixed window of recent words. What if the model could look at all the previous words and pick out the ones that hold the information it needs? That idea, called attention, is the breakthrough that makes modern AI work. And it's built entirely from things you already know.
 </Lead>
 
 ## Some Words Need Other Words
 
 You often can't tell what a word means without looking at other words in the sentence. The word "bank" could be a place for money or the side of a river. You need to see the words around it to know which one. A pronoun like "it" makes no sense on its own. You have to look back and find what it refers to.
-
-This is something our fixed-window model from the last chapter can't do well. It sees the last few words and has no way to reach back and pick out the *specific* earlier words that matter.
 
 <WhyAttentionMattersWidget>
 Each sentence has a highlighted word. Follow the arrow to the other word you need in order to understand it. Flip through the examples. The thing a word needs can be a pronoun's referent, the doer of an action, the scene a word sits in, or a name mentioned long ago.
@@ -20,33 +18,33 @@ That makes this a general and surprisingly deep problem: take a word, work out w
 
 ## Asking Questions
 
-One way to picture that: a word **asks a question** and sees if any other word has the answer. "What noun are we talking about?" "Are we talking about a river or money?" "Who has been mentioned that might have done something?" The word that can answer hands its answer back.
+One way to think about this is that a word **asks a question** and sees if another word has the answer. The word that can answer hands it back.
 
 <WordsAskQuestionsWidget>
 The highlighted word asks a question. Another word answers it. No vectors yet, just plain English. Flip through the examples and read each question and the answer it gets back.
 </WordsAskQuestionsWidget>
 
-## Questions, Keys, and Values
+## Answering Questions
 
-Attention does all of this with **dot products**. It represents the question a word is asking, the question a word offers to answer, and the answer a word provides as three vectors: the **query**, the **key**, and the **value**. A word's query is the question it asks. Another word's key is the question it offers to answer. Its value is the answer it gives.
+How does a word know which other word can answer its question? Give every word two questions: one it **wants to ask**, and one it **can answer**. To see whether one word should pull from another, compare the question the first is asking with the question the second can answer.
 
-To decide how much one word should attend to another, attention takes the dot product of the first word's query with the second word's key. A large dot product means the question being asked and the question on offer line up well.
+Sometimes they're identical. "it" asks "what thing are we talking about?" and "glass" can answer exactly that. Sometimes they only come close. "bank" asks "are we talking about a river or money?" while "river" can only answer "are we talking about a river?" That isn't a perfect match, but it's close enough to win.
 
-## Representing Questions as Vectors
+<AnsweringQuestionsWidget>
+Each highlighted word asks a question; the word it points to can answer a question of its own. Flip through the examples and see whether the two line up exactly or just closely. A close match is still a match.
+</AnsweringQuestionsWidget>
 
-How can a question be a vector? The same way anything became a vector back in the Vectors chapter: pick some things to measure, and write down how much the question involves each one. The question "are we talking about a river or money?" leans on a "river" measurement and a "money" measurement. A word that offers to answer "are we talking about a river?" leans on the "river" measurement. Take the dot product and it's large wherever the two share a measurement, so it scores how well the question and the offer match. The match doesn't have to be exact: overlapping on one measurement is enough to win.
+## Matching with the Dot Product
 
-<QuestionVectorsWidget>
-Turn the parts of the question on and off and watch the match score against each word. The dimensions here are made up for illustration. Real models learn their own, and never give them names. The only point is that a question is a vector, and the dot product scores the overlap.
-</QuestionVectorsWidget>
+So a word needs to do two things: represent the question it's asking and the question it can answer, then measure how well one matches the other. We've already solved both. The Vectors chapter showed that the **dot product** of two vectors measures how well they line up, and the Embeddings chapter showed that a vector can represent almost anything, even the meaning of a word.
 
-## Matching Questions
-
-From here on we'll write each query and key as the plain-English question it stands for, and the match as a single score. Underneath, each one is a vector like the ones you just saw, and the score is a dot product. We just won't keep writing out the numbers.
+So attention writes each question as a vector. The question a word asks is its **query**, the question it can answer is its **key**, and the answer it provides is its **value**. To decide how much one word should attend to another, attention takes the dot product of one word's query with another word's key. A big dot product means a strong match, and the matched word's value gets pulled in.
 
 <MatchingQuestionsWidget>
-The sentence examples again, labeled query, key, and value. The score says how well the query lines up with the key. The "bank" example is a loose match and still wins.
+The same examples, now labeled query, key, and value. The score is the dot product of the query and the key. The "bank" example is a loose match and still wins.
 </MatchingQuestionsWidget>
+
+From here on we'll write each query and key as the plain-English question it stands for, and the match as a single score. Underneath, each is a vector and the score is a dot product. We just won't keep writing out the numbers.
 
 ## Match Scores
 

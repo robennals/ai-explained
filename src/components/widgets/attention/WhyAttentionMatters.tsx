@@ -12,7 +12,7 @@ import { WidgetTabs } from "../shared/WidgetTabs";
 /*           matched by a (made-up) dot-product score                  */
 /* ------------------------------------------------------------------ */
 
-type Mode = "basic" | "qa" | "qkv";
+type Mode = "basic" | "qa" | "answering" | "qkv";
 
 interface SentenceExample {
   label: string;
@@ -194,9 +194,11 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
   const description =
     mode === "qkv"
       ? "The highlighted word's question becomes a query and a key; the answer becomes a value. They match by a score."
-      : mode === "qa"
-        ? "Each highlighted word asks a question. Another word in the sentence answers it. Follow the arrow."
-        : "The highlighted word needs help from specific other words. Follow the arrow.";
+      : mode === "answering"
+        ? "The highlighted word asks a question; the word it points to can answer one. See whether they match exactly or just closely."
+        : mode === "qa"
+          ? "Each highlighted word asks a question. Another word in the sentence answers it. Follow the arrow."
+          : "The highlighted word needs help from specific other words. Follow the arrow.";
 
   return (
     <WidgetContainer title="Which Words Matter?" description={description} onReset={handleReset}>
@@ -302,6 +304,46 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
                 {targetWordText} answers
               </div>
               <div className="text-foreground">{sentence.value}</div>
+            </div>
+          </div>
+        )}
+
+        {/* Asks vs can-answer + exact/close match (answering mode) */}
+        {mode === "answering" && (
+          <div className="flex flex-col gap-2">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+              <div className="rounded-lg border border-accent/40 bg-accent/5 px-3 py-2 text-sm">
+                <div className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-accent">
+                  {selectedWordText} asks
+                </div>
+                <div className="text-foreground">{sentence.query}</div>
+              </div>
+              <div className="rounded-lg border border-indigo-400/50 bg-indigo-50 px-3 py-2 text-sm dark:bg-indigo-950/40">
+                <div className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-300">
+                  {targetWordText} can answer
+                </div>
+                <div className="text-foreground">{sentence.keyQuestion}</div>
+              </div>
+              <div className="rounded-lg border border-border bg-surface px-3 py-2 text-sm">
+                <div className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-muted">
+                  Answer
+                </div>
+                <div className="font-medium text-foreground">{sentence.value}</div>
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-foreground/[0.02] px-3 py-2 text-sm">
+              <span
+                className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase tracking-wide ${
+                  sentence.inexact ? "bg-amber-500/15 text-amber-700 dark:text-amber-400" : "bg-success/15 text-success"
+                }`}
+              >
+                {sentence.inexact ? "Close match" : "Exact match"}
+              </span>
+              <span className="text-muted">
+                {sentence.inexact
+                  ? "the two questions aren't identical, but they overlap enough to count."
+                  : "the question asked and the question answered are the same."}
+              </span>
             </div>
           </div>
         )}
