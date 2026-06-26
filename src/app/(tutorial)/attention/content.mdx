@@ -26,12 +26,12 @@ The highlighted word asks a question. Another word answers it. No vectors yet, j
 
 ## Answering Questions
 
-How does a word find the one that can answer it? We give every word two questions: one it **wants to ask**, and one it **can answer**. A word then looks for another word that can answer the question it's asking.
+How does a word find the one that can answer it? We give every word two questions: one it **wants to ask**, and one it **can answer**. A word looks for another word that can answer the question it's asking, and the answer comes back from that word.
 
-Sometimes they're identical. "it" asks "what thing are we talking about?" and "glass" can answer exactly that. Sometimes they only come close. "bank" asks "are we talking about a river or money?" while "river" can only answer "are we talking about a river?" That isn't a perfect match, but it's close enough to win.
+Sometimes the two questions are identical. "it" asks "what thing are we talking about?" and "glass" can answer exactly that, so "glass" hands back the answer: it's the glass. Sometimes they only come close. "bank" asks "are we talking about a river or money?" while "river" can only answer "are we talking about a river?" That isn't a perfect match, but it's close enough that "river" still answers.
 
 <AnsweringQuestionsWidget>
-Each highlighted word asks a question; the word it points to can answer a question of its own. Flip through the examples and see whether the two line up exactly or just closely. A close match is still a match.
+The highlighted word asks a question; the word it points to can answer it. Click the other underlined words to see that their questions don't match. Flip through the examples to find exact matches and one close match.
 </AnsweringQuestionsWidget>
 
 ## Matching with the Dot Product

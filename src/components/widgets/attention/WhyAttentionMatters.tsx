@@ -35,6 +35,12 @@ interface SentenceExample {
   matchScore: number;
   /** True when the query and key overlap without being identical. */
   inexact?: boolean;
+  /**
+   * Every word that publishes a "can answer" question: word index → that
+   * question. Includes the matching target (whose question equals keyQuestion)
+   * plus a couple of distractor words whose questions don't match the query.
+   */
+  answers: Record<number, string>;
 }
 
 const SENTENCES: SentenceExample[] = [
@@ -50,6 +56,11 @@ const SENTENCES: SentenceExample[] = [
     keyQuestion: "What thing are we talking about?",
     value: "We're talking about the glass.",
     matchScore: 9,
+    answers: {
+      3: "What thing are we talking about?",
+      1: "What action happened?",
+      6: "What happened next?",
+    },
   },
   {
     label: "Who did it?",
@@ -63,6 +74,11 @@ const SENTENCES: SentenceExample[] = [
     keyQuestion: "Who performed the action?",
     value: "The chef performed it.",
     matchScore: 9,
+    answers: {
+      1: "Who performed the action?",
+      5: "What event is mentioned?",
+      8: "What was opened?",
+    },
   },
   {
     label: "Where is this?",
@@ -76,6 +92,11 @@ const SENTENCES: SentenceExample[] = [
     keyQuestion: "Where is this scene set?",
     value: "The scene is set on Mars.",
     matchScore: 8,
+    answers: {
+      1: "Where is this scene set?",
+      4: "Who is in the scene?",
+      5: "What action happened?",
+    },
   },
   {
     label: "Which one?",
@@ -89,6 +110,11 @@ const SENTENCES: SentenceExample[] = [
     keyQuestion: "Which treaty am I?",
     value: "It's the Treaty of Versailles.",
     matchScore: 8,
+    answers: {
+      3: "Which treaty am I?",
+      7: "When did it happen?",
+      12: "What place is affected?",
+    },
   },
   {
     label: "What does it mean?",
@@ -103,6 +129,11 @@ const SENTENCES: SentenceExample[] = [
     value: "We're talking about a river.",
     matchScore: 6,
     inexact: true,
+    answers: {
+      4: "Are we talking about a river?",
+      8: "What is growing here?",
+      6: "What state is it in?",
+    },
   },
 ];
 
@@ -127,6 +158,10 @@ interface Arrow {
 
 export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
   const [sentenceIdx, setSentenceIdx] = useState(0);
+  // In answering mode the reader can click any word that publishes a
+  // "can answer" question to compare it against the query. null = the
+  // matching word (the default the arrow points to).
+  const [clickedAnswerer, setClickedAnswerer] = useState<number | null>(null);
   const [arrows, setArrows] = useState<Arrow[]>([]);
   const [boxAnchorX, setBoxAnchorX] = useState<number | null>(null);
 
@@ -139,6 +174,11 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
   const targetIdx = Number(Object.keys(targets)[0]);
   const selectedWordText = sentence.words[selectedWord];
   const targetWordText = sentence.words[targetIdx];
+
+  // The word currently being compared against the query (answering mode only).
+  const effectiveAnswerer = mode === "answering" ? (clickedAnswerer ?? targetIdx) : targetIdx;
+  const effectiveAnswererText = sentence.words[effectiveAnswerer];
+  const answererMatches = effectiveAnswerer === targetIdx;
 
   // Measure word positions and compute arrows after layout settles
   useEffect(() => {
@@ -157,9 +197,14 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
       const fromX = fromRect.left + fromRect.width / 2 - containerRect.left;
       const fromY = fromRect.top - containerRect.top;
 
+      // In answering mode the arrow follows whichever word is being compared.
+      const arrowTargets: [number, number][] =
+        mode === "answering"
+          ? [[effectiveAnswerer, 0.95]]
+          : Object.entries(targets).map(([k, w]) => [Number(k), w]);
+
       const newArrows: Arrow[] = [];
-      for (const [idxStr, weight] of Object.entries(targets)) {
-        const idx = Number(idxStr);
+      for (const [idx, weight] of arrowTargets) {
         const toEl = wordRefs.current.get(idx);
         if (!toEl) continue;
         const toRect = toEl.getBoundingClientRect();
@@ -176,16 +221,18 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
     });
 
     return () => cancelAnimationFrame(raf);
-  }, [selectedWord, targets, sentenceIdx]);
+  }, [selectedWord, targets, sentenceIdx, mode, effectiveAnswerer]);
 
   const handleReset = useCallback(() => {
     setSentenceIdx(0);
+    setClickedAnswerer(null);
   }, []);
 
   const TABS = SENTENCES.map((s, i) => ({ id: String(i), label: s.label }));
 
   const handleTabChange = useCallback((tabId: string) => {
     setSentenceIdx(Number(tabId));
+    setClickedAnswerer(null);
   }, []);
 
   // SVG padding above words for arcs
@@ -244,7 +291,20 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
           <div className="flex flex-wrap gap-x-1 gap-y-0 px-5 pt-4 text-lg" style={{ paddingTop: `${arcPad + 16}px` }}>
             {sentence.words.map((word, i) => {
               const isSelected = i === selectedWord;
-              const isTarget = i in targets;
+              const isAnswering = mode === "answering";
+              const isAnswerable = isAnswering && i in sentence.answers && i !== selectedWord;
+              const isCompared = isAnswering && i === effectiveAnswerer;
+              const isTargetHighlight = isAnswering ? isCompared && answererMatches : i in targets;
+
+              const cls = isSelected
+                ? "font-semibold text-accent ring-2 ring-accent ring-offset-1 ring-offset-surface"
+                : isTargetHighlight
+                  ? "font-semibold text-indigo-600 dark:text-indigo-400"
+                  : isCompared
+                    ? "font-semibold text-foreground ring-1 ring-foreground/40 ring-offset-1 ring-offset-surface"
+                    : isAnswerable
+                      ? "cursor-pointer underline decoration-dotted decoration-foreground/30 underline-offset-4 hover:text-foreground"
+                      : "";
 
               return (
                 <span
@@ -253,13 +313,20 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
                     if (el) wordRefs.current.set(i, el);
                     else wordRefs.current.delete(i);
                   }}
-                  className={`inline-block rounded px-1 py-0.5 ${
-                    isSelected
-                      ? "font-semibold text-accent ring-2 ring-accent ring-offset-1 ring-offset-surface"
-                      : isTarget
-                        ? "font-semibold text-indigo-600 dark:text-indigo-400"
-                        : ""
-                  }`}
+                  onClick={isAnswerable ? () => setClickedAnswerer(i) : undefined}
+                  role={isAnswerable ? "button" : undefined}
+                  tabIndex={isAnswerable ? 0 : undefined}
+                  onKeyDown={
+                    isAnswerable
+                      ? (e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            setClickedAnswerer(i);
+                          }
+                        }
+                      : undefined
+                  }
+                  className={`inline-block rounded px-1 py-0.5 ${cls}`}
                 >
                   {word}
                 </span>
@@ -308,9 +375,13 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
           </div>
         )}
 
-        {/* Asks vs can-answer + exact/close match (answering mode) */}
+        {/* Asks vs can-answer + match (answering mode). The reader can click
+            any underlined word to compare its can-answer question. */}
         {mode === "answering" && (
           <div className="flex flex-col gap-2">
+            <div className="text-center text-xs text-muted">
+              Click any underlined word to compare the question it can answer.
+            </div>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
               <div className="rounded-lg border border-accent/40 bg-accent/5 px-3 py-2 text-sm">
                 <div className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-accent">
@@ -318,31 +389,49 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
                 </div>
                 <div className="text-foreground">{sentence.query}</div>
               </div>
-              <div className="rounded-lg border border-indigo-400/50 bg-indigo-50 px-3 py-2 text-sm dark:bg-indigo-950/40">
-                <div className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-300">
-                  {targetWordText} can answer
+              <div
+                className={`rounded-lg border px-3 py-2 text-sm ${
+                  answererMatches
+                    ? "border-indigo-400/50 bg-indigo-50 dark:bg-indigo-950/40"
+                    : "border-border bg-foreground/[0.02]"
+                }`}
+              >
+                <div
+                  className={`mb-0.5 text-xs font-semibold uppercase tracking-wide ${
+                    answererMatches ? "text-indigo-700 dark:text-indigo-300" : "text-muted"
+                  }`}
+                >
+                  {effectiveAnswererText} can answer
                 </div>
-                <div className="text-foreground">{sentence.keyQuestion}</div>
+                <div className="text-foreground">{sentence.answers[effectiveAnswerer]}</div>
               </div>
               <div className="rounded-lg border border-border bg-surface px-3 py-2 text-sm">
                 <div className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-muted">
                   Answer
                 </div>
-                <div className="font-medium text-foreground">{sentence.value}</div>
+                <div className={answererMatches ? "font-medium text-foreground" : "text-muted"}>
+                  {answererMatches ? sentence.value : "— nothing to give"}
+                </div>
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-foreground/[0.02] px-3 py-2 text-sm">
               <span
                 className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase tracking-wide ${
-                  sentence.inexact ? "bg-amber-500/15 text-amber-700 dark:text-amber-400" : "bg-success/15 text-success"
+                  !answererMatches
+                    ? "bg-foreground/10 text-muted"
+                    : sentence.inexact
+                      ? "bg-amber-500/15 text-amber-700 dark:text-amber-400"
+                      : "bg-success/15 text-success"
                 }`}
               >
-                {sentence.inexact ? "Close match" : "Exact match"}
+                {!answererMatches ? "No match" : sentence.inexact ? "Close match" : "Exact match"}
               </span>
               <span className="text-muted">
-                {sentence.inexact
-                  ? "the two questions aren't identical, but they overlap enough to count."
-                  : "the question asked and the question answered are the same."}
+                {!answererMatches
+                  ? `"${effectiveAnswererText}" answers a different question, so "${selectedWordText}" looks elsewhere.`
+                  : sentence.inexact
+                    ? "the two questions aren't identical, but they overlap enough to count."
+                    : "the question asked and the question answered are the same."}
               </span>
             </div>
           </div>
