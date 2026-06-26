@@ -26,7 +26,7 @@ The highlighted word asks a question. Another word answers it. No vectors yet, j
 
 ## Answering Questions
 
-How does a word know which other word can answer its question? Give every word two questions: one it **wants to ask**, and one it **can answer**. To see whether one word should pull from another, compare the question the first is asking with the question the second can answer.
+How does a word find the one that can answer it? We give every word two questions: one it **wants to ask**, and one it **can answer**. A word then looks for another word that can answer the question it's asking.
 
 Sometimes they're identical. "it" asks "what thing are we talking about?" and "glass" can answer exactly that. Sometimes they only come close. "bank" asks "are we talking about a river or money?" while "river" can only answer "are we talking about a river?" That isn't a perfect match, but it's close enough to win.
 
