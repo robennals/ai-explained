@@ -28,8 +28,8 @@ interface Sentence {
   tokens: Token[];
 }
 
-const NOUN_Q = "What noun are we talking about?";
-const NONE_Q = "Nothing in particular";
+const NOUN_Q = "a noun";
+const NONE_Q = "nothing in particular";
 
 const SINK: Token = {
   label: "sink",
@@ -239,11 +239,11 @@ export function ToyAttentionSink() {
                   <div className="mt-2 flex w-full flex-col items-center gap-1 text-center">
                     {isSelected && tok.queryText !== "—" && (
                       <div className="text-[11px] leading-tight text-accent">
-                        <span className="font-semibold">asks:</span> {tok.queryText}
+                        <span className="font-semibold">looking for:</span> {tok.queryText}
                       </div>
                     )}
                     <div className="text-[11px] leading-tight text-muted">
-                      <span className="font-semibold uppercase tracking-wide">offers:</span> {tok.keyText}
+                      <span className="font-semibold uppercase tracking-wide">has:</span> {tok.keyText}
                     </div>
 
                     {/* Big percentage */}
@@ -280,7 +280,7 @@ export function ToyAttentionSink() {
             return (
               <div className="rounded-lg border border-border bg-foreground/[0.02] px-4 py-3 text-sm text-muted">
                 <span className="font-bold text-foreground">&ldquo;{asker.label}&rdquo;</span> isn&apos;t looking
-                for a noun in this head. It asks for nothing in particular, and only the sink offers to answer
+                for a noun in this head. It&apos;s looking for nothing in particular, and only the sink has
                 that. So almost all of its attention parks on the{" "}
                 <span className="font-bold text-emerald-600 dark:text-emerald-400">sink</span> ({pct(sinkWeight)}).
                 Off-task tokens have somewhere harmless to land.

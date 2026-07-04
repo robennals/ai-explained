@@ -26,7 +26,7 @@ interface Sentence {
   tokens: Token[];
 }
 
-const NOUN_Q = "What noun are we talking about?";
+const NOUN_Q = "a noun";
 const NOUN_K = "a noun";
 
 const CAT: Token = {
@@ -143,7 +143,7 @@ export function ToyAttentionScores() {
   return (
     <WidgetContainer
       title="Match Scores"
-      description={'Click a token to see how well the question it asks matches what every other token offers to answer. No percentages yet.'}
+      description={'Click a token to see how well what it is looking for matches what every other token has. No percentages yet.'}
       onReset={handleReset}
     >
       <div className="flex flex-col gap-5">
@@ -225,11 +225,11 @@ export function ToyAttentionScores() {
                   <div className="mt-2 flex w-full flex-col items-center gap-1 text-center">
                     {isSelected && tok.queryText !== "—" && (
                       <div className="text-[11px] leading-tight text-accent">
-                        <span className="font-semibold">asks:</span> {tok.queryText}
+                        <span className="font-semibold">looking for:</span> {tok.queryText}
                       </div>
                     )}
                     <div className="text-[11px] leading-tight text-muted">
-                      <span className="font-semibold uppercase tracking-wide">offers:</span> {tok.keyText}
+                      <span className="font-semibold uppercase tracking-wide">has:</span> {tok.keyText}
                     </div>
                     {hasSelection && score != null && (
                       <div className="mt-0.5 flex flex-col items-center leading-tight">
@@ -254,7 +254,7 @@ export function ToyAttentionScores() {
           if (askingNothing) {
             return (
               <div className="rounded-lg border border-border bg-foreground/[0.02] px-4 py-3 text-sm text-muted">
-                <span className="font-bold text-foreground">&ldquo;{asker.label}&rdquo;</span> isn&apos;t asking anything
+                <span className="font-bold text-foreground">&ldquo;{asker.label}&rdquo;</span> isn&apos;t looking for anything
                 in this head. Its query is all zeros, so every match score is 0.
               </div>
             );

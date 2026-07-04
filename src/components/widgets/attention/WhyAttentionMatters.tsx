@@ -25,20 +25,20 @@ interface SentenceExample {
   explanation: string;
   /** Richer meaning the selected word gets once it gathers info from the target */
   enrichedMeaning: string;
-  /** The question the highlighted word is asking (its query). */
+  /** What the highlighted word is looking for (its query), as search keywords. */
   query: string;
-  /** The question the matched word can answer (its key). */
+  /** What the matched word has (its key), as search keywords. */
   keyQuestion: string;
-  /** What the matched word hands back, written as a full statement (its value). */
+  /** The answer the matched word hands back (its value). */
   value: string;
   /** A made-up match score between the query and the matched key, 0-10. */
   matchScore: number;
   /** True when the query and key overlap without being identical. */
   inexact?: boolean;
   /**
-   * Every word that publishes a "can answer" question: word index → that
-   * question. Includes the matching target (whose question equals keyQuestion)
-   * plus a couple of distractor words whose questions don't match the query.
+   * Every word that advertises what it has: word index → those keywords.
+   * Includes the matching target (whose keywords equal keyQuestion) plus a
+   * couple of distractor words whose keywords don't match the query.
    */
   answers: Record<number, string>;
 }
@@ -52,14 +52,14 @@ const SENTENCES: SentenceExample[] = [
     explanation:
       'What does "it" refer to? You have to look back to "glass," the thing that was dropped.',
     enrichedMeaning: "the glass",
-    query: "What thing are we talking about?",
-    keyQuestion: "What thing are we talking about?",
-    value: "We're talking about the glass.",
+    query: "the thing being talked about",
+    keyQuestion: "the thing being talked about",
+    value: "It means the glass.",
     matchScore: 9,
     answers: {
-      3: "What thing are we talking about?",
-      1: "What action happened?",
-      6: "What happened next?",
+      3: "the thing being talked about",
+      1: "an action that happened",
+      6: "what happened next",
     },
   },
   {
@@ -70,14 +70,14 @@ const SENTENCES: SentenceExample[] = [
     explanation:
       'Who opened a restaurant? The chef, not the competition. You have to skip over the whole "who won the competition" clause to connect "opened" back to "chef."',
     enrichedMeaning: "opened by the chef",
-    query: "Who performed the action?",
-    keyQuestion: "Who performed the action?",
-    value: "The chef performed it.",
+    query: "the doer of the action",
+    keyQuestion: "the doer of the action",
+    value: "The chef did it.",
     matchScore: 9,
     answers: {
-      1: "Who performed the action?",
-      5: "What event is mentioned?",
-      8: "What was opened?",
+      1: "the doer of the action",
+      5: "an event",
+      8: "a place",
     },
   },
   {
@@ -88,14 +88,14 @@ const SENTENCES: SentenceExample[] = [
     explanation:
       'Which sky? The Martian one. "sky" has to reach back to "Mars" to become "the sky of Mars," not the sky on Earth.',
     enrichedMeaning: "the sky of Mars",
-    query: "Where is this scene set?",
-    keyQuestion: "Where is this scene set?",
-    value: "The scene is set on Mars.",
+    query: "where the scene is set",
+    keyQuestion: "where the scene is set",
+    value: "The scene is on Mars.",
     matchScore: 9,
     answers: {
-      1: "Where is this scene set?",
-      4: "Who is in the scene?",
-      5: "What action happened?",
+      1: "where the scene is set",
+      4: "a person in the scene",
+      5: "an action",
     },
   },
   {
@@ -106,14 +106,14 @@ const SENTENCES: SentenceExample[] = [
     explanation:
       'Which treaty reshaped Europe? You have to reach back across the gap to "Versailles" to know. Once a model has been through several transformer layers, "Versailles" itself may already carry that it means the treaty, not the city, along with the treaty\'s details. The Transformers chapter shows how.',
     enrichedMeaning: "the Treaty of Versailles",
-    query: "Which specific treaty is this?",
-    keyQuestion: "Which specific treaty is this?",
+    query: "which specific treaty",
+    keyQuestion: "which specific treaty",
     value: "It's the Treaty of Versailles.",
     matchScore: 9,
     answers: {
-      3: "Which specific treaty is this?",
-      7: "When did it happen?",
-      12: "What place is affected?",
+      3: "which specific treaty",
+      7: "a date",
+      12: "a place",
     },
   },
   {
@@ -124,15 +124,15 @@ const SENTENCES: SentenceExample[] = [
     explanation:
       '"bank" could mean a place for money or the side of a river. You need to see "river" to know which meaning is intended.',
     enrichedMeaning: "the bank of a river",
-    query: "Are we talking about a river or money?",
-    keyQuestion: "Are we talking about a river?",
-    value: "We're talking about a river.",
+    query: "a river or money",
+    keyQuestion: "a river",
+    value: "We mean a river.",
     matchScore: 6,
     inexact: true,
     answers: {
-      4: "Are we talking about a river?",
-      8: "What is growing here?",
-      6: "What state is it in?",
+      4: "a river",
+      8: "plants",
+      6: "a state",
     },
   },
 ];
@@ -240,11 +240,11 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
 
   const description =
     mode === "qkv"
-      ? "The highlighted word's question becomes a query and a key; the answer becomes a value. They match by a score."
+      ? "What the highlighted word is looking for is a query; what a word has is a key; the answer is a value. They match by a score."
       : mode === "answering"
-        ? "The highlighted word asks a question; the word it points to can answer one. See whether they match exactly or just closely."
+        ? "The highlighted word is looking for something; the word it points to has something. See whether they match exactly or just closely."
         : mode === "qa"
-          ? "Each highlighted word asks a question. Another word in the sentence answers it. Follow the arrow."
+          ? "Each highlighted word is looking for something. Another word in the sentence has it. Follow the arrow."
           : "The highlighted word needs help from specific other words. Follow the arrow.";
 
   return (
@@ -357,18 +357,18 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
           )}
         </div>
 
-        {/* Plain-English question and answer (qa mode) */}
+        {/* Looking-for and answer (qa mode) */}
         {mode === "qa" && (
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <div className="rounded-lg border border-accent/40 bg-accent/5 px-3 py-2 text-sm">
               <div className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-accent">
-                {selectedWordText} asks
+                {selectedWordText} is looking for
               </div>
               <div className="text-foreground">{sentence.query}</div>
             </div>
             <div className="rounded-lg border border-indigo-400/50 bg-indigo-50 px-3 py-2 text-sm dark:bg-indigo-950/40">
               <div className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-300">
-                {targetWordText} answers
+                {targetWordText} has the answer
               </div>
               <div className="text-foreground">{sentence.value}</div>
             </div>
@@ -380,12 +380,12 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
         {mode === "answering" && (
           <div className="flex flex-col gap-2">
             <div className="text-center text-xs text-muted">
-              Click any underlined word to compare the question it can answer.
+              Click any underlined word to compare what it has.
             </div>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
               <div className="rounded-lg border border-accent/40 bg-accent/5 px-3 py-2 text-sm">
                 <div className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-accent">
-                  {selectedWordText} asks
+                  {selectedWordText} is looking for
                 </div>
                 <div className="text-foreground">{sentence.query}</div>
               </div>
@@ -401,7 +401,7 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
                     answererMatches ? "text-indigo-700 dark:text-indigo-300" : "text-muted"
                   }`}
                 >
-                  {effectiveAnswererText} can answer
+                  {effectiveAnswererText} has
                 </div>
                 <div className="text-foreground">{sentence.answers[effectiveAnswerer]}</div>
               </div>
@@ -428,10 +428,10 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
               </span>
               <span className="text-muted">
                 {!answererMatches
-                  ? `"${effectiveAnswererText}" answers a different question, so "${selectedWordText}" looks elsewhere.`
+                  ? `"${effectiveAnswererText}" has something different, so "${selectedWordText}" looks elsewhere.`
                   : sentence.inexact
-                    ? "the two questions aren't identical, but they overlap enough to count."
-                    : "the question asked and the question answered are the same."}
+                    ? "not identical, but they overlap enough to count."
+                    : "what it's looking for and what this word has are the same."}
               </span>
             </div>
           </div>
@@ -465,8 +465,8 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
               <span className="font-mono text-xl font-bold text-accent">{sentence.matchScore}</span>
               <span className="text-muted">
                 {sentence.inexact
-                  ? "— a loose match: the question asks about more than the key answers, but they overlap enough to win."
-                  : "— a strong match: the question and the key line up."}
+                  ? "— a loose match: it's looking for more than this word has, but they overlap enough to win."
+                  : "— a strong match: what it's looking for and what the word has line up."}
               </span>
             </div>
           </div>
