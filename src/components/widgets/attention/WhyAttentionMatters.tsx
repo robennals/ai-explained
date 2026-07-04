@@ -91,7 +91,7 @@ const SENTENCES: SentenceExample[] = [
     query: "Where is this scene set?",
     keyQuestion: "Where is this scene set?",
     value: "The scene is set on Mars.",
-    matchScore: 8,
+    matchScore: 9,
     answers: {
       1: "Where is this scene set?",
       4: "Who is in the scene?",
@@ -107,11 +107,11 @@ const SENTENCES: SentenceExample[] = [
       'Which treaty reshaped Europe? You have to reach back across the gap to "Versailles" to know. Once a model has been through several transformer layers, "Versailles" itself may already carry that it means the treaty, not the city, along with the treaty\'s details. The Transformers chapter shows how.',
     enrichedMeaning: "the Treaty of Versailles",
     query: "Which specific treaty is this?",
-    keyQuestion: "Which treaty am I?",
+    keyQuestion: "Which specific treaty is this?",
     value: "It's the Treaty of Versailles.",
-    matchScore: 8,
+    matchScore: 9,
     answers: {
-      3: "Which treaty am I?",
+      3: "Which specific treaty is this?",
       7: "When did it happen?",
       12: "What place is affected?",
     },
