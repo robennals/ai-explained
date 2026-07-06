@@ -1,9 +1,13 @@
 # Chapter 11 — "Why Training Almost Doesn't Work" (Design Spec)
 
-**Date:** 2026-06-03
+**Date:** 2026-06-03 (updated 2026-07-05: activation-functions chapter now precedes training)
 **Slug:** `training`
-**Chapter id:** 11
-**Prerequisites:** [9] transformers (transitively covers neurons + optimization)
+**Chapter id:** currently 11; will shift (likely to 12) once the activation-functions chapter is
+inserted immediately before it, which renumbers training and every later chapter. Confirm the id
+in `curriculum.ts` when the activation chapter lands.
+**Prerequisites:** the activation-functions chapter (immediately prior) + [9] transformers.
+Training now *assumes* the reader knows activation functions (sigmoid saturation, ReLU, Swish),
+so it references them as already-covered rather than peeking ahead.
 **Companion notebook:** `notebooks/training.ipynb`
 **Quiz:** yes
 
@@ -66,6 +70,10 @@ the input at one end and watch whether the output at the other end moves at all.
   neurons into the flat tails of the sigmoid where they stop responding.
 - *Residuals:* toggle a skip connection (each neuron adds its input back to its output) and the
   input's influence always reaches the end, no matter how deep.
+- *Activation toggle (callback to the previous chapter):* switch each neuron between sigmoid and
+  ReLU. The sigmoid saturates and kills the signal in its flat tails; ReLU passes positive values
+  straight through, so it resists this particular death. A concrete payoff of the activation
+  chapter the reader just finished, and part of why ReLU became standard.
 
 **Initialization — two jobs.**
 1. *Right scale.* Pick the weight scale so the signal neither shrinks nor grows on average as it
@@ -133,9 +141,10 @@ it's about using parallel hardware to get a good-enough gradient in as few steps
 anything blow up? Two reasons. First, even with a sigmoid the *pre-activation* sum (weights times
 inputs, before the squashing) can grow large as weights change during training, pushing neurons
 into the flat saturated tails — the same death from cluster 1. Second, modern networks mostly
-don't use sigmoid; they use unbounded activations like ReLU (covered next chapter — a quick peek:
-ReLU passes positive numbers straight through, so values can grow without limit as they stack
-across layers). Either way, as training proceeds the scale of each layer's inputs wanders, every
+don't use sigmoid; they use unbounded activations like ReLU (from the previous chapter — recall
+ReLU passes positive numbers straight through, with no ceiling, so values can grow without limit
+as they stack across layers). Either way, as training proceeds the scale of each layer's inputs
+wanders, every
 layer keeps re-adapting to its inputs' moving range, and that slows training and forces a tiny
 learning rate.
 
@@ -274,14 +283,17 @@ widgets, Framer Motion for animation, Radix-based shared controls (`SliderContro
 
 ## Files to update
 
-- `src/lib/curriculum.ts` — set chapter 11 `prerequisites: [9]`, mark `ready`/`polishing` per
-  workflow, confirm title/subtitle/description.
+- `src/lib/curriculum.ts` — set training's `prerequisites` to the activation-functions chapter's
+  id (with transformers upstream), confirm training's id after the activation chapter is inserted,
+  mark `ready`/`polishing` per workflow. Update the training `description` to drop the "Activation
+  functions (ReLU, Swish)" phrase, since activations are now their own preceding chapter.
 - Verify `src/lib/chapter-metadata.ts` covers the `training` slug (mirror matrix-math).
 
 ## Companion notebook (mirrors the chapter section by section)
 
 1. Build a deep chain/MLP; print per-layer activation and gradient norms → watch them vanish.
-   Fix with He init, then add residual blocks; re-print and watch the signal survive. (Mirrors
+   Compare sigmoid vs ReLU gradient flow (callback to the activation chapter), then fix with He
+   init, then add residual blocks; re-print and watch the signal survive. (Mirrors
    ChainSensitivity.)
 2. Train the same net at batch size 1 vs a large batch; show similar final accuracy but the
    wall-clock / step-count difference. (Mirrors Batching.)
@@ -304,17 +316,19 @@ tooltips (per recent repo change).
 
 ## Out of scope / explicitly brief
 
-- Activation functions: short peeks only (sigmoid saturation in cluster 1, ReLU's unboundedness
-  in cluster 3) + pointer to their own forthcoming chapter.
+- Activation functions: assumed known from the immediately-preceding chapter. Reference them as
+  callbacks where useful (sigmoid saturation in cluster 1, ReLU's unboundedness in cluster 3);
+  do not re-teach them.
 - Gradient clipping, early stopping, RMSNorm, data augmentation: short "be aware of" mentions.
 - Small-batch noise as regularization: deferred / skipped (confusing here).
 - Mixed precision, distributed training, optimizer bias-correction math: not covered.
 
 ## Resolved decisions
 
-- **Activation-function ordering:** training stays ch 11. Activation functions get only short
-  peeks here (sigmoid saturation in cluster 1, ReLU's unboundedness in cluster 3); the full
-  treatment is the following chapter.
+- **Activation-function ordering (updated 2026-07-05):** the activation-functions chapter now
+  comes *before* training. Training assumes activations are known and references them as callbacks
+  (sigmoid saturation in cluster 1, ReLU's unboundedness in cluster 3), and cluster 1's
+  ChainSensitivity widget gains a sigmoid/ReLU toggle that pays off the activation chapter.
 - **Plan scope:** one implementation plan covers the whole chapter end to end — content.mdx (all
   five clusters), all five playgrounds, the residual-stream diagram, the quiz, and the notebook.
 - **Residual-stream diagram:** build it as a static diagram alongside the cluster 1 prose.
