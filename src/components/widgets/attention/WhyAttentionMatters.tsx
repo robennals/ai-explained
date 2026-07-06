@@ -240,11 +240,11 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
 
   const description =
     mode === "qkv"
-      ? "What the highlighted word is looking for is a query; what a word has is a key; the answer is a value. They match by a score."
+      ? "A word's query and another word's key match by a dot-product score. The matched word's value gets pulled in."
       : mode === "answering"
-        ? "The highlighted word is looking for something; the word it points to has something. See whether they match exactly or just closely."
+        ? "The highlighted word's query matches one word's key, exactly or closely. Click other words to compare their keys."
         : mode === "qa"
-          ? "Each highlighted word is looking for something. Another word in the sentence has it. Follow the arrow."
+          ? "A word's query is what it's looking for; another word's key is what it advertises; its value is the answer it gives."
           : "The highlighted word needs help from specific other words. Follow the arrow.";
 
   return (
@@ -357,20 +357,29 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
           )}
         </div>
 
-        {/* Looking-for and answer (qa mode) */}
+        {/* Query / key / value (qa mode) */}
         {mode === "qa" && (
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
             <div className="rounded-lg border border-accent/40 bg-accent/5 px-3 py-2 text-sm">
               <div className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-accent">
-                {selectedWordText} is looking for
+                Query · {selectedWordText}
               </div>
+              <div className="text-[10px] uppercase tracking-wide text-muted">like a search</div>
               <div className="text-foreground">{sentence.query}</div>
             </div>
             <div className="rounded-lg border border-indigo-400/50 bg-indigo-50 px-3 py-2 text-sm dark:bg-indigo-950/40">
               <div className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-300">
-                {targetWordText} has the answer
+                Key · {targetWordText}
               </div>
-              <div className="text-foreground">{sentence.value}</div>
+              <div className="text-[10px] uppercase tracking-wide text-muted">like a page title</div>
+              <div className="text-foreground">{sentence.keyQuestion}</div>
+            </div>
+            <div className="rounded-lg border border-border bg-surface px-3 py-2 text-sm">
+              <div className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-muted">
+                Value · {targetWordText}
+              </div>
+              <div className="text-[10px] uppercase tracking-wide text-muted">like page content</div>
+              <div className="font-medium text-foreground">{sentence.value}</div>
             </div>
           </div>
         )}
@@ -380,12 +389,12 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
         {mode === "answering" && (
           <div className="flex flex-col gap-2">
             <div className="text-center text-xs text-muted">
-              Click any underlined word to compare what it has.
+              Click any underlined word to compare its key.
             </div>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
               <div className="rounded-lg border border-accent/40 bg-accent/5 px-3 py-2 text-sm">
                 <div className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-accent">
-                  {selectedWordText} is looking for
+                  Query · {selectedWordText}
                 </div>
                 <div className="text-foreground">{sentence.query}</div>
               </div>
@@ -401,13 +410,13 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
                     answererMatches ? "text-indigo-700 dark:text-indigo-300" : "text-muted"
                   }`}
                 >
-                  {effectiveAnswererText} has
+                  Key · {effectiveAnswererText}
                 </div>
                 <div className="text-foreground">{sentence.answers[effectiveAnswerer]}</div>
               </div>
               <div className="rounded-lg border border-border bg-surface px-3 py-2 text-sm">
                 <div className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-muted">
-                  Answer
+                  Value
                 </div>
                 <div className={answererMatches ? "font-medium text-foreground" : "text-muted"}>
                   {answererMatches ? sentence.value : "— nothing to give"}
@@ -428,10 +437,10 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
               </span>
               <span className="text-muted">
                 {!answererMatches
-                  ? `"${effectiveAnswererText}" has something different, so "${selectedWordText}" looks elsewhere.`
+                  ? `"${effectiveAnswererText}" has a different key, so "${selectedWordText}" looks elsewhere.`
                   : sentence.inexact
-                    ? "not identical, but they overlap enough to count."
-                    : "what it's looking for and what this word has are the same."}
+                    ? "the query and the key aren't identical, but they overlap enough to count."
+                    : "the query and the key are the same."}
               </span>
             </div>
           </div>

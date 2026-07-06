@@ -18,32 +18,32 @@ That makes this a general and surprisingly deep problem: take a word, work out w
 
 ## Searching for a Match
 
-This works a lot like a **Google search**. You type in keywords for what you're **looking for**. Every web page carries its own keywords in its title, saying what it **has**. The search engine matches your keywords against the titles and hands you the **content** of the page that fits best.
+This works a lot like a **Google search**, and it gives every word three things. A word's **query** is what it's looking for, like the keywords you type into a search box. Its **key** is what it advertises to other words, like the title of a web page. Its **value** is what it hands over once it's picked, like the content of the page.
 
-A word in a sentence does the same thing. It has keywords for what it's looking for, and it scans the other words for one whose keywords match.
+To understand a word, attention matches its query against the keys of all the other words, then pulls in the value of whichever one fits best.
 
 <WordsAskQuestionsWidget>
-The highlighted word is looking for something. Another word has it and hands back the answer. Flip through the examples and read what each word is looking for and what it gets.
+Each example shows the highlighted word's query, the key of the word it matches, and the value it pulls in. It's a search: keywords in, the matching page's content out. Flip through the examples.
 </WordsAskQuestionsWidget>
 
 ## What Each Word Has
 
-For this to work, every word carries two sets of keywords: what it's **looking for**, and what it **has** for other words to find. A word gets what it needs by finding another word whose "has" keywords match what it's looking for. The answer comes back from that word.
+A word's query is matched against every other word's key. Most keys don't fit. The whole trick is finding the one that does.
 
-Sometimes the keywords match exactly. "it" is looking for the thing being talked about, and "glass" has exactly that, so "glass" hands back the answer: it means the glass. Sometimes they only come close. "bank" is looking for a river or money, while "river" only has "a river." That isn't a perfect match, but it's close enough that "river" still wins.
+Sometimes a query and a key line up exactly. "it" is looking for the thing being talked about, and "glass" has a key that says exactly that. Sometimes they only come close. "bank" is looking for a river or money, while "river" only has a key for "a river." That isn't a perfect match, but it's close enough that "river" still wins.
 
 <AnsweringQuestionsWidget>
-The highlighted word is looking for something; the word it points to has it. Click the other underlined words to see that what they have doesn't match. Flip through the examples to find exact matches and one close match.
+The highlighted word's query matches the key of the word it points to. Click the other underlined words to see that their keys don't fit. Flip through the examples to find exact matches and one close match.
 </AnsweringQuestionsWidget>
 
 ## Matching with the Dot Product
 
-So a word needs to do two things: represent what it's looking for and what it has, then measure how well one word's "looking for" lines up with another word's "has." We've already solved both. The Vectors chapter showed that the **dot product** of two vectors measures how well they line up, and the Embeddings chapter showed that a vector can represent almost anything, even the meaning of a word.
+How does a computer tell whether a query matches a key? We've already solved this. The Vectors chapter showed that the **dot product** of two vectors measures how well they line up, and the Embeddings chapter showed that a vector can represent almost anything, even the meaning of a word.
 
-So attention writes each set of keywords as a vector. What a word is looking for is its **query**, what it has is its **key**, and the answer it hands over is its **value**. To decide how much one word should attend to another, attention takes the dot product of one word's query with another word's key. A big dot product means a strong match, and the matched word's value gets pulled in.
+So attention writes each query and each key as a vector and takes their dot product. A big dot product means a strong match, and the matched word's value gets pulled in.
 
 <MatchingQuestionsWidget>
-The same examples, now labeled query, key, and value. The score is the dot product of the query and the key. The "bank" example is a loose match and still wins.
+The same examples, with the query and key now scored. The score is the dot product of the query and the key. The "bank" example is a loose match and still wins.
 </MatchingQuestionsWidget>
 
 From here on we'll write each query and key as the plain-English keywords they stand for, and the match as a single score. Underneath, each is a vector and the score is a dot product. We just won't keep writing out the numbers.
