@@ -12,7 +12,7 @@ import { WidgetTabs } from "../shared/WidgetTabs";
 /*           matched by a (made-up) dot-product score                  */
 /* ------------------------------------------------------------------ */
 
-type Mode = "basic" | "qa" | "answering" | "qkv";
+type Mode = "basic" | "answering" | "qkv";
 
 interface SentenceExample {
   label: string;
@@ -240,12 +240,10 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
 
   const description =
     mode === "qkv"
-      ? "A word's query and another word's key match by a dot-product score. The matched word's value gets pulled in."
+      ? "A token's query and another token's key match by a dot-product score. The matched token's value gets pulled in."
       : mode === "answering"
-        ? "The highlighted word's query matches one word's key, exactly or closely. Click other words to compare their keys."
-        : mode === "qa"
-          ? "A word's query is what it's looking for; another word's key is what it advertises; its value is the answer it gives."
-          : "The highlighted word needs help from specific other words. Follow the arrow.";
+        ? "The highlighted token's query matches one token's key, exactly or closely. Click other tokens to compare their keys."
+        : "The highlighted token needs help from specific other tokens. Follow the arrow.";
 
   return (
     <WidgetContainer title="Which Words Matter?" description={description} onReset={handleReset}>
@@ -357,44 +355,18 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
           )}
         </div>
 
-        {/* Query / key / value (qa mode) */}
-        {mode === "qa" && (
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-            <div className="rounded-lg border border-accent/40 bg-accent/5 px-3 py-2 text-sm">
-              <div className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-accent">
-                Query · {selectedWordText}
-              </div>
-              <div className="text-[10px] uppercase tracking-wide text-muted">like a search</div>
-              <div className="text-foreground">{sentence.query}</div>
-            </div>
-            <div className="rounded-lg border border-indigo-400/50 bg-indigo-50 px-3 py-2 text-sm dark:bg-indigo-950/40">
-              <div className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-300">
-                Key · {targetWordText}
-              </div>
-              <div className="text-[10px] uppercase tracking-wide text-muted">like a page title</div>
-              <div className="text-foreground">{sentence.keyQuestion}</div>
-            </div>
-            <div className="rounded-lg border border-border bg-surface px-3 py-2 text-sm">
-              <div className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-muted">
-                Value · {targetWordText}
-              </div>
-              <div className="text-[10px] uppercase tracking-wide text-muted">like page content</div>
-              <div className="font-medium text-foreground">{sentence.value}</div>
-            </div>
-          </div>
-        )}
 
-        {/* Asks vs can-answer + match (answering mode). The reader can click
-            any underlined word to compare its can-answer question. */}
+        {/* Query vs key + match (answering mode). The reader can click any
+            underlined token to compare its key. */}
         {mode === "answering" && (
           <div className="flex flex-col gap-2">
             <div className="text-center text-xs text-muted">
-              Click any underlined word to compare its key.
+              Click any underlined token to compare its key.
             </div>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
               <div className="rounded-lg border border-accent/40 bg-accent/5 px-3 py-2 text-sm">
                 <div className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-accent">
-                  Query · {selectedWordText}
+                  Query for &ldquo;{selectedWordText}&rdquo;
                 </div>
                 <div className="text-foreground">{sentence.query}</div>
               </div>
@@ -410,7 +382,7 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
                     answererMatches ? "text-indigo-700 dark:text-indigo-300" : "text-muted"
                   }`}
                 >
-                  Key · {effectiveAnswererText}
+                  Key for &ldquo;{effectiveAnswererText}&rdquo;
                 </div>
                 <div className="text-foreground">{sentence.answers[effectiveAnswerer]}</div>
               </div>
@@ -452,13 +424,13 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
               <div className="rounded-lg border border-accent/40 bg-accent/5 px-3 py-2 text-sm">
                 <div className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-accent">
-                  Query · {selectedWordText}
+                  Query for &ldquo;{selectedWordText}&rdquo;
                 </div>
                 <div className="text-foreground">{sentence.query}</div>
               </div>
               <div className="rounded-lg border border-indigo-400/50 bg-indigo-50 px-3 py-2 text-sm dark:bg-indigo-950/40">
                 <div className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-300">
-                  Key · {targetWordText}
+                  Key for &ldquo;{targetWordText}&rdquo;
                 </div>
                 <div className="text-foreground">{sentence.keyQuestion}</div>
               </div>
@@ -474,8 +446,8 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
               <span className="font-mono text-xl font-bold text-accent">{sentence.matchScore}</span>
               <span className="text-muted">
                 {sentence.inexact
-                  ? "— a loose match: it's looking for more than this word has, but they overlap enough to win."
-                  : "— a strong match: what it's looking for and what the word has line up."}
+                  ? "— a loose match: it's looking for more than this token has, but they overlap enough to win."
+                  : "— a strong match: what it's looking for and what the token has line up."}
               </span>
             </div>
           </div>

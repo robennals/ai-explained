@@ -58,14 +58,6 @@ export function WhyAttentionMattersWidget({ children }: { children?: React.React
   );
 }
 
-export function WordsAskQuestionsWidget({ children }: { children?: React.ReactNode }) {
-  return (
-    <WidgetSlot tryIt={children} label="Explore it">
-      <WhyAttentionMatters mode="qa" />
-    </WidgetSlot>
-  );
-}
-
 export function AnsweringQuestionsWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children} label="Explore it">
