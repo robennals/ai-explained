@@ -9,18 +9,13 @@ const WhyAttentionMatters = dynamic(
   { ssr: false }
 );
 
-const ToyAttentionScores = dynamic(
-  () => import("@/components/widgets/attention/ToyAttentionScores").then((m) => m.ToyAttentionScores),
-  { ssr: false }
-);
-
 const SoftmaxExplorer = dynamic(
   () => import("@/components/widgets/attention/SoftmaxExplorer").then((m) => m.SoftmaxExplorer),
   { ssr: false }
 );
 
-const ToyAttentionSoftmax = dynamic(
-  () => import("@/components/widgets/attention/ToyAttentionSoftmax").then((m) => m.ToyAttentionSoftmax),
+const AttentionSoftmax = dynamic(
+  () => import("@/components/widgets/attention/AttentionSoftmax").then((m) => m.AttentionSoftmax),
   { ssr: false }
 );
 
@@ -74,14 +69,6 @@ export function MatchingQuestionsWidget({ children }: { children?: React.ReactNo
   );
 }
 
-export function ToyAttentionScoresWidget({ children }: { children?: React.ReactNode }) {
-  return (
-    <WidgetSlot tryIt={children} label="Explore it">
-      <ToyAttentionScores />
-    </WidgetSlot>
-  );
-}
-
 export function SoftmaxExplorerWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children} label="Explore it">
@@ -90,10 +77,10 @@ export function SoftmaxExplorerWidget({ children }: { children?: React.ReactNode
   );
 }
 
-export function ToyAttentionSoftmaxWidget({ children }: { children?: React.ReactNode }) {
+export function AttentionSoftmaxWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children} label="Explore it">
-      <ToyAttentionSoftmax />
+      <AttentionSoftmax />
     </WidgetSlot>
   );
 }

@@ -7,9 +7,8 @@ import {
   WhyAttentionMattersWidget,
   AnsweringQuestionsWidget,
   MatchingQuestionsWidget,
-  ToyAttentionScoresWidget,
   SoftmaxExplorerWidget,
-  ToyAttentionSoftmaxWidget,
+  AttentionSoftmaxWidget,
   ToyAttentionValuesWidget,
   ToyAttentionSinkWidget,
 } from "./widgets";
@@ -27,9 +26,8 @@ export default function Chapter07() {
             WhyAttentionMattersWidget,
             AnsweringQuestionsWidget,
             MatchingQuestionsWidget,
-            ToyAttentionScoresWidget,
             SoftmaxExplorerWidget,
-            ToyAttentionSoftmaxWidget,
+            AttentionSoftmaxWidget,
             ToyAttentionValuesWidget,
             ToyAttentionSinkWidget,
           }}

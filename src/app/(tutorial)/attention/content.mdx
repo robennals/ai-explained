@@ -40,21 +40,9 @@ The same examples, with the query and key now scored. The score is the dot produ
 
 From here on we'll write each query and key as the plain-English keywords they stand for, and the match as a single score. Underneath, each is a vector and the score is a dot product. We just won't keep writing out the numbers.
 
-## Match Scores
-
-Now run that matching across a whole tiny sentence: one token against every other token. We'll write each query and key as short keywords and make up a plausible match score, the way we did above. Underneath they're still vectors and dot products.
-
-Imagine a vocabulary of four tokens: **cat**, **dog**, **blah** (a filler token), and **it** (a pronoun). "it" is looking for a noun. "cat" and "dog" each have one. "blah" has nothing.
-
-<ToyAttentionScoresWidget>
-Click any token to see its raw match scores against every other. Click "it" to see it match "cat" (score 1) and miss "blah" (score 0). Click "cat" to see something different: "cat" isn't looking for anything, so every score is 0. The widget shows what each token is looking for and what it has.
-</ToyAttentionScoresWidget>
-
-What you have isn't the same as what you're looking for. A pronoun needs to find nouns without being mistaken for one itself. That's why keys and queries are separate.
-
 ## Dividing Your Attention
 
-Match scores are useful, but the model can't just keep piling them up. Each token has a fixed budget of attention, 100%, and needs to *divide* that budget among all the candidates. We need to turn raw scores into percentages that add up to 1. You'll find out why the attention needs to add up to 100% later.
+A token has a fixed budget of attention, 100%, and needs to *divide* that budget among all the other tokens according to their match scores. We turn the raw scores into percentages that add up to 100%. You'll find out why the attention needs to add up to 100% later.
 
 The function usually used for this is called **softmax**. Think of it as a competition: bigger numbers dominate, smaller numbers get squeezed, and the result is a set of percentages.
 
@@ -62,15 +50,15 @@ The function usually used for this is called **softmax**. Think of it as a compe
 Drag the sliders. Try "All equal": everyone gets 25%. Try "Moderate, rest silent": A wins by default because nobody else is saying anything. Try "Moderate meets loud": B drowns out A. The gaps between scores matter more than the absolute values. Softmax cares about who's loudest *relative to everyone else*.
 </SoftmaxExplorerWidget>
 
-Now apply softmax to the match scores from above. With a plain noun match scoring 1 and everything else 0, "it" against `cat blah blah it` gets scores `[1, 0, 0, 0]`, which softmax turns into roughly `[47.5%, 17.5%, 17.5%, 17.5%]`. That's the right shape, cat wins, but more than half the attention leaks to the filler tokens. Not great.
+Now apply softmax to the match scores from before. When one token is the clear best match, it takes almost all of the attention. When two tokens tie, the attention splits evenly between them.
 
-The fix is to crank up the *query magnitude*. This is the detector-sensitivity lever from the Vectors chapter: a longer query vector is a more sensitive detector, so the gap between a match and a miss grows. The keys still describe what each token is, but the asker now cares much more about the tokens that matched best. With "it"'s query at 10 instead of 1, the scores become `[10, 0, 0, 0]`, and softmax turns those into roughly `[99.99%, ≈0%, ≈0%, ≈0%]`. Nearly all the attention goes to the noun.
+<AttentionSoftmaxWidget>
+Each token gets a share of the asker's attention, and the shares always add up to 100%. Try "A split": "he" could mean Sam or Alex, so the attention divides evenly. Try "A clear winner": "glass" takes almost everything. Then drag the query strength up and watch the leftover attention on the weak matches shrink away.
+</AttentionSoftmaxWidget>
 
-<ToyAttentionSoftmaxWidget>
-Toggle the query magnitude between 1 and 10. At 1, attention leaks all over the place. At 10, "it" puts almost all of its attention on the noun. There's still a tiny leak. Softmax always allocates 100%, so a fraction of a percent goes to every loser. That's honest and we'll come back to it.
-</ToyAttentionSoftmaxWidget>
+That query strength slider is a real lever the model controls. A longer query vector is a more sensitive detector, the same idea from the Vectors chapter, so a strong query makes the best match dominate and starves the weak ones. A weak query leaves the attention spread out.
 
-But there's a bigger problem. Try clicking on "blah" in the widget above. "blah" isn't looking for a noun, so its query is just zero. So every score is zero, and softmax spreads attention evenly across all four tokens. The widget reports "blah pays 25% attention to itself, 25% to cat, 25% to the other blah, 25% to it," which is meaningless. The same thing happens to "it" if there are no nouns in the sentence. Softmax has nothing to grab onto, so it spreads attention everywhere, with full confidence.
+There's a catch, though. Softmax always hands out the full 100%, even when nothing in the sentence is a good match. What should a token do when it's looking for something that just isn't there?
 
 ## Where Does Attention Go When Nothing Matches?
 
