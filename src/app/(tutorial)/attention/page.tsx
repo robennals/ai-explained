@@ -9,8 +9,8 @@ import {
   MatchingQuestionsWidget,
   SoftmaxExplorerWidget,
   AttentionSoftmaxWidget,
-  ToyAttentionValuesWidget,
-  ToyAttentionSinkWidget,
+  AttentionSinkWidget,
+  AttentionValuesWidget,
 } from "./widgets";
 
 export const metadata = chapterMetadata("attention");
@@ -28,8 +28,8 @@ export default function Chapter07() {
             MatchingQuestionsWidget,
             SoftmaxExplorerWidget,
             AttentionSoftmaxWidget,
-            ToyAttentionValuesWidget,
-            ToyAttentionSinkWidget,
+            AttentionSinkWidget,
+            AttentionValuesWidget,
           }}
         />
       </div>

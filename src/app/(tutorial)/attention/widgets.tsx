@@ -19,13 +19,13 @@ const AttentionSoftmax = dynamic(
   { ssr: false }
 );
 
-const ToyAttentionValues = dynamic(
-  () => import("@/components/widgets/attention/ToyAttentionValues").then((m) => m.ToyAttentionValues),
+const AttentionSink = dynamic(
+  () => import("@/components/widgets/attention/AttentionSink").then((m) => m.AttentionSink),
   { ssr: false }
 );
 
-const ToyAttentionSink = dynamic(
-  () => import("@/components/widgets/attention/ToyAttentionSink").then((m) => m.ToyAttentionSink),
+const AttentionValues = dynamic(
+  () => import("@/components/widgets/attention/AttentionValues").then((m) => m.AttentionValues),
   { ssr: false }
 );
 
@@ -85,18 +85,18 @@ export function AttentionSoftmaxWidget({ children }: { children?: React.ReactNod
   );
 }
 
-export function ToyAttentionValuesWidget({ children }: { children?: React.ReactNode }) {
+export function AttentionSinkWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children} label="Explore it">
-      <ToyAttentionValues />
+      <AttentionSink />
     </WidgetSlot>
   );
 }
 
-export function ToyAttentionSinkWidget({ children }: { children?: React.ReactNode }) {
+export function AttentionValuesWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children} label="Explore it">
-      <ToyAttentionSink />
+      <AttentionValues />
     </WidgetSlot>
   );
 }

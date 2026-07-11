@@ -62,33 +62,25 @@ There's a catch, though. Softmax always hands out the full 100%, even when nothi
 
 ## Where Does Attention Go When Nothing Matches?
 
-Softmax always allocates 100% somewhere, even when no real match is available. We need a sensible place for the leftover attention to go.
+Sometimes a token is looking for something that just isn't in the sentence. Think of the "it" in "It was raining." That "it" doesn't refer to anything; it's only there because English needs a subject. But softmax still hands out the full 100%, so the attention smears thinly across every token, which is worse than useless.
 
-The fix is to add a **sink** token whose only job is to absorb leftover attention. Give it a key that's *slightly* nounish, enough to score above nothing but well below a real noun. When a real noun is around, the noun wins by a wide margin, because of the cranked-up query magnitude. When no noun is around, the sink wins by default, since it's the only thing scoring above zero.
+The fix is a **sink**: a token whose only job is to absorb leftover attention. Give it a modest fixed score, enough to beat a weak match but lose to a strong one. When there's a real answer, the answer wins and the sink is barely touched. When there isn't, the sink wins by default, and the attention lands somewhere harmless.
 
-That handles the case where "it" can't find a noun. The other case, an off-task token like "blah" that isn't looking for a noun at all, needs one more touch: the sink also advertises a generic "nothing in particular" signal, and off-task tokens point their query at exactly that. So a token with nothing to look for still has somewhere harmless to land, and the sink is the only token that matches it.
+<AttentionSinkWidget>
+Try "Nothing matches": no token is a real answer, so the sink absorbs most of the attention. Toggle the sink off to see the attention smear across the sentence with nowhere safe to go. Try "Something matches": "glass" scores well above the sink, so it wins and the sink barely registers.
+</AttentionSinkWidget>
 
-<ToyAttentionSinkWidget>
-Click "it" in `cat blah blah it`: almost all attention goes to "cat," with barely any leftover on the sink. Try `blah blah blah it`: there's no noun to find, and the sink wins ~97% of the attention. Try clicking "blah": it isn't looking for a noun, so its attention parks on the sink (also ~97%). Every off-task token now has somewhere harmless to land.
-</ToyAttentionSinkWidget>
-
-Real models don't always use a dedicated sink token. Sometimes the model learns to use a punctuation mark as a sink, or a start-of-sentence token, or just has the token attend to itself. The idea is the same in every case: when this head doesn't have anything useful to do for a particular token, attention has to go somewhere harmless.
+Real models don't always use a dedicated sink token. Sometimes the model learns to use a punctuation mark, a start-of-sentence token, or just has the token attend to itself. The idea is the same either way: when a token has nothing useful to look for, its attention needs a harmless place to go.
 
 ## What Did You Find?
 
-So far attention tells us *where to look*, which tokens are relevant. But we also need *what to gather* from those tokens.
+Attention has told us *where to look*. Now we gather *what's there*. Alongside its query and key, each token has a **value**: what it hands over when another token attends to it. The asker collects the values of the tokens it attended to, weighted by how much attention each one got.
 
-Each token gets a third vector: a **value**. The query and key decide who talks to whom. The value is what gets said. For our pronoun example, the value encodes which animal the token represents: cat's value is `[1, 0]`, dog's value is `[0, 1]`, and filler tokens (including the sink) have nothing to share, so their value is `[0, 0]`.
+<AttentionValuesWidget>
+Try "A clear value": "it" pays almost all its attention to "glass", so it gathers "the glass" and now carries that meaning. Try "A blended value": "he" splits evenly between Sam and Alex, so it gathers an equal mix of the two, which is exactly how an ambiguous pronoun should feel.
+</AttentionValuesWidget>
 
-Attention then blends these values using the softmax weights as a recipe. If "it" pays nearly 100% attention to "cat" and a fraction of a percent everywhere else, the result is roughly `[1, 0]`, almost pure cat.
-
-<ToyAttentionValuesWidget>
-Click "it" in `cat blah blah it`: the result is almost all cat. Try `cat blah dog it`: half cat, half dog, because "it" matched both nouns equally and the model can't tell which. Try `dog blah dog it`: *two* dogs, and the result is even sharper than with just one. Try `blah blah blah it`: there's no noun to find, attention falls on the sink, and the result vector is empty. That's exactly what "nothing useful gathered" looks like.
-</ToyAttentionValuesWidget>
-
-Two of the same noun produces a *more* confident answer than one, not a doubled one. Softmax-weighted blending stays in the same value-space as the input, no matter how many matches there are. Match dog twice, you get dog. Match dog and cat, you get half-dog-half-cat. The mechanism never produces "double dog."
-
-When attention falls on the sink (whose value is `[0, 0]`), the result is empty. That's a clean way to represent "this head had nothing useful to say."
+Because the values are combined by weights that add up to 100%, the result always stays in the same space as a single value. A clear winner gives a sharp result; a tie gives a genuine blend. The mechanism never overshoots into "double glass" or anything outside the range of the inputs.
 
 ## Where the Vectors Come From
 
