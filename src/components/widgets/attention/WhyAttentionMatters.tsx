@@ -301,7 +301,7 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
   // The arrow SVG lives inside the scrolling grid, so these coordinates are
   // relative to the grid content and stay aligned as it scrolls.
   useEffect(() => {
-    if (mode !== "qkv") return;
+    if (mode === "basic") return;
     const raf = requestAnimationFrame(() => {
       const content = gridContentRef.current;
       const fromEl = colRefs.current.get(selectedWord);
@@ -323,7 +323,7 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
 
   // Keep the compared column scrolled into view when it's off-screen.
   useEffect(() => {
-    if (mode !== "qkv") return;
+    if (mode === "basic") return;
     const raf = requestAnimationFrame(() => {
       colRefs.current.get(effectiveAnswerer)?.scrollIntoView({
         behavior: "smooth",
@@ -338,7 +338,7 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
   // their detail cards, relative to the exploded-view wrapper.
   const measureConnectors = useCallback(() => {
     const wrap = explodeRef.current;
-    if (mode !== "qkv" || !wrap) {
+    if (mode === "basic" || !wrap) {
       setConnectors([]);
       return;
     }
@@ -367,7 +367,7 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
   // Recompute connectors on selection change, and keep them tracking while the
   // grid scrolls or the window resizes.
   useEffect(() => {
-    if (mode !== "qkv") return;
+    if (mode === "basic") return;
     let raf = 0;
     const run = () => {
       cancelAnimationFrame(raf);
@@ -399,6 +399,13 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
   // SVG padding above words for arcs
   const arcPad = 60;
 
+  const title =
+    mode === "qkv"
+      ? "Scoring the Match"
+      : mode === "answering"
+        ? "Query, Key, and Value"
+        : "Which Tokens Need Other Tokens?";
+
   const description =
     mode === "qkv"
       ? "Each token's key gets a dot-product score against the query. Click any token to compare it; the matched token's value gets pulled in."
@@ -406,19 +413,11 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
         ? "The highlighted token's query matches one token's key, exactly or closely. Click other tokens to compare their keys."
         : "The highlighted token needs help from specific other tokens. Follow the arrow.";
 
-  // The query box shown at the top of the interactive panels.
-  const queryBox = (
-    <div className="rounded-lg border border-accent/40 bg-accent/5 px-3 py-2 text-sm">
-      <div className="text-[10px] font-semibold uppercase tracking-wide text-accent">
-        Query for &ldquo;{selectedWordText}&rdquo;
-      </div>
-      <div className="text-foreground">{sentence.query}</div>
-    </div>
-  );
-
-  // Dot-product mode: the token / match-score grid, with the arc arrow from the
-  // asker column to the compared column living inside the scrolling content.
-  const qkvGrid = (
+  // The interactive token row, shared by the answering and dot-product modes.
+  // The dot-product mode adds a match-score row; both draw the arc arrow from
+  // the asker column to the compared column inside the scrolling content.
+  const showScores = mode === "qkv";
+  const tokenGrid = (
     <div ref={gridScrollRef} className="overflow-x-auto rounded-md border border-border">
       <div ref={gridContentRef} className="relative w-max">
         <svg
@@ -428,7 +427,7 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
           style={{ zIndex: 10 }}
         >
           <defs>
-            <marker id="qkv-arrowhead" markerWidth="7" markerHeight="6" refX="3.5" refY="5" orient="auto">
+            <marker id={`arc-arrowhead-${mode}`} markerWidth="7" markerHeight="6" refX="3.5" refY="5" orient="auto">
               <polygon points="0 0, 7 0, 3.5 6" fill={`hsla(${HIGHLIGHT_HUE}, 75%, 55%, 0.85)`} />
             </marker>
           </defs>
@@ -438,7 +437,7 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
               fill="none"
               stroke={`hsla(${HIGHLIGHT_HUE}, 75%, 55%, 0.85)`}
               strokeWidth={2}
-              markerEnd="url(#qkv-arrowhead)"
+              markerEnd={`url(#arc-arrowhead-${mode})`}
               className="transition-all duration-300"
             />
           )}
@@ -446,17 +445,24 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
         <div className="border-b border-border" style={{ height: QKV_ARC_H }} aria-hidden />
         <div className="flex items-stretch">
           <div className="flex shrink-0 flex-col bg-foreground/[0.02]">
-            <div className="flex h-9 items-center justify-end border-b border-border px-3 text-[10px] font-semibold uppercase tracking-wide text-muted">
+            <div
+              className={`flex h-9 items-center justify-end px-3 text-[10px] font-semibold uppercase tracking-wide text-muted ${
+                showScores ? "border-b border-border" : ""
+              }`}
+            >
               token
             </div>
-            <div className="flex h-11 items-center justify-end px-3 text-[10px] font-semibold uppercase tracking-wide text-muted">
-              match&nbsp;score
-            </div>
+            {showScores && (
+              <div className="flex h-11 items-center justify-end px-3 text-[10px] font-semibold uppercase tracking-wide text-muted">
+                match&nbsp;score
+              </div>
+            )}
           </div>
           {sentence.words.map((word, i) => {
             const isAsker = i === selectedWord;
             const isSel = i === effectiveAnswerer && !isAsker;
             const isTgt = i === targetIdx;
+            const canClick = !isAsker && (mode === "qkv" || i in sentence.answers);
             const sc = scoreFor(i);
             return (
               <button
@@ -465,30 +471,38 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
                   if (el) colRefs.current.set(i, el);
                   else colRefs.current.delete(i);
                 }}
-                onClick={isAsker ? undefined : () => setClickedAnswerer(i)}
+                onClick={canClick ? () => setClickedAnswerer(i) : undefined}
                 aria-pressed={isSel}
                 className={`flex flex-col items-stretch border-l border-border transition-colors ${
-                  isAsker ? "cursor-default" : "cursor-pointer hover:bg-accent/10"
+                  canClick ? "cursor-pointer hover:bg-accent/10" : "cursor-default"
                 } ${isSel ? (isTgt ? "bg-indigo-50 dark:bg-indigo-950/40" : "bg-accent/5") : ""}`}
               >
                 <div
-                  className={`flex h-9 items-center justify-center whitespace-nowrap border-b border-border px-3 text-lg ${
+                  className={`flex h-9 items-center justify-center whitespace-nowrap px-3 text-lg ${
+                    showScores ? "border-b border-border" : ""
+                  } ${
                     isAsker
                       ? "font-bold text-accent"
                       : isTgt
                         ? "font-semibold text-indigo-600 dark:text-indigo-400"
                         : "text-foreground"
+                  } ${
+                    canClick && !isSel && !showScores
+                      ? "underline decoration-dotted decoration-accent/60 decoration-2 underline-offset-4"
+                      : ""
                   }`}
                 >
                   {word}
                 </div>
-                <div
-                  className={`flex h-11 items-center justify-center px-3 font-mono text-2xl font-bold ${
-                    isAsker ? "text-muted/40" : isTgt ? "text-accent" : "text-muted/60"
-                  }`}
-                >
-                  {isAsker ? "–" : sc}
-                </div>
+                {showScores && (
+                  <div
+                    className={`flex h-11 items-center justify-center px-3 font-mono text-2xl font-bold ${
+                      isAsker ? "text-muted/40" : isTgt ? "text-accent" : "text-muted/60"
+                    }`}
+                  >
+                    {isAsker ? "–" : sc}
+                  </div>
+                )}
               </button>
             );
           })}
@@ -498,14 +512,14 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
   );
 
   return (
-    <WidgetContainer title="Which Words Matter?" description={description} onReset={handleReset}>
+    <WidgetContainer title={title} description={description} onReset={handleReset}>
       <div className="flex flex-col gap-5">
         {/* Sentence selector tabs */}
         <WidgetTabs tabs={TABS} activeTab={String(sentenceIdx)} onTabChange={handleTabChange} />
 
-        {/* Word display. Dot-product mode uses a token / match-score grid;
-            the other modes use the arrow overlay. */}
-        {mode !== "qkv" && (
+        {/* Basic mode reads the sentence naturally with an arrow overlay. The
+            interactive modes use the exploded token-grid view below. */}
+        {mode === "basic" && (
         <div className="relative rounded-lg border border-border bg-surface" ref={containerRef}>
           <>
           {/* SVG overlay for curved arrows */}
@@ -544,20 +558,13 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
           <div className="flex flex-wrap gap-x-1 gap-y-0 px-5 pt-4 text-lg" style={{ paddingTop: `${arcPad + 16}px` }}>
             {sentence.words.map((word, i) => {
               const isSelected = i === selectedWord;
-              // Answering mode: only tokens that publish a key are clickable.
-              const isAnswerable = i !== selectedWord && mode === "answering" && i in sentence.answers;
-              const isCompared = isInteractive && i === effectiveAnswerer;
-              const isTargetHighlight = isInteractive ? isCompared && answererMatches : i in targets;
+              const isTargetHighlight = i in targets;
 
               const cls = isSelected
                 ? "font-semibold text-accent ring-2 ring-accent ring-offset-1 ring-offset-surface"
                 : isTargetHighlight
                   ? "font-semibold text-indigo-600 dark:text-indigo-400"
-                  : isCompared
-                    ? "font-semibold text-foreground ring-1 ring-foreground/40 ring-offset-1 ring-offset-surface"
-                    : isAnswerable
-                      ? "cursor-pointer underline decoration-accent decoration-dotted decoration-2 underline-offset-4 transition-colors hover:bg-accent/10 hover:text-accent"
-                      : "";
+                  : "";
 
               return (
                 <span
@@ -566,19 +573,6 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
                     if (el) wordRefs.current.set(i, el);
                     else wordRefs.current.delete(i);
                   }}
-                  onClick={isAnswerable ? () => setClickedAnswerer(i) : undefined}
-                  role={isAnswerable ? "button" : undefined}
-                  tabIndex={isAnswerable ? 0 : undefined}
-                  onKeyDown={
-                    isAnswerable
-                      ? (e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            e.preventDefault();
-                            setClickedAnswerer(i);
-                          }
-                        }
-                      : undefined
-                  }
                   className={`inline-block rounded px-1 py-0.5 ${cls}`}
                 >
                   {word}
@@ -613,54 +607,21 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
         )}
 
 
-        {/* Query on top, the compared token as a card below (answering mode). */}
-        {mode === "answering" && (
-          <div className="flex flex-col gap-2">
-            <div className="text-center text-sm font-medium text-accent">
-              Click any underlined token to compare its key.
-            </div>
-            {queryBox}
-            <TokenCard
-              name={effectiveAnswererText}
-              tone={answererMatches ? "match" : "nomatch"}
-              keyText={sentence.answers[effectiveAnswerer] ?? EMPTY}
-              value={answererMatches ? sentence.value : undefined}
-            />
-            <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-foreground/[0.02] px-3 py-2 text-sm">
-              <span
-                className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase tracking-wide ${
-                  !answererMatches
-                    ? "bg-foreground/10 text-muted"
-                    : sentence.inexact
-                      ? "bg-amber-500/15 text-amber-700 dark:text-amber-400"
-                      : "bg-success/15 text-success"
-                }`}
-              >
-                {!answererMatches ? "No match" : sentence.inexact ? "Close match" : "Exact match"}
-              </span>
-              <span className="text-muted">
-                {!answererMatches
-                  ? `"${effectiveAnswererText}" has a different key, so "${selectedWordText}" looks elsewhere.`
-                  : sentence.inexact
-                    ? "the query and the key aren't identical, but they overlap enough to count."
-                    : "the query and the key are the same."}
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* Dot-product mode: an exploded view. The token / match-score grid up
-            top, then dotted connectors down to a detailed card for each of the
-            two tokens being matched, the asker (its query) and the compared
-            token (its key and value). */}
-        {mode === "qkv" && (
+        {/* Interactive modes share one exploded view: the token row up top,
+            then dotted connectors down to a detailed card for each of the two
+            tokens being matched, the asker (its query) and the compared token
+            (its key and value). Dot-product mode adds a match-score row and the
+            numeric dot product; answering mode adds a match verdict. */}
+        {isInteractive && (
           <div className="flex flex-col gap-4">
             <div className="text-center text-sm font-medium text-accent">
-              Click any token to score its key against &ldquo;{selectedWordText}&rdquo;&apos;s query.
+              {mode === "qkv"
+                ? `Click any token to score its key against “${selectedWordText}”’s query.`
+                : `Click any underlined token to compare its key against “${selectedWordText}”’s query.`}
             </div>
 
             <div ref={explodeRef} className="relative">
-              <div className="rounded-lg border border-border bg-surface p-3">{qkvGrid}</div>
+              <div className="rounded-lg border border-border bg-surface p-3">{tokenGrid}</div>
 
               {/* Dotted connectors: each token in the grid links down to its
                   expanded card, so the cards read as a zoom-in on those tokens. */}
@@ -712,18 +673,43 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
               </div>
             </div>
 
-            <div className="rounded-lg border border-border bg-foreground/[0.02] px-3 py-2.5 text-center text-sm leading-relaxed">
-              <span className="font-semibold text-accent">query</span> (&ldquo;{sentence.query}&rdquo;){" "}
-              <span className="text-muted">·</span>{" "}
-              <span className="font-semibold text-indigo-700 dark:text-indigo-300">key</span> (&ldquo;
-              {sentence.answers[effectiveAnswerer] ?? EMPTY}&rdquo;){" = "}
-              <span className="font-mono text-lg font-bold text-accent">{scoreFor(effectiveAnswerer)}</span>
-            </div>
-            <div className="text-center text-sm text-muted">
-              {answererMatches
-                ? `"${effectiveAnswererText}" is the best match, so its value gets pulled in.`
-                : `Far below "${sentence.words[targetIdx]}" at ${scoreFor(targetIdx)}, so it's mostly ignored.`}
-            </div>
+            {mode === "qkv" ? (
+              <>
+                <div className="rounded-lg border border-border bg-foreground/[0.02] px-3 py-2.5 text-center text-sm leading-relaxed">
+                  <span className="font-semibold text-accent">query</span> (&ldquo;{sentence.query}&rdquo;){" "}
+                  <span className="text-muted">·</span>{" "}
+                  <span className="font-semibold text-indigo-700 dark:text-indigo-300">key</span> (&ldquo;
+                  {sentence.answers[effectiveAnswerer] ?? EMPTY}&rdquo;){" = "}
+                  <span className="font-mono text-lg font-bold text-accent">{scoreFor(effectiveAnswerer)}</span>
+                </div>
+                <div className="text-center text-sm text-muted">
+                  {answererMatches
+                    ? `"${effectiveAnswererText}" is the best match, so its value gets pulled in.`
+                    : `Far below "${sentence.words[targetIdx]}" at ${scoreFor(targetIdx)}, so it's mostly ignored.`}
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-foreground/[0.02] px-3 py-2 text-sm">
+                <span
+                  className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase tracking-wide ${
+                    !answererMatches
+                      ? "bg-foreground/10 text-muted"
+                      : sentence.inexact
+                        ? "bg-amber-500/15 text-amber-700 dark:text-amber-400"
+                        : "bg-success/15 text-success"
+                  }`}
+                >
+                  {!answererMatches ? "No match" : sentence.inexact ? "Close match" : "Exact match"}
+                </span>
+                <span className="text-muted">
+                  {!answererMatches
+                    ? `"${effectiveAnswererText}" has a different key, so "${selectedWordText}" looks elsewhere.`
+                    : sentence.inexact
+                      ? "the query and the key aren't identical, but they overlap enough to count."
+                      : "the query and the key are the same."}
+                </span>
+              </div>
+            )}
           </div>
         )}
 
