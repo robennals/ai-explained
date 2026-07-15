@@ -340,57 +340,55 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
             the other modes use the arrow overlay. */}
         <div className="relative rounded-lg border border-border bg-surface" ref={containerRef}>
           {mode === "qkv" ? (
-            <div className="overflow-x-auto px-4 py-3">
-              <div className="flex items-stretch">
-                <div className="flex shrink-0 flex-col justify-center pr-3">
-                  <div className="flex h-8 items-center justify-end text-[10px] font-semibold uppercase tracking-wide text-muted">
-                    token
+            <div className="px-4 py-4">
+              <div className="overflow-x-auto rounded-md border border-border">
+                <div className="flex w-max items-stretch">
+                  <div className="flex shrink-0 flex-col bg-foreground/[0.02]">
+                    <div className="flex h-9 items-center justify-end border-b border-border px-3 text-[10px] font-semibold uppercase tracking-wide text-muted">
+                      token
+                    </div>
+                    <div className="flex h-11 items-center justify-end px-3 text-[10px] font-semibold uppercase tracking-wide text-muted">
+                      match&nbsp;score
+                    </div>
                   </div>
-                  <div className="flex h-10 items-center justify-end text-[10px] font-semibold uppercase tracking-wide text-muted">
-                    match&nbsp;score
-                  </div>
+                  {sentence.words.map((word, i) => {
+                    const isAsker = i === selectedWord;
+                    const isSel = i === effectiveAnswerer && !isAsker;
+                    const isTgt = i === targetIdx;
+                    const sc = scoreFor(i);
+                    return (
+                      <button
+                        key={`${sentenceIdx}-${i}`}
+                        onClick={isAsker ? undefined : () => setClickedAnswerer(i)}
+                        aria-pressed={isSel}
+                        className={`flex flex-col items-stretch border-l border-border transition-colors ${
+                          isAsker ? "cursor-default" : "cursor-pointer hover:bg-accent/10"
+                        } ${
+                          isSel ? (isTgt ? "bg-indigo-50 dark:bg-indigo-950/40" : "bg-accent/5") : ""
+                        }`}
+                      >
+                        <div
+                          className={`flex h-9 items-center justify-center whitespace-nowrap border-b border-border px-3 text-lg ${
+                            isAsker
+                              ? "font-bold text-accent"
+                              : isTgt
+                                ? "font-semibold text-indigo-600 dark:text-indigo-400"
+                                : "text-foreground"
+                          }`}
+                        >
+                          {word}
+                        </div>
+                        <div
+                          className={`flex h-11 items-center justify-center px-3 font-mono text-2xl font-bold ${
+                            isAsker ? "text-muted/40" : isTgt ? "text-accent" : "text-muted/60"
+                          }`}
+                        >
+                          {isAsker ? "–" : sc}
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
-                {sentence.words.map((word, i) => {
-                  const isAsker = i === selectedWord;
-                  const isSel = i === effectiveAnswerer && !isAsker;
-                  const isTgt = i === targetIdx;
-                  const sc = scoreFor(i);
-                  return (
-                    <button
-                      key={`${sentenceIdx}-${i}`}
-                      onClick={isAsker ? undefined : () => setClickedAnswerer(i)}
-                      aria-pressed={isSel}
-                      className={`flex flex-col items-center rounded px-2 transition-colors ${
-                        isAsker ? "cursor-default" : "cursor-pointer hover:bg-accent/10"
-                      } ${
-                        isSel
-                          ? isTgt
-                            ? "bg-indigo-50 ring-1 ring-indigo-400 dark:bg-indigo-950/40"
-                            : "bg-accent/5 ring-1 ring-accent"
-                          : ""
-                      }`}
-                    >
-                      <div
-                        className={`flex h-8 items-center whitespace-nowrap text-lg ${
-                          isAsker
-                            ? "font-bold text-accent"
-                            : isTgt
-                              ? "font-semibold text-indigo-600 dark:text-indigo-400"
-                              : "text-foreground"
-                        }`}
-                      >
-                        {word}
-                      </div>
-                      <div
-                        className={`flex h-10 items-center font-mono text-2xl font-bold ${
-                          isAsker ? "text-muted/40" : isTgt ? "text-accent" : "text-muted/60"
-                        }`}
-                      >
-                        {isAsker ? "–" : sc}
-                      </div>
-                    </button>
-                  );
-                })}
               </div>
             </div>
           ) : (

@@ -6,9 +6,10 @@ import { WidgetTabs } from "../shared/WidgetTabs";
 import { softmax } from "./toyMath";
 
 /* ------------------------------------------------------------------ */
-/*  Values: once attention is divided up, each token hands over its    */
-/*  value, weighted by how much attention it got. The asker ends up    */
-/*  with a blend, sharp when one token wins, mixed when the split ties. */
+/*  Values: softmax turns match scores into attention percentages,     */
+/*  then each token hands over its value weighted by that percentage.  */
+/*  The asker ends up with a blend, sharp or mixed depending on the     */
+/*  split.                                                             */
 /* ------------------------------------------------------------------ */
 
 interface Example {
@@ -32,7 +33,7 @@ const EXAMPLES: Example[] = [
     query: "the thing being talked about",
     scores: [1, 2, 1, 8, 1, 0, 2, 1],
     values: { 3: "the glass" },
-    result: '"the glass". Almost all the attention is on one token, so "it" now clearly carries the meaning of the glass.',
+    result: "the glass",
   },
   {
     id: "split",
@@ -42,7 +43,7 @@ const EXAMPLES: Example[] = [
     query: "the animal being referred to",
     scores: [1, 6, 1, 1, 6, 1, 2, 1, 0, 2, 1, 1],
     values: { 1: "the cat", 4: "the dog" },
-    result: '"either the cat or the dog". Both score the same, so the value is an even mix until later context decides.',
+    result: "either the cat or the dog",
   },
   {
     id: "lean",
@@ -52,7 +53,7 @@ const EXAMPLES: Example[] = [
     query: "the animal doing the action",
     scores: [1, 5, 2, 1, 4, 1, 1, 1, 0, 2, 1],
     values: { 1: "the cat", 4: "the dog" },
-    result: '"probably the cat, maybe the dog". The cat is the one doing things, so the blend leans its way but keeps a little dog.',
+    result: "probably the cat, maybe the dog",
   },
 ];
 
@@ -76,12 +77,18 @@ export function AttentionValues() {
   const weightByIndex = new Map<number, number>();
   others.forEach((i, k) => weightByIndex.set(i, weights[k]));
 
+  // Tokens whose value makes a real contribution to the blend.
+  const contributors = example.words
+    .map((_, i) => i)
+    .filter((i) => example.values[i] !== undefined && (weightByIndex.get(i) ?? 0) > 0.03)
+    .sort((a, b) => (weightByIndex.get(b) ?? 0) - (weightByIndex.get(a) ?? 0));
+
   const tabs = EXAMPLES.map((e) => ({ id: e.id, label: e.label }));
 
   return (
     <WidgetContainer
       title="Gathering the Value"
-      description="Each token hands over its value, weighted by how much attention it got. The asker ends up with the blend."
+      description="Softmax turns the match scores into attention percentages. Each token then hands over its value, weighted by that percentage."
       onReset={handleReset}
     >
       <div className="flex flex-col gap-5">
@@ -94,50 +101,80 @@ export function AttentionValues() {
           <div className="text-foreground">{example.query}</div>
         </div>
 
-        <div className="flex flex-col gap-1.5">
-          {example.words.map((word, i) => {
-            if (i === example.asker) {
+        {/* token / match score / softmax grid */}
+        <div className="overflow-x-auto rounded-md border border-border">
+          <div className="flex w-max items-stretch">
+            <div className="flex shrink-0 flex-col bg-foreground/[0.02]">
+              <div className="flex h-9 items-center justify-end border-b border-border px-3 text-[10px] font-semibold uppercase tracking-wide text-muted">
+                token
+              </div>
+              <div className="flex h-10 items-center justify-end border-b border-border px-3 text-[10px] font-semibold uppercase tracking-wide text-muted">
+                match&nbsp;score
+              </div>
+              <div className="flex h-10 items-center justify-end px-3 text-[10px] font-semibold uppercase tracking-wide text-accent">
+                softmax
+              </div>
+            </div>
+            {example.words.map((word, i) => {
+              const isAsker = i === example.asker;
+              const w = weightByIndex.get(i) ?? 0;
+              const hasValue = example.values[i] !== undefined;
+              const strong = w > 0.05;
               return (
-                <div key={i} className="flex items-center gap-3 rounded-md bg-accent/5 px-3 py-1.5">
-                  <span className="w-24 shrink-0 truncate font-semibold text-accent">{word}</span>
-                  <span className="text-xs text-muted">is doing the looking</span>
-                </div>
-              );
-            }
-            const w = weightByIndex.get(i) ?? 0;
-            const hasValue = example.values[i] !== undefined;
-            const strong = w > 0.05;
-            return (
-              <div key={i} className="flex items-center gap-3 px-3 py-1">
-                <span className="w-24 shrink-0 truncate text-foreground">{word}</span>
-                <span className={`w-14 shrink-0 text-right font-mono text-sm font-bold ${strong ? "text-accent" : "text-muted"}`}>
-                  {pct(w)}
-                </span>
-                <span className="text-muted">×</span>
-                <span
-                  className={`flex-1 rounded px-2 py-0.5 text-sm ${
-                    hasValue ? "bg-indigo-500/10 text-foreground" : "text-muted/50"
+                <div
+                  key={i}
+                  className={`flex flex-col items-stretch border-l border-border ${
+                    hasValue ? "bg-indigo-50/60 dark:bg-indigo-950/30" : ""
                   }`}
                 >
-                  {hasValue ? (
-                    <>
-                      <span className="text-[10px] font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-300">
-                        value:{" "}
-                      </span>
-                      {example.values[i]}
-                    </>
-                  ) : (
-                    "no value to give"
-                  )}
-                </span>
-              </div>
-            );
-          })}
+                  <div
+                    className={`flex h-9 items-center justify-center whitespace-nowrap border-b border-border px-3 text-lg ${
+                      isAsker ? "font-bold text-accent" : hasValue ? "font-semibold text-indigo-600 dark:text-indigo-400" : "text-foreground"
+                    }`}
+                  >
+                    {word}
+                  </div>
+                  <div className="flex h-10 items-center justify-center border-b border-border px-3 font-mono text-lg font-bold text-muted/70">
+                    {isAsker ? "–" : example.scores[i]}
+                  </div>
+                  <div
+                    className={`flex h-10 items-center justify-center px-3 font-mono text-lg font-bold ${
+                      isAsker ? "text-muted/40" : strong ? "text-accent" : "text-muted/50"
+                    }`}
+                  >
+                    {isAsker ? "–" : pct(w)}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
+        {/* Contributing values */}
+        <div className="flex flex-col gap-2">
+          <div className="text-xs font-semibold uppercase tracking-wide text-muted">Values that make it in</div>
+          <div className="flex flex-wrap gap-2">
+            {contributors.map((i) => (
+              <div key={i} className="flex-1 rounded-lg border border-indigo-400/50 bg-indigo-50 px-3 py-2 text-sm dark:bg-indigo-950/40">
+                <div className="flex items-baseline justify-between gap-2">
+                  <span className="font-bold text-indigo-700 dark:text-indigo-300">&ldquo;{example.words[i]}&rdquo;</span>
+                  <span className="font-mono text-sm font-bold text-accent">{pct(weightByIndex.get(i) ?? 0)}</span>
+                </div>
+                <div className="mt-0.5 text-foreground">
+                  <span className="text-[10px] font-semibold uppercase tracking-wide text-muted">value: </span>
+                  {example.values[i]}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Combined value */}
         <div className="rounded-lg border-2 border-accent bg-accent/10 px-4 py-3 text-center">
-          <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted">What &ldquo;{example.words[example.asker]}&rdquo; gathered</div>
-          <div className="text-base font-medium text-foreground">{example.result}</div>
+          <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted">
+            What &ldquo;{example.words[example.asker]}&rdquo; gathered
+          </div>
+          <div className="text-lg font-medium text-foreground">{example.result}</div>
         </div>
       </div>
     </WidgetContainer>
