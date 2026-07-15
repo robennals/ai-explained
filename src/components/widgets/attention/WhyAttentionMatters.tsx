@@ -221,12 +221,19 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
   const [boxAnchorX, setBoxAnchorX] = useState<number | null>(null);
   // Dot-product mode arrow: x of the asker column and x of the compared column.
   const [qkvArrow, setQkvArrow] = useState<{ fromX: number; toX: number } | null>(null);
+  // Dotted "exploded" connectors from each token in the grid down to its
+  // detail card, so the cards read as a zoomed-in view of those two tokens.
+  const [connectors, setConnectors] = useState<
+    { x1: number; y1: number; x2: number; y2: number; kind: "query" | "key" }[]
+  >([]);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const wordRefs = useRef<Map<number, HTMLSpanElement>>(new Map());
   const gridContentRef = useRef<HTMLDivElement>(null);
   const gridScrollRef = useRef<HTMLDivElement>(null);
   const colRefs = useRef<Map<number, HTMLElement>>(new Map());
+  const explodeRef = useRef<HTMLDivElement>(null);
+  const detailCardRefs = useRef<Map<number, HTMLElement>>(new Map());
 
   const sentence = SENTENCES[sentenceIdx];
   const selectedWord = sentence.selectedWord;
@@ -327,6 +334,56 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
     return () => cancelAnimationFrame(raf);
   }, [effectiveAnswerer, sentenceIdx, mode]);
 
+  // Measure the dotted connectors from the query/key token columns down to
+  // their detail cards, relative to the exploded-view wrapper.
+  const measureConnectors = useCallback(() => {
+    const wrap = explodeRef.current;
+    if (mode !== "qkv" || !wrap) {
+      setConnectors([]);
+      return;
+    }
+    const w = wrap.getBoundingClientRect();
+    const lines: { x1: number; y1: number; x2: number; y2: number; kind: "query" | "key" }[] = [];
+    for (const idx of [selectedWord, effectiveAnswerer]) {
+      const col = colRefs.current.get(idx);
+      const card = detailCardRefs.current.get(idx);
+      if (!col || !card) continue;
+      const c = col.getBoundingClientRect();
+      const cd = card.getBoundingClientRect();
+      lines.push({
+        x1: c.left + c.width / 2 - w.left,
+        y1: c.bottom - w.top,
+        x2: cd.left + cd.width / 2 - w.left,
+        y2: cd.top - w.top,
+        kind: idx === selectedWord ? "query" : "key",
+      });
+    }
+    setConnectors(lines);
+    // sentenceIdx: the grid columns and cards remount when the sentence changes,
+    // so re-measure even if the token indices happen to line up.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, selectedWord, effectiveAnswerer, sentenceIdx]);
+
+  // Recompute connectors on selection change, and keep them tracking while the
+  // grid scrolls or the window resizes.
+  useEffect(() => {
+    if (mode !== "qkv") return;
+    let raf = 0;
+    const run = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(measureConnectors);
+    };
+    run();
+    const scroller = gridScrollRef.current;
+    scroller?.addEventListener("scroll", run, { passive: true });
+    window.addEventListener("resize", run);
+    return () => {
+      cancelAnimationFrame(raf);
+      scroller?.removeEventListener("scroll", run);
+      window.removeEventListener("resize", run);
+    };
+  }, [mode, measureConnectors]);
+
   const handleReset = useCallback(() => {
     setSentenceIdx(0);
     setClickedAnswerer(null);
@@ -359,6 +416,87 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
     </div>
   );
 
+  // Dot-product mode: the token / match-score grid, with the arc arrow from the
+  // asker column to the compared column living inside the scrolling content.
+  const qkvGrid = (
+    <div ref={gridScrollRef} className="overflow-x-auto rounded-md border border-border">
+      <div ref={gridContentRef} className="relative w-max">
+        <svg
+          className="pointer-events-none absolute left-0 top-0 overflow-visible"
+          width="100%"
+          height={QKV_ARC_H}
+          style={{ zIndex: 10 }}
+        >
+          <defs>
+            <marker id="qkv-arrowhead" markerWidth="7" markerHeight="6" refX="3.5" refY="5" orient="auto">
+              <polygon points="0 0, 7 0, 3.5 6" fill={`hsla(${HIGHLIGHT_HUE}, 75%, 55%, 0.85)`} />
+            </marker>
+          </defs>
+          {qkvArrow && (
+            <path
+              d={`M ${qkvArrow.fromX} ${QKV_ARC_H - 6} Q ${(qkvArrow.fromX + qkvArrow.toX) / 2} 2 ${qkvArrow.toX} ${QKV_ARC_H - 8}`}
+              fill="none"
+              stroke={`hsla(${HIGHLIGHT_HUE}, 75%, 55%, 0.85)`}
+              strokeWidth={2}
+              markerEnd="url(#qkv-arrowhead)"
+              className="transition-all duration-300"
+            />
+          )}
+        </svg>
+        <div className="border-b border-border" style={{ height: QKV_ARC_H }} aria-hidden />
+        <div className="flex items-stretch">
+          <div className="flex shrink-0 flex-col bg-foreground/[0.02]">
+            <div className="flex h-9 items-center justify-end border-b border-border px-3 text-[10px] font-semibold uppercase tracking-wide text-muted">
+              token
+            </div>
+            <div className="flex h-11 items-center justify-end px-3 text-[10px] font-semibold uppercase tracking-wide text-muted">
+              match&nbsp;score
+            </div>
+          </div>
+          {sentence.words.map((word, i) => {
+            const isAsker = i === selectedWord;
+            const isSel = i === effectiveAnswerer && !isAsker;
+            const isTgt = i === targetIdx;
+            const sc = scoreFor(i);
+            return (
+              <button
+                key={`${sentenceIdx}-${i}`}
+                ref={(el) => {
+                  if (el) colRefs.current.set(i, el);
+                  else colRefs.current.delete(i);
+                }}
+                onClick={isAsker ? undefined : () => setClickedAnswerer(i)}
+                aria-pressed={isSel}
+                className={`flex flex-col items-stretch border-l border-border transition-colors ${
+                  isAsker ? "cursor-default" : "cursor-pointer hover:bg-accent/10"
+                } ${isSel ? (isTgt ? "bg-indigo-50 dark:bg-indigo-950/40" : "bg-accent/5") : ""}`}
+              >
+                <div
+                  className={`flex h-9 items-center justify-center whitespace-nowrap border-b border-border px-3 text-lg ${
+                    isAsker
+                      ? "font-bold text-accent"
+                      : isTgt
+                        ? "font-semibold text-indigo-600 dark:text-indigo-400"
+                        : "text-foreground"
+                  }`}
+                >
+                  {word}
+                </div>
+                <div
+                  className={`flex h-11 items-center justify-center px-3 font-mono text-2xl font-bold ${
+                    isAsker ? "text-muted/40" : isTgt ? "text-accent" : "text-muted/60"
+                  }`}
+                >
+                  {isAsker ? "–" : sc}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <WidgetContainer title="Which Words Matter?" description={description} onReset={handleReset}>
       <div className="flex flex-col gap-5">
@@ -367,91 +505,8 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
 
         {/* Word display. Dot-product mode uses a token / match-score grid;
             the other modes use the arrow overlay. */}
+        {mode !== "qkv" && (
         <div className="relative rounded-lg border border-border bg-surface" ref={containerRef}>
-          {mode === "qkv" ? (
-            <div className="px-4 py-4">
-              <div ref={gridScrollRef} className="overflow-x-auto rounded-md border border-border">
-                <div ref={gridContentRef} className="relative w-max">
-                  {/* Arrow arc from the asker column to the compared column.
-                      It lives inside the scrolling content so it stays aligned. */}
-                  <svg
-                    className="pointer-events-none absolute left-0 top-0 overflow-visible"
-                    width="100%"
-                    height={QKV_ARC_H}
-                    style={{ zIndex: 10 }}
-                  >
-                    <defs>
-                      <marker id="qkv-arrowhead" markerWidth="7" markerHeight="6" refX="3.5" refY="5" orient="auto">
-                        <polygon points="0 0, 7 0, 3.5 6" fill={`hsla(${HIGHLIGHT_HUE}, 75%, 55%, 0.85)`} />
-                      </marker>
-                    </defs>
-                    {qkvArrow && (
-                      <path
-                        d={`M ${qkvArrow.fromX} ${QKV_ARC_H - 6} Q ${(qkvArrow.fromX + qkvArrow.toX) / 2} 2 ${qkvArrow.toX} ${QKV_ARC_H - 8}`}
-                        fill="none"
-                        stroke={`hsla(${HIGHLIGHT_HUE}, 75%, 55%, 0.85)`}
-                        strokeWidth={2}
-                        markerEnd="url(#qkv-arrowhead)"
-                        className="transition-all duration-300"
-                      />
-                    )}
-                  </svg>
-                  <div className="border-b border-border" style={{ height: QKV_ARC_H }} aria-hidden />
-                  <div className="flex items-stretch">
-                    <div className="flex shrink-0 flex-col bg-foreground/[0.02]">
-                      <div className="flex h-9 items-center justify-end border-b border-border px-3 text-[10px] font-semibold uppercase tracking-wide text-muted">
-                        token
-                      </div>
-                      <div className="flex h-11 items-center justify-end px-3 text-[10px] font-semibold uppercase tracking-wide text-muted">
-                        match&nbsp;score
-                      </div>
-                    </div>
-                    {sentence.words.map((word, i) => {
-                      const isAsker = i === selectedWord;
-                      const isSel = i === effectiveAnswerer && !isAsker;
-                      const isTgt = i === targetIdx;
-                      const sc = scoreFor(i);
-                      return (
-                        <button
-                          key={`${sentenceIdx}-${i}`}
-                          ref={(el) => {
-                            if (el) colRefs.current.set(i, el);
-                            else colRefs.current.delete(i);
-                          }}
-                          onClick={isAsker ? undefined : () => setClickedAnswerer(i)}
-                          aria-pressed={isSel}
-                          className={`flex flex-col items-stretch border-l border-border transition-colors ${
-                            isAsker ? "cursor-default" : "cursor-pointer hover:bg-accent/10"
-                          } ${
-                            isSel ? (isTgt ? "bg-indigo-50 dark:bg-indigo-950/40" : "bg-accent/5") : ""
-                          }`}
-                        >
-                          <div
-                            className={`flex h-9 items-center justify-center whitespace-nowrap border-b border-border px-3 text-lg ${
-                              isAsker
-                                ? "font-bold text-accent"
-                                : isTgt
-                                  ? "font-semibold text-indigo-600 dark:text-indigo-400"
-                                  : "text-foreground"
-                            }`}
-                          >
-                            {word}
-                          </div>
-                          <div
-                            className={`flex h-11 items-center justify-center px-3 font-mono text-2xl font-bold ${
-                              isAsker ? "text-muted/40" : isTgt ? "text-accent" : "text-muted/60"
-                            }`}
-                          >
-                            {isAsker ? "–" : sc}
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
           <>
           {/* SVG overlay for curved arrows */}
           {arrows.length > 0 && (
@@ -554,8 +609,8 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
             <div className="pb-3" aria-hidden />
           )}
           </>
-          )}
         </div>
+        )}
 
 
         {/* Query on top, the compared token as a card below (answering mode). */}
@@ -594,30 +649,69 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
           </div>
         )}
 
-        {/* Dot-product mode: the two tokens whose vectors made this score, the
-            asker (its query) and the compared token (its key and value). */}
+        {/* Dot-product mode: an exploded view. The token / match-score grid up
+            top, then dotted connectors down to a detailed card for each of the
+            two tokens being matched, the asker (its query) and the compared
+            token (its key and value). */}
         {mode === "qkv" && (
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-4">
             <div className="text-center text-sm font-medium text-accent">
-              Click any token above to score its key against &ldquo;{selectedWordText}&rdquo;&apos;s query.
+              Click any token to score its key against &ldquo;{selectedWordText}&rdquo;&apos;s query.
             </div>
-            <div className="grid gap-2 sm:grid-cols-2">
-              {[selectedWord, effectiveAnswerer]
-                .sort((a, b) => a - b)
-                .map((idx) =>
-                  idx === selectedWord ? (
-                    <TokenCard key="asker" name={selectedWordText} tone="asker" query={sentence.query} />
-                  ) : (
-                    <TokenCard
-                      key="compared"
-                      name={effectiveAnswererText}
-                      tone={answererMatches ? "match" : "nomatch"}
-                      keyText={sentence.answers[effectiveAnswerer] ?? EMPTY}
-                      value={answererMatches ? sentence.value : undefined}
+
+            <div ref={explodeRef} className="relative">
+              <div className="rounded-lg border border-border bg-surface p-3">{qkvGrid}</div>
+
+              {/* Dotted connectors: each token in the grid links down to its
+                  expanded card, so the cards read as a zoom-in on those tokens. */}
+              <svg
+                className="pointer-events-none absolute inset-0 h-full w-full overflow-visible"
+                style={{ zIndex: 5 }}
+              >
+                {connectors.map((ln) => {
+                  const midY = (ln.y1 + ln.y2) / 2;
+                  return (
+                    <path
+                      key={ln.kind}
+                      d={`M ${ln.x1} ${ln.y1} C ${ln.x1} ${midY}, ${ln.x2} ${midY}, ${ln.x2} ${ln.y2}`}
+                      fill="none"
+                      stroke={`hsla(${HIGHLIGHT_HUE}, 35%, 55%, 0.7)`}
+                      strokeWidth={1.5}
+                      strokeDasharray="4 3"
+                      className="transition-all duration-300"
                     />
-                  )
-                )}
+                  );
+                })}
+              </svg>
+
+              <div className="h-7" aria-hidden />
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                {[selectedWord, effectiveAnswerer]
+                  .sort((a, b) => a - b)
+                  .map((idx) => (
+                    <div
+                      key={idx}
+                      ref={(el) => {
+                        if (el) detailCardRefs.current.set(idx, el);
+                        else detailCardRefs.current.delete(idx);
+                      }}
+                    >
+                      {idx === selectedWord ? (
+                        <TokenCard name={selectedWordText} tone="asker" query={sentence.query} />
+                      ) : (
+                        <TokenCard
+                          name={effectiveAnswererText}
+                          tone={answererMatches ? "match" : "nomatch"}
+                          keyText={sentence.answers[effectiveAnswerer] ?? EMPTY}
+                          value={answererMatches ? sentence.value : undefined}
+                        />
+                      )}
+                    </div>
+                  ))}
+              </div>
             </div>
+
             <div className="rounded-lg border border-border bg-foreground/[0.02] px-3 py-2.5 text-center text-sm leading-relaxed">
               <span className="font-semibold text-accent">query</span> (&ldquo;{sentence.query}&rdquo;){" "}
               <span className="text-muted">·</span>{" "}
