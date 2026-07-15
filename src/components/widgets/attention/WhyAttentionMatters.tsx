@@ -677,7 +677,7 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
               <>
                 <div className="rounded-lg border border-border bg-foreground/[0.02] px-3 py-2.5 text-center text-sm leading-relaxed">
                   <span className="font-semibold text-accent">query</span> (&ldquo;{sentence.query}&rdquo;){" "}
-                  <span className="text-muted">·</span>{" "}
+                  <span className="text-lg font-bold text-muted">·</span>{" "}
                   <span className="font-semibold text-indigo-700 dark:text-indigo-300">key</span> (&ldquo;
                   {sentence.answers[effectiveAnswerer] ?? EMPTY}&rdquo;){" = "}
                   <span className="font-mono text-lg font-bold text-accent">{scoreFor(effectiveAnswerer)}</span>
