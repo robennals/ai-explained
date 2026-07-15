@@ -25,24 +25,34 @@ interface Example {
 
 const EXAMPLES: Example[] = [
   {
-    id: "split",
-    label: "A blended value",
-    words: ["Sam", "told", "Alex", "that", "he", "had", "won", "."],
-    asker: 4,
-    query: "a person who was just mentioned",
-    scores: [5, 1, 5, 1, 0, 1, 2, 1],
-    values: { 0: "Sam", 2: "Alex" },
-    result: "an equal blend of Sam and Alex. The model keeps both, because nothing in the sentence tells it which one won.",
-  },
-  {
     id: "winner",
     label: "A clear value",
     words: ["I", "dropped", "the", "glass", "and", "it", "broke", "."],
     asker: 5,
     query: "the thing being talked about",
-    scores: [1, 2, 1, 6, 1, 0, 2, 1],
+    scores: [1, 2, 1, 8, 1, 0, 2, 1],
     values: { 3: "the glass" },
-    result: 'almost purely "the glass". So "it" now carries the meaning of the glass.',
+    result: '"the glass". Almost all the attention is on one token, so "it" now clearly carries the meaning of the glass.',
+  },
+  {
+    id: "split",
+    label: "An even split",
+    words: ["The", "cat", "and", "the", "dog", "were", "napping", "when", "it", "woke", "up", "."],
+    asker: 8,
+    query: "the animal being referred to",
+    scores: [1, 6, 1, 1, 6, 1, 2, 1, 0, 2, 1, 1],
+    values: { 1: "the cat", 4: "the dog" },
+    result: '"either the cat or the dog". Both score the same, so the value is an even mix until later context decides.',
+  },
+  {
+    id: "lean",
+    label: "A leaning blend",
+    words: ["The", "cat", "watched", "the", "dog", ",", "and", "then", "it", "pounced", "."],
+    asker: 8,
+    query: "the animal doing the action",
+    scores: [1, 5, 2, 1, 4, 1, 1, 1, 0, 2, 1],
+    values: { 1: "the cat", 4: "the dog" },
+    result: '"probably the cat, maybe the dog". The cat is the one doing things, so the blend leans its way but keeps a little dog.',
   },
 ];
 
@@ -62,7 +72,7 @@ export function AttentionValues() {
   }, []);
 
   const others = example.words.map((_, i) => i).filter((i) => i !== example.asker);
-  const weights = softmax(others.map((i) => example.scores[i] * 4));
+  const weights = softmax(others.map((i) => example.scores[i]));
   const weightByIndex = new Map<number, number>();
   others.forEach((i, k) => weightByIndex.set(i, weights[k]));
 

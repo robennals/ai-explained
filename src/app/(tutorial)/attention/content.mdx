@@ -42,7 +42,7 @@ From here on we'll write each query and key as the plain-English keywords they s
 
 ## Dividing Your Attention
 
-A token has a fixed budget of attention, 100%, and needs to *divide* that budget among all the other tokens according to their match scores. We turn the raw scores into percentages that add up to 100%. You'll find out why the attention needs to add up to 100% later.
+We said attention pulls in the value of the token that matched. But usually several tokens match, at least a little. When that happens, we want to blend their values together, giving each token a say in proportion to how well it matched. To do that, we turn the raw match scores into a set of percentages that add up to 100%, one share of attention for each other token.
 
 The function usually used for this is called **softmax**. Think of it as a competition: bigger numbers dominate, smaller numbers get squeezed, and the result is a set of percentages.
 
@@ -50,37 +50,31 @@ The function usually used for this is called **softmax**. Think of it as a compe
 Drag the sliders. Try "All equal": everyone gets 25%. Try "Moderate, rest silent": A wins by default because nobody else is saying anything. Try "Moderate meets loud": B drowns out A. The gaps between scores matter more than the absolute values. Softmax cares about who's loudest *relative to everyone else*.
 </SoftmaxExplorerWidget>
 
-Now apply softmax to the match scores from before. When one token is the clear best match, it takes almost all of the attention. When two tokens tie, the attention splits evenly between them.
+The gap between the scores is what matters. When one token is the clear best match, it takes almost all of the attention. When two tokens tie, the attention splits evenly between them. We'll see both cases when we gather the values.
 
-<AttentionSoftmaxWidget>
-Each token gets a share of the asker's attention, and the shares always add up to 100%. Try "A split": "he" could mean Sam or Alex, so the attention divides evenly. Try "A clear winner": "glass" takes almost everything. Then drag the query strength up and watch the leftover attention on the weak matches shrink away.
-</AttentionSoftmaxWidget>
+## What Did You Find?
 
-That query strength slider is a real lever the model controls. A longer query vector is a more sensitive detector, the same idea from the Vectors chapter, so a strong query makes the best match dominate and starves the weak ones. A weak query leaves the attention spread out.
+Now we can gather the answer. Alongside its query and key, each token has a **value**: what it hands over when another token attends to it. The asker adds up the values of the tokens it looked at, each weighted by its share of the attention. When one token wins clearly, the result is sharp. When the attention is split, the result is a genuine blend of the values.
 
-There's a catch, though. Softmax always hands out the full 100%, even when nothing in the sentence is a good match. What should a token do when it's looking for something that just isn't there?
+<AttentionValuesWidget>
+Try "A clear value": "it" pays almost all its attention to "glass", so it gathers "the glass". Try "An even split": "it" could be the cat or the dog, so it gathers "either the cat or the dog". Try "A leaning blend": the cat is the more likely answer, so it gathers "probably the cat, maybe the dog".
+</AttentionValuesWidget>
+
+Because the values are combined by weights that add up to 100%, the result always stays in the same range as the inputs. The mechanism never overshoots into "double cat". And a blend is often exactly right: an ambiguous pronoun really is a mix until later context settles it.
 
 ## Where Does Attention Go When Nothing Matches?
 
-Sometimes a token is looking for something that just isn't in the sentence. Think of the "it" in "It was raining." That "it" doesn't refer to anything; it's only there because English needs a subject. But softmax still hands out the full 100%, so the attention smears thinly across every token, which is worse than useless.
+That covers the case where something matches. But what if a token is looking for something that isn't in the sentence at all? Softmax still insists on handing out the full 100%, so the attention smears thinly across every token and the gathered value is a meaningless mush.
 
-The fix is a **sink**: a token whose only job is to absorb leftover attention. Give it a modest fixed score, enough to beat a weak match but lose to a strong one. When there's a real answer, the answer wins and the sink is barely touched. When there isn't, the sink wins by default, and the attention lands somewhere harmless.
+Think of the "it" in "It was raining." That "it" doesn't refer to anything; it's only there because English needs a subject. There's no good answer for it to gather.
+
+The fix is a **sink**: a token whose only job is to absorb leftover attention. Give it a modest fixed score, enough to beat a weak match but lose to a strong one. When there's a real answer, the answer wins and the sink is barely touched. When there isn't, the sink wins by default. Its value is empty, so a token that lands on it simply gathers nothing, which is exactly right.
 
 <AttentionSinkWidget>
 Try "Nothing matches": no token is a real answer, so the sink absorbs most of the attention. Toggle the sink off to see the attention smear across the sentence with nowhere safe to go. Try "Something matches": "glass" scores well above the sink, so it wins and the sink barely registers.
 </AttentionSinkWidget>
 
 Real models don't always use a dedicated sink token. Sometimes the model learns to use a punctuation mark, a start-of-sentence token, or just has the token attend to itself. The idea is the same either way: when a token has nothing useful to look for, its attention needs a harmless place to go.
-
-## What Did You Find?
-
-Attention has told us *where to look*. Now we gather *what's there*. Alongside its query and key, each token has a **value**: what it hands over when another token attends to it. The asker collects the values of the tokens it attended to, weighted by how much attention each one got.
-
-<AttentionValuesWidget>
-Try "A clear value": "it" pays almost all its attention to "glass", so it gathers "the glass" and now carries that meaning. Try "A blended value": "he" splits evenly between Sam and Alex, so it gathers an equal mix of the two, which is exactly how an ambiguous pronoun should feel.
-</AttentionValuesWidget>
-
-Because the values are combined by weights that add up to 100%, the result always stays in the same space as a single value. A clear winner gives a sharp result; a tie gives a genuine blend. The mechanism never overshoots into "double glass" or anything outside the range of the inputs.
 
 ## Where the Vectors Come From
 

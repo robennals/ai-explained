@@ -14,11 +14,6 @@ const SoftmaxExplorer = dynamic(
   { ssr: false }
 );
 
-const AttentionSoftmax = dynamic(
-  () => import("@/components/widgets/attention/AttentionSoftmax").then((m) => m.AttentionSoftmax),
-  { ssr: false }
-);
-
 const AttentionSink = dynamic(
   () => import("@/components/widgets/attention/AttentionSink").then((m) => m.AttentionSink),
   { ssr: false }
@@ -73,14 +68,6 @@ export function SoftmaxExplorerWidget({ children }: { children?: React.ReactNode
   return (
     <WidgetSlot tryIt={children} label="Explore it">
       <SoftmaxExplorer />
-    </WidgetSlot>
-  );
-}
-
-export function AttentionSoftmaxWidget({ children }: { children?: React.ReactNode }) {
-  return (
-    <WidgetSlot tryIt={children} label="Explore it">
-      <AttentionSoftmax />
     </WidgetSlot>
   );
 }

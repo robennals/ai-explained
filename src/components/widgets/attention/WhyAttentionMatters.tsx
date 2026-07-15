@@ -336,8 +336,65 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
         {/* Sentence selector tabs */}
         <WidgetTabs tabs={TABS} activeTab={String(sentenceIdx)} onTabChange={handleTabChange} />
 
-        {/* Word display with arrow overlay */}
+        {/* Word display. Dot-product mode uses a token / match-score grid;
+            the other modes use the arrow overlay. */}
         <div className="relative rounded-lg border border-border bg-surface" ref={containerRef}>
+          {mode === "qkv" ? (
+            <div className="overflow-x-auto px-4 py-3">
+              <div className="flex items-stretch">
+                <div className="flex shrink-0 flex-col justify-center pr-3">
+                  <div className="flex h-8 items-center justify-end text-[10px] font-semibold uppercase tracking-wide text-muted">
+                    token
+                  </div>
+                  <div className="flex h-10 items-center justify-end text-[10px] font-semibold uppercase tracking-wide text-muted">
+                    match&nbsp;score
+                  </div>
+                </div>
+                {sentence.words.map((word, i) => {
+                  const isAsker = i === selectedWord;
+                  const isSel = i === effectiveAnswerer && !isAsker;
+                  const isTgt = i === targetIdx;
+                  const sc = scoreFor(i);
+                  return (
+                    <button
+                      key={`${sentenceIdx}-${i}`}
+                      onClick={isAsker ? undefined : () => setClickedAnswerer(i)}
+                      aria-pressed={isSel}
+                      className={`flex flex-col items-center rounded px-2 transition-colors ${
+                        isAsker ? "cursor-default" : "cursor-pointer hover:bg-accent/10"
+                      } ${
+                        isSel
+                          ? isTgt
+                            ? "bg-indigo-50 ring-1 ring-indigo-400 dark:bg-indigo-950/40"
+                            : "bg-accent/5 ring-1 ring-accent"
+                          : ""
+                      }`}
+                    >
+                      <div
+                        className={`flex h-8 items-center whitespace-nowrap text-lg ${
+                          isAsker
+                            ? "font-bold text-accent"
+                            : isTgt
+                              ? "font-semibold text-indigo-600 dark:text-indigo-400"
+                              : "text-foreground"
+                        }`}
+                      >
+                        {word}
+                      </div>
+                      <div
+                        className={`flex h-10 items-center font-mono text-2xl font-bold ${
+                          isAsker ? "text-muted/40" : isTgt ? "text-accent" : "text-muted/60"
+                        }`}
+                      >
+                        {isAsker ? "–" : sc}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ) : (
+          <>
           {/* SVG overlay for curved arrows */}
           {arrows.length > 0 && (
             <svg
@@ -374,18 +431,11 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
           <div className="flex flex-wrap gap-x-1 gap-y-0 px-5 pt-4 text-lg" style={{ paddingTop: `${arcPad + 16}px` }}>
             {sentence.words.map((word, i) => {
               const isSelected = i === selectedWord;
-              // Dot-product mode: every token is clickable and gets a score.
               // Answering mode: only tokens that publish a key are clickable.
-              const isAnswerable =
-                i !== selectedWord &&
-                (mode === "qkv" || (mode === "answering" && i in sentence.answers));
+              const isAnswerable = i !== selectedWord && mode === "answering" && i in sentence.answers;
               const isCompared = isInteractive && i === effectiveAnswerer;
               const isTargetHighlight = isInteractive ? isCompared && answererMatches : i in targets;
 
-              const clickableStyle =
-                mode === "qkv"
-                  ? "cursor-pointer transition-colors hover:bg-accent/10 hover:text-accent"
-                  : "cursor-pointer underline decoration-accent decoration-dotted decoration-2 underline-offset-4 transition-colors hover:bg-accent/10 hover:text-accent";
               const cls = isSelected
                 ? "font-semibold text-accent ring-2 ring-accent ring-offset-1 ring-offset-surface"
                 : isTargetHighlight
@@ -393,10 +443,9 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
                   : isCompared
                     ? "font-semibold text-foreground ring-1 ring-foreground/40 ring-offset-1 ring-offset-surface"
                     : isAnswerable
-                      ? clickableStyle
+                      ? "cursor-pointer underline decoration-accent decoration-dotted decoration-2 underline-offset-4 transition-colors hover:bg-accent/10 hover:text-accent"
                       : "";
 
-              const score = scoreFor(i);
               return (
                 <span
                   key={`${sentenceIdx}-${i}`}
@@ -417,24 +466,9 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
                         }
                       : undefined
                   }
-                  className={`${
-                    mode === "qkv" ? "inline-flex flex-col items-center align-top" : "inline-block"
-                  } rounded px-1 py-0.5 ${cls}`}
+                  className={`inline-block rounded px-1 py-0.5 ${cls}`}
                 >
-                  {mode === "qkv" ? (
-                    <>
-                      <span className="leading-tight">{word}</span>
-                      <span
-                        className={`mt-0.5 font-mono text-2xl font-bold leading-none ${
-                          i === selectedWord ? "opacity-0" : i === targetIdx ? "text-accent" : "text-muted/60"
-                        }`}
-                      >
-                        {score}
-                      </span>
-                    </>
-                  ) : (
-                    word
-                  )}
+                  {word}
                 </span>
               );
             })}
@@ -460,6 +494,8 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
             </div>
           ) : (
             <div className="pb-3" aria-hidden />
+          )}
+          </>
           )}
         </div>
 
@@ -565,10 +601,17 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
                 );
               })}
             </div>
+            <div className="rounded-lg border border-border bg-foreground/[0.02] px-3 py-2.5 text-center text-sm leading-relaxed">
+              <span className="font-semibold text-accent">query</span> (&ldquo;{sentence.query}&rdquo;){" "}
+              <span className="text-muted">·</span>{" "}
+              <span className="font-semibold text-indigo-700 dark:text-indigo-300">key</span> (&ldquo;
+              {sentence.answers[effectiveAnswerer] ?? EMPTY}&rdquo;){" = "}
+              <span className="font-mono text-lg font-bold text-accent">{scoreFor(effectiveAnswerer)}</span>
+            </div>
             <div className="text-center text-sm text-muted">
               {answererMatches
-                ? `"${effectiveAnswererText}" scores ${scoreFor(effectiveAnswerer)}, the best match, so its value gets pulled in.`
-                : `"${effectiveAnswererText}" scores only ${scoreFor(effectiveAnswerer)}, far below "${sentence.words[targetIdx]}".`}
+                ? `"${effectiveAnswererText}" is the best match, so its value gets pulled in.`
+                : `Far below "${sentence.words[targetIdx]}" at ${scoreFor(targetIdx)}, so it's mostly ignored.`}
             </div>
           </div>
         )}

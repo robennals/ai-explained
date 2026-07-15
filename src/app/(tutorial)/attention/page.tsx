@@ -8,7 +8,6 @@ import {
   AnsweringQuestionsWidget,
   MatchingQuestionsWidget,
   SoftmaxExplorerWidget,
-  AttentionSoftmaxWidget,
   AttentionSinkWidget,
   AttentionValuesWidget,
 } from "./widgets";
@@ -27,7 +26,6 @@ export default function Chapter07() {
             AnsweringQuestionsWidget,
             MatchingQuestionsWidget,
             SoftmaxExplorerWidget,
-            AttentionSoftmaxWidget,
             AttentionSinkWidget,
             AttentionValuesWidget,
           }}
