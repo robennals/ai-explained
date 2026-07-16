@@ -58,7 +58,9 @@ cousins of ReLU, such as Swish and GELU, but the idea is the same.)
 Start on **sigmoid**. The neuron begins saturated, and each learning step moves
 the output by almost nothing. Now switch to **ReLU**. The same neuron starts
 learning again. Watch the operating point on the curve: on the flat part the
-slope is near zero, and that is exactly when learning stalls.
+slope is near zero, and that is exactly when learning stalls. Click or drag the
+green target anywhere along the bar to pick a goal and try to train the neuron to
+reach it. Under ReLU the bar stretches to show its wider range.
 </ActivationWidget>
 
 ### Starting in the right place
@@ -72,8 +74,9 @@ range, so the signal neither shrinks nor blows up as it crosses each layer.
 <BadInitWidget>
 Press **Bad initialization**, then take a few learning steps. The neuron is stuck
 out on the flat part and barely moves. Now press **Good initialization** and try
-again. Same neuron, same target, but now it learns quickly. The only difference
-is where it started.
+again. Same neuron, now it learns quickly. The only difference is where it
+started. Drag the green target to a new spot and watch how well each starting
+point can chase it.
 </BadInitWidget>
 
 Initialization has a second, sneakier job. If every neuron in a layer starts with

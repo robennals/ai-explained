@@ -92,7 +92,7 @@ export function ActivationWidget({ children }: { children?: React.ReactNode }) {
         description="Start it saturated on the sigmoid and learning stalls. Switch to ReLU and it comes back to life."
         initialWeight={5}
         initialBias={0}
-        initialTarget={0.3}
+        initialTarget={0.5}
         initialActivation="sigmoid"
         showActivationToggle
       />
