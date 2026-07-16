@@ -107,10 +107,10 @@ export function AttentionSink() {
 
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="rounded-lg border border-accent/40 bg-accent/5 px-3 py-2 text-sm">
-            <div className="text-[10px] font-semibold uppercase tracking-wide text-accent">
+            <div className="text-xs font-semibold uppercase tracking-wide text-accent">
               &ldquo;{example.words[example.asker]}&rdquo; is looking for
             </div>
-            <div className="text-foreground">{example.query}</div>
+            <div className="mt-0.5 text-base font-medium text-foreground">{example.query}</div>
           </div>
           <label className="flex cursor-pointer select-none items-center gap-2.5">
             <span className="text-sm font-semibold text-foreground">Sink</span>

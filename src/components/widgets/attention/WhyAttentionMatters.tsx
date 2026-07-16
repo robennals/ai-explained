@@ -107,11 +107,11 @@ const SENTENCES: SentenceExample[] = [
       'Which treaty reshaped Europe? You have to reach back across the gap to "Versailles" to know. Once a model has been through several transformer layers, "Versailles" itself may already carry that it means the treaty, not the city, along with the treaty\'s details. The Transformers chapter shows how.',
     enrichedMeaning: "the Treaty of Versailles",
     query: "which specific treaty this is",
-    keyQuestion: "a specific name",
-    value: "It's the Treaty of Versailles.",
+    keyQuestion: "a treaty, or a place",
+    value: "The Treaty of Versailles, or the place Versailles.",
     matchScore: 9,
     answers: {
-      3: "a specific name",
+      3: "a treaty, or a place",
       7: "a date",
       12: "a place",
     },
@@ -197,13 +197,13 @@ function TokenCard({
       <div className={`mb-1.5 border-b border-border pb-1 text-center text-base font-bold ${headerColor}`}>
         &ldquo;{name}&rdquo;
       </div>
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1.5">
         {rows.map((r) => (
           <div key={r.label} className="flex items-baseline gap-2">
-            <span className={`w-11 shrink-0 text-[10px] font-semibold uppercase leading-snug tracking-wide ${r.color}`}>
+            <span className={`w-11 shrink-0 text-xs font-semibold uppercase leading-snug tracking-wide ${r.color}`}>
               {r.label}
             </span>
-            <span className="leading-snug text-foreground">{r.val}</span>
+            <span className="text-base leading-snug text-foreground">{r.val}</span>
           </div>
         ))}
       </div>

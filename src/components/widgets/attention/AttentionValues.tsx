@@ -152,8 +152,8 @@ export function AttentionValues() {
 
         <div className="rounded-lg border border-accent/40 bg-accent/5 px-3 py-2 text-sm">
           <div className="flex items-baseline gap-2">
-            <span className="w-12 shrink-0 text-[10px] font-semibold uppercase tracking-wide text-accent">query</span>
-            <span className="text-foreground">{example.query}</span>
+            <span className="w-12 shrink-0 text-xs font-semibold uppercase tracking-wide text-accent">query</span>
+            <span className="text-base font-medium text-foreground">{example.query}</span>
           </div>
           <div className="mt-1 pl-14 text-xs text-muted">
             what &ldquo;{example.words[example.asker]}&rdquo; is looking for in the other tokens
