@@ -171,8 +171,8 @@ export function AttentionValues() {
               style={{ zIndex: 10 }}
             >
               <defs>
-                <marker id="val-arrowhead" markerWidth="7" markerHeight="6" refX="3.5" refY="5" orient="auto">
-                  <polygon points="0 0, 7 0, 3.5 6" fill={`hsla(${ARC_HUE}, 75%, 55%, 0.85)`} />
+                <marker id="val-arrowhead" markerWidth="6" markerHeight="5" refX="5" refY="2.5" orient="auto">
+                  <polygon points="0 0, 6 2.5, 0 5" fill={`hsla(${ARC_HUE}, 75%, 55%, 0.85)`} />
                 </marker>
               </defs>
               {arcs.map((arc, k) => (
@@ -181,7 +181,7 @@ export function AttentionValues() {
                   d={`M ${arc.fromX} ${ARC_H - 6} Q ${(arc.fromX + arc.toX) / 2} 2 ${arc.toX} ${ARC_H - 8}`}
                   fill="none"
                   stroke={`hsla(${ARC_HUE}, 75%, 55%, ${0.4 + arc.weight * 0.5})`}
-                  strokeWidth={1.5 + arc.weight * 3}
+                  strokeWidth={1.5 + arc.weight * 1.5}
                   markerEnd="url(#val-arrowhead)"
                   className="transition-all duration-300"
                 />

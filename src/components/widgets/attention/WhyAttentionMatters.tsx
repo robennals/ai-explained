@@ -427,8 +427,8 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
           style={{ zIndex: 10 }}
         >
           <defs>
-            <marker id={`arc-arrowhead-${mode}`} markerWidth="7" markerHeight="6" refX="3.5" refY="5" orient="auto">
-              <polygon points="0 0, 7 0, 3.5 6" fill={`hsla(${HIGHLIGHT_HUE}, 75%, 55%, 0.85)`} />
+            <marker id={`arc-arrowhead-${mode}`} markerWidth="6" markerHeight="5" refX="5" refY="2.5" orient="auto">
+              <polygon points="0 0, 6 2.5, 0 5" fill={`hsla(${HIGHLIGHT_HUE}, 75%, 55%, 0.85)`} />
             </marker>
           </defs>
           {qkvArrow && (
@@ -475,7 +475,15 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
                 aria-pressed={isSel}
                 className={`flex flex-col items-stretch border-l border-border transition-colors ${
                   canClick ? "cursor-pointer hover:bg-accent/10" : "cursor-default"
-                } ${isSel ? (isTgt ? "bg-indigo-50 dark:bg-indigo-950/40" : "bg-accent/5") : ""}`}
+                } ${
+                  isAsker
+                    ? "relative z-[1] bg-accent/10 ring-2 ring-inset ring-accent"
+                    : isSel
+                      ? isTgt
+                        ? "bg-indigo-50 dark:bg-indigo-950/40"
+                        : "bg-accent/5"
+                      : ""
+                }`}
               >
                 <div
                   className={`flex h-9 items-center justify-center whitespace-nowrap px-3 text-lg ${
@@ -496,11 +504,13 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
                 </div>
                 {showScores && (
                   <div
-                    className={`flex h-11 items-center justify-center px-3 font-mono text-2xl font-bold ${
-                      isAsker ? "text-muted/40" : isTgt ? "text-accent" : "text-muted/60"
+                    className={`flex h-11 items-center justify-center px-3 ${
+                      isAsker
+                        ? "text-[10px] font-semibold uppercase tracking-wide text-accent"
+                        : `font-mono text-2xl font-bold ${isTgt ? "text-accent" : "text-muted/60"}`
                     }`}
                   >
-                    {isAsker ? "–" : sc}
+                    {isAsker ? "query" : sc}
                   </div>
                 )}
               </button>
