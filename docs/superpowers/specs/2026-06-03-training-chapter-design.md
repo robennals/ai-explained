@@ -1,13 +1,10 @@
 # Chapter 11 — "Why Training Almost Doesn't Work" (Design Spec)
 
-**Date:** 2026-06-03 (updated 2026-07-05: activation-functions chapter now precedes training)
+**Date:** 2026-06-03 (updated 2026-07-15: activation functions now covered in-chapter, condensed;
+chapter reframed as a breadth-first tour of tricks)
 **Slug:** `training`
-**Chapter id:** currently 11; will shift (likely to 12) once the activation-functions chapter is
-inserted immediately before it, which renumbers training and every later chapter. Confirm the id
-in `curriculum.ts` when the activation chapter lands.
-**Prerequisites:** the activation-functions chapter (immediately prior) + [9] transformers.
-Training now *assumes* the reader knows activation functions (sigmoid saturation, ReLU, Swish),
-so it references them as already-covered rather than peeking ahead.
+**Chapter id:** 11 (unchanged — no reorder; activation functions are covered inside this chapter)
+**Prerequisites:** [9] transformers (transitively covers neurons + optimization)
 **Companion notebook:** `notebooks/training.ipynb`
 **Quiz:** yes
 
@@ -15,27 +12,30 @@ so it references them as already-covered rather than peeking ahead.
 
 The neurons chapter promised that training a billion-weight network is "no harder in
 principle" than training a tiny one. That is true in principle and false in practice. Plain
-gradient descent on a deep network stalls, diverges, or memorizes. This chapter is a guided
-tour of the hard-won tricks that make modern training actually work, grouped by the problem
-each one solves.
+gradient descent on a deep network stalls, diverges, or memorizes. This chapter is a breadth-first
+tour of the hard-won tricks that make modern training actually work — a good intuition for *why
+each one matters*, without going deep on any single one.
 
 ## Editorial principles for this chapter
 
-- **Analogy-first.** Every concept gets a concrete, carefully-developed real-life analogy, and
-  the load-bearing analogies drive interactive playgrounds — the way the optimization and
-  computation chapters paired a real-world widget with the technical one. The analogies are the
-  backbone, not decoration. A soccer motif runs through clusters 1 and 2 (tracing *why your team
-  won* for credit assignment, and *reviewing after each game* for batching).
-- **Rough sense for most, playgrounds for the important stuff.** Cover every listed topic well
-  enough to give intuition. Build playgrounds for the five load-bearing ideas. Smaller items
-  (gradient clipping, early stopping, RMSNorm) are short "be aware of" passes.
+- **A tour, not a deep dive.** The job of this chapter is breadth: introduce a variety of tricks
+  and give the reader solid intuition for why each matters. Do *not* go deep on any one of them.
+  Depth on individual topics (activation-function zoology, optimizer internals) can be its own
+  later chapter. If a section starts feeling like a full treatment, trim it.
+- **Every topic earns an analogy and a playground.** Each trick gets at least one fun, concrete
+  real-life analogy and at least one interactive playground (a playground may be shared across
+  closely-related tricks — e.g. activation choice rides along on the gradient-flow widget). This
+  is the pattern the optimization and computation chapters used: pair a real-world framing with a
+  technical widget. The analogies are the backbone, not decoration. A soccer motif runs through
+  the gradient-flow and batching sections (tracing *why your team won*; *reviewing after each
+  game*).
 - **Honest about uncertainty.** Where a trick was found empirically and isn't fully understood
   (why Adam beats SGD, why batch norm helps), say so plainly rather than inventing a tidy reason.
 - **Voice.** Follow `docs/style/voice.md`: impersonal-but-plain textbook, no personal "I", no
   em-dash overuse, no drumroll phrases, no "it's not X it's Y", no AI-vocabulary. Reuse the
   established notation conventions from earlier chapters.
 
-## Structure: five clusters + an opener and close
+## Structure: five thematic clusters (activation functions ride inside cluster 1), plus opener and close
 
 ### Opening — "the promise was a lie"
 
@@ -60,7 +60,7 @@ link makes the connection to the root cause fainter and harder to pin down. Back
 this chain of "partly because," and after enough links the signal reaching the earliest cause is
 too weak to act on. (This is the chain rule; we needn't name it.)
 
-**Playground — ChainSensitivity (centerpiece, reused three ways).** A chain of simple neurons
+**Playground — ChainSensitivity (centerpiece, reused four ways).** A chain of simple neurons
 wired in a line: each is a single input, a weight, a bias, and a sigmoid, feeding the next. Drag
 the input at one end and watch whether the output at the other end moves at all.
 - *Vanishing:* with a long chain and saturated / badly-scaled weights, wiggling the input does
@@ -70,12 +70,26 @@ the input at one end and watch whether the output at the other end moves at all.
   neurons into the flat tails of the sigmoid where they stop responding.
 - *Residuals:* toggle a skip connection (each neuron adds its input back to its output) and the
   input's influence always reaches the end, no matter how deep.
-- *Activation toggle (callback to the previous chapter):* switch each neuron between sigmoid and
-  ReLU. The sigmoid saturates and kills the signal in its flat tails; ReLU passes positive values
-  straight through, so it resists this particular death. A concrete payoff of the activation
-  chapter the reader just finished, and part of why ReLU became standard.
+- *Activation toggle:* switch each neuron between sigmoid and ReLU. The sigmoid saturates and
+  kills the signal in its flat tails; ReLU passes positive values straight through, so it resists
+  this particular death. This same toggle is the playground for the activation-functions section
+  below — no separate widget needed.
 
-**Initialization — two jobs.**
+**Fix 1 — the activation function (condensed).** The neurons chapter introduced the sigmoid as a
+smooth logic gate. Here the training-relevant point is that the *shape* of the activation decides
+whether the gradient survives. Keep this short — a fuller tour of activation functions can be its
+own later chapter.
+- *Analogy — a volume knob that stops responding.* A sigmoid is like a volume knob that maxes out:
+  past a certain point you keep turning it up and nothing more happens (the flat tails). A neuron
+  stuck out there has stopped listening — its gradient is essentially zero, so it can't learn.
+  ReLU is more like a one-way valve: it blocks anything negative (outputs 0) but lets positive
+  signal through at full strength with no ceiling, so it doesn't go deaf the way a sigmoid does.
+- *Content.* Why saturation stalls learning; ReLU as the default fix; a one-line nod to Swish /
+  GELU as smoother modern variants. No zoology, no derivative math.
+- *Playground:* the sigmoid/ReLU toggle in ChainSensitivity (above) — flip it and watch a dead
+  deep chain come back to life.
+
+**Fix 2 — initialization — two jobs.**
 1. *Right scale.* Pick the weight scale so the signal neither shrinks nor grows on average as it
    crosses each layer (He / Xavier, named lightly).
 2. *Randomness, to break symmetry.* If every neuron in a layer started with identical weights,
@@ -83,7 +97,7 @@ the input at one end and watch whether the output at the other end moves at all.
    layer would act like a single neuron. Random initialization breaks the tie. Fully solved by
    initializing randomly; it's why we never start all weights equal (or all zero). Short aside.
 
-**Residual connections — why they don't make the model shallow.** A residual block computes
+**Fix 3 — residual connections — why they don't make the model shallow.** A residual block computes
 output = input + f(input). The "+ input" is a direct path the signal and its credit-assignment
 can always travel, so depth stops killing the gradient. But f(input) still adds new computation
 on top, so all the expressive power of a deep network remains. The picture is a *shared running
@@ -141,9 +155,9 @@ it's about using parallel hardware to get a good-enough gradient in as few steps
 anything blow up? Two reasons. First, even with a sigmoid the *pre-activation* sum (weights times
 inputs, before the squashing) can grow large as weights change during training, pushing neurons
 into the flat saturated tails — the same death from cluster 1. Second, modern networks mostly
-don't use sigmoid; they use unbounded activations like ReLU (from the previous chapter — recall
-ReLU passes positive numbers straight through, with no ceiling, so values can grow without limit
-as they stack across layers). Either way, as training proceeds the scale of each layer's inputs
+don't use sigmoid; they use unbounded activations like ReLU (from cluster 1's activation section —
+recall ReLU passes positive numbers straight through, with no ceiling, so values can grow without
+limit as they stack across layers). Either way, as training proceeds the scale of each layer's inputs
 wanders, every
 layer keeps re-adapting to its inputs' moving range, and that slows training and forces a tiny
 learning rate.
@@ -259,7 +273,7 @@ and aren't fully understood. Pointer onward to the next chapter.
 
 | Widget | Cluster | Type | Status |
 | --- | --- | --- | --- |
-| ChainSensitivity | 1 | playground — vanishing + init + residuals (centerpiece) | new |
+| ChainSensitivity | 1 | playground — vanishing + activation toggle + init + residuals (centerpiece) | new |
 | Batching | 2 | playground — batch size vs steps vs wall-clock (no loss surface) | new |
 | NormalizationPlayground | 3 | playground — layer vs batch norm on vectors | new |
 | OptimizerRace | 4 | playground — SGD/momentum/Adam on a loss surface (2D heat-map / 3D toggle) | new |
@@ -283,16 +297,15 @@ widgets, Framer Motion for animation, Radix-based shared controls (`SliderContro
 
 ## Files to update
 
-- `src/lib/curriculum.ts` — set training's `prerequisites` to the activation-functions chapter's
-  id (with transformers upstream), confirm training's id after the activation chapter is inserted,
-  mark `ready`/`polishing` per workflow. Update the training `description` to drop the "Activation
-  functions (ReLU, Swish)" phrase, since activations are now their own preceding chapter.
+- `src/lib/curriculum.ts` — keep training at id 11 with `prerequisites: [9]`, mark
+  `ready`/`polishing` per workflow. The existing `description` already mentions "Activation
+  functions (ReLU, Swish)" — keep it, since activations are covered (condensed) in this chapter.
 - Verify `src/lib/chapter-metadata.ts` covers the `training` slug (mirror matrix-math).
 
 ## Companion notebook (mirrors the chapter section by section)
 
 1. Build a deep chain/MLP; print per-layer activation and gradient norms → watch them vanish.
-   Compare sigmoid vs ReLU gradient flow (callback to the activation chapter), then fix with He
+   Compare sigmoid vs ReLU gradient flow (the in-chapter activation section), then fix with He
    init, then add residual blocks; re-print and watch the signal survive. (Mirrors
    ChainSensitivity.)
 2. Train the same net at batch size 1 vs a large batch; show similar final accuracy but the
@@ -316,19 +329,20 @@ tooltips (per recent repo change).
 
 ## Out of scope / explicitly brief
 
-- Activation functions: assumed known from the immediately-preceding chapter. Reference them as
-  callbacks where useful (sigmoid saturation in cluster 1, ReLU's unboundedness in cluster 3);
-  do not re-teach them.
+- Activation functions: covered condensed inside cluster 1 (saturation → why ReLU; one-line Swish/
+  GELU nod). No zoology or derivative math; a fuller activation-functions chapter can come later.
 - Gradient clipping, early stopping, RMSNorm, data augmentation: short "be aware of" mentions.
 - Small-batch noise as regularization: deferred / skipped (confusing here).
 - Mixed precision, distributed training, optimizer bias-correction math: not covered.
 
 ## Resolved decisions
 
-- **Activation-function ordering (updated 2026-07-05):** the activation-functions chapter now
-  comes *before* training. Training assumes activations are known and references them as callbacks
-  (sigmoid saturation in cluster 1, ReLU's unboundedness in cluster 3), and cluster 1's
-  ChainSensitivity widget gains a sigmoid/ReLU toggle that pays off the activation chapter.
+- **Activation functions (updated 2026-07-15):** covered *inside* this chapter in condensed form
+  (a short section in cluster 1: saturation → why ReLU, with the volume-knob / one-way-valve
+  analogy and the ChainSensitivity sigmoid/ReLU toggle as its playground). This removes the
+  ordering dependency entirely; a deeper activation-functions chapter can still follow later.
+- **Chapter framing (updated 2026-07-15):** breadth-first tour of tricks — good intuition for why
+  each matters, at least one analogy and one playground per topic, no deep dives.
 - **Plan scope:** one implementation plan covers the whole chapter end to end — content.mdx (all
   five clusters), all five playgrounds, the residual-stream diagram, the quiz, and the notebook.
 - **Residual-stream diagram:** build it as a static diagram alongside the cluster 1 prose.
