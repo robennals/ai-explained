@@ -60,52 +60,64 @@ link makes the connection to the root cause fainter and harder to pin down. Back
 this chain of "partly because," and after enough links the signal reaching the earliest cause is
 too weak to act on. (This is the chain rule; we needn't name it.)
 
-**Playground — ChainSensitivity (centerpiece, reused four ways).** A chain of simple neurons
-wired in a line: each is a single input, a weight, a bias, and a sigmoid, feeding the next. Drag
-the input at one end and watch whether the output at the other end moves at all.
-- *Vanishing:* with a long chain and saturated / badly-scaled weights, wiggling the input does
-  nothing to the output — the connection is dead.
-- *Initialization:* hit "good init" and the weights are set to a scale that keeps each neuron in
-  its responsive range, so the input's influence survives down the chain. Bad init pushes
-  neurons into the flat tails of the sigmoid where they stop responding.
-- *Residuals:* toggle a skip connection (each neuron adds its input back to its output) and the
-  input's influence always reaches the end, no matter how deep.
-- *Activation toggle:* switch each neuron between sigmoid and ReLU. The sigmoid saturates and
-  kills the signal in its flat tails; ReLU passes positive values straight through, so it resists
-  this particular death. This same toggle is the playground for the activation-functions section
-  below — no separate widget needed.
+**The shared baseline playground — LearningNeuron.** Several playgrounds in this chapter are built
+on one primitive so the reader learns one interface and then sees it stressed in different ways. The
+baseline is a single neuron (one input, a weight, a bias, an activation) with three readouts: its
+**current output**, a **desired output** (target), and the **error** between them. A clearly-labeled
+"Take one learning step" button runs a single gradient-descent update, and you watch whether the
+output actually moves toward the target. This is training made atomic and visible: press the button,
+see if it learns. Each Cluster 1 playground is this same neuron (or a few of them wired up) augmented
+to expose one failure mode and its fix. Build this as a reusable component; the variants below extend
+it.
 
 **Fix 1 — the activation function (condensed).** The neurons chapter introduced the sigmoid as a
 smooth logic gate. Here the training-relevant point is that the *shape* of the activation decides
-whether the gradient survives. Keep this short — a fuller tour of activation functions can be its
-own later chapter.
+whether the neuron can learn at all. Keep this short — a fuller tour of activation functions can be
+its own later chapter.
 - *Analogy — a volume knob that stops responding.* A sigmoid is like a volume knob that maxes out:
   past a certain point you keep turning it up and nothing more happens (the flat tails). A neuron
-  stuck out there has stopped listening — its gradient is essentially zero, so it can't learn.
+  stuck out there has stopped listening — its learning step barely moves it, so it can't improve.
   ReLU is more like a one-way valve: it blocks anything negative (outputs 0) but lets positive
   signal through at full strength with no ceiling, so it doesn't go deaf the way a sigmoid does.
-- *Content.* Why saturation stalls learning; ReLU as the default fix; a one-line nod to Swish /
-  GELU as smoother modern variants. No zoology, no derivative math.
-- *Playground:* the sigmoid/ReLU toggle in ChainSensitivity (above) — flip it and watch a dead
-  deep chain come back to life.
+- *Playground — Activation:* the baseline LearningNeuron with a sigmoid/ReLU toggle. Start it where
+  a sigmoid is saturated and "Take one learning step" does almost nothing; switch to ReLU (or move
+  it off the flat spot) and it learns. No zoology, no derivative math; a one-line nod to Swish/GELU.
 
 **Fix 2 — initialization — two jobs.**
 1. *Right scale.* Pick the weight scale so the signal neither shrinks nor grows on average as it
    crosses each layer (He / Xavier, named lightly).
-2. *Randomness, to break symmetry.* If every neuron in a layer started with identical weights,
-   they would receive identical gradients and update identically — staying twins forever, so the
-   layer would act like a single neuron. Random initialization breaks the tie. Fully solved by
-   initializing randomly; it's why we never start all weights equal (or all zero). Short aside.
+2. *Randomness, to break symmetry.* If every neuron in a layer started with identical weights, they
+   would receive identical gradients and update identically — staying twins forever, so the layer
+   would act like a single neuron. Random initialization breaks the tie.
+- *Playground — BadInit:* the baseline LearningNeuron initialized deep in the activation's flat
+  spot. Press "Take one learning step" and nothing happens (the update is ~0). Reset to a good scale
+  and the same neuron learns. Shows *why the starting scale matters*.
+- *Playground — Twins:* two neurons in a layer initialized to identical weights. Press "learn"
+  repeatedly and they move in perfect lockstep, forever identical — the layer wastes half its
+  capacity. Randomize one and they finally diverge and specialize. Shows *why init must be random*,
+  not merely well-scaled.
 
-**Fix 3 — residual connections — why they don't make the model shallow.** A residual block computes
-output = input + f(input). The "+ input" is a direct path the signal and its credit-assignment
-can always travel, so depth stops killing the gradient. But f(input) still adds new computation
-on top, so all the expressive power of a deep network remains. The picture is a *shared running
-report*: instead of each layer rewriting the previous summary from scratch (and burying what came
-before), each layer *adds* its findings to the report and passes it on. Nothing is overwritten,
-so information accumulates (still deep and complex) and any single contribution can be traced
-straight back (gradient flows). This shared report is the transformer **residual stream** from
-chapter 9 — every attention and MLP block reads it and adds back to it.
+**Fix 3 — residual connections.**
+- *Analogy — who wrote the bad paragraph?* Picture a document many people contribute to. If each
+  person *adds their own paragraph* to a shared doc, then when you find a bad paragraph you know
+  exactly who wrote it and can ask them to fix it. But if each person instead *rewrites the whole
+  document* from the previous person's version (a telephone game), a flaw gets smeared across
+  everyone and you can't tell whose change caused it — and the earliest writers are hardest of all
+  to hold accountable. A plain deep network is the second kind; residual connections make it the
+  first. Each layer *adds* its contribution to a shared running document (the **residual stream**),
+  so a deep layer contributes directly to the output and can be directly blamed and corrected when
+  it's wrong. Without residuals, blame for a deep layer has to filter back up through every layer
+  above it, getting weaker and more smeared the deeper it started.
+- *Why they don't make the model shallow.* A residual block computes output = input + f(input).
+  Because each layer adds rather than overwrites, information accumulates, so all the expressive
+  power of a deep network remains — you keep the depth *and* keep the blame traceable. This shared
+  stream is the transformer residual stream from chapter 9: every attention and MLP block reads it
+  and adds back to it.
+- *Playground — VanishingChain:* a deep chain of baseline neurons with a target at the far end.
+  Press "learn" and watch how much the *earliest* neuron actually moves — with a long plain chain it
+  barely budges (its blame is smeared to nothing). Toggle residual skips and the early neuron starts
+  learning again. (This is the old ChainSensitivity idea, reframed around "can the deep neuron get
+  blamed and learn?")
 
 **Key insight.** Most of deep learning's architecture tricks exist to keep one number — the
 strength of the credit signal — from fading to nothing or blowing up as it travels back through
@@ -273,12 +285,21 @@ and aren't fully understood. Pointer onward to the next chapter.
 
 | Widget | Cluster | Type | Status |
 | --- | --- | --- | --- |
-| ChainSensitivity | 1 | playground — vanishing + activation toggle + init + residuals (centerpiece) | new |
+| LearningNeuron | shared | baseline primitive — one neuron, current/desired output, error, "Take one learning step" button; other widgets extend it | new |
+| Activation | 1 | built on baseline — sigmoid/ReLU toggle; saturation blocks learning | new |
+| BadInit | 1 | built on baseline — flat-spot init stalls learning; good scale rescues | new |
+| Twins | 1 | built on baseline — identical init → lockstep neurons; randomize to split | new |
+| VanishingChain | 1 | built on baseline — deep chain; earliest neuron barely learns; residual toggle rescues | new |
 | Batching | 2 | playground — batch size vs steps vs wall-clock (no loss surface) | new |
 | NormalizationPlayground | 3 | playground — layer vs batch norm on vectors | new |
 | OptimizerRace | 4 | playground — SGD/momentum/Adam on a loss surface (2D heat-map / 3D toggle) | new |
 | Overfitting | 5 | playground — fit noisy data, dropout + weight-decay sliders | new |
 | Residual-stream diagram | 1 | static — layers adding into a shared stream | new |
+
+Every topic gets its own playground rather than overloading one widget (per author guidance). The
+Cluster 1 playgrounds share the **LearningNeuron** primitive so the reader learns one interface and
+sees it stressed in different ways; where natural, later clusters may reuse it too (e.g. Batching =
+several LearningNeurons sharing one averaged step), but that reuse is optional, not forced.
 
 Widgets live in `src/components/widgets/training/`. Follow the existing pattern: `"use client"`,
 wrapped in `<WidgetContainer>`, dynamically imported with `{ ssr: false }` and `<Suspense>` via
