@@ -52,14 +52,14 @@ const SENTENCES: SentenceExample[] = [
     explanation:
       'What does "it" refer to? You have to look back to "glass," the thing that was dropped.',
     enrichedMeaning: "the glass",
-    query: "the thing being talked about",
-    keyQuestion: "the thing being talked about",
+    query: "the thing being referred to",
+    keyQuestion: "a physical object",
     value: "It means the glass.",
     matchScore: 9,
     answers: {
-      3: "the thing being talked about",
-      1: "an action that happened",
-      6: "what happened next",
+      3: "a physical object",
+      1: "an action",
+      6: "an action",
     },
   },
   {
@@ -70,12 +70,12 @@ const SENTENCES: SentenceExample[] = [
     explanation:
       'Who opened a restaurant? The chef, not the competition. You have to skip over the whole "who won the competition" clause to connect "opened" back to "chef."',
     enrichedMeaning: "opened by the chef",
-    query: "the doer of the action",
-    keyQuestion: "the doer of the action",
+    query: "someone who could have opened something",
+    keyQuestion: "a person",
     value: "The chef did it.",
     matchScore: 9,
     answers: {
-      1: "the doer of the action",
+      1: "a person",
       5: "an event",
       8: "a place",
     },
@@ -88,13 +88,13 @@ const SENTENCES: SentenceExample[] = [
     explanation:
       'Which sky? The Martian one. "sky" has to reach back to "Mars" to become "the sky of Mars," not the sky on Earth.',
     enrichedMeaning: "the sky of Mars",
-    query: "where the scene is set",
-    keyQuestion: "where the scene is set",
+    query: "the place this sky is part of",
+    keyQuestion: "a place",
     value: "The scene is on Mars.",
     matchScore: 9,
     answers: {
-      1: "where the scene is set",
-      4: "a person in the scene",
+      1: "a place",
+      4: "a person",
       5: "an action",
     },
   },
@@ -106,12 +106,12 @@ const SENTENCES: SentenceExample[] = [
     explanation:
       'Which treaty reshaped Europe? You have to reach back across the gap to "Versailles" to know. Once a model has been through several transformer layers, "Versailles" itself may already carry that it means the treaty, not the city, along with the treaty\'s details. The Transformers chapter shows how.',
     enrichedMeaning: "the Treaty of Versailles",
-    query: "which specific treaty",
-    keyQuestion: "which specific treaty",
+    query: "which specific treaty this is",
+    keyQuestion: "a specific name",
     value: "It's the Treaty of Versailles.",
     matchScore: 9,
     answers: {
-      3: "which specific treaty",
+      3: "a specific name",
       7: "a date",
       12: "a place",
     },
@@ -124,7 +124,7 @@ const SENTENCES: SentenceExample[] = [
     explanation:
       '"bank" could mean a place for money or the side of a river. You need to see "river" to know which meaning is intended.',
     enrichedMeaning: "the bank of a river",
-    query: "a river or money",
+    query: "a river or some money",
     keyQuestion: "a river",
     value: "We mean a river.",
     matchScore: 6,
@@ -132,7 +132,7 @@ const SENTENCES: SentenceExample[] = [
     answers: {
       4: "a river",
       8: "plants",
-      6: "a state",
+      6: "an action",
     },
   },
 ];
@@ -410,7 +410,7 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
     mode === "qkv"
       ? "Each token's key gets a dot-product score against the query. Click any token to compare it; the matched token's value gets pulled in."
       : mode === "answering"
-        ? "The highlighted token's query matches one token's key, exactly or closely. Click other tokens to compare their keys."
+        ? "The highlighted token's query lines up with one token's key, strongly or loosely. Click other tokens to compare their keys."
         : "The highlighted token needs help from specific other tokens. Follow the arrow.";
 
   // The interactive token row, shared by the answering and dot-product modes.
@@ -709,14 +709,14 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
                         : "bg-success/15 text-success"
                   }`}
                 >
-                  {!answererMatches ? "No match" : sentence.inexact ? "Close match" : "Exact match"}
+                  {!answererMatches ? "No match" : sentence.inexact ? "Loose match" : "Strong match"}
                 </span>
                 <span className="text-muted">
                   {!answererMatches
-                    ? `"${effectiveAnswererText}" has a different key, so "${selectedWordText}" looks elsewhere.`
+                    ? `"${effectiveAnswererText}" advertises something else, so "${selectedWordText}" looks elsewhere.`
                     : sentence.inexact
-                      ? "the query and the key aren't identical, but they overlap enough to count."
-                      : "the query and the key are the same."}
+                      ? "the query and the key aren't identical, but they clearly line up."
+                      : "the query and the key line up closely."}
                 </span>
               </div>
             )}

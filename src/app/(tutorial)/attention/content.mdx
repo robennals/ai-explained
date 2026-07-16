@@ -24,10 +24,10 @@ In attention, we imagine each token asking a question and looking around to see 
 - Its **key** is what it advertises to other tokens, like the title of a web page.
 - Its **value** is what it hands over once it's picked, like the content of the page.
 
-To understand a token, attention matches its query against the keys of all the other tokens, then pulls in the value of whichever one fits best. The match doesn't have to be exact. "it" is looking for the thing being talked about, and "glass" has a key that says exactly that. But "bank" is looking for a river or money, while "river" only has a key for "a river." That isn't a perfect match, but it's close enough that "river" still wins.
+To understand a token, attention matches its query against the keys of all the other tokens, then pulls in the value of whichever one fits best. Each token builds its query and key from itself alone, so a token can only look for what it can tell from its own identity. "it" is a pronoun, so it looks for the thing it refers to, and "glass" advertises that it's a physical object. Those aren't the same words, but they line up well, so it's a strong match. "bank" is looking for a river or money, while "river" only advertises a river. That covers just half of what "bank" wants, but it's close enough that "river" still wins.
 
 <AnsweringQuestionsWidget>
-Each example shows the highlighted token's query, the key of the token it matches, and the value it pulls in. Click the other underlined tokens to see that their keys don't fit. Flip through the examples to find exact matches and one close match.
+Each example shows the highlighted token's query, the key of the token it matches, and the value it pulls in. Click the other underlined tokens to see that their keys don't fit. Flip through the examples to find strong matches and one loose match.
 </AnsweringQuestionsWidget>
 
 ## Matching with the Dot Product
@@ -57,7 +57,7 @@ The gap between the scores is what matters. When one token is the clear best mat
 Now we can gather the answer. Alongside its query and key, each token has a **value**: what it hands over when another token attends to it. The asker adds up the values of the tokens it looked at, each weighted by its share of the attention. When one token wins clearly, the result is sharp. When the attention is split, the result is a genuine blend of the values.
 
 <AttentionValuesWidget>
-Try "A clear value": "it" pays almost all its attention to "glass", so it gathers "the glass". Try "An even split": "it" could be the cat or the dog, so it gathers "either the cat or the dog". Try "A leaning blend": the cat is the more likely answer, so it gathers "probably the cat, maybe the dog".
+Try "A clear value": "it" pays almost all its attention to "glass", so it gathers "the glass". Try "An even split": "it" could be the cat or the dog, so it gathers "either the cat or the dog". Try "A leaning blend": "pounced" is looking for the agile animal that pounced, which fits the cat better than the dog, so it gathers "probably the cat, maybe the dog".
 </AttentionValuesWidget>
 
 Because the values are combined by weights that add up to 100%, the result always stays in the same range as the inputs. The mechanism never overshoots into "double cat". And a blend is often exactly right: an ambiguous pronoun really is a mix until later context settles it.

@@ -112,17 +112,31 @@ export function AttentionSink() {
             </div>
             <div className="text-foreground">{example.query}</div>
           </div>
-          <button
-            onClick={() => setSinkOn((s) => !s)}
-            aria-pressed={sinkOn}
-            className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${
-              sinkOn
-                ? "bg-emerald-500 text-white"
-                : "bg-foreground/5 text-muted hover:bg-foreground/10 hover:text-foreground"
-            }`}
-          >
-            Sink {sinkOn ? "on" : "off"}
-          </button>
+          <label className="flex cursor-pointer select-none items-center gap-2.5">
+            <span className="text-sm font-semibold text-foreground">Sink</span>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={sinkOn}
+              onClick={() => setSinkOn((s) => !s)}
+              className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
+                sinkOn ? "bg-emerald-500" : "bg-foreground/20"
+              }`}
+            >
+              <span
+                className={`inline-block h-5 w-5 rounded-full bg-white shadow transition-transform ${
+                  sinkOn ? "translate-x-5" : "translate-x-0.5"
+                }`}
+              />
+            </button>
+            <span
+              className={`w-7 text-xs font-bold uppercase tracking-wide ${
+                sinkOn ? "text-emerald-600 dark:text-emerald-400" : "text-muted"
+              }`}
+            >
+              {sinkOn ? "on" : "off"}
+            </span>
+          </label>
         </div>
 
         <div className="flex flex-col gap-1.5">
