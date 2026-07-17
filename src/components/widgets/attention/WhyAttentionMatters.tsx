@@ -321,15 +321,23 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
     return () => cancelAnimationFrame(raf);
   }, [effectiveAnswerer, selectedWord, sentenceIdx, mode]);
 
-  // Keep the compared column scrolled into view when it's off-screen.
+  // Keep the compared column horizontally visible inside the grid when it sits
+  // off to one side. Scroll only the grid's own container, never the page, so
+  // loading this widget below the fold can't yank the whole page down to it.
   useEffect(() => {
     if (mode === "basic") return;
     const raf = requestAnimationFrame(() => {
-      colRefs.current.get(effectiveAnswerer)?.scrollIntoView({
-        behavior: "smooth",
-        inline: "nearest",
-        block: "nearest",
-      });
+      const scroller = gridScrollRef.current;
+      const col = colRefs.current.get(effectiveAnswerer);
+      if (!scroller || !col) return;
+      const s = scroller.getBoundingClientRect();
+      const c = col.getBoundingClientRect();
+      const pad = 12;
+      if (c.left < s.left + pad) {
+        scroller.scrollBy({ left: c.left - s.left - pad, behavior: "smooth" });
+      } else if (c.right > s.right - pad) {
+        scroller.scrollBy({ left: c.right - s.right + pad, behavior: "smooth" });
+      }
     });
     return () => cancelAnimationFrame(raf);
   }, [effectiveAnswerer, sentenceIdx, mode]);
