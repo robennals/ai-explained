@@ -124,11 +124,11 @@ export const chapters: Chapter[] = [
   {
     id: 11,
     slug: "training",
-    title: "Why Training Almost Doesn't Work",
-    subtitle: "Making training work",
+    title: "Making Training Work Well",
+    subtitle: "Training",
     prerequisites: [3],
     description:
-      "Plain gradient descent on a deep network barely works. Activation functions (ReLU, Swish), regularization, dropout, learning rate schedules, and Adam are the hard-won tricks that make modern training possible.",
+      "Trained the simple way, a deep network barely learns. This is a tour of the tricks that make training work: good activations, initialization, batching, normalization, Adam, residual connections, and dropout.",
   },
   {
     id: 12,

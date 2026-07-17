@@ -1,282 +1,235 @@
-# Why Training Almost Doesn't Work
+# Making Training Work Well
 
 <Lead>
-The neurons chapter made training sound easy. Every weight has a gradient, so
-you nudge them all downhill at once and the network learns. A network with ten
-thousand weights, it said, is no harder to train in principle than one with ten.
-That is true in principle. In practice, a plain deep network trained this way
-barely works at all. It stalls, or blows up, or memorizes its training data and
-fails on everything else.
+The last chapter made training sound easy. Nudge every weight the right way, and
+the network learns. In theory, a huge network is no harder to train than a tiny
+one.
 </Lead>
 
-This chapter is a tour of the tricks that close the gap between principle and
-practice. None of them is complicated on its own. Each one fixes a specific way
-that naive training goes wrong. Taken together, they are the difference between a
-network that learns nothing and the models that write, draw, and reason today.
+In practice, it is much harder. Trained the simple way, a deep network often
+learns almost nothing.
 
-## The learning signal has to survive the trip back
+This chapter is a tour of the tricks that fix that. None of them is complicated.
+Each one solves a different way that training goes wrong.
 
-Training is credit assignment. The network makes a prediction, we measure how
-wrong it was, and then every weight gets a signal telling it which way to move to
-make the error smaller. For a weight near the output, that signal is clear. For a
-weight buried deep in the network, it has to travel back through every layer
-above it, and at each step it gets multiplied by another number. Multiply enough
-numbers smaller than one together and the signal shrinks to nothing. Multiply
-numbers larger than one and it explodes.
+## Getting the message back to every layer
 
-Think about tracing why your soccer team won on Saturday. Partly because of the
-third goal. Which happened partly because the striker was in the right place.
-Partly because she was fresh. Partly because she slept well. Partly because the
-hotel was quiet. Partly because... By the time you have followed the chain back
-far enough, the link between "we won" and "the hotel was quiet" is so faint you
-cannot act on it. A deep network has the same problem in reverse: the earliest
-layers are the hotel, and the signal reaching them is too weak to be useful.
+Training works by feedback. The network makes a guess. We measure how wrong it
+was. Then each weight gets a message telling it which way to change.
 
-To see this up close, the playgrounds below all share the same tiny machine: a
-single neuron with an input, a weight, a bias, and an activation. It has a
-current output, a target we want it to reach, and the error between them. Press
-its button to run one learning step and watch whether the output actually moves
-toward the target. That is training, stripped down to one moving part.
+For weights near the end, the message is clear. For weights deep inside, it has to
+travel back through many layers. Each layer makes it fainter.
 
-### An activation that can actually learn
+Think about why your soccer team won on Saturday. Partly the third goal. Partly the
+striker being in the right spot. Partly a good night's sleep. Partly a quiet hotel
+the night before.
 
-The neurons chapter used the sigmoid, an S-shaped curve that squeezes any number
-into the range 0 to 1. That squeeze has a cost. Out at the ends of the S the
-curve goes flat, and a neuron sitting on a flat part has almost no slope. A
-learning step multiplies by that slope, so a saturated neuron barely budges no
-matter how wrong it is.
+Follow the chain back far enough and the last reason barely counts. A deep network
+has the same trouble. Its earliest layers get a message too faint to use.
 
-A sigmoid is like a volume knob that maxes out. Past a certain point you keep
-turning and nothing gets louder. A neuron stuck out there has stopped listening.
-ReLU behaves more like a one-way valve. It blocks anything negative, passing
-nothing, but lets positive signal straight through at full strength with no
-ceiling, so it never goes deaf the way a sigmoid does. That single change is a
-big part of why deep networks started working. (Modern networks often use smooth
-cousins of ReLU, such as Swish and GELU, but the idea is the same.)
+Every playground below is built from the same tiny machine: one neuron. It has an
+input, a knob or two, and an output. You give it a target and press a button to
+make it learn one step. Then you watch whether it actually moves.
+
+### Pick an activation that can learn
+
+Every neuron passes its number through an activation. The old favorite is the
+sigmoid, an S-shaped curve. At the ends, the curve goes flat. A neuron sitting on
+a flat part barely responds, so it barely learns.
+
+It is like a volume knob that maxes out. Past a point, turning it does nothing.
+
+ReLU works better. It blocks negative numbers and lets positive ones through at
+full strength, with no ceiling. It never goes deaf the way a sigmoid does.
+
+You might worry that letting numbers grow with no ceiling would send them out of
+control. It can, but a later trick called normalization keeps everything in a
+sensible range, so in practice it works out fine.
 
 <ActivationWidget>
-Start on **sigmoid**. The neuron begins saturated, and each learning step moves
-the output by almost nothing. Now switch to **ReLU**. The same neuron starts
-learning again. Watch the operating point on the curve: on the flat part the
-slope is near zero, and that is exactly when learning stalls. Click or drag the
-green target anywhere along the bar to pick a goal and try to train the neuron to
-reach it. Under ReLU the bar stretches to show its wider range.
+Start on **sigmoid** and press the button a few times. The neuron is stuck. Now
+switch to **ReLU** and it starts learning. Click anywhere on the graph to move the
+dot into different spots, and notice where the curve is flat. Drag the green target
+line on the right to pick a goal to aim for.
 </ActivationWidget>
 
-### Starting in the right place
+### Start in a good place
 
-Where a neuron begins matters as much as which activation it uses. Start it with
-weights that are too large and it lands out on the flat part of its curve before
-it has learned anything, saturated from the first step. Initialization is the art
-of picking starting weights at a scale that keeps every neuron in its responsive
-range, so the signal neither shrinks nor blows up as it crosses each layer.
+Where a neuron begins matters too. Start it with numbers that are too big, and it
+lands out on the flat part before it has learned anything. Good starting values
+keep it in the responsive middle.
 
 <BadInitWidget>
-Press **Bad initialization**, then take a few learning steps. The neuron is stuck
-out on the flat part and barely moves. Now press **Good initialization** and try
-again. Same neuron, now it learns quickly. The only difference is where it
-started. Drag the green target to a new spot and watch how well each starting
-point can chase it.
+Press **Bad initialization**, then take a few steps. The neuron barely moves. Press
+**Good initialization** and try again. Same neuron, but now it learns fast. The
+only difference is where it started. Click around the graph to feel where learning
+is quick and where it stalls.
 </BadInitWidget>
 
-Initialization has a second, sneakier job. If every neuron in a layer starts with
-the same weights, they all get the same learning signal and move together forever,
-staying identical twins. A layer of a hundred twins does the work of one neuron.
-The fix is to start every neuron with different random weights, so they can drift
-apart and specialize.
+Starting values have a second job. If two neurons in a layer start exactly the
+same, they get the same message and change in lockstep. They stay identical twins
+forever, and the whole layer does the work of one neuron. The fix is to start each
+neuron a little differently, at random.
 
 <TwinsWidget>
-Take a few learning steps and watch the two neurons move in perfect lockstep.
-They started identical, so they stay identical. Now press **Randomize neuron B**
-and keep going. Once they differ, they can learn different things and the layer
-finally uses its full capacity.
+Take a few steps and watch the two neurons move together. They started the same, so
+they stay the same. Now press **Randomize neuron B**. They split apart, and the
+layer can finally learn two different things.
 </TwinsWidget>
 
-### Giving the signal a shortcut
+### Give the message a shortcut
 
-The deeper the network, the fainter the learning signal reaching its early layers.
-Residual connections fix this with a simple move: instead of each layer replacing
-what came before, it adds its contribution on top.
+The deeper the network, the fainter the message to its early layers. Residual
+connections fix this. Instead of each layer replacing the work before it, each
+layer adds to it.
 
-Picture a document that many people work on. If each person adds their own
-paragraph, then when you find a bad paragraph later you know exactly who wrote it
-and can ask them to fix it. But if each person instead rewrites the whole document
-from the previous version, a mistake gets smeared across everyone, and the person
-who first introduced it is impossible to single out. A plain deep network is the
-second kind. Residual connections make it the first.
+Picture a group writing one document. If each person adds their own paragraph, you
+can see who wrote what. Find a bad paragraph, and you know who to ask to fix it.
+
+But if each person rewrites the whole thing, mistakes blur together and you cannot
+tell who caused what. A plain deep network is the second kind. Residual connections
+make it the first.
 
 <ResidualStreamDiagram />
 
-Because each layer adds rather than overwrites, information accumulates instead of
-being buried, so the network keeps all the depth and power it had. What it gains
-is a direct path from every layer to the output, which means a deep layer can
-contribute directly and be corrected directly when it is wrong. This shared,
-added-to document is the residual stream from the transformers chapter: every
-attention and feed-forward block reads it and adds back to it.
+Because each layer adds instead of replacing, nothing gets lost. The network stays
+deep and powerful, but now every layer has a direct line to the answer. This is the
+residual stream from the transformers chapter.
 
 <VanishingChainWidget>
-Each bar shows how much that neuron actually learns in one step. With a long plain
-chain, the earliest neuron (the red bar) barely moves. Increase the **depth** and
-watch it shrink further. Now switch on **residual connections** and the early bars
-come back to life. The signal has a shortcut home.
+Each bar shows how much that neuron learns in one step. In a long plain chain, the
+first neuron (red) barely moves. Turn on **residual connections** and it comes back
+to life.
 </VanishingChainWidget>
 
 <KeyInsight>
-Most of the architecture tricks in deep learning exist to keep one number under
-control: the strength of the learning signal as it travels back through depth.
-Activations, initialization, and residual connections are three different ways to
-stop it from fading to nothing or blowing up.
+Almost every trick here has one job: keep the learning message strong as it travels
+back through a deep network, so it never fades to nothing or blows up.
 </KeyInsight>
 
-## Learning from a handful of examples at a time
+## Learning from small groups at a time
 
-To take one honest step, you would measure the error on the entire training set,
-all the way through, and only then update. With millions of examples that is far
-too slow. The opposite extreme, updating after every single example, is fast but
-jumpy: one weird example yanks the network in the wrong direction.
+To take one perfect step, you would check every example first. With millions of
+them, that is far too slow. Checking just one example is fast but jumpy.
 
-This is the soccer season again. You do not wait until the final whistle of the
-season to think about how to play better, and you also do not overhaul your whole
-strategy after one rainy away game with a lucky bounce. You review your last few
-games together. A small batch of examples gives a good-enough sense of direction
-without overreacting to any single one.
+It is the soccer season again. Do not wait until the season ends to improve. Review
+after each game. But do not panic over one rainy game with a lucky bounce either. A
+few recent games tell you enough.
 
-Here is the surprising part. Using a batch of one with a small step is almost as
-accurate as using the whole dataset at once, because the direction works out about
-the same either way. The real reason to use batches is the hardware. A GPU can
-work through hundreds of examples at the same time, in roughly the time it takes
-to do one. So a batch of 256 gets a far better sense of direction for almost the
-same wall-clock cost, and reaches the finish line in a fraction of the steps.
+So we learn from small groups, called batches. Here is the surprise: a batch of one
+with tiny steps ends up almost as accurate as using everything at once.
+
+The real reason to batch is speed. A GPU can handle hundreds of examples at the same
+time, about as fast as one. So a batch gives a good direction cheaply and gets there
+in far fewer steps.
 
 <BatchingWidget>
-Drag the batch size. Small batches take many jumpy steps; large batches take few
-smooth ones. Watch how the parallel hardware keeps the cost per step almost flat
-until the batch gets very large.
+Drag the batch size. Small batches take many jumpy steps. Big batches take a few
+smooth ones. The hardware keeps the cost per step low until the batch gets very
+large.
 </BatchingWidget>
 
 <KeyInsight>
-Batching is not about computing a more correct gradient than a single example
-could. It is about using parallel hardware to get a good-enough direction in as
-few steps as possible.
+Batches are not about a more perfect step. They are about using fast hardware to get
+a good-enough step in as few tries as possible.
 </KeyInsight>
 
-## Keeping the numbers in a sane range
+## Keeping the numbers in a sensible range
 
-Even with a careful start, the numbers flowing through a network drift as it
-trains. Weights change, so the scale of each layer's inputs wanders, and every
-layer keeps having to re-adapt to its inputs' shifting range. That drift slows
-everything down and forces the learning rate to stay tiny.
+As a network trains, its numbers drift. Some grow huge, some shrink to nothing. Each
+layer keeps having to adjust to the mess coming in.
 
-Normalization keeps the numbers civilized. It is grading on a curve. A raw score
-of 70 means nothing until you know how everyone else did; once you standardize it,
-the next person always knows what to expect. Normalization does the same to a
-layer's outputs, rescaling them to a standard spread on every pass, then letting
-the network stretch them back with a couple of learned knobs.
+Normalization cleans this up. It is like grading on a curve. A raw score of 70 means
+nothing until you compare it to the rest of the class. Then it is clear.
 
-There are two common versions, and the difference is what you standardize against.
-Batch normalization grades each student against everyone else who sat the exam in
-the same room, which needs a big, steady roomful to be reliable. It works well for
-image models. Layer normalization grades each student against their own other
-answers, ignoring the room entirely. That makes it independent of batch size and
-of how many words are in the sentence, and it behaves the same whether the model
-is training or generating one word at a time. That is why transformers use it.
+Normalization rescales each layer's numbers to a standard range on every pass. The
+next layer always knows what to expect. This is also what stops ReLU's numbers from
+growing out of control.
+
+There are two common kinds. Batch norm compares each value to the other examples in
+the group. Layer norm compares each value to the others in the same example. Layer
+norm does not care how big the group is, so transformers use it.
 
 <NormalizationWidget>
-Drag the raw values of three example vectors. In **layer norm** mode each vector
-is standardized on its own. Switch to **batch norm** mode and each feature is
-standardized down the batch instead. Watch which direction the rescaling runs.
+Drag the numbers in three example vectors. In **layer norm**, each vector is rescaled
+on its own. In **batch norm**, each feature is rescaled across the group. Switch
+between them to see the difference.
 </NormalizationWidget>
 
 <KeyInsight>
-Normalization keeps every layer's inputs in a predictable range so the whole
-network can train at one sensible learning rate instead of each layer chasing a
-moving target.
+Normalization keeps every layer's numbers in a steady range, so the whole network can
+learn at one sensible speed.
 </KeyInsight>
 
-## How big a step to take
+## Choosing how big a step to take
 
-A single step size cannot be right for the whole journey. Some directions in the
-landscape are steep and some are nearly flat, and one setting either bounces
-across the steep parts or crawls along the flat ones.
+One step size cannot be right for the whole trip. Some directions are steep, some are
+nearly flat. A single setting either overshoots the steep parts or crawls along the
+flat ones.
 
-Think of getting from your home in San Francisco to a friend's living room in
-Paris. You do not travel at one speed. You ease carefully out of the driveway
-while you get your bearings, cruise at full speed across the country and the ocean,
-and then take tiny careful steps down the hallway to the right door. You also match
-your speed to the terrain, sprinting the open highway and inching through a crowded
-hall.
+Think about getting from your house to a friend's living room across the world. You do
+not move at one speed. You back out of the driveway slowly, fly fast across the ocean,
+then take tiny steps down the hallway to the right door.
 
-A few ideas make this work. Starting slow, called warmup, sounds backwards when
-you have so far to go, but at the start the weights are random and the direction is
-barely trustworthy, so a big confident step can fling the model somewhere it never
-recovers from. Momentum keeps a running average of recent steps, so the model
-builds speed in a consistent direction and is not knocked around by every bump.
-And Adam, the optimizer nearly all large models use, gives each weight its own step
-size by tracking how big that weight's recent gradients have been and dividing its
-step down when they are large. A weight that keeps overshooting gets reined in; one
-that has been crawling gets a push.
+A few ideas help. Starting slow, called warmup, sounds odd when you have so far to go.
+But the weights start out random, so one big early step can throw the network somewhere
+it never recovers from.
+
+Momentum keeps you rolling in a steady direction, so small bumps do not knock you
+around. And Adam gives each weight its own step size: it shrinks the steps that keep
+overshooting and grows the ones that crawl. Almost every big model uses it.
 
 <OptimizerRaceWidget>
-Race plain gradient descent against momentum and Adam down the same landscape. Try
-the **learning rate** too small and nothing arrives; too large and it overshoots
-and diverges; just right and it settles. Adam adapts its step per direction and
-usually gets there with the least fuss.
+Race plain steps, momentum, and Adam down the same hill. Too small a step and it never
+arrives. Too big and it flies off. Adam tunes itself and usually wins.
 </OptimizerRaceWidget>
 
 <KeyInsight>
-Adam is momentum plus a separate, self-adjusting step size for every weight.
-Adapting the step to the terrain, direction by direction, is what lets enormous
-models train without anyone tuning thousands of learning rates by hand.
+Adam is momentum plus a step size that tunes itself for every weight. That is what lets
+huge models train without anyone setting speeds by hand.
 </KeyInsight>
 
-## Learning versus memorizing
+## Learning instead of memorizing
 
-A big enough network can drive its training error to zero by memorizing the
-answers, noise and all. It looks perfect in practice and then falls apart on
-anything it has not seen. What we actually care about is how it does on new data,
-not on the examples it studied.
+A big network can get every training answer right by memorizing, noise and all. Then it
+fails on anything new. What we really want is for it to do well on data it has never
+seen.
 
-This is the difference between understanding the material and cramming last year's
-answer key. The key gets you a perfect score on last year's paper and leaves you
-lost on this year's. The tricks that fight it all work by making training a little
-harder on purpose.
+It is the difference between understanding math and memorizing last year's answer key.
+The answer key gets a perfect score on the old test and falls apart on the new one.
 
-Dropout is the clearest example. Do not learn to recognize a cat only by its fur,
-or only by its ears. It might be a hairless cat, or one wearing a hat. During
-training, dropout randomly hides some of the network's cues, forcing it to rely on
-many independent ones, so it still copes when a few are missing. Weight decay pulls
-in the same direction by gently pushing weights toward zero, so the network prefers
-the simplest explanation that fits, the way a good scientist distrusts a needlessly
-elaborate theory.
+Dropout fights this. Do not learn a cat only by its fur, or only by its ears. It might
+be hairless, or wearing a hat. Dropout randomly hides some clues while training, so the
+network learns to use many.
+
+Weight decay helps too. It nudges the weights to stay small, so the network keeps its
+explanation simple.
 
 <OverfittingWidget>
-Slide the complexity up and watch the curve bend to pass through every noisy point,
-its training error near zero while its test error climbs. Now add **dropout** or
-**weight decay** and the fit calms down. It gets a little worse on the training
-points and a lot better on new ones.
+Turn up the complexity and the curve bends to hit every noisy point. Its training score
+looks great, but new points are far off. Add **dropout** or **weight decay** and it calms
+down.
 </OverfittingWidget>
 
 <KeyInsight>
-Low training error was never the goal. Generalization is. Several of training's
-most important tricks deliberately make the network's job harder so that what it
-learns holds up on data it has never seen.
+A low training score was never the goal. Doing well on new data is. Some tricks make
+training harder on purpose to get there.
 </KeyInsight>
 
-## What's next
+## Putting it together
 
-Plain gradient descent almost does not work on a deep network. The signal vanishes
-or explodes on its way back, the numbers drift out of range, the step size is
-wrong for the terrain, and the model would rather memorize than learn. Each trick
-in this chapter answers one of those failures, and stacked together they are why we
-can train networks with billions of weights at all.
+The simple way to train barely works. The message fades, the numbers drift, the steps
+are the wrong size, and the network would rather memorize than learn.
 
-It is worth being honest that a lot of this was found by trial and error. We know
-that residual connections and Adam and normalization help enormously, but the full
-story of why some of them work so well is still being written.
+Each trick here fixes one of those problems. Stack them together and you can train
+networks with billions of weights.
+
+One honest note: a lot of this was found by trial and error. We know these tricks help.
+We are still working out exactly why some of them work so well.
 
 <TryItInPyTorch notebook="training">
-Build a deep network and watch its early layers stop learning, then bring them
-back with better initialization and residual connections. Compare small and large
-batches, add normalization, race SGD against Adam, and push a small network into
-overfitting before rescuing it with dropout and weight decay.
+Build a deep network and watch its early layers stop learning. Bring them back with
+better starting values and residual connections. Compare small and big batches, add
+normalization, race Adam against plain steps, and push a network into memorizing before
+rescuing it with dropout and weight decay.
 </TryItInPyTorch>

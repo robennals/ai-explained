@@ -105,12 +105,12 @@ export function BadInitWidget({ children }: { children?: React.ReactNode }) {
     <WidgetSlot tryIt={children}>
       <LearningNeuron
         title="Good start, bad start"
-        description="A neuron that starts deep in the flat region can barely learn. A well-scaled start learns quickly."
-        initialWeight={6}
-        initialBias={2}
+        description="A neuron that starts out on the flat part can barely learn. A well-scaled start learns quickly."
+        initialWeight={4.5}
+        initialBias={0}
         initialTarget={0.4}
         initialActivation="sigmoid"
-        initPresets={{ bad: { w: 6, b: 2 }, good: { w: 0.4, b: 0 } }}
+        initPresets={{ bad: { w: 4.5, b: 0 }, good: { w: 0.4, b: 0 } }}
       />
     </WidgetSlot>
   );
