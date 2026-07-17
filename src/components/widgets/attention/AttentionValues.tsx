@@ -12,7 +12,7 @@ import { softmax } from "./toyMath";
 /*  split.                                                             */
 /* ------------------------------------------------------------------ */
 
-interface Example {
+export interface Example {
   id: string;
   label: string;
   words: string[];
@@ -26,10 +26,13 @@ interface Example {
   result: string;
 }
 
+const DEFAULT_DESCRIPTION =
+  "Each token's key scores against the query. Softmax turns those scores into attention percentages, and each token hands over its value weighted by that share.";
+
 // The scores are chosen to follow naturally from how well each token's key
 // matches the query, so a single round of query-key matching produces the
 // split we want to show (clear win, even tie, or a semantic lean).
-const EXAMPLES: Example[] = [
+const VALUE_EXAMPLES: Example[] = [
   {
     id: "winner",
     label: "A clear value",
@@ -75,14 +78,25 @@ function pct(n: number): string {
 const ARC_H = 48;
 const ARC_HUE = 240;
 
-export function AttentionValues() {
+export function AttentionValues({
+  examples = VALUE_EXAMPLES,
+  title = "Gathering the Value",
+  description = DEFAULT_DESCRIPTION,
+}: {
+  examples?: Example[];
+  title?: string;
+  description?: string;
+} = {}) {
   const [exampleIdx, setExampleIdx] = useState(0);
-  const example = EXAMPLES[exampleIdx];
+  const example = examples[exampleIdx];
 
   const handleReset = useCallback(() => setExampleIdx(0), []);
-  const handleTab = useCallback((id: string) => {
-    setExampleIdx(EXAMPLES.findIndex((e) => e.id === id));
-  }, []);
+  const handleTab = useCallback(
+    (id: string) => {
+      setExampleIdx(examples.findIndex((e) => e.id === id));
+    },
+    [examples]
+  );
 
   const others = example.words.map((_, i) => i).filter((i) => i !== example.asker);
   const weights = softmax(others.map((i) => example.scores[i]));
@@ -95,7 +109,7 @@ export function AttentionValues() {
     .filter((i) => example.values[i] !== undefined && (weightByIndex.get(i) ?? 0) > 0.03)
     .sort((a, b) => (weightByIndex.get(b) ?? 0) - (weightByIndex.get(a) ?? 0));
 
-  const tabs = EXAMPLES.map((e) => ({ id: e.id, label: e.label }));
+  const tabs = examples.map((e) => ({ id: e.id, label: e.label }));
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const gridContentRef = useRef<HTMLDivElement>(null);
@@ -142,11 +156,7 @@ export function AttentionValues() {
   }, [exampleIdx]);
 
   return (
-    <WidgetContainer
-      title="Gathering the Value"
-      description="Each token's key scores against the query. Softmax turns those scores into attention percentages, and each token hands over its value weighted by that share."
-      onReset={handleReset}
-    >
+    <WidgetContainer title={title} description={description} onReset={handleReset}>
       <div className="flex flex-col gap-5">
         <WidgetTabs tabs={tabs} activeTab={example.id} onTabChange={handleTab} />
 

@@ -62,19 +62,17 @@ Try "A clear value": "it" pays almost all its attention to "glass", so it gather
 
 Because the slices add up to 100%, the answer always stays in the same range as the values that went in. It can never overshoot into "double cat". And a blend is often the right call: an unclear pronoun really is a mix of options until later words settle it.
 
-## Where Does Attention Go When Nothing Matches?
+## When Nothing Matches
 
-But what if a token is looking for something that isn't in the sentence at all? Softmax still hands out the full 100%, so the attention smears thinly across every token and the answer comes out as mush.
+Sometimes a token looks for something that isn't there. The "it" in "It was raining" doesn't stand for anything; English just wants a subject. With no good match, softmax still hands out the full 100%, so the attention smears across every token and the answer is mush.
 
-Think of the "it" in "It was raining." That "it" doesn't stand for anything; English just likes its sentences to have a subject. There's nothing for it to gather.
-
-The fix is a **sink**, named after a drain: an extra token whose only job is to soak up spare attention. Give it a small fixed score, big enough to beat a weak match but too small to beat a real one. When there's a good answer, the answer wins and the sink barely moves. When there isn't, the leftover attention pours into the sink. Its value is empty, so a token that lands on it gathers nothing, which is just right.
+The fix is a **sink**: an extra token whose value means "nothing" and that faintly matches everything. A real answer easily beats it, but with no real answer the sink wins by default, so the token safely gathers nothing.
 
 <AttentionSinkWidget>
-Try "Nothing matches": no token is a real answer, so the sink absorbs most of the attention. Toggle the sink off to see the attention smear across the sentence with nowhere safe to go. Try "Something matches": "glass" scores well above the sink, so it wins and the sink barely registers.
+Try "Nothing matches": no real token fits, so the sink takes most of the attention and "It" gathers nothing. Try "Something matches": "glass" scores far above the sink, so it wins and the sink is ignored.
 </AttentionSinkWidget>
 
-Real models don't always add a dedicated sink token. Sometimes the model learns to dump spare attention on a comma, or the first token, or the token itself. The idea is the same: when a token has nothing useful to look for, its attention needs a harmless place to go.
+Real models don't always add a dedicated sink token. Often they just learn to dump spare attention on a comma, the first token, or the token itself.
 
 ## Where the Vectors Come From
 
@@ -86,17 +84,13 @@ And it doesn't stop at one set of numbers. It learns several sets at once, which
 
 ## Multi-Headed Attention
 
-Go back to "bank." To tell which kind of bank it is, the token really needs two things at once: a nearby river, and nearby money. One query looks for one thing, so a single round of matching can't cover both.
+One query looks for one thing. But "bank" needs two at once: a nearby river and nearby money. So attention runs many times over. Each round is a **head**, with its own queries, keys, and values, and each head learns to look for something different. This is **multi-headed attention**, like asking different friends different questions: the one who hikes about trails, the one who cooks about recipes.
 
-The fix is to let each token search several times over, each search its own round. One round is called an **attention head**: its own set of queries, keys, and values, learning one kind of connection. A model runs many heads side by side, and each learns to look for something different. This is **multi-headed attention**. Every head builds its own version of each token, and those versions get combined into one.
+<AttentionHeadsWidget>
+Flip through some heads a model might learn. Each one links a different kind of token pair, and a real model runs dozens of them at the same time.
+</AttentionHeadsWidget>
 
-It's like having a group of friends. You don't take every question to the same person. You ask the friend who hikes about trails, the friend who cooks about recipes, the doctor friend about that weird rash. Each friend is a different place to look. Each head works the same way: one round where a token looks for one kind of thing and gets one kind of answer. Run enough of them and a single token can chase down everything it needs at once: what it refers to, who acted, and which part of the sentence it belongs to.
-
-<KeyInsight>
-Multiple attention heads let the model look for many different things at once. Each head has its own query, key, and value numbers, so each learns to spot a different kind of relationship: pronouns, grammar, structure, meaning. **The model doesn't have to pick one kind of attention; it gets all of them at once.**
-</KeyInsight>
-
-In real models, each head has its own sink too, because no single head fits every token in every sentence. A head that tracks down what pronouns refer to is busy on pronouns and idle everywhere else. That idle time is what the sink is for.
+Run enough heads and a single token can chase down everything it needs at once: what it refers to, who acted, which words describe it.
 
 ## What We've Built
 

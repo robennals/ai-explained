@@ -10,6 +10,7 @@ import {
   SoftmaxExplorerWidget,
   AttentionSinkWidget,
   AttentionValuesWidget,
+  AttentionHeadsWidget,
 } from "./widgets";
 
 export const metadata = chapterMetadata("attention");
@@ -28,6 +29,7 @@ export default function Chapter07() {
             SoftmaxExplorerWidget,
             AttentionSinkWidget,
             AttentionValuesWidget,
+            AttentionHeadsWidget,
           }}
         />
       </div>
