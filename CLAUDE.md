@@ -16,6 +16,14 @@ pnpm test:notebooks   # Execute all Jupyter notebooks (requires Python + torch)
 npx playwright test   # E2E tests (expects dev server running)
 ```
 
+## Dev Server
+
+**Do not kill any running dev server, and do not start your own without asking first.** The user typically has their own `pnpm dev` running.
+
+- **Never** kill a running dev server — no `kill`, `pkill`, `kill-port`, killing the process on port 3000, or similar. The user's server may be running and killing it disrupts their work.
+- **Never** start your own dev server (`pnpm dev`, `next dev`, etc.) without first asking the user for permission. A second server fails to bind to port 3000 (or silently takes a different port), which prevents the user's server from starting or causes confusion.
+- If you need a running app — for Playwright tests, screenshots, or to verify a change — assume the user already has one on `localhost:3000`. If it doesn't appear to be running, **ask the user to start it** (or ask permission before starting one yourself) rather than launching one on your own.
+
 ## Architecture
 
 ### Routing & Content
