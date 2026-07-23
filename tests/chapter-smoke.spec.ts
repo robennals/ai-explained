@@ -20,27 +20,27 @@ const CHAPTERS: ChapterCase[] = [
   },
   {
     slug: "neurons",
-    h1Contains: "Building a Brain",
+    h1Contains: "Neural Networks",
     widgetTitles: ["A Neural Network"],
   },
   {
     slug: "vectors",
-    h1Contains: "Describing the World with Numbers",
+    h1Contains: "Vectors",
     widgetTitles: ["Describing Things with Vectors"],
   },
   {
     slug: "embeddings",
-    h1Contains: "From Words to Meanings",
+    h1Contains: "Embeddings",
     widgetTitles: ["One Dimension, Multiple Meanings"],
   },
   {
     slug: "next-word-prediction",
-    h1Contains: "Understanding by Predicting",
+    h1Contains: "Next-Word Prediction",
     widgetTitles: ["Guess the Next Word"],
   },
   {
     slug: "attention",
-    h1Contains: "Paying Attention",
+    h1Contains: "Attention",
     widgetTitles: ["Which Words Matter?"],
   },
   {
