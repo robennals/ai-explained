@@ -15,7 +15,7 @@ interface ChapterCase {
 const CHAPTERS: ChapterCase[] = [
   {
     slug: "optimization",
-    h1Contains: "Power of Incremental Improvement",
+    h1Contains: "Optimization",
     widgetTitles: ["Search: Blind vs. Guided"],
   },
   {
@@ -45,7 +45,7 @@ const CHAPTERS: ChapterCase[] = [
   },
   {
     slug: "positions",
-    h1Contains: "Where Am I",
+    h1Contains: "Positional Encoding",
     widgetTitles: ["Word Order Changes Meaning"],
   },
   {
