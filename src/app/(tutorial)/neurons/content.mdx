@@ -1,4 +1,4 @@
-The building block of modern AI is a rough imitation of a brain cell. A neuron adds up its inputs, and if the total is high enough it fires. That is a much simpler starting point than most people expect. This chapter builds one from scratch, wires several of them together, and shows how a whole network of them can be trained by the [incremental improvement](/optimization) that all AI training relies on.
+Pretty much every modern AI system is a neural network. The name evokes brain cells, but the part they are built from is closer to a logic gate, one of the AND/OR/NOT components inside every computer chip. The important difference is that a neuron's output slides smoothly instead of snapping between on and off, and that smoothness is what makes a network trainable. Nudge a weight and the answer gets slightly better or slightly worse, which is exactly what [optimization](/optimization) needs. This chapter explains what neural networks are, builds one from scratch, and shows how it learns.
 
 A neural network is made of **neurons**, arranged in **layers**. Each connection has a **weight**, a number that controls how much attention one neuron pays to another.
 
