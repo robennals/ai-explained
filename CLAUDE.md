@@ -12,7 +12,7 @@ Interactive visual tutorial website for understanding AI from first principles. 
 pnpm dev              # Start dev server at localhost:3000
 pnpm build            # Production build
 pnpm lint             # ESLint + MDX validation
-pnpm test:notebooks   # Execute all Jupyter notebooks (requires Python + torch)
+pnpm test:notebooks   # Execute all Jupyter notebooks (see scripts/test-notebooks.sh for setup)
 npx playwright test   # E2E tests (expects dev server running)
 ```
 
@@ -83,7 +83,7 @@ When modifying a chapter, check if the companion notebook needs updating. When a
 
 Every term must be defined before it's used in the notebook — either with a brief inline explanation, or a reference to the chapter where it's covered (e.g. "nn.Linear uses matrix multiplication — see Chapter 5"). See `docs/plans/pytorch-prerequisites.md` for the full forward-reference tracking.
 
-Test notebooks: `pnpm test:notebooks` (requires `pip install torch matplotlib jupyter tiktoken`). Note: notebook 04 downloads ~66MB of GloVe embeddings on first run.
+Test notebooks: `pnpm test:notebooks`. This runs `scripts/test-notebooks.sh`, which executes every notebook and prints `PASS`/`FAIL` per file. It uses `.venv/bin/jupyter` if a virtualenv exists and falls back to the system `jupyter` otherwise — the script's header has the full, current install command for setting up that venv (a system Python generally has none of the packages the notebooks need). Note that the suite is slow: `embeddings.ipynb` downloads the ~862MB GloVe zip plus text8 and trains word2vec, and `next-word-prediction.ipynb` streams TinyStories and trains. Those downloads land in `notebooks/` and are gitignored.
 
 ## MDX Gotchas
 

@@ -12,7 +12,16 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Local python venv for notebook testing (flat config doesn't read .gitignore).
+    ".venv/**",
   ]),
+  // CommonJS build scripts (remark plugins etc.) legitimately need require().
+  {
+    files: ["scripts/**/*.cjs"],
+    rules: {
+      "@typescript-eslint/no-require-imports": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;

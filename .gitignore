@@ -69,3 +69,6 @@ __pycache__/
 
 # glossary build artifact
 src/lib/glossary/index.generated.ts
+
+# python venv for notebook testing
+.venv/

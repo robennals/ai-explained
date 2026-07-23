@@ -119,7 +119,7 @@ function audit() {
   const chapters = listChapters();
   const counts = new Map(); // canonical -> count
   let total = 0;
-  for (const { slug, file, text } of chapters) {
+  for (const { file, text } of chapters) {
     const masked = maskMdx(text);
     let m;
     regex.lastIndex = 0;
