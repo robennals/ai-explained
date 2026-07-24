@@ -12,7 +12,7 @@
     "test": "vitest run",
     "sync-r2": "bash scripts/sync-r2.sh",
     "sync-r2:apply": "bash scripts/sync-r2.sh --apply",
-    "test:notebooks": "jupyter nbconvert --to notebook --execute --ExecutePreprocessor.timeout=300 notebooks/*.ipynb --output-dir /tmp/notebook-test-output",
+    "test:notebooks": "bash scripts/test-notebooks.sh",
     "og:capture": "tsx scripts/capture-og-images.ts",
     "og:crop": "tsx scripts/crop-og-images.ts"
   },
