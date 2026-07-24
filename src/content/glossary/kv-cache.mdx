@@ -15,3 +15,5 @@ Some examples:
 - **A hundred-word reply** — the last word needs the keys and values of all ninety-nine before it; without a cache, the model would redo all of that work at every step.
 - **Local (sliding-window) attention** — shrinks the cache too, since a local layer only ever needs to keep the nearby entries in memory.
 - **PagedAttention** — splits the KV cache into fixed-size blocks instead of one big reserved chunk, so it wastes far less memory serving many requests at once.
+
+The KV cache trades compute for memory: it's why generating text gets cheaper per word, but a long conversation gets steadily more expensive to hold in memory.

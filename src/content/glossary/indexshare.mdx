@@ -12,3 +12,5 @@ Some examples:
 
 - **A 100-layer model** — running the indexer at every layer means 100 scans; IndexShare cuts that to 25.
 - **GLM-5.2's reported saving** — about 2.9 times fewer computations than recomputing the indexer at every layer, a big part of what makes its million-word context window practical.
+
+IndexShare doesn't make any single scan cheaper; it just avoids paying for the same scan over and over across neighboring layers.

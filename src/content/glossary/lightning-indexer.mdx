@@ -12,3 +12,5 @@ Some examples:
 
 - **A million-word codebase** — the lightning indexer still has to scan every word, but full attention only runs on the 2,048 it keeps.
 - **IndexShare** — GLM-5.2's answer to a related cost: instead of scoring every word, reuse one shortlist across several layers.
+
+The indexer still has to look at everything once, but only the words it shortlists ever pay the full cost of attention.

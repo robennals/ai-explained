@@ -12,3 +12,5 @@ Some examples:
 
 - **A block is a page, a word is a byte, a request is a program** — the same trick operating systems use for memory, applied to the KV cache.
 - **A shared system prompt** — two sequences with an identical stretch of text can point their block tables at the very same physical blocks instead of each keeping their own copy.
+
+PagedAttention doesn't shrink the KV cache itself; it stops the cache from wasting memory on space that a request never ends up using.

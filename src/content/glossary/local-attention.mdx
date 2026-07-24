@@ -13,3 +13,5 @@ Some examples:
 - **Gemma 3** — five out of every six layers are local, each attending only to a 1024-word window; the sixth layer is global, attending to the entire context.
 - **Gemma 2** — alternates one local layer for every global layer, with a 4096-word window.
 - **A pronoun ten words back** — a single local layer can reach it directly; a pronoun a hundred words back needs its information passed along by several stacked local layers first.
+
+Mixing local layers with a few global ones is how a model keeps most of the quadratic cost down while still letting information travel the full length of the context.
