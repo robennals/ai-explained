@@ -19,7 +19,7 @@ import {
 /* ------------------------------------------------------------------ */
 
 const BLOCK_SIZE = 4;
-const POOL_SIZE = 20; // total physical blocks available
+const POOL_SIZE = 16; // total physical blocks available — sized to fit a clean 4-col mobile grid
 const MAX_LEN = 16; // 4 blocks — cap so "Add word" can't outrun the pool
 const RESERVED_PER_SEQ = MAX_LEN; // naive scheme reserves the max length up front
 const PREFIX_LEN = 8; // shared-prompt demo: 2 blocks held in common
@@ -29,7 +29,7 @@ const MAX_SEQS = 3;
 // so that a sequence's logical blocks visibly land on scattered physical
 // blocks, the way PagedAttention actually places them.
 const ALLOCATION_ORDER = [
-  6, 1, 11, 4, 14, 8, 2, 13, 0, 9, 17, 15, 3, 19, 7, 12, 5, 16, 10, 18,
+  6, 1, 11, 4, 14, 8, 2, 13, 0, 9, 5, 15, 3, 10, 7, 12,
 ];
 
 type SeqColor = "accent" | "warning" | "success";
@@ -131,7 +131,7 @@ export function PagedCache() {
 
   const shareCommonPrompt = useCallback(() => {
     setState((prev) => {
-      if (prev.sequences.length < 2) return prev;
+      if (prev.shared || prev.sequences.length < 2) return prev;
       const prefixBlockCount = blocksNeeded(PREFIX_LEN, BLOCK_SIZE);
       let allocPointer = prev.allocPointer;
       const sharedIds = Array.from({ length: prefixBlockCount }, () => {
@@ -224,7 +224,7 @@ export function PagedCache() {
                     />
                   ))}
                 </div>
-                <p className="text-[11px] text-muted">
+                <p className="text-xs text-muted">
                   {seq.len} words · {blocksNeeded(seq.len, BLOCK_SIZE)} block
                   {blocksNeeded(seq.len, BLOCK_SIZE) === 1 ? "" : "s"}
                 </p>
@@ -241,9 +241,10 @@ export function PagedCache() {
             </button>
             <button
               onClick={shareCommonPrompt}
-              className="rounded-md border border-accent/40 bg-accent/10 px-3 py-1.5 text-xs font-semibold text-accent transition-colors hover:bg-accent/20"
+              disabled={shared}
+              className="rounded-md border border-accent/40 bg-accent/10 px-3 py-1.5 text-xs font-semibold text-accent transition-colors hover:bg-accent/20 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              Share a common prompt
+              {shared ? "Sharing prompt" : "Share a common prompt"}
             </button>
           </div>
         </div>
@@ -295,13 +296,13 @@ export function PagedCache() {
                 Physical memory — {BLOCK_SIZE} word-slots per block, {POOL_SIZE} blocks
                 in the pool
               </p>
-              <div className="grid grid-cols-5 gap-2 sm:grid-cols-10">
+              <div className="grid grid-cols-4 gap-2 sm:grid-cols-8">
                 {Array.from({ length: POOL_SIZE }, (_, pid) => {
                   const owners = physicalOwners.get(pid);
                   return (
                     <div
                       key={pid}
-                      className={`flex flex-col items-center rounded-md border p-1 ${
+                      className={`flex flex-col items-center gap-1 rounded-md border p-1.5 ${
                         owners ? "border-foreground/20" : "border-border bg-foreground/5"
                       }`}
                       title={owners ? `Physical block ${pid}` : "free"}
@@ -310,7 +311,7 @@ export function PagedCache() {
                         {Array.from({ length: BLOCK_SIZE }, (_, i) => (
                           <span
                             key={i}
-                            className={`h-1.5 w-1.5 rounded-[1px] ${
+                            className={`h-2 w-2 rounded-[1px] ${
                               owners
                                 ? COLOR_CLASSES[owners[0]].bg
                                 : "bg-foreground/10"
@@ -318,7 +319,7 @@ export function PagedCache() {
                           />
                         ))}
                       </div>
-                      <span className="mt-0.5 text-[9px] text-muted">
+                      <span className="text-xs text-muted">
                         {pid}
                         {owners && owners.length > 1 ? "*" : ""}
                       </span>
@@ -327,7 +328,7 @@ export function PagedCache() {
                 })}
               </div>
               {shared && (
-                <p className="mt-1 text-[11px] text-muted">* shared by two sequences</p>
+                <p className="mt-1 text-xs text-muted">* shared by two sequences</p>
               )}
             </div>
 
@@ -345,7 +346,7 @@ export function PagedCache() {
                       {seq.blocks.map((pid, i) => (
                         <div
                           key={i}
-                          className="flex items-center justify-between rounded-sm bg-white px-2 py-0.5 text-[11px]"
+                          className="flex items-center justify-between rounded-sm bg-white px-2 py-0.5 text-xs"
                         >
                           <span className="text-muted">Logical block {i}</span>
                           <span className="font-mono font-semibold text-foreground">
