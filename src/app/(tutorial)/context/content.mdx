@@ -34,6 +34,18 @@ Generate a dozen words with reuse off, then on. Watch how without the cache the 
 
 ## Most Words Don't Need Most Words
 
+<div>
+Full attention lets every word look at every other word, but most words don't need most of that. A word usually gets what it needs from its neighbors: the words right around it, a paragraph back at most. Only a few layers in the whole stack need to reach all the way across the text.
+
+Gemma 3 builds on that. Five out of every six layers are local: each word attends only to a small window of nearby words. The sixth layer is global, attending to the entire context. Gemma 2 split the difference differently, alternating one local layer for every global layer, with a 4096-word window. Gemma 3 pushes further, five local layers to one global, with a 1024-word window on the local layers.
+
+Local layers are far cheaper: a word compares against a window instead of the whole sequence, so the cost scales with the window size instead of the square of the context length. That shrinks the KV cache too, since a local layer only ever needs to keep the nearby entries in memory. Stacking several local layers still lets information travel a long way, because each layer passes what it has gathered a little further, and those overlapping windows add up.
+</div>
+
+<LocalVsGlobalWidget>
+Set every layer to Global and check the cost. Now switch to the Gemma pattern: five cheap local layers, one global. A word can still reach clear across the text, because each local layer passes information a little further than the last.
+</LocalVsGlobalWidget>
+
 ## Pick the Words That Matter
 
 ## Memory in Pages

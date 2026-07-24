@@ -14,6 +14,11 @@ const KVCache = dynamic(
   { ssr: false }
 );
 
+const LocalVsGlobal = dynamic(
+  () => import("@/components/widgets/context/LocalVsGlobal").then((m) => m.LocalVsGlobal),
+  { ssr: false }
+);
+
 function WidgetSlot({ children, tryIt, label }: { children: React.ReactNode; tryIt?: React.ReactNode; label?: string }) {
   return (
     <Suspense
@@ -42,6 +47,14 @@ export function KVCacheWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children} label="Try this">
       <KVCache />
+    </WidgetSlot>
+  );
+}
+
+export function LocalVsGlobalWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children} label="Try this">
+      <LocalVsGlobal />
     </WidgetSlot>
   );
 }
