@@ -20,6 +20,18 @@ Drag toward a million words. Full attention needs about a trillion comparisons f
 
 ## Don't Redo the Past
 
+<div>
+A model generates one word at a time. Each new word attends back over every word that came before it, including the words it just generated itself. Ask for a hundred words of output, and the last word needs the keys and values of all ninety-nine before it.
+
+Recomputing those keys and values from scratch at every step is wasteful. The keys and values for a word never change once that word is written, so a model can compute them once and store them: the KV cache. Generating the next word then only costs a single new set of keys and values, reused against everything already stored.
+
+The catch is memory. The cache holds one entry per word in the prompt plus every word generated so far, and it only grows. That growing cache is the real cost of a long context, and it shapes several of the tricks in the rest of this chapter.
+</div>
+
+<KVCacheWidget>
+Generate a dozen words with reuse off, then on. Watch how without the cache the model redoes all its earlier work every single step, while the cache turns that into one small step per word.
+</KVCacheWidget>
+
 ## Most Words Don't Need Most Words
 
 ## Pick the Words That Matter

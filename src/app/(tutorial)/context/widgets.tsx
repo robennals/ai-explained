@@ -9,6 +9,11 @@ const QuadraticWall = dynamic(
   { ssr: false }
 );
 
+const KVCache = dynamic(
+  () => import("@/components/widgets/context/KVCacheWidget").then((m) => m.KVCache),
+  { ssr: false }
+);
+
 function WidgetSlot({ children, tryIt, label }: { children: React.ReactNode; tryIt?: React.ReactNode; label?: string }) {
   return (
     <Suspense
@@ -29,6 +34,14 @@ export function QuadraticWallWidget({ children }: { children?: React.ReactNode }
   return (
     <WidgetSlot tryIt={children} label="Explore it">
       <QuadraticWall />
+    </WidgetSlot>
+  );
+}
+
+export function KVCacheWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children} label="Try this">
+      <KVCache />
     </WidgetSlot>
   );
 }
