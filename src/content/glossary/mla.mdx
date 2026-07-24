@@ -1,0 +1,14 @@
+---
+term: MLA
+aliases: [multi-head latent attention, multi-headed latent attention]
+firstAppearance: context
+---
+
+**MLA** is short for *multi-head latent attention* — a technique that compresses the keys and values before they're stored in the KV cache, so the cache holds a smaller compressed form instead of the full-size vectors.
+
+The KV cache grows by one entry per word, and that growth is the main memory cost of a long context. MLA shrinks each of those entries by compressing the keys and values into a smaller latent form before they're written to the cache, cutting the memory cost of every word remembered.
+
+Some examples:
+
+- **Kimi K2** — uses MLA to hold long context at a fraction of the usual cache size.
+- **Kimi K3** — Moonshot, the lab behind Kimi, reports it pushes this compression further still, though that claim comes from the lab itself rather than independent verification.

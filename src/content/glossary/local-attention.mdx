@@ -1,0 +1,15 @@
+---
+term: local attention
+aliases: [sliding-window attention, sliding window attention]
+firstAppearance: context
+---
+
+**Local attention** is attention where each word only looks at a small window of nearby words, instead of the entire context.
+
+Most words get what they need from their neighbors, so restricting attention to a nearby window is far cheaper than comparing a word against the whole sequence: the cost scales with the window size instead of the square of the context length. It also shrinks the KV cache, since a local layer only ever needs to keep the nearby entries in memory. Stacking several local layers still lets information travel a long way, because each layer passes what it has gathered a little further, and those overlapping windows add up.
+
+Some examples:
+
+- **Gemma 3** — five out of every six layers are local, each attending only to a 1024-word window; the sixth layer is global, attending to the entire context.
+- **Gemma 2** — alternates one local layer for every global layer, with a 4096-word window.
+- **A pronoun ten words back** — a single local layer can reach it directly; a pronoun a hundred words back needs its information passed along by several stacked local layers first.

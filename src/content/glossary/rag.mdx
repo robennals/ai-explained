@@ -1,0 +1,14 @@
+---
+term: RAG
+aliases: [retrieval-augmented generation]
+firstAppearance: context
+---
+
+**RAG** is short for *retrieval-augmented generation* — a way of filling a model's context window by first finding the most relevant documents and pasting them in before the model sees the question.
+
+A separate step turns every document into an embedding vector and stores those vectors in a database. When a query comes in, it gets embedded too, and the database returns whichever documents sit nearest to it in that space, nearest in meaning, not nearest in spelling. Those documents get pasted into the window before the model ever sees the question.
+
+Some examples:
+
+- **A support chatbot** — embeds a company's help articles ahead of time, then retrieves the few closest to a customer's question and pastes them into the prompt.
+- **Semantic search versus keyword search** — RAG relies on semantic search to find documents; a keyword search like grep instead matches exact text, which works better for code full of exact identifiers and error strings. Most real systems use both.
