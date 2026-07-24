@@ -29,7 +29,7 @@ The catch is memory. The cache holds one entry per word in the prompt plus every
 </div>
 
 <KVCacheWidget>
-Generate a dozen words with reuse off, then on. Watch how without the cache the model redoes all its earlier work every single step, while the cache turns that into one small step per word.
+Generate a dozen words with reuse off, then on. Watch how without the cache the model redoes all its earlier work every step, while the cache turns that into one small step per word.
 </KVCacheWidget>
 
 ## Most Words Don't Need Most Words
@@ -101,7 +101,7 @@ Ask "which critter kept everyone up so late?". Keyword search finds nothing — 
 ## An Agent Minding Its Own Context
 
 <div>
-Everything so far assumes something else decides what goes in the window: a chapter, a document, a query. An agent working on a long task doesn't have that luxury. Every tool call it makes, every file it reads, every command it runs adds its output back into the conversation, and a task that runs for hours can generate far more text than any window holds. The agent has to manage its own context as it goes, deciding what to keep, what to compress, and what to set aside.
+Everything so far assumes something else decides what goes in the window: a chapter, a document, a query. An agent working on a long task doesn't have that luxury. Every tool call it makes, every file it reads, every command it runs adds its output back into the conversation, and a task that runs for hours can generate far more text than any window holds. The agent has to manage its own context as it goes, deciding what to keep and what to set aside.
 
 **Compaction** is the simplest of these tricks. Once a stretch of the conversation is no longer needed in full, the agent (or a step built into the surrounding system) summarizes it: a page of tool output and back-and-forth becomes a sentence or two describing what happened and what was learned. The detail is gone, but the fact that matters survives, and the window has room for what comes next.
 
@@ -109,9 +109,9 @@ Everything so far assumes something else decides what goes in the window: a chap
 
 **Selective retrieval**, the same idea from earlier in this chapter, applies just as well to an agent's own context. Rather than keep an entire codebase or document set loaded at once, the agent searches, greps, or embeds its way to the handful of files the current step needs, reads those, and lets the rest stay off-screen until a later step calls for something else.
 
-None of this is possible without everything built earlier in the chapter. Sparse attention, paging, a cache that doesn't grow unchecked, all of it exists to make a large window affordable in the first place. Compaction, memory files, and retrieval are what decide, moment to moment, what actually deserves a seat in that window.
+None of this is possible without everything built earlier in the chapter, from sparse attention and paging to a cache that doesn't grow unchecked. All of it exists to make a large window affordable in the first place. Compaction, memory files, and retrieval are what decide, moment to moment, what actually deserves a seat in that window.
 
-The frontier keeps pushing on the cache itself, not just what an agent chooses to put in it. Multi-head latent attention, MLA, compresses the keys and values before they're stored, so the cache holds a smaller compressed form instead of the full-size vectors, shrinking the memory cost of every word remembered. Kimi K2 uses MLA to hold long context at a fraction of the usual cache size. Moonshot, the lab behind Kimi, reports that Kimi K3 pushes this compression further still, though as with any claim about an unreleased or newly released model, that's worth treating as a claim from the lab rather than an independently verified result.
+The frontier keeps pushing on the cache itself too, beyond what an agent chooses to put in it. Multi-head latent attention, MLA, compresses the keys and values before they're stored, so the cache holds a smaller compressed form instead of the full-size vectors, shrinking the memory cost of every word remembered. Kimi K2 uses MLA to hold long context at a fraction of the usual cache size. Moonshot, the lab behind Kimi, reports that Kimi K3 pushes this compression further still, though as with any claim about an unreleased or newly released model, that's worth treating as a claim from the lab rather than an independently verified result.
 </div>
 
 <TryItInPyTorch notebook="context">
