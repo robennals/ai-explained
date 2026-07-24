@@ -48,6 +48,26 @@ Set every layer to Global and check the cost. Now switch to the Gemma pattern: f
 
 ## Pick the Words That Matter
 
+<div>
+Local attention shrinks the window by making each layer look at fewer words by default. Sparse attention takes a different approach: keep the whole window, but let a small, fast model decide which words in it actually matter for each new word being generated, and run full attention on only that shortlist.
+
+That fast model is an indexer. It scans every earlier word and gives each one a relevance score for the word currently being generated, the way a search engine ranks pages before anyone reads one. Full attention then runs only on the top-scoring words. The indexer still has to look at everything, but scoring a word is far cheaper than comparing it in full attention, so the indexer's own cost stays small even as the context grows.
+
+DeepSeek's DSA (DeepSeek Sparse Attention) does this with what it calls a lightning indexer, keeping the top 2,048 words out of a context window that can hold 128,000. Full attention only ever runs on those 2,048, no matter how long the document gets.
+
+GLM-5.2 pushes the idea further with something it calls IndexShare. Neighboring layers tend to want nearly the same words: if a word matters to layer 12, it usually matters to layer 13 as well. So instead of running the indexer at every layer, GLM-5.2 runs it once every four layers and reuses that shortlist for the three layers after it. At a million-word context, that adds up to about 2.9 times fewer computations than recomputing the indexer at every layer, and it's a big part of what makes a million-word context window practical at close to frontier quality.
+
+Neither Claude nor OpenAI's models disclose how they handle long context internally. GLM-5.2 is an open model with performance in a similar range, and it documents its method in a public paper, so it's reasonable to assume the closed labs are doing something broadly similar under the hood.
+</div>
+
+<KeyInsight>
+A trillion comparisons per layer, per word, is not something any model actually does at a million words of context. A cheap indexer that scores every word, combined with a shortlist that several layers can share instead of recomputing, is what turns that impossible number into a manageable one.
+</KeyInsight>
+
+<SparseIndexerWidget>
+Pick a question. The indexer scans every word and keeps only the few that matter. Turn k down until it starts missing the answer. Then switch on IndexShare and watch several layers agree to reuse one shortlist, dropping the cost again.
+</SparseIndexerWidget>
+
 ## Memory in Pages
 
 ## What Goes In the Window

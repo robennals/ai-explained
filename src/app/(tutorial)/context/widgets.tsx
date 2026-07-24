@@ -19,6 +19,11 @@ const LocalVsGlobal = dynamic(
   { ssr: false }
 );
 
+const SparseIndexer = dynamic(
+  () => import("@/components/widgets/context/SparseIndexer").then((m) => m.SparseIndexer),
+  { ssr: false }
+);
+
 function WidgetSlot({ children, tryIt, label }: { children: React.ReactNode; tryIt?: React.ReactNode; label?: string }) {
   return (
     <Suspense
@@ -55,6 +60,14 @@ export function LocalVsGlobalWidget({ children }: { children?: React.ReactNode }
   return (
     <WidgetSlot tryIt={children} label="Try this">
       <LocalVsGlobal />
+    </WidgetSlot>
+  );
+}
+
+export function SparseIndexerWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children} label="Try this">
+      <SparseIndexer />
     </WidgetSlot>
   );
 }
