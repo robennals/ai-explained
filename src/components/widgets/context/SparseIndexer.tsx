@@ -33,6 +33,13 @@ const REUSE_EVERY = 4;
 
 const FLOP_SEQ_LEN = 1_000_000;
 const FLOP_K = 2048; // DeepSeek DSA's real shortlist size
+// The indexer has to score every word in the context, every time it runs.
+// That per-word scan is cheap per word (low precision, few heads), but at a
+// million words the scan itself is what FLOP_INDEXER_COST stands for — it
+// represents that full-context scan, which is why it dominates the sparse
+// total below. That's exactly why reusing one scan's picks across several
+// layers (IndexShare) saves so much: it's cutting the biggest cost, not a
+// rounding error.
 const FLOP_INDEXER_COST = 14150;
 
 const DENSE_FLOPS = flops(FLOP_SEQ_LEN, FLOP_K, N_LAYERS, {
@@ -47,13 +54,6 @@ const SPARSE_FLOPS = flops(FLOP_SEQ_LEN, FLOP_K, N_LAYERS, {
   reuseEvery: REUSE_EVERY,
   indexerCost: FLOP_INDEXER_COST,
 });
-const SPARSE_SHARE_FLOPS = flops(FLOP_SEQ_LEN, FLOP_K, N_LAYERS, {
-  sparse: true,
-  share: true,
-  reuseEvery: REUSE_EVERY,
-  indexerCost: FLOP_INDEXER_COST,
-});
-const SHARE_RATIO = SPARSE_FLOPS / SPARSE_SHARE_FLOPS;
 
 /* ------------------------------------------------------------------ */
 /*  Component                                                          */
@@ -62,15 +62,29 @@ const SHARE_RATIO = SPARSE_FLOPS / SPARSE_SHARE_FLOPS;
 export function SparseIndexer() {
   const [queryIndex, setQueryIndex] = useState(DEFAULT_QUERY_INDEX);
   const [k, setK] = useState(DEFAULT_K);
-  const [share, setShare] = useState(true);
+  const [share, setShare] = useState(false);
 
   const query = QUERIES[queryIndex];
 
   const handleReset = useCallback(() => {
     setQueryIndex(DEFAULT_QUERY_INDEX);
     setK(DEFAULT_K);
-    setShare(true);
+    setShare(false);
   }, []);
+
+  // The third meter bar is live: it reflects the IndexShare toggle above, so
+  // flipping the switch visibly moves this number instead of a fixed constant.
+  const sparseShareFlops = useMemo(
+    () =>
+      flops(FLOP_SEQ_LEN, FLOP_K, N_LAYERS, {
+        sparse: true,
+        share,
+        reuseEvery: REUSE_EVERY,
+        indexerCost: FLOP_INDEXER_COST,
+      }),
+    [share]
+  );
+  const shareRatio = SPARSE_FLOPS / sparseShareFlops;
 
   const scores = useMemo(() => scoreTokens(query, HAYSTACK), [query]);
   const shortlist = useMemo(() => new Set(topK(scores, k)), [scores, k]);
@@ -191,7 +205,8 @@ export function SparseIndexer() {
           </div>
         </div>
 
-        {/* FLOP meter */}
+        {/* FLOP meter — Dense and Sparse are fixed reference points; the third
+            bar is live and tracks the IndexShare toggle above. */}
         <div className="flex flex-col gap-3">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <div className="rounded-lg border border-error/30 bg-error/5 px-4 py-3 text-center">
@@ -210,21 +225,31 @@ export function SparseIndexer() {
                 {formatCount(SPARSE_FLOPS)}
               </p>
             </div>
-            <div className="rounded-lg border border-accent/30 bg-accent/5 px-4 py-3 text-center">
+            <motion.div
+              animate={{ scale: share ? 1.05 : 1 }}
+              transition={{ duration: 0.3 }}
+              className={`rounded-lg border px-4 py-3 text-center transition-colors ${
+                share
+                  ? "border-accent bg-accent/10"
+                  : "border-accent/30 bg-accent/5"
+              }`}
+            >
               <p className="text-xs font-medium uppercase tracking-wide text-accent">
-                Sparse + IndexShare
+                Sparse + IndexShare {share ? "(on)" : "(off)"}
               </p>
               <p className="mt-1 font-mono text-2xl font-bold text-accent">
-                {formatCount(SPARSE_SHARE_FLOPS)}
+                {formatCount(sparseShareFlops)}
               </p>
-            </div>
+            </motion.div>
           </div>
           <p className="text-center text-xs text-muted">
             Computations at a {formatCount(FLOP_SEQ_LEN)}-word context, top {formatCount(FLOP_K)}
             {" "}words kept, across {N_LAYERS} layers
           </p>
           <p className="text-center text-sm font-semibold text-accent">
-            IndexShare is ~{SHARE_RATIO.toFixed(1)}x cheaper than recomputing the indexer every layer.
+            {share
+              ? `IndexShare is ~${shareRatio.toFixed(1)}x cheaper than recomputing the indexer every layer.`
+              : "Switch on IndexShare to reuse one shortlist across layers and drop this number."}
           </p>
         </div>
       </div>
