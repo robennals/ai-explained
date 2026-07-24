@@ -181,6 +181,24 @@ controls (`SliderControl`, `ToggleControl`, `SelectControl`) and the `TryItProvi
 pattern seen in the Attention chapter. Each has a "try this" prompt that leads to a
 surprise.
 
+**Widget principles (author guidance):**
+- **Readable text.** All labels, token text, and numbers must be comfortably
+  legible — no cramming a real corpus into tiny type. Prefer few, large elements
+  over many small ones. Keep the widget legible on a phone.
+- **Show the principle, not a model.** Use small, hand-authored fake data, not a
+  real model — real models are too big and too hard to interpret to make the idea
+  visible. The point is for the reader to *see* the mechanism clearly. Concretely:
+  - `SparseIndexer`: a hand-written haystack of a few dozen labeled tokens with
+    author-assigned relevance to each query, so the "indexer" deterministically and
+    understandably lights up the right ~handful. Not a real indexer network.
+  - `Retrieval`: a tiny fixed corpus with author-chosen "meaning tags" so semantic
+    vs. keyword hits are obvious and contrast cleanly (a query that shares meaning
+    but not words; a query that shares an exact identifier).
+  - `LocalVsGlobal`, `KVCache`, `QuadraticWall`, `PagedCache`: driven by counts and
+    simple rules, not tensors — the numbers should be exact and inspectable.
+- **Fun and interactive.** Each is a playground with a knob whose effect is
+  immediately visible; the "try this" prompt should lead to a moment of surprise.
+
 1. `QuadraticWall` — context length → comparison explosion vs. linear.
 2. `KVCache` — streaming generation with cache on/off; work + memory counters.
 3. `LocalVsGlobal` — per-layer local-window vs. global; reach through stacked
