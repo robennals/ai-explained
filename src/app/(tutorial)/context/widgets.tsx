@@ -24,6 +24,11 @@ const SparseIndexer = dynamic(
   { ssr: false }
 );
 
+const PagedCache = dynamic(
+  () => import("@/components/widgets/context/PagedCache").then((m) => m.PagedCache),
+  { ssr: false }
+);
+
 function WidgetSlot({ children, tryIt, label }: { children: React.ReactNode; tryIt?: React.ReactNode; label?: string }) {
   return (
     <Suspense
@@ -68,6 +73,14 @@ export function SparseIndexerWidget({ children }: { children?: React.ReactNode }
   return (
     <WidgetSlot tryIt={children} label="Try this">
       <SparseIndexer />
+    </WidgetSlot>
+  );
+}
+
+export function PagedCacheWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children} label="Try this">
+      <PagedCache />
     </WidgetSlot>
   );
 }

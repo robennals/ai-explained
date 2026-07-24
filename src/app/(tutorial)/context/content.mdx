@@ -70,6 +70,18 @@ Pick a question. The indexer scans every word and keeps only the few that matter
 
 ## Memory in Pages
 
+<div>
+The KV cache from earlier in this chapter is the real memory hog of a long context: one entry per word, for every word in the prompt and everything generated since. Serving many requests at once means holding many of these caches side by side, and the simplest way to do that is to reserve one block of memory per request, sized for the longest sequence that request might ever reach. Most requests never get that long, so most of that reserved memory sits empty the whole time.
+
+vLLM's PagedAttention borrows an old idea from operating systems instead. An OS doesn't give a program one giant reserved slab of memory; it splits memory into small fixed-size pages and hands a program only the pages it actually uses, wherever they happen to be free, keeping a table that maps the program's view of memory onto those scattered physical pages. PagedAttention does the same thing to the KV cache: split it into small fixed blocks, maybe sixteen words each, and keep a block table per sequence that points each of its logical blocks at wherever that block actually lives in physical memory. A block is a page, a word is a byte, a request is a program.
+
+Blocks don't need to sit next to each other, and a sequence only holds as many blocks as it currently needs — one partly-empty block at the end, not a whole reserved chunk. That turns wasted memory from most of the cache into almost none. It also opens up something the reserved-block scheme can't do: if two sequences share an identical stretch, such as the same system prompt, they can point their block tables at the very same physical blocks instead of each keeping their own copy.
+</div>
+
+<PagedCacheWidget>
+Grow two conversations. With one big reservation each, most of the memory sits empty. Switch to pages and the wasted space nearly vanishes — and a shared prompt can live in one place for both.
+</PagedCacheWidget>
+
 ## What Goes In the Window
 
 ## An Agent Minding Its Own Context
