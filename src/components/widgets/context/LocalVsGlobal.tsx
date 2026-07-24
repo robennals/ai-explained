@@ -21,6 +21,13 @@ const CHOSEN_INDEX = 12;
 const DEFAULT_WINDOW = 3;
 const DEFAULT_LAYERS = gemma3Layers(1); // 5 local, 1 global — 6 rows
 
+// The "Total cost" read-out is computed at a realistic context length, not
+// the 24-token toy sequence used for the visual demo above — the whole
+// point of local attention is that its cost advantage over global
+// attention compounds as the sequence gets long, and that only shows up
+// (and only makes formatCount's K/M/B/T suffixes fire) at real scale.
+const COST_SEQ_LEN = 128_000;
+
 function layerLabel(kind: LayerKind): string {
   return kind === "local" ? "Local" : "Global";
 }
@@ -77,7 +84,7 @@ export function LocalVsGlobal() {
   }, []);
 
   const cost = useMemo(
-    () => totalCost(layers, TOKEN_COUNT, windowSize),
+    () => totalCost(layers, COST_SEQ_LEN, windowSize),
     [layers, windowSize]
   );
   const reach = useMemo(
@@ -199,7 +206,9 @@ export function LocalVsGlobal() {
             <p className="mt-1 font-mono text-3xl font-bold text-error">
               {formatCount(cost)}
             </p>
-            <p className="mt-0.5 text-xs text-muted">comparisons, all layers</p>
+            <p className="mt-0.5 text-xs text-muted">
+              comparisons, all layers, at a {formatCount(COST_SEQ_LEN)}-word context
+            </p>
           </div>
           <div className="rounded-lg border border-accent/30 bg-accent/5 px-4 py-3 text-center">
             <p className="text-xs font-medium uppercase tracking-wide text-accent">
