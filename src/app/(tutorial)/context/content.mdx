@@ -6,6 +6,18 @@ Models can only see so much at once. This chapter looks at how to make the most 
 
 ## The Wall
 
+<div>
+In [Chapter 7](/attention), attention let every word look at every other word, and decide how much to listen to each one. That is what makes attention so good at connecting distant words: a pronoun on page ten can still reach back to the name it refers to on page one. But comparing every word to every other word has a cost, and that cost grows fast.
+
+Double the number of words in the context, and the number of pairs to compare quadruples. Ten times the words means a hundred times the comparisons. This is quadratic growth, and it applies separately to every layer of the model, and again for every new word it generates.
+
+A page of text is a few hundred words. A book is tens of thousands. A large codebase can run past a million lines. Push the context out to a million words, and full attention needs on the order of a trillion comparisons, per layer, per new word generated. Yet models today read whole books and codebases in one go. Something has to give.
+</div>
+
+<QuadraticWallWidget>
+Drag toward a million words. Full attention needs about a trillion comparisons for every layer, for every new word. Find the length where it stops being practical.
+</QuadraticWallWidget>
+
 ## Don't Redo the Past
 
 ## Most Words Don't Need Most Words

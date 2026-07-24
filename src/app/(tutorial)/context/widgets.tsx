@@ -1,7 +1,13 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { Suspense } from "react";
 import { TryItProvider } from "@/components/widgets/shared/WidgetContainer";
+
+const QuadraticWall = dynamic(
+  () => import("@/components/widgets/context/QuadraticWall").then((m) => m.QuadraticWall),
+  { ssr: false }
+);
 
 function WidgetSlot({ children, tryIt, label }: { children: React.ReactNode; tryIt?: React.ReactNode; label?: string }) {
   return (
@@ -16,5 +22,13 @@ function WidgetSlot({ children, tryIt, label }: { children: React.ReactNode; try
         {children}
       </TryItProvider>
     </Suspense>
+  );
+}
+
+export function QuadraticWallWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children} label="Explore it">
+      <QuadraticWall />
+    </WidgetSlot>
   );
 }

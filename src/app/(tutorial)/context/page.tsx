@@ -3,6 +3,7 @@ import { chapterMetadata } from "@/lib/chapter-metadata";
 import { getAdjacentChapters } from "@/lib/curriculum";
 import Content from "./content.mdx";
 import { QuizContent } from "./QuizContent";
+import { QuadraticWallWidget } from "./widgets";
 
 export const metadata = chapterMetadata("context");
 
@@ -12,7 +13,7 @@ export default function Chapter10() {
   return (
     <article>
       <div className="prose prose-lg max-w-none">
-        <Content components={{}} />
+        <Content components={{ QuadraticWallWidget }} />
       </div>
       <QuizContent />
       <ChapterNav prev={prev} next={next} />
