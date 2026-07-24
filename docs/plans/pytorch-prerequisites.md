@@ -82,7 +82,7 @@ No forward references. Uses `torch.tensor`, `torch.dot`, `math.cos`/`math.sin` f
 
 ### context.ipynb
 
-No forward references. Uses only `numpy` (array creation, matrix multiply, `np.linalg.norm`) — no PyTorch needed. Cosine similarity is defined inline, matching the definition already used in `embeddings.ipynb`.
+No forward references. Uses `torch.randn`, `torch.zeros`/`torch.ones`, matrix multiply (`@`), and `torch.dot` — all covered in earlier notebooks or the PyTorch appendix. Cosine similarity reuses the `magnitude`/`normalize`/`torch.dot` pattern from `vectors.ipynb` rather than redefining it from scratch.
 
 ## When adding a new notebook
 

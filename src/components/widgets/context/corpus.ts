@@ -50,7 +50,7 @@ export const CORPUS: Doc[] = [
 // best doc, one shares an exact word/identifier with its best doc.
 export const EXAMPLE_QUERIES: { text: string; tags: string[] }[] = [
   {
-    text: "who was making all that noise?",
+    text: "which critter kept everyone up so late?",
     tags: ["dog", "noise"],
   },
   {
