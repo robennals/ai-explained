@@ -29,6 +29,11 @@ const PagedCache = dynamic(
   { ssr: false }
 );
 
+const Retrieval = dynamic(
+  () => import("@/components/widgets/context/RetrievalWidget").then((m) => m.Retrieval),
+  { ssr: false }
+);
+
 function WidgetSlot({ children, tryIt, label }: { children: React.ReactNode; tryIt?: React.ReactNode; label?: string }) {
   return (
     <Suspense
@@ -81,6 +86,14 @@ export function PagedCacheWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children} label="Try this">
       <PagedCache />
+    </WidgetSlot>
+  );
+}
+
+export function RetrievalWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children} label="Try this">
+      <Retrieval />
     </WidgetSlot>
   );
 }

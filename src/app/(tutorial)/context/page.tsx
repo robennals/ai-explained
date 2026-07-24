@@ -9,6 +9,7 @@ import {
   LocalVsGlobalWidget,
   SparseIndexerWidget,
   PagedCacheWidget,
+  RetrievalWidget,
 } from "./widgets";
 
 export const metadata = chapterMetadata("context");
@@ -26,6 +27,7 @@ export default function Chapter10() {
             LocalVsGlobalWidget,
             SparseIndexerWidget,
             PagedCacheWidget,
+            RetrievalWidget,
           }}
         />
       </div>

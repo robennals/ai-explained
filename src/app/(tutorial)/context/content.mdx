@@ -84,4 +84,18 @@ Grow two conversations. With one big reservation each, most of the memory sits e
 
 ## What Goes In the Window
 
+<div>
+Everything up to this point has been about a window that's already full: how to run attention over it cheaply, how to cache it, how to page its memory. But the window is finite and the world is not. A codebase can run to millions of lines, a company's documents to millions of words, far more than any context window holds at once. Something has to decide, out of everything that exists, what actually goes in.
+
+One answer is retrieval-augmented generation, RAG. A separate step turns every document into an embedding vector, the same kind of vector covered in the chapter on embeddings, and stores those vectors in a database. When a query comes in, it gets embedded too, and the database returns whichever documents sit nearest to it in that space, nearest in meaning, not nearest in spelling. Those documents get pasted into the window before the model ever sees the question.
+
+The other answer treats the model like a developer working in a large codebase rather than a librarian searching a card catalog. Instead of pre-computing embeddings for everything, the model runs a keyword search, opens the files that turn up, follows the links and imports it finds there, and keeps iterating until it has what it needs. This is agentic search, and it has a real advantage on code: an engineer at Anthropic tested this directly and found that grep matched or beat vector search for finding relevant code, even though grep only matches exact text. Code is full of exact identifiers, function names, variable names, error strings, and those are exactly what a keyword search is built to find. It also never goes stale: grep runs against the current files, while an embedding database is only as fresh as its last update.
+
+Neither approach wins outright. Meaning search finds the document that says the right thing in different words; keyword search finds the document that says the exact thing. Most real systems use both.
+</div>
+
+<RetrievalWidget>
+Ask "who was making all that noise?". Keyword search finds nothing — those exact words aren't there. Meaning search still finds the barking dog. Now search for an exact name and watch keyword win.
+</RetrievalWidget>
+
 ## An Agent Minding Its Own Context
