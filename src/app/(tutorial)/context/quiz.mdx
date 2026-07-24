@@ -4,8 +4,8 @@
 Why does full attention get so expensive as the context window grows?
 
 <Choice>Doubling the words doubles the comparisons, since each word compares once</Choice>
-<Choice correct>Doubling the words quadruples the comparisons, since every word compares to every other word</Choice>
-<Choice>Longer context needs a model with more parameters, which is the real cost</Choice>
+<Choice correct>Doubling the words quadruples the comparisons, since word pairs grow quadratically</Choice>
+<Choice>Longer context needs a model with more parameters, which costs more</Choice>
 <Choice>Longer context needs more training data, which is the real cost</Choice>
 
 <Feedback>
@@ -17,7 +17,7 @@ Attention compares every word against every other word, so the number of pairs g
 What does the KV cache save a model from doing, and what does it cost in return?
 
 <Choice>Recomputing old keys and values every step; the cost is slower generation overall</Choice>
-<Choice correct>Recomputing old keys and values every step; the cost is memory that keeps growing</Choice>
+<Choice correct>Recomputing old keys and values every step; the cost is growing memory</Choice>
 <Choice>Running attention on the whole context; the cost is memory that keeps growing</Choice>
 <Choice>Storing the entire prompt as text; the cost is slower generation overall</Choice>
 
@@ -58,7 +58,7 @@ GLM-5.2's IndexShare notices that neighboring layers tend to want nearly the sam
 A study called *Is Grep All You Need?* found that keyword search over a codebase matched or beat embedding-based semantic search, even though grep only matches exact text. Why?
 
 <Choice>Embeddings can only be computed for natural language, never for code</Choice>
-<Choice correct>Code is full of exact identifiers and error strings, which keyword search finds directly</Choice>
+<Choice correct>Code is full of exact identifiers keyword search can match directly</Choice>
 <Choice>Grep runs faster, so its results simply appear more relevant</Choice>
 <Choice>Vector search only works on whole documents, not on individual files</Choice>
 
