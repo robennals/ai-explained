@@ -99,3 +99,22 @@ Ask "who was making all that noise?". Keyword search finds nothing — those exa
 </RetrievalWidget>
 
 ## An Agent Minding Its Own Context
+
+<div>
+Everything so far assumes something else decides what goes in the window: a chapter, a document, a query. An agent working on a long task doesn't have that luxury. Every tool call it makes, every file it reads, every command it runs adds its output back into the conversation, and a task that runs for hours can generate far more text than any window holds. The agent has to manage its own context as it goes, deciding what to keep, what to compress, and what to set aside.
+
+**Compaction** is the simplest of these tricks. Once a stretch of the conversation is no longer needed in full, the agent (or a step built into the surrounding system) summarizes it: a page of tool output and back-and-forth becomes a sentence or two describing what happened and what was learned. The detail is gone, but the fact that matters survives, and the window has room for what comes next.
+
+**Memory files** solve a different problem: some facts need to survive far longer than compaction would keep them, and some don't need to sit in the window at all times. Instead of carrying a fact in the conversation from the moment it's learned, an agent can write it to a file on disk, a running note of decisions made, bugs found, or plans agreed on. It only reads that file back in when the current step actually needs it. The fact still exists, but it stops taking up space until it's relevant again.
+
+**Selective retrieval**, the same idea from earlier in this chapter, applies just as well to an agent's own context. Rather than keep an entire codebase or document set loaded at once, the agent searches, greps, or embeds its way to the handful of files the current step needs, reads those, and lets the rest stay off-screen until a later step calls for something else.
+
+None of this is possible without everything built earlier in the chapter. Sparse attention, paging, a cache that doesn't grow unchecked, all of it exists to make a large window affordable in the first place. Compaction, memory files, and retrieval are what decide, moment to moment, what actually deserves a seat in that window.
+
+The frontier keeps pushing on the cache itself, not just what an agent chooses to put in it. Multi-head latent attention, MLA, compresses the keys and values before they're stored, so the cache holds a smaller compressed form instead of the full-size vectors, shrinking the memory cost of every word remembered. Kimi K2 uses MLA to hold long context at a fraction of the usual cache size. Moonshot, the lab behind Kimi, reports that Kimi K3 pushes this compression further still, though as with any claim about an unreleased or newly released model, that's worth treating as a claim from the lab rather than an independently verified result.
+</div>
+
+<TryItInPyTorch notebook="context">
+Measure the KV cache growing word by word, compare local versus global attention cost, run a small paged-attention allocator, and compare keyword search against embedding search on the same set of documents.
+</TryItInPyTorch>
+
