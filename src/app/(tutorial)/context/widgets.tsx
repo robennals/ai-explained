@@ -4,8 +4,8 @@ import dynamic from "next/dynamic";
 import { Suspense } from "react";
 import { TryItProvider } from "@/components/widgets/shared/WidgetContainer";
 
-const QuadraticWall = dynamic(
-  () => import("@/components/widgets/context/QuadraticWall").then((m) => m.QuadraticWall),
+const AttentionCost = dynamic(
+  () => import("@/components/widgets/context/AttentionCost").then((m) => m.AttentionCost),
   { ssr: false }
 );
 
@@ -50,10 +50,10 @@ function WidgetSlot({ children, tryIt, label }: { children: React.ReactNode; try
   );
 }
 
-export function QuadraticWallWidget({ children }: { children?: React.ReactNode }) {
+export function AttentionCostWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children} label="Explore it">
-      <QuadraticWall />
+      <AttentionCost />
     </WidgetSlot>
   );
 }

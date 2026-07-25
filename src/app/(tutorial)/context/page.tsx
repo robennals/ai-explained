@@ -4,7 +4,7 @@ import { getAdjacentChapters } from "@/lib/curriculum";
 import Content from "./content.mdx";
 import { QuizContent } from "./QuizContent";
 import {
-  QuadraticWallWidget,
+  AttentionCostWidget,
   KVCacheWidget,
   LocalVsGlobalWidget,
   SparseIndexerWidget,
@@ -22,7 +22,7 @@ export default function Chapter10() {
       <div className="prose prose-lg max-w-none">
         <Content
           components={{
-            QuadraticWallWidget,
+            AttentionCostWidget,
             KVCacheWidget,
             LocalVsGlobalWidget,
             SparseIndexerWidget,

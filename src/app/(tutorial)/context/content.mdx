@@ -7,16 +7,20 @@ Models can only see so much at once. This chapter looks at how to make the most 
 ## The Wall
 
 <div>
-In [Chapter 7](/attention), attention let every word look at every other word, and decide how much to listen to each one. That is what makes attention so good at connecting distant words: a pronoun on page ten can still reach back to the name it refers to on page one. But comparing every word to every other word has a cost, and that cost grows fast.
+In [Chapter 7](/attention), attention let every token look at every other token, and decide how much to listen to each one. That is what makes attention so good at connecting distant tokens: a pronoun on page ten can still reach back to the name it refers to on page one. But comparing every token to every other token has a cost, and that cost grows fast.
 
-Double the number of words in the context, and the number of pairs to compare quadruples. Ten times the words means a hundred times the comparisons. This is quadratic growth, and it applies separately to every layer of the model, and again for every new word it generates.
+Double the number of tokens in the context, and the number of pairs to compare quadruples. Ten times the tokens means a hundred times the comparisons. This is quadratic growth, and it doesn't stop at pairs. Each comparison is a dot product between a query and a key, and that dot product runs over the dimensions of one attention head. Chapter 7 introduced heads: the attention block's Q/K/V projection takes a token's full embedding and squeezes it down into many narrower heads, each one looking for something different. A model stacks dozens of heads per layer and dozens of layers on top of that, and every one of them pays the full W&sup2; cost separately. The real bill is context window squared, times dimensions per head, times the total number of heads across the whole stack.
 
-A page of text is a few hundred words. A book is tens of thousands. A large codebase can run past a million lines. Push the context out to a million words, and full attention needs on the order of a trillion comparisons, per layer, per new word generated. Yet models today read whole books and codebases in one go. Something has to give.
+A page of text is a few hundred tokens. A novel is well over a hundred thousand. A large codebase can run past a million. Push a frontier-sized model out to a million-token context, and answering a single question means paying that full cost once, for every head, in every layer. The energy and dollar figures involved are startling for one question.
 </div>
 
-<QuadraticWallWidget>
-Drag toward a million words. Full attention needs about a trillion comparisons for every layer, for every new word. Find the length where it stops being practical.
-</QuadraticWallWidget>
+<AttentionCostWidget>
+Set a frontier model reading a million-token codebase and look at the price of a single question. Then press "Use a DSA-style index" and watch the cost fall. That cheap all-pairs scan is what the rest of this chapter is built on.
+</AttentionCostWidget>
+
+<div>
+The one lever that brings that cost down without giving up the all-pairs comparison is shrinking what each comparison actually does: fewer dimensions per head, fewer heads, lower numeric precision. Do that and the full W&sup2; scan turns cheap. That's exactly the crack the rest of this chapter exploits: run a tiny, cheap version of attention over every pair first, then spend the expensive full-precision comparison only on the pairs that scan says matter.
+</div>
 
 ## Don't Redo the Past
 
