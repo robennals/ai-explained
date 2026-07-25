@@ -8,6 +8,7 @@ import {
   formatDollars,
   EQUIVALENTS,
   nearestEquivalent,
+  windowForEnergy,
 } from "./cost";
 
 describe("attentionFlops", () => {
@@ -138,5 +139,27 @@ describe("nearestEquivalent", () => {
   it("uses singular label when count is approximately 1", () => {
     const result = nearestEquivalent(1080);
     expect(result.label).not.toMatch(/searches/);
+  });
+
+  it("also returns the matched anchor entry, for highlighting a ladder UI", () => {
+    const result = nearestEquivalent(65000 * 2);
+    expect(result.entry.singular).toBe("phone charge");
+  });
+});
+
+describe("windowForEnergy", () => {
+  it("inverts energyJoules(attentionFlops(w, headDim, totalHeads)) for w", () => {
+    const headDim = 256;
+    const totalHeads = 4992;
+    const targetJoules = 3.6e6; // 1 kWh
+    const w = windowForEnergy(targetJoules, headDim, totalHeads);
+    const flops = attentionFlops(w, headDim, totalHeads);
+    expect(energyJoules(flops)).toBeCloseTo(targetJoules, 0);
+  });
+
+  it("scales inversely with sqrt(headDim) and sqrt(totalHeads)", () => {
+    const base = windowForEnergy(1e6, 128, 1000);
+    const doubledHeadDim = windowForEnergy(1e6, 256, 1000);
+    expect(doubledHeadDim).toBeCloseTo(base / Math.sqrt(2), 6);
   });
 });

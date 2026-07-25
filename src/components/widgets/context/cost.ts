@@ -111,7 +111,9 @@ export const EQUIVALENTS: Equivalent[] = [
   { joules: 4.63e12, singular: "full training run of GPT-3", plural: "full training runs of GPT-3" },
 ];
 
-export function nearestEquivalent(joules: number): { label: string; count: number } {
+export function nearestEquivalent(
+  joules: number
+): { label: string; count: number; entry: Equivalent } {
   let entry = EQUIVALENTS[0];
   for (const candidate of EQUIVALENTS) {
     if (candidate.joules <= joules) {
@@ -122,5 +124,20 @@ export function nearestEquivalent(joules: number): { label: string; count: numbe
   }
   const count = joules / entry.joules;
   const label = Math.abs(count - 1) < 0.05 ? entry.singular : entry.plural;
-  return { label, count };
+  return { label, count, entry };
+}
+
+/**
+ * The context window that would make full attention cost exactly
+ * `targetJoules` of energy, at a given headDim/totalHeads shape. Inverts
+ * `energyJoules(attentionFlops(w, headDim, totalHeads))` for `w`. Used to
+ * let a reader click a real-world equivalent and jump the window slider
+ * to land on it.
+ */
+export function windowForEnergy(
+  targetJoules: number,
+  headDim: number,
+  totalHeads: number
+): number {
+  return Math.sqrt((targetJoules * 1e12) / (4 * headDim * totalHeads));
 }

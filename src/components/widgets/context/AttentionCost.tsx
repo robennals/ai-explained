@@ -11,90 +11,77 @@ import {
   formatEnergy,
   formatDollars,
   nearestEquivalent,
+  windowForEnergy,
+  EQUIVALENTS,
+  type Equivalent,
 } from "./cost";
 
 /* ------------------------------------------------------------------ */
-/*  Log-scale slider helpers                                          */
+/*  Ranges and anchors — all three sliders are linear                  */
 /* ------------------------------------------------------------------ */
 
-function makeLogSlider(min: number, max: number) {
-  const logMin = Math.log10(min);
-  const logMax = Math.log10(max);
-  return {
-    toSlider(value: number): number {
-      const log = Math.log10(Math.max(value, min));
-      return ((log - logMin) / (logMax - logMin)) * 100;
-    },
-    fromSlider(pos: number): number {
-      const log = logMin + (pos / 100) * (logMax - logMin);
-      return Math.round(Math.pow(10, log));
-    },
-  };
-}
+const MIN_WINDOW = 0;
+const MAX_WINDOW = 10_000_000;
 
-/* ------------------------------------------------------------------ */
-/*  Ranges and anchors                                                */
-/* ------------------------------------------------------------------ */
-
-const MIN_WINDOW = 30;
-const MAX_WINDOW = 2_000_000;
-const windowSlider = makeLogSlider(MIN_WINDOW, MAX_WINDOW);
-
-const MIN_HEADS = 100;
-const MAX_HEADS = 20_000;
-const headsSlider = makeLogSlider(MIN_HEADS, MAX_HEADS);
+const MIN_HEADS = 0;
+const MAX_HEADS = 18_000;
 
 const MIN_HEAD_DIM = 8;
 const MAX_HEAD_DIM = 256;
-const headDimSlider = makeLogSlider(MIN_HEAD_DIM, MAX_HEAD_DIM);
 
 const WINDOW_ANCHORS: { label: string; value: number }[] = [
-  { label: "a chat message", value: 30 },
   { label: "a page", value: 700 },
-  { label: "a long blog post", value: 2700 },
-  { label: "a novel", value: 130_000 },
-  { label: "a big codebase", value: 1_000_000 },
+  { label: "a book", value: 130_000 },
+  { label: "128K", value: 128_000 },
+  {
+    label: "a modern context window — docs, tool output, search results, skills",
+    value: 1_000_000,
+  },
+  {
+    label: "Llama 4 Scout — and still smaller than a serious codebase",
+    value: 10_000_000,
+  },
 ];
 
 const HEADS_ANCHORS: { label: string; value: number }[] = [
-  { label: "GPT-2 small", value: 144 },
-  { label: "Llama-3 70B", value: 5120 },
-  { label: "DeepSeek-V3", value: 7808 },
-  { label: "GPT-3", value: 9216 },
+  { label: "GPT-2", value: 144 },
+  { label: "Llama 4", value: 1920 },
+  { label: "GLM-5.2", value: 4992 },
+  { label: "DeepSeek-V3.2", value: 7808 },
   { label: "Llama-3.1 405B", value: 16_128 },
 ];
 
 const HEAD_DIM_ANCHORS: { label: string; value: number }[] = [
-  { label: "DSA-style index", value: 24 },
   { label: "GPT-2", value: 64 },
-  { label: "most modern models", value: 128 },
+  { label: "most models", value: 128 },
+  { label: "DeepSeek/Kimi", value: 192 },
+  { label: "GLM-5.2", value: 256 },
 ];
 
 /* ------------------------------------------------------------------ */
-/*  Presets: (totalHeads, headDim), optionally windowTokens too        */
+/*  Model presets: (totalHeads, headDim, windowTokens)                 */
 /* ------------------------------------------------------------------ */
 
 interface Preset {
   label: string;
   totalHeads: number;
   headDim: number;
-  windowTokens?: number;
+  windowTokens: number;
 }
 
 const PRESETS: Preset[] = [
-  { label: "GPT-2 small", totalHeads: 144, headDim: 64 },
-  { label: "GPT-3", totalHeads: 9216, headDim: 128 },
-  { label: "DeepSeek-V3", totalHeads: 7808, headDim: 128 },
-  { label: "Llama-3.1 405B", totalHeads: 16_128, headDim: 128 },
+  { label: "GPT-2 small", totalHeads: 144, headDim: 64, windowTokens: 1024 },
+  { label: "Llama 4 Scout", totalHeads: 1920, headDim: 128, windowTokens: 10_000_000 },
+  { label: "Kimi K2", totalHeads: 3904, headDim: 192, windowTokens: 128_000 },
+  { label: "GLM-5.2", totalHeads: 4992, headDim: 256, windowTokens: 1_000_000 },
+  { label: "Qwen3-235B", totalHeads: 6016, headDim: 128, windowTokens: 128_000 },
+  { label: "DeepSeek-V3.2", totalHeads: 7808, headDim: 192, windowTokens: 128_000 },
+  { label: "Llama 3.1 405B", totalHeads: 16_128, headDim: 128, windowTokens: 128_000 },
 ];
 
-const DSA_INDEX_HEAD_DIM = 16;
-const DSA_INDEX_TOTAL_HEADS = 100;
+const DEFAULT_PRESET = PRESETS.find((p) => p.label === "GLM-5.2")!;
 
-const DEFAULT_WINDOW = 130_000; // a novel
-const DEFAULT_PRESET = PRESETS[2]; // DeepSeek-V3
-
-/** Name a preset whose (heads, headDim) is close to the current sliders. */
+/** Name a preset whose (heads, headDim) matches the current sliders exactly. */
 function matchingPreset(totalHeads: number, headDim: number): Preset | null {
   for (const preset of PRESETS) {
     if (preset.totalHeads === totalHeads && preset.headDim === headDim) {
@@ -104,17 +91,21 @@ function matchingPreset(totalHeads: number, headDim: number): Preset | null {
   return null;
 }
 
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), max);
+}
+
 /* ------------------------------------------------------------------ */
 /*  Component                                                          */
 /* ------------------------------------------------------------------ */
 
 export function AttentionCost() {
-  const [windowTokens, setWindowTokens] = useState(DEFAULT_WINDOW);
+  const [windowTokens, setWindowTokens] = useState(DEFAULT_PRESET.windowTokens);
   const [totalHeads, setTotalHeads] = useState(DEFAULT_PRESET.totalHeads);
   const [headDim, setHeadDim] = useState(DEFAULT_PRESET.headDim);
 
   const handleReset = useCallback(() => {
-    setWindowTokens(DEFAULT_WINDOW);
+    setWindowTokens(DEFAULT_PRESET.windowTokens);
     setTotalHeads(DEFAULT_PRESET.totalHeads);
     setHeadDim(DEFAULT_PRESET.headDim);
   }, []);
@@ -122,12 +113,7 @@ export function AttentionCost() {
   const applyPreset = useCallback((preset: Preset) => {
     setTotalHeads(preset.totalHeads);
     setHeadDim(preset.headDim);
-    if (preset.windowTokens) setWindowTokens(preset.windowTokens);
-  }, []);
-
-  const useIndex = useCallback(() => {
-    setHeadDim(DSA_INDEX_HEAD_DIM);
-    setTotalHeads(DSA_INDEX_TOTAL_HEADS);
+    setWindowTokens(preset.windowTokens);
   }, []);
 
   const flops = useMemo(
@@ -137,6 +123,14 @@ export function AttentionCost() {
   const joules = energyJoules(flops);
   const usd = dollars(flops);
   const equivalent = nearestEquivalent(joules);
+
+  const jumpToEquivalent = useCallback(
+    (target: Equivalent) => {
+      const w = windowForEnergy(target.joules, headDim, totalHeads);
+      setWindowTokens(Math.round(clamp(w, MIN_WINDOW, MAX_WINDOW)));
+    },
+    [headDim, totalHeads]
+  );
 
   const preset = matchingPreset(totalHeads, headDim);
 
@@ -152,11 +146,11 @@ export function AttentionCost() {
           <div className="flex flex-col gap-1">
             <SliderControl
               label="Context window"
-              value={windowSlider.toSlider(windowTokens)}
-              min={0}
-              max={100}
-              step={0.1}
-              onChange={(v) => setWindowTokens(windowSlider.fromSlider(v))}
+              value={windowTokens}
+              min={MIN_WINDOW}
+              max={MAX_WINDOW}
+              step={1000}
+              onChange={setWindowTokens}
               formatValue={() => `${formatCount(windowTokens)} tok`}
             />
             <p className="pl-[6.5rem] text-xs text-muted">
@@ -167,11 +161,11 @@ export function AttentionCost() {
           <div className="flex flex-col gap-1">
             <SliderControl
               label="Total heads"
-              value={headsSlider.toSlider(totalHeads)}
-              min={0}
-              max={100}
-              step={0.1}
-              onChange={(v) => setTotalHeads(headsSlider.fromSlider(v))}
+              value={totalHeads}
+              min={MIN_HEADS}
+              max={MAX_HEADS}
+              step={1}
+              onChange={setTotalHeads}
               formatValue={() => formatCount(totalHeads)}
             />
             <p className="pl-[6.5rem] text-xs text-muted">
@@ -182,11 +176,11 @@ export function AttentionCost() {
           <div className="flex flex-col gap-1">
             <SliderControl
               label="Dims per head"
-              value={headDimSlider.toSlider(headDim)}
-              min={0}
-              max={100}
-              step={0.1}
-              onChange={(v) => setHeadDim(headDimSlider.fromSlider(v))}
+              value={headDim}
+              min={MIN_HEAD_DIM}
+              max={MAX_HEAD_DIM}
+              step={1}
+              onChange={setHeadDim}
               formatValue={() => formatCount(headDim)}
             />
             <p className="pl-[6.5rem] text-xs text-muted">
@@ -201,7 +195,7 @@ export function AttentionCost() {
             : "Total attention heads, summed across every layer of the model."}
         </p>
 
-        {/* Preset + index buttons */}
+        {/* Preset buttons */}
         <div className="flex flex-wrap items-center justify-center gap-2">
           {PRESETS.map((p) => (
             <button
@@ -212,12 +206,6 @@ export function AttentionCost() {
               {p.label}
             </button>
           ))}
-          <button
-            onClick={useIndex}
-            className="rounded-md bg-accent px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-accent-dark"
-          >
-            Use a DSA-style index
-          </button>
         </div>
 
         {/* Big readouts */}
@@ -249,12 +237,40 @@ export function AttentionCost() {
           </div>
         </div>
 
+        {/* Interactive real-world equivalent ladder */}
+        <div className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-3">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted">
+            What does that energy look like?
+          </p>
+          <div className="flex flex-col gap-1">
+            {EQUIVALENTS.map((e) => {
+              const active = e === equivalent.entry;
+              return (
+                <button
+                  key={e.singular}
+                  onClick={() => jumpToEquivalent(e)}
+                  className={`flex items-center justify-between rounded-md border px-3 py-1.5 text-left text-xs transition-colors ${
+                    active
+                      ? "border-accent bg-accent/10 text-accent"
+                      : "border-border bg-transparent text-muted hover:border-accent/40 hover:text-foreground"
+                  }`}
+                >
+                  <span className="font-medium">{e.singular}</span>
+                  <span className="font-mono">{formatEnergy(e.joules)}</span>
+                </button>
+              );
+            })}
+          </div>
+          <p className="text-xs text-muted">
+            Click one to move the context window until this question costs about that much.
+          </p>
+        </div>
+
         <p className="text-center text-xs text-muted">
           {formatCount(flops)} FLOPs for full attention over {formatCount(windowTokens)} tokens,
           {" "}{formatCount(totalHeads)} heads at {headDim} dimensions each, all layers combined.
           Assumes ~1 pJ/FLOP effective energy and ~5&times;10<sup>14</sup> FLOP/s effective
-          throughput at $2.50/GPU-hour &mdash; a real index also runs at lower numeric precision,
-          which shrinks the cost further still.
+          throughput at $2.50/GPU-hour.
         </p>
       </div>
     </WidgetContainer>

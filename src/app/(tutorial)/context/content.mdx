@@ -11,15 +11,15 @@ In [Chapter 7](/attention), attention let every token look at every other token,
 
 Double the number of tokens in the context, and the number of pairs to compare quadruples. Ten times the tokens means a hundred times the comparisons. This is quadratic growth, and it doesn't stop at pairs. Each comparison is a dot product between a query and a key, and that dot product runs over the dimensions of one attention head. Chapter 7 introduced heads: the attention block's Q/K/V projection takes a token's full embedding and squeezes it down into many narrower heads, each one looking for something different. A model stacks dozens of heads per layer and dozens of layers on top of that, and every one of them pays the full W&sup2; cost separately. The real bill is context window squared, times dimensions per head, times the total number of heads across the whole stack.
 
-A page of text is a few hundred tokens. A novel is well over a hundred thousand. A large codebase can run past a million. Push a frontier-sized model out to a million-token context, and answering a single question means paying that full cost once, for every head, in every layer. The energy and dollar figures involved are startling for one question.
+A page of text is a few hundred tokens. A book is well over a hundred thousand. A million tokens sounds huge, but it's an ordinary size for a modern agent session once tool output, search results, and reference docs pile up in the window. GLM-5.2 reading a million tokens to answer one question means paying its full attention cost once, for every one of its heads, in every layer. Llama 4 Scout goes further still, with a window of ten million tokens, and even that is smaller than a serious codebase. The energy and dollar figures involved are startling for a single question.
 </div>
 
 <AttentionCostWidget>
-Set a frontier model reading a million-token codebase and look at the price of a single question. Then press "Use a DSA-style index" and watch the cost fall. That cheap all-pairs scan is what the rest of this chapter is built on.
+Load GLM-5.2 and drag the context window up to a million tokens, an ordinary size for a modern agent session. Then click along the ladder of everyday comparisons to feel what one question actually costs.
 </AttentionCostWidget>
 
 <div>
-The one lever that brings that cost down without giving up the all-pairs comparison is shrinking what each comparison actually does: fewer dimensions per head, fewer heads, lower numeric precision. Do that and the full W&sup2; scan turns cheap. That's exactly the crack the rest of this chapter exploits: run a tiny, cheap version of attention over every pair first, then spend the expensive full-precision comparison only on the pairs that scan says matter.
+So how does a model read a million tokens, let alone ten million, without paying this bill for every question? That is what the rest of this chapter is about.
 </div>
 
 ## Don't Redo the Past
