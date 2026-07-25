@@ -19,7 +19,7 @@ test.describe("Homepage", () => {
   test("first ready chapter card links to /computation", async ({ page }) => {
     await page.goto("/");
     const firstChapter = page.getByRole("link", {
-      name: /Everything Is Numbers/,
+      name: /Computation/,
     });
     await expect(firstChapter).toHaveAttribute("href", "/computation");
   });
