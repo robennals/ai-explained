@@ -1,20 +1,19 @@
 # Paying Attention
 
 <Lead>
-AI language models read text as **tokens**, which are just words or small pieces of words. A model reads them one at a time and guesses what comes next, and to guess well it has to understand the sentence. That means every token needs to know about the other tokens around it. **Attention** is how it does that: each token looks back over the tokens before it and pulls in the ones that matter. It's the idea that made modern AI work, and it's built from a few simple parts.
+In order to understand what a word means, we need to look at other words in the document, including words that might have occurred much earlier. Attention is how we do that.
 </Lead>
 
 ## Some Tokens Need Other Tokens
 
-You often can't tell what a token means on its own. Take "bank": is it a place for money, or the side of a river? You have to look at the tokens around it. A token like "it" is worse, because by itself it means nothing at all. You have to look back to find what it stands for.
+You often can't tell what a token means on its own. Take "bank": is it a place for money, or the side of a river? You have to look at the tokens around it. A token like "it" is even harder, because it can refer to pretty much anything and we don't know what it is referring to unless we look back to find what it refers to.
 
 <WhyAttentionMattersWidget>
 Each sentence has one highlighted token. Follow the arrow to the token it depends on. Flip through the examples: the token it needs might be what a pronoun stands for, who did an action, where a scene is set, or a name from far back.
 </WhyAttentionMattersWidget>
 
-What a token needs is different every time. "it" needs the thing it stands for. "opened" needs whoever did the opening. "sky" needs the planet it hangs over. "treaty" needs a name from pages ago. There's no rule for what to look for, or how far back it sits.
+Different tokens need different things in order for us to understand what they mean. "it" needs the thing it stands for. "opened" needs whoever did the opening. "sky" needs the planet it hangs over. "treaty" needs a name from pages ago.
 
-So the job is hard: for each token, work out what it's missing, then go find the tokens that have it. Doing this well is most of what it takes to understand a sentence. That is what **attention** does. Each token reaches back over the earlier tokens, decides which ones hold what it needs, and pulls that in.
 
 ## Searching for a Match
 
