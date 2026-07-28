@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ChapterHeader } from "@/components/layout/ChapterHeader";
 import { ChapterNav } from "@/components/layout/ChapterNav";
 import { GlossaryRenderProvider } from "@/components/mdx/G";
 import { chapterMetadata } from "@/lib/chapter-metadata";
@@ -23,7 +24,7 @@ export default function GlossaryPage() {
     <article>
       <GlossaryHashOpener />
       <div className="prose prose-lg max-w-none">
-        <h1>Glossary</h1>
+        <ChapterHeader slug="glossary" />
         <p>
           Every technical word this tutorial uses, with a short definition and
           links to the chapters where it appears. Click any word with a dotted

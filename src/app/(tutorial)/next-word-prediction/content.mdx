@@ -1,8 +1,4 @@
-# Understanding by Predicting
-
-<Lead>
-A strange claim: if a machine can accurately predict the next word in a sentence, it must *understand* the sentence. That sounds wrong. Prediction seems too simple to require understanding. But by the end of this chapter, you'll see why it's true, and why this one idea is the foundation of modern AI.
-</Lead>
+How do you teach an AI the sum of all human knowledge? It turns out that one of the most effective ways is to train it to be really good at predicting the next word of an arbitrary piece of human-written text. This chapter explains why.
 
 ## The Game
 
@@ -42,7 +38,7 @@ How does the model choose between its options? It uses the frequencies as *proba
 
 You can probably see where this is going. What about *trigrams* (3 words of context)? 4-grams? 10-grams? More context should help, right?
 
-It does, but we hit a wall. The same wall we saw back in [Everything Is Numbers](/computation) with the lookup table explosion.
+It does, but we hit a wall. The same wall we saw back in [Computation](/computation) with the lookup table explosion.
 
 <NgramExplosionWidget>
 Start with bigrams (context size 2) and a small vocabulary. Increase the context size and watch the combinations explode. By the time you reach 5-grams with a realistic vocabulary, you need more entries than there are words on the entire internet. At 10-grams, you've blown past the atoms in the universe.

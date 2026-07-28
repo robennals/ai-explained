@@ -1,3 +1,4 @@
+import { ChapterHeader } from "@/components/layout/ChapterHeader";
 import { ChapterNav } from "@/components/layout/ChapterNav";
 import { chapterMetadata } from "@/lib/chapter-metadata";
 import { getAdjacentChapters } from "@/lib/curriculum";
@@ -22,6 +23,7 @@ export default function ChapterPositions() {
   return (
     <article>
       <div className="prose prose-lg max-w-none">
+        <ChapterHeader slug="positions" />
         <Content
           components={{
             WordOrderMattersWidget,

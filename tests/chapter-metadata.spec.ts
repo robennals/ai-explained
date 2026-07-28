@@ -1,9 +1,9 @@
 import { test, expect } from "@playwright/test";
 
 const cases = [
-  { slug: "computation", expectedTitleStart: "Everything Is Numbers" },
-  { slug: "attention", expectedTitleStart: "Paying Attention" },
-  { slug: "transformers", expectedTitleStart: "One Architecture to Rule Them All" },
+  { slug: "computation", expectedTitleStart: "Computation" },
+  { slug: "attention", expectedTitleStart: "Attention" },
+  { slug: "transformers", expectedTitleStart: "Transformers" },
 ];
 
 for (const c of cases) {
