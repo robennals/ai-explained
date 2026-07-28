@@ -15,37 +15,37 @@ interface ChapterCase {
 const CHAPTERS: ChapterCase[] = [
   {
     slug: "optimization",
-    h1Contains: "Power of Incremental Improvement",
+    h1Contains: "Optimization",
     widgetTitles: ["Search: Blind vs. Guided"],
   },
   {
     slug: "neurons",
-    h1Contains: "Building a Brain",
+    h1Contains: "Neural Networks",
     widgetTitles: ["A Neural Network"],
   },
   {
     slug: "vectors",
-    h1Contains: "Describing the World with Numbers",
+    h1Contains: "Vectors",
     widgetTitles: ["Describing Things with Vectors"],
   },
   {
     slug: "embeddings",
-    h1Contains: "From Words to Meanings",
+    h1Contains: "Embeddings",
     widgetTitles: ["One Dimension, Multiple Meanings"],
   },
   {
     slug: "next-word-prediction",
-    h1Contains: "Understanding by Predicting",
+    h1Contains: "Next-Word Prediction",
     widgetTitles: ["Guess the Next Word"],
   },
   {
     slug: "attention",
-    h1Contains: "Paying Attention",
+    h1Contains: "Attention",
     widgetTitles: ["Which Words Matter?"],
   },
   {
     slug: "positions",
-    h1Contains: "Where Am I",
+    h1Contains: "Positional Encoding",
     widgetTitles: ["Word Order Changes Meaning"],
   },
   {
@@ -55,7 +55,7 @@ const CHAPTERS: ChapterCase[] = [
   },
   {
     slug: "context",
-    h1Contains: "Getting the Right Information",
+    h1Contains: "Context",
     widgetTitles: ["The cost of looking at everything"],
   },
 ];
