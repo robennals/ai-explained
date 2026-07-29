@@ -1,0 +1,72 @@
+<Quiz slug="context">
+
+<Question>
+Why does full attention get so expensive as the context window grows?
+
+<Choice>Doubling the words doubles the comparisons, since each word compares once</Choice>
+<Choice correct>Doubling the words quadruples the comparisons, since word pairs grow quadratically</Choice>
+<Choice>Longer context needs a model with more parameters, which costs more</Choice>
+<Choice>Longer context needs more training data, which is the real cost</Choice>
+
+<Feedback>
+Attention compares every word against every other word, so the number of pairs grows as the square of the word count. Ten times the words means a hundred times the comparisons, and that cost repeats at every layer and for every new word generated. Stretch the context out to a million words and full attention needs on the order of a trillion comparisons, per layer, per word.
+</Feedback>
+</Question>
+
+<Question>
+What does the KV cache save a model from doing, and what does it cost in return?
+
+<Choice>Recomputing old keys and values every step; the cost is slower generation overall</Choice>
+<Choice correct>Recomputing old keys and values every step; the cost is growing memory</Choice>
+<Choice>Running attention on the whole context; the cost is memory that keeps growing</Choice>
+<Choice>Storing the entire prompt as text; the cost is slower generation overall</Choice>
+
+<Feedback>
+A word's keys and values never change once it's written, so computing them once and storing them saves the model from redoing that work at every step of generation. The catch is that the cache holds one entry per word, for every word in the prompt and everything generated since, and it only grows. That growing cache is the real cost of a long context.
+</Feedback>
+</Question>
+
+<Question>
+In Gemma 3's mix of layers, most are local — each word attends only to a small nearby window. Why can information still travel across the whole document?
+
+<Choice>The one global layer copies its results into every local layer before the next word</Choice>
+<Choice correct>Each local layer passes gathered information a little further, and the layers stack up</Choice>
+<Choice>Local layers secretly scan the whole context but only report back a summary</Choice>
+<Choice>The KV cache lets any layer see directly back to the very first word</Choice>
+
+<Feedback>
+A single local layer only reaches its own small window, but it passes along what it gathered to the layer above it, which reaches a little further still. Stack enough of those overlapping windows and information ends up traveling a long way, even though no individual layer looked past its own neighborhood. That's what lets five cheap local layers for every one expensive global layer still cover the full document.
+</Feedback>
+</Question>
+
+<Question>
+The chapter describes a sparse-attention trick that pushes context windows out toward a million words at close to frontier quality. Which model does it?
+
+<Choice>DeepSeek, whose DSA keeps a shortlist of 2,048 words</Choice>
+<Choice correct>GLM-5.2, whose IndexShare reuses one shortlist across several layers</Choice>
+<Choice>Gemma 3, whose local layers use a 1024-word window</Choice>
+<Choice>Kimi K2, whose MLA compresses keys and values in the cache</Choice>
+
+<Feedback>
+GLM-5.2's IndexShare notices that neighboring layers tend to want nearly the same words, so instead of every layer scanning the whole context on its own, the indexer runs once every four layers and the shortlist gets reused for the three after it. That cuts out roughly 2.9 times the computation of scoring every layer separately, which is a big part of what makes a million-word window practical.
+
+*Gotcha:* DeepSeek's DSA does something similar in spirit, a lightning indexer that keeps a shortlist of 2,048 words, but its own context window tops out at 128,000, not a million.
+</Feedback>
+</Question>
+
+<Question>
+A study called *Is Grep All You Need?* found that keyword search over a codebase matched or beat embedding-based semantic search, even though grep only matches exact text. Why?
+
+<Choice>Embeddings can only be computed for natural language, never for code</Choice>
+<Choice correct>Code is full of exact identifiers keyword search can match directly</Choice>
+<Choice>Grep runs faster, so its results simply appear more relevant</Choice>
+<Choice>Vector search only works on whole documents, not on individual files</Choice>
+
+<Feedback>
+Semantic search earns its keep when the right document uses different words than the query — it finds a barking dog when you searched for "noise". Code doesn't usually work that way: a bug report about a specific function or error string is best found by matching that exact text, which is exactly what a keyword search is built to do. Grep also never goes stale, since it runs against the current files instead of a database that's only as fresh as its last update.
+
+*Gotcha:* Neither approach wins outright. Semantic search still matters when meaning and wording diverge; most real systems use both.
+</Feedback>
+</Question>
+
+</Quiz>

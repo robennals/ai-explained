@@ -1,0 +1,19 @@
+---
+term: KV cache
+aliases: [KV caches, key-value cache, key-value caches]
+firstAppearance: context
+---
+
+A **KV cache** is the stored keys and values for every word generated so far, kept so a model never has to recompute them.
+
+A model generates one word at a time, and each new word attends back over every word that came before it. The keys and values for a word never change once that word is written, so instead of recomputing them from scratch at every step, a model computes them once and stores them. Generating the next word then only costs one new set of keys and values, reused against everything already stored.
+
+The catch is memory. The cache holds one entry per word in the prompt plus every word generated so far, and it only grows for the length of the conversation. That growing cache is the main memory cost of a long context.
+
+Some examples:
+
+- **A hundred-word reply** — the last word needs the keys and values of all ninety-nine before it; without a cache, the model would redo all of that work at every step.
+- **Local (sliding-window) attention** — shrinks the cache too, since a local layer only ever needs to keep the nearby entries in memory.
+- **PagedAttention** — splits the KV cache into fixed-size blocks instead of one big reserved chunk, so it wastes far less memory serving many requests at once.
+
+The KV cache trades compute for memory: it's why generating text gets cheaper per word, but a long conversation gets steadily more expensive to hold in memory.

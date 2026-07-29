@@ -80,6 +80,10 @@ No forward references. Uses `torch.tensor`, `torch.dot`, basic arithmetic, and `
 
 No forward references. Uses `torch.tensor`, `torch.dot`, `math.cos`/`math.sin` for 2D rotations, `torch.softmax`, `torch.triu`, `masked_fill`, and matplotlib for the multi-speed RoPE curves. Reuses the toy attention setup from `attention.ipynb`.
 
+### context.ipynb
+
+No forward references. Uses `torch.randn`, `torch.zeros`/`torch.ones`, matrix multiply (`@`), and `torch.dot` — all covered in earlier notebooks or the PyTorch appendix. Cosine similarity reuses the `magnitude`/`normalize`/`torch.dot` pattern from `vectors.ipynb` rather than redefining it from scratch.
+
 ## When adding a new notebook
 
 1. List any PyTorch concepts used before their chapter

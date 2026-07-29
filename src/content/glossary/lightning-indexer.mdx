@@ -1,0 +1,16 @@
+---
+term: lightning indexer
+aliases: [DeepSeek Sparse Attention, DSA]
+firstAppearance: context
+---
+
+A **lightning indexer** is the small, cheap model DeepSeek's DSA (DeepSeek Sparse Attention) uses to score every earlier word for relevance before running full attention on the top-scoring ones.
+
+The indexer scans every word in the context and gives each one a relevance score for the word currently being generated, the way a search engine ranks pages before anyone reads one. Scoring a word this way is cheap: the indexer is small and works at low precision, nothing like the cost of comparing that word in full attention. DSA keeps the top 2,048 words out of a context window that can hold 128,000, and full attention only ever runs on those 2,048, no matter how long the document gets.
+
+Some examples:
+
+- **A million-word codebase** — the lightning indexer still has to scan every word, but full attention only runs on the 2,048 it keeps.
+- **IndexShare** — GLM-5.2's answer to a related cost: instead of scoring every word, reuse one shortlist across several layers.
+
+The indexer still has to look at everything once, but only the words it shortlists ever pay the full cost of attention.

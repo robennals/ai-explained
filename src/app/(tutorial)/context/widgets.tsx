@@ -1,0 +1,99 @@
+"use client";
+
+import dynamic from "next/dynamic";
+import { Suspense } from "react";
+import { TryItProvider } from "@/components/widgets/shared/WidgetContainer";
+
+const AttentionCost = dynamic(
+  () => import("@/components/widgets/context/AttentionCost").then((m) => m.AttentionCost),
+  { ssr: false }
+);
+
+const KVCache = dynamic(
+  () => import("@/components/widgets/context/KVCacheWidget").then((m) => m.KVCache),
+  { ssr: false }
+);
+
+const LocalVsGlobal = dynamic(
+  () => import("@/components/widgets/context/LocalVsGlobal").then((m) => m.LocalVsGlobal),
+  { ssr: false }
+);
+
+const SparseIndexer = dynamic(
+  () => import("@/components/widgets/context/SparseIndexer").then((m) => m.SparseIndexer),
+  { ssr: false }
+);
+
+const PagedCache = dynamic(
+  () => import("@/components/widgets/context/PagedCache").then((m) => m.PagedCache),
+  { ssr: false }
+);
+
+const Retrieval = dynamic(
+  () => import("@/components/widgets/context/RetrievalWidget").then((m) => m.Retrieval),
+  { ssr: false }
+);
+
+function WidgetSlot({ children, tryIt, label }: { children: React.ReactNode; tryIt?: React.ReactNode; label?: string }) {
+  return (
+    <Suspense
+      fallback={
+        <div className="my-8 flex items-center justify-center rounded-xl border border-dashed border-border p-12 text-sm text-muted">
+          Loading widget...
+        </div>
+      }
+    >
+      <TryItProvider content={tryIt} label={label}>
+        {children}
+      </TryItProvider>
+    </Suspense>
+  );
+}
+
+export function AttentionCostWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children} label="Explore it">
+      <AttentionCost />
+    </WidgetSlot>
+  );
+}
+
+export function KVCacheWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children} label="Try this">
+      <KVCache />
+    </WidgetSlot>
+  );
+}
+
+export function LocalVsGlobalWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children} label="Try this">
+      <LocalVsGlobal />
+    </WidgetSlot>
+  );
+}
+
+export function SparseIndexerWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children} label="Try this">
+      <SparseIndexer />
+    </WidgetSlot>
+  );
+}
+
+export function PagedCacheWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children} label="Try this">
+      <PagedCache />
+    </WidgetSlot>
+  );
+}
+
+export function RetrievalWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children} label="Try this">
+      <Retrieval />
+    </WidgetSlot>
+  );
+}

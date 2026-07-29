@@ -114,6 +114,16 @@ export const chapters: Chapter[] = [
   },
   {
     id: 10,
+    slug: "context",
+    title: "Context",
+    subtitle: "Getting the right information",
+    prerequisites: [9],
+    description:
+      "Attention compares every word to every other, so a million-token window should be impossible. Sparse attention, KV caching, and retrieval are the tricks that make it work — and let agents feed themselves the right facts.",
+    ready: true,
+  },
+  {
+    id: 11,
     slug: "matrix-math",
     title: "Matrix Math",
     subtitle: "Thinking by rotating",
@@ -122,7 +132,7 @@ export const chapters: Chapter[] = [
       "Every layer is a transformation in space — a rotation, a stretch, a fold. The geometry of high-dimensional space is how neural networks reshape vectors of meaning.",
   },
   {
-    id: 11,
+    id: 12,
     slug: "training",
     title: "Making Training Work",
     subtitle: "Why training almost doesn't work",
@@ -131,22 +141,13 @@ export const chapters: Chapter[] = [
       "Plain gradient descent on a deep network barely works. Activation functions (ReLU, Swish), regularization, dropout, learning rate schedules, and Adam are the hard-won tricks that make modern training possible.",
   },
   {
-    id: 12,
+    id: 13,
     slug: "mixture-of-experts",
     title: "Mixture of Experts",
     subtitle: "Only wake the specialists you need",
     prerequisites: [9],
     description:
       "A router sends each question to specialist sub-networks. A trillion parameters, but only a fraction active per question. Smarter without getting slower.",
-  },
-  {
-    id: 13,
-    slug: "long-context",
-    title: "Long Context",
-    subtitle: "Remembering a million words",
-    prerequisites: [9],
-    description:
-      "Attention scales as the square of the input — so how do models read entire books? KV caching, sparse attention, and position scaling tricks stretch memory from sentences to libraries.",
   },
   {
     id: 14,
@@ -267,15 +268,6 @@ export const chapters: Chapter[] = [
   },
   {
     id: 27,
-    slug: "context",
-    title: "Context Management",
-    subtitle: "Getting the right information",
-    prerequisites: [5, 9],
-    description:
-      "A model's intelligence depends as much on what you put in front of it as on its weights. Retrieval, prompt construction, memory systems — the art of feeding the right facts at the right time.",
-  },
-  {
-    id: 28,
     slug: "appendix-pytorch",
     title: "PyTorch from Scratch",
     subtitle: "A hands-on introduction to the code behind AI",
@@ -286,7 +278,7 @@ export const chapters: Chapter[] = [
     ready: true,
   },
   {
-    id: 29,
+    id: 28,
     slug: "glossary",
     title: "Glossary",
     subtitle: "Words this tutorial uses, in one place",

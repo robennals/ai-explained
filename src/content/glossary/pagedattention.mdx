@@ -1,0 +1,16 @@
+---
+term: PagedAttention
+aliases: [paged attention]
+firstAppearance: context
+---
+
+**PagedAttention** is a technique, used by vLLM, for storing the KV cache in small fixed-size blocks instead of one large reserved chunk per request.
+
+Serving many requests at once means holding many KV caches side by side. The simple approach reserves one block of memory per request, sized for the longest sequence that request might ever reach, and most requests never get that long, so most of that reserved memory sits empty. PagedAttention borrows an idea from operating systems instead: split memory into small fixed-size pages, hand a program only the pages it actually uses, and keep a table mapping its view of memory onto those scattered physical pages. PagedAttention does the same thing to the KV cache, splitting it into small fixed blocks and keeping a block table per sequence that points each logical block at wherever it actually lives in physical memory.
+
+Some examples:
+
+- **A block is a page, a word is a byte, a request is a program** — the same trick operating systems use for memory, applied to the KV cache.
+- **A shared system prompt** — two sequences with an identical stretch of text can point their block tables at the very same physical blocks instead of each keeping their own copy.
+
+PagedAttention doesn't shrink the KV cache itself; it stops the cache from wasting memory on space that a request never ends up using.

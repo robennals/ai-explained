@@ -1,0 +1,16 @@
+---
+term: sparse attention
+aliases: []
+firstAppearance: context
+---
+
+**Sparse attention** is running full attention over only a small, chosen subset of earlier words instead of the entire context.
+
+Full attention compares every word to every other word, so its cost grows with the square of the context length. Sparse attention keeps the whole window available but uses a small, cheap model, an indexer, to score every earlier word for relevance to the word currently being generated. Full attention then runs only on the top-scoring shortlist, no matter how long the document gets.
+
+Some examples:
+
+- **DeepSeek's DSA (DeepSeek Sparse Attention)** — uses a lightning indexer to keep the top 2,048 words out of a context window that can hold 128,000, then runs full attention on only those 2,048.
+- **GLM-5.2's IndexShare** — reuses one indexer shortlist across several neighboring layers instead of recomputing it at every layer.
+
+Sparse attention is what makes a million-word context window practical: scoring every word is cheap, and running full attention on only the shortlist avoids the trillion-comparison cost that full attention would otherwise need.

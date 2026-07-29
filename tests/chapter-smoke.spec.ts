@@ -53,6 +53,11 @@ const CHAPTERS: ChapterCase[] = [
     h1Contains: "PyTorch",
     widgetTitles: [],
   },
+  {
+    slug: "context",
+    h1Contains: "Context",
+    widgetTitles: ["The cost of looking at everything"],
+  },
 ];
 
 for (const ch of CHAPTERS) {

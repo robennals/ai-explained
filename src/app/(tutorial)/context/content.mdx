@@ -1,0 +1,120 @@
+A model can only see so much at once. Everything it knows about your current problem — your question, the documents you handed it, the output of every tool it just ran — has to fit inside one limited window of text called the *context*. This chapter is about that window: why making it large is so expensive, the tricks that make million-token windows practical anyway, and how to fill the space you have with the information that actually matters.
+
+## The Wall
+
+<div>
+In [Chapter 7](/attention), attention let every token look at every other token, and decide how much to listen to each one. That is what makes attention so good at connecting distant tokens: a pronoun on page ten can still reach back to the name it refers to on page one. But comparing every token to every other token has a cost, and that cost grows fast.
+
+Double the number of tokens in the context, and the number of pairs to compare quadruples. Ten times the tokens means a hundred times the comparisons. This is quadratic growth, and it doesn't stop at pairs. Each comparison is a dot product between a query and a key, and that dot product runs over the dimensions of one attention head. Chapter 7 introduced heads: the attention block's Q/K/V projection takes a token's full embedding and squeezes it down into many narrower heads, each one looking for something different. A model stacks dozens of heads per layer and dozens of layers on top of that, and every one of them pays the full W&sup2; cost separately. The real bill is context window squared, times dimensions per head, times the total number of heads across the whole stack.
+
+A page of text is a few hundred tokens. A book is well over a hundred thousand. A million tokens sounds huge, but it's an ordinary size for a modern agent session once tool output, search results, and reference docs pile up in the window. GLM-5.2 reading a million tokens to answer one question means paying its full attention cost once, for every one of its heads, in every layer. Llama 4 Scout goes further still, with a window of ten million tokens, and even that is smaller than a serious codebase. The energy and dollar figures involved are startling for a single question.
+</div>
+
+<AttentionCostWidget>
+Load GLM-5.2 and drag the context window up to a million tokens, an ordinary size for a modern agent session. Then click along the ladder of everyday comparisons to feel what one question actually costs.
+</AttentionCostWidget>
+
+<div>
+So how does a model read a million tokens, let alone ten million, without paying this bill for every question? That is what the rest of this chapter is about.
+</div>
+
+## Don't Redo the Past
+
+<div>
+A model generates one word at a time. Each new word attends back over every word that came before it, including the words it just generated itself. Ask for a hundred words of output, and the last word needs the keys and values of all ninety-nine before it.
+
+Recomputing those keys and values from scratch at every step is wasteful. The keys and values for a word never change once that word is written, so a model can compute them once and store them: the KV cache. Generating the next word then only costs a single new set of keys and values, reused against everything already stored.
+
+The catch is memory. The cache holds one entry per word in the prompt plus every word generated so far, and it only grows. That growing cache is the real cost of a long context, and it shapes several of the tricks in the rest of this chapter.
+</div>
+
+<KVCacheWidget>
+Generate a dozen words with reuse off, then on. Watch how without the cache the model redoes all its earlier work every step, while the cache turns that into one small step per word.
+</KVCacheWidget>
+
+## Most Words Don't Need Most Words
+
+<div>
+Full attention lets every word look at every other word, but most words don't need most of that. A word usually gets what it needs from its neighbors: the words right around it, a paragraph back at most. Only a few layers in the whole stack need to reach all the way across the text.
+
+Gemma 3 builds on that. Five out of every six layers are local: each word attends only to a small window of nearby words. The sixth layer is global, attending to the entire context. Gemma 2 split the difference differently, alternating one local layer for every global layer, with a 4096-word window. Gemma 3 pushes further, five local layers to one global, with a 1024-word window on the local layers.
+
+Local layers are far cheaper: a word compares against a window instead of the whole sequence, so the cost scales with the window size instead of the square of the context length. That shrinks the KV cache too, since a local layer only ever needs to keep the nearby entries in memory. Stacking several local layers still lets information travel a long way, because each layer passes what it has gathered a little further, and those overlapping windows add up.
+</div>
+
+<LocalVsGlobalWidget>
+Set every layer to Global and check the cost. Now switch to the Gemma pattern: five cheap local layers, one global. A word can still reach clear across the text, because each local layer passes information a little further than the last.
+</LocalVsGlobalWidget>
+
+## Pick the Words That Matter
+
+<div>
+Local attention shrinks the window by making each layer look at fewer words by default. Sparse attention takes a different approach: keep the whole window, but let a small, fast model decide which words in it actually matter for each new word being generated, and run full attention on only that shortlist.
+
+That fast model is an indexer. It scans every earlier word and gives each one a relevance score for the word currently being generated, the way a search engine ranks pages before anyone reads one. Full attention then runs only on the top-scoring words. Scoring one word is cheap: the indexer is small and works at low precision, nothing like the cost of comparing that word in full attention. But it still has to score every word in the context, not just the shortlist, so at a million words that scan adds up to a real cost of its own. That's the cost IndexShare goes after.
+
+DeepSeek's DSA (DeepSeek Sparse Attention) does this with what it calls a lightning indexer, keeping the top 2,048 words out of a context window that can hold 128,000. Full attention only ever runs on those 2,048, no matter how long the document gets.
+
+GLM-5.2 pushes the idea further with something it calls IndexShare. Neighboring layers tend to want nearly the same words: if a word matters to layer 12, it usually matters to layer 13 as well. Every layer scanning the whole context on its own is exactly the kind of cost that piles up at a million words, so instead of running the indexer at every layer, GLM-5.2 runs it once every four layers and reuses that shortlist for the three layers after it. That adds up to about 2.9 times fewer computations than recomputing the indexer at every layer, and it's a big part of what makes a million-word context window practical at close to frontier quality.
+
+Neither Claude nor OpenAI's models disclose how they handle long context internally. GLM-5.2 is an open model with performance in a similar range, and it documents its method in a public paper, so it's reasonable to assume the closed labs are doing something broadly similar under the hood.
+</div>
+
+<KeyInsight>
+A trillion comparisons per layer, per word, is not something any model actually does at a million words of context. A cheap indexer that scores every word, combined with a shortlist that several layers can share instead of recomputing, is what turns that impossible number into a manageable one.
+</KeyInsight>
+
+<SparseIndexerWidget>
+Pick a question. The indexer scans every word and keeps only the few that matter. Turn k down until it starts missing the answer. Then switch on IndexShare and watch several layers agree to reuse one shortlist, dropping the cost again.
+</SparseIndexerWidget>
+
+## Memory in Pages
+
+<div>
+The KV cache from earlier in this chapter is the real memory hog of a long context: one entry per word, for every word in the prompt and everything generated since. Serving many requests at once means holding many of these caches side by side, and the simplest way to do that is to reserve one block of memory per request, sized for the longest sequence that request might ever reach. Most requests never get that long, so most of that reserved memory sits empty the whole time.
+
+vLLM's PagedAttention borrows an old idea from operating systems instead. An OS doesn't give a program one giant reserved slab of memory; it splits memory into small fixed-size pages and hands a program only the pages it actually uses, wherever they happen to be free, keeping a table that maps the program's view of memory onto those scattered physical pages. PagedAttention does the same thing to the KV cache: split it into small fixed blocks, maybe sixteen words each, and keep a block table per sequence that points each of its logical blocks at wherever that block actually lives in physical memory. A block is a page, a word is a byte, a request is a program.
+
+Blocks don't need to sit next to each other, and a sequence only holds as many blocks as it currently needs — one partly-empty block at the end, not a whole reserved chunk. That turns wasted memory from most of the cache into almost none. It also opens up something the reserved-block scheme can't do: if two sequences share an identical stretch, such as the same system prompt, they can point their block tables at the very same physical blocks instead of each keeping their own copy.
+</div>
+
+<PagedCacheWidget>
+Grow two conversations. With one big reservation each, most of the memory sits empty. Switch to pages and the wasted space nearly vanishes — and a shared prompt can live in one place for both.
+</PagedCacheWidget>
+
+## What Goes In the Window
+
+<div>
+Everything up to this point has been about a window that's already full: how to run attention over it cheaply, how to cache it, how to page its memory. But the window is finite and the world is not. A codebase can run to millions of lines, a company's documents to millions of words, far more than any context window holds at once. Something has to decide, out of everything that exists, what actually goes in.
+
+One answer is retrieval-augmented generation, RAG. A separate step turns every document into an embedding vector, the same kind of vector covered in the chapter on embeddings, and stores those vectors in a database. When a query comes in, it gets embedded too, and the database returns whichever documents sit nearest to it in that space, nearest in meaning, not nearest in spelling. Those documents get pasted into the window before the model ever sees the question.
+
+The other answer treats the model like a developer working in a large codebase rather than a librarian searching a card catalog. Instead of pre-computing embeddings for everything, the model runs a keyword search, opens the files that turn up, follows the links and imports it finds there, and keeps iterating until it has what it needs. This is agentic search, and it has a real advantage on code: a study called *Is Grep All You Need?* found that grep-based retrieval matched or beat vector search for finding relevant code, even though grep only matches exact text. Code is full of exact identifiers, function names, variable names, error strings, and those are exactly what a keyword search is built to find. It also never goes stale: grep runs against the current files, while an embedding database is only as fresh as its last update.
+
+Neither approach wins outright. Meaning search finds the document that says the right thing in different words; keyword search finds the document that says the exact thing. Most real systems use both.
+</div>
+
+<RetrievalWidget>
+Ask "which critter kept everyone up so late?". Keyword search finds nothing — those exact words aren't there. Meaning search still finds the barking dog. Now search for an exact ticket number and watch keyword win.
+</RetrievalWidget>
+
+## An Agent Minding Its Own Context
+
+<div>
+Everything so far assumes something else decides what goes in the window: a chapter, a document, a query. An agent working on a long task doesn't have that luxury. Every tool call it makes, every file it reads, every command it runs adds its output back into the conversation, and a task that runs for hours can generate far more text than any window holds. The agent has to manage its own context as it goes, deciding what to keep and what to set aside.
+
+**Compaction** is the simplest of these tricks. Once a stretch of the conversation is no longer needed in full, the agent (or a step built into the surrounding system) summarizes it: a page of tool output and back-and-forth becomes a sentence or two describing what happened and what was learned. The detail is gone, but the fact that matters survives, and the window has room for what comes next.
+
+**Memory files** solve a different problem: some facts need to survive far longer than compaction would keep them, and some don't need to sit in the window at all times. Instead of carrying a fact in the conversation from the moment it's learned, an agent can write it to a file on disk, a running note of decisions made, bugs found, or plans agreed on. It only reads that file back in when the current step actually needs it. The fact still exists, but it stops taking up space until it's relevant again.
+
+**Selective retrieval**, the same idea from earlier in this chapter, applies just as well to an agent's own context. Rather than keep an entire codebase or document set loaded at once, the agent searches, greps, or embeds its way to the handful of files the current step needs, reads those, and lets the rest stay off-screen until a later step calls for something else.
+
+None of this is possible without everything built earlier in the chapter, from sparse attention and paging to a cache that doesn't grow unchecked. All of it exists to make a large window affordable in the first place. Compaction, memory files, and retrieval are what decide, moment to moment, what actually deserves a seat in that window.
+
+The frontier keeps pushing on the cache itself too, beyond what an agent chooses to put in it. Multi-head latent attention, MLA, compresses the keys and values before they're stored, so the cache holds a smaller compressed form instead of the full-size vectors, shrinking the memory cost of every word remembered. Kimi K2 uses MLA to hold long context at a fraction of the usual cache size. Moonshot, the lab behind Kimi, reports that Kimi K3 pushes this compression further still, though as with any claim about an unreleased or newly released model, that's worth treating as a claim from the lab rather than an independently verified result.
+</div>
+
+<TryItInPyTorch notebook="context">
+Measure the KV cache growing word by word, compare local versus global attention cost, run a small paged-attention allocator, and compare keyword search against embedding search on the same set of documents.
+</TryItInPyTorch>
+
