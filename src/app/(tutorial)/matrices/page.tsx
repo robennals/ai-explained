@@ -4,12 +4,10 @@ import { getAdjacentChapters } from "@/lib/curriculum";
 import Content from "./content.mdx";
 import {
   DetectorStackWidget,
-  LayerDetectorWidget,
+  LayerMatrixWidget,
   MatrixGridWidget,
-  MatrixCompositionWidget,
   AttentionMatmulWidget,
   Transform2D3DWidget,
-  VectorOrientationWidget,
 } from "./widgets";
 
 export const metadata = chapterMetadata("matrices");
@@ -23,12 +21,10 @@ export default function Chapter05() {
         <Content
           components={{
             DetectorStackWidget,
-            LayerDetectorWidget,
+            LayerMatrixWidget,
             MatrixGridWidget,
-            MatrixCompositionWidget,
             AttentionMatmulWidget,
             Transform2D3DWidget,
-            VectorOrientationWidget,
           }}
         />
       </div>

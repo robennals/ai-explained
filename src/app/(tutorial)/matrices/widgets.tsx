@@ -20,10 +20,10 @@ const MatrixGrid = dynamic(
   { ssr: false }
 );
 
-const MatrixComposition = dynamic(
+const LayerMatrix = dynamic(
   () =>
-    import("@/components/widgets/matrices/MatrixComposition").then(
-      (m) => m.MatrixComposition
+    import("@/components/widgets/matrices/LayerMatrix").then(
+      (m) => m.LayerMatrix
     ),
   { ssr: false }
 );
@@ -32,14 +32,6 @@ const Transform2D3D = dynamic(
   () =>
     import("@/components/widgets/matrices/Transform2D3D").then(
       (m) => m.Transform2D3D
-    ),
-  { ssr: false }
-);
-
-const VectorOrientation = dynamic(
-  () =>
-    import("@/components/widgets/matrices/VectorOrientation").then(
-      (m) => m.VectorOrientation
     ),
   { ssr: false }
 );
@@ -62,16 +54,19 @@ function WidgetSlot({ children, tryIt, label }: { children: React.ReactNode; try
 
 export function DetectorStackWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot tryIt={children}>
-      <DetectorStack />
+    <WidgetSlot tryIt={children} label="Explore it">
+      <DetectorStack
+        title="Re-describing an Animal by Similarity"
+        description="Multiply the whole matrix by one animal. Each output number is its dot-product similarity with one row."
+      />
     </WidgetSlot>
   );
 }
 
-export function LayerDetectorWidget({ children }: { children?: React.ReactNode }) {
+export function LayerMatrixWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children} label="Explore it">
-      <DetectorStack showActivation />
+      <LayerMatrix />
     </WidgetSlot>
   );
 }
@@ -80,14 +75,6 @@ export function MatrixGridWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children} label="Explore it">
       <MatrixGrid />
-    </WidgetSlot>
-  );
-}
-
-export function MatrixCompositionWidget({ children }: { children?: React.ReactNode }) {
-  return (
-    <WidgetSlot tryIt={children}>
-      <MatrixComposition />
     </WidgetSlot>
   );
 }
@@ -104,14 +91,6 @@ export function Transform2D3DWidget({ children }: { children?: React.ReactNode }
   return (
     <WidgetSlot tryIt={children}>
       <Transform2D3D />
-    </WidgetSlot>
-  );
-}
-
-export function VectorOrientationWidget({ children }: { children?: React.ReactNode }) {
-  return (
-    <WidgetSlot tryIt={children} label="Explore it">
-      <VectorOrientation />
     </WidgetSlot>
   );
 }

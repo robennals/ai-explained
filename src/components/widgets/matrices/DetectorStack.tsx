@@ -8,9 +8,7 @@ import { SliderControl } from "../shared/SliderControl";
 import {
   ANIMAL_DOMAIN,
   type VectorDomain,
-  productColor,
 } from "../vectors/vectorData";
-import { VectorCard } from "../vectors/VectorCard";
 import { matVecMul, invert, relu, applyActivation } from "./matrixMath";
 
 export interface DetectorStackProps {
@@ -55,6 +53,11 @@ function scoreColor(score: number): string {
 const DEFAULT_INPUT = "Cat";
 const DEFAULT_ROWS_DETECTORS = ["Bear", "Eagle", "Snake", "Dog"];
 const DEFAULT_ROWS_ROUNDTRIP = ["Bear", "Eagle", "Snake", "Dog", "Rabbit", "Elephant"];
+// Fixed reference animals that make up the matrix rows in detectors mode. Each
+// one becomes a new output dimension ("bear-like", "dog-like", …).
+const DETECTOR_ROW_NAMES = ["Bear", "Rabbit", "Eagle", "Snake", "Dog"];
+// Start with one dimension selected so the reader notices they can be clicked.
+const DEFAULT_SELECTED_ROW = "Dog";
 
 // Compact horizontal bar: value in [0, 1]
 function MiniBar({
@@ -170,79 +173,12 @@ function ChipSelector({
 
 // ─── Detectors mode ────────────────────────────────────────────────────────────
 
-/**
- * ProductColumn — mirrors DotProductComparison's local ProductColumn exactly,
- * reimplemented here without importing that component.
- * vecA = detector (blue), vecB = input (amber).
- */
-function DetectorProductColumn({
-  vecA,
-  vecB,
-  properties,
-  score,
-  scoreCol,
-}: {
-  vecA: number[];
-  vecB: number[];
-  properties: string[];
-  score: number;
-  scoreCol: string;
-}) {
-  const products = vecA.map((a, i) => a * vecB[i]);
-  const maxProduct = Math.max(...products, 0.001);
-
-  return (
-    <div
-      className="rounded-lg border border-foreground/10 bg-foreground/[0.02] overflow-hidden shrink-0"
-      style={{ maxWidth: "10rem" }}
-    >
-      <div className="py-2 px-3 text-sm font-medium text-foreground border-b border-foreground/10 bg-foreground/[0.02]">
-        <span className="text-[10px] font-bold uppercase tracking-widest text-muted">
-          Multiply
-        </span>
-      </div>
-      {properties.map((prop, i) => {
-        const product = products[i];
-        return (
-          <div
-            key={prop}
-            className="flex items-center py-1.5 px-3 border-b border-foreground/5 last:border-b-0 min-h-[28px]"
-          >
-            <span className="font-mono text-[10px] text-muted whitespace-nowrap">
-              <span style={{ color: "#3b82f6" }}>{vecA[i].toFixed(2)}</span>
-              {" × "}
-              <span style={{ color: "#f59e0b" }}>{vecB[i].toFixed(2)}</span>
-              {" = "}
-              <span className="font-bold" style={{ color: productColor(product, maxProduct) }}>
-                {product.toFixed(2)}
-              </span>
-            </span>
-          </div>
-        );
-      })}
-      <div className="py-1.5 px-3 border-t-2 border-foreground/15 bg-foreground/[0.02]">
-        <div className="font-mono text-[10px] font-bold">
-          {products.map((p, idx) => (
-            <span key={properties[idx]}>
-              {idx > 0 && <span className="text-muted">{" + "}</span>}
-              <span style={{ color: productColor(p, maxProduct) }}>{p.toFixed(2)}</span>
-            </span>
-          ))}
-        </div>
-        <div className="font-mono text-sm font-bold mt-0.5" style={{ color: scoreCol }}>
-          = {score.toFixed(2)}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function DetectorsView({
   domain,
   inputName,
   setInputName,
-  expandedRows,
-  setExpandedRows,
+  selectedRow,
+  setSelectedRow,
   activationOn,
   setActivationOn,
   threshold,
@@ -252,28 +188,23 @@ function DetectorsView({
   domain: VectorDomain;
   inputName: string;
   setInputName: (n: string) => void;
-  // rowNames and toggleRow are no longer used in detectors mode (all rows always shown)
-  rowNames?: string[];
-  toggleRow?: (n: string) => void;
-  expandedRows: Set<string>;
-  setExpandedRows: (rows: Set<string>) => void;
+  selectedRow: string | null;
+  setSelectedRow: (n: string | null) => void;
   activationOn: boolean;
   setActivationOn: (v: boolean) => void;
   threshold: number;
   setThreshold: (v: number) => void;
   showActivation: boolean;
 }) {
-  const toggleExpanded = useCallback((name: string) => {
-    setExpandedRows((() => {
-      const next = new Set(expandedRows);
-      if (next.has(name)) {
-        next.delete(name);
-      } else {
-        next.add(name);
-      }
-      return next;
-    })());
-  }, [expandedRows, setExpandedRows]);
+  // Clicking a matrix row OR its matching output cell selects that reference
+  // animal; clicking the selected one again clears it. Selection highlights the
+  // matrix row and its output dimension together, and shows the dot product.
+  const toggleRow = useCallback(
+    (name: string) => {
+      setSelectedRow(selectedRow === name ? null : name);
+    },
+    [selectedRow, setSelectedRow]
+  );
 
   const inputItem = useMemo(
     () => domain.items.find((i) => i.name === inputName)!,
@@ -286,36 +217,31 @@ function DetectorsView({
     [domain]
   );
 
-  // All domain items are always matrix rows
-  const allRowItems = domain.items;
+  // The matrix rows are a fixed set of reference animals; each becomes one of
+  // the output vector's new dimensions.
+  const rowItems = useMemo(() => {
+    const picked = DETECTOR_ROW_NAMES
+      .map((n) => domain.items.find((it) => it.name === n))
+      .filter(Boolean) as typeof domain.items;
+    return picked.length >= 2 ? picked : domain.items.slice(0, 5);
+  }, [domain]);
 
-  const matrix = useMemo(
-    () => allRowItems.map((item) => item.values),
-    [allRowItems]
-  );
-
+  const matrix = useMemo(() => rowItems.map((item) => item.values), [rowItems]);
   const output = useMemo(() => matVecMul(matrix, input), [matrix, input]);
+  const preActivation = useMemo(() => output.map((s) => s - threshold), [output, threshold]);
+  const activated = useMemo(() => applyActivation(preActivation, relu), [preActivation]);
 
-  const preActivation = useMemo(
-    () => output.map((s) => s - threshold),
-    [output, threshold]
-  );
-
-  const activated = useMemo(
-    () => applyActivation(preActivation, relu),
-    [preActivation]
-  );
-
-  // Shared column widths for header, input row, and all matrix rows.
-  // label col + 6 property cols — no output col in this inner grid
   const numProps = domain.properties.length;
-  // Fixed widths: label=9rem, each prop cell=3rem
-  const LABEL_W = "9rem";
+  const LABEL_W = "8.5rem";
   const CELL_W = "3rem";
-  const innerGridTemplate = `${LABEL_W} repeat(${numProps}, ${CELL_W})`;
+  const matrixTemplate = `${LABEL_W} repeat(${numProps}, ${CELL_W})`;
 
-  // Expand all rows that are currently in expandedRows
-  const anyExpanded = expandedRows.size > 0;
+  const numRefs = rowItems.length;
+  const OUT_CELL_W = "5rem";
+  const outTemplate = `${LABEL_W} repeat(${numRefs}, ${OUT_CELL_W})`;
+
+  const selItem = selectedRow ? rowItems.find((it) => it.name === selectedRow) ?? null : null;
+  const selIndex = selItem ? rowItems.indexOf(selItem) : -1;
 
   return (
     <>
@@ -351,142 +277,110 @@ function DetectorsView({
         </div>
       )}
 
-      {/* ── Equation block: [matrix-side] [=] [output-box] ── */}
+      {/* ── Equation: input × matrix = output, with the output as a row of
+           NEW dimensions at the bottom. The block shrinks to its content so the
+           centred × and = sit over the matrix, not the full widget width. ── */}
       <div className="overflow-x-auto">
-        <div className="inline-flex items-start gap-3" style={{ minWidth: "max-content" }}>
+        <div style={{ width: "max-content" }}>
 
-          {/* ── LEFT: property headers + input row + × + matrix rows ── */}
-          <div className="flex flex-col gap-1.5">
-
-            {/* Property column headers — aligned with inner grid */}
-            <div
-              className="grid"
-              style={{ gridTemplateColumns: innerGridTemplate, columnGap: "0.375rem" }}
-            >
-              {/* Empty label cell */}
-              <div className="px-1 pb-1" />
-              {domain.properties.map((prop) => (
-                <div
-                  key={prop}
-                  className="px-1 pb-1 text-center text-[10px] font-bold uppercase tracking-widest text-muted"
-                >
-                  {prop}
-                </div>
-              ))}
-            </div>
-
-            {/* Input row (amber) — same inner grid, no output cell */}
-            <div
-              className="grid"
-              style={{ gridTemplateColumns: innerGridTemplate, columnGap: "0.375rem" }}
-            >
-              {/* Input label cell */}
+          {/* Property column headers */}
+          <div className="grid" style={{ gridTemplateColumns: matrixTemplate, columnGap: "0.375rem" }}>
+            <div className="px-1 pb-1" />
+            {domain.properties.map((prop) => (
               <div
-                className="flex flex-col justify-center gap-0.5 rounded-md border bg-surface px-3 py-2.5"
-                style={{ borderColor: "#f59e0b" }}
+                key={prop}
+                className="px-1 pb-1 text-center text-[10px] font-bold uppercase tracking-widest text-muted"
               >
-                <div className="flex items-center gap-1.5">
-                  <span className="text-base leading-none">{inputItem.emoji}</span>
-                  <span className="text-xs font-semibold" style={{ color: "#f59e0b" }}>
-                    {inputItem.name}
-                  </span>
-                </div>
-                <div className="text-[9px] leading-none" style={{ color: "#f59e0b" }}>
-                  input vector
-                </div>
+                {prop}
               </div>
-              {/* Input value cells — amber */}
-              {input.map((val, vi) => (
-                <div
-                  key={`input-${domain.properties[vi]}`}
-                  className="flex items-center justify-center rounded-md border bg-surface px-2 py-2.5"
-                  style={{ borderColor: "#f59e0b" }}
-                >
-                  <span
-                    className="font-mono text-xs tabular-nums font-bold"
-                    style={{ color: "#f59e0b" }}
-                  >
-                    {val.toFixed(2)}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            {/* Big × symbol between input row and matrix */}
-            <div className="flex justify-center py-1">
-              <span
-                className="font-bold select-none"
-                style={{ fontSize: "2rem", lineHeight: 1, color: "var(--color-muted, #94a3b8)" }}
-                aria-hidden="true"
-              >
-                ×
-              </span>
-            </div>
-
-            {/* Matrix rows — each is a single clickable button */}
-            <div className="flex flex-col gap-1.5">
-              {allRowItems.map((rowItem) => {
-                const isExpanded = expandedRows.has(rowItem.name);
-
-                return (
-                  <button
-                    key={rowItem.name}
-                    onClick={() => toggleExpanded(rowItem.name)}
-                    aria-expanded={isExpanded}
-                    className={`grid text-left rounded-md border transition-colors ${
-                      isExpanded
-                        ? "border-accent bg-accent/8 hover:bg-accent/12"
-                        : "border-border bg-surface hover:bg-foreground/4"
-                    }`}
-                    style={{
-                      gridTemplateColumns: innerGridTemplate,
-                      columnGap: "0.375rem",
-                      padding: "0.625rem 0",
-                    }}
-                  >
-                    {/* Label cell: big chevron + emoji + name */}
-                    <div className="flex items-center gap-1.5 px-3">
-                      <span
-                        className="shrink-0 leading-none"
-                        style={{ fontSize: "1.35rem", color: isExpanded ? "var(--color-accent, #6366f1)" : "#94a3b8" }}
-                        aria-hidden="true"
-                      >
-                        {isExpanded ? "▾" : "▸"}
-                      </span>
-                      <span className="text-base leading-none">{rowItem.emoji}</span>
-                      <span className="text-xs font-semibold text-foreground">
-                        {rowItem.name}
-                      </span>
-                    </div>
-                    {/* Value cells */}
-                    {rowItem.values.map((val, vi) => (
-                      <div
-                        key={`${rowItem.name}-${domain.properties[vi]}`}
-                        className="flex items-center justify-center px-2"
-                      >
-                        <span className="font-mono text-xs text-foreground tabular-nums">
-                          {val.toFixed(2)}
-                        </span>
-                      </div>
-                    ))}
-                  </button>
-                );
-              })}
-            </div>
+            ))}
           </div>
 
-          {/* ── Big = symbol, vertically centered next to the matrix rows ── */}
-          {/* We align it to sit beside the matrix rows (skip the headers, input, and × rows).
-              The matrix block height is unknown at render, so we use flexbox alignment tricks:
-              wrap both sides in a shared flex with the = positioned by a top offset. */}
-          <div
-            className="flex items-center self-end"
-            style={{
-              // align with the vertical center of the matrix rows block
-              // matrix rows occupy the bottom part — we let flexbox stretch handle it
-              paddingBottom: "0.375rem",
-            }}
-          >
+          {/* Input row (amber operand) */}
+          <div className="mt-1.5 grid" style={{ gridTemplateColumns: matrixTemplate, columnGap: "0.375rem" }}>
+            <div
+              className="flex flex-col justify-center gap-0.5 rounded-md border bg-surface px-3 py-2.5"
+              style={{ borderColor: "#f59e0b" }}
+            >
+              <div className="flex items-center gap-1.5">
+                <span className="text-base leading-none">{inputItem.emoji}</span>
+                <span className="text-xs font-semibold" style={{ color: "#f59e0b" }}>
+                  {inputItem.name}
+                </span>
+              </div>
+              <div className="text-[9px] leading-none" style={{ color: "#f59e0b" }}>
+                input vector
+              </div>
+            </div>
+            {input.map((val, vi) => (
+              <div
+                key={`input-${domain.properties[vi]}`}
+                className="flex items-center justify-center rounded-md border bg-surface px-2 py-2.5"
+                style={{ borderColor: "#f59e0b" }}
+              >
+                <span className="font-mono text-xs tabular-nums font-bold" style={{ color: "#f59e0b" }}>
+                  {val.toFixed(2)}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          {/* × between the input operand and the matrix — horizontally centred */}
+          <div className="flex justify-center py-1">
+            <span
+              className="font-bold select-none"
+              style={{ fontSize: "2rem", lineHeight: 1, color: "var(--color-muted, #94a3b8)" }}
+              aria-hidden="true"
+            >
+              ×
+            </span>
+          </div>
+
+          {/* Matrix rows — clickable; each pairs with one output dimension */}
+          <div className="flex flex-col gap-1.5">
+            {rowItems.map((rowItem) => {
+              const selected = selectedRow === rowItem.name;
+              return (
+                <button
+                  key={rowItem.name}
+                  onClick={() => toggleRow(rowItem.name)}
+                  aria-pressed={selected}
+                  className="group grid text-left"
+                  style={{ gridTemplateColumns: matrixTemplate, columnGap: "0.375rem" }}
+                >
+                  <div
+                    className={`flex items-center gap-1.5 rounded-md border px-3 py-2.5 transition-colors ${
+                      selected
+                        ? "border-accent bg-accent/10"
+                        : "border-border bg-surface group-hover:border-accent/50 group-hover:bg-accent/5"
+                    }`}
+                  >
+                    <span className="text-base leading-none">{rowItem.emoji}</span>
+                    <span className={`text-xs font-semibold ${selected ? "text-accent" : "text-foreground"}`}>
+                      {rowItem.name}
+                    </span>
+                  </div>
+                  {rowItem.values.map((val, vi) => (
+                    <div
+                      key={`${rowItem.name}-${domain.properties[vi]}`}
+                      className={`flex items-center justify-center rounded-md border px-2 py-2.5 transition-colors ${
+                        selected
+                          ? "border-accent/60 bg-accent/5"
+                          : "border-border bg-surface group-hover:border-accent/50 group-hover:bg-accent/5"
+                      }`}
+                    >
+                      <span className="font-mono text-xs text-foreground tabular-nums">
+                        {val.toFixed(2)}
+                      </span>
+                    </div>
+                  ))}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* = between the matrix and the output vector — horizontally centred */}
+          <div className="flex justify-center py-2">
             <span
               className="font-bold select-none"
               style={{ fontSize: "2.5rem", lineHeight: 1, color: "var(--color-muted, #94a3b8)" }}
@@ -496,125 +390,97 @@ function DetectorsView({
             </span>
           </div>
 
-          {/* ── RIGHT: Output vector box ── */}
-          {/* Top spacer so first output row aligns with first matrix row.
-              Above the matrix rows we have: headers + input row + × + gaps.
-              We use CSS to push the output box down to match. */}
-          <div
-            className="flex flex-col self-end"
-            style={{ paddingBottom: "0.375rem" }}
-          >
-            <div
-              className="rounded-lg border-2 border-accent overflow-hidden"
-              style={{ minWidth: "5.5rem" }}
-            >
-              {/* Output header */}
-              <div className="px-2 py-1 text-center text-[10px] font-bold uppercase tracking-widest text-accent border-b-2 border-accent bg-accent/8">
-                output
-              </div>
-              {/* One output cell per matrix row */}
-              {allRowItems.map((rowItem, i) => {
-                const score = output[i];
-                const pre = preActivation[i];
-                const act = activated[i];
-                const fired = showActivation && activationOn && pre > 0;
-                const isExpanded = expandedRows.has(rowItem.name);
-                const scoreCol = showActivation && activationOn
-                  ? fired ? "#16a34a" : "#dc2626"
-                  : scoreColor(score);
-                const displayScore = showActivation && activationOn
-                  ? (fired ? act : 0)
-                  : score;
-
-                return (
-                  <div
-                    key={rowItem.name}
-                    className={`flex items-center justify-center px-2 gap-1 transition-colors ${
-                      isExpanded ? "bg-accent/8" : ""
-                    } ${i < allRowItems.length - 1 ? "border-b border-accent/30" : ""}`}
-                    style={{
-                      // Match the row height of the matrix buttons (py-2.5 ≈ 0.625rem top+bottom + text)
-                      height: "2.625rem",
-                    }}
-                  >
-                    <span
-                      className="font-mono text-xs font-bold tabular-nums"
-                      style={{ color: scoreCol }}
-                    >
-                      {displayScore.toFixed(2)}
-                    </span>
-                    {showActivation && activationOn && (
-                      <span
-                        className="text-[9px] font-semibold"
-                        style={{ color: scoreCol }}
-                      >
-                        {fired ? "✓" : "✗"}
-                      </span>
-                    )}
-                  </div>
-                );
-              })}
+          {/* Output vector — a row of NEW dimensions, one per reference animal */}
+          <div className="grid" style={{ gridTemplateColumns: outTemplate, columnGap: "0.375rem" }}>
+            <div className="flex items-end px-1 pb-1 text-[10px] font-bold uppercase tracking-widest text-accent">
+              new dimensions
             </div>
+            {rowItems.map((rowItem) => {
+              const active = selectedRow === rowItem.name;
+              return (
+                <div
+                  key={`outhdr-${rowItem.name}`}
+                  className={`flex flex-col items-center gap-0.5 px-1 pb-1 ${active ? "text-accent" : "text-foreground"}`}
+                >
+                  <span className="text-lg leading-none">{rowItem.emoji}</span>
+                  <span className="flex flex-col items-center text-center leading-none">
+                    <span className="text-xs font-bold">{rowItem.name.toLowerCase()}</span>
+                    <span className="text-[11px] font-semibold text-muted">-like</span>
+                  </span>
+                </div>
+              );
+            })}
           </div>
-
-        </div>{/* end inline-flex equation block */}
+          <div className="grid" style={{ gridTemplateColumns: outTemplate, columnGap: "0.375rem" }}>
+            {/* Output labelled with the input's name (it is the same animal, re-described) */}
+            <div
+              className="flex items-center gap-1.5 rounded-md border bg-surface px-3 py-2.5"
+              style={{ borderColor: "#f59e0b" }}
+            >
+              <span className="text-base leading-none">{inputItem.emoji}</span>
+              <span className="text-xs font-semibold" style={{ color: "#f59e0b" }}>{inputItem.name}</span>
+            </div>
+            {rowItems.map((rowItem, i) => {
+              const selected = selectedRow === rowItem.name;
+              const score = output[i];
+              const pre = preActivation[i];
+              const act = activated[i];
+              const fired = showActivation && activationOn && pre > 0;
+              const scoreCol = showActivation && activationOn
+                ? fired ? "#16a34a" : "#dc2626"
+                : scoreColor(score);
+              const displayScore = showActivation && activationOn ? (fired ? act : 0) : score;
+              return (
+                <button
+                  key={`out-${rowItem.name}`}
+                  onClick={() => toggleRow(rowItem.name)}
+                  aria-pressed={selected}
+                  className={`flex items-center justify-center gap-1 rounded-md border px-2 py-2.5 transition-colors ${
+                    selected
+                      ? "border-accent bg-accent/20 ring-1 ring-accent"
+                      : "border-border bg-surface hover:border-accent/50 hover:bg-accent/5"
+                  }`}
+                >
+                  <span className="font-mono text-xs font-bold tabular-nums" style={{ color: scoreCol }}>
+                    {displayScore.toFixed(2)}
+                  </span>
+                  {showActivation && activationOn && (
+                    <span className="text-[9px] font-semibold" style={{ color: scoreCol }}>
+                      {fired ? "✓" : "✗"}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>{/* end min-width block */}
       </div>{/* end overflow-x-auto */}
 
-      {/* ── Expansion panels below the equation block ── */}
-      {anyExpanded && (
-        <div className="mt-4 flex flex-col gap-3">
-          {allRowItems.filter((rowItem) => expandedRows.has(rowItem.name)).map((rowItem) => {
-            const score = output[allRowItems.indexOf(rowItem)];
-            return (
-              <div
-                key={rowItem.name}
-                className="border border-border rounded-lg bg-foreground/2 px-3 py-3"
-              >
-                <div className="mb-2 text-xs font-semibold text-foreground">
-                  {rowItem.emoji} {rowItem.name} row × {inputItem.emoji} {inputItem.name}
-                </div>
-                <div className="grid grid-cols-2 gap-2 items-start md:grid-cols-[1fr_1fr_auto]">
-                  {/* Row animal card (blue = detector/row) */}
-                  <VectorCard
-                    name={rowItem.name}
-                    emoji={rowItem.emoji}
-                    properties={domain.properties}
-                    values={rowItem.values}
-                    barColor="#3b82f6"
-                    label="ROW"
-                    labelColor="#3b82f6"
-                  />
-                  {/* Input animal card (amber) */}
-                  <VectorCard
-                    name={inputItem.name}
-                    emoji={inputItem.emoji}
-                    properties={domain.properties}
-                    values={input}
-                    barColor="#f59e0b"
-                    label="INPUT"
-                    labelColor="#f59e0b"
-                  />
-                  {/* Multiply column */}
-                  <div className="col-span-2 mt-2 flex justify-center md:col-span-1 md:mt-0 md:justify-start">
-                    <DetectorProductColumn
-                      vecA={rowItem.values}
-                      vecB={input}
-                      properties={domain.properties}
-                      score={score}
-                      scoreCol={scoreColor(score)}
-                    />
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+      {/* Dot product for the selected dimension, or a prompt to click */}
+      {selItem ? (
+        <div className="mt-3 rounded-md border border-border bg-foreground/2 px-3 py-2 font-mono text-[11px] leading-relaxed break-words">
+          <span className="font-semibold" style={{ color: "#f59e0b" }}>{inputItem.name.toLowerCase()}</span>
+          <span className="text-muted"> · </span>
+          <span className="font-semibold" style={{ color: "#3b82f6" }}>{selItem.name.toLowerCase()}</span>
+          <span className="text-muted"> = </span>
+          {input.map((v, vi) => (
+            <span key={domain.properties[vi]}>
+              {vi > 0 && <span className="text-muted"> + </span>}
+              <span className="text-muted">(</span>
+              <span style={{ color: "#f59e0b" }}>{v.toFixed(2)}</span>
+              <span className="text-muted"> × </span>
+              <span style={{ color: "#3b82f6" }}>{selItem.values[vi].toFixed(2)}</span>
+              <span className="text-muted">)</span>
+            </span>
+          ))}
+          <span className="text-muted"> = </span>
+          <span className="font-bold" style={{ color: scoreColor(output[selIndex]) }}>{output[selIndex].toFixed(2)}</span>
+        </div>
+      ) : (
+        <div className="mt-3 text-xs text-muted text-center">
+          Click a matrix row, or an output cell, to see the dot product that made it. The output describes {inputItem.name.toLowerCase()} in a new set of dimensions: how similar it is to each reference animal.
         </div>
       )}
-
-      {/* One-line caption */}
-      <div className="mt-4 text-xs text-muted text-center">
-        Multiplying a vector by a matrix takes the dot product of the input with every row, giving one output number per row.
-      </div>
 
       {/* Activation explainer — only when showActivation */}
       {showActivation && activationOn && (
@@ -934,15 +800,16 @@ export function DetectorStack(props: DetectorStackProps) {
   // the parent-owned reset button can clear it alongside inputName/rowNames.
   const [activationOn, setActivationOn] = useState(false);
   const [threshold, setThreshold] = useState(DEFAULT_THRESHOLD);
-  // Expanded rows state lifted here so reset can collapse all rows
-  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+  // Single selected row/dimension (detectors mode). Starts on one row so the
+  // reader sees straight away that rows and output cells are clickable.
+  const [selectedRow, setSelectedRow] = useState<string | null>(DEFAULT_SELECTED_ROW);
 
   const resetToDefaults = useCallback(() => {
     setInputName(DEFAULT_INPUT);
     setRowNames(defaultRows);
     setActivationOn(false);
     setThreshold(DEFAULT_THRESHOLD);
-    setExpandedRows(new Set());
+    setSelectedRow(DEFAULT_SELECTED_ROW);
   }, [defaultRows]);
 
   // Toggle a name in/out of rowNames.
@@ -1011,10 +878,8 @@ export function DetectorStack(props: DetectorStackProps) {
           domain={domain}
           inputName={inputName}
           setInputName={setInputName}
-          rowNames={rowNames}
-          toggleRow={toggleRow}
-          expandedRows={expandedRows}
-          setExpandedRows={setExpandedRows}
+          selectedRow={selectedRow}
+          setSelectedRow={setSelectedRow}
           activationOn={activationOn}
           setActivationOn={setActivationOn}
           threshold={threshold}

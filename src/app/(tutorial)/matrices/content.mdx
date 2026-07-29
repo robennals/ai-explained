@@ -6,76 +6,56 @@ The graphics card that runs ChatGPT was invented to make videogames look good. T
 
 ## A Matrix Is a Grid of Vectors
 
-In the Vectors chapter, each animal was a **vector** — a list of property numbers (big, scary, hairy, cuddly, fast, fat). The chapter always drew that list as a **column**: one property per line, stacked top to bottom. A cat's column of six numbers is the cat's vector.
+In the Vectors chapter we described a thing, like an animal, with a list of numbers that measure different properties: big, scary, hairy, cuddly, fast, fat. We call that list a **vector**. Mostly we worked with one vector at a time, a single animal and its six numbers.
 
-That same list of numbers can also be written as a **row**, spread left to right, one cell per property. Column or row, the numbers are identical — just the layout has changed.
-
-<VectorOrientationWidget>
-Pick an animal and compare the two panels: the column on the left is the same card from the Vectors chapter; the row on the right shows the same six values laid out horizontally, one boxed cell per property.
-</VectorOrientationWidget>
-
-Once vectors are written as rows, you can stack several animals on top of each other and the result is a **grid of numbers**. That grid is a **matrix**. Each row is one animal; each column is one property — so the cat's "scary" number sits in the same column as the bear's. A matrix built from a list of animals is just their vectors written out together.
+It is often useful to write down a whole list of vectors together. We lay them out in a table, and we call that table a **matrix**. In a matrix of animals we put one row for each animal, like cat and dog and bear, and one column for each property. The cat's "scary" number sits in the same column as the bear's, so every column holds the same property read across all the animals.
 
 <MatrixGridWidget>
-Choose which animals go in the matrix and watch the grid gain or lose a labelled, boxed row. Each row is one animal's property vector laid out across the six property columns, and the whole grid, all the rows together, is the matrix.
+Each row is one animal's vector, laid out across the property columns, and the whole grid is the matrix. Switch tabs to see the same table for the other kinds of vectors from the Vectors chapter: RPG characters, foods, instruments. Same grid, different things.
 </MatrixGridWidget>
 
 <KeyInsight>
-**A matrix is a grid of vectors.** Stack a list of vectors as rows and the grid you get is a matrix. Here each row is an animal and each column is a property.
+**A matrix is a grid of vectors.** Write a list of vectors out as rows and the grid you get is a matrix. Here each row is one animal and each column is one property.
 </KeyInsight>
 
 ## Multiplying a Vector by a Matrix
 
-Now that the animals are stacked into a matrix, you can multiply a vector by it. Multiplying a vector by a matrix means taking the **dot product** of the input vector with every row of the matrix and collecting the results into a new output vector.
+In the previous chapter we showed that you can take the **dot product** of two vectors: a single number that says how much the two vectors describe a similar thing, and how big they both are. We write it `vectorA · vectorB`, and [the Vectors chapter](/vectors) has the details.
 
-The dot product is from the Vectors chapter. Written with a dot, `bear · cat` means: multiply each matching property and add up the results, giving a single number for how bear-like the cat is. Each row of the matrix acts as a detector. Its dot product with the input says how much the input matches that row.
-
-So one matrix multiply runs every row's dot product at once. Feed in a cat and the bear row scores it for bear-likeness, the eagle row for eagle-likeness, the snake row for snake-likeness. The input vector of six properties comes out re-described as a new output vector, one match score per row.
+We can build on that to multiply a vector by a matrix. It means taking the dot product of the vector with every vector in the matrix. The result is a new vector, made of the dot products of the input vector with each vector in the matrix.
 
 <DetectorStackWidget>
-Pick an input animal from the "Input vector" dropdown; it appears as the amber row across the top, aligned to the property columns. Read down the output column on the right to see each animal-row's dot product with your input, one match score per row. Click any row to expand the full working and watch that dot product computed property by property, every matching pair multiplied and added up.
+Pick an input animal. It shows up as the amber row at the top, above the matrix of reference animals. The result is the row at the bottom, labelled with the input and given a new set of dimensions, one per reference animal: bear-like, dog-like, and so on. Click an output cell, or the matrix row it came from, to highlight the pair and read off the dot product that produced it.
 </DetectorStackWidget>
 
+You can think of a matrix as **transforming** an input vector from one set of dimensions to a new set of dimensions. Here it changes an animal from its scores on the property dimensions, big and scary and the rest, into how similar it is to each of the other animals.
+
 <KeyInsight>
-**Matrix multiplication is a stack of dot products.** A vector goes in, and the dot product of that input with each row comes out as one number, so the result is a new vector with one score per row.
+**Multiplying a vector by a matrix transforms it into new dimensions.** The input's dot product with each row becomes one number of the output. The vector that went in described by properties comes out described by its similarity to each animal in the matrix.
 </KeyInsight>
 
-## A Layer of a Neural Network Is a Matrix (Plus a Bend)
+## A Layer of a Neural Network Is a Matrix
 
-A layer of a neural network takes an input vector and produces an output vector. It does this by running a stack of weighted sums, one per output. A weighted sum is a dot product. A stack of dot products is a matrix multiply. So a layer is a matrix multiply, the same operation from the previous section.
+In the Vectors chapter we saw that a single neuron is a dot product: it multiplies the input by a vector of weights and adds them up. A whole layer of neurons is a stack of these dot products, one per neuron, so we can write the layer's weights as a matrix with one row per neuron. Running the layer is then one matrix multiply: the weight matrix times the input vector gives every neuron's weighted sum at once.
 
-There's one difference from the bear-eagle-snake matrix. We hand-picked those detectors. A neural network learns its own during training. It works out for itself which reference concepts are worth detecting, and those learned detectors become the rows of its weight matrix. Nobody tells it to build a bear detector. It builds whatever detectors make the next layer's job easier.
+A neuron does one more thing after the weighted sum. It passes the result through an **activation function**, which squashes it into a smooth answer between 0 and 1. So a layer is a matrix multiply, then an activation function applied to the whole output vector.
 
-A layer is not *only* a matrix, though. After the matrix produces its output vector, the layer applies an **activation function** to that whole vector at once: it subtracts a bias and then bends each value, zeroing out the weak matches. So a layer is a matrix multiply, then a bend. The next section is about why the bend has to be there.
-
-<LayerDetectorWidget>
-Flip on "Apply activation (ReLU)" below the detectors. Each score now has its threshold subtracted, and anything that lands at or below zero gets clipped to zero. Drag the threshold up and watch more detectors fall silent. The strong matches survive; the weak ones are cut. (ReLU and sigmoid are covered properly in the Training chapter.)
-</LayerDetectorWidget>
-
-## Why the Bend Can't Be Dropped
-
-Stack two matrix multiplies back to back with nothing between them and something deflating happens. You can multiply the two matrices together first and get a single matrix that does both at once. Two layers collapse into one. So pure matrix layers buy you no extra power from depth: a hundred of them stacked is still just one matrix in disguise.
-
-This is why the bend from the previous section earns its place. Put a nonlinear activation function between two matrix layers and they can no longer be merged. The bend is what lets a deep network do things no single matrix could.
-
-<MatrixCompositionWidget>
-Edit the numbers in matrices A and B and watch the product matrix C update. C does the work of both A and B in a single step. Now flip on "Put an activation between them." C grays out, because once there's a bend in the middle, no single matrix can stand in for the pair.
-</MatrixCompositionWidget>
+<LayerMatrixWidget>
+Each tab is a layer of neurons written as a weight matrix. Multiply it by the input to get every neuron's weighted sum at once, then read the "after sigmoid" column to see the activation function applied. The animal detectors reuse the reference animals as weights; the AND and OR tabs are the logic-gate neurons from earlier chapters.
+</LayerMatrixWidget>
 
 <KeyInsight>
-**Matrix times matrix is just one matrix.** Depth alone buys nothing. A nonlinear bend between the layers is what makes stacking worthwhile.
+**A layer of a neural network is a matrix multiply, then an activation function.** The weight matrix holds one row of weights per neuron, so multiplying by the input runs every neuron's dot product at once. The activation function then shapes each result.
 </KeyInsight>
 
 ## Attention Is a Matrix Multiply Too
 
-The Attention chapter had the word "it" looking back through a sentence for a noun to attach to. The way it scored each candidate was a dot product: the query of "it" against the key of every other token.
+Attention is the same operation once more. In the Attention chapter, a token looks at every other token by taking the dot product of its own **query** vector with each other token's **key** vector. That is one vector, the query, multiplied by a matrix, the keys of all the other tokens stacked as rows. The result is a vector of match scores, one per token, exactly like the output of the detector layer.
 
-Run that for all the candidates at once and you have a detector stack. Stack the other tokens' keys as the rows of a matrix, multiply by this token's query vector, and out come the match scores, one per token. It's the same picture as the detector stack from the start of the chapter. The keys are the detectors and the query is the input. One matrix times a vector, per token, per head.
-
-The query, key, and value vectors are themselves produced by matrix multiplies, and blending the chosen values together is one more. Attention is matrix multiplication the whole way down.
+Attention then runs those match scores through **softmax** to turn them into attention weights that add up to 1, saying how much to draw from each token. The scoring step itself, though, is just a vector times a matrix.
 
 <AttentionMatmulWidget>
-This is the worked example from the Attention chapter. The keys of "cat", "dog", and the filler "blah" are stacked as rows. Multiplying by the query for "it" gives a match score for each: the nouns score high, the filler scores low. Same operation as the detector stack, with keys for rows and a query for the input.
+This is the worked example from the Attention chapter. The keys of "cat", "dog", and the filler "blah" are stacked as rows. Multiplying by the query for "it" gives a match score for each: the nouns score high, the filler scores low. Same operation as the detector layer, with keys for rows and a query for the input.
 </AttentionMatmulWidget>
 
 ## The Same Math Spins 2D and 3D Worlds
@@ -87,13 +67,13 @@ Every frame of a 3D game does this to every vertex of every model: multiply by a
 Then neural networks turned out to be mostly matrix multiplication as well. The same chips built to spin dragons were already perfect for running detector stacks by the million. The hardware for games became the hardware for AI. That's the answer to the puzzle from the top of the chapter.
 
 <Transform2D3DWidget>
-On the **2D** tab, spin and shear the cat with the presets. Switch to the **3D** tab to tumble a chicken or a shiba. Back on the 2D tab, flip on "Apply activation (sigmoid)" and watch the straight lines bow into curves. That bending is the same nonlinearity from the layer sections, made visible: a matrix alone keeps straight lines straight, and the activation is what bends them.
+On the **2D** tab, spin and shear the cat with the presets. Switch to the **3D** tab to tumble a chicken or a shiba. Back on the 2D tab, flip on "Apply activation (sigmoid)" and watch the straight lines bow into curves. That is the same activation function from the layer section, made visible: a matrix alone keeps straight lines straight, and the activation is what curves them.
 </Transform2D3DWidget>
 
 ## What's Next
 
-A neural network is a stack of these matrices, one per layer, with a bend after each. Its whole skill lives in the numbers inside those matrices, the learned detectors. Training is the search for the right numbers. The next chapters are about how that search works: how gradient descent feels its way downhill to the matrices that solve the problem.
+A neural network is a stack of these matrices, one per layer, with an activation function after each. Its whole skill lives in the numbers inside those matrices, the learned weights. Training is the search for the right numbers. The next chapters are about how that search works: how gradient descent feels its way downhill to the matrices that solve the problem.
 
 <TryItInPyTorch notebook="matrices">
-Build a matrix as a stack of dot products, confirm that nn.Linear is a matrix multiply, watch attention score keys against a query, and check for yourself that matrix times matrix is just one matrix.
+Build a matrix as a stack of dot products, confirm that nn.Linear is a matrix multiply, add an activation function to turn it into a layer, and watch attention score keys against a query.
 </TryItInPyTorch>
