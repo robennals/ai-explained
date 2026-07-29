@@ -1,7 +1,7 @@
 # The Power of Incremental Improvement
 
 <Lead>
-Chapter 1 ended with a puzzle. We need to find the right parameter values for our model, but brute force is impossible. You might think the answer is to be brilliant. Design the solution. But that's not how complex things get built. What actually works is finding a way to make reliable tiny improvements, and then doing lots of them, very fast.
+<Ch slug="computation" /> ended with a puzzle. We need to find the right parameter values for our model, but brute force is impossible. You might think the answer is to be brilliant. Design the solution. But that's not how complex things get built. What actually works is finding a way to make reliable tiny improvements, and then doing lots of them, very fast.
 </Lead>
 
 ## How Do You Build Something You Don't Understand?
@@ -115,7 +115,7 @@ Real models don't have just one knob; they have millions. But the same idea work
 
 ## Why This Changes Everything
 
-In Chapter 1, we saw that a model is a machine with adjustable knobs. The question was: how do you find the right settings when there are millions of knobs?
+In <Ch slug="computation" />, we saw that a model is a machine with adjustable knobs. The question was: how do you find the right settings when there are millions of knobs?
 
 Now we have two powerful ideas:
 
@@ -138,7 +138,7 @@ We now understand the game:
 4. **Take a tiny step** (adjust all parameters)
 5. **Repeat billions of times**
 
-But what should this model actually *look like*? What's inside a neural network? In the next chapter, we'll meet the building block: the **artificial neuron**, a simple unit that takes a weighted sum of its inputs, adds a bias, and passes the result through a nonlinear function. It's almost embarrassingly simple. But stack enough of them together, and they can compute anything.
+But what should this model actually *look like*? What's inside a neural network? In <Ch slug="neurons" />, we'll meet the building block: the **artificial neuron**, a simple unit that takes a weighted sum of its inputs, adds a bias, and passes the result through a nonlinear function. It's almost embarrassingly simple. But stack enough of them together, and they can compute anything.
 
 <TryItInPyTorch notebook="optimization">
 Implement random search, use PyTorch's autograd to compute gradients automatically, run gradient descent from scratch, and compare both approaches side by side.

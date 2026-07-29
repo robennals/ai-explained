@@ -125,7 +125,7 @@ a * b       # tensor([4., 10., 18.])   — 1×4, 2×5, 3×6
 a ** 2      # tensor([1., 4., 9.])     — 1², 2², 3²
 ```
 
-For **matrix multiplication** (the workhorse of neural networks; every layer of weighted sums in [Chapter 3](/neurons) is a matrix multiply under the hood), use `@`:
+For **matrix multiplication** (the workhorse of neural networks; every layer of weighted sums in <Ch slug="neurons" /> is a matrix multiply under the hood), use `@`:
 
 ```python
 # Matrix multiply: (2x3) @ (3x4) -> (2x4)
@@ -137,7 +137,7 @@ print(C.shape)  # torch.Size([2, 4])
 
 ## Automatic Differentiation
 
-This is PyTorch's killer feature. Training a neural network means adjusting millions of parameters to reduce the error (see [Chapter 2](/optimization)). To know *which direction* to adjust each parameter, you need to know: **if I nudge this parameter a tiny bit, how much does the error change?** That's called a **gradient**.
+This is PyTorch's killer feature. Training a neural network means adjusting millions of parameters to reduce the error (see <Ch slug="optimization" />). To know *which direction* to adjust each parameter, you need to know: **if I nudge this parameter a tiny bit, how much does the error change?** That's called a **gradient**.
 
 If you know calculus, a gradient is a derivative. If you don't, no problem. Just think of it as: "how sensitive is the output to a small change in this input?" If the gradient is large, a small nudge to the input causes a big change in the output. If it's near zero, that input barely matters.
 
@@ -189,7 +189,7 @@ PyTorch provides `torch.nn`, a library of common neural network building blocks.
 
 ### nn.Linear
 
-The most basic layer. It computes `y = x @ W.T + b`, a weighted sum of the inputs plus a bias, applied to a whole layer of neurons at once (see [Chapter 3](/neurons)):
+The most basic layer. It computes `y = x @ W.T + b`, a weighted sum of the inputs plus a bias, applied to a whole layer of neurons at once (see <Ch slug="neurons" />):
 
 ```python
 import torch.nn as nn
@@ -214,7 +214,7 @@ model = nn.Sequential(
 )
 ```
 
-This is a three-layer neural network. **ReLU** ("rectified linear unit") is just `max(0, x)`. It passes positive values through unchanged and clamps negative values to zero. It plays the same role as the sigmoid in [Chapter 3](/neurons): a nonlinear activation function applied after each weighted sum. Most modern networks use ReLU instead of sigmoid because it's faster and easier to train. The activations between linear layers are essential. Without a nonlinearity in the middle, two stacked linear layers collapse mathematically into a single linear layer, no matter how many you stack.
+This is a three-layer neural network. **ReLU** ("rectified linear unit") is just `max(0, x)`. It passes positive values through unchanged and clamps negative values to zero. It plays the same role as the sigmoid in <Ch slug="neurons" />: a nonlinear activation function applied after each weighted sum. Most modern networks use ReLU instead of sigmoid because it's faster and easier to train. The activations between linear layers are essential. Without a nonlinearity in the middle, two stacked linear layers collapse mathematically into a single linear layer, no matter how many you stack.
 
 ## The Training Loop
 
@@ -242,14 +242,14 @@ Five lines, repeated thousands of times. That's the core of how every neural net
 To break it down:
 
 1. **Forward pass**: run inputs through the model to get predictions
-2. **Compute loss**: measure how wrong the predictions are (see [Chapter 2](/optimization))
+2. **Compute loss**: measure how wrong the predictions are (see <Ch slug="optimization" />)
 3. **Zero gradients**: clear gradients from the previous step (PyTorch accumulates them by default)
 4. **Backward pass**: compute how much each parameter contributed to the error
 5. **Update parameters**: nudge each parameter in the direction that reduces the error
 
 ## Putting It Together: Learning XOR
 
-Let's train a network to learn XOR, a problem that a single neuron can't solve (see [Chapter 3](/neurons)) but a two-layer network can.
+Let's train a network to learn XOR, a problem that a single neuron can't solve (see <Ch slug="neurons" />) but a two-layer network can.
 
 XOR returns 1 when its inputs differ, and 0 when they're the same:
 

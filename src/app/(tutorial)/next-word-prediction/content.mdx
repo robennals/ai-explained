@@ -42,7 +42,7 @@ How does the model choose between its options? It uses the frequencies as *proba
 
 You can probably see where this is going. What about *trigrams* (3 words of context)? 4-grams? 10-grams? More context should help, right?
 
-It does, but we hit a wall. The same wall we saw back in [Everything Is Numbers](/computation) with the lookup table explosion.
+It does, but we hit a wall. The same wall we saw back in <Ch slug="computation" /> with the lookup table explosion.
 
 <NgramExplosionWidget>
 Start with bigrams (context size 2) and a small vocabulary. Increase the context size and watch the combinations explode. By the time you reach 5-grams with a realistic vocabulary, you need more entries than there are words on the entire internet. At 10-grams, you've blown past the atoms in the universe.
@@ -98,7 +98,7 @@ There's also a deeper irony in dismissing prediction as unintelligent. The neuro
 
 What if the network could *choose* which earlier words to pay attention to? Instead of only looking at the last 5 words, what if it could look at every word that came before and decide: "For predicting *this* word, I need to focus on *that* word three sentences ago, and *that* word right before me, and ignore everything else"?
 
-That's the idea behind **attention**, and it changed everything. In the next chapter, we'll see how it works, built from pieces you already know: embeddings, dot products, and neural networks.
+That's the idea behind **attention**, and it changed everything. In <Ch slug="attention" />, we'll see how it works, built from pieces you already know: embeddings, dot products, and neural networks.
 
 <TryItInPyTorch notebook="next-word-prediction">
 Build a bigram model from word counts, see the n-gram explosion, train a neural network next-word predictor, visualize how similar words cluster in embedding space, and experiment with temperature sampling.

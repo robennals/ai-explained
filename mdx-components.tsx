@@ -1,5 +1,6 @@
 import type { MDXComponents } from "mdx/types";
 import { Callout } from "@/components/mdx/Callout";
+import { Ch } from "@/components/mdx/Ch";
 import { G } from "@/components/mdx/G";
 import { KeyInsight } from "@/components/mdx/KeyInsight";
 import { Lead } from "@/components/mdx/Lead";
@@ -12,6 +13,7 @@ import { Choice, Feedback, Question, Quiz } from "@/components/quiz/Quiz";
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {
     Callout,
+    Ch,
     G,
     g: G,
     KeyInsight,

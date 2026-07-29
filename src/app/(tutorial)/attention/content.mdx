@@ -1,14 +1,14 @@
 # Paying Attention
 
 <Lead>
-In the last chapter, we saw that predicting the next word requires understanding, but our models could only look at a fixed window of recent words. What if the model could *choose* which earlier words to focus on? That idea, called attention, is the breakthrough that makes modern AI work. And it's built entirely from things you already know.
+In <Ch slug="next-word-prediction" />, we saw that predicting the next word requires understanding, but our models could only look at a fixed window of recent words. What if the model could *choose* which earlier words to focus on? That idea, called attention, is the breakthrough that makes modern AI work. And it's built entirely from things you already know.
 </Lead>
 
 ## Some Words Need Other Words
 
 You often can't tell what a word means without looking at other words in the sentence. The word "bank" could be a place for money or the side of a river. You need to see the words around it to know which one. A pronoun like "it" makes no sense on its own. You have to look back and find what it refers to.
 
-This is something our fixed-window model from the last chapter can't do well. It sees the last few words and has no way to reach back and pick out the *specific* earlier words that matter.
+This is something our fixed-window model from <Ch slug="next-word-prediction" /> can't do well. It sees the last few words and has no way to reach back and pick out the *specific* earlier words that matter.
 
 <WhyAttentionMattersWidget>
 Each sentence has a highlighted word. Follow the arrows to see which other words you need to look at in order to understand it. Flip through the examples. Each shows a different reason why "looking back selectively" is essential.
@@ -31,7 +31,7 @@ Each token gets two vectors:
 
 Both vectors here are just one number: a 1 means "noun" or "looking for a noun", a 0 means "no". "cat" and "dog" offer themselves as nouns. "blah" offers nothing. "it" is *looking for* a noun.
 
-Given a token, we can work out which other tokens it should be paying attention to by multiplying its query (what it is looking for) by the key of each of the other tokens. This is the **dot product** from the Vectors chapter. The bigger the score, the better the match.
+Given a token, we can work out which other tokens it should be paying attention to by multiplying its query (what it is looking for) by the key of each of the other tokens. This is the **dot product** from <Ch slug="vectors" />. The bigger the score, the better the match.
 
 <ToyAttentionScoresWidget>
 Click any token to see its raw match scores against every key — including its own. Click "it" to see it match "cat" (score 1) and miss "blah" (score 0). Click "cat" to see something different: "cat" isn't asking anything, so every score is 0. The widget always shows both the key (what each token offers) and the query (what each token is looking for).
@@ -125,8 +125,8 @@ Attention is:
 4. **The sink** — A token that absorbs attention when nothing relevant is around, so off-task tokens have somewhere harmless to land.
 5. **Multiple heads** — Run many attention patterns in parallel, each specializing in a different relationship.
 
-But our attention mechanism has no idea *where* words are — only *what* they are. "The dog chased the cat" and "the cat chased the dog" produce identical attention scores. In the next chapter, we'll fix this with a trick involving rotation.
+But our attention mechanism has no idea *where* words are — only *what* they are. "The dog chased the cat" and "the cat chased the dog" produce identical attention scores. In <Ch slug="positions" />, we'll fix this with a trick involving rotation.
 
 <TryItInPyTorch notebook="attention">
-Compute dot-product attention from scratch, build query/key/value projections, visualize attention heatmaps on real sentences, implement multi-head attention, and see how scrambled word order doesn't change attention scores, a problem we'll solve in the next chapter.
+Compute dot-product attention from scratch, build query/key/value projections, visualize attention heatmaps on real sentences, implement multi-head attention, and see how scrambled word order doesn't change attention scores, a problem we'll solve in <Ch slug="positions" />.
 </TryItInPyTorch>
