@@ -1,0 +1,15 @@
+---
+term: sparse attention
+aliases: [sliding-window attention, sparse attention pattern]
+firstAppearance: real-ai
+---
+
+**Sparse attention** lets each token attend to only a selected subset of earlier tokens instead of all of them.
+
+Ordinary attention compares every token with every other token, so doubling the length of a passage roughly quadruples the work. Sparse attention avoids that by choosing what to look at: sometimes just a window of nearby tokens, sometimes a cheap index that picks out the few hundred earlier tokens most likely to matter, rather like a search engine finding close matches instead of reading an entire library.
+
+Some examples:
+
+- **Sliding window** — each token attends only to the last few thousand tokens, with occasional layers that look at everything.
+- **Top-k selection** — a lightweight scorer ranks all earlier tokens and the model attends only to the highest scoring ones.
+- **Why it matters** — it is one of the main reasons context windows grew from a few thousand tokens to a million.

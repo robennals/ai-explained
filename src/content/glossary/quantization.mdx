@@ -1,0 +1,15 @@
+---
+term: quantization
+aliases: [quantized, quantised, quantisation]
+firstAppearance: real-ai
+---
+
+**Quantization** stores a model's parameters using fewer bits each, making it smaller and faster to run.
+
+Models are trained using fairly precise numbers, but they don't need that precision to answer questions. Rounding each parameter to 8 bits instead of 16 halves the memory; going to 4 bits quarters it. Accuracy falls only slightly if it's done carefully, which is why quantization is what usually makes it possible to run a serious model on an ordinary computer.
+
+Some examples:
+
+- **16 bits to 8 bits** — half the size, with essentially no loss in quality.
+- **16 bits to 4 bits** — a quarter of the size, keeping around 99% of accuracy on typical tests.
+- **Where it bites** — long, multi-step answers and code tend to degrade more than short factual questions.

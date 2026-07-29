@@ -1,0 +1,15 @@
+---
+term: feed-forward network
+aliases: [feed-forward networks, feedforward network, feed-forward layer]
+firstAppearance: real-ai
+---
+
+A **feed-forward network** is the small neural network inside each transformer layer that every token passes through after attention.
+
+Attention decides which other tokens are relevant and gathers information from them. The feed-forward network is what then does the thinking on that gathered information, transforming each token's representation on its own. It is the same network for every token in the layer, and it holds most of a transformer's parameters.
+
+Some examples:
+
+- **In a vanilla transformer** — one feed-forward network per layer, used by every token.
+- **In a mixture-of-experts model** — replaced by many smaller expert networks, only a few of which run for any given token.
+- **Where the parameters live** — in most models the feed-forward networks account for far more weights than the attention machinery does.

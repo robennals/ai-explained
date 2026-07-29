@@ -1,0 +1,15 @@
+---
+term: alignment
+aliases: [aligned, aligning, RLHF, reinforcement learning from human feedback]
+firstAppearance: real-ai
+---
+
+**Alignment** is the training done after a model has learned to predict text, to make it helpful, honest, and safe rather than merely fluent.
+
+A freshly pre-trained model only continues text. Ask it a question and a perfectly reasonable continuation is a list of similar questions. Alignment fixes that, usually by fine-tuning on examples of good answers and then having people rank the model's attempts. Those rankings train a scoring model, and the main model is tuned to score well. Where an answer can be checked automatically, as in maths or code, a program can do the marking instead.
+
+Some examples:
+
+- **Ranking answers** — a person sees two replies and picks the better one; millions of such choices shape the model's behaviour.
+- **How much it matters** — an aligned 1.3-billion-parameter model was preferred by people over the raw 175-billion-parameter GPT-3.
+- **Where it goes wrong** — sycophancy, reward hacking, and over-refusal.

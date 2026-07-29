@@ -1,0 +1,15 @@
+---
+term: reasoning model
+aliases: [reasoning models, thinking model, thinking models, thinking mode]
+firstAppearance: real-ai
+---
+
+A **reasoning model** is one trained to work through a problem step by step before giving its answer.
+
+An ordinary model answers immediately, using one pass through its layers per token. A reasoning model first writes out a long chain of thought, using its own output as scratch paper, and only then commits to an answer. It gets more accurate the longer it is allowed to think, which means you can trade money and time for correctness at the moment you ask, rather than only when the model was trained.
+
+Some examples:
+
+- **DeepSeek-R1** — trained by rewarding it for verifiably correct answers, and it learned to check its own work along the way.
+- **Toggleable thinking** — some models let you switch step-by-step reasoning on for hard questions and off for easy ones.
+- **What it costs** — many more generated tokens, so answers are slower and more expensive.
