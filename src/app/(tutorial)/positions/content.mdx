@@ -29,7 +29,7 @@ The most obvious idea: just subtract a penalty from the attention score based on
 This is called **ALiBi** (Attention with Linear Biases), and it's used by models like BLOOM and MPT. It's simple and works: nearby tokens automatically get higher attention scores than distant ones.
 
 <ALiBiToyTokensWidget>
-Drag the slope around. At slope 0, both nouns get identical attention. The model is position-blind. Higher slopes make the closer noun win more decisively. Try the longer sentences to see the effect with bigger distance gaps.
+Drag the slope around. At slope 0, both nouns get identical attention, so the model is position-blind. Higher slopes make the closer noun ("cat") win more decisively over the farther one ("dog").
 </ALiBiToyTokensWidget>
 
 Different attention heads get different slopes *m*. Some heads have steep slopes and attend very locally (just the nearest few words), while others have gentle slopes and attend broadly across the whole context. This gives the model a range of distance sensitivities.
@@ -69,7 +69,7 @@ How quickly we rotate per position is called the **speed**. A higher speed means
 How do we connect this geometric idea to actual attention? Take one dimension of our token vectors (say "nouniness") and split it into two coordinates: noun-x and noun-y. Now rotate that 2D point by position × speed. The dot product between a rotated query and a rotated key automatically favors nearby tokens, just like the circle demo above.
 
 <RotationToyTokensWidget>
-Start with rotation speed at 0°. Both nouns get identical attention, just like in the attention chapter. Now drag it up. The closer noun starts winning because its key is rotated to a more similar angle to "it"'s query. Try different sentences to see the effect with different distances. This achieves the same distance preference as ALiBi, but through geometry rather than an explicit penalty.
+Start with rotation speed at 0°. Both nouns get identical attention, just like in the attention chapter. Now drag it up. The closer noun ("cat") starts winning because its key is rotated to a more similar angle to "it"'s query. This achieves the same distance preference as ALiBi, but through geometry rather than an explicit penalty.
 </RotationToyTokensWidget>
 
 This is the core of **RoPE** (Rotary Position Embeddings). Instead of *adding* a distance penalty after computing the dot product, we **rotate** each word's query and key vectors by an angle that depends on position. The dot product naturally encodes distance.
