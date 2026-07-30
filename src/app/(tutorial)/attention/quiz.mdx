@@ -66,15 +66,15 @@ Softmax always allocates 100% of attention to *something*, even when no real mat
 </Question>
 
 <Question>
-In the chapter's toy example, keys and queries are simple 0/1 values like "is this a noun?" Are real attention heads' Q, K, V vectors really that simple?
+In the chapter we wrote each query and key as a short phrase like "a thing" or "a person". Do real attention heads work with tidy phrases like that?
 
-<Choice>Yes — they're always 0 or 1 in practice</Choice>
+<Choice>Yes — they store the phrases as text</Choice>
 <Choice correct>No — they're learned vectors with no fixed meanings</Choice>
-<Choice>Yes, with dimensions like noun/verb/adverb</Choice>
-<Choice>No — they're just bigger one-hot vectors</Choice>
+<Choice>Yes, each number stands for a concept like noun or verb</Choice>
+<Choice>No — they're just longer lists of words</Choice>
 
 <Feedback>
-The toy example uses 1D keys and queries to show the mechanics. Real models learn high-dimensional, dense Q/K/V vectors through gradient descent. Each dimension doesn't correspond to a clean human concept like "noun" — it's some combination of patterns the model found useful. The result is hard for humans to read directly: meaning lives in the geometry, not in any one dimension (just like in embeddings).
+The plain-English phrases are a simplification to show the mechanics. Underneath, each query, key, and value is a vector, a list of numbers the model learns through gradient descent. No single number stands for a clean human concept like "a thing"; the meaning is spread across the whole vector, just like with embeddings.
 </Feedback>
 </Question>
 
