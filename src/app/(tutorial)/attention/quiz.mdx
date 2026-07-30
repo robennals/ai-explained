@@ -70,11 +70,11 @@ In the chapter we wrote each query and key as a short phrase like "a thing" or "
 
 <Choice>Yes — they store the phrases as text</Choice>
 <Choice correct>No — they're learned vectors with no fixed meanings</Choice>
-<Choice>Yes, each number stands for a concept like noun or verb</Choice>
+<Choice>Yes, each vector stands for a concept like noun or verb</Choice>
 <Choice>No — they're just longer lists of words</Choice>
 
 <Feedback>
-The plain-English phrases are a simplification to show the mechanics. Underneath, each query, key, and value is a vector, a list of numbers the model learns through gradient descent. No single number stands for a clean human concept like "a thing"; the meaning is spread across the whole vector, just like with embeddings.
+The plain-English phrases are a simplification to show the mechanics. Underneath, each query, key, and value is a vector, a list of numbers the model learns through gradient descent. The vectors the model learns will typically not encode simple concepts that make sense to humans.
 </Feedback>
 </Question>
 
