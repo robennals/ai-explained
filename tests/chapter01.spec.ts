@@ -1,12 +1,12 @@
 import { test, expect } from "@playwright/test";
 
-test.describe("Chapter 1: Everything Is Numbers", () => {
+test.describe("Chapter 1: Computation", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/computation");
   });
 
   test("renders chapter title and key prose", async ({ page }) => {
-    await expect(page.locator("h1")).toContainText("Everything Is Numbers");
+    await expect(page.locator("h1")).toContainText("Computation");
     await expect(
       page.getByRole("heading", { name: "Thinking Is a Function" }),
     ).toBeVisible();
@@ -20,14 +20,14 @@ test.describe("Chapter 1: Everything Is Numbers", () => {
     await page.goto("/computation");
     const sidebar = page.locator("nav.w-64");
     await expect(sidebar).toBeVisible();
-    await expect(sidebar.getByText("Everything Is Numbers")).toBeVisible();
+    await expect(sidebar.getByText("Computation")).toBeVisible();
   });
 
   test("chapter nav links to next chapter (optimization)", async ({ page }) => {
     const nextLink = page.locator('a[href="/optimization"]').last();
     await nextLink.scrollIntoViewIfNeeded();
     await expect(nextLink).toBeVisible();
-    await expect(nextLink).toContainText("The Power of Incremental Improvement");
+    await expect(nextLink).toContainText("Optimization");
   });
 
   for (const widgetTitle of [

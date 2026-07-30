@@ -19,8 +19,8 @@ test.describe("Mobile chapter drawer", () => {
       .first();
     await expect(closeButton).toBeVisible();
 
-    // Click "Building a Brain" (chapter 3, neurons).
-    await page.getByRole("link", { name: /Building a Brain/ }).click();
+    // Click "Neural Networks" (chapter 3, neurons).
+    await page.getByRole("link", { name: /Neural Networks/ }).click();
 
     await expect(page).toHaveURL("/neurons");
 

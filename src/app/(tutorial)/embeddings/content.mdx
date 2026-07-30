@@ -1,8 +1,4 @@
-# From Words to Meanings
-
-<Lead>
-In <Ch slug="vectors" />, we described animals with hand-picked properties like size and scariness. That worked because animals are one kind of thing. But words represent *everything*, and no single set of properties works for all of them. Modern AI solves this by giving up on the idea of universal properties, and instead putting similar words close to each other and letting directions mean different things in different places.
-</Lead>
+An AI has to represent the meaning of each word as a list of numbers, a [vector](/vectors). The obvious approach is to decide in advance what each dimension of the vector measures (e.g. size, aliveness, scariness), but that falls apart fast. A word can refer to absolutely anything, and no fixed set of properties describes colours, emotions and countries at the same time. The trick is to abandon the idea that the dimensions of a vector should have fixed meanings, and instead just put similar things close to each other and allow the same direction to mean different things in different places.
 
 ## The Problem with Hand-Picked Dimensions
 

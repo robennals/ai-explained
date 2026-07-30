@@ -12,9 +12,17 @@ Interactive visual tutorial website for understanding AI from first principles. 
 pnpm dev              # Start dev server at localhost:3000
 pnpm build            # Production build
 pnpm lint             # ESLint + MDX validation
-pnpm test:notebooks   # Execute all Jupyter notebooks (requires Python + torch)
+pnpm test:notebooks   # Execute all Jupyter notebooks (see scripts/test-notebooks.sh for setup)
 npx playwright test   # E2E tests (expects dev server running)
 ```
+
+## Dev Server
+
+**Do not kill any running dev server, and do not start your own without asking first.** The user typically has their own `pnpm dev` running.
+
+- **Never** kill a running dev server — no `kill`, `pkill`, `kill-port`, killing the process on port 3000, or similar. The user's server may be running and killing it disrupts their work.
+- **Never** start your own dev server (`pnpm dev`, `next dev`, etc.) without first asking the user for permission. A second server fails to bind to port 3000 (or silently takes a different port), which prevents the user's server from starting or causes confusion.
+- If you need a running app — for Playwright tests, screenshots, or to verify a change — assume the user already has one on `localhost:3000`. If it doesn't appear to be running, **ask the user to start it** (or ask permission before starting one yourself) rather than launching one on your own.
 
 ## Architecture
 
@@ -34,7 +42,7 @@ Chapter metadata (title, slug, prerequisites, descriptions) lives in `src/lib/cu
 ### MDX Pipeline
 
 - `@next/mdx` with `remark-math` + `rehype-katex` (LaTeX) + `rehype-pretty-code` (Shiki syntax highlighting)
-- Custom MDX components registered in `mdx-components.tsx`: `<Callout>`, `<KeyInsight>`, `<Lead>`, `<TryIt>`, `<TryItInPyTorch>`
+- Custom MDX components registered in `mdx-components.tsx`: `<Callout>`, `<KeyInsight>`, `<TryIt>`, `<TryItInPyTorch>`
 - MDX component source in `src/components/mdx/`
 
 ### Widget System
@@ -67,6 +75,8 @@ src/components/widgets/
 3. Create widgets in `src/components/widgets/{topic}/`
 4. Follow the `01-computation` chapter as a template
 
+The chapter title and subtitle are rendered by `<ChapterHeader slug="..." />` in `page.tsx`, reading from `curriculum.ts`. `content.mdx` therefore starts with the opening paragraph and contains no `#` heading of its own.
+
 ## PyTorch Notebooks
 
 The `notebooks/` directory contains Jupyter notebooks — one per chapter — that let readers run real PyTorch code in Google Colab. Each chapter's `content.mdx` links to its notebook via the `<TryItInPyTorch notebook="...">` component, which builds a Colab URL: `https://colab.research.google.com/github/robennals/ai-explained/blob/main/notebooks/{name}.ipynb`
@@ -75,11 +85,11 @@ When modifying a chapter, check if the companion notebook needs updating. When a
 
 Every term must be defined before it's used in the notebook — either with a brief inline explanation, or a reference to the chapter where it's covered (e.g. "nn.Linear uses matrix multiplication — see Chapter 5"). See `docs/plans/pytorch-prerequisites.md` for the full forward-reference tracking.
 
-Test notebooks: `pnpm test:notebooks` (requires `pip install torch matplotlib jupyter tiktoken`). Note: notebook 04 downloads ~66MB of GloVe embeddings on first run.
+Test notebooks: `pnpm test:notebooks`. This runs `scripts/test-notebooks.sh`, which executes every notebook and prints `PASS`/`FAIL` per file. It uses `.venv/bin/jupyter` if a virtualenv exists and falls back to the system `jupyter` otherwise — the script's header has the full, current install command for setting up that venv (a system Python generally has none of the packages the notebooks need). Note that the suite is slow: `embeddings.ipynb` downloads the ~862MB GloVe zip plus text8 and trains word2vec, and `next-word-prediction.ipynb` streams TinyStories and trains. Those downloads land in `notebooks/` and are gitignored.
 
 ## MDX Gotchas
 
-- **Never use raw `<p>` tags in MDX files.** MDX wraps paragraph text in its own `<p>`, so a raw `<p>text</p>` becomes `<p><p>text</p></p>` — invalid HTML that causes React hydration errors. Use `<Lead>` for intro paragraphs or `<div>` if you need a block wrapper. The `pnpm lint` command includes a check for this (`scripts/lint-mdx-no-raw-p.sh`).
+- **Never use raw `<p>` tags in MDX files.** MDX wraps paragraph text in its own `<p>`, so a raw `<p>text</p>` becomes `<p><p>text</p></p>` — invalid HTML that causes React hydration errors. Use a `<div>` if you need a block wrapper. The `pnpm lint` command includes a check for this (`scripts/lint-mdx-no-raw-p.sh`).
 
 ## Large Files
 

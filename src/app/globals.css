@@ -100,28 +100,22 @@ body {
   }
 }
 
-/* Scrollbar styling */
-::-webkit-scrollbar {
+/* Scrollbars use the browser default everywhere except .scrollbar-autohide,
+   so the page scrollbar looks and behaves like any other site's. */
+
+/* Auto-hiding scrollbar: thin, and invisible until hovered */
+.scrollbar-autohide::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
-::-webkit-scrollbar-track {
+.scrollbar-autohide::-webkit-scrollbar-track {
   background: transparent;
 }
 
-::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-muted);
-}
-
-/* Auto-hiding scrollbar: invisible until hovered */
 .scrollbar-autohide::-webkit-scrollbar-thumb {
   background: transparent;
+  border-radius: 3px;
   transition: background 0.2s;
 }
 

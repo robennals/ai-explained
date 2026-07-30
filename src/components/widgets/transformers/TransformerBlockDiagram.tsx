@@ -29,7 +29,7 @@ const BLOCKS: BlockInfo[] = [
     diagramLabel: "Tokenizer",
     description:
       "Splits raw text into tokens.\n\n Common words get their own token; rare words are assembled from pieces (e.g. \"unbreakable\" → \"un\", \"break\", \"able\").",
-    chapterLinks: [{ label: "Chapter 5: From Words to Meanings", href: "/embeddings" }],
+    chapterLinks: [{ label: "Chapter 5: Embeddings", href: "/embeddings" }],
     color: "#e9d5ff",
     border: "#9333ea",
   },
@@ -39,7 +39,7 @@ const BLOCKS: BlockInfo[] = [
     diagramLabel: "Token Embedding",
     description:
       "Converts each token to a vector that represents its meaning.\n\n Similar words end up with similar vectors. Directions in the space also carry meaning — for example, the direction from 'king' to 'queen' is similar to the direction from 'man' to 'woman'.\n\n The mapping from tokens to embedding vectors is learned, just like every other part of the neural network.",
-    chapterLinks: [{ label: "Chapter 5: From Words to Meanings", href: "/embeddings" }],
+    chapterLinks: [{ label: "Chapter 5: Embeddings", href: "/embeddings" }],
     color: "#d1fae5",
     border: "#059669",
   },
@@ -50,8 +50,8 @@ const BLOCKS: BlockInfo[] = [
     description:
       "Find related words and get information from them.\n\n Each token is mapped to a query vector, a key vector, and a value vector. If another token's key matches this token's query, we pull in that token's value vector. We use softmax applied to the dot product of query and key to determine how much we pull in each value.\n\n A causal mask ensures that a token only pays attention to tokens before it.\n\n This step also includes positional encoding so that it takes account of word position.\n\n There may be multiple attention \"heads\" in one attention block — meaning that we run attention multiple times, using different keys, queries, and values, to model different kinds of word relationships.",
     chapterLinks: [
-      { label: "Chapter 7: Paying Attention", href: "/attention" },
-      { label: "Chapter 8: Where Am I?", href: "/positions" },
+      { label: "Chapter 7: Attention", href: "/attention" },
+      { label: "Chapter 8: Positional Encoding", href: "/positions" },
     ],
     color: "#fed7aa",
     border: "#f97316",
@@ -82,7 +82,7 @@ const BLOCKS: BlockInfo[] = [
     diagramLabel: "Feed-Forward Network",
     description:
       "Do a bit of thinking to process what we learned from the other tokens.\n\n Each transformer layer has its own two-layer neural network which it applies to each token.",
-    chapterLinks: [{ label: "Chapter 3: Building a Brain", href: "/neurons" }],
+    chapterLinks: [{ label: "Chapter 3: Neural Networks", href: "/neurons" }],
     color: "#bfdbfe",
     border: "#3b82f6",
   },
@@ -122,7 +122,7 @@ const BLOCKS: BlockInfo[] = [
     diagramLabel: "Next Token Probabilities",
     description:
       "If the transformer is being used for next word prediction, then at the end of the transformer, we identify the likely next token.\n\n The way this works is a lot like how attention works. We compute a query vector from the final token's representation, take the dot product of that query with the embedding of every word in the vocabulary, and then use softmax to get the probability of each possible next token.",
-    chapterLinks: [{ label: "Chapter 6: Understanding by Predicting", href: "/next-word-prediction" }],
+    chapterLinks: [{ label: "Chapter 6: Next-Word Prediction", href: "/next-word-prediction" }],
     color: "#fce7f3",
     border: "#db2777",
   },
