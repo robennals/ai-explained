@@ -24,11 +24,6 @@ const AttentionValues = dynamic(
   { ssr: false }
 );
 
-const AttentionHeads = dynamic(
-  () => import("@/components/widgets/attention/AttentionHeads").then((m) => m.AttentionHeads),
-  { ssr: false }
-);
-
 function WidgetSlot({ children, tryIt, label }: { children: React.ReactNode; tryIt?: React.ReactNode; label?: string }) {
   return (
     <Suspense
@@ -89,14 +84,6 @@ export function AttentionValuesWidget({ children }: { children?: React.ReactNode
   return (
     <WidgetSlot tryIt={children} label="Explore it">
       <AttentionValues />
-    </WidgetSlot>
-  );
-}
-
-export function AttentionHeadsWidget({ children }: { children?: React.ReactNode }) {
-  return (
-    <WidgetSlot tryIt={children} label="Explore it">
-      <AttentionHeads />
     </WidgetSlot>
   );
 }
