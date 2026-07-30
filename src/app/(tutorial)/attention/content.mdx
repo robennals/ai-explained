@@ -1,4 +1,4 @@
-In order to understand what a word means, we need to look at other words in the document, including words that might have occurred much earlier. The technique models AI models use to do that is called "Attention". In this chapter we'll explain how it works.
+In order to understand what a word means, we need to look at other words in the document, including words that might have occurred much earlier. The technique AI models use to do that is called "Attention". In this chapter we'll explain how it works.
 
 ## Some Tokens Need Other Tokens
 
@@ -32,9 +32,9 @@ Each example shows the highlighted token's query, the key of the token it matche
 
 ## Matching with the Dot Product
 
-How does a computer decide whether a query matches a key? So far the have been in plain English, but comparing English text is tricky. How do we know that "A place with a sky" matches "A planet"?.
+How does a computer decide whether a query matches a key? So far they have been in plain English, but comparing English text is tricky. How do we know that "a place with a sky" matches "a planet"?
 
-In [Chapter 4](/vectors) and [Chapter 5](/embeddings) we showed that AI model can represent arbitrarily complex things using vectors. We also showed that we can use the dot product to compare two vectors to see how similar their meanings are. 
+In [Chapter 4](/vectors) and [Chapter 5](/embeddings) we showed that AI models can represent arbitrarily complex things using vectors. We also showed that we can use the dot product to compare two vectors to see how similar their meanings are. 
 
 Indeed this is how Attention compares a query to a key. The query and key are both vectors, and we use the dot product to determine how well the query vector matches a particular key vector.
 
@@ -60,9 +60,9 @@ The gap between the scores is what matters. When one token is the clear best mat
 
 The reason we pay attention to another token is to extract information from it. That information is the token's **value**, which is yet another vector.
 
-You could imagine a simplified version of attention that just picked the token that matched the best and returned that token's value. But Attention is smarter than that. It combines the values of all the tokens, weighting each by it's softmax percentage.
+You could imagine a simplified version of attention that just picked the token that matched the best and returned that token's value. But Attention is smarter than that. It combines the values of all the tokens, weighting each by its softmax percentage.
 
-It's kind of crazy that this works. Why should you be able to blend these value vectors together and get something that makes any sense? But, as we saw in [Chapter 5](/embeddings), the embeddings used by AI models are constructed such that you can do things like take the average of two emmedding vectors, and the result is a vector that combines their meanings.
+It's kind of crazy that this works. Why should you be able to blend these value vectors together and get something that makes any sense? But, as we saw in [Chapter 5](/embeddings), the embeddings used by AI models are constructed such that you can do things like take the average of two embedding vectors, and the result is a vector that combines their meanings.
 
 <AttentionValuesWidget>
 Try "A clear value": "it" pays almost all its attention to "glass", so it gathers "the glass". Try "An even split": "it" could be the cat or the dog, so it gathers "either the cat or the dog". Try "A leaning blend": "pounced" is looking for the agile animal that pounced, which fits the cat better than the dog, so it gathers "probably the cat, maybe the dog".
@@ -82,11 +82,11 @@ Real models don't always add a dedicated sink token. Often they just learn to du
 
 ## Where the Vectors Come From
 
-Where do a token's query, key, and value actually come from? You don't need to write them by hand. The model uses a neural network to compute them from the tokens embedding, and we use optimization to train the neural network to produce the queries, keys, and values that do the best job at predicting the next token of the training data.
+Where do a token's query, key, and value actually come from? You don't need to write them by hand. The model uses a neural network to compute them from the token's embedding, and we use optimization to train the neural network to produce the queries, keys, and values that do the best job at predicting the next token in the training data.
 
 ## Multi-Headed Attention
 
-In the examples we've given so far, each token only has a single query. But in practice, there are often lots of different kinds of information we might want in order to understand the meaning of a token. Where is this happening? who did this action? Which of several meanings of this word might be relevant?
+In the examples we've given so far, each token only has a single query. But in practice, there are often lots of different kinds of information we might want in order to understand the meaning of a token. Where is this happening? Who did this action? Which of several meanings of this word might be relevant?
 
 So in practice we usually do **multi-headed attention**. We have multiple **attention heads**, each of which computes a different query, key, and value for each token. We also usually have multiple layers of attention, where each layer adds more information on top of what was gathered by the previous layers.
 
@@ -102,7 +102,7 @@ Attention is:
 3. **Softmax.** Turn those scores into percentages that add up to 100%.
 4. **The sink.** A safe place for attention to go when nothing in the sentence fits.
 5. **Blended values.** Combine the chosen values using those percentages.
-6. **Many heads.** Run the whole thing many times over, each head looking for something different.
+6. **Many heads.** Several heads run side by side, each looking for something different.
 
 One thing is still missing: attention has no idea *where* the tokens are, only *what* they are. "The dog chased the cat" and "the cat chased the dog" give exactly the same scores. The next chapter fixes that with a trick involving rotation.
 
