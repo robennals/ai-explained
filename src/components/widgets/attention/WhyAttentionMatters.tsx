@@ -52,12 +52,12 @@ const SENTENCES: SentenceExample[] = [
     explanation:
       'What does "it" refer to? You have to look back to "glass," the thing that was dropped.',
     enrichedMeaning: "the glass",
-    query: "the thing being referred to",
-    keyQuestion: "a physical object",
+    query: "a thing",
+    keyQuestion: "a thing",
     value: "It means the glass.",
     matchScore: 9,
     answers: {
-      3: "a physical object",
+      3: "a thing",
       1: "an action",
       6: "an action",
     },
@@ -70,7 +70,7 @@ const SENTENCES: SentenceExample[] = [
     explanation:
       'Who opened a restaurant? The chef, not the competition. You have to skip over the whole "who won the competition" clause to connect "opened" back to "chef."',
     enrichedMeaning: "opened by the chef",
-    query: "someone who could have opened something",
+    query: "a person or thing that could have opened something",
     keyQuestion: "a person",
     value: "The chef did it.",
     matchScore: 9,
@@ -88,7 +88,7 @@ const SENTENCES: SentenceExample[] = [
     explanation:
       'Which sky? The Martian one. "sky" has to reach back to "Mars" to become "the sky of Mars," not the sky on Earth.',
     enrichedMeaning: "the sky of Mars",
-    query: "the place this sky is part of",
+    query: "a place",
     keyQuestion: "a place",
     value: "The scene is on Mars.",
     matchScore: 9,
@@ -106,7 +106,7 @@ const SENTENCES: SentenceExample[] = [
     explanation:
       'Which treaty reshaped Europe? You have to reach back across the gap to "Versailles" to know. Once a model has been through several transformer layers, "Versailles" itself may already carry that it means the treaty, not the city, along with the treaty\'s details. The Transformers chapter shows how.',
     enrichedMeaning: "the Treaty of Versailles",
-    query: "which specific treaty this is",
+    query: "a treaty",
     keyQuestion: "a treaty, or a place",
     value: "The Treaty of Versailles, or the place Versailles.",
     matchScore: 9,
