@@ -79,7 +79,7 @@ And it doesn't stop at one set of numbers. It learns several sets at once, which
 
 ## Multi-Headed Attention
 
-One query looks for one thing. But "bank" needs two at once: a nearby river and nearby money. So attention runs many times over. Each round is a **head**, with its own queries, keys, and values, and each head learns to look for something different. This is **multi-headed attention**, like asking different friends different questions: the one who hikes about trails, the one who cooks about recipes.
+One query looks for one thing. But "bank" needs two at once: a nearby river and nearby money. So the model runs several attention heads at the same time, side by side. Each **head** has its own query, key, and value weights and learns to look for something different. This is **multi-headed attention**, like asking several friends different questions at once: the one who hikes about trails, the one who cooks about recipes. Their answers are combined back into one.
 
 <AttentionHeadsWidget>
 Flip through some heads a model might learn. Each one links a different kind of token pair, and a real model runs dozens of them at the same time.
