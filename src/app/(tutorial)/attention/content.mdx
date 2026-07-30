@@ -1,4 +1,4 @@
-In order to understand what a word means, we need to look at other words in the document, including words that might have occurred much earlier. Attention is how we do that.
+In order to understand what a word means, we need to look at other words in the document, including words that might have occurred much earlier. The technique models AI models use to do that is called "Attention". In this chapter we'll explain how it works.
 
 ## Some Tokens Need Other Tokens
 
@@ -13,33 +13,42 @@ Different tokens need different things in order for us to understand what they m
 
 ## Searching for a Match
 
-Each token goes looking for the tokens that can help it, a bit like typing a Google search. To do this it gets three things:
+So how do we know which tokens we need to "pay attention to" in order to understand the meaning of a particular token?
 
-- Its **query** is what it's looking for, like the words you type into a search box.
-- Its **key** is what it advertises to the other tokens, like the title of a web page.
-- Its **value** is what it hands over once it's picked, like the contents of the page.
+The "Attention" algorithm does this by giving each token three things:
 
-To understand a token, attention compares its query against every other token's key and pulls in the value of the best fit. A token writes its own query and key from just itself, so it can only look for what it can guess from its own meaning. "it" is a pronoun, so it looks for a thing it might stand for, and "glass" advertises that it's a physical object. Those aren't the same words, but they line up, so it's a strong match. "bank" wants a river or money; "river" only offers a river. That's half of what "bank" asked for, but it's enough, so "river" wins.
+- A token's **query** is what it is looking for, like the words you type into a search box.
+- A token's **key** is what it advertises to the other tokens, like the title of a web page.
+- A token's **value** is the information it provides if you pay attention to it, like the contents of the page.
+
+To understand a token, we take that token's **query** and compare it against every other token's **key** to find the tokens whose **keys** seem most similar to our **query**. 
+
+This might seem a bit confusing, but it makes more sense once you play with the playground below:
 
 <AnsweringQuestionsWidget>
 Each example shows the highlighted token's query, the key of the token it matches, and the value it pulls in. Click the other underlined tokens to see that their keys don't fit. Flip through the examples to find strong matches and one loose match.
 </AnsweringQuestionsWidget>
 
+
 ## Matching with the Dot Product
 
-How does a computer decide whether a query matches a key? So far they've been plain English, but inside the model they are **vectors**: lists of numbers that stand for meaning. To score a match, the model takes the **dot product** of the query and the key. The dot product is a simple recipe that turns two lists of numbers into one number showing how much they line up (the [chapter on vectors](/vectors#measuring-similarity) builds it from scratch). When the query and key line up, the number is big and the match is strong. When they point different ways, it's small.
+How does a computer decide whether a query matches a key? So far the have been in plain English, but comparing English text is tricky. How do we know that "A place with a sky" matches "A planet"?.
+
+In [Chapter 4](/vectors) and [Chapter 5](/embeddings) we showed that AI model can represent arbitrarily complex things using vectors. We also showed that we can use the dot product to compare two vectors to see how similar their meanings are. 
+
+Indeed this is how Attention compares a query to a key. The query and key are both vectors, and we use the dot product to determine how well the query vector matches a particular key vector.
 
 <MatchingQuestionsWidget>
 The same examples, with the query and key now scored. The score is the dot product of the query and the key. The "bank" example is a loose match and still wins.
 </MatchingQuestionsWidget>
 
-From here on we'll write each query and key in plain English and the match as a single score. Underneath they're still vectors and dot products; we just won't spell out the numbers every time.
+From here on we'll write each query and key in plain English and the match as a single score. Underneath they're still vectors and dot products.
 
 ## Dividing Your Attention
 
-Usually more than one token matches, at least a little. So instead of crowning a single winner, attention blends the values together, giving each token a say in proportion to how well it matched. First it turns the raw scores into percentages that add up to 100%, one slice of attention per token.
+Usually more than one token matches, at least a little. So instead of crowning a single winner, attention blends the values together, giving each token a say in proportion to how well it matched. To do this, we want to take the raw scores we got from the dot product, and turn them into percentages that add up to 100%.
 
-The tool for this is called **softmax**. Think of it as slicing a pie: the highest scores get the biggest slices, low scores get slivers, and the slices always add up to one whole pie.
+Most AI models do this using a function called **softmax**. Softmax makes sure the percentages always add up to 100%, while giving a greater share to tokens that had bigger scores.
 
 <SoftmaxExplorerWidget>
 Drag the sliders. Try "All equal": everyone gets 25%. Try "Moderate, rest silent": A wins by default because nobody else is saying anything. Try "Moderate meets loud": B drowns out A. The gaps between scores matter more than the absolute values. Softmax cares about who's loudest *relative to everyone else*.
@@ -49,17 +58,19 @@ The gap between the scores is what matters. When one token is the clear best mat
 
 ## What Did You Find?
 
-Now the token collects its answer. Each token also carries a **value**: the information it hands over when another token picks it. The searching token adds up the values it paid attention to, each one weighted by its slice of attention. A clear winner gives a sharp answer. A tie gives a real blend of both.
+The reason we pay attention to another token is to extract information from it. That information is the token's **value**, which is yet another vector.
+
+You could imagine a simplified version of attention that just picked the token that matched the best and returned that token's value. But Attention is smarter than that. It combines the values of all the tokens, weighting each by it's softmax percentage.
+
+It's kind of crazy that this works. Why should you be able to blend these value vectors together and get something that makes any sense? But, as we saw in [Chapter 5](/embeddings), the embeddings used by AI models are constructed such that you can do things like take the average of two emmedding vectors, and the result is a vector that combines their meanings.
 
 <AttentionValuesWidget>
 Try "A clear value": "it" pays almost all its attention to "glass", so it gathers "the glass". Try "An even split": "it" could be the cat or the dog, so it gathers "either the cat or the dog". Try "A leaning blend": "pounced" is looking for the agile animal that pounced, which fits the cat better than the dog, so it gathers "probably the cat, maybe the dog".
 </AttentionValuesWidget>
 
-Because the slices add up to 100%, the answer always stays in the same range as the values that went in. It can never overshoot into "double cat". And a blend is often the right call: an unclear pronoun really is a mix of options until later words settle it.
-
 ## When Nothing Matches
 
-Sometimes a token looks for something that isn't there. The "it" in "It was raining" doesn't stand for anything; English just wants a subject. With no good match, softmax still hands out the full 100%, so the attention smears across every token and the answer is mush.
+Sometimes a token looks for something that isn't there. The "it" in "It was raining" doesn't stand for anything; English just wants a subject. So what does "it" pay attention to, given that the softmax scores are required to sum to 100%?
 
 The fix is a **sink**: an extra token whose value means "nothing" and that faintly matches everything. A real answer easily beats it, but with no real answer the sink wins by default, so the token safely gathers nothing.
 
@@ -71,21 +82,16 @@ Real models don't always add a dedicated sink token. Often they just learn to du
 
 ## Where the Vectors Come From
 
-Where do a token's query, key, and value actually come from? Nobody writes them by hand. Each token starts as a vector that captures its meaning, and the model multiplies that vector by three sets of learned numbers to produce the query, the key, and the value.
-
-Those numbers are set by training. The model makes a guess, checks how wrong it was, and nudges its numbers to do a little better, over and over, millions of times (an [earlier chapter](/optimization) shows how). Nobody tells it "this token advertises being a noun." It works out for itself what's worth looking for and what each token should offer.
-
-And it doesn't stop at one set of numbers. It learns several sets at once, which is the last piece of the picture.
+Where do a token's query, key, and value actually come from? You don't need to write them by hand. The model uses a neural network to compute them from the tokens embedding, and we use optimization to train the neural network to produce the queries, keys, and values that do the best job at predicting the next token of the training data.
 
 ## Multi-Headed Attention
 
-One query looks for one thing. But "bank" needs two at once: a nearby river and nearby money. So the model runs several attention heads at the same time, side by side. Each **head** has its own query, key, and value weights and learns to look for something different. This is **multi-headed attention**, like asking several friends different questions at once: the one who hikes about trails, the one who cooks about recipes. Their answers are combined back into one.
+In the examples we've given so far, each token only has a single query. But in practice, there are often lots of different kinds of information we might want in order to understand the meaning of a token. Where is this happening? who did this action? Which of several meanings of this word might be relevant?
 
-<AttentionHeadsWidget>
-Flip through some heads a model might learn. Each one links a different kind of token pair, and a real model runs dozens of them at the same time.
-</AttentionHeadsWidget>
+So in practice we usually do **multi-headed attention**. We have multiple **attention heads**, each of which computes a different query, key, and value for each token. We also usually have multiple layers of attention, where each layer adds more information on top of what was gathered by the previous layers.
 
-Run enough heads and a single token can chase down everything it needs at once: what it refers to, who acted, which words describe it.
+You'll see this in more depth when we discuss Transformers in [Chapter 9](/transformers).
+
 
 ## What We've Built
 
