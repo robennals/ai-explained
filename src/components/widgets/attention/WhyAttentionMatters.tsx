@@ -88,7 +88,7 @@ const SENTENCES: SentenceExample[] = [
     explanation:
       'Which sky? The Martian one. "sky" has to reach back to "Mars" to become "the sky of Mars," not the sky on Earth.',
     enrichedMeaning: "the sky of Mars",
-    query: "a place",
+    query: "a place with a sky",
     keyQuestion: "a planet",
     value: "The scene is on Mars.",
     matchScore: 9,
