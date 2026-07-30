@@ -7,6 +7,8 @@
  *   - math (`math`, `inlineMath`)
  *   - headings
  *   - already-wrapped <g> or <nog> JSX elements
+ *   - <Ch> cross-chapter links, whose text is already claimed as the link
+ *     label (same reasoning as manual Markdown links)
  *
  * CommonJS so it can be required from a CommonJS-loaded next.config.ts.
  */
@@ -99,7 +101,7 @@ function isSkippedJsx(node) {
     return false;
   }
   const name = (node.name || "").toLowerCase();
-  return name === "g" || name === "nog";
+  return name === "g" || name === "nog" || name === "ch";
 }
 
 function wrapInG(term, originalText) {
