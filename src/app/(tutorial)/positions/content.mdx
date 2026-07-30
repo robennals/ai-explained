@@ -1,4 +1,4 @@
-The meaning of a sentence often depends on the *order* of its words, not just on which words are there. The basic <Ch slug="attention">attention</Ch> mechanism is blind to word order, so we need to extend it a bit if we want our AI model to take word order into account.
+The meaning of a sentence often depends on the *order* of its words, not just on which words are there. The basic attention mechanism is blind to word order, so we need to extend it a bit if we want our AI model to take word order into account.
 
 ## Word Order Matters
 
@@ -50,7 +50,7 @@ It turns out there is a different model, **RoPE**, that overcomes all of these l
 
 ## Rotation Encodes Distance
 
-There's a neater way to give the model a sense of distance, leaning on a fact about <Ch slug="vectors" hash="measuring-similarity">dot products</Ch>: **the dot product of two unit vectors only depends on the angle between them.** Picture two clock hands — if you rotate the whole clock by 30°, both hands turn together and the angle between them is unchanged, so the dot product is unchanged too. But if the two hands rotate by *different* amounts, the dot product changes by an amount that depends only on the gap.
+There's a neater way to give the model a sense of distance, leaning on a fact about dot products: **the dot product of two unit vectors only depends on the angle between them.** Picture two clock hands — if you rotate the whole clock by 30°, both hands turn together and the angle between them is unchanged, so the dot product is unchanged too. But if the two hands rotate by *different* amounts, the dot product changes by an amount that depends only on the gap.
 
 <RotationDotProductWidget>
 Try dragging the base angle slider. Both vectors spin around the circle together, their x and y values change completely, but the dot product doesn't budge. Now change the angle between them and watch the dot product respond. It only cares about the gap.
