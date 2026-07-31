@@ -56,6 +56,14 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        {/* Load at the top of the page. Otherwise the browser restores the old
+            scroll position on reload, and because widgets stream in and grow
+            the page afterwards, that restore drifts down onto a widget. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{history.scrollRestoration='manual'}catch(e){}`,
+          }}
+        />
         <SiteHeader />
         {children}
         <Analytics />
