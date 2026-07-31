@@ -314,6 +314,20 @@ export function getAppendixChapters(): Chapter[] {
   return chapters.filter((c) => c.section === "appendix");
 }
 
+/**
+ * How prose refers to a chapter, e.g. "Chapter 6". This is the single place the
+ * wording lives, so changing how cross-references read is one edit here rather
+ * than a sweep through every `content.mdx`. The number is a chapter's 1-based
+ * position among the main chapters, derived from ordering so it stays correct if
+ * chapters are reordered.
+ */
+export function getChapterRefLabel(chapter: Chapter): string {
+  if (chapter.section === "appendix") return `Appendix ${getAppendixLabel(chapter)}`;
+  if (chapter.section === "intro") return chapter.title;
+  const idx = getMainChapters().findIndex((c) => c.id === chapter.id);
+  return idx === -1 ? chapter.title : `Chapter ${idx + 1}`;
+}
+
 export function getAppendixLabel(chapter: Chapter): string {
   const appendixes = getAppendixChapters();
   const idx = appendixes.findIndex((c) => c.id === chapter.id);

@@ -1,4 +1,4 @@
-The meaning of a sentence often depends on the *order* of its words, not just on which words are there. The basic [attention](/attention) mechanism is blind to word order, so we need to extend it a bit if we want our AI model to take word order into account.
+The meaning of a sentence often depends on the *order* of its words, not just on which words are there. The basic attention mechanism is blind to word order, so we need to extend it a bit if we want our AI model to take word order into account.
 
 ## Word Order Matters
 
@@ -12,7 +12,7 @@ Try each example. Every rearrangement changes the meaning, sometimes subtly, som
 
 ## Attention Is Position-Blind
 
-The attention system we built in the last chapter *can't tell any of these apart*.
+The attention system we built in <Ch slug="attention" /> *can't tell any of these apart*.
 
 Remember how attention works. Each word gets an embedding (a list of numbers representing its meaning), and then we compute how much each word should pay attention to every other word using dot products. But the word "cat" gets the *same* embedding whether it's the first word or the last word. Nothing about position goes into the calculation.
 
@@ -50,7 +50,7 @@ It turns out there is a different model, **RoPE**, that overcomes all of these l
 
 ## Rotation Encodes Distance
 
-There's a neater way to give the model a sense of distance, leaning on a fact about [dot products](/vectors#measuring-similarity): **the dot product of two unit vectors only depends on the angle between them.** Picture two clock hands — if you rotate the whole clock by 30°, both hands turn together and the angle between them is unchanged, so the dot product is unchanged too. But if the two hands rotate by *different* amounts, the dot product changes by an amount that depends only on the gap.
+There's a neater way to give the model a sense of distance, leaning on a fact about dot products: **the dot product of two unit vectors only depends on the angle between them.** Picture two clock hands — if you rotate the whole clock by 30°, both hands turn together and the angle between them is unchanged, so the dot product is unchanged too. But if the two hands rotate by *different* amounts, the dot product changes by an amount that depends only on the gap.
 
 <RotationDotProductWidget>
 Try dragging the base angle slider. Both vectors spin around the circle together, their x and y values change completely, but the dot product doesn't budge. Now change the angle between them and watch the dot product respond. It only cares about the gap.
@@ -69,7 +69,7 @@ How quickly we rotate per position is called the **speed**. A higher speed means
 How do we connect this geometric idea to actual attention? Take one dimension of our token vectors (say "nouniness") and split it into two coordinates: noun-x and noun-y. Now rotate that 2D point by position × speed. The dot product between a rotated query and a rotated key automatically favors nearby tokens, just like the circle demo above.
 
 <RotationToyTokensWidget>
-Start with rotation speed at 0°. Both nouns get identical attention, just like in the attention chapter. Now drag it up. The closer noun starts winning because its key is rotated to a more similar angle to "it"'s query. Try different sentences to see the effect with different distances. This achieves the same distance preference as ALiBi, but through geometry rather than an explicit penalty.
+Start with rotation speed at 0°. Both nouns get identical attention, just like in <Ch slug="attention" />. Now drag it up. The closer noun starts winning because its key is rotated to a more similar angle to "it"'s query. Try different sentences to see the effect with different distances. This achieves the same distance preference as ALiBi, but through geometry rather than an explicit penalty.
 </RotationToyTokensWidget>
 
 This is the core of **RoPE** (Rotary Position Embeddings). Instead of *adding* a distance penalty after computing the dot product, we **rotate** each word's query and key vectors by an angle that depends on position. The dot product naturally encodes distance.
@@ -99,7 +99,7 @@ The dot product between two rotated vectors is the same whether the other word i
 
 We started with a problem: attention couldn't tell "The dog bit the man" from "The man bit the dog." The words were floating in a bag with no order. Now, by rotating each word's vector based on its position, the model can tell how far apart two words are, and each word gets to decide for itself whether to focus on its close neighbors, scan the whole sentence, or anything in between.
 
-Attention now knows three things: what each word *means* (from embeddings), which other words *matter* (from attention scores), and where each word *is* (from rotation). In the next chapter, we'll put all of these pieces together to build the **transformer**, the architecture behind ChatGPT, Claude, and most modern language models.
+Attention now knows three things: what each word *means* (from embeddings), which other words *matter* (from attention scores), and where each word *is* (from rotation). In <Ch slug="transformers" />, we'll put all of these pieces together to build the **transformer**, the architecture behind ChatGPT, Claude, and most modern language models.
 
 <TryItInPyTorch notebook="positions">
 Demonstrate that toy attention is position-blind, build ALiBi from a linear distance penalty, derive RoPE from the rotation-invariance of the dot product, combine multiple rotation speeds for different attention-distance shapes, and apply causal masking with `torch.triu`.
