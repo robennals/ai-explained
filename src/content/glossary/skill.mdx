@@ -6,12 +6,12 @@ firstAppearance: chat
 
 A **skill** is a document of instructions that a model can fetch when it decides the job needs them.
 
-A model learns nothing during a conversation, so anything it picks up after training has to arrive as text put in front of it. A skill is that, tidied up: the model is shown a list of skill names with one line each on when they apply, and asks for the full document only when one looks relevant. That request is an ordinary tool call, and the thing that comes back is instructions instead of a search result.
+The model is shown a list of skill names with one line each on when they apply. The model then asks for the full skill instructions only when that skill looks relevant. A skill will often contain instructions for using a tool, and describe personal customizations to how you want the model to do particular tasks.
 
-Why it works this way:
+Examples of skills include:
 
-- **A person with a folder of checklists does the same** — you do not memorise the pre-flight checklist, you know one exists and fetch it.
-- **One line each is cheap** — loading every skill in full, every time, would be enormous and almost all of it irrelevant.
-- **Nothing is retrained** — a new procedure can be written in the morning and used that afternoon.
-
-This is also why telling a model something useful in one conversation does nothing for the next one.
+- **Writing in your voice** — a short style guide, fetched whenever the model drafts something for you: British spelling, short sentences, no exclamation marks.
+- **Filing an expense claim** — which form, which receipts, and who approves what, written once by the person who knows and used by everyone.
+- **Drawing a chart** — the colours, fonts and labelling rules, so every chart it makes matches the rest of your documents.
+- **Using the ticketing system at work** — what each field means and what a well-formed query looks like, so the model can drive a tool that did not exist when it was trained.
+- **Checking a contract before you sign it** — the clauses a lawyer always looks at, in the order she looks at them.
