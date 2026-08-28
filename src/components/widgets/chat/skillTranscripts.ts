@@ -69,18 +69,17 @@ export const skillScenarios: SkillScenario[] = [
         role: "skill-document",
         text: `Reporting a fault to the council
 
-Use this whenever someone wants something broken reported to the council: a
-streetlight, a pothole, a missed collection, a broken swing.
+If something is broken, report it using the "report_fault" tool, defined as
+follows:
 
-Call the report_fault tool, whose arguments are:
+report_fault(
+  service: "lighting", "roads", "waste" or "parks"
+  street:  the street name on its own, with no number
+  detail:  whereabouts on that street, in a few words
+  urgent:  true only if somebody could be hurt before it is fixed
+)
 
-  service  one of "lighting", "roads", "waste" or "parks"
-  street   the street name on its own, with no number
-  detail   whereabouts on that street, in a few words
-  urgent   true only if it is dangerous right now
-
-Mark something urgent only if somebody could be hurt before it is fixed. One
-dark streetlight is not urgent. A whole dark street is.`,
+One dark streetlight is not urgent. A whole dark street is.`,
       },
       {
         role: "tool-call",
@@ -180,15 +179,20 @@ often the bigger problem.`,
         role: "skill-document",
         text: `Booking a table
 
-Use this when someone wants a restaurant booked.
+Use this when someone wants a restaurant booked. Check what the family eats
+first, with load_skill("family-food").
 
-Check what the family eats first, with load_skill("family-food").
+Then book it using the "book_table" tool, defined as follows:
 
-Book it with book_table, giving the place, the date, how many people, and
-any notes. For a party of more than six, pick somewhere with a set menu.
+book_table(
+  place:  the name of the restaurant
+  date:   when, in whatever form they said it
+  people: how many are coming
+  notes:  anything the kitchen needs to know
+)
 
-Put every dietary requirement in the notes. Do not assume the restaurant
-will ask.`,
+For a party of more than six, pick somewhere with a set menu. Put every
+dietary requirement in the notes. Do not assume the restaurant will ask.`,
       },
       { role: "skill-request", text: 'load_skill("family-food")' },
       {

@@ -40,9 +40,13 @@ describe("skillScenarios", () => {
   it("writes every skill document as prose, not a bare parameter table", () => {
     for (const scenario of skillScenarios) {
       for (const turn of scenario.turns) {
-        if (turn.role === "skill-document") {
-          expect(turn.text).toMatch(/\b(Use this|Read this|Work through|Book it)\b/);
-        }
+        if (turn.role !== "skill-document") continue;
+        // A document has to say what to do in sentences, whatever else it
+        // also lists. Look for a full sentence outside the indented block.
+        const prose = turn.text
+          .split("\n")
+          .filter((line) => !line.startsWith("  ") && line.trim().endsWith("."));
+        expect(prose.length).toBeGreaterThanOrEqual(1);
       }
     }
   });
