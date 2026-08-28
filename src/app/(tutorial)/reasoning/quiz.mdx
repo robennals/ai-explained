@@ -3,9 +3,9 @@
 <Question>
 What actually changes in a reasoning model?
 
+<Choice correct>It emits hidden thinking tokens before answering, and was trained to use them</Choice>
 <Choice>A new memory component is added to the architecture</Choice>
 <Choice>The attention mechanism is replaced with a search algorithm</Choice>
-<Choice correct>It emits hidden thinking tokens before answering, and was trained to use them</Choice>
 <Choice>It runs the same question through the model many times in parallel</Choice>
 
 <Feedback>
@@ -27,15 +27,15 @@ The model writes the trace, reads it back, and answers from it, so the working i
 </Question>
 
 <Question>
-How are reasoning models taught to think well?
+What does most of the work in training a reasoning model?
 
-<Choice>People write out ideal reasoning and the model is trained to copy it</Choice>
-<Choice correct>The model attempts a checkable problem many times, and whole attempts that reach the right answer are made more likely</Choice>
-<Choice>Each step of the working is graded separately by a second model</Choice>
-<Choice>A search algorithm explores possible reasoning paths at answer time</Choice>
+<Choice>Experts writing out worked solutions for the model to copy</Choice>
+<Choice>A second model marking each line of the working</Choice>
+<Choice correct>Letting it attempt checkable problems many times, and rewarding whole attempts that reached the right answer</Choice>
+<Choice>Searching through possible lines of reasoning at the moment you ask</Choice>
 
 <Feedback>
-Nobody can write good working for millions of problems. What scales is checking only the final answer, which for maths and code a computer can do for free. The model attempts a problem many times, the attempts that got there are made more likely and the rest less likely, and the working is never marked at all. Habits like checking your own claim survive because attempts containing them reach the right answer more often.
+Worked examples do help, and there are plenty of them: textbooks and forum answers full of working sit in the pre-training data, and curated sets of good reasoning are used in fine-tuning. What they cannot do is cover millions of problems. The method that scales needs nothing but an answer a computer can mark. The model attempts a problem many times over, whole attempts that reached the right answer are made more likely, and the working itself is never marked at all. Habits like finishing a search survive because attempts containing them get there more often.
 </Feedback>
 </Question>
 
