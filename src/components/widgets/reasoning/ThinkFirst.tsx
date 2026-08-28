@@ -53,7 +53,6 @@ export function ThinkFirst() {
       </div>
 
       <p className="mt-4 text-base leading-relaxed text-foreground">
-        <span className="font-semibold">Why: </span>
         The dashed message is the model talking to itself. It is predicted one
         token at a time, exactly like the answer, and the model reads it back
         before writing that answer.

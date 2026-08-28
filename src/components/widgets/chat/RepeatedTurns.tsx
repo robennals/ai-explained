@@ -95,7 +95,6 @@ export function RepeatedTurns() {
       )}
 
       <p className="mt-4 text-base leading-relaxed text-foreground">
-        <span className="font-semibold">Why: </span>
         {index === 0
           ? "The first reply in a conversation. Nothing has been sent before, so the whole prompt is new."
           : "The model kept nothing from last time. Its own earlier replies are in the prompt because the program running it put them there, along with everything else that has been said."}
