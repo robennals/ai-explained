@@ -17,7 +17,7 @@ import {
  * `stroke-dasharray` sets both. `rx` matches the bubble's rounded-2xl corner.
  */
 const dashedOutline =
-  "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' stroke='%236b7280' stroke-width='4' stroke-dasharray='9%2c 11' rx='16' ry='16'/%3e%3c/svg%3e\")";
+  "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' stroke='%236b7280' stroke-width='4' stroke-dasharray='8%2c 6' rx='16' ry='16'/%3e%3c/svg%3e\")";
 
 function Message({ turn }: { turn: Turn }) {
   const fromHuman = turn.role === "user";
