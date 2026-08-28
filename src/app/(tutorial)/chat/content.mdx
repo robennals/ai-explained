@@ -59,7 +59,7 @@ That loop repeats until the model writes an ordinary reply instead of another to
 Four loops, in four tabs. It is one conversation, and the dashed messages are part of it, they just never reach the human's chat window. The model's next move is decided entirely by what came back as text.
 </ToolLoopWidget>
 
-This is all "the model searched the web" means. It is also worth being clear that the model does not run anything. It writes a request, something else acts, and the model finds out what happened by reading. Grounding an answer in a real search result makes it much more likely to be right, though the model is still the one writing the summary, so it is still capable of getting it wrong. <Ch slug="hallucination" /> takes that up.
+This is all "the model searched the web" means. It is also worth being clear that the model does not run anything. It writes a request, something else acts, and the model finds out what happened by reading. Grounding an answer in a real search result makes it much more likely to be right, though the model is still the one writing the summary, so it is still capable of getting it wrong.
 
 ## Skills
 
@@ -87,7 +87,7 @@ Underneath every chat interface there is a single stream of tokens. The model do
 
 The format is called a *chat template*, and the markers are real tokens the tokeniser knows about. Post-training is what taught the model to continue after the assistant marker, to answer rather than to carry on inventing user messages, and to emit the end marker when it is done so the harness knows to stop.
 
-The system prompt is nothing more special than text at the top of that document. That is why it works, and also why it is not a hard guarantee. Everything the model knows about the conversation is in the transcript in front of it, which is why the size of that transcript matters so much. <Ch slug="context" /> is about managing it.
+The system prompt is nothing more special than text at the top of that document. That is why it works, and also why it is not a hard guarantee. Everything the model knows about the conversation is in the transcript in front of it, which is why the size of that transcript matters so much.
 
 ## Putting It Together
 
