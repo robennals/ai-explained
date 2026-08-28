@@ -7,9 +7,16 @@ import {
   getScenario,
   isVisibleToUser,
   scenarios,
+  senderKind,
   senderLabel,
   type Turn,
 } from "./toolTranscripts";
+
+const senderColors = {
+  human: "text-accent",
+  model: "text-success",
+  tool: "text-warning",
+} as const;
 
 function Message({ turn }: { turn: Turn }) {
   const fromHuman = turn.role === "user";
@@ -18,9 +25,15 @@ function Message({ turn }: { turn: Turn }) {
 
   return (
     <div className={`flex flex-col ${fromHuman ? "items-end" : "items-start"}`}>
-      <div className="mb-1 px-1 text-xs font-bold uppercase tracking-widest text-muted">
+      <div
+        className={`mb-1 px-1 text-xs font-bold uppercase tracking-widest ${
+          senderColors[senderKind(turn)]
+        }`}
+      >
         {senderLabel(turn)}
-        {hidden && <span className="font-medium normal-case"> (hidden)</span>}
+        {hidden && (
+          <span className="font-medium normal-case text-muted"> (hidden)</span>
+        )}
       </div>
       <div
         className={`max-w-[85%] rounded-2xl px-4 py-2.5 ${

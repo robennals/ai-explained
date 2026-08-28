@@ -1,19 +1,18 @@
 ---
 term: harness
-aliases: [harnesses, agent harness, scaffold, scaffolding]
+aliases: [harnesses, agent harness]
 firstAppearance: chat
 ---
 
-A **harness** is the ordinary program that runs a language model: it assembles the prompt, reads what the model writes, acts on any tool calls, and decides when to stop.
+A **harness** is the ordinary program that runs a model: it builds the prompt, reads what the model writes, runs any tools, and decides when to stop.
 
-The model itself only turns text into more text. Everything around that is the harness. When a chat product shows you a reply, a harness put your message into the transcript, ran the model, spotted the end-of-turn token, and displayed what came before it. When an agent searches the web, the harness is what actually made the request, because the model can only write down that it would like one made.
+The model only turns text into more text. Everything around that is the harness. When an agent searches the web, the harness is what actually made the request, because the model can only write down that it would like one made.
 
-What a harness typically does:
+What a harness does:
 
-- **Builds the prompt** — glues the system prompt, the conversation so far, and any retrieved documents into the single token stream the model completes.
-- **Runs the tools** — sees a tool call in the model's output, stops generation, performs the search or runs the code, and pastes the result back into the transcript as a new turn.
-- **Loops** — feeds the model the extended transcript and lets it write again, repeating until it produces an ordinary reply instead of another tool call.
-- **Enforces limits** — caps how many turns or tokens a task may use, and asks the user before anything irreversible.
-- **Hides the plumbing** — shows the human the messages addressed to them and not the traffic between the model and the tools.
+- **Builds the prompt** — glues the system prompt, the conversation so far, and anything else needed into the one stream of text the model completes.
+- **Runs the tools** — sees a tool call, stops generation, does the search, and pastes the result back in as a new message.
+- **Loops** — lets the model write again, and keeps going until it produces an ordinary reply instead of another tool call.
+- **Hides the plumbing** — shows the human the messages meant for them, and not the traffic between the model and the tools.
 
-Two systems built on the same model can behave very differently because their harnesses differ. Most of what people experience as one AI product being more capable than another is the harness, not the weights.
+Two products built on the same model can behave very differently because their harnesses differ.

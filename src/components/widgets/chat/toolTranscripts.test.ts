@@ -3,6 +3,7 @@ import {
   getScenario,
   isVisibleToUser,
   scenarios,
+  senderKind,
   senderLabel,
 } from "./toolTranscripts";
 
@@ -95,5 +96,17 @@ describe("isVisibleToUser", () => {
 describe("getScenario", () => {
   it("falls back to the first scenario for an unknown id", () => {
     expect(getScenario("nope")).toBe(scenarios[0]);
+  });
+});
+
+describe("senderKind", () => {
+  it("puts the person, the model and the tools in three groups", () => {
+    const scenario = getScenario("search");
+    expect(scenario.turns.map(senderKind)).toEqual([
+      "human",
+      "model",
+      "tool",
+      "model",
+    ]);
   });
 });

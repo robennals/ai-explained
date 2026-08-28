@@ -177,6 +177,13 @@ export function senderLabel(turn: Turn): string {
   }
 }
 
+/** Which of the three actors wrote a turn, for colouring their name. */
+export function senderKind(turn: Turn): "human" | "model" | "tool" {
+  if (turn.role === "user") return "human";
+  if (turn.role === "tool-result") return "tool";
+  return "model";
+}
+
 /**
  * Whether a turn appears in the chat window. The traffic between the model and
  * the tools is in the same transcript as everything else; the product just
