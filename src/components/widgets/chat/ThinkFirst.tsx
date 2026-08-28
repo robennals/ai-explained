@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { ToggleControl } from "@/components/widgets/shared/ToggleControl";
 import { WidgetContainer } from "@/components/widgets/shared/WidgetContainer";
 import {
   buildPrompt,
@@ -19,42 +18,30 @@ const segmentStyles: Record<SegmentKind, string> = {
 
 export function ThinkFirst() {
   const [exampleId, setExampleId] = useState(reasoningExamples[0].id);
-  const [thinking, setThinking] = useState(true);
   const example = getReasoningExample(exampleId);
   const prompt = buildPrompt(example);
-  const stream = buildStream(example, thinking);
-  const answer = thinking ? example.answer : example.quickAnswer;
+  const stream = buildStream(example);
 
   return (
     <WidgetContainer
       title="Thinking before answering"
-      description="One stream of tokens. The product hides the part between the think tags."
-      onReset={() => {
-        setExampleId(reasoningExamples[0].id);
-        setThinking(true);
-      }}
+      description="One stream of tokens. The app hides the part between the think tags."
+      onReset={() => setExampleId(reasoningExamples[0].id)}
     >
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap gap-2">
-          {reasoningExamples.map((e) => (
-            <button
-              key={e.id}
-              onClick={() => setExampleId(e.id)}
-              className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                e.id === exampleId
-                  ? "bg-accent text-white"
-                  : "bg-foreground/5 text-muted hover:bg-foreground/10"
-              }`}
-            >
-              {e.label}
-            </button>
-          ))}
-        </div>
-        <ToggleControl
-          label="Thinking tokens"
-          checked={thinking}
-          onChange={setThinking}
-        />
+      <div className="flex flex-wrap gap-2">
+        {reasoningExamples.map((e) => (
+          <button
+            key={e.id}
+            onClick={() => setExampleId(e.id)}
+            className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+              e.id === exampleId
+                ? "bg-accent text-white"
+                : "bg-foreground/5 text-muted hover:bg-foreground/10"
+            }`}
+          >
+            {e.label}
+          </button>
+        ))}
       </div>
 
       <div className="mt-5 overflow-hidden rounded-lg border border-widget-border">
@@ -90,25 +77,16 @@ export function ThinkFirst() {
           </span>
         </div>
         <div className="bg-accent/5 px-4 py-3 text-base leading-relaxed text-foreground">
-          {answer}
+          {example.answer}
         </div>
       </div>
 
       <p className="mt-4 text-base leading-relaxed text-foreground">
-        {thinking ? (
-          <>
-            <span className="font-semibold">Why: </span>
-            The grey text is the model talking to itself. It is predicted one
-            token at a time, exactly like the answer, and the model reads it
-            back as context before writing the answer. The app strips
-            everything between the think tags.
-          </>
-        ) : (
-          <>
-            <span className="font-semibold">Why it slips: </span>
-            {example.quickWhy}
-          </>
-        )}
+        <span className="font-semibold">Why: </span>
+        The grey text is the model talking to itself. It is predicted one token
+        at a time, exactly like the answer, and the model reads it back as
+        context before writing that answer. The app strips everything between
+        the think tags.
       </p>
     </WidgetContainer>
   );

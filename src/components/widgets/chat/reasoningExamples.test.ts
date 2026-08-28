@@ -12,12 +12,6 @@ describe("reasoningExamples", () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it("gives a different answer with and without thinking", () => {
-    for (const example of reasoningExamples) {
-      expect(example.quickAnswer).not.toBe(example.answer);
-    }
-  });
-
   it("gives every example a multi-step trace", () => {
     for (const example of reasoningExamples) {
       expect(example.trace.length).toBeGreaterThanOrEqual(3);
@@ -35,26 +29,18 @@ describe("buildStream", () => {
   const example = getReasoningExample("bat");
 
   it("puts the thinking in the same stream as the answer, between think tags", () => {
-    const kinds = buildStream(example, true).map((s) => s.kind);
+    const kinds = buildStream(example).map((s) => s.kind);
     expect(kinds).toEqual(["marker", "think", "marker", "answer", "marker"]);
   });
 
   it("emits nothing the model was handed", () => {
-    for (const segment of buildStream(example, true)) {
+    for (const segment of buildStream(example)) {
       expect(segment.text).not.toContain(example.question);
     }
   });
 
-  it("emits the same stream minus the think section when thinking is off", () => {
-    const stream = buildStream(example, false);
-    expect(stream.some((s) => s.kind === "think")).toBe(false);
-    expect(stream.find((s) => s.kind === "answer")!.text).toBe(
-      example.quickAnswer
-    );
-  });
-
   it("keeps every trace line in the stream", () => {
-    const think = buildStream(example, true).find((s) => s.kind === "think")!;
+    const think = buildStream(example).find((s) => s.kind === "think")!;
     for (const line of example.trace) {
       expect(think.text).toContain(line);
     }
