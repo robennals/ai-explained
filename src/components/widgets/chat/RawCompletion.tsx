@@ -75,7 +75,10 @@ export function RawCompletion() {
         <div className="whitespace-pre-wrap bg-surface px-4 py-3 font-mono text-sm leading-relaxed text-foreground">
           {prefix}
         </div>
-        <div className="border-t border-widget-border bg-accent/5 px-4 py-2">
+      </div>
+
+      <div className="mt-4 overflow-hidden rounded-lg border border-accent/40">
+        <div className="border-b border-accent/30 bg-accent/10 px-4 py-2">
           <span className="text-xs font-bold uppercase tracking-widest text-accent">
             What the model predicts next
           </span>
@@ -85,8 +88,8 @@ export function RawCompletion() {
         </div>
       </div>
 
-      <p className="mt-3 text-sm leading-relaxed text-muted">
-        <span className="font-semibold text-foreground">Why: </span>
+      <p className="mt-4 text-base leading-relaxed text-foreground">
+        <span className="font-semibold">Why: </span>
         {mode === "base"
           ? example.baseNote
           : "The role markers put the model in the middle of a transcript, with the assistant's turn left open. Post-training taught it that the likely continuation there is an answer."}

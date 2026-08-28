@@ -11,6 +11,11 @@ describe("completionExamples", () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
+  it("names a different failure mode in every label", () => {
+    const labels = completionExamples.map((e) => e.label);
+    expect(new Set(labels).size).toBe(labels.length);
+  });
+
   it("gives every example both a base and a chat completion", () => {
     for (const example of completionExamples) {
       expect(example.base.trim()).not.toBe("");
@@ -22,12 +27,12 @@ describe("completionExamples", () => {
 
 describe("buildPrefix", () => {
   it("hands a base model the raw prompt and nothing else", () => {
-    const example = getExample("maths");
+    const example = getExample("no-stopping");
     expect(buildPrefix(example, "base")).toBe(example.prompt);
   });
 
   it("wraps the same words in role markers for a chat model", () => {
-    const example = getExample("maths");
+    const example = getExample("no-stopping");
     const prefix = buildPrefix(example, "chat");
     expect(prefix).toContain(example.prompt);
     expect(prefix.startsWith("<|user|>")).toBe(true);
@@ -37,7 +42,7 @@ describe("buildPrefix", () => {
 
 describe("getExample", () => {
   it("looks an example up by id", () => {
-    expect(getExample("maths").label).toBe("A maths problem");
+    expect(getExample("no-stopping").label).toBe("It doesn't stop");
   });
 
   it("falls back to the first example for an unknown id", () => {

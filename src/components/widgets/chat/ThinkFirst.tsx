@@ -79,8 +79,8 @@ export function ThinkFirst() {
       </div>
 
       {!thinking && (
-        <p className="mt-3 text-sm leading-relaxed text-muted">
-          <span className="font-semibold text-foreground">Why it slips: </span>
+        <p className="mt-4 text-base leading-relaxed text-foreground">
+          <span className="font-semibold">Why it slips: </span>
           {example.quickWhy}
         </p>
       )}
