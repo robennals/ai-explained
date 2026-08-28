@@ -1,68 +1,64 @@
 import { describe, expect, it } from "vitest";
-import {
-  candidates,
-  getSignal,
-  signals,
-  updatedProbabilities,
-} from "./postTrainingSignals";
+import { approaches, getApproach, sharedPrompt } from "./postTrainingSignals";
 
-describe("candidates", () => {
-  it("has prior probabilities that sum to 1", () => {
-    const total = candidates.reduce((a, c) => a + c.priorProbability, 0);
-    expect(total).toBeCloseTo(1, 6);
+describe("approaches", () => {
+  it("has a unique id for every approach", () => {
+    const ids = approaches.map((a) => a.id);
+    expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it("has exactly one correct response", () => {
-    expect(candidates.filter((c) => c.correct)).toHaveLength(1);
+  it("gives every approach panels, an outcome, a blind spot and a citation", () => {
+    for (const approach of approaches) {
+      expect(approach.panels.length).toBeGreaterThan(1);
+      expect(approach.outcome.trim()).not.toBe("");
+      expect(approach.blindSpot.trim()).not.toBe("");
+      expect(approach.usedBy.trim()).not.toBe("");
+    }
   });
-});
 
-describe("signals", () => {
-  it("scores every candidate, in range, for every signal", () => {
-    for (const signal of signals) {
-      for (const candidate of candidates) {
-        const score = signal.scores[candidate.id];
-        expect(score).toBeGreaterThanOrEqual(0);
-        expect(score).toBeLessThanOrEqual(1);
+  it("keeps scores in range wherever an approach produces one", () => {
+    for (const approach of approaches) {
+      for (const panel of approach.panels) {
+        if (panel.score !== undefined) {
+          expect(panel.score).toBeGreaterThanOrEqual(0);
+          expect(panel.score).toBeLessThanOrEqual(1);
+        }
       }
     }
   });
 
-  it("makes the usage signal prefer the flattering wrong answer", () => {
-    const usage = getSignal("usage");
-    expect(usage.scores["flattering-wrong"]).toBeGreaterThan(
-      usage.scores.correct
-    );
+  it("gives the written-answer approach no score at all, since the text is the target", () => {
+    const ideal = getApproach("ideal");
+    expect(ideal.panels.every((p) => p.score === undefined)).toBe(true);
+  });
+
+  it("uses the same prompt everywhere it shows one, so the approaches compare", () => {
+    for (const approach of approaches) {
+      for (const panel of approach.panels) {
+        if (panel.kind === "prompt") {
+          expect(panel.text).toBe(sharedPrompt);
+        }
+      }
+    }
+  });
+
+  it("scores the flattering answer above the correct one on usage data", () => {
+    const scores = getApproach("usage")
+      .panels.filter((p) => p.score !== undefined)
+      .map((p) => p.score!);
+    expect(scores[0]).toBeGreaterThan(scores[1]);
+  });
+
+  it("shows the preferred response rising and the rejected one falling", () => {
+    const shift = getApproach("comparison").shift!;
+    const [preferred, rejected] = shift;
+    expect(preferred.after).toBeGreaterThan(preferred.before);
+    expect(rejected.after).toBeLessThan(rejected.before);
   });
 });
 
-describe("updatedProbabilities", () => {
-  it("returns a distribution", () => {
-    for (const signal of signals) {
-      const updated = updatedProbabilities(signal);
-      const total = Object.values(updated).reduce((a, b) => a + b, 0);
-      expect(total).toBeCloseTo(1, 6);
-    }
-  });
-
-  it("raises the correct answer when the checker is the signal", () => {
-    const updated = updatedProbabilities(getSignal("checker"));
-    expect(updated.correct).toBeGreaterThan(0.9);
-  });
-
-  it("raises the flattering answer above the correct one on usage data", () => {
-    const updated = updatedProbabilities(getSignal("usage"));
-    expect(updated["flattering-wrong"]).toBeGreaterThan(updated.correct);
-  });
-
-  it("leaves the distribution unchanged when every score is equal", () => {
-    const flat = {
-      ...getSignal("checker"),
-      scores: Object.fromEntries(candidates.map((c) => [c.id, 0.5])),
-    };
-    const updated = updatedProbabilities(flat);
-    for (const candidate of candidates) {
-      expect(updated[candidate.id]).toBeCloseTo(candidate.priorProbability, 6);
-    }
+describe("getApproach", () => {
+  it("falls back to the first approach for an unknown id", () => {
+    expect(getApproach("nope")).toBe(approaches[0]);
   });
 });

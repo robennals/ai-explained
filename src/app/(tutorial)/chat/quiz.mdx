@@ -66,15 +66,15 @@ The architecture does not change at all. The model writes tokens into a thinking
 </Question>
 
 <Question>
-A model's thinking trace is best understood as:
+A model's thinking trace:
 
-<Choice correct>Generated text, produced the same way as the answer, which may not reflect the real reasons</Choice>
-<Choice>A log of the computation happening inside the model's layers</Choice>
-<Choice>A record of which training examples the model retrieved</Choice>
-<Choice>A guaranteed-correct proof of the final answer</Choice>
+<Choice correct>Really does drive the answer, but is not a guaranteed-complete account of what influenced it</Choice>
+<Choice>Is written after the answer, to explain it to the user</Choice>
+<Choice>Is a record of which training examples the model retrieved</Choice>
+<Choice>Is a guaranteed-correct proof of the final answer</Choice>
 
 <Feedback>
-The trace is predicted one token at a time, exactly like everything else the model writes. It is genuinely useful, because the model reads it back and works from it. But it is not a readout of the model's internals, and a model can write a plausible-looking trace while the answer is actually driven by something the trace never mentions.
+The model writes the trace, reads it back, and answers from it, so the working is real working and it changes the answer. What it does not guarantee is completeness. In experiments where a hint about the answer is slipped into the prompt, models often take the hint and then write a confident chain of reasoning that never mentions it. People do the same thing: the reasons given for a conclusion are not always the reasons that produced it.
 </Feedback>
 </Question>
 
@@ -88,6 +88,19 @@ When a model "searches the web", what does the model itself do?
 
 <Feedback>
 The model can only write text. It writes a structured tool call, the program running it (the harness) stops generation, performs the search, and pastes the result into the transcript as a new turn. The model then carries on predicting from there. The loop repeats until the model writes an ordinary reply instead of another tool call.
+</Feedback>
+</Question>
+
+<Question>
+How does a model use a *skill*?
+
+<Choice>The skill's instructions are trained into the weights beforehand</Choice>
+<Choice correct>It calls a tool that hands back the skill's instructions as text</Choice>
+<Choice>A separate model runs the skill and reports the result</Choice>
+<Choice>Every skill's full instructions are always present in the context</Choice>
+
+<Feedback>
+A skill is tool use where the tool's result happens to be a page of instructions. The model is given a list of skill names with one line each on when they apply, writes a tool call asking for the one that looks relevant, and reads the instructions that come back. Loading every skill in full every time would be enormous and mostly irrelevant, which is why the list is short and the document arrives only when it is needed.
 </Feedback>
 </Question>
 
