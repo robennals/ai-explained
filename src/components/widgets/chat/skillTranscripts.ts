@@ -33,15 +33,6 @@ export interface SkillScenario {
   takeaway: string;
 }
 
-const familyFood = `What this family eats
-
-Read this before planning a meal or booking anywhere to eat.
-
-Nobody puts nuts on the table, ever. The allergy is severe.
-Two of us are vegetarian, though both of them eat fish.
-Nobody likes coriander, so leave it out rather than serving it alongside.
-Sunday is the roast, so Saturday should be something else.`;
-
 function offered(text: string): SkillTurn {
   return {
     role: "system",
@@ -113,7 +104,14 @@ One dark streetlight is not urgent. A whole dark street is.`,
       { role: "skill-request", text: 'load_skill("family-food")' },
       {
         role: "skill-document",
-        text: familyFood,
+        text: `What this family eats
+
+Read this before planning a meal or booking anywhere to eat.
+
+Nobody puts nuts on the table, ever. The allergy is severe.
+Two of us are vegetarian, though both of them eat fish.
+Nobody likes coriander, so leave it out rather than serving it alongside.
+Sunday is the roast, so Saturday should be something else.`,
       },
       {
         role: "assistant",
@@ -128,78 +126,72 @@ One dark streetlight is not urgent. A whole dark street is.`,
     label: "One skill leading to another",
     turns: [
       offered(
-        `  book-a-table       booking somewhere to eat
-  restaurant-search  finding somewhere that suits
-  family-food        what this family eats`
+        `  restaurant-search  finding somewhere to eat
+  book-a-table       booking a table once you have picked one
+  weekly-shop        where we buy what`
       ),
       {
         role: "user",
-        text: "Book somewhere for Mum and Dad's anniversary on the 14th. Eight of us.",
+        text: "Book an Italian place near the office for lunch tomorrow. Four of us.",
+      },
+      { role: "skill-request", text: 'load_skill("restaurant-search")' },
+      {
+        role: "skill-document",
+        text: `Finding somewhere to eat
+
+Call the "find_restaurants" tool, defined as follows:
+
+find_restaurants(
+  area:    where to look
+  cuisine: the kind of food
+  people:  how many are coming
+)
+
+Ignore anything rated below 4.0. Once you have picked one, book it with load_skill("book-a-table").`,
+      },
+      {
+        role: "tool-call",
+        tool: "Restaurant finder",
+        text: 'find_restaurants(area="near the office", cuisine="Italian", people=4)',
+      },
+      {
+        role: "tool-result",
+        tool: "Restaurant finder",
+        text: `Trattoria Vera   4.5   10 minute walk, takes bookings
+Pizza Nova       3.7   5 minute walk`,
       },
       { role: "skill-request", text: 'load_skill("book-a-table")' },
       {
         role: "skill-document",
         text: `Booking a table
 
-Use this when someone wants a table booked. Check what the family eats first, with load_skill("family-food"), then find somewhere with load_skill("restaurant-search").
-
-Book it using the "book_table" tool, defined as follows:
+Call the "book_table" tool, defined as follows:
 
 book_table(
   place:  the name of the restaurant
   date:   when, in whatever form they said it
   people: how many are coming
-  notes:  anything the kitchen needs to know
 )
 
-Put every dietary requirement in the notes. Do not assume the restaurant will ask.`,
-      },
-      { role: "skill-request", text: 'load_skill("family-food")' },
-      { role: "skill-document", text: familyFood },
-      { role: "skill-request", text: 'load_skill("restaurant-search")' },
-      {
-        role: "skill-document",
-        text: `Finding somewhere that suits
-
-Use this to find a restaurant. Call the "find_restaurants" tool, defined as follows:
-
-find_restaurants(
-  area:   where to look, as a place name
-  people: how many are coming
-  needs:  dietary requirements, in plain words
-)
-
-Results come back in rating order. Do not suggest anywhere below 4.0, or anywhere that says no large groups. For more than six, prefer somewhere with a set menu.`,
-      },
-      {
-        role: "tool-call",
-        tool: "Restaurant finder",
-        text: 'find_restaurants(area="town centre", people=8,\n                 needs="severe nut allergy, two vegetarians who eat fish")',
-      },
-      {
-        role: "tool-result",
-        tool: "Restaurant finder",
-        text: `The Old Mill     4.6  set menu, groups up to 20, nut-free kitchen
-Saffron House    4.4  no large groups
-The Anchor       3.8  set menu, groups welcome`,
+Confirm back with the name and the time.`,
       },
       {
         role: "tool-call",
         tool: "Booking site",
-        text: 'book_table(place="The Old Mill", date="14th", people=8,\n           notes="Severe nut allergy, please keep nuts off the table.\n                  Two vegetarians who do eat fish. No coriander.")',
+        text: 'book_table(place="Trattoria Vera", date="tomorrow 12:30", people=4)',
       },
       {
         role: "tool-result",
         tool: "Booking site",
-        text: "Booked. The Old Mill, 19:30 on the 14th, table for 8. Notes sent to the kitchen.",
+        text: "Booked. Trattoria Vera, 12:30 tomorrow, table for 4.",
       },
       {
         role: "assistant",
-        text: "Booked: The Old Mill at 7.30 on the 14th, table for eight. It was the only one of the three that takes a group that size and has a nut-free kitchen, and it does a set menu. I've told them about the allergy, the two who eat fish but not meat, and the coriander.",
+        text: "Booked: Trattoria Vera, 12.30 tomorrow, table for four. Ten minutes from the office. Pizza Nova is closer but only rated 3.7, so I left it.",
       },
     ],
     takeaway:
-      "Three skills and two tools, and the model only knew to load two of those skills because the first one told it to. The allergy travelled from a household document, through a restaurant search, into the note the kitchen will read.",
+      "Two small skills, and the model only knew about the second because the first one named it. Neither says much: one gives the search tool and a rule about ratings, the other gives the booking tool and asks it to confirm back.",
   },
 ];
 
