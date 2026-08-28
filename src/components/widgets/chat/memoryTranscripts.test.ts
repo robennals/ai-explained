@@ -104,20 +104,6 @@ describe("learning from a mistake", () => {
   });
 });
 
-describe("seeing what it kept", () => {
-  const scenario = getMemoryScenario("inspect");
-
-  it("lists the memories and then deletes one", () => {
-    const roles = scenario.conversations[0].turns.map((t) => t.role);
-    expect(roles).toContain("memory-search");
-    expect(roles).toContain("memory-write");
-    const written = scenario.conversations[0].turns.find(
-      (t) => t.role === "memory-write"
-    )!;
-    expect(written.text).toContain("delete_memory");
-  });
-});
-
 describe("rendering", () => {
   it("hides everything between the model and the memory store", () => {
     for (const turn of allTurns) {

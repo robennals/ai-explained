@@ -130,36 +130,6 @@ export const memoryScenarios: MemoryScenario[] = [
     takeaway:
       "Nothing was learned in the sense of the model changing. It got the name wrong, was corrected, and wrote the correction down. A month later it typed the name correctly even though the request spelled it without the fada, because the note said to.",
   },
-  {
-    id: "inspect",
-    label: "Seeing what it kept",
-    conversations: [
-      {
-        when: "Any time",
-        turns: [
-          { role: "user", text: "What have you got written down about me?" },
-          { role: "memory-search", text: "list_memories()" },
-          {
-            role: "memory-result",
-            text: "1. Does not want flights departing before 09:00.\n2. Colleague is Siobhán, with the fada.\n3. Prefers metric for cooking, imperial for distances.\n4. Working from the Bristol office on Tuesdays.",
-          },
-          {
-            role: "assistant",
-            text: "Four things: no flights before nine, that Siobhán takes a fada, that you want metric for cooking and imperial for distances, and that you're in the Bristol office on Tuesdays.",
-          },
-          {
-            role: "user",
-            text: "That last one's out of date, I've not been in Bristol since March.",
-          },
-          { role: "memory-write", text: "delete_memory(4)" },
-          { role: "memory-result", text: "Deleted." },
-          { role: "assistant", text: "Gone. Three left." },
-        ],
-      },
-    ],
-    takeaway:
-      "Because a memory is just a stored note, it can be listed, read and deleted. It can also be wrong, or right when it was written and stale a year later, and it stays that way until somebody says otherwise.",
-  },
 ];
 
 export function getMemoryScenario(id: string): MemoryScenario {
