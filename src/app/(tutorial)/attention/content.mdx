@@ -1,8 +1,8 @@
-In order to understand what a word means, we need to look at other words in the document, including words that might have occurred much earlier. The technique AI models use to do that is called *Attention*. In this chapter we'll explain how it works.
+To understand what a word means, we often need to look at other words in the document, including some that came much earlier. The technique AI models use to do that is called *Attention*. In this chapter we'll explain how it works.
 
 ## Some Tokens Need Other Tokens
 
-You often can't tell what a token means on its own. Take "bank": is it a place for money, or the side of a river? You have to look at the tokens around it. A token like "it" is even harder, because it can refer to pretty much anything and we don't know what it is referring to unless we look back to find what it refers to.
+You often can't tell what a token means on its own. Take "bank": is it a place for money, or the side of a river? You have to look at the tokens around it. A token like "it" is even harder: it can stand for almost anything, so you have to look back to find what it points to.
 
 <WhyAttentionMattersWidget>
 Each sentence has one highlighted token. Follow the arrow to the token it depends on. Flip through the examples: the token it needs might be what a pronoun stands for, who did an action, where a scene is set, or a name from far back.
@@ -32,9 +32,9 @@ Each example shows the highlighted token's query, the key of the token it matche
 
 ## Matching with the Dot Product
 
-How does a computer decide whether a query matches a key? So far they have been in plain English, but comparing English text is tricky. How do we know that "a place with a sky" matches "a planet"?
+How does a computer decide whether a query matches a key? So far we've written queries and keys in plain English, but comparing English text is tricky. How do we know that "a place with a sky" matches "a planet"?
 
-In <Ch slug="vectors" /> and <Ch slug="embeddings" /> we showed that AI models can represent arbitrarily complex things using vectors. We also showed that we can use the dot product to compare two vectors to see how similar their meanings are. 
+In <Ch slug="vectors" /> and <Ch slug="embeddings" /> we showed that AI models can represent almost anything using vectors. We also showed that we can use the dot product to compare two vectors to see how similar their meanings are. 
 
 Indeed this is how Attention compares a query to a key. The query and key are both vectors, and their dot product gives a single **match score** we can read as a similarity from 0 (nothing in common) to 1 (a perfect match).
 
@@ -54,12 +54,12 @@ Most AI models do this with a function called **softmax**. Softmax always makes 
 Try "Score of 1": A scores 1 and the rest score 0, yet A only gets about 47% and each zero still keeps around 18%. Now try "Score of 9": same shape, but A takes almost everything. Small scores stay flat; big scores make the winner dominate.
 </SoftmaxExplorerWidget>
 
-The scores we gave in the previous section range from 0 to 1, but it turns out that doesn't work well with softmax. Softmax expects a score to be much bigger (e.g. 9) in order to be seen as a significantly better match than zero. In the following sections we'll use larger matching scores - which a real model accomplishes by using K and Q vectors with larger magnitudes.
+The scores we gave in the previous section range from 0 to 1, but that range doesn't work well with softmax. For softmax to treat one match as clearly better than the rest, the scores need to be much bigger, like 9 instead of 1. So from here on we'll use larger match scores. A real model gets them by giving its key and query vectors larger magnitudes, which stretches out their dot products.
 
 
 ## What if nothing matches?
 
-There is one more trick we need in order to get softmax to work nicely. Softmax requires its percentages to add up to 100%, but what do we do if nothing matches and we don't want to pay attention to any previous tokens? The fix is a **sink**: an extra token with a small fixed score. When the real tokens all score low, the sink out-competes them and quietly absorbs the attention. When something genuinely matches, it easily beats the sink.
+We need one more trick to make softmax work nicely. Softmax requires its percentages to add up to 100%, but what do we do if nothing matches and we don't want to pay attention to any previous tokens? The fix is a **sink**: an extra token with a small fixed score. When the real tokens all score low, the sink out-competes them and quietly absorbs the attention. When something genuinely matches, it easily beats the sink.
 
 <AttentionSinkWidget>
 Drag the sliders, or hit a preset. "Nothing matches": every real token scores low, so the sink (fixed at 3) wins most of the attention. "Something matches": token A scores 8, far above the sink, so it wins and the sink barely registers.
@@ -73,7 +73,7 @@ The reason we pay attention to another token is to extract information from it. 
 
 Attention combines the values of all the tokens, weighting each by its softmax percentage.
 
-It's kind of crazy that this works. Why should you be able to blend these value vectors together and get something that makes any sense? It works because, as we saw in <Ch slug="embeddings" />, the embeddings used by AI models are constructed such that you can do things like take the average of two embedding vectors, and the result is a vector that combines their meanings. 
+It's kind of crazy that this works. Why should you be able to blend these value vectors together and get something that makes any sense? It works because of something we saw in <Ch slug="embeddings" />: the vectors AI models use are built so that if you average two of them, the result combines their meanings. 
 
 
 <AttentionValuesWidget>
