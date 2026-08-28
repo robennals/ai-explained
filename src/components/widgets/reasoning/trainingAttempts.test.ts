@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   attempts,
+  check,
   correctAnswer,
   countCorrect,
   direction,
@@ -23,16 +24,32 @@ describe("attempts", () => {
     expect(countCorrect()).toBeLessThan(attempts.length);
   });
 
-  it("gives every attempt working, not just an answer", () => {
+  it("gives every attempt some working, not just an answer", () => {
     for (const attempt of attempts) {
-      expect(attempt.trace.length).toBeGreaterThanOrEqual(2);
+      expect(attempt.trace.length).toBeGreaterThanOrEqual(1);
     }
   });
 
-  it("has one winning attempt that checked itself and one that guessed well", () => {
+  it("varies how much working the attempts show", () => {
+    const lengths = attempts.map((a) => a.trace.length);
+    expect(Math.min(...lengths)).toBe(1);
+    expect(Math.max(...lengths)).toBeGreaterThanOrEqual(3);
+  });
+
+  it("has one winning attempt that worked through the cases and one that just saw it", () => {
     const winners = attempts.filter((a) => a.correct).map((a) => a.id);
     expect(winners).toContain("checked");
-    expect(winners).toContain("short");
+    expect(winners).toContain("spotted");
+  });
+
+  it("is a problem the reader can check in one line, whatever it took to find", () => {
+    expect(check.length).toBeLessThan(60);
+    expect(Number(correctAnswer) % 7).toBe(0);
+    expect(
+      String(correctAnswer)
+        .split("")
+        .reduce((a, d) => a + Number(d), 0)
+    ).toBe(11);
   });
 });
 

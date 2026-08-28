@@ -1,7 +1,13 @@
 "use client";
 
 import { WidgetContainer } from "@/components/widgets/shared/WidgetContainer";
-import { attempts, correctAnswer, direction, problem } from "./trainingAttempts";
+import {
+  attempts,
+  check,
+  correctAnswer,
+  direction,
+  problem,
+} from "./trainingAttempts";
 
 export function TraceSampling() {
   return (
@@ -65,9 +71,11 @@ export function TraceSampling() {
       </div>
 
       <p className="mt-4 text-base leading-relaxed text-foreground">
-        The checker only knows whether the answer was {correctAnswer}. Nobody
-        marked the working. The habits in the surviving attempts are there
-        because attempts containing them reach the right answer more often.
+        Finding the number takes a search. Checking it takes one line:{" "}
+        {check} That gap is what makes this work, because the checker only ever
+        asks whether the answer was {correctAnswer}. Nobody marked the working.
+        The habits in the surviving attempts are there because attempts
+        containing them reach the right answer more often.
       </p>
     </WidgetContainer>
   );

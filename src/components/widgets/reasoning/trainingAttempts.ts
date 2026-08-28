@@ -18,56 +18,53 @@ export interface Attempt {
 }
 
 export const problem =
-  "A shop sells pens in packs of 4 and 7. What is the largest number of pens you cannot buy exactly?";
+  "I am thinking of a two-digit number. It is a multiple of 7, and its two digits add up to 11. What is it?";
 
-export const correctAnswer = "17";
+export const correctAnswer = "56";
+
+/** What the checker does, which is all it does. */
+export const check = "56 ÷ 7 = 8, and 5 + 6 = 11.";
 
 export const attempts: Attempt[] = [
   {
+    id: "digit-sum",
+    trace: [
+      "Two-digit numbers whose digits add to 11: 29, 38, 47, 56, 65, 74, 83, 92.",
+      "That is the list. I will take 65.",
+    ],
+    answer: "65",
+    correct: false,
+    note: "Got half the conditions right and stopped, without checking the other one.",
+  },
+  {
     id: "gave-up",
     trace: [
-      "Packs of 4 and 7. I need the largest number that cannot be made.",
-      "4, 7, 8, 11, 12, 14, 15, 16... this could go on a while.",
-      "There is probably a formula for this. I think it is 4 × 7 = 28.",
+      "Multiples of 7: 7, 14, 21, 28, 35, 42, 49.",
+      "Digit sums: 7, 5, 3, 10, 8, 6, 13. None of them is 11.",
+      "So there is no such number.",
     ],
-    answer: "28",
+    answer: "no such number",
     correct: false,
-    note: "Reached for a half-remembered formula rather than checking anything.",
+    note: "Searched properly, then stopped searching halfway through the two-digit numbers.",
   },
   {
-    id: "slip",
-    trace: [
-      "Try each number and see if it can be made from 4s and 7s.",
-      "17 = no. 18 = 4+7+7 yes. 19 = 4+4+4+7 yes. 20 = 4×5 yes.",
-      "So 17 works, but 21 is 7×3, and I have not checked past 20.",
-      "The answer is 21.",
-    ],
-    answer: "21",
-    correct: false,
-    note: "Started checking properly, then stopped before the working was finished.",
-  },
-  {
-    id: "short",
-    trace: [
-      "Formula for two coprime numbers a and b: the largest unmakeable is ab − a − b.",
-      "4 × 7 − 4 − 7 = 28 − 11 = 17.",
-    ],
-    answer: "17",
+    id: "spotted",
+    trace: ["7 × 8 = 56, and 5 + 6 = 11. That is it."],
+    answer: "56",
     correct: true,
-    note: "Straight to a formula it knew, and the formula happened to be right.",
+    note: "Saw it straight away. Nothing here would have caught a mistake if it had made one.",
   },
   {
     id: "checked",
     trace: [
-      "Try to build each number from 4s and 7s.",
-      "17: 17−7=10, no. 17−14=3, no. 17 is not a multiple of 4. So 17 cannot be made.",
-      "18 = 4+7+7. 19 = 4+4+4+7. 20 = 4×5. 21 = 7×3.",
-      "That is four in a row, and every number after can be reached by adding 4 to one of those.",
-      "So nothing above 17 is impossible, and 17 is.",
+      "Go through the two-digit multiples of 7 and add the digits each time.",
+      "14 → 5. 21 → 3. 28 → 10. 35 → 8. 42 → 6. 49 → 13. 56 → 11.",
+      "56 works. Keep going in case there is another: 63 → 9, 70 → 7, 77 → 14, 84 → 12, 91 → 10, 98 → 17.",
+      "Nothing else reaches 11, so 56 is the only one.",
     ],
-    answer: "17",
+    answer: "56",
     correct: true,
-    note: "Checked its own claim, and then explained why nothing larger could work.",
+    note: "Worked through every case, and carried on afterwards to make sure the answer was the only one.",
   },
 ];
 
