@@ -6,6 +6,7 @@ import { WidgetTabs } from "@/components/widgets/shared/WidgetTabs";
 import { ChatMessage } from "./ChatMessage";
 import {
   getSkillScenario,
+  isMonospace,
   isSkillTurnVisible,
   skillScenarios,
   skillSenderKind,
@@ -35,11 +36,7 @@ export function SkillLoop() {
             sender={skillSenderLabel(turn)}
             kind={skillSenderKind(turn)}
             hidden={!isSkillTurnVisible(turn)}
-            mono={
-              turn.role === "skill-request" ||
-              turn.role === "skill-document" ||
-              turn.role === "system"
-            }
+            mono={isMonospace(turn)}
             text={turn.text}
           />
         ))}
