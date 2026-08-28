@@ -114,6 +114,15 @@ export const chapters: Chapter[] = [
   },
   {
     id: 10,
+    slug: "chat",
+    title: "Chat Models",
+    subtitle: "From predictor to assistant",
+    prerequisites: [9],
+    description:
+      "A trained transformer completes documents. It does not answer questions, think before speaking, or look things up. Post-training, reasoning tokens, and tool calls are what turn one into the assistant you actually talk to.",
+  },
+  {
+    id: 11,
     slug: "matrix-math",
     title: "Matrix Math",
     subtitle: "Thinking by rotating",
@@ -122,7 +131,7 @@ export const chapters: Chapter[] = [
       "Every layer is a transformation in space — a rotation, a stretch, a fold. The geometry of high-dimensional space is how neural networks reshape vectors of meaning.",
   },
   {
-    id: 11,
+    id: 12,
     slug: "training",
     title: "Making Training Work",
     subtitle: "Why training almost doesn't work",
@@ -131,7 +140,7 @@ export const chapters: Chapter[] = [
       "Plain gradient descent on a deep network barely works. Activation functions (ReLU, Swish), regularization, dropout, learning rate schedules, and Adam are the hard-won tricks that make modern training possible.",
   },
   {
-    id: 12,
+    id: 13,
     slug: "mixture-of-experts",
     title: "Mixture of Experts",
     subtitle: "Only wake the specialists you need",
@@ -140,7 +149,7 @@ export const chapters: Chapter[] = [
       "A router sends each question to specialist sub-networks. A trillion parameters, but only a fraction active per question. Smarter without getting slower.",
   },
   {
-    id: 13,
+    id: 14,
     slug: "long-context",
     title: "Long Context",
     subtitle: "Remembering a million words",
@@ -149,7 +158,7 @@ export const chapters: Chapter[] = [
       "Attention scales as the square of the input — so how do models read entire books? KV caching, sparse attention, and position scaling tricks stretch memory from sentences to libraries.",
   },
   {
-    id: 14,
+    id: 15,
     slug: "inference",
     title: "Inference and Hardware",
     subtitle: "Running models fast",
@@ -158,7 +167,7 @@ export const chapters: Chapter[] = [
       "GPUs, CUDA, FlashAttention, KV caching, speculative decoding, memory bandwidth — the engineering that makes inference cheap enough to use.",
   },
   {
-    id: 15,
+    id: 16,
     slug: "interpretability",
     title: "Interpretability",
     subtitle: "Looking inside the mind",
@@ -167,7 +176,7 @@ export const chapters: Chapter[] = [
       "Models aren't black boxes anymore. Sparse autoencoders, feature visualization, and circuit tracing reveal what individual neurons mean — sometimes finding a literal Golden Gate Bridge neuron inside.",
   },
   {
-    id: 16,
+    id: 17,
     slug: "reinforcement-learning",
     title: "Reinforcement Learning",
     subtitle: "Learning from experience",
@@ -176,29 +185,20 @@ export const chapters: Chapter[] = [
       "What if you don't have right answers, only rewards? RL learns from trial, error, and consequence — the algorithm behind robots that walk, agents that play games, and models that improve themselves.",
   },
   {
-    id: 17,
+    id: 18,
     slug: "self-play",
     title: "Self-Play",
     subtitle: "Getting better by beating yourself",
-    prerequisites: [16],
+    prerequisites: [17],
     description:
       "AlphaZero mastered chess and Go without ever seeing a human game — by playing itself, millions of times. The same idea now teaches reasoning models to think.",
-  },
-  {
-    id: 18,
-    slug: "reasoning",
-    title: "Reasoning Models",
-    subtitle: "Thinking by talking to yourself",
-    prerequisites: [9, 16],
-    description:
-      "Standard LLMs answer in one shot with no scratch paper. Reasoning models use their own output as working memory, talking through problems before answering — and get dramatically smarter.",
   },
   {
     id: 19,
     slug: "alignment",
     title: "Alignment",
     subtitle: "Teaching AI right from wrong",
-    prerequisites: [9, 16],
+    prerequisites: [10, 17],
     description:
       "RLHF transforms a text completer into a helpful assistant. But optimize too hard and the model learns to tell you what you want to hear, not what's true.",
   },
@@ -249,15 +249,6 @@ export const chapters: Chapter[] = [
   },
   {
     id: 25,
-    slug: "agents",
-    title: "Agents and Tool Use",
-    subtitle: "Getting things done",
-    prerequisites: [9, 18],
-    description:
-      "A model that just predicts text is a chatbot. A model that picks tools, runs loops, and uses a computer is an agent. From talker to doer.",
-  },
-  {
-    id: 26,
     slug: "hallucination",
     title: "Hallucination and Grounding",
     subtitle: "Making stuff up",
@@ -266,7 +257,7 @@ export const chapters: Chapter[] = [
       "Models sound confident even when they're wrong. Next-word training all but guarantees it. Why hallucinations happen, why they're hard to detect, and what actually reduces them.",
   },
   {
-    id: 27,
+    id: 26,
     slug: "context",
     title: "Context Management",
     subtitle: "Getting the right information",
@@ -275,7 +266,7 @@ export const chapters: Chapter[] = [
       "A model's intelligence depends as much on what you put in front of it as on its weights. Retrieval, prompt construction, memory systems — the art of feeding the right facts at the right time.",
   },
   {
-    id: 28,
+    id: 27,
     slug: "appendix-pytorch",
     title: "PyTorch from Scratch",
     subtitle: "A hands-on introduction to the code behind AI",
@@ -286,7 +277,7 @@ export const chapters: Chapter[] = [
     ready: true,
   },
   {
-    id: 29,
+    id: 28,
     slug: "glossary",
     title: "Glossary",
     subtitle: "Words this tutorial uses, in one place",

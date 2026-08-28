@@ -1,0 +1,120 @@
+<Quiz slug="chat">
+
+<Question>
+A *base model* is a model that has been pre-trained and nothing else. Compared to a chat model, it:
+
+<Choice>Knows far fewer facts about the world</Choice>
+<Choice correct>Knows almost as much, but continues documents instead of answering</Choice>
+<Choice>Uses a different architecture with no attention</Choice>
+<Choice>Cannot produce grammatical English</Choice>
+
+<Feedback>
+Nearly all of a model's knowledge comes from pre-training, so the base model already has it. What it lacks is the habit of treating your text as a request addressed to it. Ask a base model a question and it works out what kind of document your question appeared in, then continues that document, which is often a list of more questions.
+</Feedback>
+</Question>
+
+<Question>
+What does post-training mostly do?
+
+<Choice>Adds the model's knowledge of facts</Choice>
+<Choice correct>Selects which behaviours the base model already has</Choice>
+<Choice>Replaces the transformer with a conversational architecture</Choice>
+<Choice>Uses most of the total training compute</Choice>
+
+<Feedback>
+Post-training is a thin layer on top of pre-training, often less than 1% of the compute. It rarely teaches new facts. What it does is pick out, from all the behaviours latent in the base model, the ones that look like a helpful assistant answering a question.
+</Feedback>
+</Question>
+
+<Question>
+In RLHF, what is the reward model for?
+
+<Choice>Generating the responses that get shown to users</Choice>
+<Choice correct>Predicting the score a human rater would have given</Choice>
+<Choice>Storing the conversation between turns</Choice>
+<Choice>Checking arithmetic and running code</Choice>
+
+<Feedback>
+Human comparisons are expensive, so they are used once to train a second model that predicts how a rater would score a response. That reward model can then score huge numbers of responses no human ever saw. It is a model, so it can be wrong, and training hard against a wrong score is where a lot of odd behaviour comes from.
+</Feedback>
+</Question>
+
+<Question>
+Why is feedback from real product usage (thumbs up, thumbs down) risky to train on?
+
+<Choice>It is too expensive to collect at scale</Choice>
+<Choice>It cannot be turned into a numerical score</Choice>
+<Choice correct>It measures whether the user was pleased, not whether the answer was right</Choice>
+<Choice>It only works for maths and code questions</Choice>
+
+<Feedback>
+Usage feedback is cheap and abundant, which is exactly why it is tempting. But a confident wrong answer gets a thumbs up and a correct answer nobody wanted to hear gets a thumbs down. Optimise hard on that and the model learns to flatter, a failure mode called sycophancy.
+</Feedback>
+</Question>
+
+<Question>
+What actually changes in a reasoning model?
+
+<Choice>A new memory component is added to the architecture</Choice>
+<Choice>The attention mechanism is replaced with a search algorithm</Choice>
+<Choice correct>It emits hidden thinking tokens before answering, and was trained to use them</Choice>
+<Choice>It runs the same question through the model many times in parallel</Choice>
+
+<Feedback>
+The architecture does not change at all. The model writes tokens into a thinking section the product hides, reads them back as context, and then writes the answer. Its own output is its working memory. What made this work was training with automatically checkable answers, which let the reward go to whatever scratchpad led to a correct result.
+</Feedback>
+</Question>
+
+<Question>
+A model's thinking trace is best understood as:
+
+<Choice correct>Generated text, produced the same way as the answer, which may not reflect the real reasons</Choice>
+<Choice>A log of the computation happening inside the model's layers</Choice>
+<Choice>A record of which training examples the model retrieved</Choice>
+<Choice>A guaranteed-correct proof of the final answer</Choice>
+
+<Feedback>
+The trace is predicted one token at a time, exactly like everything else the model writes. It is genuinely useful, because the model reads it back and works from it. But it is not a readout of the model's internals, and a model can write a plausible-looking trace while the answer is actually driven by something the trace never mentions.
+</Feedback>
+</Question>
+
+<Question>
+When a model "searches the web", what does the model itself do?
+
+<Choice>Opens a network connection and fetches the page</Choice>
+<Choice correct>Writes a tool call as text, then reads the result that gets pasted back into the transcript</Choice>
+<Choice>Looks the answer up in weights stored during training</Choice>
+<Choice>Hands the conversation over to a separate search model</Choice>
+
+<Feedback>
+The model can only write text. It writes a structured tool call, the program running it (the harness) stops generation, performs the search, and pastes the result into the transcript as a new turn. The model then carries on predicting from there. The loop repeats until the model writes an ordinary reply instead of another tool call.
+</Feedback>
+</Question>
+
+<Question>
+Why does telling a model something useful in one conversation do nothing for the next one?
+
+<Choice>Each conversation uses a different model</Choice>
+<Choice correct>The weights don't change while you talk to it, so anything it knows is text in its context</Choice>
+<Choice>The model deliberately discards user-provided information</Choice>
+<Choice>Conversations are encrypted so the model cannot read old ones</Choice>
+
+<Feedback>
+Training changes weights; conversation does not. Everything the model knows about the current conversation is text sitting in its context. That is why skills exist: instructions are written down as documents and loaded into the context when they are relevant, rather than being learned.
+</Feedback>
+</Question>
+
+<Question>
+The system prompt is:
+
+<Choice>A separate model that supervises the main one</Choice>
+<Choice>A set of hard constraints enforced outside the model</Choice>
+<Choice correct>Text placed at the top of the same token stream the model is completing</Choice>
+<Choice>A list of weights loaded before the conversation starts</Choice>
+
+<Feedback>
+Underneath a chat interface there is one document with role markers in it. The system prompt is text at the top of that document. That is why it works, since the model is completing the document and everything in it shapes what comes next, and also why it is not a hard guarantee.
+</Feedback>
+</Question>
+
+</Quiz>

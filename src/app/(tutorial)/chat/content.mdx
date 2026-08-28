@@ -1,0 +1,125 @@
+The previous chapter ended with a machine that reads a passage of text and says what is likely to come next. That machine is not ChatGPT. It will not answer your question, stop to think, or look anything up. This chapter covers what gets added on top: the training that turns a text predictor into an assistant, the hidden thinking tokens, the tool calls, and the transcript format that makes the whole thing feel like a conversation.
+
+## What a Raw Model Does
+
+A model that has been through the training in <Ch slug="transformers" /> and nothing else is called a *base model*. It had one job during training: given the text so far, predict what comes next. Ask it a question and it does that job faithfully. It works out what kind of document your question probably appeared in, and continues that document.
+
+Quite often, the document your question appeared in was a list of other questions.
+
+<RawCompletionWidget>
+Switch between **base model** and **chat model** on each prompt. The base model's answer is not a mistake. Ask yourself where on the internet that text would have come next.
+</RawCompletionWidget>
+
+The base model is not confused and it is not stupid. Almost everything a chat model knows about the world, the base model already knows, because almost all of the knowledge came from that pile of text. What the base model lacks is the habit of treating your words as a request addressed to it.
+
+<KeyInsight>
+Pre-training teaches a model about the world. It does not tell the model who to be.
+</KeyInsight>
+
+## Post-Training
+
+The training in the last chapter has a name: *pre-training*. Everything that happens afterwards is *post-training*. Pre-training is where nearly all of the compute goes, often more than 99% of it. Post-training is a thin layer on top, and it accounts for most of the difference between the two columns in the playground above.
+
+There are several ways to do it, and a modern chat model has usually been through most of them.
+
+### Show it what a good answer looks like
+
+The simplest approach is to write the answers you want. Pay people to produce a few tens of thousands of ideal prompt-and-response pairs, then keep training the model on exactly the same next-token objective, on that small curated pile instead of the internet. This is called *supervised fine-tuning*. It is the first stage of OpenAI's InstructGPT, and it is what Google's FLAN work used to make models follow instructions.
+
+No new machinery is involved. The model is still predicting the next token. It is just predicting it in documents where a question is followed by a helpful answer rather than by more questions.
+
+The catch is cost. Writing an ideal response to a hard question is slow, and people are much better at spotting a good answer than at writing one.
+
+### Let people pick the winner
+
+So don't ask them to write. Show a rater two responses to the same prompt and ask which one is better. Those comparisons train a second model, the *reward model*, whose only job is to predict the score a human would have given. Once that exists, the reward model can score responses the humans never saw, at whatever volume you like.
+
+Then you improve the model against that score. Generate several candidate responses, score each one, and adjust the weights so that the higher-scoring responses become more likely next time. That is *reinforcement learning from human feedback*, RLHF, the technique behind the original ChatGPT and later documented in detail for Llama 2.
+
+The full machinery of reinforcement learning has more to it, and <Ch slug="reinforcement-learning" /> covers it properly. For now the summary above is enough: produce answers, score them, make the good ones more likely.
+
+It helps to remember what the model actually emits. Not a response, but a probability for every possible next token. That is what makes "more likely" something you can do arithmetic with. Training can push probability towards one answer and away from another in the same step, which is why a *pair* of responses, one preferred and one rejected, is such a useful thing to have. Some systems skip the reward model and train directly on those pairs, an approach called direct preference optimisation.
+
+### Let the model check itself against written rules
+
+Human comparisons are still slow and still expensive. But judging is easier than writing, and models are decent judges.
+
+*Constitutional AI*, published by Anthropic, writes the rules down. A constitution is a list of principles in plain English, things like "prefer the response that is honest about uncertainty" or "do not be preachy". One copy of the model produces a response, another copy scores it against a principle, and the score is used the same way a human rating would be. When the rules need to change, someone edits the document. Re-labelling a human dataset would take months.
+
+### Watch what real users do
+
+Chat products generate an enormous amount of feedback for free. Thumbs up and thumbs down. Which of two shown responses a user picked. Whether the next message was "thanks, that worked" or the same question asked again in a sharper tone.
+
+This signal is cheap and there is a lot of it, and it is the most dangerous of the lot. It measures whether the user was pleased, not whether the answer was right. A confident wrong answer gets a thumbs up. A correct answer the user did not want to hear gets a thumbs down. Optimise hard on it and the model learns to flatter, a failure mode called *sycophancy*. <Ch slug="alignment" /> is about what goes wrong when you optimise a proxy like this too hard.
+
+### Just check the answer
+
+For maths, code, and puzzles, nobody needs to judge anything. Run the code. Check the arithmetic. Compare against the known answer. The score is right or wrong, it costs nothing, and it cannot be charmed.
+
+This is called reinforcement learning from verifiable rewards, and DeepSeek published the details of doing it at scale for their R1 model. The signal is narrow, since most useful questions have no checkable answer, but where it applies you can generate an unlimited amount of it. That turned out to matter enormously, for reasons the next section gets to.
+
+<TrainingSignalWidget>
+Pick a signal source and watch how it scores the four candidate answers. Try **what users upvote**. The answer it likes best is wrong.
+</TrainingSignalWidget>
+
+Three things worth holding on to. Post-training rarely teaches the model new facts, it selects which of the behaviours already latent in the base model come out. It is a small fraction of the total training bill. And every signal except the last one is a proxy, produced by a rater or a model that can be mistaken, which is where a lot of the strange behaviour of chat models comes from.
+
+## Thinking Before Speaking
+
+Ask a person a hard question and demand an answer in the next half second, and they will do badly. Not because they cannot solve it, but because solving it takes steps and they were not given room for any.
+
+A transformer has the same problem. Each token gets a fixed amount of computation, a fixed number of layers. A question needing ten steps of work does not get ten times the compute just because it is harder.
+
+*Reasoning models* fix this in about the most direct way possible. The model is allowed to write to itself first. It emits tokens into a thinking section that the product does not show you, works through the problem there, and then writes the answer. Nothing about the architecture changes. There is no new component, no extra network. The thinking tokens are predicted exactly like every other token, and the model reads them back the same way it reads anything else in its context. Its own output becomes its working memory.
+
+<ThinkFirstWidget>
+Toggle thinking off and watch the answers change. The one-shot answers are the mistakes people actually make when they answer these too fast.
+</ThinkFirstWidget>
+
+What made this work was the verifiable rewards from the previous section. If you can check the final answer automatically, you can reward whatever scratchpad led to it, without anyone having to specify what good reasoning looks like. Models trained this way picked up habits nobody wrote down: checking their work, backing out of a dead end, noticing halfway through that an earlier step was wrong.
+
+Two things people commonly get wrong about this. The thinking trace is text, generated by the same process that generates everything else, so it is not a readout of what is happening inside the model. A model can produce a trace that sounds reasonable while the answer is actually driven by something the trace never mentions. And more thinking is not always better. Every thinking token costs time and money, and on an easy question a long trace mostly gives the model more opportunities to talk itself out of the right answer.
+
+## Tools
+
+A model can only do one thing: write text. So tool use has to be made of text, and it is.
+
+The list of available tools goes into the model's context as a description of each one and what it is for. When the model wants to use a tool, it writes a tool call, a short structured piece of text naming the tool and its arguments. The program running the model, sometimes called the harness, watches for that. When it sees one, it stops generation, actually runs the search or the calculator or the code, and pastes the result back into the transcript as a new turn, in the same way a user's message would arrive. Then the model carries on from there.
+
+That loop repeats until the model writes an ordinary reply instead of another tool call.
+
+<ToolLoopWidget>
+Step through the loop, then break the tool and step through again. The model's next move is decided entirely by what came back as text.
+</ToolLoopWidget>
+
+This is all "the model searched the web" means. It is also worth being clear that the model does not run anything. It writes a request, something else acts, and the model finds out what happened by reading. Grounding an answer in a real search result makes it much more likely to be right, though the model is still the one writing the summary, so it is still capable of getting it wrong. <Ch slug="hallucination" /> takes that up.
+
+## Skills
+
+Nothing the model learns during a conversation survives it. The weights do not change while you talk to it. So any capability added after training has to arrive as text placed into the context.
+
+A *skill* is that idea made tidy. Write the instructions for a task as a document, give it a name and a one-line description of when it applies, and let the model load the full document with a tool call when it decides the situation calls for it. A person keeping a folder of checklists works the same way. You do not memorise the pre-flight checklist. You know one exists, and you fetch it at the right moment.
+
+This is why a model can pick up a new procedure in the morning and use it that afternoon without anyone retraining anything. It is also why telling a model something useful in one conversation does nothing for the next one.
+
+## Making It a Conversation
+
+Underneath every chat interface there is a single stream of tokens. The model does not see turns. It sees one document with markers in it saying who is speaking, something along the lines of:
+
+```
+<|system|>You are a helpful assistant. Today is 27 August 2026.
+<|user|>What's the capital of Australia?
+<|assistant|>Canberra.<|end|>
+<|user|>Are you sure?
+<|assistant|>
+```
+
+The format is called a *chat template*, and the markers are real tokens the tokeniser knows about. Post-training is what taught the model to continue after the assistant marker, to answer rather than to carry on inventing user messages, and to emit the end marker when it is done so the harness knows to stop.
+
+The system prompt is nothing more special than text at the top of that document. That is why it works, and also why it is not a hard guarantee. Everything the model knows about the conversation is in the transcript in front of it, which is why the size of that transcript matters so much. <Ch slug="context" /> is about managing it.
+
+## Putting It Together
+
+A chat model is a next-token predictor with four things layered on top. Post-training aims it at being helpful rather than at continuing a document. Thinking tokens give it room to work before it commits to an answer. Tool calls let it act on the world by writing text that something else executes. And a chat template arranges the whole exchange as one document for it to continue.
+
+None of that changes the machine from the last chapter. The transformer is doing the same thing it was doing at the end of <Ch slug="transformers" />, predicting one token at a time. Everything in this chapter is about what it gets asked to predict, and what happens to the text once it has.
