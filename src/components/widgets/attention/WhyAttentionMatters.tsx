@@ -55,7 +55,7 @@ const SENTENCES: SentenceExample[] = [
     query: "a thing",
     keyQuestion: "a thing",
     value: "It means the glass.",
-    matchScore: 9,
+    matchScore: 0.9,
     answers: {
       3: "a thing",
       1: "an action",
@@ -73,7 +73,7 @@ const SENTENCES: SentenceExample[] = [
     query: "a person or thing that could have opened something",
     keyQuestion: "a person",
     value: "The chef did it.",
-    matchScore: 9,
+    matchScore: 0.9,
     answers: {
       1: "a person",
       5: "an event",
@@ -82,38 +82,38 @@ const SENTENCES: SentenceExample[] = [
   },
   {
     label: "Where is this?",
-    words: ["On", "Mars", ",", "the", "astronaut", "looked", "up", "at", "the", "sky", "."],
-    selectedWord: 9,
-    targets: { 1: 0.95 },
+    words: ["The", "astronaut", "on", "Mars", "watched", "the", "sky", "."],
+    selectedWord: 6,
+    targets: { 3: 0.95 },
     explanation:
       'Which sky? The Martian one. "sky" has to reach back to "Mars" to become "the sky of Mars," not the sky on Earth.',
     enrichedMeaning: "the sky of Mars",
     query: "a place with a sky",
     keyQuestion: "a planet",
     value: "The scene is on Mars.",
-    matchScore: 9,
+    matchScore: 0.9,
     answers: {
-      1: "a planet",
-      4: "a person",
-      5: "an action",
+      3: "a planet",
+      1: "a person",
+      4: "an action",
     },
   },
   {
     label: "Which one?",
-    words: ["The", "Treaty", "of", "Versailles", "was", "signed", "in", "1919", "…", "the", "treaty", "reshaped", "Europe", "."],
-    selectedWord: 10,
-    targets: { 3: 0.95 },
+    words: ["Versailles", "reshaped", "Europe", "…", "the", "treaty", "was", "hated", "."],
+    selectedWord: 5,
+    targets: { 0: 0.95 },
     explanation:
-      'Which treaty reshaped Europe? You have to reach back across the gap to "Versailles" to know. Once a model has been through several transformer layers, "Versailles" itself may already carry that it means the treaty, not the city, along with the treaty\'s details. The Transformers chapter shows how.',
+      'Which treaty was hated? You have to reach back across the gap to "Versailles" to know. Once a model has been through several transformer layers, "Versailles" itself may already carry that it means the treaty, not the city. The Transformers chapter shows how.',
     enrichedMeaning: "the Treaty of Versailles",
     query: "a treaty",
     keyQuestion: "a treaty, or a place",
     value: "The Treaty of Versailles, or the place Versailles.",
-    matchScore: 9,
+    matchScore: 0.9,
     answers: {
-      3: "a treaty, or a place",
-      7: "a date",
-      12: "a place",
+      0: "a treaty, or a place",
+      2: "a place",
+      7: "an action",
     },
   },
   {
@@ -127,7 +127,7 @@ const SENTENCES: SentenceExample[] = [
     query: "a river or some money",
     keyQuestion: "a river",
     value: "We mean a river.",
-    matchScore: 6,
+    matchScore: 0.6,
     inexact: true,
     answers: {
       4: "a river",
@@ -251,7 +251,9 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
   // match; every other token gets a small, deterministic non-zero score, well
   // below the match (real dot products of unrelated tokens are rarely exactly
   // zero, just small).
-  const scoreFor = (i: number) => (i === targetIdx ? sentence.matchScore : ((i * 37 + 11) % 3) + 1);
+  // Match scores are a 0-1 similarity: 1 = identical, 0 = unrelated. The target
+  // matches well; every other token gets a small, deterministic score.
+  const scoreFor = (i: number) => (i === targetIdx ? sentence.matchScore : (((i * 37 + 11) % 3) + 1) / 10);
 
   // Measure word positions and compute arrows after layout settles
   useEffect(() => {
@@ -497,7 +499,7 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
                         : `font-mono text-2xl font-bold ${isTgt ? "text-accent" : "text-muted/60"}`
                     }`}
                   >
-                    {isAsker ? "query" : sc}
+                    {isAsker ? "query" : sc.toFixed(1)}
                   </div>
                 )}
               </button>
@@ -677,12 +679,12 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
                   <span className="text-lg font-bold text-muted">·</span>{" "}
                   <span className="font-semibold text-indigo-700 dark:text-indigo-300">key</span> (&ldquo;
                   {sentence.answers[effectiveAnswerer] ?? EMPTY}&rdquo;){" = "}
-                  <span className="font-mono text-lg font-bold text-accent">{scoreFor(effectiveAnswerer)}</span>
+                  <span className="font-mono text-lg font-bold text-accent">{scoreFor(effectiveAnswerer).toFixed(1)}</span>
                 </div>
                 <div className="text-center text-sm text-muted">
                   {answererMatches
                     ? `"${effectiveAnswererText}" is the best match, so its value gets pulled in.`
-                    : `Far below "${sentence.words[targetIdx]}" at ${scoreFor(targetIdx)}, so it's mostly ignored.`}
+                    : `Far below "${sentence.words[targetIdx]}" at ${scoreFor(targetIdx).toFixed(1)}, so it's mostly ignored.`}
                 </div>
               </>
             ) : (
