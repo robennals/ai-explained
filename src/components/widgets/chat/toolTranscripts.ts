@@ -59,7 +59,7 @@ export const scenarios: Scenario[] = [
     id: "websearch",
     label: "Searching the web",
     intro:
-      "A search returns whatever the internet happens to say, including things that are years out of date.",
+      "Training finished long before this weekend, so nothing in the model's weights could contain the answer. A search puts it in front of the model as text.",
     turns: [
       {
         role: "user",
@@ -73,15 +73,15 @@ export const scenarios: Scenario[] = [
       {
         role: "tool-result",
         tool: "Web search",
-        text: 'cliftonbridge.org.uk — "Planned maintenance: closed to vehicles 06:00 Sat to 18:00 Sun. Pedestrians and cyclists unaffected."\nbristolpost.co.uk (2019) — "Suspension bridge to shut for four nights"\ntripadvisor.co.uk — "Clifton Suspension Bridge, 4.5/5 from 3,412 reviews"',
+        text: 'cliftonbridge.org.uk — "Planned maintenance: closed to vehicles 06:00 Sat to 18:00 Sun. Pedestrians and cyclists unaffected."\ntraveleast.bristol.gov.uk — "Suspension bridge closed to traffic this weekend. Diversion signed via Cumberland Basin."',
       },
       {
         role: "assistant",
-        text: "Not to cars, no. The bridge's own site says it's closed to vehicles from 6am Saturday until 6pm Sunday for maintenance. You can still walk or cycle across.",
+        text: "Not to cars, no. It's closed to vehicles from 6am Saturday until 6pm Sunday for maintenance, with a diversion signed via Cumberland Basin. You can still walk or cycle across.",
       },
     ],
     takeaway:
-      "Two of the three results were useless: a news story from 2019 and a page of reviews. Picking the official one and ignoring the rest is a judgement the model made while predicting text. Grounding an answer in a real page makes it far more likely to be right, though the model is still the one writing the summary.",
+      "Once the results are pasted in, the model is reading them the same way it read the question. The reply draws on both of them, which is ordinary next-word prediction over whatever now sits in the conversation.",
   },
   {
     id: "code",
