@@ -47,7 +47,7 @@ Nature loves S-curves. An enormous number of real-world phenomena follow this sh
 
 <SigmoidZoomWidget />
 
-The key property for neural networks: when you change a weight by a small amount, the output changes by a small amount. No sudden jumps, no unpredictable flips. That's exactly what Chapter 2 told us we need for optimization to work.
+The key property for neural networks: when you change a weight by a small amount, the output changes by a small amount. No sudden jumps, no unpredictable flips. That's exactly what <Ch slug="optimization" /> told us we need for optimization to work.
 
 But you can make the sigmoid *sharper* or *smoother* by scaling the weights. Multiply all the weights and bias by a large number and the S-curve steepens toward a hard step. Scale them down and it flattens into a gentle slope. The boundary stays in the same place. Only the sharpness changes.
 
@@ -55,7 +55,7 @@ But you can make the sigmoid *sharper* or *smoother* by scaling the weights. Mul
 Drag the sharpness slider all the way up. The curve snaps almost like a light switch, 0 or 1, nothing in between. Now drag it down. The curve becomes a gentle slope.
 </SharpnessExplorerWidget>
 
-There's a catch, though. Very sharp neurons are harder to train. Remember from Chapter 2: optimization works by measuring how a small change in a weight affects the output. On the flat parts of a sharp sigmoid, the output barely changes at all. The slope is nearly zero. The optimizer gets stuck because it can't tell which direction to move. Real networks use various tricks to keep neurons in the smooth, trainable middle of the curve, but the basic intuition is enough for now: smoother neurons are easier to train.
+There's a catch, though. Very sharp neurons are harder to train. Remember from <Ch slug="optimization" />: optimization works by measuring how a small change in a weight affects the output. On the flat parts of a sharp sigmoid, the output barely changes at all. The slope is nearly zero. The optimizer gets stuck because it can't tell which direction to move. Real networks use various tricks to keep neurons in the smooth, trainable middle of the curve, but the basic intuition is enough for now: smoother neurons are easier to train.
 
 ## Logic Gates
 
@@ -75,7 +75,7 @@ Wire enough gates together and you can compute anything. Real computer chips hav
 
 <GateCircuitDiagramWidget />
 
-But logic gates have a problem. Their outputs snap between 0 and 1 with nothing in between. There's no smooth gradient to follow, which means you can't train a network of logic gates using the optimization techniques from Chapter 2. You can't ask "how should I adjust this gate to make the answer a *little* more correct?" It's all or nothing.
+But logic gates have a problem. Their outputs snap between 0 and 1 with nothing in between. There's no smooth gradient to follow, which means you can't train a network of logic gates using the optimization techniques from <Ch slug="optimization" />. You can't ask "how should I adjust this gate to make the answer a *little* more correct?" It's all or nothing.
 
 ## Neurons as Smooth Logic
 
@@ -118,13 +118,13 @@ In 1969, Minsky and Papert published *Perceptrons*, proving that single-layer ne
 
 XOR needed a single hidden layer computing intermediate facts. Harder problems need many. You can't jump straight from raw pixels to "that's a cat," so you build up through stepping stones. The first hidden layer might detect simple patterns: edges, color patches, textures. The next combines those into parts: eyes, ears, fur. A later layer combines *those* into whole objects: "cat" or "dog." Real networks have lots of layers, allowing them to think very deeply. GPT-3 has 96 layers and frontier models today likely have more.
 
-No human decides what new things each layer computes. The AI learns that as part of its training. So how do we train weights buried deep inside the network? Surprisingly straightforwardly. Every weight contributes to the final output, so it contributes to the error, which means every weight has a **gradient** (as we saw in the optimization chapter) telling us which direction to nudge it. We run gradient descent on **every weight at once**, using an algorithm called **backpropagation** that computes those gradients efficiently by flowing the error signal backward through each layer.
+No human decides what new things each layer computes. The AI learns that as part of its training. So how do we train weights buried deep inside the network? Surprisingly straightforwardly. Every weight contributes to the final output, so it contributes to the error, which means every weight has a **gradient** (as we saw in <Ch slug="optimization" />) telling us which direction to nudge it. We run gradient descent on **every weight at once**, using an algorithm called **backpropagation** that computes those gradients efficiently by flowing the error signal backward through each layer.
 
 ## What's Next
 
 We've built up from a single neuron to deep networks. A neuron is just a weighted sum and an activation function. But wire enough of them together, and finding the right weights is what creates the intelligence. Backpropagation makes that possible, even for networks with billions of weights.
 
-But what *is* that weighted sum, really? In the next chapter, we'll meet **vectors**, lists of numbers that describe things, and discover that a neuron's weighted sum is actually a geometric operation called a dot product. This connection reveals *why* a single neuron can only draw a straight line through input space, *why* XOR is impossible for one neuron, and *why* activation functions are the key to making depth work.
+But what *is* that weighted sum, really? In <Ch slug="vectors" />, we'll meet **vectors**, lists of numbers that describe things, and discover that a neuron's weighted sum is actually a geometric operation called a dot product. This connection reveals *why* a single neuron can only draw a straight line through input space, *why* XOR is impossible for one neuron, and *why* activation functions are the key to making depth work.
 
 <TryItInPyTorch notebook="neurons">
 Build a neuron from scratch, implement AND/OR gates, watch a single neuron fail on XOR, then train a two-layer network that succeeds, and visualize its decision boundary.

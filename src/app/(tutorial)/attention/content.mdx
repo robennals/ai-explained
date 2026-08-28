@@ -34,7 +34,7 @@ Each example shows the highlighted token's query, the key of the token it matche
 
 How does a computer decide whether a query matches a key? So far they have been in plain English, but comparing English text is tricky. How do we know that "a place with a sky" matches "a planet"?
 
-In [Chapter 4](/vectors) and [Chapter 5](/embeddings) we showed that AI models can represent arbitrarily complex things using vectors. We also showed that we can use the dot product to compare two vectors to see how similar their meanings are. 
+In <Ch slug="vectors" /> and <Ch slug="embeddings" /> we showed that AI models can represent arbitrarily complex things using vectors. We also showed that we can use the dot product to compare two vectors to see how similar their meanings are. 
 
 Indeed this is how Attention compares a query to a key. The query and key are both vectors, and their dot product gives a single **match score** we can read as a similarity from 0 (nothing in common) to 1 (a perfect match).
 
@@ -73,7 +73,7 @@ The reason we pay attention to another token is to extract information from it. 
 
 Attention combines the values of all the tokens, weighting each by its softmax percentage.
 
-It's kind of crazy that this works. Why should you be able to blend these value vectors together and get something that makes any sense? It works because, as we saw in [Chapter 5](/embeddings), the embeddings used by AI models are constructed such that you can do things like take the average of two embedding vectors, and the result is a vector that combines their meanings. 
+It's kind of crazy that this works. Why should you be able to blend these value vectors together and get something that makes any sense? It works because, as we saw in <Ch slug="embeddings" />, the embeddings used by AI models are constructed such that you can do things like take the average of two embedding vectors, and the result is a vector that combines their meanings. 
 
 
 <AttentionValuesWidget>
@@ -90,7 +90,7 @@ In the examples we've given so far, each token only has a single query. But in p
 
 So in practice we usually do **multi-headed attention**. We have multiple **attention heads**, each of which computes a different query, key, and value for each token. We also usually have multiple layers of attention, where each layer adds more information on top of what was gathered by the previous layers.
 
-You'll see this in more depth when we discuss Transformers in [Chapter 9](/transformers).
+You'll see this in more depth when we discuss Transformers in <Ch slug="transformers" />.
 
 
 ## What We've Built

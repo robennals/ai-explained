@@ -1,4 +1,4 @@
-An AI has to represent the meaning of each word as a list of numbers, a [vector](/vectors). The obvious approach is to decide in advance what each dimension of the vector measures (e.g. size, aliveness, scariness), but that falls apart fast. A word can refer to absolutely anything, and no fixed set of properties describes colours, emotions and countries at the same time. The trick is to abandon the idea that the dimensions of a vector should have fixed meanings, and instead just put similar things close to each other and allow the same direction to mean different things in different places.
+An AI has to represent the meaning of each word as a list of numbers, a vector. The obvious approach is to decide in advance what each dimension of the vector measures (e.g. size, aliveness, scariness), but that falls apart fast. A word can refer to absolutely anything, and no fixed set of properties describes colours, emotions and countries at the same time. The trick is to abandon the idea that the dimensions of a vector should have fixed meanings, and instead just put similar things close to each other and allow the same direction to mean different things in different places.
 
 ## The Problem with Hand-Picked Dimensions
 
@@ -40,7 +40,7 @@ The dimensions don't need labels. What matters is that similar things are nearby
 
 ## Exploring a Real Embedding
 
-A real embedding: GloVe, created by Stanford. Each word is a point in 300-dimensional space. The full embedding contains 400,000 words, which is too many to fit in the browser, so we're showing a subset of common nouns. We can't visualize 300 dimensions, but we *can* use cosine similarity (from the previous chapter) to ask: what's nearby?
+A real embedding: GloVe, created by Stanford. Each word is a point in 300-dimensional space. The full embedding contains 400,000 words, which is too many to fit in the browser, so we're showing a subset of common nouns. We can't visualize 300 dimensions, but we *can* use cosine similarity (from <Ch slug="vectors" />) to ask: what's nearby?
 
 <EmbeddingPlaygroundWidget>
 Start with "dog". Its neighbors are other animals and pets. Click on a neighbor to jump to it and browse around the space. Try "guitar" and you get other instruments. Try "queen" and it sits near royalty words. Type your own words and see what clusters together.
@@ -75,7 +75,7 @@ Try each preset. Combine your own. Try nonsense like cat − dog + piano to see 
 
 Like directions, these transformations only exist where the embedding has learned them. Our small GloVe embedding knows a few dozen clean ones; a frontier model like Claude encodes vastly more. And subtraction is just a detective's trick. We extract transformations this way so we can *see* them, but real neural networks learn transformation vectors directly as weights during training.
 
-This is how modern AI builds up complex meaning. In the chapter on [transformers](/transformers), we'll see that each layer of a transformer model adds vectors to deepen the model's understanding of what each word in a text is about.
+This is how modern AI builds up complex meaning. In <Ch slug="transformers" />, we'll see that each layer of a transformer model adds vectors to deepen the model's understanding of what each word in a text is about.
 
 <KeyInsight>
 You can apply transformations like "capital of" or "bigger animal" by adding a vector that encodes that transformation.
@@ -112,7 +112,7 @@ Try punctuation too (`!`, `,`, `?`); those are tokens as well.
 
 In modern AIs, the embedding is just the first layer of the neural network. It has one input node for every possible token. When a token comes in, that input is set to 1 and every other input is set to 0, like raising your hand in a crowd when someone calls your name. This is called **one-hot encoding**.
 
-Each connection carries a weight. Since only one input word is "on," the output of the first layer is just the weights for that one word. Those weights *are* the embedding. Unlike the neurons we saw in previous chapters, the embedding layer has no bias and no activation function.
+Each connection carries a weight. Since only one input word is "on," the output of the first layer is just the weights for that one word. Those weights *are* the embedding. Unlike the neurons we saw in <Ch slug="neurons" />, the embedding layer has no bias and no activation function.
 
 The network learns those weights through gradient descent, just like any other weights, naturally assigning each word the meaning that helps the network the most.
 
@@ -144,7 +144,7 @@ An embedding is a learned mapping from discrete symbols to continuous geometry. 
 
 We've seen that embeddings turn words into lists of numbers: points in a high-dimensional space where proximity means similarity and directions encode relationships.
 
-Now we have all the pieces we need to build a real language model. In the next chapter, we'll see that one surprisingly simple task, *predicting the next word in a sentence*, turns out to require everything an AI needs to know: grammar, facts, common sense, even emotions. We'll build up from naive word-counting to a neural network that uses embeddings to generalize, and discover why this single task is the foundation of every modern AI you've heard of.
+Now we have all the pieces we need to build a real language model. In <Ch slug="next-word-prediction" />, we'll see that one surprisingly simple task, *predicting the next word in a sentence*, turns out to require everything an AI needs to know: grammar, facts, common sense, even emotions. We'll build up from naive word-counting to a neural network that uses embeddings to generalize, and discover why this single task is the foundation of every modern AI you've heard of.
 
 <TryItInPyTorch notebook="embeddings">
 Build one-hot vectors, train your own word embeddings, explore real word analogies (king − man + woman = queen) with GloVe, and see how GPT-4 splits text into tokens.
