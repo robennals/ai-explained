@@ -1,10 +1,10 @@
 /**
  * Hand-authored agent loops.
  *
- * Every turn below is text in one transcript, addressed from someone to
- * someone. The model writes the replies and the tool calls; the harness writes
- * the tool results. The product shows you only the turns between you and the
- * model, which is why an agent looks like it acts when it only ever writes.
+ * Every turn below is a message in one conversation. The model writes the
+ * replies and the tool calls; the tools write the results. The product shows
+ * the human only the messages between them and the model, which is why an
+ * agent looks like it acts when it only ever writes.
  */
 
 export type TurnRole = "user" | "assistant" | "tool-call" | "tool-result";
@@ -164,17 +164,16 @@ export function getScenario(id: string): Scenario {
   return scenarios.find((s) => s.id === id) ?? scenarios[0];
 }
 
-/** Who wrote a turn and who it is addressed to. */
-export function addressLine(turn: Turn): { from: string; to: string } {
+/** Who wrote a turn. */
+export function senderLabel(turn: Turn): string {
   switch (turn.role) {
     case "user":
-      return { from: "You", to: "Model" };
+      return "Human";
     case "assistant":
-      return { from: "Model", to: "You" };
     case "tool-call":
-      return { from: "Model", to: turn.tool ?? "Tool" };
+      return "Model";
     case "tool-result":
-      return { from: turn.tool ?? "Tool", to: "Model" };
+      return turn.tool ?? "Tool";
   }
 }
 

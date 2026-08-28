@@ -4,28 +4,31 @@ import { useState } from "react";
 import { WidgetContainer } from "@/components/widgets/shared/WidgetContainer";
 import { WidgetTabs } from "@/components/widgets/shared/WidgetTabs";
 import {
-  addressLine,
   getScenario,
   isVisibleToUser,
   scenarios,
+  senderLabel,
   type Turn,
 } from "./toolTranscripts";
 
 function Message({ turn }: { turn: Turn }) {
-  const { from, to } = addressLine(turn);
+  const fromHuman = turn.role === "user";
   const hidden = !isVisibleToUser(turn);
   const mono = turn.role === "tool-call" || turn.role === "tool-result";
 
   return (
-    <div>
+    <div className={`flex flex-col ${fromHuman ? "items-end" : "items-start"}`}>
       <div className="mb-1 px-1 text-xs font-bold uppercase tracking-widest text-muted">
-        {from} <span aria-hidden>→</span> {to}
+        {senderLabel(turn)}
+        {hidden && <span className="font-medium normal-case"> (hidden)</span>}
       </div>
       <div
-        className={`rounded-lg border px-4 py-2.5 ${
+        className={`max-w-[85%] rounded-2xl px-4 py-2.5 ${
           hidden
-            ? "border-dashed border-border bg-foreground/[0.03]"
-            : "border-widget-border bg-widget-bg"
+            ? "border-2 border-dashed border-border bg-transparent"
+            : fromHuman
+              ? "bg-accent/15"
+              : "bg-surface ring-1 ring-widget-border"
         }`}
       >
         <div
@@ -47,7 +50,7 @@ export function ToolLoop() {
   return (
     <WidgetContainer
       title="The tool-use loop"
-      description="One transcript of messages. The dashed ones are in it too, you are just never shown them."
+      description="One conversation. The dashed messages are part of it too, the human is just never shown them."
       onReset={() => setScenarioId(scenarios[0].id)}
     >
       <WidgetTabs

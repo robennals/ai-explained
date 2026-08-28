@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
-  addressLine,
   getScenario,
   isVisibleToUser,
   scenarios,
+  senderLabel,
 } from "./toolTranscripts";
 
 describe("scenarios", () => {
@@ -50,33 +50,26 @@ describe("scenarios", () => {
   });
 });
 
-describe("addressLine", () => {
-  it("addresses each turn from someone to someone", () => {
+describe("senderLabel", () => {
+  it("names a sender for every message", () => {
     for (const scenario of scenarios) {
       for (const turn of scenario.turns) {
-        const { from, to } = addressLine(turn);
-        expect(from).toBeTruthy();
-        expect(to).toBeTruthy();
-        expect(from).not.toBe(to);
+        expect(senderLabel(turn)).toBeTruthy();
       }
     }
   });
 
-  it("puts the model on one side of every turn", () => {
-    for (const scenario of scenarios) {
-      for (const turn of scenario.turns) {
-        const { from, to } = addressLine(turn);
-        expect([from, to]).toContain("Model");
-      }
-    }
-  });
-
-  it("names the tool as the correspondent on a call and its result", () => {
+  it("attributes the tool call to the model and the result to the tool", () => {
     const scenario = getScenario("chained");
     const call = scenario.turns.find((t) => t.role === "tool-call")!;
     const result = scenario.turns.find((t) => t.role === "tool-result")!;
-    expect(addressLine(call).to).toBe("Email search");
-    expect(addressLine(result).from).toBe("Email search");
+    expect(senderLabel(call)).toBe("Model");
+    expect(senderLabel(result)).toBe("Email search");
+  });
+
+  it("labels the person Human rather than You", () => {
+    const first = getScenario("search").turns[0];
+    expect(senderLabel(first)).toBe("Human");
   });
 });
 
