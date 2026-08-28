@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { getReasoningExample, reasoningExamples } from "./reasoningExamples";
+import {
+  buildStream,
+  getReasoningExample,
+  reasoningExamples,
+} from "./reasoningExamples";
 
 describe("reasoningExamples", () => {
   it("has a unique id for every example", () => {
@@ -23,5 +27,38 @@ describe("reasoningExamples", () => {
 describe("getReasoningExample", () => {
   it("falls back to the first example for an unknown id", () => {
     expect(getReasoningExample("nope")).toBe(reasoningExamples[0]);
+  });
+});
+
+describe("buildStream", () => {
+  const example = getReasoningExample("bat");
+
+  it("puts the thinking in the same stream as the answer, between think tags", () => {
+    const kinds = buildStream(example, true).map((s) => s.kind);
+    expect(kinds).toEqual([
+      "marker",
+      "user",
+      "marker",
+      "marker",
+      "think",
+      "marker",
+      "answer",
+      "marker",
+    ]);
+  });
+
+  it("emits the same stream minus the think section when thinking is off", () => {
+    const stream = buildStream(example, false);
+    expect(stream.some((s) => s.kind === "think")).toBe(false);
+    expect(stream.find((s) => s.kind === "answer")!.text).toBe(
+      example.quickAnswer
+    );
+  });
+
+  it("keeps every trace line in the stream", () => {
+    const think = buildStream(example, true).find((s) => s.kind === "think")!;
+    for (const line of example.trace) {
+      expect(think.text).toContain(line);
+    }
   });
 });

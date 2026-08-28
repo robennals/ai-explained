@@ -74,3 +74,37 @@ export function getReasoningExample(id: string): ReasoningExample {
     reasoningExamples.find((e) => e.id === id) ?? reasoningExamples[0]
   );
 }
+
+export type SegmentKind = "marker" | "user" | "think" | "answer";
+
+export interface Segment {
+  kind: SegmentKind;
+  text: string;
+}
+
+/**
+ * The single stream of tokens the model emits, role markers and all. Thinking
+ * is not a separate channel: the think tags are ordinary tokens in the same
+ * stream, and the product simply does not show what sits between them.
+ */
+export function buildStream(
+  example: ReasoningExample,
+  thinking: boolean
+): Segment[] {
+  const segments: Segment[] = [
+    { kind: "marker", text: "<|user|>" },
+    { kind: "user", text: example.question + "\n" },
+    { kind: "marker", text: "<|assistant|>" },
+  ];
+  if (thinking) {
+    segments.push({ kind: "marker", text: "<think>\n" });
+    segments.push({ kind: "think", text: example.trace.join("\n") + "\n" });
+    segments.push({ kind: "marker", text: "</think>\n" });
+  }
+  segments.push({
+    kind: "answer",
+    text: thinking ? example.answer : example.quickAnswer,
+  });
+  segments.push({ kind: "marker", text: "<|end|>" });
+  return segments;
+}

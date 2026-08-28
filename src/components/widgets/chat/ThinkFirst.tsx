@@ -3,17 +3,31 @@
 import { useState } from "react";
 import { ToggleControl } from "@/components/widgets/shared/ToggleControl";
 import { WidgetContainer } from "@/components/widgets/shared/WidgetContainer";
-import { getReasoningExample, reasoningExamples } from "./reasoningExamples";
+import {
+  buildStream,
+  getReasoningExample,
+  reasoningExamples,
+  type SegmentKind,
+} from "./reasoningExamples";
+
+const segmentStyles: Record<SegmentKind, string> = {
+  marker: "font-mono text-sm text-accent",
+  user: "text-foreground",
+  think: "text-muted",
+  answer: "font-semibold text-foreground",
+};
 
 export function ThinkFirst() {
   const [exampleId, setExampleId] = useState(reasoningExamples[0].id);
   const [thinking, setThinking] = useState(true);
   const example = getReasoningExample(exampleId);
+  const stream = buildStream(example, thinking);
+  const answer = thinking ? example.answer : example.quickAnswer;
 
   return (
     <WidgetContainer
       title="Thinking before answering"
-      description="The same model, with and without room to work things out first."
+      description="One stream of tokens. The product hides the part between the think tags."
       onReset={() => {
         setExampleId(reasoningExamples[0].id);
         setThinking(true);
@@ -42,55 +56,48 @@ export function ThinkFirst() {
         />
       </div>
 
-      <div className="mt-5 rounded-lg border border-border bg-surface p-4">
-        <div className="text-xs font-bold uppercase tracking-widest text-muted">
-          You ask
+      <div className="mt-5 overflow-hidden rounded-lg border border-widget-border">
+        <div className="border-b border-widget-border bg-surface px-4 py-2">
+          <span className="text-xs font-bold uppercase tracking-widest text-muted">
+            Every token the model emits
+          </span>
         </div>
-        <p className="mt-1 text-base leading-relaxed text-foreground">
-          {example.question}
-        </p>
+        <div className="whitespace-pre-wrap bg-widget-bg px-4 py-3 text-base leading-relaxed">
+          {stream.map((segment, i) => (
+            <span key={i} className={segmentStyles[segment.kind]}>
+              {segment.text}
+            </span>
+          ))}
+        </div>
       </div>
 
-      {thinking && (
-        <div className="mt-4 rounded-lg border border-dashed border-border bg-foreground/[0.03] p-4">
-          <div className="text-xs font-bold uppercase tracking-widest text-muted">
-            Thinking &middot; hidden from you
-          </div>
-          <ol className="mt-2 space-y-1.5">
-            {example.trace.map((line, i) => (
-              <li
-                key={i}
-                className="text-base leading-relaxed text-foreground/70"
-              >
-                {line}
-              </li>
-            ))}
-          </ol>
+      <div className="mt-4 overflow-hidden rounded-lg border border-accent/40">
+        <div className="border-b border-accent/30 bg-accent/10 px-4 py-2">
+          <span className="text-xs font-bold uppercase tracking-widest text-accent">
+            What you see in the app
+          </span>
         </div>
-      )}
-
-      <div className="mt-4 rounded-lg border border-widget-border bg-white p-4">
-        <div className="text-xs font-bold uppercase tracking-widest text-muted">
-          The model answers
+        <div className="bg-accent/5 px-4 py-3 text-base leading-relaxed text-foreground">
+          {answer}
         </div>
-        <p className="mt-1 text-base leading-relaxed text-foreground">
-          {thinking ? example.answer : example.quickAnswer}
-        </p>
       </div>
 
-      {!thinking && (
-        <p className="mt-4 text-base leading-relaxed text-foreground">
-          <span className="font-semibold">Why it slips: </span>
-          {example.quickWhy}
-        </p>
-      )}
-      {thinking && (
-        <p className="mt-3 text-sm leading-relaxed text-muted">
-          The thinking section is ordinary generated text. The model writes it,
-          reads it back as context, and answers from there. Nothing else about
-          the model has changed.
-        </p>
-      )}
+      <p className="mt-4 text-base leading-relaxed text-foreground">
+        {thinking ? (
+          <>
+            <span className="font-semibold">Why: </span>
+            The grey text is the model talking to itself. It is predicted one
+            token at a time, exactly like the answer, and the model reads it
+            back as context before writing the answer. The app strips
+            everything between the think tags.
+          </>
+        ) : (
+          <>
+            <span className="font-semibold">Why it slips: </span>
+            {example.quickWhy}
+          </>
+        )}
+      </p>
     </WidgetContainer>
   );
 }

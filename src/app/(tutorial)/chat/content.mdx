@@ -36,7 +36,7 @@ A transformer has the same problem. Each token gets a fixed amount of computatio
 *Reasoning models* fix this in about the most direct way possible. The model is allowed to write to itself first. It emits tokens into a thinking section that the product does not show you, works through the problem there, and then writes the answer. Nothing about the architecture changes. There is no new component, no extra network. The thinking tokens are predicted exactly like every other token, and the model reads them back the same way it reads anything else in its context. Its own output becomes its working memory.
 
 <ThinkFirstWidget>
-Toggle thinking off and watch the answers change. The one-shot answers are the mistakes people actually make when they answer these too fast.
+Toggle thinking off and watch the answers change. It is all one stream of tokens: the think tags are ordinary tokens like any other, and the app just does not show what sits between them.
 </ThinkFirstWidget>
 
 What made this work was the verifiable rewards from the previous section. If you can check the final answer automatically, you can reward whatever scratchpad led to it, without anyone having to specify what good reasoning looks like. Models trained this way picked up habits nobody wrote down: checking their work, backing out of a dead end, noticing halfway through that an earlier step was wrong.
