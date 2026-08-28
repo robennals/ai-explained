@@ -128,32 +128,37 @@ One dark streetlight is not urgent. A whole dark street is.`,
     label: "Working through a checklist",
     turns: [
       offered(
-        `  tenancy-check  what to look at in a rental agreement
-  moving-in      the list of things to do before you get the keys
-  letter-writing  how to write to a letting agent`
+        `  closing-up  what to do at the end of the day
+  opening-up  what to do first thing
+  cash-up     counting the till and getting it to the bank`
       ),
       {
         role: "user",
-        text: "The agent sent this over: “Either party may end the tenancy on two months' written notice. Rent is payable monthly in advance. The tenant is responsible for all repairs and maintenance.” Should I sign it?",
+        text: "It's my first time locking up on my own tonight. What do I need to do?",
       },
-      { role: "skill-request", text: 'load_skill("tenancy-check")' },
+      { role: "skill-request", text: 'load_skill("closing-up")' },
       {
         role: "skill-document",
-        text: `Checking a tenancy agreement
+        text: `Closing up
 
-Use this when someone is about to sign a rental agreement and wants to know whether it is reasonable.
+Use this when someone is shutting the café for the night. Do these in order, because two of them only work that way round.
 
-Work through four things, in this order. How much notice each side has to give. Whether the deposit is protected, and how it comes back. Who pays for repairs. Whether the rent can go up part-way through.
+  1. Chairs up, then mop from the back of the room forwards
+  2. Backflush the coffee machine and leave it switched on overnight
+  3. Fridges shut, and push the freezer door to check it has caught
+  4. Cash out of the till into the safe, and leave the till drawer open
+  5. Bins out, but only on a Tuesday or a Thursday
+  6. Set the alarm at the panel by the back door, then leave through that door within 30 seconds
 
-Say what is missing as well as what is there. The clause that is absent is often the bigger problem.`,
+Never lock the back door before setting the alarm. You will only have to unlock it again, and the alarm will go off while you do.`,
       },
       {
         role: "assistant",
-        text: "Taking them in order.\n\nNotice: two months either way, which is normal.\n\nDeposit: not mentioned at all. Ask where it will be held and how you get it back.\n\nRepairs: this is the one to push on. As written, you pay for everything, including the boiler and the roof. That is not usual, and much of it is not enforceable anyway.\n\nRent rises: also not mentioned, so ask for a clause saying the rent is fixed for the term.",
+        text: "In order, because a couple of these only work one way round.\n\n1. Chairs up, then mop from the back of the room forwards, so you're not walking back over it.\n2. Backflush the coffee machine and leave it switched on.\n3. Fridges shut, and give the freezer door a push to check it has caught.\n4. Cash out of the till into the safe. Leave the drawer open.\n5. Bins out only if it's Tuesday or Thursday. Any other night, leave them.\n6. Last thing: set the alarm at the panel by the back door, then out through that door within 30 seconds.\n\nDon't lock the back door before you set the alarm, or you'll have to unlock it again with the alarm going off.",
       },
     ],
     takeaway:
-      "The answer is the checklist, in the checklist's order, including the instruction to say what is absent. Two of the four points are things the agreement never mentions, which the model would have had no reason to raise on its own.",
+      "Every step here is particular to one café, and two of them are ordering rules: mop back to front, and set the alarm before you lock up. Without the document the model would write a confident, generic closing-up list and get both of them wrong.",
   },
   {
     id: "chained",
