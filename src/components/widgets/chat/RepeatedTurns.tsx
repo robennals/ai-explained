@@ -26,7 +26,7 @@ export function RepeatedTurns() {
   return (
     <WidgetContainer
       title="The conversation goes back every time"
-      description="Step through the replies. Shaded text was already sent in an earlier prompt."
+      description="Step through the replies, and watch the prompt grow."
       onReset={() => {
         setIndex(0);
         setView("raw");
@@ -62,19 +62,10 @@ export function RepeatedTurns() {
                 Prompt the model is given
               </span>
             </div>
-            <div className="whitespace-pre-wrap bg-surface px-4 py-3 font-mono text-sm leading-relaxed">
-              {promptParts(assistantIndex).map((part, i) => (
-                <span
-                  key={i}
-                  className={
-                    part.carriedOver
-                      ? "rounded bg-foreground/8 text-muted"
-                      : "font-semibold text-foreground"
-                  }
-                >
-                  {part.text}
-                </span>
-              ))}
+            <div className="whitespace-pre-wrap bg-surface px-4 py-3 font-mono text-sm leading-relaxed text-foreground">
+              {promptParts(assistantIndex)
+                .map((part) => part.text)
+                .join("")}
             </div>
           </div>
 
