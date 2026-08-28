@@ -92,7 +92,7 @@ export function RawCompletion() {
         <span className="font-semibold">Why: </span>
         {mode === "base"
           ? example.baseNote
-          : "The role markers put the model in the middle of a transcript, with the assistant's turn left open. Post-training taught it that the likely continuation there is an answer."}
+          : "The role markers put the model in the middle of a transcript, with the assistant's turn left open. Post-training taught it to answer there, rather than to carry on with whatever text would plausibly have followed."}
       </p>
     </WidgetContainer>
   );

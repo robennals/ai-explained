@@ -148,7 +148,7 @@ export const scenarios: Scenario[] = [
       },
     ],
     takeaway:
-      "Nothing planned that sequence. The model wrote one call, read the result, and the most likely continuation was a second call using an id that only existed once the first result came back. A loop of one-step decisions like this is most of what people mean when they call a model an agent.",
+      "Nothing planned that sequence. The model wrote one call, read the result, and then wrote a second call using an id that had not existed until the first result came back. A loop of one-step decisions like this is most of what people mean when they call a model an agent.",
   },
 ];
 

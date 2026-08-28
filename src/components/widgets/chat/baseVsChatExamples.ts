@@ -112,7 +112,7 @@ export function getExample(id: string): CompletionExample {
  * The text the model is actually completing. A base model is handed the raw
  * prompt. A chat model is handed the same words wrapped in the role markers
  * of a chat template, with the assistant marker left open at the end, which is
- * what makes "answer the question" the likely continuation.
+ * the arrangement post-training taught it to answer in.
  */
 export function buildPrefix(
   example: CompletionExample,

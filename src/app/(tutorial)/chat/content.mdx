@@ -29,7 +29,7 @@ Post-training does not teach the model new facts or new ways of understanding th
 
 ## Making It a Conversation
 
-Underneath every chat interface there is a single stream of tokens. The model does not see a conversation. It sees a prompt, and it writes the text that most likely follows, exactly as in the first playground of this chapter. What makes it a conversation is markers in the prompt saying who is speaking.
+Underneath every chat interface there is a single stream of tokens. The model does not see a conversation. It sees a prompt and writes a completion, exactly as in the first playground of this chapter. Post-training is what changed the completion from whatever text would plausibly have come next into an answer. What makes it a conversation is markers in the prompt saying who is speaking.
 
 <TranscriptViewsWidget>
 The same exchange twice. As text, it is a prompt and a completion. As messages, it is what you would see on screen, plus one the human is never shown.
