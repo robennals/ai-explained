@@ -56,16 +56,18 @@ describe("individual illustrations", () => {
     expect(visual.response).not.toContain("$50");
   });
 
-  it("shows real users upvoting the flattering answer and downvoting the right one", () => {
+  it("reads the usage signal out of what the user typed, not a button", () => {
     const visual = getApproach("usage").visual;
     if (visual.type !== "usage") throw new Error("expected usage");
-    expect(visual.rows.map((r) => r.up)).toEqual([true, false]);
+    expect(visual.turns[visual.turns.length - 1].role).toBe("user");
+    expect(visual.good).toBe(false);
   });
 
-  it("passes exactly the correct response through the automatic check", () => {
+  it("verifies the solution against the question, step by step", () => {
     const visual = getApproach("checker").visual;
     if (visual.type !== "check") throw new Error("expected a check");
-    expect(visual.rows.filter((r) => r.passed)).toHaveLength(1);
+    expect(visual.passed).toBe(true);
+    expect(visual.steps.length).toBeGreaterThanOrEqual(3);
   });
 });
 

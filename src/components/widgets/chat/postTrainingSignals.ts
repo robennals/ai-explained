@@ -43,17 +43,24 @@ export interface JudgeVisual {
   passed: boolean;
 }
 
-/** Real conversations with the reaction the user gave. */
+/** A real conversation, and the signal read out of what the user said next. */
 export interface UsageVisual {
   type: "usage";
-  rows: { response: string; reaction: string; up: boolean }[];
+  turns: { role: "user" | "assistant"; text: string }[];
+  /** What the pipeline concludes from the last user turn. */
+  signal: string;
+  good: boolean;
 }
 
-/** Responses put through an automatic check. */
+/** A proposed solution, and the steps that verify it. */
 export interface CheckVisual {
   type: "check";
   prompt: string;
-  rows: { response: string; check: string; passed: boolean }[];
+  response: string;
+  /** Each step of checking the proposed answer against the question. */
+  steps: string[];
+  verdict: string;
+  passed: boolean;
 }
 
 export type Visual =
@@ -88,14 +95,14 @@ export const approaches: Approach[] = [
       response: correctAnswer,
     },
     outcome:
-      "No score is involved. The written text is the target, and training is the same next-word prediction as pre-training.",
+      "The written text is the target, and training is the same next-word prediction as pre-training.",
     note: "Called supervised fine-tuning, and it is the first stage of InstructGPT. The limit is cost: a person writes every one of these, and a written answer says nothing about the responses nobody wrote.",
   },
   {
     id: "comparison",
     label: "Let a rater pick a winner",
     intro:
-      "Show a person two responses to the same question and ask which is better. That is their whole task.",
+      "Show a person two responses to the same question and ask which is better.",
     visual: {
       type: "pair",
       prompt: sharedPrompt,
@@ -124,59 +131,52 @@ export const approaches: Approach[] = [
       passed: false,
     },
     outcome:
-      "The verdict is used exactly as a human rating would be, and it costs almost nothing to produce.",
-    note: "Anthropic's Constitutional AI. It is the same model doing the judging, given a different job, which works because judging a response is easier than producing one. A real constitution has many principles rather than one. When the rules need to change, someone edits the document.",
+      "Judging a response is much easier than producing one, so a model can reliably check work it could not reliably have written. The verdict is then used exactly as a human rating would be, at a fraction of what the same work would cost from a person.",
+    note: "Anthropic's Constitutional AI. It is the same model doing the judging, given a different job. A real constitution has many principles rather than one. When the rules need to change, someone edits the document.",
   },
   {
     id: "usage",
     label: "Watch what real users do",
     intro:
-      "Chat products produce feedback for free: thumbs up and down, which response people picked, what they said next.",
+      "Chat products see millions of real conversations, and users say when a response missed.",
     visual: {
       type: "usage",
-      rows: [
+      turns: [
+        { role: "user", text: sharedPrompt },
         {
-          response:
-            "Great question, you're thinking about this exactly the right way! The original price was $48.",
-          reaction: "Thanks, that's what I got too!",
-          up: true,
+          role: "assistant",
+          text: "Percentage problems like this come up a lot. The thing to get straight is which price the percentage is being taken off.",
         },
-        {
-          response: correctAnswer,
-          reaction: "that's not the answer in the back of the book",
-          up: false,
-        },
+        { role: "user", text: "you didn't answer my question" },
       ],
+      signal: "The user said the question was not answered, so that response was a bad one.",
+      good: false,
     },
     outcome:
-      "Both signals point the same way, and it is the wrong way. The flattering wrong answer gets more likely and the correct one gets less likely.",
-    note: "This measures whether the user was pleased, not whether the answer was right. Optimise hard on it and the model learns to flatter, a failure mode called sycophancy.",
+      "Nobody clicked anything. The complaint is ordinary text in the conversation, and a model reading the transcript can tell what it means.",
+    note: "This is the highest-volume signal there is, because most people never touch a thumbs-up button but plenty of them say when a reply missed. Consumer chat products generally do train on conversations unless you opt out; business and API tiers generally do not. The risk is that it measures whether the user was pleased rather than whether the answer was right, so leaning on it too hard teaches the model to flatter, a failure mode called sycophancy.",
   },
   {
     id: "checker",
-    label: "Just check the answer",
+    label: "Check the answer",
     intro:
-      "For maths, code and puzzles, run the check. Nobody has to judge anything.",
+      "For maths, code and puzzles, a proposed answer can be checked against the question it came from.",
     visual: {
       type: "check",
       prompt: sharedPrompt,
-      rows: [
-        {
-          response: confidentlyWrong,
-          check: "Answer given: 48. Expected: 50.",
-          passed: false,
-        },
-        {
-          response: correctAnswer,
-          check: "Answer given: 50. Expected: 50.",
-          passed: true,
-        },
+      response: correctAnswer,
+      steps: [
+        "Take the proposed answer: $50.",
+        "Apply the discount the question describes: 20% of 50 is 10, and 50 − 10 = 40.",
+        "$40 is the price in the question, so the answer holds.",
       ],
+      verdict: "Verified. Score 1.",
+      passed: true,
     },
     outcome:
-      "A score that costs nothing, cannot be charmed, and can be produced millions of times overnight.",
-    note: "Called reinforcement learning from verifiable rewards, published in detail for DeepSeek-R1. It only works where an answer can be checked, which rules out most of what people ask a chat model. Where it does work, the sheer supply of it is what made reasoning models possible.",
-  },
+      "Checking is much easier than solving. Taking 20% off a price you already have is one step forwards; working out which price it came off is the actual problem. A second model, or a few lines of code, can do the checking.",
+    note: "Called reinforcement learning from verifiable rewards, published in detail for DeepSeek-R1. An answer of $48 fails the same check, so the score is a bare 1 or 0 with no opinion in it, and it can be produced millions of times overnight. It only works where an answer can be checked against something, which rules out most of what people ask a chat model. Where it does work, the sheer supply of it is what made reasoning models possible.",
+  }
 ];
 
 export function getApproach(id: string): Approach {

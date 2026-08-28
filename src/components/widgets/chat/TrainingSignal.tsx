@@ -129,21 +129,38 @@ function JudgePanel({ visual }: { visual: JudgeVisual }) {
 function UsagePanel({ visual }: { visual: UsageVisual }) {
   return (
     <div className="space-y-3">
-      {visual.rows.map((row, i) => (
-        <div
-          key={i}
-          className="rounded-lg border border-widget-border bg-surface p-4"
-        >
-          <Label>The model said</Label>
-          <p className="mt-1 text-base leading-relaxed text-foreground">
-            {row.response}
-          </p>
-          <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-widget-border pt-3">
-            <Verdict passed={row.up}>{row.up ? "Thumbs up" : "Thumbs down"}</Verdict>
-            <span className="text-base text-muted">&ldquo;{row.reaction}&rdquo;</span>
-          </div>
+      <div className="rounded-lg border border-widget-border bg-surface p-4">
+        <Label>A real conversation</Label>
+        <div className="mt-2 space-y-2">
+          {visual.turns.map((turn, i) => (
+            <div
+              key={i}
+              className={`flex ${turn.role === "user" ? "justify-end" : "justify-start"}`}
+            >
+              <div
+                className={`max-w-[85%] rounded-2xl px-4 py-2 text-base leading-relaxed ${
+                  turn.role === "user"
+                    ? "bg-accent/10 text-foreground"
+                    : "bg-widget-bg text-foreground ring-1 ring-widget-border"
+                }`}
+              >
+                {turn.text}
+              </div>
+            </div>
+          ))}
         </div>
-      ))}
+      </div>
+      <div className="rounded-lg border border-widget-border bg-white p-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <Label>What the training pipeline reads from that</Label>
+          <Verdict passed={visual.good}>
+            {visual.good ? "Good response" : "Bad response"}
+          </Verdict>
+        </div>
+        <p className="mt-1 text-base leading-relaxed text-foreground">
+          {visual.signal}
+        </p>
+      </div>
     </div>
   );
 }
@@ -152,23 +169,25 @@ function CheckPanel({ visual }: { visual: CheckVisual }) {
   return (
     <div className="space-y-3">
       <Prompt text={visual.prompt} />
-      {visual.rows.map((row, i) => (
-        <div
-          key={i}
-          className="rounded-lg border border-widget-border bg-surface p-4"
-        >
-          <Label>Response</Label>
-          <p className="mt-1 text-base leading-relaxed text-foreground">
-            {row.response}
-          </p>
-          <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-widget-border pt-3">
-            <Verdict passed={row.passed}>
-              {row.passed ? "Score 1" : "Score 0"}
-            </Verdict>
-            <span className="font-mono text-sm text-muted">{row.check}</span>
-          </div>
+      <div className="rounded-lg border border-widget-border bg-surface p-4">
+        <Label>The model's solution</Label>
+        <p className="mt-1 text-base leading-relaxed text-foreground">
+          {visual.response}
+        </p>
+      </div>
+      <div className="rounded-lg border border-widget-border bg-white p-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <Label>Checking it against the question</Label>
+          <Verdict passed={visual.passed}>{visual.verdict}</Verdict>
         </div>
-      ))}
+        <ol className="mt-2 space-y-1.5">
+          {visual.steps.map((step, i) => (
+            <li key={i} className="text-base leading-relaxed text-foreground">
+              {step}
+            </li>
+          ))}
+        </ol>
+      </div>
     </div>
   );
 }
