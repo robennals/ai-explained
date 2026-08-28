@@ -1,25 +1,25 @@
-The previous chapter ended with a machine that reads a passage of text and says what is likely to come next. That machine is not ChatGPT. This chapter is about the training that turns a text predictor into something that answers you, and the format that arranges a conversation for it to continue.
+The previous chapter ended with a machine that reads a passage of text and says what is likely to come next. That machine is not ChatGPT or Claude. This chapter is about the training that turns a next word predictor into something useful.
 
 ## What a Raw Model Does
 
-A transformer (<Ch slug="transformers" />) trained to predict the next word (<Ch slug="next-word-prediction" />) is called a *base model*, and that training is called *pre-training*. It reads an enormous amount of text, and what it gets out of it is an understanding of how the world works.
+A transformer (<Ch slug="transformers" />) trained to predict the next word (<Ch slug="next-word-prediction" />) is called a *base model*. This model has read an enormous amount of text and has formed a deep enough understanding of how the world works that it can predict the next work in a piece of text about pretty much anything.
 
-What it does not get is any sense of what to do with that understanding. Predicting the most likely next token is often not what you would want from a helpful assistant. The playground shows a few examples.
+But predicting the next word is not what you usually want a helpful assistant to do. The playground shows a few examples.
 
 <RawCompletionWidget>
 Switch between **base model** and **chat model** on each prompt. The base model's completion is not a mistake. Ask yourself where on the internet that text would have come next.
 </RawCompletionWidget>
 
-The base model is not confused and it is not stupid. It is doing exactly what we trained it to do. What we trained it to do was predict the next token, not be a useful assistant. Almost everything a chat model knows about the world, the base model already knows, because almost all of the knowledge came from that pile of text.
+The base model is not confused and it is not stupid. It is doing exactly what we trained it to do. What we trained it to do was predict the next token, not to be a useful assistant.
 
 ## Post-Training
 
 Closing that gap is a whole second stage of training. The two stages have names:
 
 - **Pre-training** is next-word prediction over a very large body of text. It is where the model picks up its understanding of how the world works. Nearly all of the compute goes here, often more than 99% of it.
-- **Post-training** is everything after that. It teaches the model how to apply that understanding to the thing you actually want. It is a thin layer, and it accounts for all of the difference between the two completions in the playground above.
+- **Post-training** is everything after that. It teaches the model how to apply that understanding to the thing you actually want the model to do. It is a thin layer, and it accounts for all of the difference between the two completions in the playground above.
 
-There are several ways to do the second part, and a modern chat model has usually been through most of them. Most work the same way underneath: produce several candidate responses, score them somehow, and adjust the weights so that higher-scoring responses become more likely.
+There are several ways to do the second part, and a modern chat model has usually been through most of them. Most work the same way underneath: produce several candidate responses, score them somehow, and adjust the model's weights so that higher-scoring responses become more likely.
 
 <TrainingSignalWidget>
 Step through the five tabs. Each is a different way of telling the model which answer you wanted, and the last two rest on the same idea: checking an answer is far easier than producing one.
