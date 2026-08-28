@@ -56,7 +56,10 @@ Try "Score of 1": A scores 1 and the rest score 0, yet A only gets about 47% and
 
 The scores we gave in the previous section range from 0 to 1, but it turns out that doesn't work well with softmax. Softmax expects a score to be much bigger (e.g. 9) in order to be seen as a significantly better match than zero. In the following sections we'll use larger matching scores - which a real model accomplishes by using K and Q vectors with larger magnitudes.
 
-There is one more thing softmax forces on us: it always hands out the full 100%, even when nothing really matches. A pronoun like the "it" in "It was raining" doesn't refer to anything, but softmax would still spread its attention across every token. The fix is a **sink**: an extra token with a small fixed score. When the real tokens all score low, the sink out-competes them and quietly absorbs the attention. When something genuinely matches, it easily beats the sink.
+
+## What if nothing matches?
+
+There is one more trick we need in order to get softmax to work nicely. Softmax requires its percentages to add up to 100%, but what do we do if nothing matches and we don't want to pay attention to any previous tokens? The fix is a **sink**: an extra token with a small fixed score. When the real tokens all score low, the sink out-competes them and quietly absorbs the attention. When something genuinely matches, it easily beats the sink.
 
 <AttentionSinkWidget>
 Drag the sliders, or hit a preset. "Nothing matches": every real token scores low, so the sink (fixed at 3) wins most of the attention. "Something matches": token A scores 8, far above the sink, so it wins and the sink barely registers.
@@ -68,9 +71,10 @@ Real models don't always add a dedicated sink token. Often they just learn to du
 
 The reason we pay attention to another token is to extract information from it. That information is the token's **value**, which is yet another vector.
 
-You could imagine a simplified version of attention that just picked the token that matched the best and returned that token's value. But Attention is smarter than that. It combines the values of all the tokens, weighting each by its softmax percentage.
+Attention combines the values of all the tokens, weighting each by its softmax percentage.
 
-It's kind of crazy that this works. Why should you be able to blend these value vectors together and get something that makes any sense? But, as we saw in [Chapter 5](/embeddings), the embeddings used by AI models are constructed such that you can do things like take the average of two embedding vectors, and the result is a vector that combines their meanings.
+It's kind of crazy that this works. Why should you be able to blend these value vectors together and get something that makes any sense? It works because, as we saw in [Chapter 5](/embeddings), the embeddings used by AI models are constructed such that you can do things like take the average of two embedding vectors, and the result is a vector that combines their meanings. 
+
 
 <AttentionValuesWidget>
 Try "A clear value": "it" pays almost all its attention to "glass", so it gathers "the glass". Try "An even split": "it" could be the cat or the dog, so it gathers "either the cat or the dog". Try "A leaning blend": "pounced" is looking for the agile animal that pounced, which fits the cat better than the dog, so it gathers "probably the cat, maybe the dog".
