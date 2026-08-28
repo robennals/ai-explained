@@ -35,7 +35,7 @@ function Verdict({ passed, children }: { passed: boolean; children: React.ReactN
   return (
     <span
       className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-semibold ${
-        passed ? "bg-success/10 text-success" : "bg-foreground/8 text-muted"
+        passed ? "bg-success/10 text-success" : "bg-error/10 text-error"
       }`}
     >
       <span aria-hidden>{passed ? "✓" : "✕"}</span>
@@ -98,20 +98,26 @@ function PairPanel({ visual }: { visual: PairVisual }) {
 function JudgePanel({ visual }: { visual: JudgeVisual }) {
   return (
     <div className="space-y-3">
-      <div className="rounded-lg border border-dashed border-border bg-foreground/[0.03] p-4">
+      <div className="rounded-lg border border-warning/50 bg-warning/8 p-4">
         <Label>The constitution, in full</Label>
         <p className="mt-1 text-base leading-relaxed text-foreground">
           {visual.rule}
         </p>
       </div>
       <Prompt text={visual.prompt} />
-      <div className="rounded-lg border border-widget-border bg-surface p-4">
+      <div className="rounded-lg border border-accent/40 bg-accent/5 p-4">
         <Label>Response</Label>
         <p className="mt-1 text-base leading-relaxed text-foreground">
           {visual.response}
         </p>
       </div>
-      <div className="rounded-lg border border-widget-border bg-white p-4">
+      <div
+        className={`rounded-lg border p-4 ${
+          visual.passed
+            ? "border-success/40 bg-success/5"
+            : "border-error/40 bg-error/5"
+        }`}
+      >
         <div className="flex flex-wrap items-center justify-between gap-2">
           <Label>The model, asked whether the rule was met</Label>
           <Verdict passed={visual.passed}>
