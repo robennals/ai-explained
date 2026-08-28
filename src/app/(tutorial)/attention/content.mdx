@@ -1,128 +1,111 @@
-Attention is the breakthrough that made modern AI work, and the idea behind it is simple. When a model processes a word, it should be able to reach back and pick out whichever earlier words give that word its meaning, however far back they sit. This chapter builds attention from scratch, out of vectors, dot products and neural networks.
+To understand what a word means, we often need to look at other words in the document, including some that came much earlier. The technique AI models use to do that is called *Attention*. In this chapter we'll explain how it works.
 
-## Some Words Need Other Words
+## Some Tokens Need Other Tokens
 
-You often can't tell what a word means without looking at other words in the sentence. The word "bank" could be a place for money or the side of a river. You need to see the words around it to know which one. A pronoun like "it" makes no sense on its own. You have to look back and find what it refers to.
-
-This is something our fixed-window model from <Ch slug="next-word-prediction" /> can't do well. It sees the last few words and has no way to reach back and pick out the *specific* earlier words that matter.
+You often can't tell what a token means on its own. Take "bank": is it a place for money, or the side of a river? You have to look at the tokens around it. A token like "it" is even harder: it can stand for almost anything, so you have to look back to find what it points to.
 
 <WhyAttentionMattersWidget>
-Each sentence has a highlighted word. Follow the arrows to see which other words you need to look at in order to understand it. Flip through the examples. Each shows a different reason why "looking back selectively" is essential.
+Each sentence has one highlighted token. Follow the arrow to the token it depends on. Flip through the examples: the token it needs might be what a pronoun stands for, who did an action, where a scene is set, or a name from far back.
 </WhyAttentionMattersWidget>
 
-Every one of these examples requires the same ability: given a word, *choose* which other words in the sentence are relevant to understanding it. Not the nearest words. Not a fixed window. The *right* words, wherever they happen to be.
+Different tokens need different things in order for us to understand what they mean. "it" needs the thing it stands for. "opened" needs whoever did the opening. "sky" needs the planet it hangs over. "treaty" needs a name from pages ago.
 
-This is what **attention** does. It gives the model the ability to look at every word that came before and decide which ones matter for the word it's currently processing. We'll build up to how it works, step by step.
 
-## Match Scores
+## Searching for a Match
 
-We need each token to be able to ask a question and find the other tokens that answer it. The token isn't really asking anything; the model does the asking on the token's behalf. But it's easier to follow the math if we picture it from the token's point of view.
+So how do we know which tokens we need to "pay attention to" in order to understand the meaning of a particular token?
 
-Imagine a tiny vocabulary of just four tokens: **cat**, **dog**, **blah** (a filler word), and **it** (a pronoun). Our goal is to work out what noun **it** is referring to.
+The "Attention" algorithm does this by giving each token three things:
 
-Each token gets two vectors:
+- A token's **query** is what it is looking for, like the words you type into a search box.
+- A token's **key** is what it advertises to the other tokens, like the title of a web page.
+- A token's **value** is the information it provides if you pay attention to it, like the contents of the page.
 
-- A **query** — what this token is *looking for* in other tokens.
-- A **key** — what this token is *offering* to other tokens.
+To understand a token, we take that token's **query** and compare it against every other token's **key** to find the tokens whose **keys** seem most similar to that **query**. 
 
-Both vectors here are just one number: a 1 means "noun" or "looking for a noun", a 0 means "no". "cat" and "dog" offer themselves as nouns. "blah" offers nothing. "it" is *looking for* a noun.
+This might seem a bit confusing, but it makes more sense once you play with the playground below:
 
-Given a token, we can work out which other tokens it should be paying attention to by multiplying its query (what it is looking for) by the key of each of the other tokens. This is the **dot product** from <Ch slug="vectors" />. The bigger the score, the better the match.
+<AnsweringQuestionsWidget>
+Each example shows the highlighted token's query, the key of the token it matches, and the value it pulls in. Click the other underlined tokens to see that their keys don't fit. Flip through the examples to find strong matches and one loose match.
+</AnsweringQuestionsWidget>
 
-<ToyAttentionScoresWidget>
-Click any token to see its raw match scores against every key — including its own. Click "it" to see it match "cat" (score 1) and miss "blah" (score 0). Click "cat" to see something different: "cat" isn't asking anything, so every score is 0. The widget always shows both the key (what each token offers) and the query (what each token is looking for).
-</ToyAttentionScoresWidget>
 
-What you offer isn't the same as what you're looking for. A pronoun needs to find nouns without being mistaken for one itself. That's why keys and queries are separate.
+## Matching with the Dot Product
+
+How does a computer decide whether a query matches a key? So far we've written queries and keys in plain English, but comparing English text is tricky. How do we know that "a place with a sky" matches "a planet"?
+
+In <Ch slug="vectors" /> and <Ch slug="embeddings" /> we showed that AI models can represent almost anything using vectors. We also showed that we can use the dot product to compare two vectors to see how similar their meanings are. 
+
+Indeed this is how Attention compares a query to a key. The query and key are both vectors, and their dot product gives a single **match score** we can read as a similarity from 0 (nothing in common) to 1 (a perfect match).
+
+<MatchingQuestionsWidget>
+The same examples, with each key now scored against the query, from 0 to 1. The score is the dot product of the query and the key. The "bank" example is a loose match (0.6) and still wins.
+</MatchingQuestionsWidget>
+
+From here on we'll write each query and key in plain English and the match as a single score. Underneath they're still vectors and dot products.
 
 ## Dividing Your Attention
 
-Match scores are useful, but the model can't just keep piling them up. Each token has a fixed budget of attention, 100%, and needs to *divide* that budget among all the candidates. We need to turn raw scores into percentages that add up to 1. You'll find out why the attention needs to add up to 100% later.
+Usually more than one token matches, at least a little. So instead of crowning a single winner, attention blends everything it looked at, giving each token a say in proportion to how well it matched. To do this, we turn the match scores into percentages that add up to 100%.
 
-The function usually used for this is called **softmax**. Think of it as a competition: bigger numbers dominate, smaller numbers get squeezed, and the result is a set of percentages.
+Most AI models do this with a function called **softmax**. Softmax always makes the percentages add up to 100%, and gives a bigger share to bigger scores.
 
 <SoftmaxExplorerWidget>
-Drag the sliders. Try "All equal" — everyone gets 25%. Try "Moderate, rest silent" — A wins by default because nobody else is saying anything. Try "Moderate meets loud" — B drowns out A. The gaps between scores matter more than the absolute values. Softmax cares about who's loudest *relative to everyone else*.
+Try "Score of 1": A scores 1 and the rest score 0, yet A only gets about 47% and each zero still keeps around 18%. Now try "Score of 9": same shape, but A takes almost everything. Small scores stay flat; big scores make the winner dominate.
 </SoftmaxExplorerWidget>
 
-Now apply softmax to the dot products we computed above. With keys and queries at 1/0, "it" against `cat blah blah it` gets scores `[1, 0, 0, 0]`, which softmax turns into roughly `[47.5%, 17.5%, 17.5%, 17.5%]`. That's the right shape, cat wins, but more than half the attention leaks to the filler tokens. Not great.
+The scores we gave in the previous section range from 0 to 1, but that range doesn't work well with softmax. For softmax to treat one match as clearly better than the rest, the scores need to be much bigger, like 9 instead of 1. So from here on we'll use larger match scores. A real model gets them by giving its key and query vectors larger magnitudes, which stretches out their dot products.
 
-The fix is to crank up the *query magnitude*. The keys still describe what each token is, but the asker cares more about paying attention to the tokens that matched best. With "it"'s query at 10 instead of 1, the scores become `[10, 0, 0, 0]`, and softmax turns those into roughly `[99.99%, ≈0%, ≈0%, ≈0%]`. Nearly all the attention goes to the noun.
 
-<ToyAttentionSoftmaxWidget>
-Toggle the query magnitude between 1 and 10. At 1, attention leaks all over the place. At 10, "it" puts almost all of its attention on the noun. There's still a tiny leak — softmax always allocates 100%, so a fraction of a percent goes to every loser. That's honest and we'll come back to it.
-</ToyAttentionSoftmaxWidget>
+## What if nothing matches?
 
-But there's a bigger problem. Try clicking on "blah" in the widget above. "blah" doesn't have a noun-finding question — its query is just zero. So every score is zero, and softmax spreads attention evenly across all four tokens. The widget reports "blah pays 25% attention to itself, 25% to cat, 25% to the other blah, 25% to it" — which is meaningless. The same thing happens to "it" if there are no nouns in the sentence. Softmax has nothing to grab onto, so it spreads attention everywhere, with full confidence.
+We need one more trick to make softmax work nicely. Softmax requires its percentages to add up to 100%, but what do we do if nothing matches and we don't want to pay attention to any previous tokens? The fix is a **sink**: an extra token with a small fixed score. When the real tokens all score low, the sink out-competes them and quietly absorbs the attention. When something genuinely matches, it easily beats the sink.
 
-## Where Does Attention Go When Nothing Matches?
+<AttentionSinkWidget>
+Drag the sliders, or hit a preset. "Nothing matches": every real token scores low, so the sink (fixed at 3) wins most of the attention. "Something matches": token A scores 8, far above the sink, so it wins and the sink barely registers.
+</AttentionSinkWidget>
 
-Softmax always allocates 100% somewhere, even when no real match is available. We need a sensible place for the leftover attention to go.
-
-The first fix is to add a **sink** token whose only job is to absorb leftover attention. Give it a key that's *slightly* nounish — say, `[0.5]` — so it scores higher than zero, but lower than a real noun like `[1]`. When a real noun is around, the noun wins by a wide margin (because of the cranked-up query magnitude). When no noun is around, the sink wins by default — `0.5` is the only score above zero.
-
-That handles the "it can't find a noun" case. But there's still the other problem we saw above: clicking on "blah" or "cat". Those tokens don't have a noun-finding query, so their scores are still all zero, and attention still spreads evenly.
-
-The second fix is to add a **"none"** dimension to every token's key and query, alongside the existing "noun" dimension. Tokens that aren't looking for a noun get queries pointing at the "none" dimension. The sink advertises in *both* dimensions — its key becomes `[0.5, 0.5]`, slightly nounish *and* a strong "none". So now off-task tokens have something to search for, and the sink is the only token that answers them.
-
-<ToyAttentionSinkWidget>
-Click "it" in `cat blah blah it` — almost all attention goes to "cat", with barely any leftover on the sink. Try `blah blah blah it` — there's no noun to find, and the sink wins ~97% of the attention. Try clicking "blah" — it isn't looking for a noun, so its attention parks on the sink (also ~97%). Every off-task token now has somewhere harmless to land.
-</ToyAttentionSinkWidget>
-
-Real models don't always use a dedicated sink token. Sometimes the model learns to use a punctuation mark as a sink, or a start-of-sentence token, or just have the token attend to itself. The idea is the same in every case: when this head doesn't have anything useful to do for a particular token, attention has to go somewhere harmless.
+Real models don't always add a dedicated sink token. Often they just learn to dump spare attention on a comma, the first token, or the token itself.
 
 ## What Did You Find?
 
-So far attention tells us *where to look* — which tokens are relevant. But we also need *what to gather* from those tokens.
+The reason we pay attention to another token is to extract information from it. That information is the token's **value**, which is yet another vector.
 
-Each token gets a third vector: a **value**. The query and key decide who talks to whom. The value is what gets said. For our pronoun example, the value encodes which animal the token represents: cat's value is `[1, 0]`, dog's value is `[0, 1]`, and filler tokens (including the sink) have nothing to share, so their value is `[0, 0]`.
+Attention combines the values of all the tokens, weighting each by its softmax percentage.
 
-Attention then blends these values using the softmax weights as a recipe. If "it" pays nearly 100% attention to "cat" and a fraction of a percent everywhere else, the result is roughly `[1, 0]` — almost pure cat.
+It's kind of crazy that this works. Why should you be able to blend these value vectors together and get something that makes any sense? It works because of something we saw in <Ch slug="embeddings" />: the vectors AI models use are built so that if you average two of them, the result combines their meanings. 
 
-<ToyAttentionValuesWidget>
-Click "it" in `cat blah blah it` — the result is almost all cat. Try `cat blah dog it` — half cat, half dog, because "it" matched both nouns equally and the model can't tell which. Try `dog blah dog it` — *two* dogs, and the result is even sharper than with just one. Try `blah blah blah it` — there's no noun to find, attention falls on the sink, and the result vector is empty. That's exactly what "nothing useful gathered" looks like.
-</ToyAttentionValuesWidget>
 
-Two of the same noun produces a *more* confident answer than one, not a doubled one. Softmax-weighted blending stays in the same value-space as the input, no matter how many matches there are. Match dog twice, you get dog. Match dog and cat, you get half-dog-half-cat. The mechanism never produces "double dog."
-
-When attention falls on the sink (whose value is `[0, 0]`), the result is empty. That's a clean way to represent "this head had nothing useful to say."
-
-## Multi-Headed Attention
-
-An **attention head** is one full attention computation — one set of queries, keys, and values, learning one pattern of which words attend to which.
-
-Real models don't run just one head. They run many in parallel, each with its own queries, keys, and values, each free to learn a different pattern. This is called **multi-headed attention**. Each head produces its own new representation of every token; those per-head outputs are then combined into a single representation that gets passed on.
-
-Why bother with more than one head? Understanding a sentence requires many kinds of questions at once: What does this pronoun refer to? What's the subject of this verb? What clause does this word belong to? Multi-headed attention lets the model ask all of these at the same time, with each head specializing in a different relationship.
-
-<KeyInsight>
-Multiple attention heads let the model ask many different questions in parallel. Each head has its own query, key, and value weights, so each learns to attend to a different kind of relationship — pronouns, grammar, structure, semantics. **The model doesn't need to choose one kind of attention; it gets all of them at once.**
-</KeyInsight>
-
-In real models, every head also has its own sink behavior, because no single head can apply to every token in every sentence. A pronoun-resolving head will be on-task for pronouns and idle for everything else. That idle behavior is what the sink is for.
+<AttentionValuesWidget>
+Try "A clear value": "it" pays almost all its attention to "glass", so it gathers "the glass". Try "An even split": "it" could be the cat or the dog, so it gathers "either the cat or the dog". Try "A leaning blend": "pounced" is looking for the animal that pounced, and since cats are known for pouncing it fits the cat better than the dog, so it gathers "probably the cat, maybe the dog".
+</AttentionValuesWidget>
 
 ## Where the Vectors Come From
 
-We've been talking about query, key, and value vectors — but where do they actually come from? 
+Where do a token's query, key, and value actually come from? You don't need to write them by hand. The model uses a neural network to compute them from the token's embedding, and we use optimization to train the neural network to produce the queries, keys, and values that do the best job at predicting the next token in the training data.
 
-The answer is the same answer we've run into many times before. The model uses gradient descent to learn the weights that make the model perform best and thus minimize its error.
+## Multi-Headed Attention
 
-To be more precise, the model learns a simple one-layer neural network (without an activation function) that transforms the token's current embedding into query, key, and value vectors.
+In the examples we've given so far, each token only has a single query. But in practice, there are often lots of different kinds of information we might want in order to understand the meaning of a token. Where is this happening? Who did this action? Which of several meanings of this word might be relevant?
 
-In a model with multiple attention heads, each head gets its own three sets of weights, so each head translates the same embedding into its own private Q, K, V vectors. That's how different heads end up looking for different things.
+So in practice we usually do **multi-headed attention**. We have multiple **attention heads**, each of which computes a different query, key, and value for each token. We also usually have multiple layers of attention, where each layer adds more information on top of what was gathered by the previous layers.
+
+You'll see this in more depth when we discuss Transformers in <Ch slug="transformers" />.
+
 
 ## What We've Built
 
 Attention is:
 
-1. **Match scores** — Each query and key combine via dot product to score how relevant each token is to each other token.
-2. **Softmax** — Turn relevance scores into percentages that add up to 100%.
-3. **Values** — A third vector from each token, blended together using the softmax weights.
-4. **The sink** — A token that absorbs attention when nothing relevant is around, so off-task tokens have somewhere harmless to land.
-5. **Multiple heads** — Run many attention patterns in parallel, each specializing in a different relationship.
+1. **Query, key, value.** Each token looks for something (query), advertises what it has (key), and offers an answer (value), like a search.
+2. **Match scores.** The dot product of a query and a key scores how well two tokens fit.
+3. **Softmax.** Turn those scores into percentages that add up to 100%.
+4. **The sink.** A safe place for attention to go when nothing in the sentence fits.
+5. **Blended values.** Combine the chosen values using those percentages.
+6. **Many heads.** Several heads run side by side, each looking for something different.
 
-But our attention mechanism has no idea *where* words are — only *what* they are. "The dog chased the cat" and "the cat chased the dog" produce identical attention scores. In <Ch slug="positions" />, we'll fix this with a trick involving rotation.
+One thing is still missing: attention has no idea *where* the tokens are, only *what* they are. "The dog chased the cat" and "the cat chased the dog" give exactly the same scores. The next chapter fixes that with a trick involving rotation.
 
 <TryItInPyTorch notebook="attention">
-Compute dot-product attention from scratch, build query/key/value projections, visualize attention heatmaps on real sentences, implement multi-head attention, and see how scrambled word order doesn't change attention scores, a problem we'll solve in <Ch slug="positions" />.
+Compute dot-product attention from scratch, build query/key/value projections, visualize attention heatmaps on real sentences, implement multi-head attention, and see how scrambled token order doesn't change attention scores, a problem we'll solve in the next chapter.
 </TryItInPyTorch>

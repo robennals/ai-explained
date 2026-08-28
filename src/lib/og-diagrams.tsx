@@ -16,7 +16,7 @@ import { NeuronFreePlayWidget } from "@/app/(tutorial)/neurons/widgets";
 import { AmplifiedAnimalExplorerWidget } from "@/app/(tutorial)/vectors/widgets";
 import { EmbeddingClassifierWidget } from "@/app/(tutorial)/embeddings/widgets";
 import { BigramExplorerWidget } from "@/app/(tutorial)/next-word-prediction/widgets";
-import { ToyAttentionScoresWidget } from "@/app/(tutorial)/attention/widgets";
+import { WhyAttentionMattersWidget } from "@/app/(tutorial)/attention/widgets";
 import { RotationToyTokensWidget } from "@/app/(tutorial)/positions/widgets";
 import { TransformerOverviewWidget } from "@/app/(tutorial)/transformers/widgets";
 
@@ -71,10 +71,10 @@ export function getOgDiagram(slug: string): OgDiagram | null {
       // Probability bars — zoomed to fill canvas.
       return { node: zoomed(1.6, <BigramExplorerWidget />) };
     case "attention":
-      // Toy attention — cat ← it arrow with KEY/QUERY values. No zoom:
-      // the SVG arc uses absolute coordinates that mis-align under CSS
-      // zoom. The crop script upscales the trimmed content to fill.
-      return { node: <ToyAttentionScoresWidget /> };
+      // "Which words matter" — the glass ← it arrow showing a token reaching
+      // back for what it needs. No zoom: the SVG arc uses absolute coordinates
+      // that mis-align under CSS zoom. The crop script upscales to fill.
+      return { node: <WhyAttentionMattersWidget /> };
     case "positions":
       // "Applying Rotation to a Dimension" — visual rotation of a single
       // dimension pair, less wide than WordOrderMatters.

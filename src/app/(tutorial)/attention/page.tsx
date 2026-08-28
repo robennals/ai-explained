@@ -6,11 +6,11 @@ import Content from "./content.mdx";
 import { QuizContent } from "./QuizContent";
 import {
   WhyAttentionMattersWidget,
-  ToyAttentionScoresWidget,
+  AnsweringQuestionsWidget,
+  MatchingQuestionsWidget,
   SoftmaxExplorerWidget,
-  ToyAttentionSoftmaxWidget,
-  ToyAttentionValuesWidget,
-  ToyAttentionSinkWidget,
+  AttentionSinkWidget,
+  AttentionValuesWidget,
 } from "./widgets";
 
 export const metadata = chapterMetadata("attention");
@@ -25,11 +25,11 @@ export default function Chapter07() {
         <Content
           components={{
             WhyAttentionMattersWidget,
-            ToyAttentionScoresWidget,
+            AnsweringQuestionsWidget,
+            MatchingQuestionsWidget,
             SoftmaxExplorerWidget,
-            ToyAttentionSoftmaxWidget,
-            ToyAttentionValuesWidget,
-            ToyAttentionSinkWidget,
+            AttentionSinkWidget,
+            AttentionValuesWidget,
           }}
         />
       </div>

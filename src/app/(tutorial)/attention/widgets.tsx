@@ -9,28 +9,18 @@ const WhyAttentionMatters = dynamic(
   { ssr: false }
 );
 
-const ToyAttentionScores = dynamic(
-  () => import("@/components/widgets/attention/ToyAttentionScores").then((m) => m.ToyAttentionScores),
-  { ssr: false }
-);
-
 const SoftmaxExplorer = dynamic(
   () => import("@/components/widgets/attention/SoftmaxExplorer").then((m) => m.SoftmaxExplorer),
   { ssr: false }
 );
 
-const ToyAttentionSoftmax = dynamic(
-  () => import("@/components/widgets/attention/ToyAttentionSoftmax").then((m) => m.ToyAttentionSoftmax),
+const AttentionSink = dynamic(
+  () => import("@/components/widgets/attention/AttentionSink").then((m) => m.AttentionSink),
   { ssr: false }
 );
 
-const ToyAttentionValues = dynamic(
-  () => import("@/components/widgets/attention/ToyAttentionValues").then((m) => m.ToyAttentionValues),
-  { ssr: false }
-);
-
-const ToyAttentionSink = dynamic(
-  () => import("@/components/widgets/attention/ToyAttentionSink").then((m) => m.ToyAttentionSink),
+const AttentionValues = dynamic(
+  () => import("@/components/widgets/attention/AttentionValues").then((m) => m.AttentionValues),
   { ssr: false }
 );
 
@@ -58,10 +48,18 @@ export function WhyAttentionMattersWidget({ children }: { children?: React.React
   );
 }
 
-export function ToyAttentionScoresWidget({ children }: { children?: React.ReactNode }) {
+export function AnsweringQuestionsWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children} label="Explore it">
-      <ToyAttentionScores />
+      <WhyAttentionMatters mode="answering" />
+    </WidgetSlot>
+  );
+}
+
+export function MatchingQuestionsWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children} label="Explore it">
+      <WhyAttentionMatters mode="qkv" />
     </WidgetSlot>
   );
 }
@@ -74,26 +72,18 @@ export function SoftmaxExplorerWidget({ children }: { children?: React.ReactNode
   );
 }
 
-export function ToyAttentionSoftmaxWidget({ children }: { children?: React.ReactNode }) {
+export function AttentionSinkWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children} label="Explore it">
-      <ToyAttentionSoftmax />
+      <AttentionSink />
     </WidgetSlot>
   );
 }
 
-export function ToyAttentionValuesWidget({ children }: { children?: React.ReactNode }) {
+export function AttentionValuesWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children} label="Explore it">
-      <ToyAttentionValues />
-    </WidgetSlot>
-  );
-}
-
-export function ToyAttentionSinkWidget({ children }: { children?: React.ReactNode }) {
-  return (
-    <WidgetSlot tryIt={children} label="Explore it">
-      <ToyAttentionSink />
+      <AttentionValues />
     </WidgetSlot>
   );
 }

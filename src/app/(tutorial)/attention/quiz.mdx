@@ -40,15 +40,15 @@ A pronoun like "it" is looking for a noun, but isn't itself a noun. If query and
 </Question>
 
 <Question>
-Three tokens have keys: A=(1, 0), B=(0, 1), C=(1, 1). A query of (1, 0) is fired. Which token gets the highest attention score (before softmax)?
+"bank" is looking for "a river or money", but the closest key it finds is just "a river". How does attention handle this partial match?
 
-<Choice>Only token A</Choice>
-<Choice correct>A and C tie</Choice>
-<Choice>Only token B</Choice>
-<Choice>C wins by a lot</Choice>
+<Choice>It ignores "river" because the match isn't exact</Choice>
+<Choice correct>"river" still scores well enough to win, so its value gets pulled in</Choice>
+<Choice>It waits for an exact match later in the sentence</Choice>
+<Choice>It splits attention equally across every token</Choice>
 
 <Feedback>
-The attention score is just the dot product from the Vectors chapter — multiply matching dimensions and add. (1, 0) · (1, 0) = 1 (token A). (1, 0) · (0, 1) = 0 (token B). (1, 0) · (1, 1) = 1 (token C). A and C tie at 1 because both have a 1 where the query has a 1; the query's 0 in the second dimension wipes out anything in that slot. After softmax, A and C split most of the attention while B gets very little.
+Matches don't have to be exact. The dot product measures how *similar* a query and key are, so "a river" overlaps enough with "a river or money" to score highly — not as high as a perfect match, but higher than everything else. "river" wins the attention and hands over its value, which is how "bank" learns it means the riverbank.
 </Feedback>
 </Question>
 
@@ -66,15 +66,15 @@ Softmax always allocates 100% of attention to *something*, even when no real mat
 </Question>
 
 <Question>
-In the chapter's toy example, keys and queries are simple 0/1 values like "is this a noun?" Are real attention heads' Q, K, V vectors really that simple?
+In the chapter we wrote each query and key as a short phrase like "a thing" or "a person". Do real attention heads work with tidy phrases like that?
 
-<Choice>Yes — they're always 0 or 1 in practice</Choice>
+<Choice>Yes — they store the phrases as text</Choice>
 <Choice correct>No — they're learned vectors with no fixed meanings</Choice>
-<Choice>Yes, with dimensions like noun/verb/adverb</Choice>
-<Choice>No — they're just bigger one-hot vectors</Choice>
+<Choice>Yes, each vector stands for a concept like noun or verb</Choice>
+<Choice>No — they're just longer lists of words</Choice>
 
 <Feedback>
-The toy example uses 1D keys and queries to show the mechanics. Real models learn high-dimensional, dense Q/K/V vectors through gradient descent. Each dimension doesn't correspond to a clean human concept like "noun" — it's some combination of patterns the model found useful. The result is hard for humans to read directly: meaning lives in the geometry, not in any one dimension (just like in embeddings).
+The plain-English phrases are a simplification to show the mechanics. Underneath, each query, key, and value is a vector, a list of numbers the model learns through gradient descent. The vectors the model learns will typically not encode simple concepts that make sense to humans.
 </Feedback>
 </Question>
 

@@ -6,7 +6,7 @@ import { SliderControl } from "../shared/SliderControl";
 import { VectorCard } from "../vectors/VectorCard";
 
 /* ------------------------------------------------------------------ */
-/*  Data — same toy tokens as ALiBiToyTokens                          */
+/*  Data — one real sentence: "The dog chased the cat and bit it"      */
 /* ------------------------------------------------------------------ */
 
 interface Token {
@@ -16,36 +16,30 @@ interface Token {
   color: string;
 }
 
-interface Sentence {
-  label: string;
-  tokens: Token[];
-}
-
 const S = 3;
 
-const CAT: Token = {
-  label: "cat", key: [S], query: [0],
-  color: "text-amber-600 dark:text-amber-400",
-};
 const DOG: Token = {
   label: "dog", key: [S], query: [0],
   color: "text-blue-600 dark:text-blue-400",
 };
-const BLA: Token = {
-  label: "blah", key: [0], query: [0],
-  color: "text-foreground/40",
+const CAT: Token = {
+  label: "cat", key: [S], query: [0],
+  color: "text-amber-600 dark:text-amber-400",
 };
 const IT: Token = {
   label: "it", key: [0], query: [S],
   color: "text-purple-600 dark:text-purple-400",
 };
 
-const SENTENCES: Sentence[] = [
-  { label: "dog blah blah blah cat blah it", tokens: [DOG, BLA, BLA, BLA, CAT, BLA, IT] },
-  { label: "cat blah blah blah dog blah it", tokens: [CAT, BLA, BLA, BLA, DOG, BLA, IT] },
-  { label: "dog blah cat blah it", tokens: [DOG, BLA, CAT, BLA, IT] },
-  { label: "cat blah blah blah blah dog blah blah it", tokens: [CAT, BLA, BLA, BLA, BLA, DOG, BLA, BLA, IT] },
-];
+// Filler words carry no noun signal (key 0), so "it" never attends to them.
+const filler = (label: string): Token => ({
+  label, key: [0], query: [0],
+  color: "text-foreground/40",
+});
+
+// "it" refers to the cat (the one that got bitten). The cat sits 3 positions
+// back and the dog 6, so faster rotation tips attention toward the cat.
+const TOKENS: Token[] = [filler("The"), DOG, filler("chased"), filler("the"), CAT, filler("and"), filler("bit"), IT];
 
 /* ------------------------------------------------------------------ */
 /*  Math                                                              */
@@ -242,7 +236,6 @@ function RotationCircle({
 /* ------------------------------------------------------------------ */
 
 export function RotationToyTokens() {
-  const [sentIdx, setSentIdx] = useState(0);
   const [degPerPos, setDegPerPos] = useState(15);
   const [selectedToken, setSelectedToken] = useState<number | null>(null);
   const [arrows, setArrows] = useState<Arrow[]>([]);
@@ -250,8 +243,7 @@ export function RotationToyTokens() {
   const rowRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<Map<number, HTMLElement>>(new Map());
 
-  const sentence = SENTENCES[sentIdx];
-  const tokens = sentence.tokens;
+  const tokens = TOKENS;
   const itIdx = tokens.length - 1;
 
   // Find the default selected token (first noun) when sentence changes
@@ -268,15 +260,9 @@ export function RotationToyTokens() {
   const isClickable = (t: Token) => t.label !== "it";
 
   const handleReset = useCallback(() => {
-    setSentIdx(0);
     setDegPerPos(15);
     setSelectedToken(null);
   }, []);
-
-  const handleSentenceChange = (idx: number) => {
-    setSentIdx(idx);
-    setSelectedToken(null); // reset to default for new sentence
-  };
 
   // Compute rotated dot products and attention weights
   const itQuery = rotateScalar(tokens[itIdx].query[0], itIdx * degPerPos);
@@ -328,7 +314,7 @@ export function RotationToyTokens() {
     });
 
     return () => cancelAnimationFrame(raf);
-  }, [itIdx, weights, sentIdx, tokens]);
+  }, [itIdx, weights, tokens]);
 
   const arcPad = 50;
 
@@ -349,23 +335,6 @@ export function RotationToyTokens() {
       onReset={handleReset}
     >
       <div className="flex flex-col gap-5">
-        {/* Sentence selector */}
-        <div className="flex flex-wrap gap-1.5">
-          {SENTENCES.map((s, i) => (
-            <button
-              key={i}
-              onClick={() => handleSentenceChange(i)}
-              className={`rounded-full px-3 py-1 font-mono text-xs font-medium transition-colors ${
-                i === sentIdx
-                  ? "bg-accent text-white"
-                  : "bg-foreground/5 text-muted hover:bg-foreground/10 hover:text-foreground"
-              }`}
-            >
-              {s.label}
-            </button>
-          ))}
-        </div>
-
         {/* Rotation speed slider */}
         <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 dark:border-amber-900 dark:bg-amber-950/30">
           <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
@@ -443,7 +412,7 @@ export function RotationToyTokens() {
               const clickable = isClickable(tok);
 
               return (
-                <div key={`${sentIdx}-${i}`} className="flex flex-col items-center" style={{ width: 56 }}>
+                <div key={`${i}`} className="flex flex-col items-center" style={{ width: 56 }}>
                   {/* Token label */}
                   <div
                     ref={(el) => {

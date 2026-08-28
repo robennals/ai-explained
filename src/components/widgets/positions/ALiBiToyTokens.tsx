@@ -5,7 +5,7 @@ import { WidgetContainer } from "../shared/WidgetContainer";
 import { SliderControl } from "../shared/SliderControl";
 
 /* ------------------------------------------------------------------ */
-/*  Data — same toy tokens as ToyAttention                            */
+/*  Data — one real sentence: "The dog chased the cat and bit it"      */
 /* ------------------------------------------------------------------ */
 
 interface Token {
@@ -15,37 +15,30 @@ interface Token {
   color: string;
 }
 
-interface Sentence {
-  label: string;
-  tokens: Token[];
-}
-
-// Same toy values as the attention chapter's softmax kicker:
-// "it" sends a query of 10 in the noun dimension, nouns answer with key=1.
-// Dot product is 10 for noun matches, 0 otherwise.
-const CAT: Token = {
-  label: "cat", key: [1], query: [0],
-  color: "text-amber-600 dark:text-amber-400",
-};
+// "it" sends a query of 10 in the noun dimension; nouns answer with key = 1,
+// so the dot product is 10 for a noun and 0 for everything else.
 const DOG: Token = {
   label: "dog", key: [1], query: [0],
   color: "text-blue-600 dark:text-blue-400",
 };
-const BLA: Token = {
-  label: "blah", key: [0], query: [0],
-  color: "text-foreground/40",
+const CAT: Token = {
+  label: "cat", key: [1], query: [0],
+  color: "text-amber-600 dark:text-amber-400",
 };
 const IT: Token = {
   label: "it", key: [0], query: [10],
   color: "text-purple-600 dark:text-purple-400",
 };
 
-const SENTENCES: Sentence[] = [
-  { label: "dog blah blah blah cat blah it", tokens: [DOG, BLA, BLA, BLA, CAT, BLA, IT] },
-  { label: "cat blah blah blah dog blah it", tokens: [CAT, BLA, BLA, BLA, DOG, BLA, IT] },
-  { label: "dog blah cat blah it", tokens: [DOG, BLA, CAT, BLA, IT] },
-  { label: "cat blah blah blah blah dog blah blah it", tokens: [CAT, BLA, BLA, BLA, BLA, DOG, BLA, BLA, IT] },
-];
+// Filler words carry no noun signal (key 0), so "it" never attends to them.
+const filler = (label: string): Token => ({
+  label, key: [0], query: [0],
+  color: "text-foreground/40",
+});
+
+// "it" refers to the cat (the one that got bitten). The cat sits 3 positions
+// back and the dog 6, so a distance penalty tips attention toward the cat.
+const TOKENS: Token[] = [filler("The"), DOG, filler("chased"), filler("the"), CAT, filler("and"), filler("bit"), IT];
 
 /* ------------------------------------------------------------------ */
 /*  Math                                                              */
@@ -103,20 +96,17 @@ interface Arrow {
 /* ------------------------------------------------------------------ */
 
 export function ALiBiToyTokens() {
-  const [sentIdx, setSentIdx] = useState(0);
   const [slope, setSlope] = useState(1);
   const [arrows, setArrows] = useState<Arrow[]>([]);
 
   const rowRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<Map<number, HTMLElement>>(new Map());
 
-  const sentence = SENTENCES[sentIdx];
-  const tokens = sentence.tokens;
+  const tokens = TOKENS;
   const itIdx = tokens.length - 1; // "it" is always last
   const selected = itIdx; // always show attention from "it"
 
   const handleReset = useCallback(() => {
-    setSentIdx(0);
     setSlope(1);
   }, []);
 
@@ -185,7 +175,7 @@ export function ALiBiToyTokens() {
     });
 
     return () => cancelAnimationFrame(raf);
-  }, [selected, weights, sentIdx, tokens]);
+  }, [selected, weights, tokens]);
 
   const arcPad = 50;
 
@@ -196,23 +186,6 @@ export function ALiBiToyTokens() {
       onReset={handleReset}
     >
       <div className="flex flex-col gap-5">
-        {/* Sentence selector */}
-        <div className="flex flex-wrap gap-1.5">
-          {SENTENCES.map((s, i) => (
-            <button
-              key={i}
-              onClick={() => setSentIdx(i)}
-              className={`rounded-full px-3 py-1 font-mono text-xs font-medium transition-colors ${
-                i === sentIdx
-                  ? "bg-accent text-white"
-                  : "bg-foreground/5 text-muted hover:bg-foreground/10 hover:text-foreground"
-              }`}
-            >
-              {s.label}
-            </button>
-          ))}
-        </div>
-
         {/* Slope slider */}
         <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 dark:border-blue-900 dark:bg-blue-950/30">
           <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400">
@@ -292,7 +265,7 @@ export function ALiBiToyTokens() {
               {tokens.map((tok, i) => {
                 const isSelected = i === selected;
                 return (
-                  <div key={`tok-${sentIdx}-${i}`} className="flex justify-center">
+                  <div key={`tok-${i}`} className="flex justify-center">
                     <div
                       ref={(el) => {
                         if (el) cardRefs.current.set(i, el);
@@ -321,7 +294,7 @@ export function ALiBiToyTokens() {
               </div>
               {tokens.map((_, i) => (
                 <div
-                  key={`dot-${sentIdx}-${i}`}
+                  key={`dot-${i}`}
                   className="text-center font-mono text-base font-semibold text-foreground"
                 >
                   {dots[i]}
@@ -337,7 +310,7 @@ export function ALiBiToyTokens() {
               </div>
               {tokens.map((_, i) => (
                 <div
-                  key={`dist-${sentIdx}-${i}`}
+                  key={`dist-${i}`}
                   className="text-center font-mono text-base font-semibold text-foreground"
                 >
                   {distances[i]}
@@ -356,7 +329,7 @@ export function ALiBiToyTokens() {
                 if (p < 0.05) {
                   return (
                     <div
-                      key={`pen-${sentIdx}-${i}`}
+                      key={`pen-${i}`}
                       className="text-center font-mono text-base text-muted"
                     >
                       0
@@ -365,7 +338,7 @@ export function ALiBiToyTokens() {
                 }
                 return (
                   <div
-                    key={`pen-${sentIdx}-${i}`}
+                    key={`pen-${i}`}
                     className="text-center font-mono text-base font-semibold text-red-500"
                   >
                     −{p.toFixed(1)}
@@ -382,7 +355,7 @@ export function ALiBiToyTokens() {
               </div>
               {tokens.map((_, i) => (
                 <div
-                  key={`score-${sentIdx}-${i}`}
+                  key={`score-${i}`}
                   className="text-center font-mono text-base font-bold text-foreground"
                 >
                   {penalizedScores[i].toFixed(1)}
@@ -402,7 +375,7 @@ export function ALiBiToyTokens() {
                 const isTarget = weight > 0.01 && !isSelected;
                 return (
                   <div
-                    key={`att-${sentIdx}-${i}`}
+                    key={`att-${i}`}
                     className="flex justify-center"
                   >
                     {isTarget ? (
