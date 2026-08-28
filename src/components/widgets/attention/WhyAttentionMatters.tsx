@@ -55,7 +55,7 @@ const SENTENCES: SentenceExample[] = [
     query: "a thing",
     keyQuestion: "a thing",
     value: "It means the glass.",
-    matchScore: 0.9,
+    matchScore: 1,
     answers: {
       3: "a thing",
       1: "an action",
