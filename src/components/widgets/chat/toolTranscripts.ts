@@ -68,15 +68,25 @@ export const scenarios: Scenario[] = [
       {
         role: "tool-result",
         tool: "Web search",
-        text: 'cliftonbridge.org.uk — "Planned maintenance: closed to vehicles 06:00 Sat to 18:00 Sun. Pedestrians and cyclists unaffected."\ntraveleast.bristol.gov.uk — "Suspension bridge closed to traffic this weekend. Diversion signed via Cumberland Basin."',
+        text: '1. Traffic updates — Clifton Suspension Bridge Trust\n   cliftonbridge.org.uk/visit/traffic\n2. Visiting the bridge: opening times and parking\n   cliftonbridge.org.uk/visit\n3. Bridge closed for four nights — Bristol Post, 2019\n   bristolpost.co.uk/news/bridge-closure-8814',
+      },
+      {
+        role: "tool-call",
+        tool: "Page reader",
+        text: 'fetch_page("cliftonbridge.org.uk/visit/traffic")',
+      },
+      {
+        role: "tool-result",
+        tool: "Page reader",
+        text: "Traffic updates\n\nPlanned maintenance. The bridge will be closed to vehicles from 06:00 on Saturday until 18:00 on Sunday. Pedestrians and cyclists are unaffected. A diversion is signed via Cumberland Basin.",
       },
       {
         role: "assistant",
-        text: "Not to cars, no. It's closed to vehicles from 6am Saturday until 6pm Sunday for maintenance, with a diversion signed via Cumberland Basin. You can still walk or cycle across.",
+        text: "Not to cars, no. The bridge trust's traffic page says it's closed to vehicles from 6am Saturday until 6pm Sunday for maintenance, with a diversion signed via Cumberland Basin. You can still walk or cycle across.",
       },
     ],
     takeaway:
-      "Once the results are pasted in, the model is reading them the same way it read the question. The reply draws on both of them, which is ordinary next-word prediction over whatever now sits in the conversation.",
+      "A search gives back titles and links, not answers, so the model opens the one that looks most likely to say. Once the page text is pasted in, it is ordinary context, and the model is reading it the same way it read the question.",
   },
   {
     id: "code",
