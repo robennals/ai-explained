@@ -14,6 +14,19 @@ The architecture does not change at all. The model writes tokens into a thinking
 </Question>
 
 <Question>
+Why does writing its working out make a model better at hard questions?
+
+<Choice>The thinking tokens are run through a bigger version of the model</Choice>
+<Choice correct>Each token gets a fixed amount of computation, so more tokens means more room to work, and the model reads its own working back</Choice>
+<Choice>It looks up similar solved problems and copies the method</Choice>
+<Choice>The question is put through the model several times at once</Choice>
+
+<Feedback>
+A transformer does a fixed amount of computation per token, the same number of layers whether the question is easy or hard. A question needing ten steps does not get ten times the computation just for being harder. Writing the working out gets around that: every token of working is more computation, and the model reads back what it has written as it goes, so its own output becomes its scratch paper.
+</Feedback>
+</Question>
+
+<Question>
 A model's thinking trace:
 
 <Choice correct>Really does drive the answer, but is not a guaranteed-complete account of what influenced it</Choice>
@@ -36,6 +49,19 @@ What does most of the work in training a reasoning model?
 
 <Feedback>
 Worked examples do help, and there are millions of them: the web is full of homework help, textbook solutions and forum answers with the working shown, and curated sets of good reasoning are used in fine-tuning too. What they do not cover is breadth and difficulty, because the problems people write up are the standard ones. The method that scales needs nothing but an answer a computer can mark. The model attempts a problem many times over, whole attempts that reached the right answer are made more likely, and the working itself is never marked at all. Habits like finishing a search survive because attempts containing them get there more often.
+</Feedback>
+</Question>
+
+<Question>
+Reasoning training improved maths and code far more than most other kinds of question. Why?
+
+<Choice>Maths and code make up most of the text models are pre-trained on</Choice>
+<Choice>Their answers are shorter, so the working is easier to learn</Choice>
+<Choice>Reasoning models have a separate part of the network for symbols</Choice>
+<Choice correct>Their answers can be marked by a computer, so there was something to train against</Choice>
+
+<Feedback>
+The training needs problems whose answers can be checked automatically, and maths and code are where that is easy: run the code, check the arithmetic. That is where the signal was, so that is where the gains were. The habits do carry over to questions nobody can mark, but more weakly, because nothing was ever able to score those.
 </Feedback>
 </Question>
 
