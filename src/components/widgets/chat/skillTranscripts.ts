@@ -68,8 +68,7 @@ export const skillScenarios: SkillScenario[] = [
         role: "skill-document",
         text: `Reporting a fault to the council
 
-If something is broken, report it using the "report_fault" tool, defined as
-follows:
+If something is broken, report it using the "report_fault" tool, defined as follows:
 
 report_fault(
   service: "lighting", "roads", "waste" or "parks"
@@ -142,15 +141,11 @@ One dark streetlight is not urgent. A whole dark street is.`,
         role: "skill-document",
         text: `Checking a tenancy agreement
 
-Use this when someone is about to sign a rental agreement and wants to know
-whether it is reasonable.
+Use this when someone is about to sign a rental agreement and wants to know whether it is reasonable.
 
-Work through four things, in this order. How much notice each side has to
-give. Whether the deposit is protected, and how it comes back. Who pays for
-repairs. Whether the rent can go up part-way through.
+Work through four things, in this order. How much notice each side has to give. Whether the deposit is protected, and how it comes back. Who pays for repairs. Whether the rent can go up part-way through.
 
-Say what is missing as well as what is there. The clause that is absent is
-often the bigger problem.`,
+Say what is missing as well as what is there. The clause that is absent is often the bigger problem.`,
       },
       {
         role: "assistant",
@@ -178,8 +173,7 @@ often the bigger problem.`,
         role: "skill-document",
         text: `Booking a table
 
-Use this when someone wants a restaurant booked. Check what the family eats
-first, with load_skill("family-food").
+Use this when someone wants a restaurant booked. Check what the family eats first, with load_skill("family-food").
 
 Then book it using the "book_table" tool, defined as follows:
 
@@ -190,8 +184,7 @@ book_table(
   notes:  anything the kitchen needs to know
 )
 
-For a party of more than six, pick somewhere with a set menu. Put every
-dietary requirement in the notes. Do not assume the restaurant will ask.`,
+For a party of more than six, pick somewhere with a set menu. Put every dietary requirement in the notes. Do not assume the restaurant will ask.`,
       },
       { role: "skill-request", text: 'load_skill("family-food")' },
       {
