@@ -37,16 +37,7 @@ The same conversation both ways. The markers are real tokens, and the system pro
 
 The format is called a *chat template*. Every turn is opened and closed, and the markers are real tokens the tokeniser knows about. What differs is who writes them. The program running the model writes the system and human turns, and the marker that opens the model's turn. The model writes its reply, and then the marker that closes it, which is how the program knows the reply has finished.
 
-The exact markers vary by model, though the shape does not. Llama 3 opens a turn with `<|start_header_id|>user<|end_header_id|>` and closes it with `<|eot_id|>`. The format OpenAI called ChatML, which many open models adopted, looks like this:
-
-```
-<|im_start|>system
-You are a helpful assistant.<|im_end|>
-<|im_start|>user
-What's the capital of Australia?<|im_end|>
-<|im_start|>assistant
-Canberra.<|im_end|>
-```
+The exact markers vary from model to model, though the shape does not.
 
 Post-training is what taught the model to continue after the assistant marker, to answer rather than carry on inventing the human's messages, and to stop where it should.
 
