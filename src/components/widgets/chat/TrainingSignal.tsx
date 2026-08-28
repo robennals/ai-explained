@@ -170,7 +170,7 @@ function CheckPanel({ visual }: { visual: CheckVisual }) {
     <div className="space-y-3">
       <Prompt text={visual.prompt} />
       <div className="rounded-lg border border-widget-border bg-surface p-4">
-        <Label>The model's solution</Label>
+        <Label>The model&rsquo;s solution</Label>
         <p className="mt-1 text-base leading-relaxed text-foreground">
           {visual.response}
         </p>
