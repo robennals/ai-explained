@@ -32,14 +32,12 @@ describe("attempts", () => {
 
   it("varies how much working the attempts show", () => {
     const lengths = attempts.map((a) => a.trace.length);
-    expect(Math.min(...lengths)).toBe(1);
-    expect(Math.max(...lengths)).toBeGreaterThanOrEqual(3);
+    expect(Math.max(...lengths)).toBeGreaterThan(Math.min(...lengths));
   });
 
-  it("has one winning attempt that worked through the cases and one that just saw it", () => {
+  it("has the attempt that worked through the cases as the one that got there", () => {
     const winners = attempts.filter((a) => a.correct).map((a) => a.id);
-    expect(winners).toContain("checked");
-    expect(winners).toContain("spotted");
+    expect(winners).toEqual(["checked"]);
   });
 
   it("is a problem the reader can check in one line, whatever it took to find", () => {

@@ -13,7 +13,7 @@ export function TraceSampling() {
   return (
     <WidgetContainer
       title="How the working gets trained"
-      description="One problem, four attempts. Only the final answer is checked."
+      description="One problem, three attempts. Only the final answer is checked."
     >
       <div className="rounded-lg border border-border bg-surface p-4">
         <div className="text-xs font-bold uppercase tracking-widest text-muted">

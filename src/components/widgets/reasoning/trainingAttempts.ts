@@ -48,13 +48,6 @@ export const attempts: Attempt[] = [
     note: "Searched properly, then stopped searching halfway through the two-digit numbers.",
   },
   {
-    id: "spotted",
-    trace: ["7 × 8 = 56, and 5 + 6 = 11. That is it."],
-    answer: "56",
-    correct: true,
-    note: "Saw it straight away. Nothing here would have caught a mistake if it had made one.",
-  },
-  {
     id: "checked",
     trace: [
       "Go through the two-digit multiples of 7 and add the digits each time.",
