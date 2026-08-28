@@ -41,13 +41,11 @@ describe("scenarios", () => {
     }
   });
 
-  it("takes two round trips in the chained and failing scenarios", () => {
-    for (const id of ["chained", "broken"]) {
-      const calls = getScenario(id).turns.filter(
-        (t) => t.role === "tool-call"
-      );
-      expect(calls).toHaveLength(2);
-    }
+  it("takes two round trips when one tool feeds another", () => {
+    const calls = getScenario("chained").turns.filter(
+      (t) => t.role === "tool-call"
+    );
+    expect(calls).toHaveLength(2);
   });
 });
 

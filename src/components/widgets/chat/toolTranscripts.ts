@@ -56,6 +56,34 @@ export const scenarios: Scenario[] = [
       "The forecast was never in the model's weights. It arrived as text and the model read it the same way it read your question. The model did not call anything either: it wrote a message, and the harness made the call on its behalf.",
   },
   {
+    id: "websearch",
+    label: "Searching the web",
+    intro:
+      "A search returns whatever the internet happens to say, including things that are years out of date.",
+    turns: [
+      {
+        role: "user",
+        text: "Is the Clifton Suspension Bridge open to cars this weekend?",
+      },
+      {
+        role: "tool-call",
+        tool: "Web search",
+        text: 'web_search("Clifton Suspension Bridge closure this weekend")',
+      },
+      {
+        role: "tool-result",
+        tool: "Web search",
+        text: 'cliftonbridge.org.uk — "Planned maintenance: closed to vehicles 06:00 Sat to 18:00 Sun. Pedestrians and cyclists unaffected."\nbristolpost.co.uk (2019) — "Suspension bridge to shut for four nights"\ntripadvisor.co.uk — "Clifton Suspension Bridge, 4.5/5 from 3,412 reviews"',
+      },
+      {
+        role: "assistant",
+        text: "Not to cars, no. The bridge's own site says it's closed to vehicles from 6am Saturday until 6pm Sunday for maintenance. You can still walk or cycle across.",
+      },
+    ],
+    takeaway:
+      "Two of the three results were useless: a news story from 2019 and a page of reviews. Picking the official one and ignoring the rest is a judgement the model made while predicting text. Grounding an answer in a real page makes it far more likely to be right, though the model is still the one writing the summary.",
+  },
+  {
     id: "code",
     label: "Running code",
     intro:
@@ -120,43 +148,6 @@ export const scenarios: Scenario[] = [
     ],
     takeaway:
       "Nothing planned that sequence. The model wrote one call, read the result, and the most likely continuation was a second call using an id that only existed once the first result came back. A loop of one-step decisions like this is most of what people mean when they call a model an agent.",
-  },
-  {
-    id: "broken",
-    label: "When a tool fails",
-    intro: "A failure arrives as text too, and the model reads it like anything else.",
-    turns: [
-      {
-        role: "user",
-        text: "Is it going to rain in Bristol this afternoon? I'm cycling home at 6.",
-      },
-      {
-        role: "tool-call",
-        tool: "Weather service",
-        text: 'get_weather(location="Bristol, UK", hours=12)',
-      },
-      {
-        role: "tool-result",
-        tool: "Weather service",
-        text: "Error: ServiceUnavailable — the weather provider did not respond.",
-      },
-      {
-        role: "tool-call",
-        tool: "Web search",
-        text: 'web_search("Bristol weather forecast this evening")',
-      },
-      {
-        role: "tool-result",
-        tool: "Web search",
-        text: "metoffice.gov.uk — Bristol: cloudy this afternoon, rain arriving early evening, heaviest 18:00–21:00.",
-      },
-      {
-        role: "assistant",
-        text: "The live forecast service is down, so this is from the Met Office page rather than a direct lookup: rain is expected early evening, heaviest between 6 and 9. Take a jacket.",
-      },
-    ],
-    takeaway:
-      "Nothing crashed, and nobody wrote a rule about what to do when the weather tool fails. Having read an error, the model's most likely next text was a different tool call. The recovery is prediction.",
   },
 ];
 
