@@ -1,0 +1,18 @@
+---
+term: chat template
+aliases: [chat templates]
+firstAppearance: chat
+---
+
+A **chat template** is the format that turns a conversation into the single block of text a model is given, with markers saying who said what.
+
+A model does not see turns, or people, or a chat window. It sees one long piece of text and writes what comes after it. The template is what puts that text together: the system prompt, then each message in order, each one wrapped in markers, ending with the marker that opens the model's own turn.
+
+What the markers do:
+
+- **They say who is speaking** — something like `<|user|>` before your message and `<|assistant|>` before the reply, so the model can tell your words from its own.
+- **They are real tokens** — not punctuation the model has to interpret, but entries in its vocabulary, the same as any word.
+- **They say where a turn ends** — the model writes the closing marker itself when its reply is finished, which is how the program running it knows to stop and show you the answer.
+- **They leave the last turn open** — the text handed over ends with the marker that starts the model's turn, so an answer is the thing left to write.
+
+The exact markers differ from model to model. Send a model text in a shape it was not post-trained on and it behaves noticeably worse.
