@@ -3,58 +3,14 @@
 import { useState } from "react";
 import { WidgetContainer } from "@/components/widgets/shared/WidgetContainer";
 import { WidgetTabs } from "@/components/widgets/shared/WidgetTabs";
+import { ChatMessage } from "./ChatMessage";
 import {
   getScenario,
   isVisibleToUser,
   scenarios,
   senderKind,
   senderLabel,
-  type Turn,
 } from "./toolTranscripts";
-
-const senderColors = {
-  human: "text-accent",
-  model: "text-success",
-  tool: "text-warning",
-} as const;
-
-function Message({ turn }: { turn: Turn }) {
-  const fromHuman = turn.role === "user";
-  const hidden = !isVisibleToUser(turn);
-  const mono = turn.role === "tool-call" || turn.role === "tool-result";
-
-  return (
-    <div className={`flex flex-col ${fromHuman ? "items-end" : "items-start"}`}>
-      <div
-        className={`mb-1 px-1 text-xs font-bold uppercase tracking-widest ${
-          senderColors[senderKind(turn)]
-        }`}
-      >
-        {senderLabel(turn)}
-        {hidden && (
-          <span className="font-medium normal-case text-muted"> (hidden)</span>
-        )}
-      </div>
-      <div
-        className={`max-w-[85%] rounded-2xl px-4 py-2.5 ${
-          hidden
-            ? "border-2 border-dashed border-border bg-transparent"
-            : fromHuman
-              ? "bg-accent/15"
-              : "bg-surface ring-1 ring-widget-border"
-        }`}
-      >
-        <div
-          className={`whitespace-pre-wrap leading-relaxed text-foreground ${
-            mono ? "font-mono text-sm" : "text-base"
-          }`}
-        >
-          {turn.text}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 export function ToolLoop() {
   const [scenarioId, setScenarioId] = useState(scenarios[0].id);
@@ -74,7 +30,14 @@ export function ToolLoop() {
 
       <div className="space-y-3">
         {scenario.turns.map((turn, i) => (
-          <Message key={i} turn={turn} />
+          <ChatMessage
+            key={i}
+            sender={senderLabel(turn)}
+            kind={senderKind(turn)}
+            hidden={!isVisibleToUser(turn)}
+            mono={turn.role === "tool-call" || turn.role === "tool-result"}
+            text={turn.text}
+          />
         ))}
       </div>
 

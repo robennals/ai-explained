@@ -63,15 +63,15 @@ This is all "the model searched the web" means. It is also worth being clear tha
 
 ## Skills
 
-The tool list from the last section is itself just text sitting in the context: a name and a short description for each tool the model is allowed to use. That is the only way the model knows any of them exist.
+A *skill* is a tool whose result is a page of instructions.
 
-*Skills* run on the same mechanism, because a skill is a tool whose result is a page of instructions. The model is given a list of skill names, one line each on when the skill applies. When one looks relevant it writes a tool call asking for that skill, and what comes back is not a search result or a forecast. It is the instructions: how to do this particular task, step by step. The tool's whole job is to hand over some standard text.
+<SkillLoopWidget>
+Compare the two tabs. Both open with the same four skills offered, one line each. The only difference is whether the model decides one of them applies.
+</SkillLoopWidget>
 
-Those instructions then sit in the context and the model works from them. A person with a folder of checklists does the same thing. You do not memorise the pre-flight checklist, you know one exists and you fetch it when you need it.
+Loading every skill in full, in every conversation, would be enormous and almost all of it irrelevant. One line each is cheap, and the document arrives only when it is about to be used.
 
-The two-step exists because loading every skill's full instructions into every conversation would be enormous and almost all of it would be irrelevant. One line each is cheap. The document only arrives when it is about to be used.
-
-It also has to work this way, because nothing the model learns during a conversation survives it. The weights do not change while you talk to it. Any capability added after training arrives as text placed in the context, which is the same reason telling a model something useful in one conversation does nothing for the next one.
+It has to work this way, because nothing the model learns in a conversation survives it. Any capability added after training arrives as text placed in the context, which is also why telling a model something useful in one conversation does nothing for the next.
 
 ## Making It a Conversation
 
