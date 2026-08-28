@@ -82,13 +82,10 @@ export function AttentionValues({
   examples = VALUE_EXAMPLES,
   title = "Gathering the Value",
   description = DEFAULT_DESCRIPTION,
-  showValues = true,
 }: {
   examples?: Example[];
   title?: string;
   description?: string;
-  /** When false, show only the token/score/softmax grid (values not yet introduced). */
-  showValues?: boolean;
 } = {}) {
   const [exampleIdx, setExampleIdx] = useState(0);
   const example = examples[exampleIdx];
@@ -255,7 +252,6 @@ export function AttentionValues({
 
         {/* Contributing values: each shows the key that earned its match and
             the value it hands over, so the softmax share follows from the key. */}
-        {showValues && (
         <div className="flex flex-col gap-2">
           <div className="text-xs font-semibold uppercase tracking-wide text-muted">How each value matches</div>
           <div className="flex flex-wrap gap-2">
@@ -277,17 +273,14 @@ export function AttentionValues({
             ))}
           </div>
         </div>
-        )}
 
         {/* Combined value */}
-        {showValues && (
         <div className="rounded-lg border-2 border-accent bg-accent/10 px-4 py-3 text-center">
           <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted">
             What &ldquo;{example.words[example.asker]}&rdquo; gathered
           </div>
           <div className="text-lg font-medium text-foreground">{example.result}</div>
         </div>
-        )}
       </div>
     </WidgetContainer>
   );

@@ -54,12 +54,12 @@ Most AI models do this with a function called **softmax**. Softmax always makes 
 Try "Score of 1": A scores 1 and the rest score 0, yet A only gets about 47% and each zero still keeps around 18%. Now try "Score of 9": same shape, but A takes almost everything. Small scores stay flat; big scores make the winner dominate.
 </SoftmaxExplorerWidget>
 
-Here is the catch: our match scores only run from 0 to 1, and softmax barely separates numbers that small. Even a token that scored 0 would keep a real slice of the attention. So models **scale the scores up** before softmax, turning a gap of 0.8 into a gap of 8 or more, which is what makes the best match clearly win. From here on, picture the scores as already scaled up.
+The scores we gave in the previous section range from 0 to 1, but it turns out that doesn't work well with softmax. Softmax expects a score to be much bigger (e.g. 9) in order to be seen as a significantly better match than zero. In the following sections we'll use larger matching scores - which a real model accomplishes by using K and Q vectors with larger magnitudes.
 
 There is one more thing softmax forces on us: it always hands out the full 100%, even when nothing really matches. A pronoun like the "it" in "It was raining" doesn't refer to anything, but softmax would still spread its attention across every token. The fix is a **sink**: an extra token with a small fixed score. When the real tokens all score low, the sink out-competes them and quietly absorbs the attention. When something genuinely matches, it easily beats the sink.
 
 <AttentionSinkWidget>
-Try "Nothing matches": no real token scores well, so the sink (fixed at 3) takes most of the attention. Try "Something matches": "glass" scores 8, far above the sink, so it wins and the sink barely registers.
+Drag the sliders, or hit a preset. "Nothing matches": every real token scores low, so the sink (fixed at 3) wins most of the attention. "Something matches": token A scores 8, far above the sink, so it wins and the sink barely registers.
 </AttentionSinkWidget>
 
 Real models don't always add a dedicated sink token. Often they just learn to dump spare attention on a comma, the first token, or the token itself.
