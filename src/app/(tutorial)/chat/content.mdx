@@ -2,12 +2,12 @@ The previous chapter ended with a machine that reads a passage of text and says 
 
 ## What a Raw Model Does
 
-A model that has been through the training in <Ch slug="transformers" /> and nothing else is called a *base model*. It had one job during training: given the text so far, predict what comes next. Ask it a question and it does that job faithfully. It works out what kind of document your question probably appeared in, and continues that document.
+A transformer (<Ch slug="transformers" />) trained to predict the next word (<Ch slug="next-word-prediction" />) is called a *base model*, and that training is called *pre-training*. It reads an enormous amount of text, and what it gets out of it is an understanding of how the world works.
 
-Quite often, the document your question appeared in was a list of other questions.
+What it does not get is any sense of what to do with that understanding. Predicting the most likely next token is often not what you would want from a helpful assistant. The playground shows a few examples.
 
 <RawCompletionWidget>
-Switch between **base model** and **chat model** on each prompt. The base model's answer is not a mistake. Ask yourself where on the internet that text would have come next.
+Switch between **base model** and **chat model** on each prompt. The base model's completion is not a mistake. Ask yourself where on the internet that text would have come next.
 </RawCompletionWidget>
 
 The base model is not confused and it is not stupid. Almost everything a chat model knows about the world, the base model already knows, because almost all of the knowledge came from that pile of text. What the base model lacks is the habit of treating your words as a request addressed to it.
@@ -18,51 +18,16 @@ Pre-training teaches a model about the world. It does not tell the model who to 
 
 ## Post-Training
 
-The training in the last chapter has a name: *pre-training*. Everything that happens afterwards is *post-training*. Pre-training is where nearly all of the compute goes, often more than 99% of it. Post-training is a thin layer on top, and it accounts for most of the difference between the two columns in the playground above.
+- **Pre-training** is next-word prediction over a very large body of text. It is where the model picks up its understanding of how the world works. Nearly all of the compute goes here, often more than 99% of it.
+- **Post-training** is everything after that. It teaches the model how to apply that understanding to the thing you actually want. It is a thin layer, and it accounts for almost all of the difference between the two completions in the playground above.
 
-There are several ways to do it, and a modern chat model has usually been through most of them.
-
-### Show it what a good answer looks like
-
-The simplest approach is to write the answers you want. Pay people to produce a few tens of thousands of ideal prompt-and-response pairs, then keep training the model on exactly the same next-token objective, on that small curated pile instead of the internet. This is called *supervised fine-tuning*. It is the first stage of OpenAI's InstructGPT, and it is what Google's FLAN work used to make models follow instructions.
-
-No new machinery is involved. The model is still predicting the next token. It is just predicting it in documents where a question is followed by a helpful answer rather than by more questions.
-
-The catch is cost. Writing an ideal response to a hard question is slow, and people are much better at spotting a good answer than at writing one.
-
-### Let people pick the winner
-
-So don't ask them to write. Show a rater two responses to the same prompt and ask which one is better. Those comparisons train a second model, the *reward model*, whose only job is to predict the score a human would have given. Once that exists, the reward model can score responses the humans never saw, at whatever volume you like.
-
-Then you improve the model against that score. Generate several candidate responses, score each one, and adjust the weights so that the higher-scoring responses become more likely next time. That is *reinforcement learning from human feedback*, RLHF, the technique behind the original ChatGPT and later documented in detail for Llama 2.
-
-The full machinery of reinforcement learning has more to it, and <Ch slug="reinforcement-learning" /> covers it properly. For now the summary above is enough: produce answers, score them, make the good ones more likely.
-
-It helps to remember what the model actually emits. Not a response, but a probability for every possible next token. That is what makes "more likely" something you can do arithmetic with. Training can push probability towards one answer and away from another in the same step, which is why a *pair* of responses, one preferred and one rejected, is such a useful thing to have. Some systems skip the reward model and train directly on those pairs, an approach called direct preference optimisation.
-
-### Let the model check itself against written rules
-
-Human comparisons are still slow and still expensive. But judging is easier than writing, and models are decent judges.
-
-*Constitutional AI*, published by Anthropic, writes the rules down. A constitution is a list of principles in plain English, things like "prefer the response that is honest about uncertainty" or "do not be preachy". One copy of the model produces a response, another copy scores it against a principle, and the score is used the same way a human rating would be. When the rules need to change, someone edits the document. Re-labelling a human dataset would take months.
-
-### Watch what real users do
-
-Chat products generate an enormous amount of feedback for free. Thumbs up and thumbs down. Which of two shown responses a user picked. Whether the next message was "thanks, that worked" or the same question asked again in a sharper tone.
-
-This signal is cheap and there is a lot of it, and it is the most dangerous of the lot. It measures whether the user was pleased, not whether the answer was right. A confident wrong answer gets a thumbs up. A correct answer the user did not want to hear gets a thumbs down. Optimise hard on it and the model learns to flatter, a failure mode called *sycophancy*. <Ch slug="alignment" /> is about what goes wrong when you optimise a proxy like this too hard.
-
-### Just check the answer
-
-For maths, code, and puzzles, nobody needs to judge anything. Run the code. Check the arithmetic. Compare against the known answer. The score is right or wrong, it costs nothing, and it cannot be charmed.
-
-This is called reinforcement learning from verifiable rewards, and DeepSeek published the details of doing it at scale for their R1 model. The signal is narrow, since most useful questions have no checkable answer, but where it applies you can generate an unlimited amount of it. That turned out to matter enormously, for reasons the next section gets to.
+There are several ways to do the second part, and a modern chat model has usually been through most of them. Most work the same way underneath: produce several candidate responses, score them somehow, and adjust the weights so that higher-scoring responses become more likely. <Ch slug="reinforcement-learning" /> covers the machinery properly.
 
 <TrainingSignalWidget>
 Step through the five tabs. Same question every time, and a different way of telling the model which answer you wanted. Look at what the **watch what real users do** tab ends up rewarding.
 </TrainingSignalWidget>
 
-Three things worth holding on to. Post-training rarely teaches the model new facts, it selects which of the behaviours already latent in the base model come out. It is a small fraction of the total training bill. And every signal except the last one is a proxy, produced by a rater or a model that can be mistaken, which is where a lot of the strange behaviour of chat models comes from.
+Two things worth holding on to. Post-training rarely teaches the model new facts, it selects which of the behaviours already latent in the base model come out. And every signal except the last one is a proxy, produced by a rater or a model that can be mistaken, which is where a lot of the strange behaviour of chat models comes from.
 
 ## Thinking Before Speaking
 

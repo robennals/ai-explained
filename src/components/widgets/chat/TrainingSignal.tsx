@@ -6,84 +6,186 @@ import { WidgetTabs } from "@/components/widgets/shared/WidgetTabs";
 import {
   approaches,
   getApproach,
-  type Panel,
-  type PanelKind,
+  type CheckVisual,
+  type JudgeVisual,
+  type PairVisual,
+  type TargetVisual,
+  type UsageVisual,
+  type Visual,
 } from "./postTrainingSignals";
 
-const panelStyles: Record<PanelKind, string> = {
-  prompt: "border-border bg-surface",
-  response: "border-widget-border bg-white",
-  target: "border-accent/40 bg-accent/5",
-  human: "border-dashed border-border bg-foreground/[0.03]",
-  judge: "border-dashed border-border bg-foreground/[0.03]",
-  checker: "border-dashed border-border bg-foreground/[0.03]",
-};
-
-function PanelCard({ panel }: { panel: Panel }) {
+function Label({ children }: { children: React.ReactNode }) {
   return (
-    <div className={`rounded-lg border p-4 ${panelStyles[panel.kind]}`}>
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <span className="text-xs font-bold uppercase tracking-widest text-muted">
-          {panel.label}
-        </span>
-        {panel.score !== undefined && (
-          <span className="rounded-md bg-foreground/5 px-2 py-0.5 text-xs font-semibold tabular-nums text-foreground">
-            Score {panel.score.toFixed(2)}
-          </span>
-        )}
-      </div>
-      <p className="mt-1.5 text-base leading-relaxed text-foreground">
-        {panel.text}
-      </p>
+    <div className="text-xs font-bold uppercase tracking-widest text-muted">
+      {children}
     </div>
   );
 }
 
-function ShiftBars({
-  shift,
-}: {
-  shift: { label: string; before: number; after: number }[];
-}) {
+function Prompt({ text }: { text: string }) {
   return (
-    <div className="mt-4 rounded-lg border border-widget-border bg-white p-4">
-      <div className="text-xs font-bold uppercase tracking-widest text-muted">
-        What the training step does
-      </div>
-      <div className="mt-3 space-y-3">
-        {shift.map((row) => (
-          <div key={row.label}>
-            <div className="text-sm font-medium text-foreground">
-              {row.label}
-            </div>
-            <div className="mt-1 grid grid-cols-[4.5rem_1fr_3rem] items-center gap-2 text-xs text-muted">
-              <span>Before</span>
-              <div className="h-2.5 rounded-full bg-foreground/10">
-                <div
-                  className="h-2.5 rounded-full bg-foreground/30"
-                  style={{ width: `${row.before * 100}%` }}
-                />
-              </div>
-              <span className="text-right tabular-nums">
-                {Math.round(row.before * 100)}%
-              </span>
-              <span className="font-semibold text-foreground">After</span>
-              <div className="h-2.5 rounded-full bg-foreground/10">
-                <div
-                  className={`h-2.5 rounded-full ${
-                    row.after > row.before ? "bg-accent" : "bg-foreground/25"
-                  }`}
-                  style={{ width: `${row.after * 100}%` }}
-                />
-              </div>
-              <span className="text-right font-semibold tabular-nums text-foreground">
-                {Math.round(row.after * 100)}%
-              </span>
-            </div>
-          </div>
-        ))}
+    <div className="rounded-lg border border-border bg-surface p-4">
+      <Label>The question</Label>
+      <p className="mt-1 text-base leading-relaxed text-foreground">{text}</p>
+    </div>
+  );
+}
+
+function Verdict({ passed, children }: { passed: boolean; children: React.ReactNode }) {
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-semibold ${
+        passed ? "bg-success/10 text-success" : "bg-foreground/8 text-muted"
+      }`}
+    >
+      <span aria-hidden>{passed ? "✓" : "✕"}</span>
+      {children}
+    </span>
+  );
+}
+
+function TargetPanel({ visual }: { visual: TargetVisual }) {
+  return (
+    <div className="space-y-3">
+      <Prompt text={visual.prompt} />
+      <div className="rounded-lg border border-accent/40 bg-accent/5 p-4">
+        <Label>Response, written by a person</Label>
+        <p className="mt-1 text-base leading-relaxed text-foreground">
+          {visual.response}
+        </p>
       </div>
     </div>
   );
+}
+
+function PairPanel({ visual }: { visual: PairVisual }) {
+  return (
+    <div className="space-y-3">
+      <Prompt text={visual.prompt} />
+      <div className="grid gap-3 sm:grid-cols-2">
+        {visual.options.map((option) => {
+          const chosen = option.id === visual.chosen;
+          return (
+            <div
+              key={option.id}
+              className={`flex flex-col rounded-lg border p-4 ${
+                chosen
+                  ? "border-accent bg-accent/5"
+                  : "border-widget-border bg-surface"
+              }`}
+            >
+              <Label>Response {option.id}</Label>
+              <p className="mt-1 flex-1 text-base leading-relaxed text-foreground">
+                {option.response}
+              </p>
+              <div
+                className={`mt-3 rounded-md border px-3 py-1.5 text-center text-sm font-semibold ${
+                  chosen
+                    ? "border-accent bg-accent text-white"
+                    : "border-border text-muted"
+                }`}
+              >
+                {chosen ? "✓ I prefer this response" : "I prefer this response"}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function JudgePanel({ visual }: { visual: JudgeVisual }) {
+  return (
+    <div className="space-y-3">
+      <div className="rounded-lg border border-dashed border-border bg-foreground/[0.03] p-4">
+        <Label>The constitution, in full</Label>
+        <p className="mt-1 text-base leading-relaxed text-foreground">
+          {visual.rule}
+        </p>
+      </div>
+      <Prompt text={visual.prompt} />
+      <div className="rounded-lg border border-widget-border bg-surface p-4">
+        <Label>Response</Label>
+        <p className="mt-1 text-base leading-relaxed text-foreground">
+          {visual.response}
+        </p>
+      </div>
+      <div className="rounded-lg border border-widget-border bg-white p-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <Label>The model, asked whether the rule was met</Label>
+          <Verdict passed={visual.passed}>
+            {visual.passed ? "Rule met" : "Rule not met"}
+          </Verdict>
+        </div>
+        <p className="mt-1 text-base leading-relaxed text-foreground">
+          {visual.verdict}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function UsagePanel({ visual }: { visual: UsageVisual }) {
+  return (
+    <div className="space-y-3">
+      {visual.rows.map((row, i) => (
+        <div
+          key={i}
+          className="rounded-lg border border-widget-border bg-surface p-4"
+        >
+          <Label>The model said</Label>
+          <p className="mt-1 text-base leading-relaxed text-foreground">
+            {row.response}
+          </p>
+          <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-widget-border pt-3">
+            <Verdict passed={row.up}>{row.up ? "Thumbs up" : "Thumbs down"}</Verdict>
+            <span className="text-base text-muted">&ldquo;{row.reaction}&rdquo;</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function CheckPanel({ visual }: { visual: CheckVisual }) {
+  return (
+    <div className="space-y-3">
+      <Prompt text={visual.prompt} />
+      {visual.rows.map((row, i) => (
+        <div
+          key={i}
+          className="rounded-lg border border-widget-border bg-surface p-4"
+        >
+          <Label>Response</Label>
+          <p className="mt-1 text-base leading-relaxed text-foreground">
+            {row.response}
+          </p>
+          <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-widget-border pt-3">
+            <Verdict passed={row.passed}>
+              {row.passed ? "Score 1" : "Score 0"}
+            </Verdict>
+            <span className="font-mono text-sm text-muted">{row.check}</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function Illustration({ visual }: { visual: Visual }) {
+  switch (visual.type) {
+    case "target":
+      return <TargetPanel visual={visual} />;
+    case "pair":
+      return <PairPanel visual={visual} />;
+    case "judge":
+      return <JudgePanel visual={visual} />;
+    case "usage":
+      return <UsagePanel visual={visual} />;
+    case "check":
+      return <CheckPanel visual={visual} />;
+  }
 }
 
 export function TrainingSignal() {
@@ -92,8 +194,8 @@ export function TrainingSignal() {
 
   return (
     <WidgetContainer
-      title="Five ways to score an answer"
-      description="The same question, and five ways of telling the model which response you wanted."
+      title="Five ways to tell a model what you wanted"
+      description="The same question every time. Only the source of the signal changes."
       onReset={() => setApproachId(approaches[0].id)}
     >
       <WidgetTabs
@@ -102,24 +204,21 @@ export function TrainingSignal() {
         onTabChange={setApproachId}
       />
 
-      <p className="text-base leading-relaxed text-foreground">{approach.how}</p>
+      <p className="text-base leading-relaxed text-foreground">
+        {approach.intro}
+      </p>
 
-      <div className="mt-4 space-y-3">
-        {approach.panels.map((panel, i) => (
-          <PanelCard key={i} panel={panel} />
-        ))}
+      <div className="mt-4">
+        <Illustration visual={approach.visual} />
       </div>
 
-      {approach.shift && <ShiftBars shift={approach.shift} />}
+      <p className="mt-4 text-base leading-relaxed text-foreground">
+        {approach.outcome}
+      </p>
 
-      <div className="mt-4 rounded-lg border border-widget-border bg-white p-4 text-sm leading-relaxed">
-        <p className="text-foreground">{approach.outcome}</p>
-        <p className="mt-2 text-muted">
-          <span className="font-semibold text-foreground">Blind spot: </span>
-          {approach.blindSpot}
-        </p>
-        <p className="mt-2 text-xs text-muted">{approach.usedBy}</p>
-      </div>
+      <p className="mt-3 border-t border-widget-border pt-3 text-sm leading-relaxed text-muted">
+        {approach.note}
+      </p>
     </WidgetContainer>
   );
 }

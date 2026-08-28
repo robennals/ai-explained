@@ -2,7 +2,11 @@
 
 import { useState } from "react";
 import { WidgetContainer } from "@/components/widgets/shared/WidgetContainer";
-import { completionExamples, getExample } from "./baseVsChatExamples";
+import {
+  buildPrefix,
+  completionExamples,
+  getExample,
+} from "./baseVsChatExamples";
 
 type Mode = "base" | "chat";
 
@@ -10,12 +14,16 @@ export function RawCompletion() {
   const [exampleId, setExampleId] = useState(completionExamples[0].id);
   const [mode, setMode] = useState<Mode>("base");
   const example = getExample(exampleId);
-  const completion = mode === "base" ? example.base : example.chat;
+  const prefix = buildPrefix(example, mode);
+  const completion = (mode === "base" ? example.base : example.chat).replace(
+    /^\n/,
+    ""
+  );
 
   return (
     <WidgetContainer
       title="Base model vs chat model"
-      description="The same prompt, given to a model before and after post-training."
+      description="Both models are completing a piece of text. Only the text differs."
       onReset={() => {
         setExampleId(completionExamples[0].id);
         setMode("base");
@@ -37,16 +45,7 @@ export function RawCompletion() {
         ))}
       </div>
 
-      <div className="mt-5 rounded-lg border border-border bg-surface p-4">
-        <div className="text-xs font-bold uppercase tracking-widest text-muted">
-          Prompt
-        </div>
-        <p className="mt-1 text-base leading-relaxed text-foreground">
-          {example.prompt}
-        </p>
-      </div>
-
-      <div className="mt-5 flex gap-2">
+      <div className="mt-4 flex gap-2">
         {(["base", "chat"] as Mode[]).map((m) => (
           <button
             key={m}
@@ -62,29 +61,36 @@ export function RawCompletion() {
         ))}
       </div>
 
-      <div className="mt-4 rounded-lg border border-widget-border bg-white p-4">
-        <div className="text-xs font-bold uppercase tracking-widest text-muted">
-          What comes next
+      <div className="mt-5 overflow-hidden rounded-lg border border-widget-border">
+        <div className="border-b border-widget-border bg-surface px-4 py-2">
+          <span className="text-xs font-bold uppercase tracking-widest text-muted">
+            Text handed to the model
+          </span>
+          {mode === "chat" && (
+            <span className="ml-2 text-xs text-muted">
+              the same words, wrapped in role markers
+            </span>
+          )}
         </div>
-        <pre className="mt-2 whitespace-pre-wrap font-sans text-base leading-relaxed text-foreground">
+        <div className="whitespace-pre-wrap bg-surface px-4 py-3 font-mono text-sm leading-relaxed text-foreground">
+          {prefix}
+        </div>
+        <div className="border-t border-widget-border bg-accent/5 px-4 py-2">
+          <span className="text-xs font-bold uppercase tracking-widest text-accent">
+            What the model predicts next
+          </span>
+        </div>
+        <div className="whitespace-pre-wrap bg-accent/5 px-4 py-3 text-base leading-relaxed text-foreground">
           {completion}
-        </pre>
+        </div>
       </div>
 
-      {mode === "base" && (
-        <p className="mt-3 text-sm leading-relaxed text-muted">
-          <span className="font-semibold text-foreground">Why: </span>
-          {example.baseNote}
-        </p>
-      )}
-      {mode === "chat" && (
-        <p className="mt-3 text-sm leading-relaxed text-muted">
-          <span className="font-semibold text-foreground">Why: </span>
-          Post-training taught the model that text arriving in this position is
-          a request addressed to it, and that the thing to write next is an
-          answer.
-        </p>
-      )}
+      <p className="mt-3 text-sm leading-relaxed text-muted">
+        <span className="font-semibold text-foreground">Why: </span>
+        {mode === "base"
+          ? example.baseNote
+          : "The role markers put the model in the middle of a transcript, with the assistant's turn left open. Post-training taught it that the likely continuation there is an answer."}
+      </p>
     </WidgetContainer>
   );
 }

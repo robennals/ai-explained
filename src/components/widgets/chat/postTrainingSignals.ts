@@ -1,51 +1,13 @@
 /**
  * Hand-authored walkthroughs of the main post-training approaches.
  *
- * Each approach is shown as the scene it actually is: a written answer, a
- * rater's pick, a judge reading a rule, a thumbs-up, a test run. Every
- * approach uses the same prompt so they can be compared, and nothing here
- * comes from a real model or a real rater.
+ * Each approach follows the same shape: a one-line summary of the idea, a
+ * minimal illustration of it, and a smaller note underneath for the
+ * subtleties. The illustration differs per approach because the approaches
+ * genuinely differ. Writing an ideal answer produces no score at all; a rater
+ * produces a comparison, not a number; a checker produces a bare pass or fail.
+ * Nothing here comes from a real model or a real rater.
  */
-
-export type PanelKind =
-  | "prompt"
-  | "response"
-  | "target"
-  | "human"
-  | "judge"
-  | "checker";
-
-export interface Panel {
-  kind: PanelKind;
-  /** Heading above the panel. */
-  label: string;
-  text: string;
-  /** Score attached to this panel, when the approach produces one. */
-  score?: number;
-}
-
-export interface ProbabilityShift {
-  label: string;
-  before: number;
-  after: number;
-}
-
-export interface Approach {
-  id: string;
-  /** Tab label. */
-  label: string;
-  /** One sentence on how this approach produces a signal. */
-  how: string;
-  panels: Panel[];
-  /** What training does with what the panels produced. */
-  outcome: string;
-  /** The honest limitation. */
-  blindSpot: string;
-  /** Real systems that use it. */
-  usedBy: string;
-  /** Shown only where a preferred/rejected pair makes the shift concrete. */
-  shift?: ProbabilityShift[];
-}
 
 export const sharedPrompt =
   "A shirt costs $40 after a 20% discount. What was the original price?";
@@ -56,138 +18,164 @@ const correctAnswer =
 const confidentlyWrong =
   "$48. Add the 20% discount back on: 40 + (20% of 40) = 48.";
 
-const flatteringWrong =
-  "Great question, you're thinking about this exactly the right way! The original price was $48.";
+/** A written response used as the training target. No score involved. */
+export interface TargetVisual {
+  type: "target";
+  prompt: string;
+  response: string;
+}
+
+/** Two responses, one of which a person chose. */
+export interface PairVisual {
+  type: "pair";
+  prompt: string;
+  options: { id: "A" | "B"; response: string }[];
+  chosen: "A" | "B";
+}
+
+/** A rule, a response, and a model's verdict on whether the rule was met. */
+export interface JudgeVisual {
+  type: "judge";
+  rule: string;
+  prompt: string;
+  response: string;
+  verdict: string;
+  passed: boolean;
+}
+
+/** Real conversations with the reaction the user gave. */
+export interface UsageVisual {
+  type: "usage";
+  rows: { response: string; reaction: string; up: boolean }[];
+}
+
+/** Responses put through an automatic check. */
+export interface CheckVisual {
+  type: "check";
+  prompt: string;
+  rows: { response: string; check: string; passed: boolean }[];
+}
+
+export type Visual =
+  | TargetVisual
+  | PairVisual
+  | JudgeVisual
+  | UsageVisual
+  | CheckVisual;
+
+export interface Approach {
+  id: string;
+  /** Tab label. */
+  label: string;
+  /** One or two sentences. This is all the prominent text an approach gets. */
+  intro: string;
+  visual: Visual;
+  /** What training does with what the illustration produced. One line. */
+  outcome: string;
+  /** Smaller text at the bottom: the subtleties and who does this. */
+  note: string;
+}
 
 export const approaches: Approach[] = [
   {
     id: "ideal",
     label: "Write the ideal answer",
-    how: "Pay people to write the response you wanted, and train the model to produce it.",
-    panels: [
-      { kind: "prompt", label: "Prompt", text: sharedPrompt },
-      {
-        kind: "target",
-        label: "Response written by a human, by hand",
-        text: correctAnswer,
-      },
-    ],
+    intro:
+      "Pay people to write the response you wanted, and train the model to produce it.",
+    visual: {
+      type: "target",
+      prompt: sharedPrompt,
+      response: correctAnswer,
+    },
     outcome:
-      "No score is involved anywhere. The pair goes into a small curated pile, and the model keeps training on the same next-token objective it was pre-trained with. The written text is the target.",
-    blindSpot:
-      "Someone has to write every one of these, tens of thousands of times, and a written answer says nothing about the responses nobody wrote.",
-    usedBy:
-      "Supervised fine-tuning. The first stage of InstructGPT, and how Google's FLAN work taught instruction-following.",
+      "No score is involved. The written text is the target, and training is the same next-word prediction as pre-training.",
+    note: "Called supervised fine-tuning, and it is the first stage of InstructGPT. The limit is cost: a person writes every one of these, and a written answer says nothing about the responses nobody wrote.",
   },
   {
     id: "comparison",
     label: "Let a rater pick a winner",
-    how: "Show a rater two responses and ask which is better. Their picks train a reward model that can then score responses nobody ever looked at.",
-    panels: [
-      { kind: "prompt", label: "Prompt", text: sharedPrompt },
-      { kind: "response", label: "Response A", text: confidentlyWrong },
-      { kind: "response", label: "Response B", text: correctAnswer },
-      {
-        kind: "human",
-        label: "The rater's whole job",
-        text: "B is better.",
-      },
-      {
-        kind: "judge",
-        label: "After thousands of picks, the reward model scores a response no rater saw",
-        text: "Original price: $50, because 40 is 80% of it and 40 / 0.8 = 50.",
-        score: 0.81,
-      },
-    ],
+    intro:
+      "Show a person two responses to the same question and ask which is better. That is their whole task.",
+    visual: {
+      type: "pair",
+      prompt: sharedPrompt,
+      options: [
+        { id: "A", response: confidentlyWrong },
+        { id: "B", response: correctAnswer },
+      ],
+      chosen: "B",
+    },
     outcome:
-      "The model emits a probability for every possible response, so one training step can raise the preferred response and lower the rejected one at the same time.",
-    blindSpot:
-      "Raters work fast and are not always checking the arithmetic. A confident, friendly wrong answer wins a surprising number of these comparisons.",
-    usedBy:
-      "RLHF, as used for InstructGPT and Llama 2. Training straight on the preferred and rejected pair, with no reward model in between, is direct preference optimisation.",
-    shift: [
-      { label: "Response B, preferred", before: 0.2, after: 0.63 },
-      { label: "Response A, rejected", before: 0.25, after: 0.08 },
-    ],
+      "The model is trained to make responses like the chosen one more likely, and responses like the rejected one less likely.",
+    note: "This is RLHF, used for InstructGPT and Llama 2. In practice the picks train a separate reward model, which then scores responses no person ever saw. Raters work fast and do not always check the arithmetic, so a confident, friendly wrong answer wins more of these than it should.",
   },
   {
     id: "constitution",
-    label: "A model judges against written rules",
-    how: "Write the principles down in plain English and have a second copy of the model score responses against them.",
-    panels: [
-      { kind: "prompt", label: "Prompt", text: sharedPrompt },
-      { kind: "response", label: "Response", text: flatteringWrong },
-      {
-        kind: "human",
-        label: "One principle from the constitution",
-        text: "Prefer the response that does not flatter the user, and that shows its working so the reader can check it.",
-      },
-      {
-        kind: "judge",
-        label: "A second copy of the model, reading that principle",
-        text: "The response opens by praising the question, which the principle rules out. It shows no working, so nothing can be checked. It is also wrong: $40 is 80% of the original, so the original is 40 ÷ 0.8 = 50, not 48.",
-        score: 0.15,
-      },
-    ],
+    label: "Let the model judge",
+    intro:
+      "Write the rules down, then have a second copy of the same model check responses against them.",
+    visual: {
+      type: "judge",
+      rule: "The response must actually answer the question it was asked.",
+      prompt: sharedPrompt,
+      response:
+        "Percentage discounts trip people up all the time! The trick is to remember that the sale price is a fraction of the original price.",
+      verdict: "No. Nothing here gives a price.",
+      passed: false,
+    },
     outcome:
-      "The score is used exactly as a human rating would be. When the rules need to change, someone edits the document. Re-labelling a human dataset would take months.",
-    blindSpot:
-      "The judge is a model. It catches the flattery every time, because that is visible in the text. On a harder problem it would be no better at the arithmetic than the model it is grading.",
-    usedBy: "Constitutional AI and RLAIF, published by Anthropic.",
+      "The verdict is used exactly as a human rating would be, and it costs almost nothing to produce.",
+    note: "Anthropic's Constitutional AI. It is the same model doing the judging, given a different job, which works because judging a response is easier than producing one. A real constitution has many principles rather than one. When the rules need to change, someone edits the document.",
   },
   {
     id: "usage",
     label: "Watch what real users do",
-    how: "Take the signal from the product: thumbs up and down, which response people picked, what they said next.",
-    panels: [
-      { kind: "response", label: "One conversation", text: flatteringWrong },
-      {
-        kind: "human",
-        label: "What the user did",
-        text: "👍  “Thanks, that's what I got too!”",
-        score: 0.9,
-      },
-      { kind: "response", label: "Another conversation", text: correctAnswer },
-      {
-        kind: "human",
-        label: "What the user did",
-        text: "👎  “that's not the answer in the back of the book”",
-        score: 0.2,
-      },
-    ],
+    intro:
+      "Chat products produce feedback for free: thumbs up and down, which response people picked, what they said next.",
+    visual: {
+      type: "usage",
+      rows: [
+        {
+          response:
+            "Great question, you're thinking about this exactly the right way! The original price was $48.",
+          reaction: "Thanks, that's what I got too!",
+          up: true,
+        },
+        {
+          response: correctAnswer,
+          reaction: "that's not the answer in the back of the book",
+          up: false,
+        },
+      ],
+    },
     outcome:
-      "Both signals point the same way, and it is the wrong way. The flattering wrong answer gets more likely, the correct one gets less likely.",
-    blindSpot:
-      "This measures whether the user was pleased, not whether the answer was right. Optimise hard on it and the model learns to flatter, a failure mode called sycophancy.",
-    usedBy: "Preference and feedback data collected inside chat products.",
+      "Both signals point the same way, and it is the wrong way. The flattering wrong answer gets more likely and the correct one gets less likely.",
+    note: "This measures whether the user was pleased, not whether the answer was right. Optimise hard on it and the model learns to flatter, a failure mode called sycophancy.",
   },
   {
     id: "checker",
     label: "Just check the answer",
-    how: "For maths, code and puzzles, run the check. Nobody has to judge anything.",
-    panels: [
-      { kind: "prompt", label: "Prompt", text: sharedPrompt },
-      { kind: "response", label: "Response", text: confidentlyWrong },
-      {
-        kind: "checker",
-        label: "Automatic check",
-        text: "Extracted answer: 48. Expected: 50. Wrong.",
-        score: 0,
-      },
-      { kind: "response", label: "Response", text: correctAnswer },
-      {
-        kind: "checker",
-        label: "Automatic check",
-        text: "Extracted answer: 50. Expected: 50. Correct.",
-        score: 1,
-      },
-    ],
+    intro:
+      "For maths, code and puzzles, run the check. Nobody has to judge anything.",
+    visual: {
+      type: "check",
+      prompt: sharedPrompt,
+      rows: [
+        {
+          response: confidentlyWrong,
+          check: "Answer given: 48. Expected: 50.",
+          passed: false,
+        },
+        {
+          response: correctAnswer,
+          check: "Answer given: 50. Expected: 50.",
+          passed: true,
+        },
+      ],
+    },
     outcome:
-      "The score costs nothing, cannot be charmed, and can be produced millions of times overnight. That abundance is what made reasoning models possible.",
-    blindSpot:
-      "It only works where an answer can be checked. Most of what people ask a chat model has no such check.",
-    usedBy:
-      "Reinforcement learning from verifiable rewards, published in detail for DeepSeek-R1.",
+      "A score that costs nothing, cannot be charmed, and can be produced millions of times overnight.",
+    note: "Called reinforcement learning from verifiable rewards, published in detail for DeepSeek-R1. It only works where an answer can be checked, which rules out most of what people ask a chat model. Where it does work, the sheer supply of it is what made reasoning models possible.",
   },
 ];
 

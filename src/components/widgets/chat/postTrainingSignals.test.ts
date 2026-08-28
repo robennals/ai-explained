@@ -7,53 +7,65 @@ describe("approaches", () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it("gives every approach panels, an outcome, a blind spot and a citation", () => {
+  it("gives every approach an intro, an outcome and a note", () => {
     for (const approach of approaches) {
-      expect(approach.panels.length).toBeGreaterThan(1);
+      expect(approach.intro.trim()).not.toBe("");
       expect(approach.outcome.trim()).not.toBe("");
-      expect(approach.blindSpot.trim()).not.toBe("");
-      expect(approach.usedBy.trim()).not.toBe("");
+      expect(approach.note.trim()).not.toBe("");
     }
   });
 
-  it("keeps scores in range wherever an approach produces one", () => {
+  it("keeps the prominent intro text short, since the illustration does the work", () => {
     for (const approach of approaches) {
-      for (const panel of approach.panels) {
-        if (panel.score !== undefined) {
-          expect(panel.score).toBeGreaterThanOrEqual(0);
-          expect(panel.score).toBeLessThanOrEqual(1);
-        }
-      }
+      expect(approach.intro.length).toBeLessThan(160);
     }
-  });
-
-  it("gives the written-answer approach no score at all, since the text is the target", () => {
-    const ideal = getApproach("ideal");
-    expect(ideal.panels.every((p) => p.score === undefined)).toBe(true);
   });
 
   it("uses the same prompt everywhere it shows one, so the approaches compare", () => {
     for (const approach of approaches) {
-      for (const panel of approach.panels) {
-        if (panel.kind === "prompt") {
-          expect(panel.text).toBe(sharedPrompt);
-        }
+      const visual = approach.visual;
+      if ("prompt" in visual) {
+        expect(visual.prompt).toBe(sharedPrompt);
       }
     }
   });
 
-  it("scores the flattering answer above the correct one on usage data", () => {
-    const scores = getApproach("usage")
-      .panels.filter((p) => p.score !== undefined)
-      .map((p) => p.score!);
-    expect(scores[0]).toBeGreaterThan(scores[1]);
+  it("has a distinct illustration per approach", () => {
+    const types = approaches.map((a) => a.visual.type);
+    expect(new Set(types).size).toBe(types.length);
+  });
+});
+
+describe("individual illustrations", () => {
+  it("gives the written-answer approach a target and no score", () => {
+    const visual = getApproach("ideal").visual;
+    expect(visual.type).toBe("target");
   });
 
-  it("shows the preferred response rising and the rejected one falling", () => {
-    const shift = getApproach("comparison").shift!;
-    const [preferred, rejected] = shift;
-    expect(preferred.after).toBeGreaterThan(preferred.before);
-    expect(rejected.after).toBeLessThan(rejected.before);
+  it("offers the rater exactly two options and marks one chosen", () => {
+    const visual = getApproach("comparison").visual;
+    if (visual.type !== "pair") throw new Error("expected a pair");
+    expect(visual.options).toHaveLength(2);
+    expect(visual.options.map((o) => o.id)).toContain(visual.chosen);
+  });
+
+  it("shows the judge failing a response that dodges the question", () => {
+    const visual = getApproach("constitution").visual;
+    if (visual.type !== "judge") throw new Error("expected a judge");
+    expect(visual.passed).toBe(false);
+    expect(visual.response).not.toContain("$50");
+  });
+
+  it("shows real users upvoting the flattering answer and downvoting the right one", () => {
+    const visual = getApproach("usage").visual;
+    if (visual.type !== "usage") throw new Error("expected usage");
+    expect(visual.rows.map((r) => r.up)).toEqual([true, false]);
+  });
+
+  it("passes exactly the correct response through the automatic check", () => {
+    const visual = getApproach("checker").visual;
+    if (visual.type !== "check") throw new Error("expected a check");
+    expect(visual.rows.filter((r) => r.passed)).toHaveLength(1);
   });
 });
 

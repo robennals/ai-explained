@@ -24,27 +24,28 @@ export const completionExamples: CompletionExample[] = [
     id: "question",
     label: "A question",
     prompt: "How do I stop my sourdough starter from going mouldy?",
-    base: `How often should I feed my starter?
+    base: `
+How often should I feed my starter?
 Why does my starter smell like acetone?
 Can I keep a starter in the fridge?
-What flour is best for a new starter?
 
 Browse all 47 questions in our Baking forum →`,
     baseNote:
       "A question like this appears most often in a list of other questions, on a forum index or an FAQ page.",
-    chat: `Mould usually means something other than your starter is growing in the jar. A few things help:
+    chat: `Mould usually means something other than your starter is growing in the jar. Three things help:
 
-1. Scrape the sides down after each feed. Dried streaks of flour above the surface are where mould normally takes hold.
-2. Feed it more often, or with more flour and water. A hungry starter goes acidic and then weak, and a weak starter loses to mould.
+1. Scrape the sides down after each feed. Dried streaks above the surface are where mould normally takes hold.
+2. Feed it more often. A hungry starter goes acidic and then weak, and a weak starter loses to mould.
 3. Use a clean jar every few feeds rather than topping up the same one for weeks.
 
-If there is fuzzy growth of any colour on the surface, throw the whole jar out. Stirring it in does not work.`,
+If there is fuzzy growth of any colour on the surface, throw the jar out. Stirring it in does not work.`,
   },
   {
     id: "request",
     label: "A request",
     prompt: "Write a short poem about the sea.",
-    base: `Write a short poem about a city at night.
+    base: `
+Write a short poem about a city at night.
 Write a short poem in the voice of an animal.
 Write a short poem that does not rhyme.
 
@@ -60,7 +61,8 @@ some brown glass worn to blue.`,
     id: "maths",
     label: "A maths problem",
     prompt: "A shirt costs $40 after a 20% discount. What was the original price?",
-    base: `A jacket costs $63 after a 10% discount. What was the original price?
+    base: `
+A jacket costs $63 after a 10% discount. What was the original price?
 A book costs $17 after a 15% discount. What was the original price?
 
 Answers on page 112. Show your working for full marks.`,
@@ -74,16 +76,17 @@ The $40 is 80% of the original price, so the original is 40 ÷ 0.8 = 50. Checkin
     id: "help",
     label: "Asking for help",
     prompt: "My laptop won't turn on. Can you help?",
-    base: `Sign in to your account to open a support ticket, or call us on 0800 555 0199 (Mon-Fri, 9am-5pm).
+    base: `
+Sign in to your account to open a support ticket, or call us on 0800 555 0199 (Mon-Fri, 9am-5pm).
 
-Was this article helpful? Yes / No
+Was this article helpful?   Yes / No
 
-Related: Extend your warranty from £4.99/month.`,
+Related: extend your warranty from £4.99/month.`,
     baseNote:
       "“Can you help?” is a phrase from support pages, and support pages continue with contact details.",
     chat: `Let's narrow it down. Does anything at all happen when you press the power button, any light, fan noise, or a beep?
 
-If nothing happens: hold the power button down for 30 seconds with the charger unplugged, then plug the charger in and try again. If you see a charging light but no screen, the machine may be running with a dead display, which is a different problem.
+If nothing happens, hold the power button down for 30 seconds with the charger unplugged, then plug the charger in and try again. If you get a charging light but no picture, the machine may be running with a dead display, which is a different problem.
 
 Tell me which of those you get and we can go from there.`,
   },
@@ -91,4 +94,18 @@ Tell me which of those you get and we can go from there.`,
 
 export function getExample(id: string): CompletionExample {
   return completionExamples.find((e) => e.id === id) ?? completionExamples[0];
+}
+
+/**
+ * The text the model is actually completing. A base model is handed the raw
+ * prompt. A chat model is handed the same words wrapped in the role markers
+ * of a chat template, with the assistant marker left open at the end, which is
+ * what makes "answer the question" the likely continuation.
+ */
+export function buildPrefix(
+  example: CompletionExample,
+  mode: "base" | "chat"
+): string {
+  if (mode === "base") return example.prompt;
+  return `<|user|>${example.prompt}\n<|assistant|>`;
 }

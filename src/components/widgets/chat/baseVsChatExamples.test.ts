@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { completionExamples, getExample } from "./baseVsChatExamples";
+import {
+  buildPrefix,
+  completionExamples,
+  getExample,
+} from "./baseVsChatExamples";
 
 describe("completionExamples", () => {
   it("has a unique id for every example", () => {
@@ -13,6 +17,21 @@ describe("completionExamples", () => {
       expect(example.chat.trim()).not.toBe("");
       expect(example.base).not.toBe(example.chat);
     }
+  });
+});
+
+describe("buildPrefix", () => {
+  it("hands a base model the raw prompt and nothing else", () => {
+    const example = getExample("maths");
+    expect(buildPrefix(example, "base")).toBe(example.prompt);
+  });
+
+  it("wraps the same words in role markers for a chat model", () => {
+    const example = getExample("maths");
+    const prefix = buildPrefix(example, "chat");
+    expect(prefix).toContain(example.prompt);
+    expect(prefix.startsWith("<|user|>")).toBe(true);
+    expect(prefix.endsWith("<|assistant|>")).toBe(true);
   });
 });
 

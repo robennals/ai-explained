@@ -64,15 +64,15 @@ export function ToolLoop() {
                   </span>
                 )}
               </div>
-              <pre
+              <div
                 className={`mt-1.5 whitespace-pre-wrap text-base leading-relaxed text-foreground ${
                   turn.role === "tool-call" || turn.role === "tool-result"
                     ? "font-mono text-sm"
-                    : "font-sans"
+                    : ""
                 }`}
               >
                 {turn.text}
-              </pre>
+              </div>
             </div>
             <p className="mt-1.5 px-1 text-sm leading-relaxed text-muted">
               {turn.note}
