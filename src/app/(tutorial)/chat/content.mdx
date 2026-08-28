@@ -41,7 +41,7 @@ Toggle thinking off and watch the answers change. It is all one stream of tokens
 
 What made this work was the verifiable rewards from the previous section. If you can check the final answer automatically, you can reward whatever scratchpad led to it, without anyone having to specify what good reasoning looks like. Models trained this way picked up habits nobody wrote down: checking their work, backing out of a dead end, noticing halfway through that an earlier step was wrong.
 
-One caveat. The trace is not a complete account of what drove the answer. Slip a hint into the prompt and models will often take it, then write a confident chain of reasoning that never mentions it. People do the same thing: the reasons given for a conclusion are not always the reasons that produced it.
+One caveat. The trace is not a complete account of what drove the answer. Give a model a hint of what answer you want, and the model will often write a confident chain of reasoning that justifies the answer it thinks you want, without mentioning your hint. People do the same thing.
 
 More thinking is also not always better. Every thinking token costs time and money, and on an easy question a long trace mostly gives the model more chances to talk itself out of the right answer.
 
@@ -49,7 +49,9 @@ More thinking is also not always better. Every thinking token costs time and mon
 
 A model can only do one thing: write text. So tool use has to be made of text, and it is.
 
-The list of available tools goes into the model's context as a description of each one and what it is for. When the model wants to use a tool, it writes a tool call, a short structured piece of text naming the tool and its arguments. The program running the model, sometimes called the harness, watches for that. When it sees one, it stops generation, actually runs the search or the calculator or the code, and pastes the result back into the transcript as a new turn, in the same way a user's message would arrive. Then the model carries on from there.
+The list of available tools goes into the model's context, a name and a short description for each. When the model wants one, it writes a *tool call*: a piece of structured text naming the tool and its arguments.
+
+The program running the model, the *harness*, watches for that. It stops generation, runs the tool, and pastes the result back into the transcript as a new turn. Then the model carries on.
 
 That loop repeats until the model writes an ordinary reply instead of another tool call.
 
