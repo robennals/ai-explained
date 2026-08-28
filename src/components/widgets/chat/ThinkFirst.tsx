@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ToggleControl } from "@/components/widgets/shared/ToggleControl";
 import { WidgetContainer } from "@/components/widgets/shared/WidgetContainer";
 import {
+  buildPrompt,
   buildStream,
   getReasoningExample,
   reasoningExamples,
@@ -12,7 +13,6 @@ import {
 
 const segmentStyles: Record<SegmentKind, string> = {
   marker: "font-mono text-sm text-accent",
-  user: "text-foreground",
   think: "text-muted",
   answer: "font-semibold text-foreground",
 };
@@ -21,6 +21,7 @@ export function ThinkFirst() {
   const [exampleId, setExampleId] = useState(reasoningExamples[0].id);
   const [thinking, setThinking] = useState(true);
   const example = getReasoningExample(exampleId);
+  const prompt = buildPrompt(example);
   const stream = buildStream(example, thinking);
   const answer = thinking ? example.answer : example.quickAnswer;
 
@@ -57,6 +58,17 @@ export function ThinkFirst() {
       </div>
 
       <div className="mt-5 overflow-hidden rounded-lg border border-widget-border">
+        <div className="border-b border-widget-border bg-surface px-4 py-2">
+          <span className="text-xs font-bold uppercase tracking-widest text-muted">
+            Text handed to the model
+          </span>
+        </div>
+        <div className="whitespace-pre-wrap bg-surface px-4 py-3 font-mono text-sm leading-relaxed text-foreground">
+          {prompt}
+        </div>
+      </div>
+
+      <div className="mt-4 overflow-hidden rounded-lg border border-widget-border">
         <div className="border-b border-widget-border bg-surface px-4 py-2">
           <span className="text-xs font-bold uppercase tracking-widest text-muted">
             Every token the model emits

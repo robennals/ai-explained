@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildPrompt,
   buildStream,
   getReasoningExample,
   reasoningExamples,
@@ -35,16 +36,13 @@ describe("buildStream", () => {
 
   it("puts the thinking in the same stream as the answer, between think tags", () => {
     const kinds = buildStream(example, true).map((s) => s.kind);
-    expect(kinds).toEqual([
-      "marker",
-      "user",
-      "marker",
-      "marker",
-      "think",
-      "marker",
-      "answer",
-      "marker",
-    ]);
+    expect(kinds).toEqual(["marker", "think", "marker", "answer", "marker"]);
+  });
+
+  it("emits nothing the model was handed", () => {
+    for (const segment of buildStream(example, true)) {
+      expect(segment.text).not.toContain(example.question);
+    }
   });
 
   it("emits the same stream minus the think section when thinking is off", () => {
@@ -60,5 +58,15 @@ describe("buildStream", () => {
     for (const line of example.trace) {
       expect(think.text).toContain(line);
     }
+  });
+});
+
+describe("buildPrompt", () => {
+  it("wraps the question in role markers, with the assistant turn left open", () => {
+    const example = getReasoningExample("letters");
+    const prompt = buildPrompt(example);
+    expect(prompt).toContain(example.question);
+    expect(prompt.startsWith("<|user|>")).toBe(true);
+    expect(prompt.endsWith("<|assistant|>")).toBe(true);
   });
 });
