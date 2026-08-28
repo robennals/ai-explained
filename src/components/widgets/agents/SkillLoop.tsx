@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { WidgetContainer } from "@/components/widgets/shared/WidgetContainer";
 import { WidgetTabs } from "@/components/widgets/shared/WidgetTabs";
-import { ChatMessage } from "./ChatMessage";
+import { ChatMessage } from "@/components/widgets/shared/ChatMessage";
 import {
   getSkillScenario,
   isMonospace,

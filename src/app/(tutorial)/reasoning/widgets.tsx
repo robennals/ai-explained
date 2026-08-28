@@ -4,26 +4,18 @@ import dynamic from "next/dynamic";
 import { Suspense } from "react";
 import { TryItProvider } from "@/components/widgets/shared/WidgetContainer";
 
-const RawCompletion = dynamic(
+const ThinkFirst = dynamic(
   () =>
-    import("@/components/widgets/chat/RawCompletion").then(
-      (m) => m.RawCompletion
+    import("@/components/widgets/reasoning/ThinkFirst").then(
+      (m) => m.ThinkFirst
     ),
   { ssr: false }
 );
 
-const TrainingSignal = dynamic(
+const TraceSampling = dynamic(
   () =>
-    import("@/components/widgets/chat/TrainingSignal").then(
-      (m) => m.TrainingSignal
-    ),
-  { ssr: false }
-);
-
-const TranscriptViews = dynamic(
-  () =>
-    import("@/components/widgets/chat/TranscriptViews").then(
-      (m) => m.TranscriptViews
+    import("@/components/widgets/reasoning/TraceSampling").then(
+      (m) => m.TraceSampling
     ),
   { ssr: false }
 );
@@ -52,38 +44,22 @@ function WidgetSlot({
   );
 }
 
-export function RawCompletionWidget({
-  children,
-}: {
-  children?: React.ReactNode;
-}) {
+export function ThinkFirstWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children} label="Explore it">
-      <RawCompletion />
+      <ThinkFirst />
     </WidgetSlot>
   );
 }
 
-export function TrainingSignalWidget({
+export function TraceSamplingWidget({
   children,
 }: {
   children?: React.ReactNode;
 }) {
   return (
     <WidgetSlot tryIt={children} label="Explore it">
-      <TrainingSignal />
-    </WidgetSlot>
-  );
-}
-
-export function TranscriptViewsWidget({
-  children,
-}: {
-  children?: React.ReactNode;
-}) {
-  return (
-    <WidgetSlot tryIt={children} label="Explore it">
-      <TranscriptViews />
+      <TraceSampling />
     </WidgetSlot>
   );
 }

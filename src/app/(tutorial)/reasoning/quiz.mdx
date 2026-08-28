@@ -1,0 +1,42 @@
+<Quiz slug="reasoning">
+
+<Question>
+What actually changes in a reasoning model?
+
+<Choice>A new memory component is added to the architecture</Choice>
+<Choice>The attention mechanism is replaced with a search algorithm</Choice>
+<Choice correct>It emits hidden thinking tokens before answering, and was trained to use them</Choice>
+<Choice>It runs the same question through the model many times in parallel</Choice>
+
+<Feedback>
+The architecture does not change at all. The model writes tokens into a thinking section the product hides, reads them back as context, and then writes the answer. Its own output is its working memory. What made this work was training with automatically checkable answers, which let the reward go to whatever scratchpad led to a correct result.
+</Feedback>
+</Question>
+
+<Question>
+A model's thinking trace:
+
+<Choice correct>Really does drive the answer, but is not a guaranteed-complete account of what influenced it</Choice>
+<Choice>Is written after the answer, to explain it to the user</Choice>
+<Choice>Is a record of which training examples the model retrieved</Choice>
+<Choice>Is a guaranteed-correct proof of the final answer</Choice>
+
+<Feedback>
+The model writes the trace, reads it back, and answers from it, so the working is real working and it changes the answer. What it does not guarantee is completeness. In experiments where a hint about the answer is slipped into the prompt, models often take the hint and then write a confident chain of reasoning that never mentions it. People do the same thing: the reasons given for a conclusion are not always the reasons that produced it.
+</Feedback>
+</Question>
+
+<Question>
+How are reasoning models taught to think well?
+
+<Choice>People write out ideal reasoning and the model is trained to copy it</Choice>
+<Choice correct>The model attempts a checkable problem many times, and whole attempts that reach the right answer are made more likely</Choice>
+<Choice>Each step of the working is graded separately by a second model</Choice>
+<Choice>A search algorithm explores possible reasoning paths at answer time</Choice>
+
+<Feedback>
+Nobody can write good working for millions of problems. What scales is checking only the final answer, which for maths and code a computer can do for free. The model attempts a problem many times, the attempts that got there are made more likely and the rest less likely, and the working is never marked at all. Habits like checking your own claim survive because attempts containing them reach the right answer more often.
+</Feedback>
+</Question>
+
+</Quiz>

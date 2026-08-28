@@ -1,0 +1,49 @@
+A model writes text. That is the whole of what it does. Wrap it in a program that reads what it writes, acts on it, and writes back, and you have something that can get things done.
+
+That assembly is what people mean by an *agent*: the model, the program around it, and the loop between them. The program is usually called the *harness*. The model inside an agent is the same model as before, unchanged. What is different is what happens to the text it emits.
+
+Everything in this chapter is one trick in three forms. The model writes a message that is not addressed to you, something answers it, and the answer lands back in the conversation.
+
+## Tools
+
+A model can only write text, so tool use has to be made of text, and it is.
+
+The list of available tools goes into the model's context, a name and a short description for each. When the model wants one, it writes a *tool call*: a piece of structured text naming the tool and its arguments. The harness watches for that. It stops generation, runs the tool, and pastes the result back into the conversation as a new message. Then the model carries on.
+
+That loop repeats until the model writes an ordinary reply instead of another tool call.
+
+<ToolLoopWidget>
+Four loops, in four tabs. It is one conversation, and the dashed messages are part of it, they just never reach the human's chat window. The model's next move is decided entirely by what came back as text.
+</ToolLoopWidget>
+
+This is all "the model searched the web" means. The model does not run anything. It writes a request, something else acts, and the model finds out what happened by reading. Grounding an answer in a real search result makes it much more likely to be right, though the model is still the one writing the summary, so it is still capable of getting it wrong.
+
+## Skills
+
+A *skill* is a tool whose result is a page of instructions.
+
+<SkillLoopWidget>
+Each tab opens with a different set of skills on offer, one line each. Watch which one the model asks for, and check its answer against the document that comes back.
+</SkillLoopWidget>
+
+Loading every skill in full, in every conversation, would be enormous and almost all of it irrelevant. One line each is cheap, and the document arrives only when it is about to be used.
+
+It has to work this way, because nothing the model learns in a conversation survives it. Any capability added after training arrives as text placed in the context.
+
+## Memory
+
+Which is also true of anything you tell it. If we want an agent to remember something from a previous conversation, we give it a tool for saving notes and a tool for searching the notes it saved before.
+
+<MemoryLoopWidget>
+Both tabs show two conversations weeks apart, and each one starts from nothing. Watch what actually crosses the gap.
+</MemoryLoopWidget>
+
+Products differ in who decides. Some let the model write a memory when it notices something worth keeping, as above. Some have the harness search the store at the start of every conversation and paste anything relevant in before the model sees your message. Either way, what arrives is text in the context.
+
+Which also means a memory is only a note. It can be wrong, or it can be right at the time and stale a year later, and it will stay that way until someone edits or deletes it. This is why chat products let you read the list.
+
+## Putting It Together
+
+Tools, skills and memory are the same mechanism pointed at three different problems. The model writes a message the human never sees, something on the other end answers it, and the reply becomes part of the text the model is predicting from.
+
+The model has not gained an ability to act. It has gained a correspondent.

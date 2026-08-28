@@ -5,25 +5,25 @@ import { getAdjacentChapters } from "@/lib/curriculum";
 import Content from "./content.mdx";
 import { QuizContent } from "./QuizContent";
 import {
-  RawCompletionWidget,
-  TrainingSignalWidget,
-  TranscriptViewsWidget,
+  MemoryLoopWidget,
+  SkillLoopWidget,
+  ToolLoopWidget,
 } from "./widgets";
 
-export const metadata = chapterMetadata("chat");
+export const metadata = chapterMetadata("agents");
 
-export default function Chapter10() {
-  const { prev, next } = getAdjacentChapters("chat");
+export default function Chapter12() {
+  const { prev, next } = getAdjacentChapters("agents");
 
   return (
     <article>
       <div className="prose prose-lg max-w-none">
-        <ChapterHeader slug="chat" />
+        <ChapterHeader slug="agents" />
         <Content
           components={{
-            RawCompletionWidget,
-            TrainingSignalWidget,
-            TranscriptViewsWidget,
+            MemoryLoopWidget,
+            SkillLoopWidget,
+            ToolLoopWidget,
           }}
         />
       </div>

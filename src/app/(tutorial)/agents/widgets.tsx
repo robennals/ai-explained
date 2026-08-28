@@ -4,27 +4,20 @@ import dynamic from "next/dynamic";
 import { Suspense } from "react";
 import { TryItProvider } from "@/components/widgets/shared/WidgetContainer";
 
-const RawCompletion = dynamic(
-  () =>
-    import("@/components/widgets/chat/RawCompletion").then(
-      (m) => m.RawCompletion
-    ),
+const ToolLoop = dynamic(
+  () => import("@/components/widgets/agents/ToolLoop").then((m) => m.ToolLoop),
   { ssr: false }
 );
 
-const TrainingSignal = dynamic(
+const SkillLoop = dynamic(
   () =>
-    import("@/components/widgets/chat/TrainingSignal").then(
-      (m) => m.TrainingSignal
-    ),
+    import("@/components/widgets/agents/SkillLoop").then((m) => m.SkillLoop),
   { ssr: false }
 );
 
-const TranscriptViews = dynamic(
+const MemoryLoop = dynamic(
   () =>
-    import("@/components/widgets/chat/TranscriptViews").then(
-      (m) => m.TranscriptViews
-    ),
+    import("@/components/widgets/agents/MemoryLoop").then((m) => m.MemoryLoop),
   { ssr: false }
 );
 
@@ -52,38 +45,26 @@ function WidgetSlot({
   );
 }
 
-export function RawCompletionWidget({
-  children,
-}: {
-  children?: React.ReactNode;
-}) {
+export function ToolLoopWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children} label="Explore it">
-      <RawCompletion />
+      <ToolLoop />
     </WidgetSlot>
   );
 }
 
-export function TrainingSignalWidget({
-  children,
-}: {
-  children?: React.ReactNode;
-}) {
+export function SkillLoopWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children} label="Explore it">
-      <TrainingSignal />
+      <SkillLoop />
     </WidgetSlot>
   );
 }
 
-export function TranscriptViewsWidget({
-  children,
-}: {
-  children?: React.ReactNode;
-}) {
+export function MemoryLoopWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children} label="Explore it">
-      <TranscriptViews />
+      <MemoryLoop />
     </WidgetSlot>
   );
 }

@@ -1,0 +1,33 @@
+Ask a person a hard question and demand an answer in the next half second, and they will do badly. Not because they cannot solve it, but because solving it takes steps and they were not given room for any.
+
+A transformer has the same problem. Each token gets a fixed amount of computation, a fixed number of layers. A question needing ten steps of work does not get ten times the compute just because it is harder.
+
+## Writing To Itself First
+
+*Reasoning models* fix this in about the most direct way possible. The model writes its working out first, into a message the product does not show you, and then writes the answer.
+
+<ThinkFirstWidget>
+The dashed message is the model's working. It is generated one token at a time, exactly like the answer, and the model reads it back before answering.
+</ThinkFirstWidget>
+
+Nothing about the architecture changes. There is no new component and no extra network. The thinking tokens are predicted exactly like every other token, and the model reads them back the same way it reads anything else in its context. Its own output becomes its working memory.
+
+## How They Are Trained
+
+The obvious way to teach this would be to write out ideal reasoning and train on it, the way <Ch slug="chat" /> showed for ideal answers. That does not scale, because nobody can write good working for millions of problems.
+
+What works instead needs only the verifiable rewards from the last chapter. Give the model a problem it can be marked on automatically, let it attempt the problem many times over, and check nothing but the final answer.
+
+<TraceSamplingWidget>
+Four attempts at one problem. The checker never reads the working. Compare the two that got there: one knew a formula, and one checked its own claim before trusting it.
+</TraceSamplingWidget>
+
+Repeat that over millions of problems and the habits that survive are the ones that lead to correct answers: checking your work, backing out of a dead end, noticing halfway through that an earlier step was wrong. Nobody wrote those down, and nobody marked a single line of working.
+
+This is also why reasoning helps most where answers can be checked. Maths and code improved dramatically. The habits carry over to other questions, but more weakly, because nothing was ever able to score those.
+
+## Two Things To Keep Straight
+
+The trace is not a complete account of what drove the answer. Give a model a hint of what answer you want, and it will often write a confident chain of reasoning that justifies the answer it thinks you want, without ever mentioning your hint. People do the same thing.
+
+More thinking is also not always better. Every thinking token costs time and money, and on an easy question a long trace mostly gives the model more chances to talk itself out of the right answer.

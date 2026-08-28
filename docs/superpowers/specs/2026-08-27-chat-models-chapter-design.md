@@ -1,7 +1,33 @@
-# Chapter: Chat Models — design
+# Chapters: Chat Models, Reasoning Models, Agents — design
 
-Status: approved design, ready for implementation planning.
-Date: 2026-08-27
+Status: implemented. Originally one chapter; split into three on 2026-08-28.
+Date: 2026-08-27, revised 2026-08-28
+
+## What changed after the first draft
+
+The material was written as a single chapter and then split, because seven
+sections and five playgrounds is too much for one, and because the three parts
+answer different questions: why a raw predictor does not act like an
+assistant, how a model gets room to think, and how it acts on the world.
+
+| Slug | Title | Sections |
+|----|----|----|
+| `chat` | Chat Models | raw model, post-training, chat template |
+| `reasoning` | Reasoning Models | thinking first, how they are trained |
+| `agents` | Agents | tools, skills, memory |
+
+Ids 10, 11 and 12; everything after shifts by two. `reasoning` and `agents`
+both take `chat` as their only prerequisite.
+
+`chat` is the only chapter that shows raw token streams. It ends by showing
+the same conversation as one stream and as speech bubbles, and the later two
+chapters use the bubbles, with a dashed outline for any message the human
+never sees.
+
+Two sections were added that the original design did not have: how reasoning
+models are trained (attempt a checkable problem many times, keep what reached
+the answer, never mark the working), and an opening for `agents` defining an
+agent as the model plus the harness plus the loop.
 
 ## Summary
 

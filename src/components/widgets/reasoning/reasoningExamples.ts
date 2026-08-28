@@ -61,30 +61,3 @@ export function getReasoningExample(id: string): ReasoningExample {
     reasoningExamples.find((e) => e.id === id) ?? reasoningExamples[0]
   );
 }
-
-export type SegmentKind = "marker" | "think" | "answer";
-
-export interface Segment {
-  kind: SegmentKind;
-  text: string;
-}
-
-/** The text handed to the model: the question, wrapped in role markers. */
-export function buildPrompt(example: ReasoningExample): string {
-  return `<|user|>${example.question}\n<|assistant|>`;
-}
-
-/**
- * The tokens the model itself emits, and nothing else. Thinking is not a
- * separate channel: the think tags are ordinary tokens in the same stream, and
- * the product simply does not show what sits between them.
- */
-export function buildStream(example: ReasoningExample): Segment[] {
-  return [
-    { kind: "marker", text: "<think>\n" },
-    { kind: "think", text: example.trace.join("\n") + "\n" },
-    { kind: "marker", text: "</think>\n" },
-    { kind: "answer", text: example.answer },
-    { kind: "marker", text: "<|end|>" },
-  ];
-}

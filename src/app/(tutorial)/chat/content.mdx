@@ -1,4 +1,4 @@
-The previous chapter ended with a machine that reads a passage of text and says what is likely to come next. That machine is not ChatGPT. It will not answer your question, stop to think, or look anything up. This chapter covers what gets added on top: the training that turns a text predictor into an assistant, the hidden thinking tokens, the tool calls, and the transcript format that makes the whole thing feel like a conversation.
+The previous chapter ended with a machine that reads a passage of text and says what is likely to come next. That machine is not ChatGPT. This chapter is about the training that turns a text predictor into something that answers you, and the format that arranges a conversation for it to continue.
 
 ## What a Raw Model Does
 
@@ -10,7 +10,7 @@ What it does not get is any sense of what to do with that understanding. Predict
 Switch between **base model** and **chat model** on each prompt. The base model's completion is not a mistake. Ask yourself where on the internet that text would have come next.
 </RawCompletionWidget>
 
-The base model is not confused and it is not stupid. It is doing exactly what we trained it to do. What we trained it to do was predict the next token, not be a useful assistant. 
+The base model is not confused and it is not stupid. It is doing exactly what we trained it to do. What we trained it to do was predict the next token, not be a useful assistant. Almost everything a chat model knows about the world, the base model already knows, because almost all of the knowledge came from that pile of text.
 
 ## Post-Training
 
@@ -19,7 +19,7 @@ Closing that gap is a whole second stage of training. The two stages have names:
 - **Pre-training** is next-word prediction over a very large body of text. It is where the model picks up its understanding of how the world works. Nearly all of the compute goes here, often more than 99% of it.
 - **Post-training** is everything after that. It teaches the model how to apply that understanding to the thing you actually want. It is a thin layer, and it accounts for all of the difference between the two completions in the playground above.
 
-There are several ways to do post training, and a modern chat model has usually been through most of them. Most work the same way underneath: produce several candidate responses, score them somehow, and adjust the weights so that higher-scoring responses become more likely. 
+There are several ways to do the second part, and a modern chat model has usually been through most of them. Most work the same way underneath: produce several candidate responses, score them somehow, and adjust the weights so that higher-scoring responses become more likely.
 
 <TrainingSignalWidget>
 Step through the five tabs. Each is a different way of telling the model which answer you wanted, and the last two rest on the same idea: checking an answer is far easier than producing one.
@@ -27,83 +27,24 @@ Step through the five tabs. Each is a different way of telling the model which a
 
 Post-training does not teach the model new facts or new ways of understanding the world. It teaches it how to apply the understanding it already has to do something useful.
 
-## Thinking Before Speaking
-
-Ask a person a hard question and demand an answer in the next half second, and they will do badly. Not because they cannot solve it, but because solving it takes steps and they were not given room for any.
-
-A transformer has the same problem. Each token gets a fixed amount of computation, a fixed number of layers. A question needing ten steps of work does not get ten times the compute just because it is harder.
-
-*Reasoning models* fix this in about the most direct way possible. The model is allowed to write to itself first. It emits tokens into a thinking section that the product does not show you, works through the problem there, and then writes the answer. Nothing about the architecture changes. There is no new component, no extra network. The thinking tokens are predicted exactly like every other token, and the model reads them back the same way it reads anything else in its context. Its own output becomes its working memory.
-
-<ThinkFirstWidget>
-It is all one stream of tokens. The think tags are ordinary tokens like any other, and the app simply does not show what sits between them.
-</ThinkFirstWidget>
-
-What made this work was the verifiable rewards from the previous section. If you can check the final answer automatically, you can reward whatever scratchpad led to it, without anyone having to specify what good reasoning looks like. Models trained this way picked up habits nobody wrote down: checking their work, backing out of a dead end, noticing halfway through that an earlier step was wrong.
-
-One caveat. The trace is not a complete account of what drove the answer. Give a model a hint of what answer you want, and the model will often write a confident chain of reasoning that justifies the answer it thinks you want, without mentioning your hint. People do the same thing.
-
-More thinking is also not always better. Every thinking token costs time and money, and on an easy question a long trace mostly gives the model more chances to talk itself out of the right answer.
-
-## Tools
-
-A model can only do one thing: write text. So tool use has to be made of text, and it is.
-
-The list of available tools goes into the model's context, a name and a short description for each. When the model wants one, it writes a *tool call*: a piece of structured text naming the tool and its arguments.
-
-The program running the model, the *harness*, watches for that. It stops generation, runs the tool, and pastes the result back into the transcript as a new turn. Then the model carries on.
-
-That loop repeats until the model writes an ordinary reply instead of another tool call.
-
-<ToolLoopWidget>
-Four loops, in four tabs. It is one conversation, and the dashed messages are part of it, they just never reach the human's chat window. The model's next move is decided entirely by what came back as text.
-</ToolLoopWidget>
-
-This is all "the model searched the web" means. It is also worth being clear that the model does not run anything. It writes a request, something else acts, and the model finds out what happened by reading. Grounding an answer in a real search result makes it much more likely to be right, though the model is still the one writing the summary, so it is still capable of getting it wrong.
-
-
-## Skills
-
-A *skill* is a tool whose result is a page of instructions.
-
-<SkillLoopWidget>
-Each tab opens with a different set of skills on offer, one line each. Watch which one the model asks for, and check its answer against the document that comes back.
-</SkillLoopWidget>
-
-Loading every skill in full, in every conversation, would be enormous and almost all of it irrelevant. One line each is cheap, and the document arrives only when it is about to be used.
-
-It has to work this way, because nothing the model learns in a conversation survives it. Any capability added after training arrives as text placed in the context, which is also why telling a model something useful in one conversation does nothing for the next.
-
-## Memory
-
-If we want a model to remember things that happened in previous conversations then we can give it at tool to save memories and search memories it recorded in the past.
-
-<MemoryLoopWidget>
-Both tabs show two conversations weeks apart, and each one starts from nothing. Watch what actually crosses the gap.
-</MemoryLoopWidget>
-
-Products differ in who decides. Some let the model write a memory when it notices something worth keeping, as above. Some have the harness search the store at the start of every conversation and paste anything relevant in before the model sees your message. Either way, what arrives is text in the context.
-
-Which also means a memory is only a note. It can be wrong, or it can be right at the time and stale a year later, and it will stay that way until someone edits or deletes it. This is why chat products let you read the list.
-
 ## Making It a Conversation
 
-Underneath every chat interface there is a single stream of tokens. The model does not see turns. It sees one document with markers in it saying who is speaking, something along the lines of:
+Underneath every chat interface there is a single stream of tokens. The model does not see turns. It sees one document with markers in it saying who is speaking.
 
-```
-<|system|>You are a helpful assistant. Today is 27 August 2026.
-<|user|>What's the capital of Australia?
-<|assistant|>Canberra.<|end|>
-<|user|>Are you sure?
-<|assistant|>
-```
+<TranscriptViewsWidget>
+The same conversation both ways. The markers are real tokens, and the system prompt is text like everything else. Note the dashed message in the second view: it is in the transcript, but the human never sees it.
+</TranscriptViewsWidget>
 
-The format is called a *chat template*, and the markers are real tokens the tokeniser knows about. Post-training is what taught the model to continue after the assistant marker, to answer rather than to carry on inventing user messages, and to emit the end marker when it is done so the harness knows to stop.
+The format is called a *chat template*. Post-training is what taught the model to continue after the assistant marker, to answer rather than carry on inventing the human's messages, and to emit the end marker when it is done so the program running it knows to stop.
 
-The system prompt is nothing more special than text at the top of that document. That is why it works, and also why it is not a hard guarantee. Everything the model knows about the conversation is in the transcript in front of it, which is why the size of that transcript matters so much.
+The system prompt is nothing more special than text at the top of that document. That is why it works, and also why it is not a hard guarantee. Everything the model knows about the conversation is in the transcript in front of it.
+
+From here on, this tutorial draws conversations as messages rather than as raw tokens, because they are easier to follow. Every one of them is really one stream of text like the one above, and a message drawn with a dashed outline is one the human is never shown.
 
 ## Putting It Together
 
-A chat model is a next-token predictor with four things layered on top. Post-training aims it at being helpful rather than at continuing a document. Thinking tokens give it room to work before it commits to an answer. Tool calls let it act on the world by writing text that something else executes. And a chat template arranges the whole exchange as one document for it to continue.
+A chat model is a next-token predictor with two things wrapped around it. Post-training aims it at answering rather than at continuing a document. A chat template arranges the exchange as one document for it to continue.
 
-None of that changes the machine from the last chapter. The transformer is doing the same thing it was doing at the end of <Ch slug="transformers" />, predicting one token at a time. Everything in this chapter is about what it gets asked to predict, and what happens to the text once it has.
+The transformer is doing the same thing it was doing at the end of <Ch slug="transformers" />, predicting one token at a time. What changed is what it gets asked to predict.
+
+The next two chapters add the rest of what a chat product does. <Ch slug="reasoning" /> gives the model room to think before it answers. <Ch slug="agents" /> lets it act on the world rather than only talk about it.
