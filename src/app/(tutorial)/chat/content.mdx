@@ -56,7 +56,7 @@ The program running the model, the *harness*, watches for that. It stops generat
 That loop repeats until the model writes an ordinary reply instead of another tool call.
 
 <ToolLoopWidget>
-Step through the loop, then break the tool and step through again. The model's next move is decided entirely by what came back as text.
+Four loops, in four tabs. Every message is addressed from someone to someone, and the dashed ones never reach your chat window. The model's next move is decided entirely by what came back as text.
 </ToolLoopWidget>
 
 This is all "the model searched the web" means. It is also worth being clear that the model does not run anything. It writes a request, something else acts, and the model finds out what happened by reading. Grounding an answer in a real search result makes it much more likely to be right, though the model is still the one writing the summary, so it is still capable of getting it wrong. <Ch slug="hallucination" /> takes that up.
