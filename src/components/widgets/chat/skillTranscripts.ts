@@ -124,43 +124,6 @@ One dark streetlight is not urgent. A whole dark street is.`,
       "No tool involved. The skill is one household's rules, written down once, and every constraint in it shows up in the answer. None of it could have been in the model's weights, because it is true only of this family.",
   },
   {
-    id: "checklist",
-    label: "Working through a checklist",
-    turns: [
-      offered(
-        `  closing-up  what to do at the end of the day
-  opening-up  what to do first thing
-  cash-up     counting the till and getting it to the bank`
-      ),
-      {
-        role: "user",
-        text: "It's my first time locking up on my own tonight. What do I need to do?",
-      },
-      { role: "skill-request", text: 'load_skill("closing-up")' },
-      {
-        role: "skill-document",
-        text: `Closing up
-
-Use this when someone is shutting the café for the night. Do these in order, because two of them only work that way round.
-
-  1. Chairs up, then mop from the back of the room forwards
-  2. Backflush the coffee machine and leave it switched on overnight
-  3. Fridges shut, and push the freezer door to check it has caught
-  4. Cash out of the till into the safe, and leave the till drawer open
-  5. Bins out, but only on a Tuesday or a Thursday
-  6. Set the alarm at the panel by the back door, then leave through that door within 30 seconds
-
-Never lock the back door before setting the alarm. You will only have to unlock it again, and the alarm will go off while you do.`,
-      },
-      {
-        role: "assistant",
-        text: "In order, because a couple of these only work one way round.\n\n1. Chairs up, then mop from the back of the room forwards, so you're not walking back over it.\n2. Backflush the coffee machine and leave it switched on.\n3. Fridges shut, and give the freezer door a push to check it has caught.\n4. Cash out of the till into the safe. Leave the drawer open.\n5. Bins out only if it's Tuesday or Thursday. Any other night, leave them.\n6. Last thing: set the alarm at the panel by the back door, then out through that door within 30 seconds.\n\nDon't lock the back door before you set the alarm, or you'll have to unlock it again with the alarm going off.",
-      },
-    ],
-    takeaway:
-      "Every step here is particular to one café, and two of them are ordering rules: mop back to front, and set the alarm before you lock up. Without the document the model would write a confident, generic closing-up list and get both of them wrong.",
-  },
-  {
     id: "chained",
     label: "One skill leading to another",
     turns: [
