@@ -17,7 +17,7 @@ Nearly all of a model's knowledge comes from pre-training, so the base model alr
 What does post-training mostly do?
 
 <Choice>Adds the model's knowledge of facts</Choice>
-<Choice correct>Selects which behaviours the base model already has</Choice>
+<Choice correct>Selects between behaviours the base model already has</Choice>
 <Choice>Replaces the transformer with a conversational architecture</Choice>
 <Choice>Uses most of the total training compute</Choice>
 
@@ -40,15 +40,15 @@ Human comparisons are expensive, so they are used once to train a second model t
 </Question>
 
 <Question>
-Why is feedback from real product usage (thumbs up, thumbs down) risky to train on?
+Post-training can reward the model for giving people answers they are happy with. What is the risk?
 
-<Choice>It is too expensive to collect at scale</Choice>
-<Choice>It cannot be turned into a numerical score</Choice>
-<Choice correct>It measures whether the user was pleased, not whether the answer was right</Choice>
-<Choice>It only works for maths and code questions</Choice>
+<Choice>There are not enough conversations to learn anything from</Choice>
+<Choice correct>Being pleased with an answer is not the same as the answer being right</Choice>
+<Choice>It only works for questions with a checkable answer</Choice>
+<Choice>Someone has to read every conversation for it to be usable</Choice>
 
 <Feedback>
-Usage feedback is cheap and abundant, which is exactly why it is tempting. But a confident wrong answer gets a thumbs up and a correct answer nobody wanted to hear gets a thumbs down. Optimise hard on that and the model learns to flatter, a failure mode called sycophancy.
+Real conversations are the biggest source of feedback there is, and it costs nothing: whether the next message says thanks, or complains that the question was not answered, or asks the same thing again more sharply. What it measures is whether the person was pleased, which is only a stand-in for whether the answer was good. A confident wrong answer often pleases; a correct answer someone did not want to hear often does not. Lean on this signal too hard and the model learns to flatter, a failure mode called sycophancy.
 </Feedback>
 </Question>
 
