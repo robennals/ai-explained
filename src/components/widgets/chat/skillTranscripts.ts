@@ -165,9 +165,9 @@ Never lock the back door before setting the alarm. You will only have to unlock 
     label: "One skill leading to another",
     turns: [
       offered(
-        `  book-a-table  booking somewhere to eat, and how we pick
-  family-food   what this family eats
-  birthdays     who gets a card, and when`
+        `  book-a-table       booking somewhere to eat
+  restaurant-search  finding somewhere that suits
+  family-food        what this family eats`
       ),
       {
         role: "user",
@@ -178,9 +178,9 @@ Never lock the back door before setting the alarm. You will only have to unlock 
         role: "skill-document",
         text: `Booking a table
 
-Use this when someone wants a restaurant booked. Check what the family eats first, with load_skill("family-food").
+Use this when someone wants a table booked. Check what the family eats first, with load_skill("family-food"), then find somewhere with load_skill("restaurant-search").
 
-Then book it using the "book_table" tool, defined as follows:
+Book it using the "book_table" tool, defined as follows:
 
 book_table(
   place:  the name of the restaurant
@@ -189,12 +189,36 @@ book_table(
   notes:  anything the kitchen needs to know
 )
 
-For a party of more than six, pick somewhere with a set menu. Put every dietary requirement in the notes. Do not assume the restaurant will ask.`,
+Put every dietary requirement in the notes. Do not assume the restaurant will ask.`,
       },
       { role: "skill-request", text: 'load_skill("family-food")' },
+      { role: "skill-document", text: familyFood },
+      { role: "skill-request", text: 'load_skill("restaurant-search")' },
       {
         role: "skill-document",
-        text: familyFood,
+        text: `Finding somewhere that suits
+
+Use this to find a restaurant. Call the "find_restaurants" tool, defined as follows:
+
+find_restaurants(
+  area:   where to look, as a place name
+  people: how many are coming
+  needs:  dietary requirements, in plain words
+)
+
+Results come back in rating order. Do not suggest anywhere below 4.0, or anywhere that says no large groups. For more than six, prefer somewhere with a set menu.`,
+      },
+      {
+        role: "tool-call",
+        tool: "Restaurant finder",
+        text: 'find_restaurants(area="town centre", people=8,\n                 needs="severe nut allergy, two vegetarians who eat fish")',
+      },
+      {
+        role: "tool-result",
+        tool: "Restaurant finder",
+        text: `The Old Mill     4.6  set menu, groups up to 20, nut-free kitchen
+Saffron House    4.4  no large groups
+The Anchor       3.8  set menu, groups welcome`,
       },
       {
         role: "tool-call",
@@ -208,11 +232,11 @@ For a party of more than six, pick somewhere with a set menu. Put every dietary 
       },
       {
         role: "assistant",
-        text: "Booked: The Old Mill at 7.30 on the 14th, table for eight. They do a set menu, which is easier with that many. I've told the kitchen about the nut allergy, the two who eat fish but not meat, and the coriander.",
+        text: "Booked: The Old Mill at 7.30 on the 14th, table for eight. It was the only one of the three that takes a group that size and has a nut-free kitchen, and it does a set menu. I've told them about the allergy, the two who eat fish but not meat, and the coriander.",
       },
     ],
     takeaway:
-      "Two skills and a tool. The model only knew to look at what the family eats because the first document told it to, and the allergy reached the restaurant because a second document said never to assume anyone will ask.",
+      "Three skills and two tools, and the model only knew to load two of those skills because the first one told it to. The allergy travelled from a household document, through a restaurant search, into the note the kitchen will read.",
   },
 ];
 
