@@ -61,6 +61,7 @@ Four loops, in four tabs. It is one conversation, and the dashed messages are pa
 
 This is all "the model searched the web" means. It is also worth being clear that the model does not run anything. It writes a request, something else acts, and the model finds out what happened by reading. Grounding an answer in a real search result makes it much more likely to be right, though the model is still the one writing the summary, so it is still capable of getting it wrong.
 
+
 ## Skills
 
 A *skill* is a tool whose result is a page of instructions.
@@ -75,10 +76,10 @@ It has to work this way, because nothing the model learns in a conversation surv
 
 ## Memory
 
-Remembering has to work the same way, and for the same reason. The weights do not change while you talk, so anything carried from one conversation to the next has to be written down and fetched back.
+If we want a model to remember things that happened in previous conversations then we can give it at tool to save memories and search memories it recorded in the past.
 
 <MemoryLoopWidget>
-The two conversations are weeks apart, and the second one starts from nothing. Watch what actually crosses the gap.
+Three tabs. The conversations in each are weeks apart, and every one of them starts from nothing. Watch what actually crosses the gap.
 </MemoryLoopWidget>
 
 Products differ in who decides. Some let the model write a memory when it notices something worth keeping, as above. Some have the harness search the store at the start of every conversation and paste anything relevant in before the model sees your message. Either way, what arrives is text in the context.

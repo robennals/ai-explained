@@ -1,10 +1,9 @@
 /**
  * Hand-authored memory.
  *
- * Two separate conversations, weeks apart. The first ends with the model
- * writing a note; the second begins with it searching for one. Nothing about
- * the model changed in between, which is the point: the only thing carrying
- * anything across is a line of text in a store the harness can read.
+ * Conversations separated by weeks. A memory is written in one and fetched in
+ * another, and nothing about the model changes in between: the only thing
+ * carrying anything across is a line of text in a store the harness can read.
  */
 
 export type MemoryTurnRole =
@@ -25,44 +24,147 @@ export interface Conversation {
   turns: MemoryTurn[];
 }
 
-export const conversations: Conversation[] = [
+export interface MemoryScenario {
+  id: string;
+  /** Tab label. */
+  label: string;
+  conversations: Conversation[];
+  /** Smaller text at the bottom. */
+  takeaway: string;
+}
+
+export const memoryScenarios: MemoryScenario[] = [
   {
-    when: "Tuesday",
-    turns: [
+    id: "preference",
+    label: "Something you mentioned once",
+    conversations: [
       {
-        role: "user",
-        text: "Can you help me sort out the Lisbon trip? One thing: I'm useless before nine, so nothing that leaves early.",
+        when: "Tuesday",
+        turns: [
+          {
+            role: "user",
+            text: "Can you help me sort out the Lisbon trip? One thing: I'm useless before nine, so nothing that leaves early.",
+          },
+          {
+            role: "memory-write",
+            text: 'save_memory("Does not want flights departing before 09:00.")',
+          },
+          { role: "memory-result", text: "Saved." },
+          {
+            role: "assistant",
+            text: "Noted, nothing before nine. There are two afternoon departures on the Thursday, at 13:20 and 16:05. Shall I look at what they cost?",
+          },
+        ],
       },
       {
-        role: "memory-write",
-        text: 'save_memory("Does not want flights departing before 09:00.")',
-      },
-      { role: "memory-result", text: "Saved." },
-      {
-        role: "assistant",
-        text: "Noted, nothing before nine. There are two afternoon departures on the Thursday, at 13:20 and 16:05. Shall I look at what they cost?",
+        when: "Three weeks later, in a new conversation",
+        turns: [
+          { role: "user", text: "Get me on something to Berlin next Friday." },
+          {
+            role: "memory-search",
+            text: 'search_memory("flights, travel preferences")',
+          },
+          {
+            role: "memory-result",
+            text: "Does not want flights departing before 09:00.  (saved 3 weeks ago)",
+          },
+          {
+            role: "assistant",
+            text: "There's an 07:15 and an 11:40. You've mentioned before that you'd rather not fly before nine, so I've gone with the 11:40 unless you say otherwise.",
+          },
+        ],
       },
     ],
+    takeaway:
+      "The second conversation is a fresh transcript. The model has no recollection of the first, and no part of it changed in the three weeks between. One line of text crossed the gap, written by one tool call and fetched by another.",
   },
   {
-    when: "Three weeks later, in a new conversation",
-    turns: [
-      { role: "user", text: "Get me on something to Berlin next Friday." },
+    id: "mistake",
+    label: "Getting it wrong once",
+    conversations: [
       {
-        role: "memory-search",
-        text: 'search_memory("flights, travel preferences")',
+        when: "Monday",
+        turns: [
+          {
+            role: "user",
+            text: "Draft a quick note to Siobhan thanking her for covering last week.",
+          },
+          {
+            role: "assistant",
+            text: "Here you go:\n\n“Hi Siobhan, thank you for covering last week, it was a real help. I owe you one.”",
+          },
+          {
+            role: "user",
+            text: "It's Siobhán, with the fada over the a. She does notice.",
+          },
+          {
+            role: "memory-write",
+            text: 'save_memory("Colleague is Siobhán, with the fada. Always spell it that way, even if I type it without.")',
+          },
+          { role: "memory-result", text: "Saved." },
+          {
+            role: "assistant",
+            text: "Sorry, fixed:\n\n“Hi Siobhán, thank you for covering last week, it was a real help. I owe you one.”",
+          },
+        ],
       },
       {
-        role: "memory-result",
-        text: 'Does not want flights departing before 09:00.  (saved 3 weeks ago)',
-      },
-      {
-        role: "assistant",
-        text: "There's an 07:15 and an 11:40. You've mentioned before that you'd rather not fly before nine, so I've gone with the 11:40 unless you say otherwise.",
+        when: "A month later",
+        turns: [
+          {
+            role: "user",
+            text: "Ask Siobhan whether she can swap Thursday with me.",
+          },
+          { role: "memory-search", text: 'search_memory("Siobhan")' },
+          {
+            role: "memory-result",
+            text: "Colleague is Siobhán, with the fada. Always spell it that way, even if I type it without.  (saved a month ago)",
+          },
+          {
+            role: "assistant",
+            text: "“Hi Siobhán, any chance you could swap Thursday with me? Happy to take one of yours in return.”",
+          },
+        ],
       },
     ],
+    takeaway:
+      "Nothing was learned in the sense of the model changing. It got the name wrong, was corrected, and wrote the correction down. A month later it typed the name correctly even though the request spelled it without the fada, because the note said to.",
+  },
+  {
+    id: "inspect",
+    label: "Seeing what it kept",
+    conversations: [
+      {
+        when: "Any time",
+        turns: [
+          { role: "user", text: "What have you got written down about me?" },
+          { role: "memory-search", text: "list_memories()" },
+          {
+            role: "memory-result",
+            text: "1. Does not want flights departing before 09:00.\n2. Colleague is Siobhán, with the fada.\n3. Prefers metric for cooking, imperial for distances.\n4. Working from the Bristol office on Tuesdays.",
+          },
+          {
+            role: "assistant",
+            text: "Four things: no flights before nine, that Siobhán takes a fada, that you want metric for cooking and imperial for distances, and that you're in the Bristol office on Tuesdays.",
+          },
+          {
+            role: "user",
+            text: "That last one's out of date, I've not been in Bristol since March.",
+          },
+          { role: "memory-write", text: "delete_memory(4)" },
+          { role: "memory-result", text: "Deleted." },
+          { role: "assistant", text: "Gone. Three left." },
+        ],
+      },
+    ],
+    takeaway:
+      "Because a memory is just a stored note, it can be listed, read and deleted. It can also be wrong, or right when it was written and stale a year later, and it stays that way until somebody says otherwise.",
   },
 ];
+
+export function getMemoryScenario(id: string): MemoryScenario {
+  return memoryScenarios.find((s) => s.id === id) ?? memoryScenarios[0];
+}
 
 export function senderLabel(turn: MemoryTurn): string {
   switch (turn.role) {
