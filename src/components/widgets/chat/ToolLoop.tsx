@@ -25,7 +25,7 @@ function Message({ turn }: { turn: Turn }) {
       <div
         className={`max-w-[85%] rounded-2xl px-4 py-2.5 ${
           hidden
-            ? "border-2 border-dashed border-border bg-transparent"
+            ? "border-[3px] border-dashed border-muted/70 bg-transparent"
             : fromHuman
               ? "bg-accent/15"
               : "bg-surface ring-1 ring-widget-border"
