@@ -163,20 +163,21 @@ export const approaches: Approach[] = [
       "For maths, code and puzzles, a proposed answer can be checked against the question it came from.",
     visual: {
       type: "check",
-      prompt: sharedPrompt,
-      response: correctAnswer,
+      prompt:
+        "8,051 is the product of two prime numbers. Which two?",
+      response: "83 and 97.",
       steps: [
-        "Take the proposed answer: $50.",
-        "Apply the discount the question describes: 20% of 50 is 10, and 50 − 10 = 40.",
-        "$40 is the price in the question, so the answer holds.",
+        "Take the proposed answer: 83 and 97.",
+        "Multiply them: 83 × 97 = 8,051.",
+        "That is the number in the question, and neither 83 nor 97 has any divisor but itself and 1.",
       ],
       verdict: "Verified. Score 1.",
       passed: true,
     },
     outcome:
-      "Checking is much easier than solving. Taking 20% off a price you already have is one step forwards; working out which price it came off is the actual problem. A second model, or a few lines of code, can do the checking.",
-    note: "Called reinforcement learning from verifiable rewards, published in detail for DeepSeek-R1. An answer of $48 fails the same check, so the score is a bare 1 or 0 with no opinion in it, and it can be produced millions of times overnight. It only works where an answer can be checked against something, which rules out most of what people ask a chat model. Where it does work, the sheer supply of it is what made reasoning models possible.",
-  }
+      "Finding the answer means hunting for a divisor. Checking it is one multiplication that a child could do. That gap is the whole point: a second model, or three lines of code, can grade an answer it would have struggled to produce.",
+    note: "Called reinforcement learning from verifiable rewards, published in detail for DeepSeek-R1. A wrong answer fails just as fast: 89 × 91 comes to 8,099, and 91 is not prime anyway. So the score is a bare 1 or 0 with no opinion in it, and it can be produced millions of times overnight. It only works where an answer can be checked against something, which rules out most of what people ask a chat model. Where it does work, the sheer supply of it is what made reasoning models possible.",
+  },
 ];
 
 export function getApproach(id: string): Approach {

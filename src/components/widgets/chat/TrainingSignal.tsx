@@ -220,7 +220,7 @@ export function TrainingSignal() {
   return (
     <WidgetContainer
       title="Five ways to tell a model what you wanted"
-      description="The same question every time. Only the source of the signal changes."
+      description="One way of scoring a response per tab, illustrated end to end."
       onReset={() => setApproachId(approaches[0].id)}
     >
       <WidgetTabs

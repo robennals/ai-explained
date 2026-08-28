@@ -22,9 +22,11 @@ describe("approaches", () => {
   });
 
   it("uses the same prompt everywhere it shows one, so the approaches compare", () => {
+    // The verification tab is the exception: it needs a question whose answer
+    // is far harder to find than to check, which the shared one is not.
     for (const approach of approaches) {
       const visual = approach.visual;
-      if ("prompt" in visual) {
+      if ("prompt" in visual && approach.id !== "checker") {
         expect(visual.prompt).toBe(sharedPrompt);
       }
     }
@@ -68,6 +70,15 @@ describe("individual illustrations", () => {
     if (visual.type !== "check") throw new Error("expected a check");
     expect(visual.passed).toBe(true);
     expect(visual.steps.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it("checks by multiplying the factors back to the number in the question", () => {
+    const visual = getApproach("checker").visual;
+    if (visual.type !== "check") throw new Error("expected a check");
+    expect(83 * 97).toBe(8051);
+    expect(visual.prompt).toContain("8,051");
+    expect(visual.response).toContain("83");
+    expect(visual.response).toContain("97");
   });
 });
 
