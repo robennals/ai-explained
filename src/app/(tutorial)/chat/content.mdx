@@ -73,6 +73,18 @@ Loading every skill in full, in every conversation, would be enormous and almost
 
 It has to work this way, because nothing the model learns in a conversation survives it. Any capability added after training arrives as text placed in the context, which is also why telling a model something useful in one conversation does nothing for the next.
 
+## Memory
+
+Remembering has to work the same way, and for the same reason. The weights do not change while you talk, so anything carried from one conversation to the next has to be written down and fetched back.
+
+<MemoryLoopWidget>
+The two conversations are weeks apart, and the second one starts from nothing. Watch what actually crosses the gap.
+</MemoryLoopWidget>
+
+Products differ in who decides. Some let the model write a memory when it notices something worth keeping, as above. Some have the harness search the store at the start of every conversation and paste anything relevant in before the model sees your message. Either way, what arrives is text in the context.
+
+Which also means a memory is only a note. It can be wrong, or it can be right at the time and stale a year later, and it will stay that way until someone edits or deletes it. This is why chat products let you read the list.
+
 ## Making It a Conversation
 
 Underneath every chat interface there is a single stream of tokens. The model does not see turns. It sees one document with markers in it saying who is speaking, something along the lines of:

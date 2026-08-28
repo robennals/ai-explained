@@ -25,6 +25,12 @@ const ThinkFirst = dynamic(
   { ssr: false }
 );
 
+const MemoryLoop = dynamic(
+  () =>
+    import("@/components/widgets/chat/MemoryLoop").then((m) => m.MemoryLoop),
+  { ssr: false }
+);
+
 const SkillLoop = dynamic(
   () => import("@/components/widgets/chat/SkillLoop").then((m) => m.SkillLoop),
   { ssr: false }
@@ -87,6 +93,18 @@ export function ThinkFirstWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children} label="Explore it">
       <ThinkFirst />
+    </WidgetSlot>
+  );
+}
+
+export function MemoryLoopWidget({
+  children,
+}: {
+  children?: React.ReactNode;
+}) {
+  return (
+    <WidgetSlot tryIt={children} label="Explore it">
+      <MemoryLoop />
     </WidgetSlot>
   );
 }

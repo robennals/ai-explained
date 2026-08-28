@@ -5,6 +5,7 @@ import { getAdjacentChapters } from "@/lib/curriculum";
 import Content from "./content.mdx";
 import { QuizContent } from "./QuizContent";
 import {
+  MemoryLoopWidget,
   RawCompletionWidget,
   SkillLoopWidget,
   ThinkFirstWidget,
@@ -23,6 +24,7 @@ export default function Chapter10() {
         <ChapterHeader slug="chat" />
         <Content
           components={{
+            MemoryLoopWidget,
             RawCompletionWidget,
             SkillLoopWidget,
             ThinkFirstWidget,

@@ -118,6 +118,19 @@ Training changes weights; conversation does not. Everything the model knows abou
 </Question>
 
 <Question>
+When a chat product "remembers" something about you between conversations, what has happened?
+
+<Choice>The model was retrained on your conversation</Choice>
+<Choice correct>A note was written to a store, and fetched back into the context later</Choice>
+<Choice>The earlier conversation stays open in the background</Choice>
+<Choice>The model recognises you and recalls what you said</Choice>
+
+<Feedback>
+The weights do not change while you talk, so nothing can be learned in the ordinary sense. A memory is text: the model (or the harness) writes a short note through a tool, and a later conversation searches for it and pastes what it finds into the context. That means a memory can be wrong or out of date, and stays that way until someone edits or deletes it.
+</Feedback>
+</Question>
+
+<Question>
 The system prompt is:
 
 <Choice>A separate model that supervises the main one</Choice>
