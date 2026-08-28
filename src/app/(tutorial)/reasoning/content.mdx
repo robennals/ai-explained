@@ -4,7 +4,9 @@ A transformer has the same problem. Each token gets a fixed amount of computatio
 
 ## Writing To Itself First
 
-*Reasoning models* fix this in about the most direct way possible. The model writes its working out first, into a message the product does not show you, and then writes the answer.
+If you ask a human to solve a hard problem, they might talk to themselves inside their head, or get out a pen and paper and write out their reasoning. 
+
+*Reasoning models* solve this problem in roughly the same way. The model writes out its thinking process in a series of hidden messages the human user can't see. 
 
 <ThinkFirstWidget>
 The dashed message is the model's working. It is generated one token at a time, exactly like the answer, and the model reads it back before answering.

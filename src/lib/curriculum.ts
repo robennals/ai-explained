@@ -125,7 +125,7 @@ export const chapters: Chapter[] = [
   {
     id: 11,
     slug: "reasoning",
-    title: "Reasoning Models",
+    title: "Reasoning",
     subtitle: "Thinking by talking to yourself",
     prerequisites: [10],
     description:
