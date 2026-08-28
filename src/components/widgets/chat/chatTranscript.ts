@@ -24,6 +24,11 @@ export const transcript: TranscriptTurn[] = [
     role: "assistant",
     text: "Sure. Sydney is bigger and better known, which is where the confusion comes from, but Canberra has been the capital since 1913.",
   },
+  { role: "user", text: "How big is it?" },
+  {
+    role: "assistant",
+    text: "Canberra has just over 450,000 people, which makes it about an eighth the size of Sydney.",
+  },
 ];
 
 const markers: Record<TranscriptTurn["role"], string> = {

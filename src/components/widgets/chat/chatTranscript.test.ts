@@ -17,10 +17,23 @@ const joined = (i: number) =>
 
 describe("exchanges", () => {
   it("finds the turns the model wrote", () => {
-    expect(exchanges.length).toBeGreaterThanOrEqual(2);
+    expect(exchanges.length).toBeGreaterThanOrEqual(3);
     for (const i of exchanges) {
       expect(transcript[i].role).toBe("assistant");
     }
+  });
+
+  it("gives the model a longer prompt every time it replies", () => {
+    const lengths = exchanges.map((i) => joined(i).length);
+    for (let i = 1; i < lengths.length; i++) {
+      expect(lengths[i]).toBeGreaterThan(lengths[i - 1]);
+    }
+  });
+
+  it("ends with a question that only makes sense from the earlier turns", () => {
+    const last = exchanges[exchanges.length - 1];
+    expect(transcript[last - 1].text).not.toMatch(/Canberra|Australia/);
+    expect(transcript[last].text).toContain("Canberra");
   });
 });
 

@@ -46,10 +46,10 @@ So far, one prompt and one reply. A conversation is several, and the model keeps
 So the program sends the whole conversation again, every time, including the model's own earlier answers.
 
 <RepeatedTurnsWidget>
-The shaded text is the prompt from last time, sent again. Only the last line is new.
+Step through the three replies. The shaded text was sent in an earlier prompt and is being sent again. Switch to **As messages** to see the same thing as the conversation you would see on screen.
 </RepeatedTurnsWidget>
 
-This is what people mean when they say a model is stateless. It is not remembering your last message. It is reading it again, along with everything else, as though for the first time.
+This is what people mean when they say a model is stateless. It is not remembering your last message. It is reading it again, along with everything else, as though for the first time. By the third reply, "How big is it?" only means anything because the two exchanges that explain what *it* is are sitting in the prompt above it.
 
 Re-reading the entire conversation for every reply sounds hopelessly wasteful, and it would be, except that nearly all of that work can be reused from the previous turn rather than redone. The trick is called the KV cache, and <Ch slug="context" /> covers it.
 
