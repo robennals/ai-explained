@@ -36,25 +36,33 @@ How does a computer decide whether a query matches a key? So far they have been 
 
 In [Chapter 4](/vectors) and [Chapter 5](/embeddings) we showed that AI models can represent arbitrarily complex things using vectors. We also showed that we can use the dot product to compare two vectors to see how similar their meanings are. 
 
-Indeed this is how Attention compares a query to a key. The query and key are both vectors, and we use the dot product to determine how well the query vector matches a particular key vector.
+Indeed this is how Attention compares a query to a key. The query and key are both vectors, and their dot product gives a single **match score** we can read as a similarity from 0 (nothing in common) to 1 (a perfect match).
 
 <MatchingQuestionsWidget>
-The same examples, with the query and key now scored. The score is the dot product of the query and the key. The "bank" example is a loose match and still wins.
+The same examples, with each key now scored against the query, from 0 to 1. The score is the dot product of the query and the key. The "bank" example is a loose match (0.6) and still wins.
 </MatchingQuestionsWidget>
 
 From here on we'll write each query and key in plain English and the match as a single score. Underneath they're still vectors and dot products.
 
 ## Dividing Your Attention
 
-Usually more than one token matches, at least a little. So instead of crowning a single winner, attention blends the values together, giving each token a say in proportion to how well it matched. To do this, we want to take the raw scores we got from the dot product, and turn them into percentages that add up to 100%.
+Usually more than one token matches, at least a little. So instead of crowning a single winner, attention blends everything it looked at, giving each token a say in proportion to how well it matched. To do this, we turn the match scores into percentages that add up to 100%.
 
-Most AI models do this using a function called **softmax**. Softmax makes sure the percentages always add up to 100%, while giving a greater share to tokens that had bigger scores.
+Most AI models do this with a function called **softmax**. Softmax always makes the percentages add up to 100%, and gives a bigger share to bigger scores.
 
 <SoftmaxExplorerWidget>
-Drag the sliders. Try "All equal": everyone gets 25%. Try "Moderate, rest silent": A wins by default because nobody else is saying anything. Try "Moderate meets loud": B drowns out A. The gaps between scores matter more than the absolute values. Softmax cares about who's loudest *relative to everyone else*.
+Try "Score of 1": A scores 1 and the rest score 0, yet A only gets about 47% and each zero still keeps around 18%. Now try "Score of 9": same shape, but A takes almost everything. Small scores stay flat; big scores make the winner dominate.
 </SoftmaxExplorerWidget>
 
-The gap between the scores is what matters. When one token is the clear best match, it takes almost all of the attention. When two tokens tie, the attention splits evenly between them. We'll see both cases when we gather the values.
+Here is the catch: our match scores only run from 0 to 1, and softmax barely separates numbers that small. Even a token that scored 0 would keep a real slice of the attention. So models **scale the scores up** before softmax, turning a gap of 0.8 into a gap of 8 or more, which is what makes the best match clearly win. From here on, picture the scores as already scaled up.
+
+There is one more thing softmax forces on us: it always hands out the full 100%, even when nothing really matches. A pronoun like the "it" in "It was raining" doesn't refer to anything, but softmax would still spread its attention across every token. The fix is a **sink**: an extra token with a small fixed score. When the real tokens all score low, the sink out-competes them and quietly absorbs the attention. When something genuinely matches, it easily beats the sink.
+
+<AttentionSinkWidget>
+Try "Nothing matches": no real token scores well, so the sink (fixed at 3) takes most of the attention. Try "Something matches": "glass" scores 8, far above the sink, so it wins and the sink barely registers.
+</AttentionSinkWidget>
+
+Real models don't always add a dedicated sink token. Often they just learn to dump spare attention on a comma, the first token, or the token itself.
 
 ## What Did You Find?
 
@@ -67,18 +75,6 @@ It's kind of crazy that this works. Why should you be able to blend these value 
 <AttentionValuesWidget>
 Try "A clear value": "it" pays almost all its attention to "glass", so it gathers "the glass". Try "An even split": "it" could be the cat or the dog, so it gathers "either the cat or the dog". Try "A leaning blend": "pounced" is looking for the agile animal that pounced, which fits the cat better than the dog, so it gathers "probably the cat, maybe the dog".
 </AttentionValuesWidget>
-
-## When Nothing Matches
-
-Sometimes a token looks for something that isn't there. The "it" in "It was raining" doesn't stand for anything; English just wants a subject. So what does "it" pay attention to, given that the softmax scores are required to sum to 100%?
-
-The fix is a **sink**: an extra token whose value means "nothing" and that faintly matches everything. A real answer easily beats it, but with no real answer the sink wins by default, so the token safely gathers nothing.
-
-<AttentionSinkWidget>
-Try "Nothing matches": no real token fits, so the sink takes most of the attention and "It" gathers nothing. Try "Something matches": "glass" scores far above the sink, so it wins and the sink is ignored.
-</AttentionSinkWidget>
-
-Real models don't always add a dedicated sink token. Often they just learn to dump spare attention on a comma, the first token, or the token itself.
 
 ## Where the Vectors Come From
 

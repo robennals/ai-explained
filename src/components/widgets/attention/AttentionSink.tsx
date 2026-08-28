@@ -39,7 +39,8 @@ export function AttentionSink() {
     <AttentionValues
       examples={SINK_EXAMPLES}
       title="The Attention Sink"
-      description="The sink is an extra token worth nothing that faintly matches everything. A real match beats it, but when nothing matches it wins and the answer comes out as nothing."
+      description="The sink is an extra token with a small fixed score. When real tokens all score low, the sink wins the softmax and soaks up the spare attention. When something genuinely matches, it easily beats the sink."
+      showValues={false}
     />
   );
 }

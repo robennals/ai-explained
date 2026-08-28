@@ -40,15 +40,15 @@ A pronoun like "it" is looking for a noun, but isn't itself a noun. If query and
 </Question>
 
 <Question>
-Three tokens have keys: A=(1, 0), B=(0, 1), C=(1, 1). A query of (1, 0) is fired. Which token gets the highest attention score (before softmax)?
+"bank" is looking for "a river or money", but the closest key it finds is just "a river". How does attention handle this partial match?
 
-<Choice>Only token A</Choice>
-<Choice correct>A and C tie</Choice>
-<Choice>Only token B</Choice>
-<Choice>C wins by a lot</Choice>
+<Choice>It ignores "river" because the match isn't exact</Choice>
+<Choice correct>"river" still scores well enough to win, so its value gets pulled in</Choice>
+<Choice>It waits for an exact match later in the sentence</Choice>
+<Choice>It splits attention equally across every token</Choice>
 
 <Feedback>
-The attention score is just the dot product from the Vectors chapter — multiply matching dimensions and add. (1, 0) · (1, 0) = 1 (token A). (1, 0) · (0, 1) = 0 (token B). (1, 0) · (1, 1) = 1 (token C). A and C tie at 1 because both have a 1 where the query has a 1; the query's 0 in the second dimension wipes out anything in that slot. After softmax, A and C split most of the attention while B gets very little.
+Matches don't have to be exact. The dot product measures how *similar* a query and key are, so "a river" overlaps enough with "a river or money" to score highly — not as high as a perfect match, but higher than everything else. "river" wins the attention and hands over its value, which is how "bank" learns it means the riverbank.
 </Feedback>
 </Question>
 

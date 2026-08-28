@@ -40,6 +40,18 @@ const COLORS_LIGHT = [
 
 const PRESETS: Preset[] = [
   {
+    label: "Score of 1",
+    scores: [1, 0, 0, 0],
+    description:
+      "A scores 1 and the rest score 0. Even so, A only gets about 47% — and each zero still keeps around 18%. When the scores are small, softmax stays flat, so even a token that scored nothing keeps a slice.",
+  },
+  {
+    label: "Score of 9",
+    scores: [9, 0, 0, 0],
+    description:
+      "Same shape, but now A scores 9. This time A takes almost all the weight and the zeros vanish. Bigger scores make the winner dominate — which is why models scale their scores up before softmax.",
+  },
+  {
     label: "All equal",
     scores: [2, 2, 2, 2],
     description:
