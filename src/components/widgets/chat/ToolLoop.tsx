@@ -72,11 +72,7 @@ export function ToolLoop() {
         onTabChange={setScenarioId}
       />
 
-      <p className="text-base leading-relaxed text-foreground">
-        {scenario.intro}
-      </p>
-
-      <div className="mt-4 space-y-3">
+      <div className="space-y-3">
         {scenario.turns.map((turn, i) => (
           <Message key={i} turn={turn} />
         ))}

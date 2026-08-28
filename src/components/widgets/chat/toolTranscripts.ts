@@ -20,8 +20,6 @@ export interface Scenario {
   id: string;
   /** Tab label. */
   label: string;
-  /** One sentence on what this example shows. */
-  intro: string;
   turns: Turn[];
   /** Smaller text at the bottom, carrying whatever is not obvious. */
   takeaway: string;
@@ -31,7 +29,6 @@ export const scenarios: Scenario[] = [
   {
     id: "search",
     label: "Looking something up",
-    intro: "The model has no idea what the weather is. It has a tool that does.",
     turns: [
       {
         role: "user",
@@ -58,8 +55,6 @@ export const scenarios: Scenario[] = [
   {
     id: "websearch",
     label: "Searching the web",
-    intro:
-      "Training finished long before this weekend, so nothing in the model's weights could contain the answer. A search puts it in front of the model as text.",
     turns: [
       {
         role: "user",
@@ -86,8 +81,6 @@ export const scenarios: Scenario[] = [
   {
     id: "code",
     label: "Running code",
-    intro:
-      "Arithmetic one token at a time is unreliable. Writing code and reading the output is not.",
     turns: [
       {
         role: "user",
@@ -114,8 +107,6 @@ export const scenarios: Scenario[] = [
   {
     id: "chained",
     label: "One tool, then another",
-    intro:
-      "Two round trips before anything appears in the chat window, and the second call could not have been written before the first result arrived.",
     turns: [
       {
         role: "user",
