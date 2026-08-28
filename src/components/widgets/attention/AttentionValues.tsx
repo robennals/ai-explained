@@ -62,7 +62,7 @@ const VALUE_EXAMPLES: Example[] = [
     asker: 9,
     query: "the agile animal that pounced",
     scores: [1, 5, 2, 1, 4, 1, 1, 1, 2, 0, 1],
-    keys: { 1: "a cat, which pounces", 4: "a dog" },
+    keys: { 1: "a cat, an agile animal", 4: "a dog" },
     values: { 1: "the cat", 4: "the dog" },
     result: "probably the cat, maybe the dog",
   },
