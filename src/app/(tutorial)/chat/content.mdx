@@ -41,7 +41,7 @@ Toggle thinking off and watch the answers change. It is all one stream of tokens
 
 What made this work was the verifiable rewards from the previous section. If you can check the final answer automatically, you can reward whatever scratchpad led to it, without anyone having to specify what good reasoning looks like. Models trained this way picked up habits nobody wrote down: checking their work, backing out of a dead end, noticing halfway through that an earlier step was wrong.
 
-The trace is doing real work. The model reads it back, and the answer changes because of what is in it, which is what the playground above is showing. What it does not come with is a guarantee that it is the whole story. Anthropic ran an experiment where a hint about the answer was slipped into the prompt. Models often took the hint, and then wrote a confident chain of reasoning that never mentioned it and arrived at the hinted answer by a route assembled afterwards. People do this all the time. The reasons someone gives for a conclusion are not always the reasons that produced it. So the trace is worth reading and worth trusting more than nothing, and it is not an audit trail.
+One caveat. The trace is not a complete account of what drove the answer. Slip a hint into the prompt and models will often take it, then write a confident chain of reasoning that never mentions it. People do the same thing: the reasons given for a conclusion are not always the reasons that produced it.
 
 More thinking is also not always better. Every thinking token costs time and money, and on an easy question a long trace mostly gives the model more chances to talk itself out of the right answer.
 
