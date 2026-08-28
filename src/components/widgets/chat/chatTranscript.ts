@@ -32,15 +32,15 @@ const markers: Record<TranscriptTurn["role"], string> = {
   assistant: "<|assistant|>",
 };
 
-/** The transcript as one stream of tokens, markers and all. */
+/**
+ * The transcript as one stream of tokens, markers and all. Every turn is
+ * closed, as in every real chat template. What differs is who wrote the
+ * marker: the model generates the one that ends its own turn, and the harness
+ * writes all the others.
+ */
 export function asRawText(turns: TranscriptTurn[] = transcript): string {
   return turns
-    .map(
-      (turn) =>
-        `${markers[turn.role]}${turn.text}${
-          turn.role === "assistant" ? "<|end|>" : ""
-        }`
-    )
+    .map((turn) => `${markers[turn.role]}${turn.text}<|end|>`)
     .join("\n");
 }
 

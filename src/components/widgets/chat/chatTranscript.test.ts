@@ -22,15 +22,9 @@ describe("asRawText", () => {
     expect(raw).toContain("<|assistant|>");
   });
 
-  it("closes the model's turns so the harness knows to stop", () => {
+  it("closes every turn, as every real chat template does", () => {
     const ends = raw.split("<|end|>").length - 1;
-    expect(ends).toBe(
-      transcript.filter((t) => t.role === "assistant").length
-    );
-  });
-
-  it("does not close the human's turns", () => {
-    expect(raw).not.toMatch(/What's the capital of Australia\?<\|end\|>/);
+    expect(ends).toBe(transcript.length);
   });
 });
 

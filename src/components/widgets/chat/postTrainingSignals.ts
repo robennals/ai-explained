@@ -138,7 +138,7 @@ export const approaches: Approach[] = [
     id: "usage",
     label: "Watch what real users do",
     intro:
-      "Chat products see millions of real conversations, and users say when a response missed.",
+      "Chat products see billions of real conversations, and you can often tell how happy the user is with the model by how they reply to it.",
     visual: {
       type: "usage",
       turns: [
@@ -153,8 +153,8 @@ export const approaches: Approach[] = [
       good: false,
     },
     outcome:
-      "Nobody clicked anything. The complaint is ordinary text in the conversation, and a model reading the transcript can tell what it means.",
-    note: "This is the highest-volume signal there is, because most people never touch a thumbs-up button but plenty of them say when a reply missed. Consumer chat products generally do train on conversations unless you opt out; business and API tiers generally do not. The risk is that it measures whether the user was pleased rather than whether the answer was right, so leaning on it too hard teaches the model to flatter, a failure mode called sycophancy.",
+      "This is the highest-volume signal there is. The weakness is that it measures whether the user was pleased rather than whether the answer was right, so leaning on it too hard teaches the model to flatter the user, a failure mode called sycophanciy. ",
+    note: "Consumer chat products generally do train on conversations unless you opt out; business and API tiers generally do not.",
   },
   {
     id: "checker",
