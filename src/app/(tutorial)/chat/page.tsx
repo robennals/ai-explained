@@ -6,6 +6,7 @@ import Content from "./content.mdx";
 import { QuizContent } from "./QuizContent";
 import {
   RawCompletionWidget,
+  RepeatedTurnsWidget,
   TrainingSignalWidget,
   TranscriptViewsWidget,
 } from "./widgets";
@@ -22,6 +23,7 @@ export default function Chapter10() {
         <Content
           components={{
             RawCompletionWidget,
+            RepeatedTurnsWidget,
             TrainingSignalWidget,
             TranscriptViewsWidget,
           }}

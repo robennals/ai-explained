@@ -1,10 +1,10 @@
 /**
- * One short conversation, held in the form the model actually sees.
+ * One short conversation, in the form the model actually sees.
  *
- * The widget renders it twice: as the single stream of tokens it really is,
- * and as the speech bubbles the rest of the tutorial uses as shorthand. The
- * system prompt is in the transcript but never shown to the human, which is
- * what establishes the convention for a hidden message.
+ * A chat is prefix-and-completion like anything else: the harness assembles a
+ * prompt out of the whole conversation so far, opens the model's turn, and the
+ * model completes it. The second exchange re-sends the first, which is the
+ * point of the repeated-turns widget.
  */
 
 export interface TranscriptTurn {
@@ -19,10 +19,10 @@ export const transcript: TranscriptTurn[] = [
   },
   { role: "user", text: "What's the capital of Australia?" },
   { role: "assistant", text: "Canberra." },
-  { role: "user", text: "Are you sure?" },
+  { role: "user", text: "Are you sure? I thought it was Sydney." },
   {
     role: "assistant",
-    text: "Yes. Sydney is bigger and better known, which is where the confusion comes from, but Canberra has been the capital since 1913.",
+    text: "Sure. Sydney is bigger and better known, which is where the confusion comes from, but Canberra has been the capital since 1913.",
   },
 ];
 
@@ -32,16 +32,49 @@ const markers: Record<TranscriptTurn["role"], string> = {
   assistant: "<|assistant|>",
 };
 
+/** The indices of the turns the model wrote, one per exchange. */
+export const exchanges = transcript
+  .map((turn, i) => (turn.role === "assistant" ? i : -1))
+  .filter((i) => i >= 0);
+
+export interface PromptPart {
+  text: string;
+  /** True when this text was already sent in an earlier exchange. */
+  carriedOver: boolean;
+}
+
+function render(turn: TranscriptTurn): string {
+  return `${markers[turn.role]}${turn.text}<|end|>`;
+}
+
 /**
- * The transcript as one stream of tokens, markers and all. Every turn is
- * closed, as in every real chat template. What differs is who wrote the
- * marker: the model generates the one that ends its own turn, and the harness
- * writes all the others.
+ * The prompt handed to the model for one exchange: every earlier turn, then
+ * the marker that opens the model's own turn. Parts already sent in a previous
+ * exchange are flagged, since re-sending them is the thing worth seeing.
  */
-export function asRawText(turns: TranscriptTurn[] = transcript): string {
-  return turns
-    .map((turn) => `${markers[turn.role]}${turn.text}<|end|>`)
+export function promptParts(assistantIndex: number): PromptPart[] {
+  const previous = exchanges.filter((i) => i < assistantIndex).pop() ?? -1;
+  const before = transcript.slice(0, assistantIndex);
+  const carried = before
+    .filter((_, i) => i <= previous)
+    .map(render)
     .join("\n");
+  const added = before
+    .filter((_, i) => i > previous)
+    .map(render)
+    .join("\n");
+  const parts: PromptPart[] = [];
+  if (carried) parts.push({ text: carried + "\n", carriedOver: true });
+  parts.push({
+    text: (added ? added + "\n" : "") + markers.assistant,
+    carriedOver: false,
+  });
+  return parts;
+}
+
+/** What the model writes: its reply, and the marker that ends its turn. */
+export function completionFor(assistantIndex: number): string {
+  return `${transcript[assistantIndex].text}<|end|>`;
 }
 
 export function senderLabel(turn: TranscriptTurn): string {

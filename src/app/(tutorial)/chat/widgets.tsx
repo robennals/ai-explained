@@ -20,6 +20,14 @@ const TrainingSignal = dynamic(
   { ssr: false }
 );
 
+const RepeatedTurns = dynamic(
+  () =>
+    import("@/components/widgets/chat/RepeatedTurns").then(
+      (m) => m.RepeatedTurns
+    ),
+  { ssr: false }
+);
+
 const TranscriptViews = dynamic(
   () =>
     import("@/components/widgets/chat/TranscriptViews").then(
@@ -72,6 +80,18 @@ export function TrainingSignalWidget({
   return (
     <WidgetSlot tryIt={children} label="Explore it">
       <TrainingSignal />
+    </WidgetSlot>
+  );
+}
+
+export function RepeatedTurnsWidget({
+  children,
+}: {
+  children?: React.ReactNode;
+}) {
+  return (
+    <WidgetSlot tryIt={children} label="Explore it">
+      <RepeatedTurns />
     </WidgetSlot>
   );
 }

@@ -1,30 +1,68 @@
 import { describe, expect, it } from "vitest";
 import {
-  asRawText,
+  completionFor,
+  exchanges,
   isVisible,
+  promptParts,
   senderKind,
   senderLabel,
   transcript,
 } from "./chatTranscript";
 
-describe("asRawText", () => {
-  const raw = asRawText();
+const [firstReply, secondReply] = exchanges;
+const joined = (i: number) =>
+  promptParts(i)
+    .map((p) => p.text)
+    .join("");
 
-  it("keeps every turn's words", () => {
-    for (const turn of transcript) {
-      expect(raw).toContain(turn.text);
+describe("exchanges", () => {
+  it("finds the turns the model wrote", () => {
+    expect(exchanges.length).toBeGreaterThanOrEqual(2);
+    for (const i of exchanges) {
+      expect(transcript[i].role).toBe("assistant");
+    }
+  });
+});
+
+describe("promptParts", () => {
+  it("ends with the marker opening the model's turn, so a reply is what comes next", () => {
+    for (const i of exchanges) {
+      expect(joined(i).endsWith("<|assistant|>")).toBe(true);
     }
   });
 
-  it("marks who is speaking before each turn", () => {
-    expect(raw).toContain("<|system|>");
-    expect(raw).toContain("<|user|>");
-    expect(raw).toContain("<|assistant|>");
+  it("holds no part of the model's own reply", () => {
+    for (const i of exchanges) {
+      expect(joined(i)).not.toContain(transcript[i].text);
+    }
   });
 
-  it("closes every turn, as every real chat template does", () => {
-    const ends = raw.split("<|end|>").length - 1;
-    expect(ends).toBe(transcript.length);
+  it("sends nothing twice over on the first exchange", () => {
+    expect(promptParts(firstReply).every((p) => !p.carriedOver)).toBe(true);
+  });
+
+  it("re-sends the whole first exchange when answering the second", () => {
+    const parts = promptParts(secondReply);
+    const carried = parts.filter((p) => p.carriedOver).map((p) => p.text).join("");
+    expect(carried).toContain(transcript[1].text);
+    expect(carried).toContain(transcript[firstReply].text);
+  });
+
+  it("marks only the newest human turn as new", () => {
+    const added = promptParts(secondReply)
+      .filter((p) => !p.carriedOver)
+      .map((p) => p.text)
+      .join("");
+    expect(added).toContain(transcript[3].text);
+    expect(added).not.toContain(transcript[1].text);
+  });
+});
+
+describe("completionFor", () => {
+  it("is the reply and the marker that ends the turn, and nothing else", () => {
+    expect(completionFor(firstReply)).toBe(
+      `${transcript[firstReply].text}<|end|>`
+    );
   });
 });
 
@@ -36,8 +74,7 @@ describe("bubbles", () => {
   });
 
   it("labels the three speakers", () => {
-    const labels = transcript.map(senderLabel);
-    expect(new Set(labels)).toEqual(
+    expect(new Set(transcript.map(senderLabel))).toEqual(
       new Set(["System prompt", "Human", "Model"])
     );
   });

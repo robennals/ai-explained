@@ -29,21 +29,31 @@ Post-training does not teach the model new facts or new ways of understanding th
 
 ## Making It a Conversation
 
-Underneath every chat interface there is a single stream of tokens. The model does not see turns. It sees one document with markers in it saying who is speaking.
+Underneath every chat interface there is a single stream of tokens. The model does not see a conversation. It sees a prompt, and it writes the text that most likely follows, exactly as in the first playground of this chapter. What makes it a conversation is markers in the prompt saying who is speaking.
 
 <TranscriptViewsWidget>
-The same conversation both ways. The markers are real tokens, and the system prompt is text like everything else. Note the dashed message in the second view: it is in the transcript, but the human never sees it.
+The same exchange twice. As text, it is a prompt and a completion. As messages, it is what you would see on screen, plus one the human is never shown.
 </TranscriptViewsWidget>
 
-The format is called a *chat template*. Every turn is opened and closed, and the markers are real tokens the tokeniser knows about. What differs is who writes them. The program running the model writes the system and human turns, and the marker that opens the model's turn. The model writes its reply, and then the marker that closes it, which is how the program knows the reply has finished.
+The format is called a *chat template*. Every turn is opened and closed, and the markers are real tokens the tokeniser knows about. The program running the model writes the system and human turns, and the marker that opens the model's turn. The model writes its reply, and then the marker that closes it, which is how the program knows the reply has finished. The exact markers vary from model to model, though the shape does not.
 
-The exact markers vary from model to model, though the shape does not.
+The system prompt is nothing more special than text at the top of that prompt. That is why it works, and also why it is not a hard guarantee.
 
-Post-training is what taught the model to continue after the assistant marker, to answer rather than carry on inventing the human's messages, and to stop where it should.
+## Repeated Turns
 
-The system prompt is nothing more special than text at the top of that document. That is why it works, and also why it is not a hard guarantee. Everything the model knows about the conversation is in the transcript in front of it.
+So far, one prompt and one reply. A conversation is several, and the model keeps nothing at all between them. Whatever it should know when writing its third reply has to be in the prompt for the third reply.
 
-From here on, this tutorial draws conversations as messages rather than as raw tokens, because they are easier to follow. Every one of them is really one stream of text like the one above, and a message drawn with a dashed outline is one the human is never shown.
+So the program sends the whole conversation again, every time, including the model's own earlier answers.
+
+<RepeatedTurnsWidget>
+The shaded text is the prompt from last time, sent again. Only the last line is new.
+</RepeatedTurnsWidget>
+
+This is what people mean when they say a model is stateless. It is not remembering your last message. It is reading it again, along with everything else, as though for the first time.
+
+Re-reading the entire conversation for every reply sounds hopelessly wasteful, and it would be, except that nearly all of that work can be reused from the previous turn rather than redone. The trick is called the KV cache, and <Ch slug="context" /> covers it.
+
+From here on, this tutorial draws conversations as messages rather than as raw tokens, because they are easier to follow. Every one of them is really a prompt like the one above, and a message drawn with a dashed outline is one the human is never shown.
 
 ## Putting It Together
 
