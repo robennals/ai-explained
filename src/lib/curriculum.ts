@@ -120,6 +120,7 @@ export const chapters: Chapter[] = [
     prerequisites: [9],
     description:
       "A trained transformer completes documents. It does not answer questions, think before speaking, or look things up. Post-training, reasoning tokens, and tool calls are what turn one into the assistant you actually talk to.",
+    ready: true,
   },
   {
     id: 11,
@@ -129,6 +130,7 @@ export const chapters: Chapter[] = [
     prerequisites: [10],
     description:
       "A model answering in one shot has no scratch paper. Reasoning models write their working first, in tokens you never see, and get dramatically better at anything that takes more than one step.",
+    ready: true,
   },
   {
     id: 12,
@@ -138,6 +140,7 @@ export const chapters: Chapter[] = [
     prerequisites: [10],
     description:
       "Wrap a model in a program that can run tools, fetch instructions and store notes, and it stops being something you talk to and starts being something that acts. Tools, skills, and memory, all made of text.",
+    ready: true,
   },
   {
     id: 13,
