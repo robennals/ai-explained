@@ -40,8 +40,7 @@ Read this before planning a meal or booking anywhere to eat.
 Nobody puts nuts on the table, ever. The allergy is severe.
 Two of us are vegetarian, though both of them eat fish.
 Nobody likes coriander, so leave it out rather than serving it alongside.
-Sunday is the roast, so Saturday should be something else.
-Aim for about £4 a head.`;
+Sunday is the roast, so Saturday should be something else.`;
 
 function offered(text: string): SkillTurn {
   return {
@@ -119,7 +118,7 @@ One dark streetlight is not urgent. A whole dark street is.`,
       },
       {
         role: "assistant",
-        text: "Fish pie. One dish, one oven, and it stretches to eight easily.\n\nIt suits everyone: the two who don't eat meat do eat fish, there are no nuts in it, and no coriander anywhere near it. It also keeps Saturday clear of anything roast-shaped.\n\nWhite fish and a bag of frozen prawns comes to roughly £3.50 a head. Peas on the side.",
+        text: "How about fish pie? One dish in the oven, feeds eight, and it suits everyone: no nuts, no coriander, and the two who don't eat meat do eat fish. It also leaves the roast for Sunday.",
       },
     ],
     takeaway:
