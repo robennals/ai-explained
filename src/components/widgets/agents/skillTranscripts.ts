@@ -191,7 +191,7 @@ Confirm back with the name and the time.`,
       },
     ],
     takeaway:
-      "Two small skills, and the model only knew about the second because the first one named it. Neither says much: one gives the search tool and a rule about ratings, the other gives the booking tool and asks it to confirm back.",
+      "Two small skills, and the first skill recommended using the second skill as a follow up.  An agent will often chain together many skills to complete a task.",
   },
 ];
 

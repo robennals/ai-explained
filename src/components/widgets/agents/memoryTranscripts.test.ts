@@ -41,10 +41,11 @@ describe("memoryScenarios", () => {
     }
   });
 
-  it("starts each conversation with the human and ends with a reply", () => {
+  it("starts each conversation with the memory instructions, then the human", () => {
     for (const scenario of memoryScenarios) {
       for (const conversation of scenario.conversations) {
-        expect(conversation.turns[0].role).toBe("user");
+        expect(conversation.turns[0].role).toBe("system");
+        expect(conversation.turns[1].role).toBe("user");
         expect(
           conversation.turns[conversation.turns.length - 1].role
         ).toBe("assistant");
@@ -80,6 +81,15 @@ describe("learning from a mistake", () => {
   const scenario = getMemoryScenario("mistake");
   const [first, second] = scenario.conversations;
 
+  it("gives every conversation the same instructions, since each starts from nothing", () => {
+    const texts = memoryScenarios.flatMap((s) =>
+      s.conversations.map((c) => c.turns[0].text)
+    );
+    expect(new Set(texts).size).toBe(1);
+    expect(texts[0]).toContain("save_memory");
+    expect(texts[0]).toContain("search_memory");
+  });
+
   it("gets it wrong, is corrected, and only then writes anything down", () => {
     const roles = first.turns.map((t) => t.role);
     expect(roles.indexOf("assistant")).toBeLessThan(
@@ -96,7 +106,7 @@ describe("learning from a mistake", () => {
   });
 
   it("later gets it right even though the request spells it wrongly", () => {
-    const request = second.turns[0];
+    const request = second.turns.find((t) => t.role === "user")!;
     const reply = second.turns[second.turns.length - 1];
     expect(request.text).toContain("Siobhan");
     expect(request.text).not.toContain("Siobhán");

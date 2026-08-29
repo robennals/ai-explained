@@ -4,11 +4,9 @@ Everything in this chapter is a version of the same trick. The model writes a hi
 
 ## Tools
 
-Humans are tool users. We use tools to help us think (e.g. a calculator), or to look up information (e.g. a search engine), or to do things (e.g. sending an email). 
+Humans are tool users. We use tools to help us think (e.g. a calculator), or to look up information (e.g. a search engine), or to do things (e.g. sending an email). The harness the AI model runs in allows it to use tools in a similar way.
 
-A model can only write text, so tool use has to be made of text, and it is.
-
-I hidden message the user can't see tells the model a list of tools it can use and a short description for each. When the model wants one, it writes a *tool call*: a piece of structured text naming the tool and its arguments. When the harness sees a tool cool it runs the tool and sends a hidden message to the model with the result of the tool. 
+A hidden message the user can't see tells the model what tools it can use. When the model wants one, it writes a *tool call*: a piece of structured text naming the tool and its arguments. When the harness sees a tool cool it runs the tool and sends a hidden message to the model with the result of the tool. 
 
 That loop repeats until the model writes an ordinary reply instead of another tool call.
 
@@ -16,26 +14,24 @@ That loop repeats until the model writes an ordinary reply instead of another to
 Four loops, in four tabs. Each opens with the tools on offer, one line each, which is the only way the model knows any of them exist. The dashed messages are part of the same conversation and never reach the human's chat window.
 </ToolLoopWidget>
 
-This is all "the model searched the web" means. The model does not run anything. It writes a request, something else acts, and the model finds out what happened by reading. Grounding an answer in a real search result makes it much more likely to be right, though the model is still the one writing the summary, so it is still capable of getting it wrong.
+Search is a particularly important tool. The model's weights don't tell it about anything that happened after it was trained and may not contain lack niche knowledge that you care about, so the model needs to rely on web search, and other information lookup tools, to give in the knowledge it needs.
 
 ## Skills
 
-A *skill* is a tool whose result is a page of instructions.
+A *skill* is a tool whose result is a page of instructions. They are are essential way that we teach models to do new things and customize their behavior.
 
 <SkillLoopWidget>
 Each tab opens with a different set of skills on offer, one line each. Watch which one the model asks for, and check its answer against the document that comes back.
 </SkillLoopWidget>
 
-Loading every skill in full, in every conversation, would be enormous and almost all of it irrelevant. One line each is cheap, and the document arrives only when it is about to be used.
-
-It has to work this way, because nothing the model learns in a conversation survives it. Any capability added after training arrives as text placed in the context.
+Loading every skill in full in every conversation would be a waste of space. Providing a list of skills and a tool to fetch them on demand makes each skill available only when needed.
 
 ## Memory
 
-Which is also true of anything you tell it. If we want an agent to remember something from a previous conversation, we give it a tool for saving notes and a tool for searching the notes it saved before.
+If we want an agent to remember something from a previous conversation, we can give it a tool for saving notes and a tool for searching the notes it saved before.
 
 <MemoryLoopWidget>
-Both tabs show two conversations weeks apart, and each one starts from nothing. Watch what actually crosses the gap.
+Both tabs show two conversations weeks apart. Each one starts from nothing but the same instructions about when to save a note and when to look for one. Watch what actually crosses the gap.
 </MemoryLoopWidget>
 
 Products differ in who decides. Some let the model write a memory when it notices something worth keeping, as above. Some have the harness search the store at the start of every conversation and paste anything relevant in before the model sees your message. Either way, what arrives is text in the context.

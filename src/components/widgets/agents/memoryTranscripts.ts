@@ -7,6 +7,7 @@
  */
 
 export type MemoryTurnRole =
+  | "system"
   | "user"
   | "assistant"
   | "memory-write"
@@ -33,6 +34,19 @@ export interface MemoryScenario {
   takeaway: string;
 }
 
+const memorySkill: MemoryTurn = {
+  role: "system",
+  text: `Memory
+
+If the human tells you something that will matter in later conversations, save it with save_memory(note). Before answering anything that might depend on what they have told you before, check with search_memory(query).
+
+  save_memory(note)     keep a short note
+  search_memory(query)  look for notes saved earlier
+  list_memories()       everything saved so far
+
+Keep notes short and factual, and do not save anything they would not expect you to keep.`,
+};
+
 export const memoryScenarios: MemoryScenario[] = [
   {
     id: "preference",
@@ -41,6 +55,7 @@ export const memoryScenarios: MemoryScenario[] = [
       {
         when: "Tuesday",
         turns: [
+          memorySkill,
           {
             role: "user",
             text: "Can you help me sort out the Lisbon trip? One thing: I'm useless before nine, so nothing that leaves early.",
@@ -59,6 +74,7 @@ export const memoryScenarios: MemoryScenario[] = [
       {
         when: "Three weeks later, in a new conversation",
         turns: [
+          memorySkill,
           { role: "user", text: "Get me on something to Berlin next Friday." },
           {
             role: "memory-search",
@@ -85,6 +101,7 @@ export const memoryScenarios: MemoryScenario[] = [
       {
         when: "Monday",
         turns: [
+          memorySkill,
           {
             role: "user",
             text: "Draft a quick note to Siobhan thanking her for covering last week.",
@@ -111,6 +128,7 @@ export const memoryScenarios: MemoryScenario[] = [
       {
         when: "A month later",
         turns: [
+          memorySkill,
           {
             role: "user",
             text: "Ask Siobhan whether she can swap Thursday with me.",
@@ -138,6 +156,8 @@ export function getMemoryScenario(id: string): MemoryScenario {
 
 export function senderLabel(turn: MemoryTurn): string {
   switch (turn.role) {
+    case "system":
+      return "System prompt";
     case "user":
       return "Human";
     case "assistant":
@@ -153,6 +173,8 @@ export function senderKind(
   turn: MemoryTurn
 ): "human" | "model" | "tool" | "system" {
   switch (turn.role) {
+    case "system":
+      return "system";
     case "user":
       return "human";
     case "memory-result":
