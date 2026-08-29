@@ -4,17 +4,15 @@ The previous chapter ended with a machine that reads a passage of text and says 
 
 A transformer (<Ch slug="transformers" />) trained to predict the next word (<Ch slug="next-word-prediction" />) is called a *base model*. This model has read an enormous amount of text and has formed a deep enough understanding of how the world works that it can predict the next word in a piece of text about pretty much anything.
 
-Sometimes predicting the next word is exactly what a helpful assistant would do. Ask a base model who wrote Pride and Prejudice and you may well get "Jane Austen", because on the web that question is usually followed by its answer. Predicting and answering are the same act there.
-
-The trouble is everything else it might say instead. The playground has five prompts. Four of them go somewhere you would not want.
+Often a base model will write exactly what you hoped for. Ask it how to stop a sourdough starter going mouldy and it may well tell you, because pages that answer that question are part of what it read. But pages full of other people asking the same question are part of what it read too, and so are forum threads, and support pages, and lists of similar questions. All of those are plausible things to write next.
 
 <RawCompletionWidget>
-Try each <nog>prompt</nog>. None of these completions is a mistake. Ask yourself where on the internet that text would have come next.
+Each <nog>prompt</nog> shows two completions. Neither is a mistake, and the model has no opinion about which of them you wanted.
 </RawCompletionWidget>
 
 The base model is not confused and it is not stupid. It is doing exactly what we trained it to do. What we trained it to do was predict the next token, not to be a useful assistant.
 
-That last tab is the important one. The answer you wanted is already in there, and the model can already produce it. It is just one of many things it might produce, and not reliably the one it picks.
+So the useful answer is already in there. It is one of the things the model might write, alongside all the others, and nothing yet makes it the one you get.
 
 ## Post-Training
 

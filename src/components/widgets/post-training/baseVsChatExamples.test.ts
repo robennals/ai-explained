@@ -11,16 +11,24 @@ describe("completionExamples", () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it("names a different failure mode in every label", () => {
+  it("names a different way of going wrong in every label", () => {
     const labels = completionExamples.map((e) => e.label);
     expect(new Set(labels).size).toBe(labels.length);
   });
 
-  it("gives every example both a base and a chat completion", () => {
+  it("gives every prompt both a completion you want and one you do not", () => {
+    // The chapter's argument is that both are plausible from the same model,
+    // so a prompt with only one continuation would undercut it.
     for (const example of completionExamples) {
-      expect(example.base.trim()).not.toBe("");
-      expect(example.chat.trim()).not.toBe("");
-      expect(example.base).not.toBe(example.chat);
+      expect(example.helpful.trim()).not.toBe("");
+      expect(example.sideways.trim()).not.toBe("");
+      expect(example.helpful).not.toBe(example.sideways);
+    }
+  });
+
+  it("says in every note that both are plausible", () => {
+    for (const example of completionExamples) {
+      expect(example.note).toMatch(/[Bb]oth/);
     }
   });
 });
@@ -41,21 +49,7 @@ describe("buildPrefix", () => {
 });
 
 describe("getExample", () => {
-  it("looks an example up by id", () => {
-    expect(getExample("no-stopping").label).toBe("It doesn't stop");
-  });
-
   it("falls back to the first example for an unknown id", () => {
     expect(getExample("nope")).toBe(completionExamples[0]);
-  });
-});
-
-describe("the example where it simply answers", () => {
-  it("is there, because post-training steers rather than teaches", () => {
-    // The chapter's argument is that the helpful reply is already available to
-    // the base model. One tab has to show that, or the argument is an assertion.
-    const answers = getExample("just-answers");
-    expect(answers.base).toMatch(/Jane Austen/);
-    expect(answers.baseNote).toMatch(/same act|always available/);
   });
 });

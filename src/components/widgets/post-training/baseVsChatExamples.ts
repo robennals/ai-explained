@@ -2,25 +2,26 @@
  * Hand-authored base-model / chat-model completions.
  *
  * Nothing here comes from a real model. Each base completion is written to be
- * a plausible continuation of a document that could contain the prompt. Four
- * of them fail in four different ways: wrong kind of document, writing the
- * user's turn as well as its own, not stopping, and copying whoever was likely
- * to have written the page. The fifth is the one that matters most for the
- * rest of the chapter, where predicting the next words and answering the
- * question turn out to be the same act.
+ * a plausible continuation of a document that could contain the prompt.
+ *
+ * Each prompt has two: one you would want and one you would not. That pairing
+ * is the point. It is not that some questions get answered and others do not.
+ * For almost any prompt both continuations are plausible, and which one you
+ * get is not something the base model has any opinion about. Post-training is
+ * what puts a thumb on the scale.
  */
 
 export interface CompletionExample {
   id: string;
-  /** Short label for the picker, naming the failure rather than the prompt. */
+  /** Short label for the picker, naming the way this one can go wrong. */
   label: string;
   prompt: string;
-  /** What a base model does: continue the document the prompt came from. */
-  base: string;
-  /** Why that continuation is the likely one. */
-  baseNote: string;
-  /** What a post-trained chat model does: answer. */
-  chat: string;
+  /** A continuation you would not want, and why it is plausible anyway. */
+  sideways: string;
+  /** A continuation you would want. Just as plausible, from the same model. */
+  helpful: string;
+  /** Why both of them are things this model might write. */
+  note: string;
 }
 
 export const completionExamples: CompletionExample[] = [
@@ -28,27 +29,21 @@ export const completionExamples: CompletionExample[] = [
     id: "more-questions",
     label: "It asks more questions",
     prompt: "How do I stop my sourdough starter from going mouldy?",
-    base: `
+    sideways: `
 How often should I feed my starter?
 Why does my starter smell like acetone?
 Can I keep a starter in the fridge?
 
 Browse all 47 questions in our Baking forum →`,
-    baseNote:
-      "A question phrased like this appears far more often in a list of other questions, on a forum index or an FAQ page, than it does at the start of an answer.",
-    chat: `Mould usually means something other than your starter is growing in the jar. Three things help:
-
-1. Scrape the sides down after each feed. Dried streaks above the surface are where mould normally takes hold.
-2. Feed it more often. A hungry starter goes acidic and then weak, and a weak starter loses to mould.
-3. Use a clean jar every few feeds rather than topping up the same one for weeks.
-
-If there is fuzzy growth of any colour on the surface, throw the jar out. Stirring it in does not work.`,
+    note:
+      "Both of these are things this model might write. A question phrased like this appears on pages that answer it, and on forum indexes and FAQ lists full of other questions. Nothing in the model prefers one kind of page to the other.",
+    helpful: `Keep the jar clean and scrape the sides down after every feed. Dried streaks above the surface are where mould usually takes hold. Feed it more often if it smells sharp, and use a fresh jar every week or so. If anything fuzzy appears, throw the whole lot out rather than stirring it in.`,
   },
   {
     id: "both-sides",
     label: "It writes your side too",
     prompt: "Can you recommend a book about the Apollo programme?",
-    base: `
+    sideways: `
 A Man on the Moon by Andrew Chaikin is the one most people start with.
 
 Thanks. Is there anything shorter?
@@ -58,17 +53,15 @@ Carrying the Fire, by Michael Collins. About half the length, and he was there.
 What about something for a ten-year-old?
 
 Team Moon by Catherine Thimmesh is aimed at that age and is very good on the`,
-    baseNote:
-      "A conversation is a document with two people in it. Nothing in the text says the model should stop after one reply and wait, so it writes your next message as well, and then answers that too.",
-    chat: `A Man on the Moon by Andrew Chaikin is the standard recommendation. It covers all the crewed missions, is based on interviews with almost every astronaut who flew, and reads like narrative rather than history.
-
-If you want something shorter or more personal, Michael Collins wrote Carrying the Fire himself, and it is the best-written book by anyone who went.`,
+    note:
+      "Both are plausible. Plenty of pages answer this question; plenty of others are whole conversations, and a conversation carries on past the first reply. Nothing has told the model that its turn ends.",
+    helpful: `A Man on the Moon by Andrew Chaikin is the usual recommendation. It covers all the crewed missions and draws on interviews with nearly every astronaut who flew. Carrying the Fire, by Michael Collins, is shorter and better written, though it only covers his own flights.`,
   },
   {
     id: "no-stopping",
     label: "It doesn't stop",
     prompt: "What is the tallest mountain in the world?",
-    base: `
+    sideways: `
 Mount Everest, at 8,849 m, on the border between Nepal and China.
 
 2. K2 — 8,611 m
@@ -78,27 +71,15 @@ Mount Everest, at 8,849 m, on the border between Nepal and China.
 Share this article    ·    Print    ·    Save
 
 Posted in Geography, Lists. Older post: The 10 deepest lakes on Earth →`,
-    baseNote:
-      "It gets the answer right and then keeps going, because the page it landed in was a listicle and a page always continues after the first item. Nothing in pre-training marks the end of a reply.",
-    chat: `Mount Everest, at 8,849 m above sea level, on the Nepal–China border.
-
-Worth knowing: measured from base to summit rather than from sea level, Mauna Kea in Hawaii is taller at about 10,200 m, though most of it is underwater.`,
-  },
-  {
-    id: "just-answers",
-    label: "Sometimes it just answers",
-    prompt: "Who wrote Pride and Prejudice?",
-    base: `
-Jane Austen. It was published in 1813, though she had written an earlier version, called First Impressions, in the 1790s.`,
-    baseNote:
-      "Nothing has gone right here that went wrong in the other tabs. It is the same model doing the same thing. It just happens that on the web, a question like this is usually followed by its answer, so predicting what comes next and answering are the same act. The helpful reply was always available. It simply is not what you get every time.",
-    chat: `Jane Austen wrote Pride and Prejudice. She finished an early version in the 1790s under the title First Impressions, and the book was published in 1813.`,
+    note:
+      "Both are plausible. The answer is the same in each, and the difference is what comes after it. A web page usually has more page after the answer, and the model has no reason to treat the answer as the end.",
+    helpful: `Mount Everest, at 8,849 m above sea level, on the border between Nepal and China. Measured from base to summit rather than from sea level, Mauna Kea is taller, but most of it is underwater.`,
   },
   {
     id: "any-voice",
     label: "It copies whoever wrote the page",
     prompt: "Is it safe to reheat rice?",
-    base: `
+    sideways: `
 Yeah, rice is fine, I reheat mine two or three times and I've never had a problem.
 
     Reply · 14
@@ -108,11 +89,9 @@ Same, been doing it for twenty years. The whole thing is a myth started by
     Reply · 6
 
 Actually you do have to be careful, my cousin ended up in hospital after a`,
-    baseNote:
-      "Predicting the likely next words means predicting whoever was likely to have written the page. Confident and wrong is very well represented on the internet, and nothing in pre-training prefers the correct reply to the popular one.",
-    chat: `Yes, but the risk is in how it is stored rather than in the reheating. Uncooked rice carries Bacillus cereus spores, which survive cooking and multiply if the rice sits at room temperature.
-
-So: cool it quickly, refrigerate within an hour, use it within a day, and reheat it once, until it is steaming all the way through. Rice left out overnight should be thrown away, and reheating it will not make it safe.`,
+    note:
+      "Both are plausible. This question is answered carefully on health pages and confidently, sometimes wrongly, in forum threads. Predicting the likely next words means predicting whoever was likely to have written the page, and nothing prefers the accurate one.",
+    helpful: `Reheating rice is safe as long as it was cooled quickly and kept in the fridge. The risk comes from rice left standing at room temperature, where Bacillus cereus spores multiply. Cool it within an hour, keep it no more than a day, and reheat it once until it is steaming throughout.`,
   },
 ];
 
