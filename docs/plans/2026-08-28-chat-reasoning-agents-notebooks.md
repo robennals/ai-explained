@@ -1,6 +1,7 @@
 # Notebooks for Chat Models, Reasoning and Agents — plan
 
-Status: plan, not yet implemented.
+Status: implemented and verified. See the notebooks themselves for what
+shipped; this records what the spikes found and why the design changed.
 Date: 2026-08-28
 
 Three companion notebooks, one per new chapter, following
@@ -199,3 +200,52 @@ plan rather than just the prose:
 
 **Wiring up.** Each chapter gets `<TryItInPyTorch notebook="chat">` and so on,
 which builds the Colab URL from the filename. Add after the notebooks exist.
+
+
+## What the spikes found
+
+Run before writing any of the notebooks, and two of the three changed the plan.
+
+**Tool calling is a trained skill with a trained format, and that matters more
+than model size.** Driving a loop with an invented JSON convention, Qwen2.5
+managed 3/6 at 1.5B and only 2/6 at 3B, hallucinating results instead of
+calling anything. Passing the same tools through
+`apply_chat_template(tools=...)`, so the model sees the format it was
+post-trained on, the same 1.5B scored 5/6 and the 3B 6/6. Qwen3-1.7B scores
+6/6. Phi-4-mini-instruct scored 1/6, though our parser looks for Qwen's
+`<tool_call>` tags, so some of that is our harness rather than the model.
+
+The lesson is in the chapter already: tool use is post-training, not a
+property of size. Inventing a format fights it.
+
+**Qwen3 rather than Qwen2.5**, on all three notebooks. It has a base model in
+the same family for the chat comparison, and a switch on the chat template
+that turns thinking on and off, so the reasoning notebook needs no tricks.
+
+**Thinking needs a real token budget.** At 600 tokens the model never closed
+its `<think>` tag, so every downstream measurement read as a failure. That was
+a measurement bug of ours, not a model limit. 1600 is enough for the questions
+we ask; some questions need far more, and a couple of the ones originally
+planned were dropped for taking 200+ seconds.
+
+**Judging was dropped from the chat notebook.** The plan's most interesting
+experiment, whether a small model can check an answer it cannot produce, needs
+thinking to work at this size, and thinking has not been introduced by then.
+It belongs in the reasoning chapter if it is worth doing at all.
+
+**Greedy decoding turned out to be the better demonstration** of what the
+training loop does. Asked how many times "r" appears in "strawberry",
+Qwen3-1.7B answers 2 every single time when taking the most likely token, and
+3 in all six sampled attempts. One deterministic attempt is stuck; several
+sampled attempts explore, and a checker picks the good ones out. That is the
+mechanism, visible in a minute of compute.
+
+## Running them
+
+`pnpm test:notebooks` skips these three, because each downloads a model of a
+few gigabytes. Include them deliberately:
+
+```
+pnpm test:notebooks -- --heavy        # all notebooks
+pnpm test:notebooks -- --only agents  # one of them
+```
