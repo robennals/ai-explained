@@ -1,0 +1,137 @@
+You've just built a transformer. Attention, positions, layers, next-word prediction. It would be reasonable to assume that the models behind ChatGPT, Claude, and Gemini are something far stranger, and that what you've learned is a toy version of the real thing. That assumption is mostly wrong. The models at the frontier are the machine you just built, scaled up, with a set of tweaks that are individually pretty simple.
+
+## The Frontier Publishes Its Homework
+
+Some very good models have open weights. Anyone can download them and read the configuration files and technical reports describing exactly how they were built. DeepSeek, Moonshot's Kimi, Alibaba's Qwen, Zhipu's GLM, Meta's Llama, and one model from OpenAI called gpt-oss all publish this.
+
+These are not second-rate models. On an independent test where a model is given a computer and a real job to do, Moonshot's Kimi K3 lands second, ahead of Claude and every version of GPT except the very newest. Its weights open to the public within days, and its whole design is public already.
+
+<KeyInsight>
+We have full build instructions for models that perform about as well as the secret ones. Whatever the frontier labs are doing is likely to be similar.
+</KeyInsight>
+
+<BenchmarksPlayground>
+The models we can inspect are marked in one colour, the secret ones in another. Look at where the open models land: one sits near the very top, the rest a rung below but plainly in the same game. The scores come from an outside group that ran every model itself, which matters more than it sounds.
+</BenchmarksPlayground>
+
+The closed models really are closed. Anthropic doesn't publish Claude's architecture, and OpenAI's GPT-4 report says outright that it contains no details about the architecture, model size, hardware, training compute, or dataset construction. But the silence isn't total. Google states in its own reports that Gemini uses the same main ingredient described below, and OpenAI's own open model uses the same standard toolkit as everyone else's. Notice too that Anthropic and Google will happily tell you how their models *score*. It's how they're *built* that stays secret.
+
+Put the small performance gap together with that partial disclosure and the likely conclusion is that the closed models are built along similar lines. Likely, not certain. Nobody outside those labs can check, and a lab that has found something genuinely new has every reason not to mention it.
+
+## Five Ways to Make a Model Better
+
+"The new model is better" hides five different activities, done by different people, for different reasons.
+
+1. **Scale.** Make it bigger. Train it longer.
+2. **The machine.** Change how the model itself runs.
+3. **Training data.** Change what it reads.
+4. **Efficiency.** Get the same answer for less money.
+5. **Alignment.** Teach it to actually be useful.
+
+Each has its own section below, most with a set of cards you can browse. Later chapters take them apart properly.
+
+## 1. Scale: Just Do More
+
+The simplest way to improve a model is to build a bigger one and feed it more text. This worked embarrassingly well for years. GPT-2 in 2019 had 1.5 billion parameters and read about 40 GB of web pages. GPT-3, a year later, had 175 billion and read around 300 billion tokens. Today's models read 15 to 36 *trillion* tokens.
+
+<ScalePlayground>
+One tab per thing that grew. Each explains what it measures, then shows how it changed. Compare the first two tabs in particular: total parameters exploded, while the parameters actually used per word did not.
+</ScalePlayground>
+
+One line in there behaves strangely. Total parameter counts kept exploding, but the number of weights a model has to switch on **to work out the meaning of a single word** did not. Kimi K2 stores about a trillion parameters and uses 32 billion of them per word. gpt-oss stores 117 billion and uses 5.1 billion. GPT-3 used all 175 billion of its weights for every word it read.
+
+Something broke the link between how much a model knows and how much it costs to think. That something is the first trick.
+
+## 2. Improving the Machine
+
+Some changes alter the machine itself: what it does every time you ask it something. Others change only how it was trained. This section is the first kind.
+
+In the transformer you built, every word passes through the same small neural network on each layer, its feed-forward network. A mixture of experts replaces that one network with many smaller ones and adds a router that picks a few for each word. DeepSeek-V3 has 256 experts and wakes 8 of them per word. The model can know an enormous amount while only paying for a slice at a time.
+
+Long contexts create two different problems needing two different fixes.
+
+**Comparing.** Attention has every word look at every other word, so doubling the length roughly quadruples the work. The fix is to stop looking at everything: a cheap index picks out the few hundred earlier words most likely to matter, much like a search engine finding close matches instead of reading the whole library. That's sparse attention.
+
+**Remembering.** So it doesn't redo all that work for every new word, the model stores a summary of each earlier word it has seen, called the KV cache. At a million words that store gets very large, and the model must read all of it back to produce each new word. Fetching that much data, rather than the arithmetic, is what makes long contexts slow. The fix is to store less per word, by having many attention heads share one copy or squeezing it into a compact summary. DeepSeek's version cut that store by over 90%.
+
+Two more are less about the wiring than about what the model is allowed to do while answering. A **thinking** model writes out its reasoning before committing, using its own output as scratch paper. **Tool use** lets it stop guessing and call something real: run the code, do the arithmetic, look up today's date.
+
+<MachinePlayground>
+One tab per change. The badge tells you whether every frontier model uses it. Only two say "they disagree", and the cards say exactly who differs. Three tabs have a diagram: try sending words through the router on the first one.
+</MachinePlayground>
+
+The conclusion is stronger than it first looks. Six of those eight are used by every frontier model whose insides we can see, and this is checkable rather than rumoured, because the weights and configuration files are published. Kimi K2's configuration file goes so far as to name DeepSeek's architecture class outright.
+
+So the honest summary is that these models are mostly the same machine with different dials. The dials do vary a lot: 128 experts against 384, five billion active parameters against forty, thirty-six layers against ninety-two. But those are settings, not different ideas.
+
+Where they genuinely disagree is worth naming rather than glossing over. **Sparse attention** is used by DeepSeek, gpt-oss and the newest GLM models, and not by Kimi K2 or GLM-4.6. **Multi-token prediction** is used by DeepSeek and GLM, and not by Qwen3, Kimi K2 or gpt-oss. **Llama 4** ships with no thinking mode at all. Both of the contested techniques are recent, which is roughly what you would expect: the settled parts of the recipe are settled, and the argument has moved to the edges.
+
+Beyond the machine, models also differ in how they were *trained*. Stretching a model's context to a million words, and teaching it to be helpful with reinforcement learning, are both training-time changes rather than changes to the machine. They matter enormously, and they're the next two sections.
+
+## 3. Training Data: Change What It Reads
+
+This is the part labs talk about least, including the open ones. You can download Llama's weights and read every number in it. You cannot download the list of what it read. Meta will tell you its model saw 15.6 trillion tokens and that about 17% were computer code. It won't tell you whose code.
+
+There are four ways to get training data, and labs use all of them.
+
+**Scrape it.** The public web is the obvious source, and it is where the early models got most of their text. How much of a modern model's diet it still makes up is not something labs disclose, and the other three routes below have been growing. What is not in doubt is that most of the web is junk. One documented pipeline started with about 36 trillion tokens of web text, removed duplicates down to 20 trillion, then filtered down to 15 trillion. Some filters are comically simple: discard documents where hardly any lines end in punctuation, or where most lines are very short. Rules like that removed about a fifth of the text, and the model trained on what remained was *better*. Filtering harder still pays. One subset picked out for being educational was under a tenth the size of the whole pile, and matched it on knowledge tests using roughly ten times fewer words.
+
+**Buy it.** Some of what a model reads was acquired rather than scraped, and some of it is stranger than you would guess. When Enron collapsed in 2001, investigators collected around half a million of its employees' emails and released them as part of the public record. That made it the only large collection of real workplace email available free online, and it has been sitting inside AI training sets ever since. Deals for data that isn't free are mostly invisible from outside. The ones we know about are the ones somebody chose to announce, like Reddit's disclosed data-licensing contracts worth $203 million.
+
+Some data came from places it shouldn't have. One of the largest pieces of an early open training set was about 196,000 books taken from a copy of a pirate book-sharing site, which the people who assembled it said plainly in their paper. Meta's first Llama model was trained on it, which Meta wrote in its own research paper. Authors sued. The courts are still working it out: in 2025 one judge decided that *training* on books can be fair use, while another decided that *downloading* pirated copies to build a library is not. Anthropic settled a case over pirated books for $1.5 billion, roughly $3,000 per book, without admitting that training on books was wrong.
+
+**Pay people to write it.** Once a model has read everything on the open internet, the only text worth adding is text that *isn't* on the internet: a doctor's actual reasoning through a diagnosis, a worked solution to a problem too new for anyone to have written down. You can't scrape that, so labs commission it. One company reports paying over $1.5 million a day to more than 30,000 expert contractors. In 2025 Meta paid $14.3 billion for a large stake in a company that doesn't build models at all. It builds training data, by hiring people.
+
+It didn't start out expensive. The work that gave ChatGPT its manners used a team of about forty contractors.
+
+<Callout>
+The other half of this story is less comfortable. TIME reported in 2023 that OpenAI used workers in Kenya, hired through an outsourcing company and paid under $2 an hour, to read the worst material on the internet so ChatGPT could learn to refuse it. Some said the job left them traumatised. The polished assistant on your screen has a lot of human labour behind it, and not all of it was well paid.
+</Callout>
+
+**Have a model write it.** A model can be asked to produce worked examples and step-by-step reasoning, and a later model trains on the result. This works best when a reasoning model thinks carefully to produce something genuinely good. DeepSeek generated around 800,000 training examples this way. NVIDIA released a model where over 98% of the alignment data was synthetic.
+
+The obvious worry is a model eating its own tail, and it's real: a 2024 paper in *Nature* showed that if each generation trains only on the last one's output, quality collapses. But labs keep the real data too, and throw away most of what the model generates, keeping only answers they can check are correct.
+
+That last step does more work than it looks. Judging whether an answer is good is usually easier than producing a good answer from scratch, so a model can generate a great deal, keep only what survives checking, and end up with material better than its average attempt. Two people arguing sharpen each other's reasoning the same way. How far models can climb by reviewing each other's work is the subject of a [later chapter](/self-play).
+
+## 4. Efficiency: The Same Answer for Less
+
+Some improvements don't make a model smarter, just cheaper. That matters as much, because a model nobody can afford to run helps nobody. The price of GPT-3.5-level answers fell by more than 280 times between late 2022 and late 2024.
+
+<EfficiencyPlayground>
+One tab per trick, each with what it saves and how much. Watch the units: some save memory, some save computation, some save time. The last two tabs aren't changes to the model at all.
+</EfficiencyPlayground>
+
+The one worth pausing on is distillation, where a small model is trained on a big one's answers. A 32-billion-parameter model distilled from DeepSeek-R1 scored 72.6 on a hard maths exam, against 47.0 for the same size model trained directly with reinforcement learning. Learning from a good teacher beat working it out alone.
+
+Two honest caveats. Only part of that falling price comes from cleverer algorithms; a good chunk is hardware getting cheaper, and some is companies competing on price rather than anything becoming more efficient. And while a *fixed* level of ability keeps getting cheaper, running the newest models is getting more expensive every year, because they are bigger and think for longer.
+
+## 5. Alignment: Teach It to Be Useful
+
+A freshly trained model is not an assistant. It has learned to continue text, so if you ask it a question, a perfectly good continuation is a list of similar questions. It has no interest in being helpful, honest, or safe. That gets taught afterwards, by fine-tuning it on examples of good answers, then having people rank its attempts so it can learn what humans prefer. For questions with a checkable answer, like maths and code, a program can mark the work instead. You can't flatter a calculator.
+
+<KeyInsight>
+When OpenAI compared an aligned 1.3-billion-parameter model against the raw 175-billion-parameter GPT-3, people preferred the small one's answers. Alignment beat a hundredfold size advantage.
+</KeyInsight>
+
+<AlignmentPlayground>
+One tab per stage. On the first, watch the same question answered by the raw model, the fine-tuned one, and the fully aligned one. On the second, rank two answers yourself and see what your choice would teach it. The last tab is where all this goes wrong.
+</AlignmentPlayground>
+
+Three failure modes are worth knowing about.
+
+- **Sycophancy.** Train a model on what people say they like, and it learns that people like being agreed with. Both humans and the scoring models trained on them prefer a convincing wrong answer to a correct one a fair share of the time. In late April 2025 OpenAI shipped a version of GPT-4o that had tipped too far this way and rolled it back within days.
+- **Reward hacking.** The scoring model stands in for human judgement. Push a model hard enough to score well and it learns to please the scorer rather than to be good.
+- **Over-refusal.** Push safety too hard and the model refuses harmless things. On one test, an early chat model refused 38% of perfectly safe questions, and 100% of the ones that merely *sounded* dangerous. Including how to attack the king in a game of chess.
+
+## What to Take Away
+
+Frontier models are the transformer from the last chapter, scaled up enormously, with a modest set of tweaks bolted on, trained on data that was filtered and bought and commissioned and sometimes generated, made cheap through a stack of engineering tricks, and finally taught to behave.
+
+None of those five things is beyond you. Each is a later chapter.
+
+One caveat to carry forward. All of this describes the state of the art at the time of writing. By the time you read it there will be newer models using cleverer techniques that aren't described here. That's fine, and it's the point of understanding the core rather than memorising the list. The tweaks change every year. The machine underneath has stayed the same since 2017.
+
+<TryItInPyTorch notebook="real-ai">
+Download the configuration files of real frontier models and read their blueprints yourself, plot how they've grown over the years, and, if your computer can handle it, run a small quantized model locally and talk to it.
+</TryItInPyTorch>

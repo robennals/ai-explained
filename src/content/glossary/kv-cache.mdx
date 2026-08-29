@@ -1,0 +1,15 @@
+---
+term: KV cache
+aliases: [KV caching, key-value cache]
+firstAppearance: real-ai
+---
+
+The **KV cache** is the store of keys and values a model keeps for every token it has already seen, so it doesn't have to recompute them for each new token.
+
+Without it, generating each new token would mean redoing the attention work for the whole passage. With it, the model computes each token's keys and values once and remembers them. The catch is size: the cache grows with the length of the context, and the model must read all of it back to produce every new token. At long contexts, fetching that data is what makes generation slow, more than the arithmetic is.
+
+Some examples:
+
+- **Short prompt** — a small cache, barely noticeable.
+- **A million-token context** — a very large cache, often the main limit on speed and memory.
+- **Shrinking it** — having several attention heads share one copy, or compressing keys and values into a compact summary. DeepSeek's version cut the store by over 90%.

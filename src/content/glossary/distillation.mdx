@@ -1,0 +1,15 @@
+---
+term: distillation
+aliases: [distil, distilled, distilling, distillation model]
+firstAppearance: real-ai
+---
+
+**Distillation** is training a small model to copy the behaviour of a large one.
+
+The big model answers a great many questions, and the small model is trained on those answers. This transfers a surprising amount of capability, and often works better than training the small model from scratch on the same task, because a good teacher's worked answers are a much richer signal than raw text. It is also how a capability spreads cheaply once one expensive model has it.
+
+Some examples:
+
+- **DeepSeek-R1** — its reasoning was distilled into much smaller models. A 32-billion-parameter student scored 72.6 on a hard maths exam, against 47.0 for the same size model trained directly with reinforcement learning.
+- **Running on your own machine** — distillation is a large part of why small models are now genuinely useful.
+- **The limit** — a student recovers much of the teacher's ability, not all of it, and you need the expensive teacher first.

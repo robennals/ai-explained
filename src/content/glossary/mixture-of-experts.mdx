@@ -1,0 +1,16 @@
+---
+term: mixture of experts
+aliases: [mixture-of-experts, MoE, mixture of expert models]
+firstAppearance: real-ai
+---
+
+A **mixture of experts** replaces one feed-forward network with many smaller ones, plus a router that picks a few of them for each token.
+
+This breaks the link between how much a model knows and how much it costs to run. All the experts together hold an enormous number of parameters, but only the chosen few do any work for a given token, so the cost per token stays close to that of a much smaller model. The router learns which experts to use without anyone telling it what each expert should specialise in.
+
+Some examples:
+
+- **DeepSeek-V3** — 256 experts, 8 of them active per token. 671 billion parameters stored, 37 billion used.
+- **Kimi K2** — about a trillion parameters stored, 32 billion used per token.
+- **gpt-oss** — 117 billion stored, 5.1 billion used.
+- **GPT-3** — not a mixture of experts. All 175 billion parameters ran for every token.

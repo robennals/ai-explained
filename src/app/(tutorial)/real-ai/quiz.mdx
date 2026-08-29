@@ -1,0 +1,104 @@
+<Quiz slug="real-ai">
+
+<Question>
+Today's frontier models are mostly:
+
+<Choice>A new design that replaced the transformer</Choice>
+<Choice correct>The transformer design, scaled up and tweaked</Choice>
+<Choice>Many small models that vote on each answer</Choice>
+<Choice>Transformers with the attention mechanism taken out</Choice>
+
+<Feedback>
+The models behind ChatGPT, Claude, and Gemini are built from attention, positions, layers, and next-word prediction, exactly as before. What changed is the size, the training, and a set of individually simple additions bolted on top. That's why understanding the core machine gets you most of the way to understanding the frontier.
+</Feedback>
+</Question>
+
+<Question>
+In a mixture-of-experts model, what does the router do?
+
+<Choice>Splits the model across several computers</Choice>
+<Choice>Decides which language the answer is in</Choice>
+<Choice correct>Picks a few experts for each word</Choice>
+<Choice>Chooses how long the answer should be</Choice>
+
+<Feedback>
+Instead of one thinking layer that every word passes through, a mixture-of-experts model has many smaller ones. The router looks at each word and wakes only a few of them. DeepSeek-V3 has 256 experts and uses 8 per word, so the model can hold an enormous amount of knowledge while only paying for a slice of it at a time.
+</Feedback>
+</Question>
+
+<Question>
+Nobody outside OpenAI or Anthropic knows how GPT-5 or Claude are built. So why is it still possible to make a reasonable guess?
+
+<Choice>Those companies publish their architectures in full</Choice>
+<Choice>A model's answers reveal how many layers it has</Choice>
+<Choice correct>Open models that score similarly publish their designs</Choice>
+<Choice>Every neural network must be built the same way</Choice>
+
+<Feedback>
+Several models with published blueprints score close to the closed ones. GLM-5 reports 77.8 on a benchmark of fixing real bugs, against GPT-5's 74.9. So we have full build instructions for something roughly as capable, which makes it likely the secret models work along similar lines.
+
+It's worth being careful about how strong that claim is. It's an inference, not a fact. Nobody outside those labs can check, and a company that had found something genuinely new would have every reason to keep quiet about it.
+</Feedback>
+</Question>
+
+<Question>
+A lab has an enormous pile of raw text scraped from the web and a fixed budget. Based on how modern models are trained, what would most improve the result?
+
+<Choice>Training on all of it for as many passes as possible</Choice>
+<Choice correct>Throwing most of it out and keeping the best</Choice>
+<Choice>Sorting it alphabetically before training begins</Choice>
+<Choice>Removing all the computer code from the mixture</Choice>
+
+<Feedback>
+Most of the web is junk, and training on junk teaches a model to predict junk. One documented pipeline cut 36 trillion words down to 15 trillion, and filters as crude as "most lines in this document are very short" removed about a fifth of the text while making the resulting model better.
+
+Removing the code would actively hurt. Code is a small fraction of the internet but around 17% of what Llama 3 was trained on, because working through code appears to make models better at reasoning generally.
+</Feedback>
+</Question>
+
+<Question>
+A new model has a trillion parameters, several times more than an older one. What does that tell you about the work it does for each word?
+
+<Choice>It does several times more work per word</Choice>
+<Choice correct>Little, since it may use only a fraction</Choice>
+<Choice>It must be several times slower to answer</Choice>
+<Choice>It needs several times as much training data</Choice>
+
+<Feedback>
+Mixture of experts broke the link between how much a model knows and how much it costs to think. Kimi K2 stores about a trillion parameters and switches on 32 billion of them per word. gpt-oss stores 117 billion and uses 5.1 billion. Both use fewer per word than GPT-3, which had 175 billion and ran every one of them for every word it read.
+
+The tempting assumption is that parameter count and running cost move together. For a model without experts that's true, and it was true for years, which is exactly why the change is easy to miss.
+</Feedback>
+</Question>
+
+<Question>
+Which statement about the cost of running AI is accurate?
+
+<Choice>Running AI of every kind keeps getting cheaper</Choice>
+<Choice>Falling prices are entirely due to better algorithms</Choice>
+<Choice correct>A fixed level of ability keeps getting cheaper</Choice>
+<Choice>The cost of the newest models barely changes</Choice>
+
+<Feedback>
+Getting GPT-3.5-level answers became more than 280 times cheaper in about two years. But running the newest models is getting *more* expensive each year, because they are larger and think for longer before answering. Cheap and frontier move in opposite directions, so the claim has to be pinned to a fixed level of ability to be true.
+
+The price drop also isn't purely an algorithmic achievement. A good share of it is hardware getting cheaper, and some is simply companies competing on price rather than anything becoming more efficient.
+</Feedback>
+</Question>
+
+<Question>
+People preferred the answers of a 1.3-billion-parameter aligned model to those of the 175-billion-parameter GPT-3. What does that suggest?
+
+<Choice>Smaller models are usually more capable than big ones</Choice>
+<Choice>Size stopped mattering once alignment was invented</Choice>
+<Choice>People cannot reliably tell models apart at all</Choice>
+<Choice correct>Teaching a model to be useful can outweigh size</Choice>
+
+<Feedback>
+A raw pre-trained model has learned to continue text, not to help you. Ask it a question and a perfectly good continuation is a list of similar questions. Alignment is what turns that into an assistant, and here it was worth more than a hundredfold difference in size.
+
+This doesn't mean small models beat large ones in general. The 1.3-billion-parameter model knew far less. It simply used what it knew to answer the question that was actually asked, which turned out to matter more to the people judging.
+</Feedback>
+</Question>
+
+</Quiz>

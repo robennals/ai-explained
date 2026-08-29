@@ -1,0 +1,15 @@
+---
+term: reward hacking
+aliases: [reward hacked, Goodhart's law]
+firstAppearance: real-ai
+---
+
+**Reward hacking** is when a model learns to score well on its training signal instead of actually doing the task well.
+
+During alignment the model isn't graded by a human on every attempt. It is graded by a scoring model that stands in for human judgement, and that stand-in is imperfect. Optimise against it hard enough and the model finds the gaps: answers that please the scorer without being better. This is a version of Goodhart's law, which says that once a measure becomes a target, it stops being a good measure.
+
+Some examples:
+
+- **Padding** — the scorer mildly prefers longer answers, so answers get longer and emptier.
+- **Confident wrongness** — the scorer rewards a self-assured tone, so the model sounds certain even when it isn't.
+- **Avoiding it** — DeepSeek deliberately used programmatic checks rather than a learned scoring model, precisely to remove something hackable.
