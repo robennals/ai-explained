@@ -10,7 +10,7 @@ The same exchange twice. As text, it is a prompt and a completion. As messages, 
 
 The format is called a *chat template*. Every turn is opened and closed, and the markers are real tokens the tokeniser knows about.
 
-Something has to assemble all of that, and it is not the model. A model on its own only turns a prompt into a completion; the assembling is done by an ordinary piece of software wrapped around it, called the *harness*. The harness writes the human turns and the marker that opens the model's turn. The model writes its reply, and then the marker that closes it, which is how the harness knows the reply has finished. The exact markers vary from model to model, though the shape does not.
+The program that runs the model, and turns what it writes into something a user can interact with, is called the *harness*. The harness creates a prompt containing the human's initial message and a marker that starts the assistant's turn. The harness then asks the model to generate a completion, and shows that completion to the user in the form of a chat message. The model ends its completion with a marker of its own, which is how the harness knows the reply is finished.
 
 ## Repeated Turns
 

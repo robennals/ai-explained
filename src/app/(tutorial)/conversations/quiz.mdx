@@ -55,13 +55,13 @@ Nothing is skipped or shortened: the model really does read the whole thing. Wha
 <Question>
 Who writes the marker that ends the model's turn?
 
-<Choice correct>The model, which is how the program knows it has finished</Choice>
-<Choice>The program, once it decides the reply is long enough</Choice>
+<Choice correct>The model, which is how the harness knows it has finished</Choice>
+<Choice>The harness, once it decides the reply is long enough</Choice>
 <Choice>Nobody: the turn ends when the model stops writing</Choice>
 <Choice>The person who set up the system prompt, in advance</Choice>
 
 <Feedback>
-The program writes the human's messages and the marker that opens the model's turn. The model writes its reply, and then the marker that closes it. That closing marker is an ordinary token it was post-trained to produce, and it is the signal to stop generating and show the reply.
+The harness writes the human's messages and the marker that opens the model's turn. The model writes its reply, and then the marker that closes it. That closing marker is an ordinary token it was post-trained to produce, and it is the signal to stop generating and show the reply.
 </Feedback>
 </Question>
 
