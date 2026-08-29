@@ -2,7 +2,7 @@ The previous chapter ended with a machine that predicts one token. That machine 
 
 ## Prompts and Completions
 
-The transformer in <Ch slug="transformers" /> does exactly one thing: given a piece of text, it says which token plausibly comes next. Run it once and you get a single word. Add that word to the end of the text and run it again, and again, and what comes out is a whole block of text.
+The transformer in <Ch slug="transformers" /> predicts a single token. Given a piece of text, it says which token plausibly comes next. Run it once and you get a single word. Add that word to the end of the text and run it again, and again, and what comes out is a whole block of text.
 
 That block is called a *completion*, and the text you started it from is called the *prompt*. Hand a model a prompt, get back a completion. That is the whole of what a language model does.
 
