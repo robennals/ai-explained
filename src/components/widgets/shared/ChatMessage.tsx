@@ -21,12 +21,19 @@ export function ChatMessage({
   hidden,
   mono,
   text,
+  collapsed,
 }: {
   sender: string;
   kind: ActorKind;
   hidden: boolean;
   mono?: boolean;
   text: string;
+  /**
+   * Fold the message away behind a summary line. For a message the reader has
+   * already seen once in the same widget, such as a system prompt repeated at
+   * the top of a second conversation.
+   */
+  collapsed?: boolean;
 }) {
   const fromHuman = kind === "human";
   return (
@@ -48,13 +55,28 @@ export function ChatMessage({
               : "bg-surface ring-1 ring-widget-border"
         }`}
       >
-        <div
-          className={`whitespace-pre-wrap leading-relaxed text-foreground ${
-            mono ? "font-mono text-sm" : "text-base"
-          }`}
-        >
-          {text}
-        </div>
+        {collapsed ? (
+          <details>
+            <summary className="cursor-pointer text-sm text-muted marker:text-muted">
+              Same as above
+            </summary>
+            <div
+              className={`mt-2 whitespace-pre-wrap leading-relaxed text-foreground ${
+                mono ? "font-mono text-sm" : "text-base"
+              }`}
+            >
+              {text}
+            </div>
+          </details>
+        ) : (
+          <div
+            className={`whitespace-pre-wrap leading-relaxed text-foreground ${
+              mono ? "font-mono text-sm" : "text-base"
+            }`}
+          >
+            {text}
+          </div>
+        )}
       </div>
     </div>
   );

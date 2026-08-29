@@ -46,6 +46,7 @@ export function MemoryLoop() {
                 hidden={!isVisible(turn)}
                 mono={isMonospace(turn)}
                 text={turn.text}
+                collapsed={c > 0 && turn.role === "system"}
               />
             ))}
           </div>
