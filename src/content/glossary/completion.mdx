@@ -1,0 +1,18 @@
+---
+term: completion
+aliases: [completions]
+firstAppearance: post-training
+---
+
+A **completion** is the text a model writes when you hand it a piece of text to continue.
+
+The text you hand over is the prompt. The model reads it and writes what comes next, and that is the completion. This is the only thing a language model ever does. Everything else is a matter of what somebody puts into the prompt, and what they do with the completion afterwards.
+
+Some completions:
+
+- **Finishing a sentence** — the prompt is "the cat sat on the", and the completion is "mat".
+- **Answering a question** — the prompt is your question, and the completion is an answer, because on the page the model learned from, answers are what follow questions.
+- **A reply in a chat** — the prompt is every message so far, with markers saying who said what, and the completion is the next thing the assistant says.
+- **A request that is not for you** — sometimes the completion is a tool call, addressed to the program running the model rather than to the person reading.
+
+The same machine produces all four. What changes is the prompt it was given, and who reads the completion.

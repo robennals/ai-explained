@@ -65,7 +65,7 @@ export function RawCompletion() {
       <div className="overflow-hidden rounded-lg border border-widget-border">
         <div className="border-b border-widget-border bg-surface px-4 py-2">
           <span className="text-xs font-bold uppercase tracking-widest text-muted">
-            Text handed to the model
+            The prompt
           </span>
         </div>
         <div className="whitespace-pre-wrap bg-surface px-4 py-3 font-mono text-sm leading-relaxed text-foreground">

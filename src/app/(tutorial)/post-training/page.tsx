@@ -5,6 +5,7 @@ import { getAdjacentChapters } from "@/lib/curriculum";
 import Content from "./content.mdx";
 import { QuizContent } from "./QuizContent";
 import {
+  PromptsAndCompletionsWidget,
   RawCompletionWidget,
   TrainingSignalWidget,
 } from "./widgets";
@@ -20,6 +21,7 @@ export default function Chapter10() {
         <ChapterHeader slug="post-training" />
         <Content
           components={{
+            PromptsAndCompletionsWidget,
             RawCompletionWidget,
             TrainingSignalWidget,
           }}

@@ -12,6 +12,14 @@ const RawCompletion = dynamic(
   { ssr: false }
 );
 
+const PromptsAndCompletions = dynamic(
+  () =>
+    import("@/components/widgets/post-training/PromptsAndCompletions").then(
+      (m) => m.PromptsAndCompletions
+    ),
+  { ssr: false }
+);
+
 const TrainingSignal = dynamic(
   () =>
     import("@/components/widgets/post-training/TrainingSignal").then(
@@ -52,6 +60,18 @@ export function RawCompletionWidget({
   return (
     <WidgetSlot tryIt={children} label="Explore it">
       <RawCompletion />
+    </WidgetSlot>
+  );
+}
+
+export function PromptsAndCompletionsWidget({
+  children,
+}: {
+  children?: React.ReactNode;
+}) {
+  return (
+    <WidgetSlot tryIt={children} label="Explore it">
+      <PromptsAndCompletions />
     </WidgetSlot>
   );
 }
