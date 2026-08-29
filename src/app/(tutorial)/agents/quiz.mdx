@@ -6,7 +6,7 @@ What is an *agent*, as distinct from a model?
 <Choice>A model that can run programs and open web pages by itself</Choice>
 <Choice>A larger model with a lot more parameters</Choice>
 <Choice>A model that keeps running between conversations</Choice>
-<Choice correct>A model wrapped in a program that acts on what it writes</Choice>
+<Choice correct>A model wrapped in a program that does what the model asks</Choice>
 
 <Feedback>
 The model in an agent is the same model, unchanged, and it still only writes text. What is added is the program around it, the harness, and the loop between them: the model writes a message that is not addressed to the user, the harness acts on it, and the reply lands back in the conversation. Post-training does teach a model to write good tool calls, but on its own that just leaves it writing requests nothing acts on. The model has not gained an ability to act. It has gained a correspondent.
@@ -27,15 +27,15 @@ The model can only write text. It writes a structured tool call, the program run
 </Question>
 
 <Question>
-How does a model use a *skill*?
+How do a skill's instructions reach the model?
 
-<Choice>The instructions are trained into the weights beforehand</Choice>
-<Choice>A separate model runs it and reports the result back</Choice>
-<Choice>Every skill is always present in the context</Choice>
-<Choice correct>It calls a tool that hands back the instructions</Choice>
+<Choice>They are trained into the weights beforehand</Choice>
+<Choice>A separate model runs the skill and reports back</Choice>
+<Choice correct>They arrive as a hidden message when the model asks</Choice>
+<Choice>They are always in the context, along with every other skill</Choice>
 
 <Feedback>
-A skill is tool use where the tool's result happens to be a page of instructions. The model is given a list of skill names with one line each on when they apply, writes a tool call asking for the one that looks relevant, and reads the instructions that come back. Loading every skill in full every time would be enormous and mostly irrelevant, which is why the list is short and the document arrives only when it is needed.
+The model cannot fetch anything itself, any more than it can run a tool itself. It writes a request for the skill, and the harness answers with a hidden message containing the instructions, exactly as it does with the result of a tool. What makes a skill a skill is only what comes back: a page of instructions rather than a search result or a number.
 </Feedback>
 </Question>
 
