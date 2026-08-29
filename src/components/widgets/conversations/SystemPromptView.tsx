@@ -67,7 +67,7 @@ export function SystemPromptView() {
       <p className="mt-4 text-base leading-relaxed text-foreground">
         The system prompt is not a special channel or a rule the model is forced
         to obey. It is text at the top of the same stream, put there by the
-        program rather than by you, and the model completes the document it
+        harness rather than by you, and the model completes the document it
         finds itself in.
       </p>
     </WidgetContainer>

@@ -8,7 +8,9 @@ Underneath every chat interface there is a single stream of text. What makes it 
 The same exchange twice. As text, it is a prompt and a completion. As messages, it is what you would see on screen.
 </TranscriptViewsWidget>
 
-The format is called a *chat template*. Every turn is opened and closed, and the markers are real tokens the tokeniser knows about. The program running the model writes the human turns and the marker that opens the model's turn. The model writes its reply, and then the marker that closes it, which is how the program knows the reply has finished. The exact markers vary from model to model, though the shape does not.
+The format is called a *chat template*. Every turn is opened and closed, and the markers are real tokens the tokeniser knows about.
+
+Something has to assemble all of that, and it is not the model. A model on its own only turns a prompt into a completion; the assembling is done by an ordinary piece of software wrapped around it, called the *harness*. The harness writes the human turns and the marker that opens the model's turn. The model writes its reply, and then the marker that closes it, which is how the harness knows the reply has finished. The exact markers vary from model to model, though the shape does not.
 
 ## Repeated Turns
 
@@ -24,7 +26,7 @@ It might seem wasteful to make the model re-read the whole conversation before e
 
 ## The System Prompt
 
-There is one more message in a real conversation, and you never see it. Before your first message, the program puts a *system prompt* at the top: text telling the model any local customizations to the model's behavior. This can include things like how you want it to behave, today's date, where you are located, or what tools it can use (<Ch slug="agents"/>).
+There is one more message in a real conversation, and you never see it. Before your first message, the harness puts a *system prompt* at the top: text telling the model any local customizations to the model's behavior. This can include things like how you want it to behave, today's date, where you are located, or what tools it can use (<Ch slug="agents"/>).
 
 <SystemPromptViewWidget>
 Switch between the two views. It is the same stream of tokens as before, with one more message at the front, and that message is the one you are not shown.
@@ -38,7 +40,7 @@ From here on, this tutorial draws conversations as messages rather than as raw t
 
 A chat is a prompt and a completion, like everything else. The prompt is the whole conversation so far, with markers saying who said what and a hidden message at the top. The completion is the next reply.
 
-Nothing was added to the model to do this. <Ch slug="post-training" /> made the helpful completion the likely one. This chapter was the plumbing around it.
+<Ch slug="post-training" /> made the helpful completion with conversation markers the likely one. This chapter was the plumbing around it.
 
 <Ch slug="reasoning" /> and <Ch slug="agents" /> are both built out of the same two pieces: more hidden messages, and more text in the prompt.
 
