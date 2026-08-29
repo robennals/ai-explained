@@ -7,7 +7,12 @@
  * agent looks like it acts when it only ever writes.
  */
 
-export type TurnRole = "user" | "assistant" | "tool-call" | "tool-result";
+export type TurnRole =
+  | "system"
+  | "user"
+  | "assistant"
+  | "tool-call"
+  | "tool-result";
 
 export interface Turn {
   role: TurnRole;
@@ -25,11 +30,23 @@ export interface Scenario {
   takeaway: string;
 }
 
+function offered(text: string): Turn {
+  return {
+    role: "system",
+    text: `You have these tools available.\n\n${text}`,
+  };
+}
+
 export const scenarios: Scenario[] = [
   {
     id: "search",
     label: "Looking something up",
     turns: [
+      offered(
+        `  get_weather(location, hours)  the forecast for a place
+  get_time(place)               the local time somewhere
+  web_search(query)             search the web`
+      ),
       {
         role: "user",
         text: "Is it going to rain in Bristol this afternoon? I'm cycling home at 6.",
@@ -56,6 +73,11 @@ export const scenarios: Scenario[] = [
     id: "websearch",
     label: "Searching the web",
     turns: [
+      offered(
+        `  web_search(query)  search the web, returns titles and links
+  fetch_page(url)    read one page and return its text
+  get_time(place)    the local time somewhere`
+      ),
       {
         role: "user",
         text: "Is the Clifton Suspension Bridge open to cars this weekend?",
@@ -92,6 +114,10 @@ export const scenarios: Scenario[] = [
     id: "code",
     label: "Running code",
     turns: [
+      offered(
+        `  run_python(code)   run a short program, returns what it prints
+  web_search(query)  search the web`
+      ),
       {
         role: "user",
         text: "I've got three payments of £1,249.99 and one of £874. What's the total, and what's VAT at 20% on that?",
@@ -118,6 +144,11 @@ export const scenarios: Scenario[] = [
     id: "chained",
     label: "One tool, then another",
     turns: [
+      offered(
+        `  search_email(query, limit)     find messages, returns ids and subjects
+  read_email(id)                 read one message
+  send_email(to, subject, body)  send a message`
+      ),
       {
         role: "user",
         text: "Did the invoice from Bramley ever get paid?",
@@ -159,6 +190,8 @@ export function getScenario(id: string): Scenario {
 /** Who wrote a turn. */
 export function senderLabel(turn: Turn): string {
   switch (turn.role) {
+    case "system":
+      return "System prompt";
     case "user":
       return "Human";
     case "assistant":
@@ -170,7 +203,10 @@ export function senderLabel(turn: Turn): string {
 }
 
 /** Which of the three actors wrote a turn, for colouring their name. */
-export function senderKind(turn: Turn): "human" | "model" | "tool" {
+export function senderKind(
+  turn: Turn
+): "human" | "model" | "tool" | "system" {
+  if (turn.role === "system") return "system";
   if (turn.role === "user") return "human";
   if (turn.role === "tool-result") return "tool";
   return "model";

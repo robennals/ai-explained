@@ -13,10 +13,23 @@ describe("scenarios", () => {
     expect(new Set(scenarios.map((s) => s.label)).size).toBe(scenarios.length);
   });
 
-  it("starts with the user and ends with a plain reply, which is what stops the loop", () => {
+  it("opens with the tool list and ends with a plain reply, which is what stops the loop", () => {
     for (const scenario of scenarios) {
-      expect(scenario.turns[0].role).toBe("user");
+      expect(scenario.turns[0].role).toBe("system");
+      expect(scenario.turns[1].role).toBe("user");
       expect(scenario.turns[scenario.turns.length - 1].role).toBe("assistant");
+    }
+  });
+
+  it("offers every tool it goes on to call, and some it does not", () => {
+    for (const scenario of scenarios) {
+      const offered = scenario.turns[0].text;
+      const called = scenario.turns
+        .filter((t) => t.role === "tool-call")
+        .map((t) => /^(\w+)\(/.exec(t.text)![1]);
+      for (const name of called) expect(offered).toContain(name + "(");
+      const listed = offered.match(/^ {2}(\w+)\(/gm)!.length;
+      expect(listed).toBeGreaterThan(new Set(called).size);
     }
   });
 
@@ -67,7 +80,7 @@ describe("senderLabel", () => {
   });
 
   it("labels the person Human rather than You", () => {
-    const first = getScenario("search").turns[0];
+    const first = getScenario("search").turns.find((t) => t.role === "user")!;
     expect(senderLabel(first)).toBe("Human");
   });
 });
@@ -98,9 +111,10 @@ describe("getScenario", () => {
 });
 
 describe("senderKind", () => {
-  it("puts the person, the model and the tools in three groups", () => {
+  it("puts the setup, the person, the model and the tools in four groups", () => {
     const scenario = getScenario("search");
     expect(scenario.turns.map(senderKind)).toEqual([
+      "system",
       "human",
       "model",
       "tool",

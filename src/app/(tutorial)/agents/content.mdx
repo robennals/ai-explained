@@ -1,19 +1,19 @@
-A model writes text. That is the whole of what it does. Wrap it in a program that reads what it writes, acts on it, and writes back, and you have something that can get things done.
+A chat model can chat with a user in text. That's useful, but agents like ChatGPT and Claude can do a lot more. They can use tools, search the web, remember things from the past, and use skills. This chapter is about how that works.
 
-That assembly is what people mean by an *agent*: the model, the program around it, and the loop between them. The program is usually called the *harness*. The model inside an agent is the same model as before, unchanged. What is different is what happens to the text it emits.
-
-Everything in this chapter is one trick in three forms. The model writes a message that is not addressed to you, something answers it, and the answer lands back in the conversation.
+Everything in this chapter is a version of the same trick. The model writes a hidden message that is not addressed to you, and something other than the user answers it with a hidden message to the model.
 
 ## Tools
 
+Humans are tool users. We use tools to help us think (e.g. a calculator), or to look up information (e.g. a search engine), or to do things (e.g. sending an email). 
+
 A model can only write text, so tool use has to be made of text, and it is.
 
-The list of available tools goes into the model's context, a name and a short description for each. When the model wants one, it writes a *tool call*: a piece of structured text naming the tool and its arguments. The harness watches for that. It stops generation, runs the tool, and pastes the result back into the conversation as a new message. Then the model carries on.
+I hidden message the user can't see tells the model a list of tools it can use and a short description for each. When the model wants one, it writes a *tool call*: a piece of structured text naming the tool and its arguments. When the harness sees a tool cool it runs the tool and sends a hidden message to the model with the result of the tool. 
 
 That loop repeats until the model writes an ordinary reply instead of another tool call.
 
 <ToolLoopWidget>
-Four loops, in four tabs. It is one conversation, and the dashed messages are part of it, they just never reach the human's chat window. The model's next move is decided entirely by what came back as text.
+Four loops, in four tabs. Each opens with the tools on offer, one line each, which is the only way the model knows any of them exist. The dashed messages are part of the same conversation and never reach the human's chat window.
 </ToolLoopWidget>
 
 This is all "the model searched the web" means. The model does not run anything. It writes a request, something else acts, and the model finds out what happened by reading. Grounding an answer in a real search result makes it much more likely to be right, though the model is still the one writing the summary, so it is still capable of getting it wrong.

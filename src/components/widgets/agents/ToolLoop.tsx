@@ -35,7 +35,7 @@ export function ToolLoop() {
             sender={senderLabel(turn)}
             kind={senderKind(turn)}
             hidden={!isVisibleToUser(turn)}
-            mono={turn.role === "tool-call" || turn.role === "tool-result"}
+            mono={turn.role !== "user" && turn.role !== "assistant"}
             text={turn.text}
           />
         ))}
