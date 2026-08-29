@@ -23,48 +23,28 @@ weights, a 1.5B about 3GB. Both fit with room to spare. The pairs and
 reasoning models named below are all ungated on Hugging Face, so no token or
 licence click-through is needed.
 
-**When is an API key actually required?** Less often than expected. Every
-section below has a local path that works with no key at all. The API is an
-optional upgrade that shows the same experiment with a model good enough to
-behave like a product. This matters for two reasons: a reader with no key
-still gets a complete notebook, and `pnpm test:notebooks` keeps passing,
-because the API cells no-op when no key is set.
+**No API keys.** Everything below runs on a free Colab T4 with no account, no
+key and no gated model. That is a deliberate constraint: a reader should be
+able to open the notebook and press run. It also keeps `pnpm test:notebooks`
+simple, since there is no path that silently does nothing.
 
-## API access
+## Saying how small these models are
 
-One code path, configurable, so a reader can use whichever provider they
-already have:
+Every notebook opens with the same framing, in its own short markdown cell,
+and repeats it in one line wherever a result is visibly worse than the
+chapter's hand-authored version:
 
-```python
-import os, getpass
-from openai import OpenAI
+> The models in this notebook are small enough to run free, in your browser,
+> in a couple of minutes. They are hundreds of times smaller than the ones
+> behind ChatGPT or Claude, and it shows: they make mistakes a frontier model
+> would not, and they need the questions kept simple. What they do have is the
+> same machinery. Everything here works the same way at a thousand times the
+> size, which is the point.
 
-# Leave blank to skip every API cell in this notebook.
-API_KEY = os.environ.get("API_KEY") or getpass.getpass("API key (or blank to skip): ")
-BASE_URL = "https://api.openai.com/v1"   # or Groq, OpenRouter, …
-MODEL = "gpt-4o-mini"
-
-client = OpenAI(api_key=API_KEY, base_url=BASE_URL) if API_KEY else None
-
-def ask(prompt, **kw):
-    """Returns None when no key is set, so the notebook still runs end to end."""
-    if client is None:
-        print("No API key set, skipping."); return None
-    ...
-```
-
-Every API cell begins `if client is None: ...` and prints what the reader
-would have seen. The markdown above each says what the cell costs, roughly.
-
-**Decision needed:** which provider to name first in the instructions. The
-code is OpenAI-compatible, so all three work by changing two lines. My
-recommendation is to write the instructions around a provider with a genuine
-free tier so a reader can follow along without a card, and mention the others.
-`docs/` should record whichever is chosen so the three notebooks agree.
-
-**Never commit a key.** Cells use `getpass`, and the markdown points Colab
-users at the key icon in the sidebar (`userdata.get(...)`) as the better
-option.
+Where a cell's output is worse than the chapter's, the markdown says so
+plainly rather than hoping the reader does not notice. A small model failing
+at something a frontier model manages is evidence about size, and the notebook
+should treat it as a result rather than an embarrassment.
 
 ## `chat.ipynb`
 
@@ -104,8 +84,9 @@ accuracies. If the gap shows up, the reader has proof of the thing the whole
 post-training section rests on.
 
 Risk: at 0.5B the verification may be near chance. Falls back to the 1.5B
-instruct model, and to the API path for a third data point. **Spike this
-before writing prose around it.**
+instruct model, and beyond that to `Qwen2.5-7B-Instruct` loaded in 4-bit with
+`bitsandbytes`, about 5GB and comfortable on a T4. **Spike this before writing
+prose around it.**
 
 **5. Reading the room.** Take ~10 hand-written conversation endings, half
 where the user is happy ("perfect, thanks") and half where they are not ("you
@@ -169,11 +150,15 @@ notebook output looks like the chapter's transcript, dashed messages and all.
 Use a real weather-ish tool (a fixed lookup table, no network) and a
 calculator.
 
-Risk: a 1.5B model is unreliable at emitting well-formed tool calls. Three
-mitigations, in order: few-shot examples in the system prompt; a forgiving
-parser; and the API path, where a stronger model makes the loop work first
-time. **Spike this before writing — it decides whether the local path is the
-main one or the fallback.**
+Risk: a 1.5B model is unreliable at emitting well-formed tool calls, and this
+is the biggest open question in the plan. Mitigations, in order of preference:
+few-shot examples in the system prompt showing the exact call format; a
+forgiving parser that accepts near-miss JSON; `Qwen2.5-3B-Instruct` at about
+6GB; and `Qwen2.5-7B-Instruct` in 4-bit at about 5GB, which fits a T4 and is
+comfortably capable of tool calls. **Spike this first.** If none of them give
+a reliable loop, the section still works with one narrow tool and a single
+call rather than a multi-step loop, and the notebook says why: driving a tool
+loop is one of the things small models are worst at.
 
 **3. Skills.** Add a `load_skill` tool returning a document, offer two skills
 one line each, and show the model asking for one and then following it. Reuse
@@ -192,8 +177,9 @@ an agent good is the harness rather than the model.
 ## Constraints and open questions
 
 **Test-suite cost.** `scripts/test-notebooks.sh` executes every notebook with
-a 900s timeout. Three notebooks that each download a 1–3GB model will add
-meaningful time and disk. Options: keep every model at 0.5B in the default
+a 900s timeout. Three notebooks that each download a 1–7GB model will add
+meaningful time and disk, and the reasoning notebook generates long traces
+over ~20 questions, which is slow without a GPU. Options: keep every model at 0.5B in the default
 path; or add a `FAST=1` environment check that shortens loops under test. The
 download itself is unavoidable if the notebooks are to be honest. Worth
 deciding before implementation, since it shapes how the cells are written.
