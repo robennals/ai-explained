@@ -4,7 +4,7 @@
 A *base model* is a model that has been pre-trained and nothing else. Compared to a chat model, it:
 
 <Choice>Knows far fewer facts, having been shown less text</Choice>
-<Choice correct>Knows almost as much, but continues documents instead</Choice>
+<Choice correct>Produces completions that may not be useful</Choice>
 <Choice>Uses a different architecture, with no attention at all</Choice>
 <Choice>Cannot reliably produce grammatical English</Choice>
 
@@ -18,7 +18,7 @@ What does post-training mostly do?
 
 <Choice>Adds the model's knowledge of facts about the world</Choice>
 <Choice>Replaces the transformer with a design meant for chat</Choice>
-<Choice correct>Picks out behaviours the base model already has</Choice>
+<Choice correct>Rewards the completions we find useful</Choice>
 <Choice>Uses most of the total training compute</Choice>
 
 <Feedback>
@@ -27,15 +27,15 @@ Post-training is a thin layer on top of pre-training, often less than 1% of the 
 </Question>
 
 <Question>
-In RLHF, what is the reward model for?
+Why train a second model to predict how a person would rate a response?
 
-<Choice>Generating the responses that get shown to users</Choice>
-<Choice correct>Predicting a human rater's score</Choice>
-<Choice>Storing the conversation between turns</Choice>
-<Choice>Checking arithmetic and running code</Choice>
+<Choice>Because the second model can write better responses</Choice>
+<Choice correct>Because people cannot rate enough responses by hand</Choice>
+<Choice>Because it checks arithmetic and runs code</Choice>
+<Choice>Because it stores the conversation between turns</Choice>
 
 <Feedback>
-Human comparisons are expensive, so they are used once to train a second model that predicts how a rater would score a response. That reward model can then score huge numbers of responses no human ever saw. It is a model, so it can be wrong, and training hard against a wrong score is where a lot of odd behaviour comes from.
+Ratings from real people are slow and expensive, and steering a model takes a great many of them. So the ratings are used once, to train a second model that predicts which response a person would have preferred. That model can then score millions of responses nobody ever looked at. It is a model, so it can be wrong, and everything trained against a wrong score inherits the mistake.
 </Feedback>
 </Question>
 
@@ -57,7 +57,7 @@ The system prompt is:
 
 <Choice>A separate model that supervises the main one</Choice>
 <Choice>A set of hard constraints enforced from outside</Choice>
-<Choice correct>Text at the top of the stream the model is completing</Choice>
+<Choice correct>A hidden message added to the conversation</Choice>
 <Choice>A list of weights loaded before the conversation starts</Choice>
 
 <Feedback>

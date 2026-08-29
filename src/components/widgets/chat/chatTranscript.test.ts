@@ -7,6 +7,7 @@ import {
   senderKind,
   senderLabel,
   transcript,
+  withSystemPrompt,
 } from "./chatTranscript";
 
 const [firstReply, secondReply] = exchanges;
@@ -57,7 +58,7 @@ describe("promptParts", () => {
   it("re-sends the whole first exchange when answering the second", () => {
     const parts = promptParts(secondReply);
     const carried = parts.filter((p) => p.carriedOver).map((p) => p.text).join("");
-    expect(carried).toContain(transcript[1].text);
+    expect(carried).toContain(transcript[0].text);
     expect(carried).toContain(transcript[firstReply].text);
   });
 
@@ -66,8 +67,11 @@ describe("promptParts", () => {
       .filter((p) => !p.carriedOver)
       .map((p) => p.text)
       .join("");
-    expect(added).toContain(transcript[3].text);
-    expect(added).not.toContain(transcript[1].text);
+    const newestHuman = transcript[secondReply - 1];
+    const olderHuman = transcript[firstReply - 1];
+    expect(newestHuman.role).toBe("user");
+    expect(added).toContain(newestHuman.text);
+    expect(added).not.toContain(olderHuman.text);
   });
 });
 
@@ -80,20 +84,26 @@ describe("completionFor", () => {
 });
 
 describe("bubbles", () => {
-  it("hides the system prompt and shows everything else", () => {
+  it("shows every turn of a plain conversation", () => {
+    // The system prompt gets its own section, so it is not in this transcript.
+    expect(transcript.some((t) => t.role === "system")).toBe(false);
     for (const turn of transcript) {
-      expect(isVisible(turn)).toBe(turn.role !== "system");
+      expect(isVisible(turn)).toBe(true);
     }
   });
 
-  it("labels the three speakers", () => {
-    expect(new Set(transcript.map(senderLabel))).toEqual(
-      new Set(["System prompt", "Human", "Model"])
-    );
+  it("adds the system prompt in front, hidden, when asked for it", () => {
+    const withSystem = withSystemPrompt();
+    expect(withSystem[0].role).toBe("system");
+    expect(isVisible(withSystem[0])).toBe(false);
+    expect(senderLabel(withSystem[0])).toBe("System prompt");
+    expect(withSystem.slice(1).every(isVisible)).toBe(true);
   });
 
   it("colours the human and the model differently", () => {
-    expect(senderKind(transcript[1])).toBe("human");
-    expect(senderKind(transcript[2])).toBe("model");
+    const human = transcript.find((t) => t.role === "user")!;
+    const assistant = transcript.find((t) => t.role === "assistant")!;
+    expect(senderKind(human)).toBe("human");
+    expect(senderKind(assistant)).toBe("model");
   });
 });

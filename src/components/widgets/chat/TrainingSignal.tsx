@@ -106,7 +106,7 @@ function JudgePanel({ visual }: { visual: JudgeVisual }) {
       </div>
       <Prompt text={visual.prompt} />
       <div className="rounded-lg border border-accent/40 bg-accent/5 p-4">
-        <Label>Response</Label>
+        <Label>{visual.responseLabel}</Label>
         <p className="mt-1 text-base leading-relaxed text-foreground">
           {visual.response}
         </p>
@@ -119,7 +119,7 @@ function JudgePanel({ visual }: { visual: JudgeVisual }) {
         }`}
       >
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <Label>The model, asked whether the rule was met</Label>
+          <Label>{visual.verdictLabel}</Label>
           <Verdict passed={visual.passed}>
             {visual.passed ? "Rule met" : "Rule not met"}
           </Verdict>

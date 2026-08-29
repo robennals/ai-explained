@@ -38,6 +38,10 @@ export interface JudgeVisual {
   type: "judge";
   rule: string;
   prompt: string;
+  /** Whose response this is, since two separate models are involved. */
+  responseLabel: string;
+  /** Who is judging, and what they were asked. */
+  verdictLabel: string;
   response: string;
   verdict: string;
   passed: boolean;
@@ -113,8 +117,8 @@ export const approaches: Approach[] = [
       chosen: "B",
     },
     outcome:
-      "The model is trained to make responses like the chosen one more likely, and responses like the rejected one less likely.",
-    note: "This is RLHF, used for InstructGPT and Llama 2. In practice the picks train a separate reward model, which then scores responses no person ever saw. Raters work fast and do not always check the arithmetic, so a confident, friendly wrong answer wins more of these than it should.",
+      "The model is trained to make responses like the chosen one more likely, and responses like the rejected one less likely. Ratings from people are slow and expensive though, and steering a model takes a great many of them. So the picks are used once, to train a second model that predicts which response a person would have preferred, and that model then scores millions of responses no human ever saw. The whole approach is called RLHF, reinforcement learning from human feedback.",
+    note: "Used for InstructGPT and Llama 2. Raters work fast and do not always check the arithmetic, so a confident, friendly wrong answer wins more of these comparisons than it should, and everything trained on those ratings inherits the mistake.",
   },
   {
     id: "constitution",
@@ -125,6 +129,8 @@ export const approaches: Approach[] = [
       type: "judge",
       rule: "The response must actually answer the question it was asked.",
       prompt: sharedPrompt,
+      responseLabel: "Model A's response to the question",
+      verdictLabel: "Model B, asked whether Model A's answer followed the constitution",
       response:
         "Percentage discounts trip people up all the time! The trick is to remember that the sale price is a fraction of the original price.",
       verdict: "No. Nothing here gives a price.",
@@ -132,7 +138,7 @@ export const approaches: Approach[] = [
     },
     outcome:
       "Judging a response is much easier than producing one, so a model can reliably check work it could not reliably have written. The verdict is then used exactly as a human rating would be, at a fraction of what the same work would cost from a person.",
-    note: "Anthropic's Constitutional AI. It is the same model doing the judging, given a different job. A real constitution has many principles rather than one. When the rules need to change, someone edits the document.",
+    note: "Anthropic's Constitutional AI. Model A and Model B are usually two separate runs of the same model, given different jobs. Model A never sees the constitution: it is being trained to follow those rules by default, not told about them at the time. A real constitution has many principles rather than one, and when they change, someone edits the document.",
   },
   {
     id: "usage",
@@ -153,7 +159,7 @@ export const approaches: Approach[] = [
       good: false,
     },
     outcome:
-      "This is the highest-volume signal there is. The weakness is that it measures whether the user was pleased rather than whether the answer was right, so leaning on it too hard teaches the model to flatter the user, a failure mode called sycophanciy. ",
+      "This is the highest-volume signal there is. The weakness is that it measures whether the user was pleased rather than whether the answer was right, so leaning on it too hard teaches the model to flatter the user, a failure mode called sycophancy. ",
     note: "Consumer chat products generally do train on conversations unless you opt out; business and API tiers generally do not.",
   },
   {
@@ -164,19 +170,19 @@ export const approaches: Approach[] = [
     visual: {
       type: "check",
       prompt:
-        "8,051 is the product of two prime numbers. Which two?",
+        "What two whole numbers, other than 1, multiply together to give 8,051?",
       response: "83 and 97.",
       steps: [
         "Take the proposed answer: 83 and 97.",
         "Multiply them: 83 × 97 = 8,051.",
-        "That is the number in the question, and neither 83 nor 97 has any divisor but itself and 1.",
+        "That is the number in the question, so the answer is right.",
       ],
       verdict: "Verified. Score 1.",
       passed: true,
     },
     outcome:
       "Finding the answer means hunting for a divisor. Checking it is one multiplication that a child could do. That gap is the whole point: a second model, or three lines of code, can grade an answer it would have struggled to produce.",
-    note: "Called reinforcement learning from verifiable rewards, published in detail for DeepSeek-R1. A wrong answer fails just as fast: 89 × 91 comes to 8,099, and 91 is not prime anyway. So the score is a bare 1 or 0 with no opinion in it, and it can be produced millions of times overnight. It only works where an answer can be checked against something, which rules out most of what people ask a chat model. Where it does work, the sheer supply of it is what made reasoning models possible.",
+    note: "Called reinforcement learning from verifiable rewards, published in detail for DeepSeek-R1. A wrong answer fails just as fast: 89 × 91 comes to 8,099, not 8,051. So the score is a bare 1 or 0 with no opinion in it, and it can be produced millions of times overnight. It only works where an answer can be checked against something, which rules out most of what people ask a chat model. Where it does work, the sheer supply of it is what made reasoning models possible.",
   },
 ];
 

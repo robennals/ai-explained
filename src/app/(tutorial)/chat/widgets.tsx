@@ -28,6 +28,14 @@ const RepeatedTurns = dynamic(
   { ssr: false }
 );
 
+const SystemPromptView = dynamic(
+  () =>
+    import("@/components/widgets/chat/SystemPromptView").then(
+      (m) => m.SystemPromptView
+    ),
+  { ssr: false }
+);
+
 const TranscriptViews = dynamic(
   () =>
     import("@/components/widgets/chat/TranscriptViews").then(
@@ -92,6 +100,18 @@ export function RepeatedTurnsWidget({
   return (
     <WidgetSlot tryIt={children} label="Explore it">
       <RepeatedTurns />
+    </WidgetSlot>
+  );
+}
+
+export function SystemPromptViewWidget({
+  children,
+}: {
+  children?: React.ReactNode;
+}) {
+  return (
+    <WidgetSlot tryIt={children} label="Explore it">
+      <SystemPromptView />
     </WidgetSlot>
   );
 }

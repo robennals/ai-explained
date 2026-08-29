@@ -58,6 +58,28 @@ describe("individual illustrations", () => {
     expect(visual.response).not.toContain("$50");
   });
 
+  it("names two separate models, so the judging does not read as one chat", () => {
+    const visual = getApproach("constitution").visual;
+    if (visual.type !== "judge") throw new Error("expected a judge");
+    expect(visual.responseLabel).toContain("Model A");
+    expect(visual.verdictLabel).toContain("Model B");
+    expect(visual.verdictLabel).toContain("Model A");
+  });
+
+  it("explains the reward model where the reader will see it, not in the note", () => {
+    const comparison = getApproach("comparison");
+    expect(comparison.outcome).toMatch(/second model|predicts/);
+    expect(comparison.outcome).toContain("RLHF");
+  });
+
+  it("asks for whole numbers rather than primes", () => {
+    const visual = getApproach("checker").visual;
+    if (visual.type !== "check") throw new Error("expected a check");
+    expect(visual.prompt).not.toMatch(/prime/i);
+    expect(visual.steps.join(" ")).not.toMatch(/prime/i);
+    expect(83 * 97).toBe(8051);
+  });
+
   it("reads the usage signal out of what the user typed, not a button", () => {
     const visual = getApproach("usage").visual;
     if (visual.type !== "usage") throw new Error("expected usage");

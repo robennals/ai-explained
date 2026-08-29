@@ -7,6 +7,7 @@ import { QuizContent } from "./QuizContent";
 import {
   RawCompletionWidget,
   RepeatedTurnsWidget,
+  SystemPromptViewWidget,
   TrainingSignalWidget,
   TranscriptViewsWidget,
 } from "./widgets";
@@ -24,6 +25,7 @@ export default function Chapter10() {
           components={{
             RawCompletionWidget,
             RepeatedTurnsWidget,
+            SystemPromptViewWidget,
             TrainingSignalWidget,
             TranscriptViewsWidget,
           }}

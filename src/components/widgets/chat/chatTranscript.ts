@@ -13,10 +13,6 @@ export interface TranscriptTurn {
 }
 
 export const transcript: TranscriptTurn[] = [
-  {
-    role: "system",
-    text: "You are a helpful assistant. Today is 28 August 2026.",
-  },
   { role: "user", text: "What's the capital of Australia?" },
   { role: "assistant", text: "Canberra." },
   { role: "user", text: "Are you sure? I thought it was Sydney." },
@@ -80,6 +76,20 @@ export function promptParts(assistantIndex: number): PromptPart[] {
 /** What the model writes: its reply, and the marker that ends its turn. */
 export function completionFor(assistantIndex: number): string {
   return `${transcript[assistantIndex].text}<|end|>`;
+}
+
+/** The hidden message a product puts at the top, introduced in its own section. */
+export const systemPrompt: TranscriptTurn = {
+  role: "system",
+  text: "You are Otter, a friendly assistant who keeps answers short. "
+    + "Today is 29 August 2026. The user is in Bristol.",
+};
+
+/** The same conversation with the system prompt in front of it. */
+export function withSystemPrompt(
+  turns: TranscriptTurn[] = transcript.slice(0, 2)
+): TranscriptTurn[] {
+  return [systemPrompt, ...turns];
 }
 
 export function senderLabel(turn: TranscriptTurn): string {
