@@ -112,6 +112,9 @@ describe("learning from a mistake", () => {
     expect(new Set(texts).size).toBe(1);
     expect(texts[0]).toContain("save_memory");
     expect(texts[0]).toContain("search_memory");
+    // The full list would be long and beside the point, so say it is elided
+    // rather than pretending these are the only tools on offer.
+    expect(texts[0]).toContain("left out here");
   });
 
   it("gets it wrong, is corrected, and only then writes anything down", () => {
