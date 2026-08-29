@@ -2,10 +2,12 @@
  * Hand-authored base-model / chat-model completions.
  *
  * Nothing here comes from a real model. Each base completion is written to be
- * a plausible continuation of a document that could contain the prompt, and
- * the four are chosen to fail in four different ways: wrong kind of document,
- * writing the user's turn as well as its own, not stopping, and copying
- * whoever was likely to have written the page.
+ * a plausible continuation of a document that could contain the prompt. Four
+ * of them fail in four different ways: wrong kind of document, writing the
+ * user's turn as well as its own, not stopping, and copying whoever was likely
+ * to have written the page. The fifth is the one that matters most for the
+ * rest of the chapter, where predicting the next words and answering the
+ * question turn out to be the same act.
  */
 
 export interface CompletionExample {
@@ -81,6 +83,16 @@ Posted in Geography, Lists. Older post: The 10 deepest lakes on Earth →`,
     chat: `Mount Everest, at 8,849 m above sea level, on the Nepal–China border.
 
 Worth knowing: measured from base to summit rather than from sea level, Mauna Kea in Hawaii is taller at about 10,200 m, though most of it is underwater.`,
+  },
+  {
+    id: "just-answers",
+    label: "Sometimes it just answers",
+    prompt: "Who wrote Pride and Prejudice?",
+    base: `
+Jane Austen. It was published in 1813, though she had written an earlier version, called First Impressions, in the 1790s.`,
+    baseNote:
+      "Nothing has gone right here that went wrong in the other tabs. It is the same model doing the same thing. It just happens that on the web, a question like this is usually followed by its answer, so predicting what comes next and answering are the same act. The helpful reply was always available. It simply is not what you get every time.",
+    chat: `Jane Austen wrote Pride and Prejudice. She finished an early version in the 1790s under the title First Impressions, and the book was published in 1813.`,
   },
   {
     id: "any-voice",

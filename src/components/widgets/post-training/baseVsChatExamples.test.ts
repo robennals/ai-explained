@@ -49,3 +49,13 @@ describe("getExample", () => {
     expect(getExample("nope")).toBe(completionExamples[0]);
   });
 });
+
+describe("the example where it simply answers", () => {
+  it("is there, because post-training steers rather than teaches", () => {
+    // The chapter's argument is that the helpful reply is already available to
+    // the base model. One tab has to show that, or the argument is an assertion.
+    const answers = getExample("just-answers");
+    expect(answers.base).toMatch(/Jane Austen/);
+    expect(answers.baseNote).toMatch(/same act|always available/);
+  });
+});

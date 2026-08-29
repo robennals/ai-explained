@@ -4,13 +4,17 @@ The previous chapter ended with a machine that reads a passage of text and says 
 
 A transformer (<Ch slug="transformers" />) trained to predict the next word (<Ch slug="next-word-prediction" />) is called a *base model*. This model has read an enormous amount of text and has formed a deep enough understanding of how the world works that it can predict the next word in a piece of text about pretty much anything.
 
-But predicting the next word is not what you usually want a helpful assistant to do. The playground shows a few examples.
+Sometimes predicting the next word is exactly what a helpful assistant would do. Ask a base model who wrote Pride and Prejudice and you may well get "Jane Austen", because on the web that question is usually followed by its answer. Predicting and answering are the same act there.
+
+The trouble is everything else it might say instead. The playground has five prompts. Four of them go somewhere you would not want.
 
 <RawCompletionWidget>
-Try each <nog>prompt</nog>. The completion is not a mistake. Ask yourself where on the internet that text would have come next.
+Try each <nog>prompt</nog>. None of these completions is a mistake. Ask yourself where on the internet that text would have come next.
 </RawCompletionWidget>
 
 The base model is not confused and it is not stupid. It is doing exactly what we trained it to do. What we trained it to do was predict the next token, not to be a useful assistant.
+
+That last tab is the important one. The answer you wanted is already in there, and the model can already produce it. It is just one of many things it might produce, and not reliably the one it picks.
 
 ## Post-Training
 
