@@ -44,6 +44,8 @@ const memorySkill: MemoryTurn = {
 
   save_memory(note)     keep a short note
   search_memory(query)  look for notes saved earlier
+
+  [the other tools and skills, left out here]
 `,
 };
 
