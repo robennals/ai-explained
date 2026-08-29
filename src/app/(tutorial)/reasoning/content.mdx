@@ -6,13 +6,13 @@ A transformer has the same problem. Each token gets a fixed amount of computatio
 
 If you ask a human to solve a hard problem, they might talk to themselves inside their head, or get out a pen and paper and write out their reasoning. 
 
-*Reasoning models* solve this problem in roughly the same way. The model writes out its thinking process in a series of hidden messages the human user can't see. 
+*Reasoning models* solve this problem in roughly the same way. The model writes out its thinking in a series of *hidden thinking messages* that the human never sees, and only then writes its reply.
 
 <ThinkFirstWidget>
-The dashed message is the model's working. It is generated one token at a time, exactly like the answer, and the model reads it back before answering.
+The dashed message is the model's hidden thinking. It is generated one token at a time, exactly like the answer, and the model reads it back before answering.
 </ThinkFirstWidget>
 
-Nothing about the architecture changes. There is no new component and no extra network. The thinking tokens are predicted exactly like every other token, and the model reads them back the same way it reads anything else in its context. Its own output becomes its working memory.
+Nothing about the architecture changes. There is no new component and no extra network. The thinking tokens are predicted exactly like every other token, and the model reads them back the same way it reads anything else in its context. Its own output becomes its scratch paper.
 
 ## How They Are Trained
 
@@ -23,19 +23,19 @@ A models learn to reason in pretty much the same way humans do. In a classroom, 
 We do essentially the same thing for an AI model by giving it many problems whose answers can be easily checked, letting it try to solve each problem many times over, and reward the outputs that quickly lead to a good answer. 
 
 <TraceSamplingWidget>
-Three attempts at one problem. The checker never reads the working, only the answer. The two that failed both did something reasonable and stopped too soon.
+Three attempts at the same problem, one per tab. The checker never reads the hidden thinking messages, only the final answer. Both of the failures did something reasonable and then stopped too soon.
 </TraceSamplingWidget>
 
-Repeat that over millions of problems and the habits that survive are the ones that lead to correct answers: checking your work, backing out of a dead end, noticing halfway through that an earlier step was wrong.
+Repeat that over millions of problems and the habits that survive are the ones that lead to correct answers: checking your work, backing out of a dead end, noticing halfway through that an earlier step was wrong. Nobody marked a single thinking message. They are shaped entirely by which answers turned out to be right.
 
-Maths and code improved most, because those are the domains where it's easiest to show that an answer is correct. But the method is not limited to them. Judging something is easier than producing it almost everywhere: it is much easier to tell that a poem is good than to write one, and much easier to tell that a business plan is good than to come up with it. So the same training works in fuzzier subjects. 
+Maths and code improved most, because those are the domains where it's easiest to show that an answer is correct. But the method is not limited to them. Judging something is easier than producing it almost everywhere: it is much easier to tell that a poem is good than to write one, and much easier to tell that a business plan is good than to come up with it. So the same training works in fuzzier subjects too, though not as effectively.
 
 ## Two Things To Keep Straight
 
-The trace is not a complete account of what drove the answer. Give a model a hint of what answer you want, and it will often write a confident chain of reasoning that justifies the answer it thinks you want, without ever mentioning your hint. People do the same thing.
+The hidden thinking messages are not a complete account of what drove the answer. Give a model a hint of what answer you want, and it will often write a confident chain of reasoning that justifies the answer it thinks you want, without ever mentioning your hint. People do the same thing.
 
-More thinking is also not always better. Every thinking token costs time and money, and on an easy question a long trace mostly gives the model more chances to talk itself out of the right answer.
+More thinking is also not always better. Every thinking token costs time and money, and on an easy question a long stretch of thinking mostly gives the model more chances to talk itself out of the right answer.
 
 <TryItInPyTorch notebook="reasoning">
-Watch a real reasoning model emit its thinking tokens, split the hidden working from the answer, and see what all that working costs. Then run the training loop in miniature: sample several attempts at a checkable problem and mark only the final answers.
+Watch a real reasoning model emit its thinking tokens, split the hidden thinking from the answer, and see what it all costs. Then run the training loop in miniature: sample several attempts at a checkable problem and mark only the final answers.
 </TryItInPyTorch>

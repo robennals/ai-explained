@@ -3,10 +3,10 @@
 <Question>
 What is an *agent*, as distinct from a model?
 
-<Choice>A model able to run programs and open web pages itself</Choice>
+<Choice>A model that can run programs and open web pages by itself</Choice>
 <Choice>A larger model with a lot more parameters</Choice>
 <Choice>A model that keeps running between conversations</Choice>
-<Choice correct>A model wrapped in a program that does things the model asks</Choice>
+<Choice correct>A model wrapped in a program that acts on what it writes</Choice>
 
 <Feedback>
 The model in an agent is the same model, unchanged, and it still only writes text. What is added is the program around it, the harness, and the loop between them: the model writes a message that is not addressed to the user, the harness acts on it, and the reply lands back in the conversation. Post-training does teach a model to write good tool calls, but on its own that just leaves it writing requests nothing acts on. The model has not gained an ability to act. It has gained a correspondent.

@@ -9,7 +9,7 @@
 
 export interface Attempt {
   id: string;
-  /** The model's working, one line per step. */
+  /** The model's hidden thinking messages, one line per step. */
   trace: string[];
   answer: string;
   correct: boolean;
@@ -34,7 +34,7 @@ export const attempts: Attempt[] = [
     ],
     answer: "65",
     correct: false,
-    note: "Got half the conditions right and stopped, without checking the other one.",
+    note: "Forgot to check whether the number was a multiple of 7. Every number it listed has digits adding to 11, and it picked one without ever testing the other half of the question.",
   },
   {
     id: "gave-up",
@@ -45,7 +45,7 @@ export const attempts: Attempt[] = [
     ],
     answer: "no such number",
     correct: false,
-    note: "Searched properly, then stopped searching halfway through the two-digit numbers.",
+    note: "Didn't list enough multiples of 7. It stopped at 49, four short of 56, and concluded there was no answer at all.",
   },
   {
     id: "checked",
@@ -57,7 +57,7 @@ export const attempts: Attempt[] = [
     ],
     answer: "56",
     correct: true,
-    note: "Worked through every case, and carried on afterwards to make sure the answer was the only one.",
+    note: "Checked every two-digit multiple of 7, and then kept going to be sure 56 was the only one.",
   },
 ];
 

@@ -1,77 +1,74 @@
 "use client";
 
+import { useState } from "react";
+import { ChatMessage } from "@/components/widgets/shared/ChatMessage";
 import { WidgetContainer } from "@/components/widgets/shared/WidgetContainer";
-import {
-  attempts,
-  check,
-  correctAnswer,
-  direction,
-  problem,
-} from "./trainingAttempts";
+import { WidgetTabs } from "@/components/widgets/shared/WidgetTabs";
+import { attempts, check, correctAnswer, problem } from "./trainingAttempts";
 
 export function TraceSampling() {
+  const [attemptId, setAttemptId] = useState(attempts[0].id);
+  const attempt = attempts.find((a) => a.id === attemptId) ?? attempts[0];
+
   return (
     <WidgetContainer
       title="How the working gets trained"
-      description="One problem, three attempts. Only the final answer is checked."
+      description="The same problem, attempted three times. Only the final answer is checked."
+      onReset={() => setAttemptId(attempts[0].id)}
     >
-      <div className="rounded-lg border border-border bg-surface p-4">
-        <div className="text-xs font-bold uppercase tracking-widest text-muted">
-          The problem
+      <WidgetTabs
+        tabs={attempts.map((a, i) => ({ id: a.id, label: `Attempt ${i + 1}` }))}
+        activeTab={attemptId}
+        onTabChange={setAttemptId}
+      />
+
+      <div className="space-y-3">
+        <ChatMessage sender="Human" kind="human" hidden={false} text={problem} />
+        <ChatMessage
+          sender="Model, thinking"
+          kind="model"
+          hidden
+          text={attempt.trace.join("\n")}
+        />
+        <ChatMessage
+          sender="Model"
+          kind="model"
+          hidden={false}
+          text={attempt.answer}
+        />
+      </div>
+
+      <div
+        className={`mt-5 overflow-hidden rounded-lg border-2 ${
+          attempt.correct
+            ? "border-success bg-success/10"
+            : "border-error bg-error/10"
+        }`}
+      >
+        <div
+          className={`px-4 py-3 text-lg font-bold ${
+            attempt.correct ? "text-success" : "text-error"
+          }`}
+        >
+          <span aria-hidden className="mr-2">
+            {attempt.correct ? "✓" : "✕"}
+          </span>
+          {attempt.correct ? "Correct" : "Wrong"}
+          <span className="ml-2 text-base font-medium text-foreground">
+            {attempt.correct
+              ? `the answer is ${correctAnswer}`
+              : `the answer should be ${correctAnswer}`}
+          </span>
         </div>
-        <p className="mt-1 text-base leading-relaxed text-foreground">
-          {problem}
+        <p className="border-t border-widget-border/60 px-4 py-3 text-base leading-relaxed text-foreground">
+          {attempt.note}
         </p>
       </div>
 
-      <div className="mt-4 space-y-3">
-        {attempts.map((attempt) => {
-          const up = direction(attempt) === "up";
-          return (
-            <div
-              key={attempt.id}
-              className={`rounded-lg border p-4 ${
-                up
-                  ? "border-success/40 bg-success/5"
-                  : "border-widget-border bg-surface"
-              }`}
-            >
-              <ol className="space-y-1">
-                {attempt.trace.map((line, i) => (
-                  <li
-                    key={i}
-                    className="text-base leading-relaxed text-muted"
-                  >
-                    {line}
-                  </li>
-                ))}
-              </ol>
-
-              <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-widget-border pt-3">
-                <span className="text-base font-semibold text-foreground">
-                  Answer: {attempt.answer}
-                </span>
-                <span
-                  className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-semibold ${
-                    up
-                      ? "bg-success/10 text-success"
-                      : "bg-error/10 text-error"
-                  }`}
-                >
-                  <span aria-hidden>{up ? "✓" : "✕"}</span>
-                  {up ? "Correct, made more likely" : "Wrong, made less likely"}
-                </span>
-              </div>
-              <p className="mt-2 text-sm leading-relaxed text-muted">
-                {attempt.note}
-              </p>
-            </div>
-          );
-        })}
-      </div>
-
       <p className="mt-4 text-base leading-relaxed text-foreground">
-        Finding the right answer requires careful reasoning. Checking that the answer is correct is easy. 
+        The checker never reads the thinking messages. It does one thing:{" "}
+        {check} Finding the number takes a search, and checking it takes a
+        moment, which is what makes this cheap enough to do millions of times.
       </p>
     </WidgetContainer>
   );

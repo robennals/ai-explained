@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ChatMessage } from "@/components/widgets/shared/ChatMessage";
 import { WidgetContainer } from "@/components/widgets/shared/WidgetContainer";
+import { WidgetTabs } from "@/components/widgets/shared/WidgetTabs";
 import { getReasoningExample, reasoningExamples } from "./reasoningExamples";
 
 export function ThinkFirst() {
@@ -15,23 +16,13 @@ export function ThinkFirst() {
       description="The model writes to itself first, in a message the human never sees."
       onReset={() => setExampleId(reasoningExamples[0].id)}
     >
-      <div className="flex flex-wrap gap-2">
-        {reasoningExamples.map((e) => (
-          <button
-            key={e.id}
-            onClick={() => setExampleId(e.id)}
-            className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-              e.id === exampleId
-                ? "bg-accent text-white"
-                : "bg-foreground/5 text-muted hover:bg-foreground/10"
-            }`}
-          >
-            {e.label}
-          </button>
-        ))}
-      </div>
+      <WidgetTabs
+        tabs={reasoningExamples.map((e) => ({ id: e.id, label: e.label }))}
+        activeTab={exampleId}
+        onTabChange={setExampleId}
+      />
 
-      <div className="mt-5 space-y-3">
+      <div className="space-y-3">
         <ChatMessage
           sender="Human"
           kind="human"
