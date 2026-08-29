@@ -6,10 +6,10 @@ The transformer in <Ch slug="transformers" /> predicts a single token. Given a p
 
 That block is called a *completion*, and the text you started it from is called the *prompt*. Hand a model a prompt, get back a completion. That is the whole of what a language model does.
 
-A prompt does not have to be a question, or an instruction, or anything addressed to anybody. It is just text that stops.
+A prompt does not have to be a question, or an instruction, or anything addressed to anybody. It is just text, and the completion is whatever plausibly comes after it.
 
 <PromptsAndCompletionsWidget>
-Step through the tabs. Only the last one is a question. The others are ordinary pieces of text that happen to stop partway through, and the model carries on from where they stopped.
+Step through the tabs. Only the last one is a question. The others are ordinary pieces of text, and in every case the completion is whatever plausibly comes next.
 </PromptsAndCompletionsWidget>
 
 Everything in the rest of this tutorial is a matter of what goes into the prompt, and what somebody does with the completion.

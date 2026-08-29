@@ -1,10 +1,10 @@
 /**
  * Hand-authored prompt and completion pairs.
  *
- * Most of them are not questions. A prompt is any piece of text that stops
- * partway through, and the completion is whatever the model writes next. The
- * question at the end is there to make the point that asking something is not
- * a special mode: it is one more piece of text that happens to stop.
+ * Most of them are not questions. A prompt is any piece of text at all, and
+ * the completion is whatever plausibly comes next. The question at the end is
+ * there to make the point that asking something is not a special mode: it is
+ * one more piece of text to carry on from.
  */
 
 export interface PromptExample {
