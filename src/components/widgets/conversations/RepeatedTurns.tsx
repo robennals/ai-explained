@@ -59,7 +59,7 @@ export function RepeatedTurns() {
           <div className="mt-5 overflow-hidden rounded-lg border border-widget-border">
             <div className="border-b border-widget-border bg-surface px-4 py-2">
               <span className="text-xs font-bold uppercase tracking-widest text-muted">
-                Prompt the model is given
+                The prompt
               </span>
             </div>
             <div className="whitespace-pre-wrap bg-surface px-4 py-3 font-mono text-sm leading-relaxed text-foreground">
@@ -72,7 +72,7 @@ export function RepeatedTurns() {
           <div className="mt-4 overflow-hidden rounded-lg border border-accent/40">
             <div className="border-b border-accent/30 bg-accent/10 px-4 py-2">
               <span className="text-xs font-bold uppercase tracking-widest text-accent">
-                The model&rsquo;s completion
+                The completion
               </span>
             </div>
             <div className="whitespace-pre-wrap bg-accent/5 px-4 py-3 font-mono text-sm leading-relaxed text-foreground">

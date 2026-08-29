@@ -4,9 +4,9 @@ Everything in this chapter is a version of the same trick. The model writes a hi
 
 ## Tools
 
-Humans are tool users. We use tools to help us think (e.g. a calculator), or to look up information (e.g. a search engine), or to do things (e.g. sending an email). The harness the AI model runs in allows it to use tools in a similar way.
+Humans are tool users. We use tools to help us think (e.g. a calculator), or to look up information (e.g. a search engine), or to do things (e.g. sending an email). The program that an AI model runs inside, called the *harness*, lets it use tools in a similar way.
 
-A hidden message the user can't see tells the model what tools it can use. When the model wants one, it writes a *tool call*: a piece of structured text naming the tool and its arguments. When the harness sees a tool cool it runs the tool and sends a hidden message to the model with the result of the tool. 
+A hidden message the user can't see tells the model what tools it can use. When the model wants one, it writes a *tool call*: a piece of structured text naming the tool and its arguments. When the harness sees a tool call it runs the tool, and sends a hidden message back to the model with the result. 
 
 That loop repeats until the model writes an ordinary reply instead of another tool call.
 
