@@ -42,6 +42,9 @@ The chapter teaches the idea. The notebook proves it's real. Chapters can hand-w
 11. **Every notebook must pass `pnpm test:notebooks`.**
     Large data (GloVe, datasets) downloads to `notebooks/` (gitignored). Notebooks fetch what they need on first run.
 
+11b. **Notebooks that run a language model are skipped by default.**
+    `chat`, `reasoning` and `agents` each download a multi-gigabyte model and generate from it, which takes many minutes. `pnpm test:notebooks` skips them and says so; `pnpm test:notebooks -- --heavy` includes them, and `-- --only chat` runs one. Keep that list current: if a new notebook loads a model, add it to `HEAVY` in `scripts/test-notebooks.sh`, so that nobody testing something unrelated pays for it by accident.
+
 12. **Maintenance — update the notebook when you edit the chapter.**
     When editing a chapter, check whether any new claim now has no corresponding concrete demo in the notebook. If so, update the notebook in the same PR when practical. If the drift is larger than a quick touch-up, log it in `notebook-sync-overview.md` so it's not forgotten.
 

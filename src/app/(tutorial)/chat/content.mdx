@@ -62,3 +62,7 @@ A chat model is a next-token predictor with two things wrapped around it. Post-t
 The transformer is doing the same thing it was doing at the end of <Ch slug="transformers" />, predicting one token at a time. What changed is what it gets asked to predict.
 
 The next two chapters add the rest of what a chat product does. <Ch slug="reasoning" /> gives the model room to think before it answers. <Ch slug="agents" /> lets it act on the world rather than only talk about it.
+
+<TryItInPyTorch notebook="chat">
+Run a base model and a chat model from the same family on the same prompts, and watch the difference. Print the chat template the model is really handed, see the prompt grow as a conversation goes on, and measure how well a small model spots a user who is unhappy with an answer.
+</TryItInPyTorch>
