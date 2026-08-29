@@ -34,9 +34,10 @@ export const reasoningExamples: ReasoningExample[] = [
     label: "Counting letters",
     question: "How many times does the letter r appear in the word strawberry?",
     trace: [
-      "I can't see the letters directly, the word arrives as one or two tokens, so spell it out: s, t, r, a, w, b, e, r, r, y.",
-      "Now count the r positions: position 3, position 8, position 9.",
-      "That is three.",
+      "I can't see the letters directly. The word arrives as one or two tokens, so I have to write it out a letter at a time and number them as I go.",
+      "1: s\n2: t\n3: r\n4: a\n5: w\n6: b\n7: e\n8: r\n9: r\n10: y",
+      "Now pick out the r's: 3, 8 and 9.",
+      "That is three of them.",
     ],
     answer: "Three. s-t-r-a-w-b-e-r-r-y has an r in the middle and two together near the end.",
   },
