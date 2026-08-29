@@ -30,7 +30,7 @@ There are no turns inside the model. The whole conversation is written out as on
 Why does the whole conversation get sent again on every turn?
 
 <Choice>To let the model check that nothing has been edited</Choice>
-<Choice correct>The model keeps nothing between turns, so it has to be told again</Choice>
+<Choice correct>The model keeps nothing, so it has to be told again</Choice>
 <Choice>Because each turn is handled by a different copy of the model</Choice>
 <Choice>To give the model more time to think about the reply</Choice>
 
@@ -55,7 +55,7 @@ Nothing is skipped or shortened: the model really does read the whole thing. Wha
 <Question>
 Who writes the marker that ends the model's turn?
 
-<Choice correct>The model, which is how the harness knows it has finished</Choice>
+<Choice correct>The model, which is how the harness knows to stop</Choice>
 <Choice>The harness, once it decides the reply is long enough</Choice>
 <Choice>Nobody: the turn ends when the model stops writing</Choice>
 <Choice>The person who set up the system prompt, in advance</Choice>
