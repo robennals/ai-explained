@@ -26,7 +26,7 @@ We do essentially the same thing for an AI model by giving it many problems whos
 Three attempts at the same problem, one per tab. The checker never reads the hidden thinking messages, only the final answer. Both of the failures did something reasonable and then stopped too soon.
 </TraceSamplingWidget>
 
-Repeat that over millions of problems and the habits that survive are the ones that lead to correct answers: checking your work, backing out of a dead end, noticing halfway through that an earlier step was wrong. Nobody marked a single thinking message. They are shaped entirely by which answers turned out to be right.
+Repeat that over millions of problems and the habits that survive are the ones that lead to correct answers: checking your work, backing out of a dead end, noticing halfway through that an earlier step was wrong. 
 
 Maths and code improved most, because those are the domains where it's easiest to show that an answer is correct. But the method is not limited to them. Judging something is easier than producing it almost everywhere: it is much easier to tell that a poem is good than to write one, and much easier to tell that a business plan is good than to come up with it. So the same training works in fuzzier subjects too, though not as effectively.
 
@@ -34,7 +34,7 @@ Maths and code improved most, because those are the domains where it's easiest t
 
 The hidden thinking messages are not a complete account of what drove the answer. Give a model a hint of what answer you want, and it will often write a confident chain of reasoning that justifies the answer it thinks you want, without ever mentioning your hint. People do the same thing.
 
-More thinking is also not always better. Every thinking token costs time and money, and on an easy question a long stretch of thinking mostly gives the model more chances to talk itself out of the right answer.
+More thinking is also not always better. Every thinking token costs time and money, and on an easy question a long stretch of thinking can give the model more chances to talk itself out of the right answer.
 
 <TryItInPyTorch notebook="reasoning">
 Watch a real reasoning model emit its thinking tokens, split the hidden thinking from the answer, and see what it all costs. Then run the training loop in miniature: sample several attempts at a checkable problem and mark only the final answers.

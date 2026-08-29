@@ -45,7 +45,7 @@ export const attempts: Attempt[] = [
     ],
     answer: "no such number",
     correct: false,
-    note: "Didn't list enough multiples of 7. It stopped at 49, four short of 56, and concluded there was no answer at all.",
+    note: "Didn't list enough multiples of 7. It stopped at 49, and didn't list 56, which would have been the right answer.",
   },
   {
     id: "checked",

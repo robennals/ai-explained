@@ -4,7 +4,7 @@ import { useState } from "react";
 import { ChatMessage } from "@/components/widgets/shared/ChatMessage";
 import { WidgetContainer } from "@/components/widgets/shared/WidgetContainer";
 import { WidgetTabs } from "@/components/widgets/shared/WidgetTabs";
-import { attempts, check, correctAnswer, problem } from "./trainingAttempts";
+import { attempts, correctAnswer, problem } from "./trainingAttempts";
 
 export function TraceSampling() {
   const [attemptId, setAttemptId] = useState(attempts[0].id);
@@ -66,9 +66,8 @@ export function TraceSampling() {
       </div>
 
       <p className="mt-4 text-base leading-relaxed text-foreground">
-        The checker never reads the thinking messages. It does one thing:{" "}
-        {check} Finding the number takes a search, and checking it takes a
-        moment, which is what makes this cheap enough to do millions of times.
+        The checker never reads the thinking messages. It just checks that the model got the right answer at the end.
+        In maths problems it is usually much easier to check an answer than to find one.
       </p>
     </WidgetContainer>
   );

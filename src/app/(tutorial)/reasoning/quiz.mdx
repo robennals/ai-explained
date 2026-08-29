@@ -1,7 +1,7 @@
 <Quiz slug="reasoning">
 
 <Question>
-What actually changes in a reasoning model?
+How is a reasoning model different from a non-reasoning model?
 
 <Choice>Its answers get checked by a second model before you see them</Choice>
 <Choice>A new memory component is added to the architecture</Choice>
@@ -9,7 +9,7 @@ What actually changes in a reasoning model?
 <Choice>Attention is replaced by a search algorithm</Choice>
 
 <Feedback>
-Nothing about the architecture changes. The model writes tokens into messages the product hides, reads them back as context, and only then writes the reply you see. Its own output becomes its scratch paper. What changed was the training, not the machine.
+Nothing about the architecture changes. The model writes hidden messages to itself, reads them back as context, and writes the reply you see once it thinks it has worked out the answer. Its own output becomes its scratch paper.
 </Feedback>
 </Question>
 
@@ -61,7 +61,7 @@ Reasoning training improved maths and code far more than most other kinds of que
 <Choice correct>It is easy to tell whether an answer is correct</Choice>
 
 <Feedback>
-Run the code, check the arithmetic: it is easy to tell whether an answer is correct, and it costs nothing to find out, which makes the training signal as sharp as it gets. That is not to say nothing else can be judged. Judging is easier than producing almost everywhere, and a person or another model can mark a poem or a plan perfectly well. The marking is just noisier and more arguable there, so the same training pulls in the same direction more weakly.
+Run the code, check the arithmetic: it is easy to tell whether an answer is correct, and it costs nothing to find out, which makes the training signal as sharp as it gets. That is not to say nothing else can be judged. Judging is easier than producing almost everywhere, and a person or another model can judge a poem or a business plan more easily than create one. The judging is just noisier and more subjective there, so the same training pulls in the same direction more weakly.
 </Feedback>
 </Question>
 
