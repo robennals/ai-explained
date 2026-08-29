@@ -1,4 +1,4 @@
-<Quiz slug="chat">
+<Quiz slug="post-training">
 
 <Question>
 A *base model* is a model that has been pre-trained and nothing else. Compared to a chat model, it:
@@ -53,15 +53,15 @@ Real conversations are the biggest source of feedback there is, and it costs not
 </Question>
 
 <Question>
-The system prompt is:
+Roughly how much of the total training effort goes into post-training?
 
-<Choice>A separate model that supervises the main one</Choice>
-<Choice>A set of hard constraints enforced from outside</Choice>
-<Choice correct>A hidden message added to the conversation</Choice>
-<Choice>A list of weights loaded before the conversation starts</Choice>
+<Choice>About half of it, split evenly with pre-training</Choice>
+<Choice correct>A small fraction, usually well under a hundredth</Choice>
+<Choice>Almost all of it, since pre-training is only a first pass</Choice>
+<Choice>None, because post-training happens while you talk to it</Choice>
 
 <Feedback>
-Underneath a chat interface there is one document with role markers in it. The system prompt is text at the top of that document. That is why it works, since the model is completing the document and everything in it shapes what comes next, and also why it is not a hard guarantee.
+Nearly all the compute goes into pre-training, often more than 99% of it. Post-training is a thin layer on top. That is worth holding on to, because it tells you where a chat model's knowledge comes from: it was all learned in the first stage, and the second stage only steered which of it comes out.
 </Feedback>
 </Question>
 

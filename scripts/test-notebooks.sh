@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 # Execute every notebook and fail if any raises.
 #
-# Three notebooks are skipped by default: chat, reasoning and agents each
+# Four notebooks are skipped by default: post-training, conversations, reasoning
+# and agents each
 # download a multi-gigabyte language model and generate from it, which takes
 # many minutes and several GB of disk. Run them deliberately, not casually:
 #
 #   pnpm test:notebooks -- --heavy     # everything, including those three
-#   pnpm test:notebooks -- --only chat # just one of them
+#   pnpm test:notebooks -- --only agents  # just one of them
 #
 # Notebooks need python packages the site itself doesn't (torch, transformers).
 # If a local virtualenv exists at .venv, use it; otherwise fall back to whatever
@@ -19,7 +20,7 @@
 set -uo pipefail
 
 # Notebooks that download and run a language model.
-HEAVY="chat.ipynb reasoning.ipynb agents.ipynb"
+HEAVY="post-training.ipynb conversations.ipynb reasoning.ipynb agents.ipynb"
 RUN_HEAVY=0
 ONLY=""
 while [ $# -gt 0 ]; do

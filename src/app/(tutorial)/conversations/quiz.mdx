@@ -1,0 +1,68 @@
+<Quiz slug="conversations">
+
+<Question>
+The system prompt is:
+
+<Choice>A separate model that supervises the main one</Choice>
+<Choice>A set of hard constraints enforced from outside</Choice>
+<Choice correct>A hidden message added to the conversation</Choice>
+<Choice>A list of weights loaded before the conversation starts</Choice>
+
+<Feedback>
+Underneath a chat interface there is one document with role markers in it. The system prompt is text at the top of that document. That is why it works, since the model is completing the document and everything in it shapes what comes next, and also why it is not a hard guarantee.
+</Feedback>
+</Question>
+
+<Question>
+What does a model see when you send it a message in a chat?
+
+<Choice>Your message on its own, with the earlier ones summarised</Choice>
+<Choice>A list of messages, each kept separate from the others</Choice>
+<Choice correct>One piece of text, with markers saying who said what</Choice>
+<Choice>Your message, plus a memory of the conversation so far</Choice>
+
+<Feedback>
+There are no turns inside the model. The whole conversation is written out as one stream of tokens, with markers like an opening and closing tag around each message, and the model completes it. Those markers are real tokens in its vocabulary, not punctuation it has to interpret.
+</Feedback>
+</Question>
+
+<Question>
+Why does the whole conversation get sent again on every turn?
+
+<Choice>To let the model check that nothing has been edited</Choice>
+<Choice correct>The model keeps nothing between turns, so it has to be told again</Choice>
+<Choice>Because each turn is handled by a different copy of the model</Choice>
+<Choice>To give the model more time to think about the reply</Choice>
+
+<Feedback>
+The model is run fresh every time. It has no memory of the previous turn, and its only knowledge of its past self is the messages we hand back to it. That is why the prompt gets longer as a conversation goes on, and why a question like "how big is it?" only works when the earlier messages explaining what "it" is are still in there.
+</Feedback>
+</Question>
+
+<Question>
+Re-reading the whole conversation before every reply sounds wasteful. Why is it not?
+
+<Choice>The conversation is summarised down before it is sent</Choice>
+<Choice>Only the most recent few messages are actually read</Choice>
+<Choice>The model skims the earlier text rather than reading it</Choice>
+<Choice correct>The work done on text it has already seen can be cached</Choice>
+
+<Feedback>
+Nothing is skipped or shortened: the model really does read the whole thing. What saves the work is that the attention vectors for the earlier part of the conversation are the same as they were last turn, so they can be kept and reused rather than recomputed. The Context chapter covers how.
+</Feedback>
+</Question>
+
+<Question>
+Who writes the marker that ends the model's turn?
+
+<Choice correct>The model, which is how the program knows it has finished</Choice>
+<Choice>The program, once it decides the reply is long enough</Choice>
+<Choice>Nobody: the turn ends when the model stops writing</Choice>
+<Choice>The person who set up the system prompt, in advance</Choice>
+
+<Feedback>
+The program writes the human's messages and the marker that opens the model's turn. The model writes its reply, and then the marker that closes it. That closing marker is an ordinary token it was post-trained to produce, and it is the signal to stop generating and show the reply.
+</Feedback>
+</Question>
+
+</Quiz>

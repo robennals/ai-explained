@@ -4,25 +4,17 @@ import dynamic from "next/dynamic";
 import { Suspense } from "react";
 import { TryItProvider } from "@/components/widgets/shared/WidgetContainer";
 
-const RawCompletion = dynamic(
+const TranscriptViews = dynamic(
   () =>
-    import("@/components/widgets/chat/RawCompletion").then(
-      (m) => m.RawCompletion
-    ),
-  { ssr: false }
-);
-
-const TrainingSignal = dynamic(
-  () =>
-    import("@/components/widgets/chat/TrainingSignal").then(
-      (m) => m.TrainingSignal
+    import("@/components/widgets/conversations/TranscriptViews").then(
+      (m) => m.TranscriptViews
     ),
   { ssr: false }
 );
 
 const RepeatedTurns = dynamic(
   () =>
-    import("@/components/widgets/chat/RepeatedTurns").then(
+    import("@/components/widgets/conversations/RepeatedTurns").then(
       (m) => m.RepeatedTurns
     ),
   { ssr: false }
@@ -30,16 +22,8 @@ const RepeatedTurns = dynamic(
 
 const SystemPromptView = dynamic(
   () =>
-    import("@/components/widgets/chat/SystemPromptView").then(
+    import("@/components/widgets/conversations/SystemPromptView").then(
       (m) => m.SystemPromptView
-    ),
-  { ssr: false }
-);
-
-const TranscriptViews = dynamic(
-  () =>
-    import("@/components/widgets/chat/TranscriptViews").then(
-      (m) => m.TranscriptViews
     ),
   { ssr: false }
 );
@@ -68,26 +52,14 @@ function WidgetSlot({
   );
 }
 
-export function RawCompletionWidget({
+export function TranscriptViewsWidget({
   children,
 }: {
   children?: React.ReactNode;
 }) {
   return (
     <WidgetSlot tryIt={children} label="Explore it">
-      <RawCompletion />
-    </WidgetSlot>
-  );
-}
-
-export function TrainingSignalWidget({
-  children,
-}: {
-  children?: React.ReactNode;
-}) {
-  return (
-    <WidgetSlot tryIt={children} label="Explore it">
-      <TrainingSignal />
+      <TranscriptViews />
     </WidgetSlot>
   );
 }
@@ -112,18 +84,6 @@ export function SystemPromptViewWidget({
   return (
     <WidgetSlot tryIt={children} label="Explore it">
       <SystemPromptView />
-    </WidgetSlot>
-  );
-}
-
-export function TranscriptViewsWidget({
-  children,
-}: {
-  children?: React.ReactNode;
-}) {
-  return (
-    <WidgetSlot tryIt={children} label="Explore it">
-      <TranscriptViews />
     </WidgetSlot>
   );
 }

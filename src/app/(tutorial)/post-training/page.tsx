@@ -6,28 +6,22 @@ import Content from "./content.mdx";
 import { QuizContent } from "./QuizContent";
 import {
   RawCompletionWidget,
-  RepeatedTurnsWidget,
-  SystemPromptViewWidget,
   TrainingSignalWidget,
-  TranscriptViewsWidget,
 } from "./widgets";
 
-export const metadata = chapterMetadata("chat");
+export const metadata = chapterMetadata("post-training");
 
 export default function Chapter10() {
-  const { prev, next } = getAdjacentChapters("chat");
+  const { prev, next } = getAdjacentChapters("post-training");
 
   return (
     <article>
       <div className="prose prose-lg max-w-none">
-        <ChapterHeader slug="chat" />
+        <ChapterHeader slug="post-training" />
         <Content
           components={{
             RawCompletionWidget,
-            RepeatedTurnsWidget,
-            SystemPromptViewWidget,
             TrainingSignalWidget,
-            TranscriptViewsWidget,
           }}
         />
       </div>

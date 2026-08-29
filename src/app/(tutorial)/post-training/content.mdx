@@ -1,0 +1,40 @@
+The previous chapter ended with a machine that reads a passage of text and says what is likely to come next. That machine is not ChatGPT or Claude. This chapter is about the training that turns a next word predictor into something useful.
+
+## What a Raw Model Does
+
+A transformer (<Ch slug="transformers" />) trained to predict the next word (<Ch slug="next-word-prediction" />) is called a *base model*. This model has read an enormous amount of text and has formed a deep enough understanding of how the world works that it can predict the next word in a piece of text about pretty much anything.
+
+But predicting the next word is not what you usually want a helpful assistant to do. The playground shows a few examples.
+
+<RawCompletionWidget>
+Try each <nog>prompt</nog>. The completion is not a mistake. Ask yourself where on the internet that text would have come next.
+</RawCompletionWidget>
+
+The base model is not confused and it is not stupid. It is doing exactly what we trained it to do. What we trained it to do was predict the next token, not to be a useful assistant.
+
+## Post-Training
+
+Closing that gap is a whole second stage of training. The two stages have names:
+
+- **Pre-training** is next-word prediction over a very large body of text. It is where the model picks up its understanding of how the world works. Nearly all of the compute goes here, often more than 99% of it.
+- **Post-training** is everything after that. It teaches the model how to apply that understanding to the thing you actually want the model to do. It is a thin layer, and it accounts for the difference between the completions above and the assistant you are used to.
+
+It is worth being clear about what post-training is not. The model has already read a great deal of real back-and-forth conversation, and a great many genuinely helpful answers. It can already produce the kind of response you want. That response is simply not the most likely thing it will say, and not what it will pick when left to itself. Post-training does not teach the model a new kind of completion. It steers it towards the completions we want and away from the ones we do not.
+
+There are several ways to do that, and a modern chat model has usually been through most of them. Most work the same way underneath: produce several candidate responses, score them somehow, and adjust the model's weights so that higher-scoring responses become more likely.
+
+<TrainingSignalWidget>
+Step through the five tabs. Each is a different way of telling the model which answer you wanted, and the last two rest on the same idea: checking an answer is far easier than producing one.
+</TrainingSignalWidget>
+
+Post-training does not teach the model new facts or new ways of understanding the world. It steers it towards using what it already has in the way we want.
+
+## Putting It Together
+
+A base model and a chat model are the same machine, and they know almost exactly the same things. What separates them is a thin layer of training that made the helpful answer the likely one.
+
+That is half of what turns a next word predictor into something you can talk to. The other half is not training at all. <Ch slug="conversations" /> is about the plumbing: how a back-and-forth conversation gets turned into the single piece of text a model can complete.
+
+<TryItInPyTorch notebook="post-training">
+Run a base model and a chat model from the same family on the same prompts and watch the difference, then measure how well a small model can spot a user who is unhappy with an answer.
+</TryItInPyTorch>

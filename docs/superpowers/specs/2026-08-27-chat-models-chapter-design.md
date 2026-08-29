@@ -12,14 +12,23 @@ assistant, how a model gets room to think, and how it acts on the world.
 
 | Slug | Title | Sections |
 |----|----|----|
-| `chat` | Chat Models | raw model, post-training, chat template |
-| `reasoning` | Reasoning Models | thinking first, how they are trained |
+| `post-training` | Post-Training | raw model, post-training |
+| `conversations` | Conversations | chat template, repeated turns, system prompt |
+| `reasoning` | Reasoning | thinking first, how they are trained |
 | `agents` | Agents | tools, skills, memory |
 
-Ids 10, 11 and 12; everything after shifts by two. `reasoning` and `agents`
-both take `chat` as their only prerequisite.
+Ids 10 to 13; everything after shifts by four. `reasoning` and `agents` both
+take `conversations` as their prerequisite.
 
-`chat` is the only chapter that shows raw token streams. It ends by showing
+`chat` was split again on 2026-08-29, for the same reason as the first split:
+five playgrounds and six sections is too many. The two halves also answer
+different questions. Post-Training is about weights, and why a next word
+predictor does not answer. Conversations is about text plumbing, and adds no
+training at all. The ordering only works one way round, since Conversations
+needs post-training to explain why the model answers after the assistant
+marker, while Post-Training needs nothing from Conversations.
+
+`post-training` and `conversations` are the only chapters that show raw token streams. It ends by showing
 the same conversation as one stream and as speech bubbles, and the later two
 chapters use the bubbles, with a dashed outline for any message the human
 never sees.
