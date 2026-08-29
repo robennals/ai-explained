@@ -1,8 +1,10 @@
-The previous chapter ended with a machine that reads a passage of text and says what is likely to come next. That machine is not ChatGPT or Claude. This chapter is about the training that turns a next word predictor into something useful.
+The previous chapter ended with a machine that predicts one token. That machine is not ChatGPT or Claude. This chapter is about the training that turns it into something useful.
 
 ## Prompts and Completions
 
-Two words we will use from here on. The text you hand a model is the *prompt*. The text it writes next is the *completion*. That is the whole of what a language model does: it takes a prompt and produces a completion.
+The transformer in <Ch slug="transformers" /> does exactly one thing: given a piece of text, it says which token plausibly comes next. Run it once and you get a single word. Add that word to the end of the text and run it again, and again, and what comes out is a whole block of text.
+
+That block is called a *completion*, and the text you started it from is called the *prompt*. Hand a model a prompt, get back a completion. That is the whole of what a language model does.
 
 A prompt does not have to be a question, or an instruction, or anything addressed to anybody. It is just text that stops.
 
