@@ -4,9 +4,9 @@
 What is an *agent*, as distinct from a model?
 
 <Choice>A model able to run programs and open web pages itself</Choice>
-<Choice>A larger model with rather more parameters</Choice>
+<Choice>A larger model with a lot more parameters</Choice>
 <Choice>A model that keeps running between conversations</Choice>
-<Choice correct>A model wrapped in a program that acts on what it writes</Choice>
+<Choice correct>A model wrapped in a program that does things the model asks</Choice>
 
 <Feedback>
 The model in an agent is the same model, unchanged, and it still only writes text. What is added is the program around it, the harness, and the loop between them: the model writes a message that is not addressed to the user, the harness acts on it, and the reply lands back in the conversation. Post-training does teach a model to write good tool calls, but on its own that just leaves it writing requests nothing acts on. The model has not gained an ability to act. It has gained a correspondent.
@@ -31,7 +31,7 @@ How does a model use a *skill*?
 
 <Choice>The instructions are trained into the weights beforehand</Choice>
 <Choice>A separate model runs it and reports the result back</Choice>
-<Choice>Every skill is always present in the context anyway</Choice>
+<Choice>Every skill is always present in the context</Choice>
 <Choice correct>It calls a tool that hands back the instructions</Choice>
 
 <Feedback>
@@ -40,15 +40,15 @@ A skill is tool use where the tool's result happens to be a page of instructions
 </Question>
 
 <Question>
-Why does telling a model something useful in one conversation do nothing for the next one?
+What does a conversation change about the model itself?
 
-<Choice correct>The weights do not change while you talk to it</Choice>
-<Choice>Each conversation is handled by a different model</Choice>
-<Choice>The model throws away what you tell it</Choice>
-<Choice>Conversations are encrypted, so it cannot read them</Choice>
+<Choice correct>Nothing. Only the text in its context changes</Choice>
+<Choice>Its weights shift a little as the conversation goes on</Choice>
+<Choice>It permanently learns any fact you tell it</Choice>
+<Choice>It rewrites its own system prompt as it goes</Choice>
 
 <Feedback>
-Training changes weights; conversation does not. Everything the model knows about the current conversation is text sitting in its context. That is why skills exist: instructions are written down as documents and loaded into the context when they are relevant, rather than being learned.
+Training changes weights. Talking does not. Everything the model knows about what is going on is text sitting in its context, which is why a skill has to arrive as a fetched document, and why carrying something from one conversation to the next means writing a note down and fetching it back later. Take that machinery away and the next conversation starts blank, not because anything was discarded, but because nothing was ever kept.
 </Feedback>
 </Question>
 
