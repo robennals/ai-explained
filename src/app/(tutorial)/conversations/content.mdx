@@ -2,7 +2,7 @@ A model completes text. It does not take turns, remember what you said, or know 
 
 ## Making It a Conversation
 
-Underneath every chat interface there is a single stream of tokens. The model does not see a conversation. It sees a prompt and writes a completion, exactly as a base model does. Post-training (<Ch slug="post-training" />) is what changed the completion from whatever text would plausibly have come next into an answer. What makes it a conversation is markers in the prompt saying who is speaking.
+Underneath every chat interface there is a single stream of tokens. The model does not see a conversation. It sees a prompt and writes a completion, exactly as a base model does. Post-training (<Ch slug="post-training" />) did not change that. It changed which completion you get, not whether you get one. What makes it a conversation is markers in the prompt saying who is speaking.
 
 <TranscriptViewsWidget>
 The same exchange twice. As text, it is a prompt and a completion. As messages, it is what you would see on screen.
