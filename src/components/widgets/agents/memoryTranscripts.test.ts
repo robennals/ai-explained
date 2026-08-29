@@ -57,10 +57,34 @@ describe("memoryScenarios", () => {
 describe("remembering a preference", () => {
   const scenario = getMemoryScenario("preference");
 
+  it("looks for a note before answering, every time, since it cannot know", () => {
+    for (const scenario of memoryScenarios) {
+      for (const conversation of scenario.conversations) {
+        const roles = conversation.turns.map((t) => t.role);
+        expect(roles.indexOf("memory-search")).toBeGreaterThan(-1);
+        expect(roles.indexOf("memory-search")).toBeLessThan(
+          roles.indexOf("assistant")
+        );
+      }
+    }
+  });
+
+  it("finds nothing the first time and something the second", () => {
+    for (const scenario of memoryScenarios) {
+      const [first, second] = scenario.conversations;
+      const firstResult = first.turns.find((t) => t.role === "memory-result")!;
+      const secondResult = second.turns.find(
+        (t) => t.role === "memory-result"
+      )!;
+      expect(firstResult.text).toMatch(/Nothing saved/);
+      expect(secondResult.text).not.toMatch(/Nothing saved/);
+    }
+  });
+
   it("writes in the first conversation and reads in the second", () => {
     const [first, second] = scenario.conversations;
     expect(first.turns.some((t) => t.role === "memory-write")).toBe(true);
-    expect(second.turns.some((t) => t.role === "memory-search")).toBe(true);
+    expect(second.turns.some((t) => t.role === "memory-write")).toBe(false);
   });
 
   it("reads back the preference it wrote", () => {

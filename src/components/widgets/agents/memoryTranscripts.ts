@@ -61,6 +61,11 @@ export const memoryScenarios: MemoryScenario[] = [
             text: "Can you help me sort out the Lisbon trip? One thing: I'm useless before nine, so nothing that leaves early.",
           },
           {
+            role: "memory-search",
+            text: 'search_memory("travel, flights, preferences")',
+          },
+          { role: "memory-result", text: "Nothing saved matching that." },
+          {
             role: "memory-write",
             text: 'save_memory("Does not want flights departing before 09:00.")',
           },
@@ -106,6 +111,8 @@ export const memoryScenarios: MemoryScenario[] = [
             role: "user",
             text: "Draft a quick note to Siobhan thanking her for covering last week.",
           },
+          { role: "memory-search", text: 'search_memory("Siobhan")' },
+          { role: "memory-result", text: "Nothing saved matching that." },
           {
             role: "assistant",
             text: "Here you go:\n\n“Hi Siobhan, thank you for covering last week, it was a real help. I owe you one.”",
@@ -146,7 +153,7 @@ export const memoryScenarios: MemoryScenario[] = [
       },
     ],
     takeaway:
-      "Nothing was learned in the sense of the model changing. It got the name wrong, was corrected, and wrote the correction down. A month later it typed the name correctly even though the request spelled it without the fada, because the note said to.",
+      "It looked both times, because it had no way of knowing whether a note existed. The first time there was nothing, so it got the name wrong, was corrected, and wrote the correction down. A month later it typed the name correctly even though the request spelled it without the fada, because the note said to.",
   },
 ];
 
