@@ -84,7 +84,7 @@ export function TranscriptViews() {
 
       <p className="mt-4 text-base leading-relaxed text-foreground">
         {view === "raw"
-          ? "Exactly the arrangement from the first playground in this chapter: a prompt, and what the model writes after it. The prompt ends with the marker that opens the model's turn, and post-training is what taught it to answer there."
+          ? "The prompt ends with the marker that opens the model's turn, and post-training is what taught it to write a response and end with an end token."
           : "Same text, drawn as messages, which is easier to follow. The dashed one is in the prompt but never shown to the human. The rest of this tutorial draws conversations this way."}
       </p>
     </WidgetContainer>

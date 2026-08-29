@@ -1,8 +1,8 @@
-A model completes text. It does not take turns, remember what you said, or know that a conversation is happening. Yet talking to one feels like talking to someone who does all three. This chapter is about the plumbing that produces that illusion, and it is simpler than you might expect.
+A model completes text. It does not take turns, remember what you said, or know that a conversation is happening. Yet talking to one feels like talking to someone who does all three. This chapter is about the plumbing that produces that illusion.
 
 ## Making It a Conversation
 
-Underneath every chat interface there is a single stream of tokens. The model does not see a conversation. It sees a prompt and writes a completion, exactly as a base model does. Post-training (<Ch slug="post-training" />) did not change that. It changed which completion you get, not whether you get one. What makes it a conversation is markers in the prompt saying who is speaking.
+Underneath every chat interface there is a single stream of text. What makes it a conversation is markers in the text saying who is speaking.
 
 <TranscriptViewsWidget>
 The same exchange twice. As text, it is a prompt and a completion. As messages, it is what you would see on screen.
@@ -12,7 +12,7 @@ The format is called a *chat template*. Every turn is opened and closed, and the
 
 ## Repeated Turns
 
-A real conversation is several turns. The way we handle that is simple. Each time you send a message, we pass the model every message so far, including the ones it wrote itself, and ask it to complete the text by saying what comes next.
+A real conversation is several turns. The way we handle that is simple. Each time you send a message, we pass the model every message so far, including the ones it wrote itself.
 
 <RepeatedTurnsWidget>
 Step through the three replies and watch the prompt grow. Everything the model said earlier is in there too, sent again. Switch to **As messages** to see the same thing as the conversation you would see on screen.
@@ -24,7 +24,7 @@ It might seem wasteful to make the model re-read the whole conversation before e
 
 ## The System Prompt
 
-There is one more message in a real conversation, and you never see it. Before your first message, the program puts a *system prompt* at the top: text telling the model things it could not have learned during training. What it is called and how it should behave. Today's date. Where you are.
+There is one more message in a real conversation, and you never see it. Before your first message, the program puts a *system prompt* at the top: text telling the model any local customizations to the model's behavior. This can include things like how you want it to behave, today's date, where you are located, or what tools it can use (<Ch slug="agents"/>).
 
 <SystemPromptViewWidget>
 Switch between the two views. It is the same stream of tokens as before, with one more message at the front, and that message is the one you are not shown.
@@ -36,11 +36,11 @@ From here on, this tutorial draws conversations as messages rather than as raw t
 
 ## Putting It Together
 
-Turning a next word predictor into something you can talk to takes two things. <Ch slug="post-training" /> was the first: steering the model towards the kind of completion that reads like a helpful reply. This chapter was the second, and none of it is training at all. A program arranges the exchange as one document, hands the whole thing over every turn, and presents what comes back as a conversation.
+A chat is a prompt and a completion, like everything else. The prompt is the whole conversation so far, with markers saying who said what and a hidden message at the top. The completion is the next reply.
 
-The transformer is doing the same thing it was doing at the end of <Ch slug="transformers" />, predicting one token at a time. What changed is what it gets asked to predict, and who arranges the text it predicts from.
+Nothing was added to the model to do this. <Ch slug="post-training" /> made the helpful completion the likely one. This chapter was the plumbing around it.
 
-The next two chapters add the rest of what a chat product does. <Ch slug="reasoning" /> gives the model room to think before it answers. <Ch slug="agents" /> lets it act on the world rather than only talk about it, using hidden messages exactly like the system prompt above.
+<Ch slug="reasoning" /> and <Ch slug="agents" /> are both built out of the same two pieces: more hidden messages, and more text in the prompt.
 
 <TryItInPyTorch notebook="conversations">
 Print the chat template a real model is handed, check that the markers are single tokens, and watch the prompt grow as a conversation goes on.
