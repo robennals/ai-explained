@@ -80,7 +80,7 @@ export function RawCompletion() {
           wanted
         />
         <Completion
-          label="A completion you would not"
+          label="A completion you would not want"
           text={example.sideways}
           wanted={false}
         />
