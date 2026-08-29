@@ -12,10 +12,14 @@ export type MemoryTurnRole =
   | "assistant"
   | "memory-write"
   | "memory-search"
-  | "memory-result";
+  | "memory-result"
+  | "tool-call"
+  | "tool-result";
 
 export interface MemoryTurn {
   role: MemoryTurnRole;
+  /** Display name of the tool, for call and result turns. */
+  tool?: string;
   text: string;
 }
 
@@ -36,15 +40,11 @@ export interface MemoryScenario {
 
 const memorySkill: MemoryTurn = {
   role: "system",
-  text: `Memory
-
-If the human tells you something that will matter in later conversations, save it with save_memory(note). Before answering anything that might depend on what they have told you before, check with search_memory(query).
+  text: `If the human tells you something that will matter in later conversations, save it with save_memory(note). Before answering anything that might depend on what they have told you before, check with search_memory(query).
 
   save_memory(note)     keep a short note
   search_memory(query)  look for notes saved earlier
-  list_memories()       everything saved so far
-
-Keep notes short and factual, and do not save anything they would not expect you to keep.`,
+`,
 };
 
 export const memoryScenarios: MemoryScenario[] = [
@@ -71,8 +71,18 @@ export const memoryScenarios: MemoryScenario[] = [
           },
           { role: "memory-result", text: "Saved." },
           {
+            role: "tool-call",
+            tool: "Flight search",
+            text: 'search_flights(from="Bristol", to="Lisbon", when="Thursday")',
+          },
+          {
+            role: "tool-result",
+            tool: "Flight search",
+            text: "07:05, 13:20, 16:05",
+          },
+          {
             role: "assistant",
-            text: "Noted, nothing before nine. There are two afternoon departures on the Thursday, at 13:20 and 16:05. Shall I look at what they cost?",
+            text: "Noted, nothing before nine. That rules out the 07:05, which leaves 13:20 and 16:05 on the Thursday. Shall I look at what they cost?",
           },
         ],
       },
@@ -90,14 +100,24 @@ export const memoryScenarios: MemoryScenario[] = [
             text: "Does not want flights departing before 09:00.  (saved 3 weeks ago)",
           },
           {
+            role: "tool-call",
+            tool: "Flight search",
+            text: 'search_flights(from="Bristol", to="Berlin", when="Friday")',
+          },
+          {
+            role: "tool-result",
+            tool: "Flight search",
+            text: "07:15, 11:40, 18:25",
+          },
+          {
             role: "assistant",
-            text: "There's an 07:15 and an 11:40. You've mentioned before that you'd rather not fly before nine, so I've gone with the 11:40 unless you say otherwise.",
+            text: "Three on Friday: 07:15, 11:40 and 18:25. You've mentioned before that you'd rather not fly before nine, so I've gone with the 11:40 unless you say otherwise.",
           },
         ],
       },
     ],
     takeaway:
-      "The second conversation is a fresh transcript. The model has no recollection of the first, and no part of it changed in the three weeks between. One line of text crossed the gap, written by one tool call and fetched by another.",
+      "The second conversation is a fresh transcript. The model has no recollection of the first, and no part of it changed in the three weeks between. The flights it quotes came from a search it ran just now. The only thing that crossed the gap is one line of text, written by one tool call and fetched back by another.",
   },
   {
     id: "mistake",
@@ -170,9 +190,12 @@ export function senderLabel(turn: MemoryTurn): string {
     case "assistant":
     case "memory-write":
     case "memory-search":
+    case "tool-call":
       return "Model";
     case "memory-result":
       return "Memory store";
+    case "tool-result":
+      return turn.tool ?? "Tool";
   }
 }
 
@@ -185,6 +208,7 @@ export function senderKind(
     case "user":
       return "human";
     case "memory-result":
+    case "tool-result":
       return "tool";
     default:
       return "model";
