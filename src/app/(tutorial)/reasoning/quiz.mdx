@@ -3,10 +3,10 @@
 <Question>
 What actually changes in a reasoning model?
 
-<Choice correct>It emits hidden thinking tokens before answering, and was trained to use them</Choice>
-<Choice>A new memory component is added to the architecture</Choice>
-<Choice>The attention mechanism is replaced with a search algorithm</Choice>
-<Choice>It runs the same question through the model many times in parallel</Choice>
+<Choice correct>It writes hidden working before it answers</Choice>
+<Choice>A new memory component is added to it</Choice>
+<Choice>Attention is replaced by a search algorithm</Choice>
+<Choice>It runs the question through the model many times</Choice>
 
 <Feedback>
 The architecture does not change at all. The model writes tokens into a thinking section the product hides, reads them back as context, and then writes the answer. Its own output is its working memory. What made this work was training with automatically checkable answers, which let the reward go to whatever scratchpad led to a correct result.
@@ -16,10 +16,10 @@ The architecture does not change at all. The model writes tokens into a thinking
 <Question>
 Why does writing its working out make a model better at hard questions?
 
-<Choice>The thinking tokens are run through a bigger version of the model</Choice>
-<Choice correct>Each token gets a fixed amount of computation, so more tokens means more room to work, and the model reads its own working back</Choice>
-<Choice>It looks up similar solved problems and copies the method</Choice>
-<Choice>The question is put through the model several times at once</Choice>
+<Choice>The thinking tokens run through a bigger model</Choice>
+<Choice correct>More tokens means more computation to spend</Choice>
+<Choice>It looks up solved problems and copies the method</Choice>
+<Choice>The question goes through the model several times</Choice>
 
 <Feedback>
 A transformer does a fixed amount of computation per token, the same number of layers whether the question is easy or hard. A question needing ten steps does not get ten times the computation just for being harder. Writing the working out gets around that: every token of working is more computation, and the model reads back what it has written as it goes, so its own output becomes its scratch paper.
@@ -29,10 +29,10 @@ A transformer does a fixed amount of computation per token, the same number of l
 <Question>
 A model's thinking trace:
 
-<Choice correct>Really does drive the answer, but is not a guaranteed-complete account of what influenced it</Choice>
-<Choice>Is written after the answer, to explain it to the user</Choice>
-<Choice>Is a record of which training examples the model retrieved</Choice>
-<Choice>Is a guaranteed-correct proof of the final answer</Choice>
+<Choice correct>Drives the answer, without being the whole story of it</Choice>
+<Choice>Is written afterwards, to explain the answer</Choice>
+<Choice>Records which training examples were retrieved</Choice>
+<Choice>Is a proof that the final answer is correct</Choice>
 
 <Feedback>
 The model writes the trace, reads it back, and answers from it, so the working is real working and it changes the answer. What it does not guarantee is completeness. In experiments where a hint about the answer is slipped into the prompt, models often take the hint and then write a confident chain of reasoning that never mentions it. People do the same thing: the reasons given for a conclusion are not always the reasons that produced it.
@@ -42,10 +42,10 @@ The model writes the trace, reads it back, and answers from it, so the working i
 <Question>
 What does most of the work in training a reasoning model?
 
-<Choice>Experts writing out worked solutions for the model to copy</Choice>
+<Choice>Experts writing out worked solutions to copy</Choice>
 <Choice>A second model marking each line of the working</Choice>
-<Choice correct>Letting it attempt checkable problems many times, and rewarding whole attempts that reached the right answer</Choice>
-<Choice>Searching through possible lines of reasoning at the moment you ask</Choice>
+<Choice correct>Many attempts, rewarding the ones that got there</Choice>
+<Choice>Searching possible lines of reasoning as you ask it</Choice>
 
 <Feedback>
 Worked examples do help, and there are millions of them: the web is full of homework help, textbook solutions and forum answers with the working shown, and curated sets of good reasoning are used in fine-tuning too. What they do not cover is breadth and difficulty, because the problems people write up are the standard ones. The method that scales needs nothing but an answer a computer can mark. The model attempts a problem many times over, whole attempts that reached the right answer are made more likely, and the working itself is never marked at all. Habits like finishing a search survive because attempts containing them get there more often.
@@ -55,13 +55,13 @@ Worked examples do help, and there are millions of them: the web is full of home
 <Question>
 Reasoning training improved maths and code far more than most other kinds of question. Why?
 
-<Choice>Maths and code make up most of the text models are pre-trained on</Choice>
-<Choice>Their answers are shorter, so the working is easier to learn</Choice>
-<Choice>Reasoning models have a separate part of the network for symbols</Choice>
-<Choice correct>Their answers can be marked automatically, cheaply and without argument</Choice>
+<Choice>Maths and code are most of the pre-training text</Choice>
+<Choice>Their answers are shorter, so they are easier to learn</Choice>
+<Choice>The network has a separate part for symbols</Choice>
+<Choice correct>It is easy to tell whether an answer is correct</Choice>
 
 <Feedback>
-Run the code, check the arithmetic: the marking is free and nobody can argue with the result, which makes the training signal as sharp as it gets. That is not to say nothing else can be judged. Judging is easier than producing almost everywhere, and a person or another model can mark a poem or a plan perfectly well. The marking is just noisier and more arguable there, so the same training pulls in the same direction more weakly.
+Run the code, check the arithmetic: it is easy to tell whether an answer is correct, and it costs nothing to find out, which makes the training signal as sharp as it gets. That is not to say nothing else can be judged. Judging is easier than producing almost everywhere, and a person or another model can mark a poem or a plan perfectly well. The marking is just noisier and more arguable there, so the same training pulls in the same direction more weakly.
 </Feedback>
 </Question>
 

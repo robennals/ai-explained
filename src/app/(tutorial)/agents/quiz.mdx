@@ -3,10 +3,10 @@
 <Question>
 What is an *agent*, as distinct from a model?
 
-<Choice>A model that has been trained on how to use tools</Choice>
-<Choice>A larger model with more parameters</Choice>
+<Choice>A model trained on how to use tools and websites</Choice>
+<Choice>A larger model with rather more parameters</Choice>
 <Choice>A model that keeps running between conversations</Choice>
-<Choice correct>A model wrapped in a program that reads what it writes, acts on it, and writes back</Choice>
+<Choice correct>A model wrapped in a program that acts on what it writes</Choice>
 
 <Feedback>
 The model in an agent is the same model, unchanged. What is added is the program around it, the harness, and the loop between them: the model writes a message that is not addressed to the user, the harness acts on it, and the reply lands back in the conversation. The model has not gained an ability to act. It has gained a correspondent.
@@ -16,10 +16,10 @@ The model in an agent is the same model, unchanged. What is added is the program
 <Question>
 When a model "searches the web", what does the model itself do?
 
-<Choice correct>Writes a tool call as text, then reads the result that gets pasted back into the transcript</Choice>
-<Choice>Opens a network connection and fetches the page</Choice>
-<Choice>Looks the answer up in weights stored during training</Choice>
-<Choice>Hands the conversation over to a separate search model</Choice>
+<Choice correct>Writes a tool call, then reads the result it gets</Choice>
+<Choice>Opens a network connection and fetches the page itself</Choice>
+<Choice>Looks the answer up in weights from training</Choice>
+<Choice>Hands the conversation to a search model</Choice>
 
 <Feedback>
 The model can only write text. It writes a structured tool call, the program running it (the harness) stops generation, performs the search, and pastes the result into the transcript as a new turn. The model then carries on predicting from there. The loop repeats until the model writes an ordinary reply instead of another tool call.
@@ -29,10 +29,10 @@ The model can only write text. It writes a structured tool call, the program run
 <Question>
 How does a model use a *skill*?
 
-<Choice>The skill's instructions are trained into the weights beforehand</Choice>
-<Choice>A separate model runs the skill and reports the result</Choice>
-<Choice>Every skill's full instructions are always present in the context</Choice>
-<Choice correct>It calls a tool that hands back the skill's instructions as text</Choice>
+<Choice>The instructions are trained into the weights beforehand</Choice>
+<Choice>A separate model runs it and reports the result back</Choice>
+<Choice>Every skill is always present in the context anyway</Choice>
+<Choice correct>It calls a tool that hands back the instructions</Choice>
 
 <Feedback>
 A skill is tool use where the tool's result happens to be a page of instructions. The model is given a list of skill names with one line each on when they apply, writes a tool call asking for the one that looks relevant, and reads the instructions that come back. Loading every skill in full every time would be enormous and mostly irrelevant, which is why the list is short and the document arrives only when it is needed.
@@ -42,10 +42,10 @@ A skill is tool use where the tool's result happens to be a page of instructions
 <Question>
 Why does telling a model something useful in one conversation do nothing for the next one?
 
-<Choice correct>The weights don't change while you talk to it, so anything it knows is text in its context</Choice>
-<Choice>Each conversation uses a different model</Choice>
-<Choice>The model deliberately discards user-provided information</Choice>
-<Choice>Conversations are encrypted so the model cannot read old ones</Choice>
+<Choice correct>The weights do not change while you talk to it</Choice>
+<Choice>Each conversation is handled by a different model</Choice>
+<Choice>The model throws away what you tell it</Choice>
+<Choice>Conversations are encrypted, so it cannot read them</Choice>
 
 <Feedback>
 Training changes weights; conversation does not. Everything the model knows about the current conversation is text sitting in its context. That is why skills exist: instructions are written down as documents and loaded into the context when they are relevant, rather than being learned.
@@ -56,9 +56,9 @@ Training changes weights; conversation does not. Everything the model knows abou
 When a chat product "remembers" something about you between conversations, what has happened?
 
 <Choice>The model was retrained on your conversation</Choice>
-<Choice correct>A note was written to a store, and fetched back into the context later</Choice>
-<Choice>The earlier conversation stays open in the background</Choice>
-<Choice>The model recognises you and recalls what you said</Choice>
+<Choice correct>A note was saved, and fetched back in again later</Choice>
+<Choice>The earlier conversation is still open somewhere</Choice>
+<Choice>The model recognises you and recalls it</Choice>
 
 <Feedback>
 The weights do not change while you talk, so nothing can be learned in the ordinary sense. A memory is text: the model (or the harness) writes a short note through a tool, and a later conversation searches for it and pastes what it finds into the context. That means a memory can be wrong or out of date, and stays that way until someone edits or deletes it.

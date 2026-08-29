@@ -3,10 +3,10 @@
 <Question>
 A *base model* is a model that has been pre-trained and nothing else. Compared to a chat model, it:
 
-<Choice>Knows far fewer facts about the world</Choice>
-<Choice correct>Knows almost as much, but continues documents instead of answering</Choice>
-<Choice>Uses a different architecture with no attention</Choice>
-<Choice>Cannot produce grammatical English</Choice>
+<Choice>Knows far fewer facts, having been shown less text</Choice>
+<Choice correct>Knows almost as much, but continues documents instead</Choice>
+<Choice>Uses a different architecture, with no attention at all</Choice>
+<Choice>Cannot reliably produce grammatical English</Choice>
 
 <Feedback>
 Nearly all of a model's knowledge comes from pre-training, so the base model already has it. What it lacks is the habit of treating your text as a request addressed to it. Ask a base model a question and it works out what kind of document your question appeared in, then continues that document, which is often a list of more questions.
@@ -16,9 +16,9 @@ Nearly all of a model's knowledge comes from pre-training, so the base model alr
 <Question>
 What does post-training mostly do?
 
-<Choice>Adds the model's knowledge of facts</Choice>
-<Choice>Replaces the transformer with a conversational architecture</Choice>
-<Choice correct>Selects between behaviours the base model already has</Choice>
+<Choice>Adds the model's knowledge of facts about the world</Choice>
+<Choice>Replaces the transformer with a design meant for chat</Choice>
+<Choice correct>Picks out behaviours the base model already has</Choice>
 <Choice>Uses most of the total training compute</Choice>
 
 <Feedback>
@@ -30,7 +30,7 @@ Post-training is a thin layer on top of pre-training, often less than 1% of the 
 In RLHF, what is the reward model for?
 
 <Choice>Generating the responses that get shown to users</Choice>
-<Choice correct>Predicting the score a human rater would have given</Choice>
+<Choice correct>Predicting a human rater's score</Choice>
 <Choice>Storing the conversation between turns</Choice>
 <Choice>Checking arithmetic and running code</Choice>
 
@@ -42,10 +42,10 @@ Human comparisons are expensive, so they are used once to train a second model t
 <Question>
 Post-training can reward the model for giving people answers they are happy with. What is the risk?
 
-<Choice>There are not enough conversations to learn anything from</Choice>
-<Choice>It only works for questions with a checkable answer</Choice>
-<Choice>Someone has to read every conversation for it to be usable</Choice>
-<Choice correct>Being pleased with an answer is not the same as the answer being right</Choice>
+<Choice>There are not enough conversations to learn from</Choice>
+<Choice>It only works where the answer can be checked</Choice>
+<Choice>Someone must read every conversation for it to work</Choice>
+<Choice correct>Pleasing someone is not the same as being right about it</Choice>
 
 <Feedback>
 Real conversations are the biggest source of feedback there is, and it costs nothing: whether the next message says thanks, or complains that the question was not answered, or asks the same thing again more sharply. What it measures is whether the person was pleased, which is only a stand-in for whether the answer was good. A confident wrong answer often pleases; a correct answer someone did not want to hear often does not. Lean on this signal too hard and the model learns to flatter, a failure mode called sycophancy.
@@ -56,8 +56,8 @@ Real conversations are the biggest source of feedback there is, and it costs not
 The system prompt is:
 
 <Choice>A separate model that supervises the main one</Choice>
-<Choice>A set of hard constraints enforced outside the model</Choice>
-<Choice correct>Text placed at the top of the same token stream the model is completing</Choice>
+<Choice>A set of hard constraints enforced from outside</Choice>
+<Choice correct>Text at the top of the stream the model is completing</Choice>
 <Choice>A list of weights loaded before the conversation starts</Choice>
 
 <Feedback>
