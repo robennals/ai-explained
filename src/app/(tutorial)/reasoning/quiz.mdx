@@ -1,0 +1,68 @@
+<Quiz slug="reasoning">
+
+<Question>
+How is a reasoning model different from a non-reasoning model?
+
+<Choice>Its answers get checked by a second model before you see them</Choice>
+<Choice>A new memory component is added to the architecture</Choice>
+<Choice correct>It writes hidden thinking messages before answering</Choice>
+<Choice>Attention is replaced by a search algorithm</Choice>
+
+<Feedback>
+Nothing about the architecture changes. The model writes hidden messages to itself, reads them back as context, and writes the reply you see once it thinks it has worked out the answer. Its own output becomes its scratch paper.
+</Feedback>
+</Question>
+
+<Question>
+Why do hidden thinking messages make a model better at hard questions?
+
+<Choice correct>They let it work through the problem a step at a time</Choice>
+<Choice>They are run through a larger version of the same model</Choice>
+<Choice>They let it look up problems it has already been shown</Choice>
+<Choice>They give it a longer memory of earlier conversations</Choice>
+
+<Feedback>
+Each token gets a fixed amount of computation, the same number of layers whether the question is easy or hard, so a question needing ten steps does not get ten times the thinking just for being harder. Writing the steps out gets around that. Each step is written down, and the model reads its own words back before writing the next one, so it can work through the problem the way you would on paper rather than having to see the whole answer at once.
+</Feedback>
+</Question>
+
+<Question>
+A model's hidden thinking messages:
+
+<Choice>Are written after the answer, in order to explain it</Choice>
+<Choice correct>Help produce the answer, but may not be the real reason</Choice>
+<Choice>Are a record of which training examples were looked up</Choice>
+<Choice>Are a proof that the answer it gave you is correct</Choice>
+
+<Feedback>
+The model writes the thinking first and reads it back, so it really is doing the work, and the answer changes because of what is in it. What it does not guarantee is honesty about why. Give a model a hint of the answer you want and it will often take the hint, then write confident thinking that never mentions it. People do the same: the reasons someone gives are not always the reasons that convinced them.
+</Feedback>
+</Question>
+
+<Question>
+What does most of the work in training a reasoning model?
+
+<Choice correct>Many attempts, rewarding the ones that got it right</Choice>
+<Choice>Experts writing out worked solutions for it to copy</Choice>
+<Choice>A second model marking each line of the thinking</Choice>
+<Choice>Searching possible lines of reasoning as you ask it</Choice>
+
+<Feedback>
+Worked examples do help, and there are millions of them: the web is full of homework help, textbook solutions and forum answers with the working shown, and curated sets of good reasoning are used in fine-tuning too. What they do not cover is breadth and difficulty, because the problems people write up are the standard ones. The method that scales needs nothing but an answer a computer can mark. The model attempts a problem many times over, whole attempts that reached the right answer are made more likely, and the working itself is never marked at all. Habits like finishing a search survive because attempts containing them get there more often.
+</Feedback>
+</Question>
+
+<Question>
+Reasoning training improved maths and code far more than most other kinds of question. Why?
+
+<Choice>Maths and code are most of the pre-training text</Choice>
+<Choice>Their answers are shorter, so they are easier to learn</Choice>
+<Choice>The network has a separate part for symbols</Choice>
+<Choice correct>It is easy to tell whether an answer is correct</Choice>
+
+<Feedback>
+Run the code, check the arithmetic: it is easy to tell whether an answer is correct, and it costs nothing to find out, which makes the training signal as sharp as it gets. That is not to say nothing else can be judged. Judging is easier than producing almost everywhere, and a person or another model can judge a poem or a business plan more easily than create one. The judging is just noisier and more subjective there, so the same training pulls in the same direction more weakly.
+</Feedback>
+</Question>
+
+</Quiz>

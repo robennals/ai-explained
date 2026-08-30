@@ -1,0 +1,68 @@
+<Quiz slug="post-training">
+
+<Question>
+A *base model* is a model that has been pre-trained and nothing else. Compared to a chat model, it:
+
+<Choice>Knows far fewer facts, having been shown less text</Choice>
+<Choice correct>Produces completions that may not be useful</Choice>
+<Choice>Uses a different architecture, with no attention at all</Choice>
+<Choice>Cannot reliably produce grammatical English</Choice>
+
+<Feedback>
+Nearly all of a model's knowledge comes from pre-training, so the base model already has it. What it lacks is the habit of treating your text as a request addressed to it. Ask a base model a question and it works out what kind of document your question appeared in, then continues that document, which is often a list of more questions.
+</Feedback>
+</Question>
+
+<Question>
+What does post-training mostly do?
+
+<Choice>Adds the model's knowledge of facts about the world</Choice>
+<Choice>Replaces the transformer with a design meant for chat</Choice>
+<Choice correct>Rewards the completions we find useful</Choice>
+<Choice>Uses most of the total training compute</Choice>
+
+<Feedback>
+Post-training is a thin layer on top of pre-training, often less than 1% of the compute. It rarely teaches new facts. What it does is pick out, from all the behaviours latent in the base model, the ones that look like a helpful assistant answering a question.
+</Feedback>
+</Question>
+
+<Question>
+Why train a second model to predict how a person would rate a response?
+
+<Choice>Because the second model can write better responses</Choice>
+<Choice correct>Because people cannot rate enough responses by hand</Choice>
+<Choice>Because it checks arithmetic and runs code</Choice>
+<Choice>Because it stores the conversation between turns</Choice>
+
+<Feedback>
+Ratings from real people are slow and expensive, and steering a model takes a great many of them. So the ratings are used once, to train a second model that predicts which response a person would have preferred. That model can then score millions of responses nobody ever looked at. It is a model, so it can be wrong, and everything trained against a wrong score inherits the mistake.
+</Feedback>
+</Question>
+
+<Question>
+Post-training can reward the model for giving people answers they are happy with. What is the risk?
+
+<Choice>There are not enough conversations to learn from</Choice>
+<Choice>It only works where the answer can be checked</Choice>
+<Choice>Someone would have to read every conversation for it to work</Choice>
+<Choice correct>Pleasing someone is not the same as being right</Choice>
+
+<Feedback>
+Real conversations are the biggest source of feedback there is, and it costs nothing: whether the next message says thanks, or complains that the question was not answered, or asks the same thing again more sharply. What it measures is whether the person was pleased, which is only a stand-in for whether the answer was good. A confident wrong answer often pleases; a correct answer someone did not want to hear often does not. Lean on this signal too hard and the model learns to flatter, a failure mode called sycophancy.
+</Feedback>
+</Question>
+
+<Question>
+Roughly how much of the total training effort goes into post-training?
+
+<Choice>About half of it, split evenly with pre-training</Choice>
+<Choice correct>A small fraction, usually well under a hundredth</Choice>
+<Choice>Almost all of it, since pre-training is only a first pass</Choice>
+<Choice>None, because post-training happens while you talk to it</Choice>
+
+<Feedback>
+Nearly all the compute goes into pre-training, often more than 99% of it. Post-training is a thin layer on top. That is worth holding on to, because it tells you where a chat model's knowledge comes from: it was all learned in the first stage, and the second stage only steered which of it comes out.
+</Feedback>
+</Question>
+
+</Quiz>

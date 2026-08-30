@@ -1,0 +1,18 @@
+---
+term: post-training
+aliases: [post-train, post-trains, post-trained, posttraining]
+firstAppearance: post-training
+---
+
+**Post-training** is everything done to a model after pre-training, to teach it how to use what it already knows.
+
+It does not add facts. It picks, out of everything the model could say, the kind of thing you actually wanted. It is a thin layer of training compared with pre-training, and it is the whole difference between a base model and something like ChatGPT.
+
+Some ways it is done:
+
+- **Show it good answers** — people write ideal responses by hand and the model is trained on them.
+- **Let someone pick a winner** — a person sees two answers and says which is better, and the model is pushed towards the winner.
+- **Let a model judge** — one copy of the model scores another's answer against written rules, which is far cheaper than paying people.
+- **Check the answer** — for maths and code, the answer can be checked automatically, so no human or judge is needed at all.
+
+Every one of these is a way of scoring answers, so that better answers become more likely next time.

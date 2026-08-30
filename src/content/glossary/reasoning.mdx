@@ -1,0 +1,17 @@
+---
+term: reasoning
+aliases: [reasoning model, reasoning models, thinking tokens, reasoning tokens]
+firstAppearance: reasoning
+---
+
+**Reasoning** is a model writing out its working before it answers, in tokens the app usually hides from you.
+
+Nothing about the model changes to do this. The thinking is predicted one token at a time exactly like the answer, and the model reads it back as it goes, so its own output becomes its rough paper. A model trained to do this is called a *reasoning model*.
+
+Questions where thinking first changes the answer:
+
+- **A bat and a ball cost $1.10, and the bat costs $1.00 more than the ball** — answer immediately and you say 10 cents, like most people. Check it and you get 5 cents.
+- **How many r's in "strawberry"** — the model has to spell the word out before it can count.
+- **Scaling a recipe** — the rice doubles, but the cooking time does not, and spotting that takes a second thought.
+
+Reasoning models came from training with answers a computer could check automatically, which meant good reasoning could be rewarded without anyone having to define what good reasoning looks like.

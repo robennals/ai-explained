@@ -1,0 +1,49 @@
+A model completes text. It does not take turns, remember what you said, or know that a conversation is happening. Yet talking to one feels like talking to someone who does all three. This chapter is about the plumbing that produces that illusion.
+
+## Making It a Conversation
+
+Underneath every chat interface there is a single stream of text. What makes it a conversation is markers in the text saying who is speaking.
+
+<TranscriptViewsWidget>
+The same exchange twice. As text, it is a <NoG>prompt</NoG> and a <NoG>completion</NoG>. As messages, it is what you would see on screen.
+</TranscriptViewsWidget>
+
+The format is called a *chat template*. Every turn is opened and closed, and the markers are real tokens the tokeniser knows about.
+
+The program that runs the model is called a *harness*. The harness turns the user's initial message into a prompt, and turns the model's completion into a message the user can see.
+
+## Repeated Turns
+
+A real conversation is several turns. The way we handle that is simple. Each time you send a message, we pass the model every message so far, including the ones it wrote itself.
+
+<RepeatedTurnsWidget>
+Step through the three replies and watch the prompt grow. Everything the model said earlier is in there too, sent again. Switch to **As messages** to see the same thing as the conversation you would see on screen.
+</RepeatedTurnsWidget>
+
+The model is run fresh every time. Its only knowledge of its past self is the messages we tell it it wrote.
+
+It might seem wasteful to make the model re-read the whole conversation before every reply. As <Ch slug="context" /> shows, it can be made efficient by caching the attention vectors for prefixes the model has already seen, so the re-reading is mostly free.
+
+## The System Prompt
+
+There is one more message in a real conversation, and you never see it. Before your first message, the harness puts a *system prompt* at the top: text telling the model any local customizations to the model's behavior. This can include things like how you want it to behave, today's date, where you are located, or what tools it can use (<Ch slug="agents"/>).
+
+<SystemPromptViewWidget>
+Switch between the two views. It is the same stream of tokens as before, with one more message at the front, and that message is the one you are not shown.
+</SystemPromptViewWidget>
+
+The system prompt is nothing more special than text at the top of the prompt. That is why it works at all, and also why it is not a hard guarantee: it is not a rule the model is forced to obey, only text it is completing a document after.
+
+From here on, this tutorial draws conversations as messages rather than as raw tokens, because they are easier to follow. A message drawn with a dashed outline, like the system prompt above, is one the human is never shown.
+
+## Putting It Together
+
+A chat is a prompt and a completion, like everything else. The prompt is the whole conversation so far, with markers saying who said what and a hidden message at the top. The completion is the next reply.
+
+<Ch slug="post-training" /> made the helpful completion with conversation markers the likely one. This chapter was the plumbing around it.
+
+<Ch slug="reasoning" /> and <Ch slug="agents" /> are both built out of the same two pieces: more hidden messages, and more text in the prompt.
+
+<TryItInPyTorch notebook="conversations">
+Print the chat template a real model is handed, check that the markers are single tokens, and watch the prompt grow as a conversation goes on.
+</TryItInPyTorch>

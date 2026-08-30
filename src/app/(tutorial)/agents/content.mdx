@@ -1,0 +1,47 @@
+A chat model can chat with a user in text. That's useful, but agents like ChatGPT and Claude can do a lot more. They can use tools, search the web, remember things from the past, and use skills. This chapter is about how that works.
+
+Everything in this chapter is a version of the same trick. The model writes a hidden message that is not addressed to you, and something other than the user answers it with a hidden message to the model.
+
+## Tools
+
+Humans are tool users. We use tools to help us think (e.g. a calculator), or to look up information (e.g. a search engine), or to do things (e.g. sending an email). The harness (<Ch slug="conversations" />) lets a model use tools in a similar way.
+
+A hidden message the user can't see tells the model what tools it can use. When the model wants one, it writes a *tool call*: a piece of structured text naming the tool and its arguments. When the harness sees a tool call it runs the tool, and sends a hidden message back to the model with the result. 
+
+That loop repeats until the model writes an ordinary reply instead of another tool call.
+
+<ToolLoopWidget>
+Four loops, in four tabs. Each opens with the tools on offer, one line each, which is the only way the model knows any of them exist. The dashed messages are part of the same conversation and never reach the human's chat window.
+</ToolLoopWidget>
+
+Search is a particularly important tool. The model's weights don't tell it about anything that happened after it was trained and may lack niche knowledge that you care about, so the model needs to rely on web search, and other information lookup tools, to give in the knowledge it needs.
+
+## Skills
+
+A *skill* is a tool whose result is a page of instructions. They are are essential way that we teach models to do new things and customize their behavior.
+
+<SkillLoopWidget>
+Each tab opens with a different set of skills on offer, one line each. Watch which one the model asks for, and check its answer against the document that comes back.
+</SkillLoopWidget>
+
+Loading every skill in full in every conversation would be a waste of space. Providing a list of skills and a tool to fetch them on demand makes each skill available only when needed.
+
+## Memory
+
+If we want an agent to remember something from a previous conversation, we can give it a tool for saving notes and a tool for searching the notes it saved before.
+
+<MemoryLoopWidget>
+Both tabs show two conversations weeks apart. Each one starts from nothing but the same instructions about when to save a note and when to look for one. Watch what actually crosses the gap.
+</MemoryLoopWidget>
+
+Products differ in how memories are fetched. Some expect the model to search for memories itself (as in this example). Some have the harness automatically search for memories relevant to the conversation. Either way, what arrives as a hidden message in the conversation.
+
+## Putting It Together
+
+Tools, skills and memory are the same mechanism pointed at three different problems. The model writes a message the human never sees, something on the other end answers it, and the reply becomes part of the text the model is predicting from.
+
+The model has not gained an ability to act. It has gained a correspondent.
+
+<TryItInPyTorch notebook="agents">
+Write the harness yourself. About thirty lines of Python give a small model working tools, a skill it can load, and a memory that outlasts the conversation.
+</TryItInPyTorch>
