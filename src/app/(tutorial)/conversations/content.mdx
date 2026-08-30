@@ -5,12 +5,12 @@ A model completes text. It does not take turns, remember what you said, or know 
 Underneath every chat interface there is a single stream of text. What makes it a conversation is markers in the text saying who is speaking.
 
 <TranscriptViewsWidget>
-The same exchange twice. As text, it is a prompt and a completion. As messages, it is what you would see on screen.
+The same exchange twice. As text, it is a <NoG>prompt</NoG> and a <NoG>completion</NoG>. As messages, it is what you would see on screen.
 </TranscriptViewsWidget>
 
 The format is called a *chat template*. Every turn is opened and closed, and the markers are real tokens the tokeniser knows about.
 
-The program that runs the model, and turns what it writes into something a user can interact with, is called the *harness*. The harness creates a prompt containing the human's initial message and a marker that starts the assistant's turn. The harness then asks the model to generate a completion, and shows that completion to the user in the form of a chat message. The model ends its completion with a marker of its own, which is how the harness knows the reply is finished.
+The program that runs the model is called a *harness*. The harness turns the user's initial message into a prompt, and turns the model's completion into a message the user can see.
 
 ## Repeated Turns
 

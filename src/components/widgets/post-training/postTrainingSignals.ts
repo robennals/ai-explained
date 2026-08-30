@@ -133,7 +133,7 @@ export const approaches: Approach[] = [
       verdictLabel: "Model B, asked whether Model A's answer followed the constitution",
       response:
         "Percentage discounts trip people up all the time! The trick is to remember that the sale price is a fraction of the original price.",
-      verdict: "No. Nothing here gives a price.",
+      verdict: "No. Nothing here gives a price, so it didn't answer the question.",
       passed: false,
     },
     outcome:
@@ -181,7 +181,7 @@ export const approaches: Approach[] = [
       passed: true,
     },
     outcome:
-      "Finding the answer means hunting for a divisor. Checking it is one multiplication that a child could do. That gap is the whole point: a second model, or three lines of code, can grade an answer it would have struggled to produce.",
+      "Finding the answer means hunting for a divisor. Checking it is one multiplication. It is often much easier for a model to check whether an answer is good than to produce a good answer itself.",
     note: "Called reinforcement learning from verifiable rewards, published in detail for DeepSeek-R1. A wrong answer fails just as fast: 89 × 91 comes to 8,099, not 8,051. So the score is a bare 1 or 0 with no opinion in it, and it can be produced millions of times overnight. It only works where an answer can be checked against something, which rules out most of what people ask a chat model. Where it does work, the sheer supply of it is what made reasoning models possible.",
   },
 ];

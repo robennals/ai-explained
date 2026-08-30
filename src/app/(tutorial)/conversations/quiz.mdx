@@ -53,15 +53,15 @@ Nothing is skipped or shortened: the model really does read the whole thing. Wha
 </Question>
 
 <Question>
-Who writes the marker that ends the model's turn?
+What does the harness do?
 
-<Choice correct>The model, which is how the harness knows to stop</Choice>
-<Choice>The harness, once it decides the reply is long enough</Choice>
-<Choice>Nobody: the turn ends when the model stops writing</Choice>
-<Choice>The person who set up the system prompt, in advance</Choice>
+<Choice correct>Wraps your message into a prompt and shows the reply</Choice>
+<Choice>Decides which word the model should write next</Choice>
+<Choice>Trains the model on each conversation it handles</Choice>
+<Choice>Checks the model's answers for mistakes before you see them</Choice>
 
 <Feedback>
-The harness writes the human's messages and the marker that opens the model's turn. The model writes its reply, and then the marker that closes it. That closing marker is an ordinary token it was post-trained to produce, and it is the signal to stop generating and show the reply.
+The harness is the program the model runs inside. It writes the prompt, which is your message wrapped in markers saying who is speaking, asks the model for a completion, and turns that completion into the chat message you see. It does none of the predicting. That part is entirely the model, and the harness never looks inside it.
 </Feedback>
 </Question>
 

@@ -1,8 +1,8 @@
-The previous chapter ended with a machine that predicts one token. That machine is not ChatGPT or Claude. This chapter is about the training that turns it into something useful.
+The previous chapter ended with a machine that takes a block of text and predicts the word that comes next. That machine is much less useful than ChatGPT or Claude. This chapter is about the training that turns it into something useful.
 
 ## Prompts and Completions
 
-The transformer in <Ch slug="transformers" /> predicts a single token. Given a piece of text, it says which token plausibly comes next (<Ch slug="next-word-prediction" />). Run it once and you get a single word. Add that word to the end of the text and run it again, and again, and what comes out is a whole block of text.
+The transformer in <Ch slug="transformers" /> takes a block of text and predicts what word comes next (<Ch slug="next-word-prediction" />). Run it once and you get a single word. Add that word to the end of the text and run it again, and again, and what comes out is a whole block of text.
 
 The block of text you started with is called a *prompt* and the text the model thinks should follow it is called a *completion*.
 
@@ -12,9 +12,9 @@ A prompt does not have to be a question, or an instruction, or anything addresse
 Step through the tabs. Only the last one is a question. The others are ordinary pieces of text, and in every case the completion is what the model thinks should follow.
 </PromptsAndCompletionsWidget>
 
-## What a Raw Model Does
+## What a Base Model Does
 
-A model trained to predict the most likely completion for a prompt is called a *base model*. It has read an enormous amount of text, and it has picked up enough about how the world works to write a likely completion for almost any prompt you give it.
+If we take a massive amount of text, say all the text on the internet, and train a model to predict what words come after any prompt, we get something called a *base model*. It has read an enormous amount of text, and it has picked up enough about how the world works to write a likely completion for almost any prompt you give it.
 
 Often a base model will write exactly what you hoped for. Ask it how to stop a sourdough starter going mouldy and it may well give a good answer, because pages that follow a question with a good answer are part of what it has seen. But it has also seen lists of questions, and other things that aren't what you want.
 
@@ -31,17 +31,17 @@ So the useful answer is already in there. It is one of the things the model migh
 Closing that gap is a whole second stage of training. The two stages have names:
 
 - **Pre-training** is next-word prediction over a very large body of text. It is where the model picks up its understanding of how the world works. Nearly all of the compute goes here, often more than 99% of it.
-- **Post-training** is everything after that. It teaches the model how to apply that understanding to the thing you actually want the model to do. It is a thin layer, and it accounts for the difference between the completions above and the assistant you are used to.
+- **Post-training** takes the model produced by pre-training and tweaks it to produce the completion that would be *most useful*, rather than the completion that is *most likely* in the pre-training data. 
 
-There are several ways to do that, and a modern chat model has usually been through most of them. Most work the same way underneath: produce several candidate responses, score them somehow, and adjust the model's weights so that higher-scoring responses become more likely.
+There are several ways to do that, and a modern chat model has usually been through most of them. Most work the same way underneath: produce several candidate responses, score them somehow, and adjust the model's weights so that the model is more likely to produce completions that score highly.
 
 <TrainingSignalWidget>
 Step through the five tabs. Each is a different way of telling the model which answer you wanted, and the last two rest on the same idea: checking an answer is far easier than producing one.
 </TrainingSignalWidget>
 
-It is worth being clear about what post-training is not. The model has already read a great deal of real back-and-forth conversation, and a great many genuinely helpful answers. It can already produce the kind of response you want. That response is simply not the most likely thing it will say, and not what it will pick when left to itself. Post-training does not teach the model a new kind of completion. It steers it towards the completions we want and away from the ones we do not.
+It is worth being clear about what post-training is not. The model has already read a great deal of real back-and-forth conversation, and a great many genuinely helpful answers. It already knows how to produce the kind of responses you want, but it also knows how to produce plenty you don't. Post-training does not teach the model a new kind of completion. It encourages it to produce the completions we want rather than the ones we do not want.
 
-Nothing about the machinery changes either. A post-trained model is still handed a prompt and still writes a completion, one token at a time, exactly as before. What changes is the target it was trained against. Pre-training asked: which completion is most likely, given everything on the internet? Post-training asks a different question: which completion would we score as being the best?
+Nothing about the machinery changes either. A post-trained model is still handed a prompt and still writes a completion, one token at a time, exactly as before. What changes is the target it was trained against. Pre-training asked: which completion is most likely? Post-training asks a different question: which completion would we score as being the best?
 
 ## Putting It Together
 
