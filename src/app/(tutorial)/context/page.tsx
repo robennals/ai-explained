@@ -5,12 +5,12 @@ import { getAdjacentChapters } from "@/lib/curriculum";
 import Content from "./content.mdx";
 import { QuizContent } from "./QuizContent";
 import {
-  AttentionCostWidget,
+  ClientServerWidget,
   KVCacheWidget,
-  LocalVsGlobalWidget,
+  SubagentContextWidget,
+  CompressionWidget,
+  AttentionCostWidget,
   SparseIndexerWidget,
-  PagedCacheWidget,
-  RetrievalWidget,
 } from "./widgets";
 
 export const metadata = chapterMetadata("context");
@@ -24,12 +24,12 @@ export default function Chapter10() {
         <ChapterHeader slug="context" />
         <Content
           components={{
-            AttentionCostWidget,
+            ClientServerWidget,
             KVCacheWidget,
-            LocalVsGlobalWidget,
+            SubagentContextWidget,
+            CompressionWidget,
+            AttentionCostWidget,
             SparseIndexerWidget,
-            PagedCacheWidget,
-            RetrievalWidget,
           }}
         />
       </div>

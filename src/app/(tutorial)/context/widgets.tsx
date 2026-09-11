@@ -4,8 +4,8 @@ import dynamic from "next/dynamic";
 import { Suspense } from "react";
 import { TryItProvider } from "@/components/widgets/shared/WidgetContainer";
 
-const AttentionCost = dynamic(
-  () => import("@/components/widgets/context/AttentionCost").then((m) => m.AttentionCost),
+const ClientServer = dynamic(
+  () => import("@/components/widgets/context/ClientServerWidget").then((m) => m.ClientServer),
   { ssr: false }
 );
 
@@ -14,23 +14,23 @@ const KVCache = dynamic(
   { ssr: false }
 );
 
-const LocalVsGlobal = dynamic(
-  () => import("@/components/widgets/context/LocalVsGlobal").then((m) => m.LocalVsGlobal),
+const SubagentContext = dynamic(
+  () => import("@/components/widgets/context/SubagentContext").then((m) => m.SubagentContext),
+  { ssr: false }
+);
+
+const Compression = dynamic(
+  () => import("@/components/widgets/context/CompressionWidget").then((m) => m.Compression),
+  { ssr: false }
+);
+
+const AttentionCost = dynamic(
+  () => import("@/components/widgets/context/AttentionCost").then((m) => m.AttentionCost),
   { ssr: false }
 );
 
 const SparseIndexer = dynamic(
   () => import("@/components/widgets/context/SparseIndexer").then((m) => m.SparseIndexer),
-  { ssr: false }
-);
-
-const PagedCache = dynamic(
-  () => import("@/components/widgets/context/PagedCache").then((m) => m.PagedCache),
-  { ssr: false }
-);
-
-const Retrieval = dynamic(
-  () => import("@/components/widgets/context/RetrievalWidget").then((m) => m.Retrieval),
   { ssr: false }
 );
 
@@ -50,10 +50,10 @@ function WidgetSlot({ children, tryIt, label }: { children: React.ReactNode; try
   );
 }
 
-export function AttentionCostWidget({ children }: { children?: React.ReactNode }) {
+export function ClientServerWidget({ children }: { children?: React.ReactNode }) {
   return (
-    <WidgetSlot tryIt={children} label="Explore it">
-      <AttentionCost />
+    <WidgetSlot tryIt={children} label="Try this">
+      <ClientServer />
     </WidgetSlot>
   );
 }
@@ -66,10 +66,26 @@ export function KVCacheWidget({ children }: { children?: React.ReactNode }) {
   );
 }
 
-export function LocalVsGlobalWidget({ children }: { children?: React.ReactNode }) {
+export function SubagentContextWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children} label="Try this">
-      <LocalVsGlobal />
+      <SubagentContext />
+    </WidgetSlot>
+  );
+}
+
+export function CompressionWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children} label="Try this">
+      <Compression />
+    </WidgetSlot>
+  );
+}
+
+export function AttentionCostWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children} label="Explore it">
+      <AttentionCost />
     </WidgetSlot>
   );
 }
@@ -78,22 +94,6 @@ export function SparseIndexerWidget({ children }: { children?: React.ReactNode }
   return (
     <WidgetSlot tryIt={children} label="Try this">
       <SparseIndexer />
-    </WidgetSlot>
-  );
-}
-
-export function PagedCacheWidget({ children }: { children?: React.ReactNode }) {
-  return (
-    <WidgetSlot tryIt={children} label="Try this">
-      <PagedCache />
-    </WidgetSlot>
-  );
-}
-
-export function RetrievalWidget({ children }: { children?: React.ReactNode }) {
-  return (
-    <WidgetSlot tryIt={children} label="Try this">
-      <Retrieval />
     </WidgetSlot>
   );
 }
