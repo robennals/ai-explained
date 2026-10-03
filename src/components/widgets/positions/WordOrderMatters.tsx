@@ -60,7 +60,7 @@ const EXAMPLES: SentenceExample[] = [
       "Moving \"only\" one position changes the entire meaning. Word order isn't just decoration — it's how language carries meaning.",
   },
   {
-    label: "Active vs. passive",
+    label: "Who bit whom?",
     kind: "reorder",
     sentenceA: ["The", "dog", "bit", "the", "man"],
     sentenceB: ["The", "man", "bit", "the", "dog"],
