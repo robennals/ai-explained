@@ -11,7 +11,7 @@ test.describe("Chapter 1: Computation", () => {
       page.getByRole("heading", { name: "Thinking Is a Function" }),
     ).toBeVisible();
     await expect(
-      page.getByRole("heading", { name: "Machines with Knobs" }),
+      page.getByRole("heading", { name: "Functions with Knobs" }),
     ).toBeVisible();
   });
 

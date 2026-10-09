@@ -41,7 +41,7 @@ const CHAPTERS: ChapterCase[] = [
   {
     slug: "attention",
     h1Contains: "Attention",
-    widgetTitles: ["Which Words Matter?"],
+    widgetTitles: ["Which Tokens Need Other Tokens?"],
   },
   {
     slug: "positions",
