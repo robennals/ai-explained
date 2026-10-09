@@ -11,16 +11,94 @@ test.describe("Chapter 1: Computation", () => {
       page.getByRole("heading", { name: "Thinking Is a Function" }),
     ).toBeVisible();
     await expect(
-      page.getByRole("heading", { name: "Machines with Knobs" }),
+      page.getByRole("heading", { name: "Functions with Knobs" }),
     ).toBeVisible();
   });
 
-  test("sidebar lists chapters on desktop viewport", async ({ page }) => {
-    await page.setViewportSize({ width: 1280, height: 800 });
-    await page.goto("/computation");
-    const sidebar = page.locator("nav.w-64");
-    await expect(sidebar).toBeVisible();
-    await expect(sidebar.getByText("Computation")).toBeVisible();
+  test.describe("sidebar on desktop viewport", () => {
+    test.use({ viewport: { width: 1280, height: 800 } });
+
+    test("lists this chapter's sections and jumps to the one clicked", async ({
+      page,
+    }) => {
+      const sidebar = page.locator("nav.w-64");
+      const sectionLink = sidebar.getByRole("link", {
+        name: "Functions with Knobs",
+      });
+      await expect(sectionLink).not.toHaveAttribute("aria-current");
+
+      await sectionLink.click();
+
+      await expect(page).toHaveURL("/computation#functions-with-knobs");
+      await expect(
+        page.getByRole("heading", { name: "Functions with Knobs" }),
+      ).toBeInViewport();
+      await expect(sectionLink).toHaveAttribute("aria-current", "location");
+    });
+
+    test("lists the PyTorch notebook and the quiz after the sections", async ({
+      page,
+    }) => {
+      const sidebar = page.locator("nav.w-64");
+      const quizLink = sidebar.getByRole("link").last();
+      await expect(quizLink).toHaveText("Quiz");
+
+      await quizLink.click();
+      await expect(quizLink).toHaveAttribute("aria-current", "location");
+
+      await sidebar.getByRole("link", { name: "Try it in PyTorch" }).click();
+
+      await expect(page).toHaveURL("/computation#try-it-in-pytorch");
+      await expect(
+        page.getByRole("link", { name: /Open in Google Colab/ }),
+      ).toBeInViewport();
+    });
+
+    test("highlights a clicked section that cannot scroll to the top", async ({
+      page,
+    }) => {
+      // Tall enough that the last two entries share the final screen.
+      await page.setViewportSize({ width: 1280, height: 2400 });
+      const sidebar = page.locator("nav.w-64");
+      const quizLink = sidebar.getByRole("link", { name: "Quiz" });
+      const pytorchLink = sidebar.getByRole("link", {
+        name: "Try it in PyTorch",
+      });
+
+      await quizLink.click();
+      await expect(quizLink).toHaveAttribute("aria-current", "location");
+
+      await pytorchLink.click();
+      await expect(pytorchLink).toHaveAttribute("aria-current", "location");
+      await expect(quizLink).not.toHaveAttribute("aria-current");
+    });
+
+    test("chapter menu switches to another chapter", async ({ page }) => {
+      const sidebar = page.locator("nav.w-64");
+      const chapterMenu = sidebar.getByRole("button", {
+        name: "Switch chapter",
+      });
+      await expect(chapterMenu).toContainText("Computation");
+
+      await chapterMenu.click();
+      await page.getByRole("link", { name: /Neural Networks/ }).click();
+
+      await expect(page).toHaveURL("/neurons");
+      await expect(chapterMenu).toContainText("Neural Networks");
+      await expect(
+        sidebar.getByRole("link", { name: "Three Neurons Solve XOR" }),
+      ).toBeVisible();
+    });
+
+    test("a page with no sections lists the chapters instead", async ({
+      page,
+    }) => {
+      await page.goto("/introduction");
+      const sidebar = page.locator("nav.w-64");
+      await expect(
+        sidebar.getByRole("link", { name: /Neural Networks/ }),
+      ).toBeVisible();
+    });
   });
 
   test("chapter nav links to next chapter (optimization)", async ({ page }) => {

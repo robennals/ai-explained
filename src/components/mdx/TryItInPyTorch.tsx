@@ -8,7 +8,11 @@ export function TryItInPyTorch({ notebook, children }: TryItInPyTorchProps) {
   const colabUrl = `https://colab.research.google.com/github/robennals/ai-explained/blob/${branch}/notebooks/${notebook}.ipynb`;
 
   return (
-    <div className="my-8 rounded-xl border border-orange-500/20 bg-gradient-to-r from-orange-500/5 to-transparent p-6">
+    <div
+      id="try-it-in-pytorch"
+      data-nav-title="Try it in PyTorch"
+      className="my-8 scroll-mt-20 rounded-xl border border-orange-500/20 bg-gradient-to-r from-orange-500/5 to-transparent p-6"
+    >
       <p className="mb-2 text-xs font-bold uppercase tracking-widest text-orange-600 dark:text-orange-400">
         Try it in PyTorch — Optional
       </p>

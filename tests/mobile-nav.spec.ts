@@ -19,7 +19,9 @@ test.describe("Mobile chapter drawer", () => {
       .first();
     await expect(closeButton).toBeVisible();
 
-    // Click "Neural Networks" (chapter 3, neurons).
+    // The drawer leads with this chapter's sections; other chapters are
+    // behind the chapter menu. Pick "Neural Networks" (chapter 3, neurons).
+    await page.getByRole("button", { name: "Switch chapter" }).click();
     await page.getByRole("link", { name: /Neural Networks/ }).click();
 
     await expect(page).toHaveURL("/neurons");
@@ -28,6 +30,23 @@ test.describe("Mobile chapter drawer", () => {
     await expect(
       page.getByRole("button", { name: "Close chapter list" }).first(),
     ).not.toBeVisible();
+  });
+
+  test("clicking a section jumps to it and closes the drawer", async ({
+    page,
+  }) => {
+    await page.goto("/computation");
+    await page.getByRole("button", { name: "Open chapter list" }).click();
+
+    await page.getByRole("link", { name: "Functions with Knobs" }).click();
+
+    await expect(page).toHaveURL("/computation#functions-with-knobs");
+    await expect(
+      page.getByRole("button", { name: "Close chapter list" }).first(),
+    ).not.toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Functions with Knobs" }),
+    ).toBeInViewport();
   });
 
   test("hamburger is hidden on desktop", async ({ page }) => {
