@@ -15,12 +15,53 @@ test.describe("Chapter 1: Computation", () => {
     ).toBeVisible();
   });
 
-  test("sidebar lists chapters on desktop viewport", async ({ page }) => {
-    await page.setViewportSize({ width: 1280, height: 800 });
-    await page.goto("/computation");
-    const sidebar = page.locator("nav.w-64");
-    await expect(sidebar).toBeVisible();
-    await expect(sidebar.getByText("Computation")).toBeVisible();
+  test.describe("sidebar on desktop viewport", () => {
+    test.use({ viewport: { width: 1280, height: 800 } });
+
+    test("lists this chapter's sections and jumps to the one clicked", async ({
+      page,
+    }) => {
+      const sidebar = page.locator("nav.w-64");
+      const sectionLink = sidebar.getByRole("link", {
+        name: "Functions with Knobs",
+      });
+      await expect(sectionLink).not.toHaveAttribute("aria-current");
+
+      await sectionLink.click();
+
+      await expect(page).toHaveURL("/computation#functions-with-knobs");
+      await expect(
+        page.getByRole("heading", { name: "Functions with Knobs" }),
+      ).toBeInViewport();
+      await expect(sectionLink).toHaveAttribute("aria-current", "location");
+    });
+
+    test("chapter menu switches to another chapter", async ({ page }) => {
+      const sidebar = page.locator("nav.w-64");
+      const chapterMenu = sidebar.getByRole("button", {
+        name: "Switch chapter",
+      });
+      await expect(chapterMenu).toContainText("Computation");
+
+      await chapterMenu.click();
+      await page.getByRole("link", { name: /Neural Networks/ }).click();
+
+      await expect(page).toHaveURL("/neurons");
+      await expect(chapterMenu).toContainText("Neural Networks");
+      await expect(
+        sidebar.getByRole("link", { name: "Three Neurons Solve XOR" }),
+      ).toBeVisible();
+    });
+
+    test("a page with no sections lists the chapters instead", async ({
+      page,
+    }) => {
+      await page.goto("/introduction");
+      const sidebar = page.locator("nav.w-64");
+      await expect(
+        sidebar.getByRole("link", { name: /Neural Networks/ }),
+      ).toBeVisible();
+    });
   });
 
   test("chapter nav links to next chapter (optimization)", async ({ page }) => {

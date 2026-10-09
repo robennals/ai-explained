@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { ChapterList } from "./ChapterList";
+import { SideNavContent } from "./SideNavContent";
 import { useHideOnScroll } from "./useHideOnScroll";
 
 export function MobileChapterNav() {
@@ -95,7 +95,7 @@ export function MobileChapterNav() {
                 </svg>
               </button>
             </div>
-            <ChapterList onNavigate={() => setOpen(false)} />
+            <SideNavContent onNavigate={() => setOpen(false)} />
           </div>
         </div>
       )}
