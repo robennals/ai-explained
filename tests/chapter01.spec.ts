@@ -36,6 +36,24 @@ test.describe("Chapter 1: Computation", () => {
       await expect(sectionLink).toHaveAttribute("aria-current", "location");
     });
 
+    test("lists the PyTorch notebook and the quiz after the sections", async ({
+      page,
+    }) => {
+      const sidebar = page.locator("nav.w-64");
+      const quizLink = sidebar.getByRole("link").last();
+      await expect(quizLink).toHaveText("Quiz");
+
+      await quizLink.click();
+      await expect(quizLink).toHaveAttribute("aria-current", "location");
+
+      await sidebar.getByRole("link", { name: "Try it in PyTorch" }).click();
+
+      await expect(page).toHaveURL("/computation#try-it-in-pytorch");
+      await expect(
+        page.getByRole("link", { name: /Open in Google Colab/ }),
+      ).toBeInViewport();
+    });
+
     test("chapter menu switches to another chapter", async ({ page }) => {
       const sidebar = page.locator("nav.w-64");
       const chapterMenu = sidebar.getByRole("button", {

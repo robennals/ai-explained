@@ -251,7 +251,12 @@ export function Quiz({ slug, children }: QuizProps) {
   const isLast = current === total - 1;
 
   return (
-    <section className="widget-container my-8" aria-label="Chapter quiz">
+    <section
+      id="quiz"
+      data-nav-title="Quiz"
+      className="widget-container my-8 scroll-mt-20"
+      aria-label="Chapter quiz"
+    >
       <header className="border-b border-widget-border bg-surface px-5 py-3">
         <h3 className="text-sm font-semibold text-foreground">
           Quiz: Check Your Understanding

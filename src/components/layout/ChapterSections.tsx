@@ -8,20 +8,27 @@ interface Section {
   title: string;
 }
 
-// A heading counts as "reached" once it is this close to the top of the
-// window. Slightly more than the heading's scroll margin, so the section you
+// A section counts as "reached" once it is this close to the top of the
+// window. Slightly more than a section's scroll margin, so the section you
 // just clicked is the one that lights up.
 const ACTIVE_OFFSET_PX = 100;
 
-function findSectionHeadings(): HTMLHeadingElement[] {
+/**
+ * The elements the sidebar links to, in page order: the article's section
+ * headings, plus blocks that have no heading of their own (the quiz, the
+ * PyTorch notebook box) and so name themselves with `data-nav-title`.
+ */
+function findSectionElements(): HTMLElement[] {
   return Array.from(
-    document.querySelectorAll<HTMLHeadingElement>("article h2[id]"),
+    document.querySelectorAll<HTMLElement>(
+      "article :is(h2[id], [id][data-nav-title])",
+    ),
   );
 }
 
 /**
- * The sections of the chapter on screen, read from the page's own headings so
- * the list can never drift from the article. `sections` is null until the page
+ * The sections of the chapter on screen, read from the page itself so the
+ * list can never drift from the article. `sections` is null until the page
  * has been read, which lets callers tell "not known yet" from "has none".
  */
 function useChapterSections(): {
@@ -33,17 +40,20 @@ function useChapterSections(): {
   const [activeId, setActiveId] = useState<string | null>(null);
 
   useEffect(() => {
-    const headings = findSectionHeadings();
+    const elements = findSectionElements();
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setSections(
-      headings.map((h) => ({ id: h.id, title: h.textContent ?? "" })),
+      elements.map((el) => ({
+        id: el.id,
+        title: el.dataset.navTitle ?? el.textContent ?? "",
+      })),
     );
 
     let ticking = false;
     const updateActive = () => {
       ticking = false;
-      const reached = headings.filter(
-        (h) => h.getBoundingClientRect().top <= ACTIVE_OFFSET_PX,
+      const reached = elements.filter(
+        (el) => el.getBoundingClientRect().top <= ACTIVE_OFFSET_PX,
       );
       setActiveId(reached.at(-1)?.id ?? null);
     };
