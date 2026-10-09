@@ -52,10 +52,23 @@ function useChapterSections(): {
     let ticking = false;
     const updateActive = () => {
       ticking = false;
-      const reached = elements.filter(
+      const reachedCount = elements.filter(
         (el) => el.getBoundingClientRect().top <= ACTIVE_OFFSET_PX,
-      );
-      setActiveId(reached.at(-1)?.id ?? null);
+      ).length;
+      const atPageBottom =
+        window.innerHeight + window.scrollY >=
+        document.documentElement.scrollHeight - 1;
+      if (!atPageBottom) {
+        setActiveId(elements[reachedCount - 1]?.id ?? null);
+        return;
+      }
+      // The page has run out of scroll, so the sections still below the
+      // reach line can never get to it. Light up the one the reader jumped
+      // to, or failing that the last one.
+      const jumpedTo = elements
+        .slice(reachedCount)
+        .find((el) => el.id === window.location.hash.slice(1));
+      setActiveId((jumpedTo ?? elements.at(-1))?.id ?? null);
     };
     const onScroll = () => {
       if (ticking) return;
@@ -65,7 +78,13 @@ function useChapterSections(): {
 
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    // Jumping between two sections that are both on screen at the bottom of
+    // the page changes the hash without scrolling.
+    window.addEventListener("hashchange", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("hashchange", onScroll);
+    };
   }, [pathname]);
 
   return { sections, activeId };

@@ -54,6 +54,25 @@ test.describe("Chapter 1: Computation", () => {
       ).toBeInViewport();
     });
 
+    test("highlights a clicked section that cannot scroll to the top", async ({
+      page,
+    }) => {
+      // Tall enough that the last two entries share the final screen.
+      await page.setViewportSize({ width: 1280, height: 2400 });
+      const sidebar = page.locator("nav.w-64");
+      const quizLink = sidebar.getByRole("link", { name: "Quiz" });
+      const pytorchLink = sidebar.getByRole("link", {
+        name: "Try it in PyTorch",
+      });
+
+      await quizLink.click();
+      await expect(quizLink).toHaveAttribute("aria-current", "location");
+
+      await pytorchLink.click();
+      await expect(pytorchLink).toHaveAttribute("aria-current", "location");
+      await expect(quizLink).not.toHaveAttribute("aria-current");
+    });
+
     test("chapter menu switches to another chapter", async ({ page }) => {
       const sidebar = page.locator("nav.w-64");
       const chapterMenu = sidebar.getByRole("button", {
