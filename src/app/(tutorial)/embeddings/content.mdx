@@ -110,20 +110,37 @@ Try punctuation too (`!`, `,`, `?`); those are tokens as well.
 
 ## Where Do Embeddings Come From?
 
-In modern AIs, the embedding is just the first layer of the neural network. It has one input node for every possible token. When a token comes in, that input is set to 1 and every other input is set to 0, like raising your hand in a crowd when someone calls your name. This is called **one-hot encoding**.
+Nobody writes an embedding by hand. We use optimization to find embeddings which are useful for whatever we want to do with them. Here is a small example of how that can work.
 
-Each connection carries a weight. Since only one input word is "on," the output of the first layer is just the weights for that one word. Those weights *are* the embedding. Unlike the neurons we saw in <Ch slug="neurons" />, the embedding layer has no bias and no activation function.
+We take a handful of sentence prefixes, like "I like to pet my ___", along with how often each word comes next in ordinary writing. Each word gets an embedding, and each sentence prefix gets an embedding too. A prefix's embedding stands for what word comes next. A word is a good fit for a prefix when their two embeddings are similar, which we measure with the dot product. (Turning those fits into percentages uses a function called **softmax**, which we'll meet in <Ch slug="attention" />.)
 
-The network learns those weights through gradient descent, just like any other weights, naturally assigning each word the meaning that helps the network the most.
+Everything starts out random. Training then nudges both the word embeddings and the prefix embeddings, a little at a time, until the model's guesses match how often each word really comes next.
 
-Modern language models use even bigger embeddings than our 300-dimensional GloVe example: GPT-2 uses 768 dimensions, GPT-3 uses 12,288 dimensions.
+<EmbeddingTrainerWidget>
+Press **Train** and watch the map. Circles are words and diamonds are prefixes; each prefix chases the words that fill its blank, and each word chases the prefixes it follows. Pick a prefix from the dropdown to compare how often each word really fills its blank with the model's current guess. Press **Scramble** to start again from new random positions: the map comes out rotated or flipped, but the same words end up together.
+</EmbeddingTrainerWidget>
+
+Nobody told the model that cats and dogs are both pets, or that cars and buses are both vehicles. Those words ended up close together because they fill the same blanks. A word that lives two lives lands in between: "chicken" is both something you eat for dinner and something a farmer feeds, so it sits between the foods and the animals.
+
+<KeyInsight>
+A word's embedding is shaped by the prefixes it follows. Words that are used in similar ways are pulled toward the same prefixes, so they end up with similar vectors.
+</KeyInsight>
+
+A real language model learns its embeddings in much the same way, by getting better at predicting what comes next. The difference is that it can't keep a ready-made embedding for every prefix, so it has to work one out from the words in the prefix. We'll see how it does that when we get to <Ch slug="transformers" />.
+
+## Where Embeddings Live in the Network
+
+In a modern AI, the word vectors are not kept in a separate table. They are the weights of the first layer of the neural network.
+
+That layer has one input for every possible token. When a token comes in, its input is set to 1 and every other input is set to 0, like raising your hand in a crowd when someone calls your name. This is called **one-hot encoding**.
+
+Each connection carries a weight. Since only one input is "on," the output of the first layer is just the weights for that one token. Those weights *are* the embedding, and they are trained along with every other weight in the network. Unlike the neurons we saw in <Ch slug="neurons" />, the embedding layer has no bias and no activation function.
 
 <EmbeddingLayerDiagramWidget>
 Select different tokens from the dropdown. The selected token's input lights up with a 1, and all the others show 0: that's one-hot encoding. The bright lines show the weights connecting that token to the embedding layer, and those weights become the embedding values on the right. The embedding then feeds into more layers of neurons, the rest of the network. Try selecting "dog" then "cat", and their embedding values look more similar to each other than to "car".
 </EmbeddingLayerDiagramWidget>
 
-
-
+Modern language models use even bigger embeddings than our 300-dimensional GloVe example: GPT-2 uses 768 dimensions, GPT-3 uses 12,288 dimensions.
 
 ## Beyond Words
 
