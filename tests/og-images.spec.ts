@@ -1,5 +1,7 @@
 import { test, expect } from "@playwright/test";
 
+// Only chapters with a curated diagram in src/lib/og-diagrams.tsx get their
+// own image; every other page falls back to /og/site.png.
 const slugs = [
   "site",
   "computation",
@@ -11,7 +13,6 @@ const slugs = [
   "attention",
   "positions",
   "transformers",
-  "appendix-pytorch",
 ];
 
 for (const slug of slugs) {

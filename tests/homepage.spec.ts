@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { getIntroChapter, getMainChapters } from "../src/lib/curriculum";
 
 test.describe("Homepage", () => {
   test("renders title and intro", async ({ page }) => {
@@ -28,9 +29,11 @@ test.describe("Homepage", () => {
     page,
   }) => {
     await page.goto("/");
-    // Main chapter grid: 27 entries (some "ready", some "coming soon")
+    // Main chapter grid: the introduction plus one card per main chapter
+    // (some "ready", some "coming soon").
     const mainGrid = page.locator("main > .grid").first();
-    await expect(mainGrid.locator("> *")).toHaveCount(27);
+    const expectedCards = (getIntroChapter() ? 1 : 0) + getMainChapters().length;
+    await expect(mainGrid.locator("> *")).toHaveCount(expectedCards);
 
     // Appendix section header
     await expect(
