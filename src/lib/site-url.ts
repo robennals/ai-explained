@@ -2,7 +2,7 @@
 // Production deploys default to the launch domain; dev defaults to localhost.
 // NEXT_PUBLIC_SITE_URL overrides both (useful for preview deploys).
 
-const PRODUCTION_URL = "https://learnai.robennals.org";
+export const PRODUCTION_URL = "https://learnai.robennals.org";
 const DEV_URL = "http://localhost:3000";
 
 export const SITE_URL =

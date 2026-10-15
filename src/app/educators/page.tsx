@@ -3,7 +3,7 @@ import Link from "next/link";
 import { getChapter, type Chapter } from "@/lib/curriculum";
 import { learningPath } from "@/lib/learning-path";
 import { getReadingMinutes } from "@/lib/reading-time";
-import { SITE_URL } from "@/lib/site-url";
+import { PRODUCTION_URL } from "@/lib/site-url";
 import { EducatorSignup } from "@/components/feedback/EducatorSignup";
 
 const TITLE = "For educators";
@@ -151,7 +151,7 @@ export default function EducatorsPage() {
         <ul className="mt-4 list-disc space-y-3 pl-5 leading-relaxed text-muted">
           <li>
             Every chapter has a permanent link, such as{" "}
-            <code className="break-all text-sm text-foreground">{SITE_URL}/attention</code>,
+            <code className="break-all text-sm text-foreground">{PRODUCTION_URL}/attention</code>,
             that you can paste into Google Classroom, Canvas, or any other
             learning platform.
           </li>
