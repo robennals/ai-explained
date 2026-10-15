@@ -20,7 +20,7 @@ export function NewChaptersSignup() {
         rel="noopener noreferrer"
         className="shrink-0 rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-accent-dark"
       >
-        Get new chapters by email
+        Subscribe to Messy Progress
       </a>
     </div>
   );

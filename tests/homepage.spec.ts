@@ -42,7 +42,7 @@ test.describe("Homepage", () => {
       await expect(page.getByText(chapter.title, { exact: true })).toBeVisible();
     }
     await expect(
-      page.getByRole("link", { name: "Get new chapters by email" }),
+      page.getByRole("link", { name: "Subscribe to Messy Progress" }),
     ).toHaveAttribute("href", /messyprogress\.substack\.com/);
   });
 
