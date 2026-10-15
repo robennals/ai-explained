@@ -1,7 +1,6 @@
 import { ChapterHeader } from "@/components/layout/ChapterHeader";
 import { ChapterNav } from "@/components/layout/ChapterNav";
 import { chapterMetadata } from "@/lib/chapter-metadata";
-import { getAdjacentChapters } from "@/lib/curriculum";
 import Content from "./content.mdx";
 import { QuizContent } from "./QuizContent";
 import {
@@ -13,8 +12,6 @@ import {
 export const metadata = chapterMetadata("transformers");
 
 export default function Chapter09() {
-  const { prev, next } = getAdjacentChapters("transformers");
-
   return (
     <article>
       <div className="prose prose-lg max-w-none">
@@ -28,7 +25,7 @@ export default function Chapter09() {
         />
       </div>
       <QuizContent />
-      <ChapterNav prev={prev} next={next} />
+      <ChapterNav slug="transformers" />
     </article>
   );
 }

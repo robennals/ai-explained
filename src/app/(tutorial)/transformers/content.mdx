@@ -65,7 +65,20 @@ We've come a long way:
 8. **Position encoding adds order** (<Ch slug="positions" />): so "dog bit man" isn't the same as "man bit dog".
 9. **The transformer wires it all together** (this chapter): and meaning emerges from prediction.
 
-Same architecture, scaled up trillions of times, is what powers ChatGPT, Claude, and Gemini.
+This same architecture, scaled up enormously, is the engine inside ChatGPT, Claude, and Gemini.
+
+## But It Isn't a Chatbot Yet
+
+Train a transformer on the whole internet, type in a question, and you might not get an answer. You might get a list of other people's questions, as if yours were one line in a forum's index page. A transformer has only ever learned to continue text. Nobody has told it that it's supposed to be helping you.
+
+Getting from here to the assistant you actually talk to is the next part of this tutorial:
+
+1. **Post-training** (<Ch slug="post-training" />): a second, much smaller round of training that makes the helpful completion the likely one.
+2. **Conversations** (<Ch slug="conversations" />): how a back-and-forth chat becomes one long document the model can continue.
+3. **Reasoning** (<Ch slug="reasoning" />): why a model that writes out its working before it answers gets dramatically better.
+4. **Agents** (<Ch slug="agents" />): how a model wrapped in a program can run tools and get things done.
+
+All four are built on the transformer you now understand.
 
 <TryItInPyTorch notebook="transformers">
 Build a complete transformer from scratch in PyTorch. Train one on simple patterns, visualize what the attention heads learn, then train a bigger one on real stories and experiment with temperature and generation.

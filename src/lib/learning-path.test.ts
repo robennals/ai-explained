@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { getChapter, getMainChapters } from "./curriculum";
-import { learningPath } from "./learning-path";
+import { getPartOf, learningPath } from "./learning-path";
 import { getWidgetCount } from "./widget-counts";
 
 describe("learningPath", () => {
@@ -19,6 +19,18 @@ describe("learningPath", () => {
       expect(chapter, slug).toBeDefined();
       expect(chapter?.section, slug).toBeUndefined();
     }
+  });
+});
+
+describe("getPartOf", () => {
+  it("returns a chapter's part, numbered from 1", () => {
+    expect(getPartOf("transformers")).toEqual({ part: learningPath[2], number: 3 });
+    expect(getPartOf("post-training")).toEqual({ part: learningPath[3], number: 4 });
+  });
+
+  it("returns undefined for pages outside the learning path", () => {
+    expect(getPartOf("introduction")).toBeUndefined();
+    expect(getPartOf("appendix-pytorch")).toBeUndefined();
   });
 });
 
