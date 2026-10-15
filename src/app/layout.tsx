@@ -4,6 +4,7 @@ import { SiteHeader } from "@/components/layout/SiteHeader";
 import { Analytics } from "@vercel/analytics/next";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { SITE_URL } from "@/lib/site-url";
+import { GA_ID, isAnalyticsEnabled } from "@/lib/analytics";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -68,7 +69,12 @@ export default function RootLayout({
         {children}
         <Analytics />
       </body>
-      {process.env.VERCEL_ENV === "production" && <GoogleAnalytics gaId="G-4BJPJ1RZR6" />}
+      {isAnalyticsEnabled() && (
+        <GoogleAnalytics
+          gaId={GA_ID}
+          debugMode={process.env.NEXT_PUBLIC_VERCEL_ENV === "preview"}
+        />
+      )}
     </html>
   );
 }

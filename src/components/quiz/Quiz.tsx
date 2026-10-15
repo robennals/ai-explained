@@ -15,13 +15,20 @@ import {
   type ReactNode,
 } from "react";
 import { GlossaryPlainProvider } from "@/components/mdx/G";
+import { trackQuizAnswer } from "./quizAnalytics";
 
 // ───────────────────────────────────────────────────────────────────────────
 // localStorage-backed persistence (via useSyncExternalStore so it survives the
 // react-hooks/set-state-in-effect lint without an escape hatch).
 // ───────────────────────────────────────────────────────────────────────────
 
-type QuizState = { current: number; selections: Record<number, number> };
+// `retaken` marks a quiz the reader has restarted, whose answers are no longer
+// first attempts and so aren't reported to analytics.
+type QuizState = {
+  current: number;
+  selections: Record<number, number>;
+  retaken?: boolean;
+};
 const EMPTY_QUIZ_STATE: QuizState = { current: 0, selections: {} };
 
 const localChangeListeners = new Map<string, Set<() => void>>();
@@ -192,9 +199,19 @@ export function Quiz({ slug, children }: QuizProps) {
   const handleSelect = (questionIdx: number, optionIdx: number) => {
     if (selections[questionIdx] != null) return;
     setPersisted({
+      ...persisted,
       current,
       selections: { ...selections, [questionIdx]: optionIdx },
     });
+    if (!persisted.retaken) {
+      trackQuizAnswer({
+        chapter: slug,
+        selectionsBefore: selections,
+        questionIdx,
+        optionIdx,
+        correctIndices,
+      });
+    }
   };
 
   const handleNext = () => {
@@ -205,11 +222,11 @@ export function Quiz({ slug, children }: QuizProps) {
       next.delete(current);
       return next;
     });
-    setPersisted({ current: current + 1, selections });
+    setPersisted({ ...persisted, current: current + 1, selections });
   };
 
   const handleRetake = () => {
-    setPersisted({ current: 0, selections: {} });
+    setPersisted({ current: 0, selections: {}, retaken: true });
     setExpandedSet(new Set());
     setSessionId((s) => s + 1);
   };

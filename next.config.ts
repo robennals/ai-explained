@@ -16,6 +16,9 @@ const nextConfig: NextConfig = {
   pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
   env: {
     NEXT_PUBLIC_GIT_BRANCH: getGitBranch(),
+    // Exposes VERCEL_ENV to client code, which uses it to decide whether
+    // Google Analytics is loaded (see src/lib/analytics.ts).
+    NEXT_PUBLIC_VERCEL_ENV: process.env.VERCEL_ENV ?? "",
   },
 };
 

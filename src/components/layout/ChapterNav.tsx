@@ -8,7 +8,11 @@ interface ChapterNavProps {
 
 export function ChapterNav({ prev, next }: ChapterNavProps) {
   return (
-    <nav className="mt-16 flex flex-col items-stretch gap-3 border-t border-border pt-8 sm:flex-row sm:gap-4">
+    <nav
+      // Marks the end of the chapter, for analytics in chapters with no quiz.
+      data-chapter-end
+      className="mt-16 flex flex-col items-stretch gap-3 border-t border-border pt-8 sm:flex-row sm:gap-4"
+    >
       {prev ? (
         <Link
           href={`/${prev.slug}`}
