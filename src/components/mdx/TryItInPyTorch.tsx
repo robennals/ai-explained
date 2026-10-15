@@ -1,4 +1,9 @@
+import Link from "next/link";
 import { ColabLink } from "./ColabLink";
+
+// The appendix's own notebook shares its slug, so its box skips the link
+// back to itself.
+const PYTORCH_APPENDIX_SLUG = "appendix-pytorch";
 
 interface TryItInPyTorchProps {
   notebook: string;
@@ -22,6 +27,18 @@ export function TryItInPyTorch({ notebook, children }: TryItInPyTorchProps) {
         {children}
       </div>
       <ColabLink href={colabUrl} />
+      {notebook !== PYTORCH_APPENDIX_SLUG && (
+        <div className="mt-3 text-xs text-muted">
+          New to PyTorch?{" "}
+          <Link
+            href={`/${PYTORCH_APPENDIX_SLUG}`}
+            className="font-medium text-orange-700 underline underline-offset-2 hover:text-orange-800"
+          >
+            Start with PyTorch from Scratch
+          </Link>
+          , a beginner-friendly introduction.
+        </div>
+      )}
     </div>
   );
 }
