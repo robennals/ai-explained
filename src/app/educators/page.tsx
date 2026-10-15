@@ -151,7 +151,10 @@ export default function EducatorsPage() {
         <ul className="mt-4 list-disc space-y-3 pl-5 leading-relaxed text-muted">
           <li>
             Every chapter has a permanent link, such as{" "}
-            <code className="break-all text-sm text-foreground">{PRODUCTION_URL}/attention</code>,
+            <a href={`${PRODUCTION_URL}/attention`} className="break-all text-accent hover:text-accent-dark">
+              {PRODUCTION_URL.replace(/^https:\/\//, "")}/attention
+            </a>
+            ,
             that you can paste into Google Classroom, Canvas, or any other
             learning platform.
           </li>
