@@ -42,3 +42,9 @@ export const learningPath: LearningPart[] = [
     slugs: ["post-training", "conversations", "reasoning", "agents"],
   },
 ];
+
+/** The part containing `slug`, with its 1-based number, if it's in one. */
+export function getPartOf(slug: string): { part: LearningPart; number: number } | undefined {
+  const i = learningPath.findIndex((p) => p.slugs.includes(slug));
+  return i === -1 ? undefined : { part: learningPath[i], number: i + 1 };
+}

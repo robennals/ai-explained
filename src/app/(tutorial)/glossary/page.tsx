@@ -3,7 +3,7 @@ import { ChapterHeader } from "@/components/layout/ChapterHeader";
 import { ChapterNav } from "@/components/layout/ChapterNav";
 import { GlossaryRenderProvider } from "@/components/mdx/G";
 import { chapterMetadata } from "@/lib/chapter-metadata";
-import { chapters, getAdjacentChapters } from "@/lib/curriculum";
+import { chapters } from "@/lib/curriculum";
 import { glossaryEntries } from "@/lib/glossary/index.generated";
 import { GlossaryHashOpener } from "./GlossaryHashOpener";
 
@@ -18,8 +18,6 @@ function isReady(slug: string): boolean {
 }
 
 export default function GlossaryPage() {
-  const { prev, next } = getAdjacentChapters("glossary");
-
   return (
     <article>
       <GlossaryHashOpener />
@@ -82,7 +80,7 @@ export default function GlossaryPage() {
         })}
       </div>
 
-      <ChapterNav prev={prev} next={next} />
+      <ChapterNav slug="glossary" />
     </article>
   );
 }
