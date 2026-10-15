@@ -2,12 +2,12 @@
 
 An interactive, visual tutorial site for understanding AI from first principles. Tinker with real models, break things on purpose, and discover why neural networks work the way they do.
 
-🌐 **Live site:** https://ai-explained.com (TODO: replace with the real launch URL)
+🌐 **Live site:** https://learnai.robennals.org
 📨 **New chapter notifications:** [messyprogress.substack.com](https://messyprogress.substack.com)
 
 ## What's here
 
-The site walks through the big ideas behind modern AI — neural networks, embeddings, attention, transformers — using interactive widgets you can play with. Each chapter is a standalone article with playgrounds inline. A companion Jupyter notebook for each chapter lets you run real PyTorch code in Google Colab.
+The site walks through the big ideas behind modern AI — neural networks, embeddings, attention, transformers, and on to post-training, reasoning, and agents — using interactive widgets you can play with. Each chapter is a standalone article with playgrounds inline. A companion Jupyter notebook for each chapter lets you run real PyTorch code in Google Colab.
 
 See `src/lib/curriculum.ts` for the full chapter list.
 
