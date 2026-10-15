@@ -1,32 +1,21 @@
-Modern AI does things that would have seemed impossible for a computer a few years ago. Underneath all of it is math, and less math than you would expect. This chapter is about what kind of math, and why a foundation this simple can do so much.
-
-## What Can AI Do?
-
-A few years ago, the things AI does routinely now would have read as science fiction. It can translate between hundreds of languages, generate a photorealistic image from a description, write complex computer programs from scratch, or perform expert tasks better than most experts. The goal of this tutorial is to give you a deep intuitive sense of how AI does these things. 
-
-The whole tutorial rests on four ideas that the rest of this chapter introduces:
-
-- **Everything inside an AI is numbers.** Words, images, sound.
-- **An AI is a function**: numbers go in, different numbers come out.
-- **The function is itself made of numbers.** Billions of them, called *parameters*.
-- **Training an AI means finding the right values for those numbers.**
-
-Most of the tutorial is spent on the fourth point, because that's where the interesting complications live.
+Modern AI does things that would have seemed impossible for a computer a few years ago. It can translate between hundreds of languages, generate a photorealistic image from a description, write complex computer programs from scratch, or perform expert tasks better than most experts. Underneath all of it is math, and less math than you would expect. This chapter is about what kind of math, and why a foundation this simple can do so much.
 
 ## Everything Is Numbers
 
 You probably think of a text message as letters, a photo as colors, a song as sound. Inside a computer, all of them are lists of numbers.
-
-- **Text** is numbers. Every character has a number assigned to it. The letter "H" is one number, "e" is another, the space between words is yet another. Your text message is a sequence of numbers.
-- **Colors** are numbers. Every color you've ever seen can be described by three numbers: how much red, green, and blue light to mix. (Or how much cyan, magenta, and yellow ink, if you're painting.) Change those three numbers and you get a different color.
-- **Images** are numbers. Every pixel is a color, and every color is three numbers. A photo is a giant grid of number-triplets.
-- **Sound** is numbers. A microphone samples the air pressure thousands of times per second. Each sample is one number. A three-minute song is about 8 million numbers.
 
 Throughout this tutorial, the boxes that look like the one below are interactive *playgrounds*. Click the tabs, type things in, drag the sliders. The point is to mess around with them.
 
 <NumbersEverywhereWidget>
 Type your name in the Text tab and watch each letter become a number. Mix a color using three sliders in the Color tab. Paint something in the Image tab. The computer only ever sees the numbers. In the Sound tab, click a preset like "aaah" or "eeee" and press Play. You'll hear a synthesized vowel, and see the raw numbers that produce it.
 </NumbersEverywhereWidget>
+
+Here's what's going on in each tab:
+
+- **Text** is numbers. Every character has a number assigned to it. The letter "H" is one number, "e" is another, the space between words is yet another. Your text message is a sequence of numbers.
+- **Colors** are numbers. Every color you've ever seen can be described by three numbers: how much red, green, and blue light to mix. (Or how much cyan, magenta, and yellow ink, if you're painting.) Change those three numbers and you get a different color.
+- **Images** are numbers. Every pixel is a color, and every color is three numbers. A photo is a giant grid of number-triplets.
+- **Sound** is numbers. A microphone samples the air pressure thousands of times per second. Each sample is one number. A three-minute song is about 8 million numbers.
 
 <KeyInsight>
 **Every input a computer ever sees is a list of numbers. Every output it produces is also a list of numbers.** So every kind of computer thinking is the act of turning one list of numbers into another.
