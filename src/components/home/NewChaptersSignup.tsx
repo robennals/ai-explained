@@ -7,7 +7,7 @@ export function NewChaptersSignup() {
     <div className="mt-6 flex flex-col items-center gap-4 rounded-2xl bg-accent/5 px-6 py-6 text-center ring-1 ring-inset ring-accent/20 sm:flex-row sm:text-left">
       <div className="flex-1">
         <h3 className="font-semibold text-foreground">
-          Want to know when these are written?
+          Want to know when more chapters are written?
         </h3>
         <p className="mt-1 text-sm text-muted">
           I announce each new chapter on my blog, Messy Progress. Subscribe and
