@@ -1,6 +1,8 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, useRef, type ReactNode } from "react";
+import { usePathname } from "next/navigation";
+import { chapterFromPathname, track } from "@/lib/analytics";
 
 interface TryItValue {
   content: ReactNode;
@@ -42,6 +44,16 @@ export function WidgetContainer({
   const [hasError, setHasError] = useState(false);
   const [tabVisit, setTabVisit] = useState<TabVisitState | null>(null);
   const tryIt = useContext(TryItContext);
+  const chapter = chapterFromPathname(usePathname());
+  const interactedRef = useRef(false);
+
+  // Report the reader's first poke at this widget. Capture phase, so a
+  // control that stops propagation still counts.
+  const handleFirstInteraction = useCallback(() => {
+    if (interactedRef.current || !chapter) return;
+    interactedRef.current = true;
+    track("widget_interact", { chapter, widget: title });
+  }, [chapter, title]);
 
   const handleReset = useCallback(() => {
     setHasError(false);
@@ -69,7 +81,11 @@ export function WidgetContainer({
   }
 
   return (
-    <div className="widget-container my-8">
+    <div
+      className="widget-container my-8"
+      onPointerDownCapture={handleFirstInteraction}
+      onKeyDownCapture={handleFirstInteraction}
+    >
       <div className="flex items-center justify-between border-b border-widget-border bg-surface px-5 py-3">
         <div>
           <h3 className="text-sm font-semibold text-foreground">{title}</h3>
