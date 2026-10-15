@@ -59,6 +59,12 @@ export default function HomePage() {
             or read the introduction →
           </Link>
         </div>
+        <p className="mt-5 text-sm text-muted">
+          Teaching a class?{" "}
+          <Link href="/educators" className="font-medium text-accent hover:text-accent-dark">
+            See the guide for educators
+          </Link>
+        </p>
       </div>
 
       <nav aria-label="Parts of the course" className="mx-auto max-w-4xl">
