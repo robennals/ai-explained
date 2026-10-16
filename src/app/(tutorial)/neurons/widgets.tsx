@@ -108,10 +108,10 @@ const TwoNeuronXOR = dynamic(
   { ssr: false }
 );
 
-const AdderCircuit = dynamic(
+const GateScaleTour = dynamic(
   () =>
-    import("@/components/widgets/neurons/AdderCircuit").then(
-      (m) => m.AdderCircuit
+    import("@/components/widgets/neurons/GateScaleTour").then(
+      (m) => m.GateScaleTour
     ),
   { ssr: false }
 );
@@ -260,10 +260,10 @@ export function TwoNeuronXORWidget({ children }: { children?: React.ReactNode })
   );
 }
 
-export function AdderCircuitWidget({ children }: { children?: React.ReactNode }) {
+export function GateScaleWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children}>
-      <AdderCircuit />
+      <GateScaleTour />
     </WidgetSlot>
   );
 }
