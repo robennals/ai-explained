@@ -95,16 +95,6 @@ This neuron has two inputs, so that it can work like a logic gate. Real neurons 
 
 With the right weights, a single neuron computes AND, OR, NOT, and more, and you can slide smoothly from one gate to another. One gate is missing, though: no settings of a single neuron compute XOR. We'll see why, and how to fix it, in a moment. A neuron also keeps the nuance of in-between inputs. The cutoff in Step 1 squashed them into a hard yes or no, so 0.8 AND 0.8 ("probably" and "probably") came out as a flat 1 ("definitely"). A neuron's output can be 0.73 ("probably") or 0.4 ("maybe not"). That matters because real-world data is rarely cleanly true or false. Is this email spam? Probably. Is that shadow in the photo a cat? Maybe.
 
-## Sharp or Smooth
-
-You can control how gate-like a neuron is. Multiply all the weights and the bias by a large number and the S-curve steepens toward a hard cutoff, so the neuron behaves just like a logic gate. Scale them down and it flattens into a gentle slope. The point where it switches stays in the same place. Only the sharpness changes.
-
-<SharpnessExplorerWidget>
-Drag the sharpness slider all the way up. The curve snaps almost like a light switch, 0 or 1, nothing in between. Now drag it down. The curve becomes a gentle slope.
-</SharpnessExplorerWidget>
-
-There's a catch, though. Very sharp neurons are harder to train. On the flat parts of a sharp sigmoid, the output barely changes when you nudge a weight, so the optimizer can't tell which direction to move. Real networks use various tricks to keep neurons in the smooth, trainable middle of the curve, but the basic intuition is enough for now: smoother neurons are easier to train.
-
 <KeyInsight>
 **A neuron is a smooth, trainable logic gate.** With the right weights it can compute AND, OR, NOT, and more. Because small changes to the weights produce small changes in the output, we can find those weights using optimization. And neurons handle in-between values naturally, which suits messy, uncertain real-world data.
 </KeyInsight>
