@@ -307,7 +307,7 @@ export function CombinedNumberLine() {
                 <text
                   x={cx} y={adjustedLineY + 34}
                   textAnchor="middle"
-                  className="text-[9px] pointer-events-none select-none"
+                  className="text-[10px] sm:text-[9px] pointer-events-none select-none"
                   fill={group.color} opacity={0.7}
                 >
                   {group.ordering} →

@@ -262,12 +262,13 @@ export function WordPairSpectrum() {
           {/* Header row showing what the two bars represent */}
           <div className="mb-1 flex items-center gap-2 text-[10px] text-muted">
             <span className="w-24" />
-            <div className="flex-[2] flex items-baseline justify-between">
+            <div className="flex-[2] flex min-w-0 items-baseline justify-between gap-2">
               <span>{wordA}</span>
-              <span className="text-[9px] uppercase tracking-wider">position on the line</span>
+              {/* No room for this between the two words on a phone. */}
+              <span className="hidden text-[9px] uppercase tracking-wider sm:inline">position on the line</span>
               <span>{wordB}</span>
             </div>
-            <div className="w-24 text-center text-[9px] uppercase tracking-wider">closeness to line</div>
+            <div className="w-24 text-center text-[10px] uppercase tracking-wider sm:text-[9px]">closeness to line</div>
           </div>
 
           {entries.map((entry) => (

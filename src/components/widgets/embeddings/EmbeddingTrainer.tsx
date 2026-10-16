@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { SelectControl } from "../shared/SelectControl";
+import { useSvgFontSize } from "../shared/useSvgScale";
 import { WidgetContainer } from "../shared/WidgetContainer";
 import {
   predictedShares,
@@ -91,6 +92,8 @@ function EmbeddingMap({
   selected: TrainingSentence;
   onSelect: (id: string) => void;
 }) {
+  const svgRef = useRef<SVGSVGElement>(null);
+  const fontSize = useSvgFontSize(svgRef, MAP_SIZE);
   const vectors = [...Object.values(model.wordVectors), ...Object.values(model.sentenceVectors)];
   // Zoom out as the vectors grow, so everything always fits.
   const furthest = Math.max(0.2, ...vectors.map((v) => Math.hypot(v[0], v[1])));
@@ -102,7 +105,7 @@ function EmbeddingMap({
   const selectedShares = realShares(selected, WORDS);
 
   return (
-    <svg viewBox={`0 0 ${MAP_SIZE} ${MAP_SIZE}`} className="w-full rounded-lg bg-surface">
+    <svg ref={svgRef} viewBox={`0 0 ${MAP_SIZE} ${MAP_SIZE}`} className="w-full rounded-lg bg-surface">
       <line x1={MAP_CENTER} y1={8} x2={MAP_CENTER} y2={MAP_SIZE - 8} stroke="var(--color-border)" />
       <line x1={8} y1={MAP_CENTER} x2={MAP_SIZE - 8} y2={MAP_CENTER} stroke="var(--color-border)" />
 
@@ -138,9 +141,10 @@ function EmbeddingMap({
             <Diamond x={x} y={y} size={isSelected ? 13 : 11} color={COLORS[sentence.id]} />
             <text
               x={x}
-              y={y + 3}
+              y={y + (3 * fontSize(8)) / 8}
               textAnchor="middle"
-              className="pointer-events-none select-none fill-white text-[8px] font-bold"
+              fontSize={fontSize(8)}
+              className="pointer-events-none select-none fill-white font-bold"
             >
               {i + 1}
             </text>
@@ -157,7 +161,8 @@ function EmbeddingMap({
               x={x + 8}
               y={y + 3.5}
               fill={COLORS[word]}
-              className="pointer-events-none select-none text-[11px] font-semibold"
+              fontSize={fontSize(11)}
+              className="pointer-events-none select-none font-semibold"
             >
               {word}
             </text>
@@ -268,7 +273,7 @@ export function EmbeddingTrainer() {
               >
                 <svg width={18} height={18} viewBox="0 0 18 18" className="shrink-0">
                   <Diamond x={9} y={9} size={11} color={COLORS[sentence.id]} />
-                  <text x={9} y={12} textAnchor="middle" className="fill-white text-[8px] font-bold">
+                  <text x={9} y={12} textAnchor="middle" className="fill-white text-[10px] font-bold sm:text-[8px]">
                     {i + 1}
                   </text>
                 </svg>
