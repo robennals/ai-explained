@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useRef } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
+import { useSvgFontSize } from "../shared/useSvgScale";
 
 const SVG_W = 280;
 const SVG_H = 280;
@@ -139,6 +140,11 @@ function computeIsoLines(
 }
 
 export function BasisVectorView() {
+  // Both panels share a viewBox and width, so one measures for both.
+  const svgRef = useRef<SVGSVGElement>(null);
+  const fontSize = useSvgFontSize(svgRef, SVG_W);
+  const labelSize = fontSize(9);
+  const dotR = 7 * (labelSize / 9);
   const [r1x, setR1x] = useState(1);
   const [r1y, setR1y] = useState(0);
   const [r2x, setR2x] = useState(0);
@@ -206,7 +212,7 @@ export function BasisVectorView() {
             <circle
               cx={px}
               cy={py}
-              r={7}
+              r={dotR}
               fill={color}
               stroke="white"
               strokeWidth={1.5}
@@ -217,7 +223,7 @@ export function BasisVectorView() {
               textAnchor="middle"
               dominantBaseline="central"
               fill="white"
-              fontSize={9}
+              fontSize={labelSize}
               fontWeight="bold"
             >
               {p.label}
@@ -336,14 +342,15 @@ export function BasisVectorView() {
         ))}
       </div>
 
-      {/* Side-by-side panels */}
-      <div className="flex gap-3">
+      {/* Side-by-side panels (stacked on phones, so each is wide enough to read) */}
+      <div className="flex flex-col gap-3 sm:flex-row">
         {/* Left: Original space with new-coordinate iso-lines */}
         <div className="flex-1">
           <div className="mb-1 text-center text-xs font-medium text-muted">
             Original space
           </div>
           <svg
+            ref={svgRef}
             viewBox={`0 0 ${SVG_W} ${SVG_H}`}
             className="w-full rounded border border-border"
           >
@@ -426,9 +433,9 @@ export function BasisVectorView() {
           <div className="mb-1.5 text-xs font-semibold text-red-500">
             Row 1 &mdash; new x measurement direction
           </div>
-          <div className="grid grid-cols-2 gap-x-4">
+          <div className="grid grid-cols-1 gap-y-1 sm:grid-cols-2 sm:gap-x-4 sm:gap-y-0">
             <div className="flex items-center gap-1.5">
-              <span className="w-10 shrink-0 text-[10px] font-medium text-red-400">
+              <span className="w-10 shrink-0 text-[11px] font-medium sm:text-[10px] text-red-400">
                 old x
               </span>
               <input
@@ -441,12 +448,12 @@ export function BasisVectorView() {
                 className="h-1.5 flex-1"
                 style={{ accentColor: "#ef4444" }}
               />
-              <span className="w-10 shrink-0 text-right font-mono text-[10px] font-bold text-red-500">
+              <span className="w-10 shrink-0 text-right font-mono text-xs font-bold sm:text-[10px] text-red-500">
                 {r1x.toFixed(2)}
               </span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="w-10 shrink-0 text-[10px] font-medium text-red-400">
+              <span className="w-10 shrink-0 text-[11px] font-medium sm:text-[10px] text-red-400">
                 old y
               </span>
               <input
@@ -459,7 +466,7 @@ export function BasisVectorView() {
                 className="h-1.5 flex-1"
                 style={{ accentColor: "#ef4444" }}
               />
-              <span className="w-10 shrink-0 text-right font-mono text-[10px] font-bold text-red-500">
+              <span className="w-10 shrink-0 text-right font-mono text-xs font-bold sm:text-[10px] text-red-500">
                 {r1y.toFixed(2)}
               </span>
             </div>
@@ -471,9 +478,9 @@ export function BasisVectorView() {
           <div className="mb-1.5 text-xs font-semibold text-green-600">
             Row 2 &mdash; new y measurement direction
           </div>
-          <div className="grid grid-cols-2 gap-x-4">
+          <div className="grid grid-cols-1 gap-y-1 sm:grid-cols-2 sm:gap-x-4 sm:gap-y-0">
             <div className="flex items-center gap-1.5">
-              <span className="w-10 shrink-0 text-[10px] font-medium text-green-500">
+              <span className="w-10 shrink-0 text-[11px] font-medium sm:text-[10px] text-green-500">
                 old x
               </span>
               <input
@@ -486,12 +493,12 @@ export function BasisVectorView() {
                 className="h-1.5 flex-1"
                 style={{ accentColor: "#22c55e" }}
               />
-              <span className="w-10 shrink-0 text-right font-mono text-[10px] font-bold text-green-600">
+              <span className="w-10 shrink-0 text-right font-mono text-xs font-bold sm:text-[10px] text-green-600">
                 {r2x.toFixed(2)}
               </span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="w-10 shrink-0 text-[10px] font-medium text-green-500">
+              <span className="w-10 shrink-0 text-[11px] font-medium sm:text-[10px] text-green-500">
                 old y
               </span>
               <input
@@ -504,7 +511,7 @@ export function BasisVectorView() {
                 className="h-1.5 flex-1"
                 style={{ accentColor: "#22c55e" }}
               />
-              <span className="w-10 shrink-0 text-right font-mono text-[10px] font-bold text-green-600">
+              <span className="w-10 shrink-0 text-right font-mono text-xs font-bold sm:text-[10px] text-green-600">
                 {r2y.toFixed(2)}
               </span>
             </div>
