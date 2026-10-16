@@ -2,7 +2,7 @@ The core idea behind AI is that we can create any function we want by choosing a
 
 For this to work, the model needs two properties:
 
-- **It must be a universal approximator.** Big enough, and with the right parameters, it can compute any function whose inputs and outputs are of finite size (see <Ch slug="computation" />).
+- **It must be a universal approximator.** It can compute any function of finite inputs and outputs, provided you find the right parameters and make it big enough. (see <Ch slug="computation" />).
 - **It must be smooth.** A tiny change to its parameters makes only a tiny change to its output (see <Ch slug="optimization" />).
 
 The most widely used model that is both is the **neural network**. This chapter builds one from scratch, starting with logic gates, which can build any function but aren't smooth.
@@ -29,10 +29,10 @@ Step through the tabs, from one gate to billions. You don't need to follow how a
 But you can't train a circuit of gates. Its knobs are choices like "is this gate an AND or an OR?", and you can't make a gate 1% more like an OR. Its outputs snap between 0 and 1, so a small change either does nothing or flips the answer completely. There's no slope to follow.
 
 <KeyInsight>
-**Logic gates can build any function, but they aren't smooth.** What we want is something that acts like a logic gate, but whose behavior slides smoothly as you turn its knobs. We'll build it in two steps.
+**Logic gates can build any function, but they aren't smooth.** What we want is something that acts like a logic gate, but whose behavior slides smoothly as you turn its knobs. We'll build it in three steps.
 </KeyInsight>
 
-## Step 1: Gates Controlled by Numbers
+## Step 1: Values Between True and False
 
 Logic gates work on 0 (false) and 1 (true). But what if, rather than just 0 or 1, an input could be any number between 0 and 1? Then 0.2 could mean "probably not", 0.5 "not sure", and 0.9 "almost certainly". That's closer to the real world, where we're rarely completely sure of anything. So here's a way to compute AND that works with numbers like these: add up the two inputs, and if the total is more than 1.5, output 1. Otherwise output 0. When the inputs are exactly 0 or 1, only 1 + 1 gets over 1.5, so this is exactly AND.
 
@@ -52,6 +52,8 @@ NOT needs one more idea: multiply the input by −1 before adding. Then output 1
 Slide the input from 0 to 1 and watch the total move the *other* way. Multiplying by −1 is what flips the answer.
 </ThresholdGateWidget>
 
+## Step 2: The Gate That Does Everything
+
 All three gates follow the same pattern, so we can make one machine that can be any of them:
 
 1. Multiply each input by a number called its **weight**. The weight says how much that input counts, and a negative weight means the input counts *against* the answer.
@@ -66,7 +68,7 @@ This is real progress. Which gate we get is no longer a choice between separate 
 
 But it's still not smooth. Try nudging the bias in the playground above: the output doesn't change at all, until suddenly it flips from 0 to 1. That's the stepped curve from <Ch slug="optimization" /> again.
 
-## Step 2: Replace the Cutoff With a Slope
+## Step 3: Replace the Cutoff With a Slope
 
 The fix is to replace the sudden cutoff with a smooth S-shaped curve called the **sigmoid**. It squashes any number into the range 0 to 1. Large positive totals become close to 1. Large negative totals become close to 0. Totals near 0 get a graded value in between. Think of it as a **dimmer switch** instead of a light switch: instead of snapping between off and on, it slides smoothly between them.
 
@@ -78,12 +80,12 @@ The key property for us: when you change a weight by a small amount, the output 
 
 ## The Artificial Neuron
 
-Put the two steps together and you have an **artificial neuron**, the building block of every neural network. A neuron does two things:
+Put Steps 2 and 3 together and you have an **artificial neuron**, the building block of every neural network. A neuron does two things:
 
 1. **Weighted sum.** Multiply each input by its weight, add them up, and add the bias.
 2. **Activation function.** Pass the result through a smooth function, such as the sigmoid, that decides how strongly to output. This is called the **activation function**.
 
-The name comes from brain cells, which (very roughly) do something similar: they add up signals from their neighbors and fire if the total is high enough. But you don't need any biology to follow the rest of this tutorial. Below is the same machine you played with in Step 1, with the cutoff swapped for the sigmoid.
+The name comes from brain cells, which (very roughly) do something similar: they add up signals from their neighbors and fire if the total is high enough. But you don't need any biology to follow the rest of this tutorial. Below is the same machine you played with in Step 2, with the cutoff swapped for the sigmoid.
 
 <NeuronFreePlayWidget>
 Tap **AND**, **OR**, **NOT A**, and **NAND** and watch the weights glide to each gate. Unlike the cutoff machine, the output now slides smoothly as the weights move, instead of jumping. Then slide the inputs to in-between values and see how the output responds. Finally, try to set the knobs so the neuron computes XOR.
