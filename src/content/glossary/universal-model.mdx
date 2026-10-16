@@ -4,14 +4,21 @@ aliases: [universal models]
 firstAppearance: computation
 ---
 
-A **universal model** is a model that can compute anything that can be computed at all, provided it is big enough, is allowed to run long enough, and has the right values for its parameters.
+A **universal model** is a model that, with the right parameters, and given enough size and enough time, can compute anything that can be computed.
 
-Most models aren't universal. A cubic formula with four knobs can only ever draw a gentle curve, however you set them. A universal model has no such ceiling: with the right parameters it could translate text, recognize faces, or write code.
+The size and time conditions matter. A model of a fixed size, run once, can only do a fixed amount of work, so some problems will always be beyond it. A universal model gets past this in two ways: it can be made bigger, and it can be allowed to run again on its own output, as many times as a problem needs. Given enough of both, there's nothing computable it can't do.
 
-Some examples:
+Most models aren't universal. The cubic formula in the Computation chapter has four knobs and can only ever draw a gentle curve, however you set them.
 
-- **A computer running a program** — the program is the "parameters", and the right program can compute anything computable.
-- **A circuit of logic gates** — big enough circuits, run repeatedly, can compute anything a computer can.
-- **A neural network** — with enough neurons and the right weights it can compute almost any function in a single pass, and language models get the rest by writing out their working and reading it back in.
+Some universal models:
 
-There's no single standard name for this idea, so this tutorial uses "universal model" as a plain-English umbrella for two precise terms. Computer scientists call a model of computation **Turing complete** if it can compute anything computable, given unlimited time and memory. Machine-learning researchers call a family of models, such as neural networks, **universal approximators** because a big enough one can match any smooth function as closely as you like, in a single pass.
+- **A computer running a program** — the program plays the role of the parameters, and the computer keeps running it step by step until the work is done.
+- **A circuit of logic gates with memory, run over and over** — this is what a computer chip is.
+- **A neural network that feeds its output back in** — a language model writing out its working, then reading it back, can take as many steps as a problem needs.
+
+This tutorial's term combines two precise ideas from computer science and machine learning:
+
+- **Turing complete.** A *Turing machine* is Alan Turing's 1936 mathematical model of a computer: a simple machine with an unlimited strip of memory. A system is **Turing complete** if it can do anything a Turing machine can, given unlimited time and memory, which (by the Church–Turing thesis) means anything computable. Real computers are Turing complete apart from having finite memory. Turing completeness is only about what can be computed in principle; it says nothing about how to find the right program.
+- **Universal approximator.** A family of models is a **universal approximator** if, for any continuous function and any accuracy you choose, some member of the family matches that function to within that accuracy over a bounded range of inputs. The *universal approximation theorem* proves that neural networks with a hidden layer and an activation function such as the sigmoid are universal approximators. This is a claim about a single pass through a big enough network. It doesn't say how many neurons are needed, or whether training will find the right weights.
+
+A neural network on its own is a universal approximator. Let it feed its output back in, and researchers have shown that, under idealized assumptions such as unlimited numerical precision, it becomes Turing complete too. That combination is what this tutorial means by a universal model.

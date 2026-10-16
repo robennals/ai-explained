@@ -64,7 +64,7 @@ Try to match the target curve by adjusting the sliders. Pay attention to how eac
 
 Before going further, a question worth asking: is it possible to create a model that can build any function we might possibly want?
 
-In 1936, two mathematicians, Alan Turing and Alonzo Church, independently came up with two models, the *Turing machine* and the *lambda calculus*, that they claimed could compute any function that can be computed at all. Not just math. Anything. This claim is called the *Church-Turing thesis*. It can't be formally proven, but no one has ever found anything computable that these models cannot. We call a model that can compute any computable function a *universal model*.
+In 1936, two mathematicians, Alan Turing and Alonzo Church, independently came up with two models, the *Turing machine* and the *lambda calculus*, that they claimed could compute any function that can be computed at all. Not just math. Anything. This claim is called the *Church-Turing thesis*. It can't be formally proven, but no one has ever found anything computable that these models cannot. We call a model like this a *universal model*: with the right parameters, and given enough size and enough time, it can compute anything that can be computed.
 
 The simple cubic model we gave above is not a universal model, and is very limited in what it can compute. But some of the models we use in AI are universal models. If you allow them to become big enough, and run long enough, and find the right parameters, they really can compute anything that can be computed.
 
@@ -95,7 +95,7 @@ So here's where this leaves us:
 1. **Everything is numbers.** Text, images, sound, all of it.
 2. **Thinking is a function.** Every intelligent task is numbers in, numbers out.
 3. **Models are functions with knobs.** Different settings compute different functions.
-4. **Some models are universal.** Big enough, and with the right parameters, they can compute anything that can be computed. The Church-Turing thesis says so.
+4. **Some models are universal.** With the right parameters, and given enough size and enough time, they can compute anything that can be computed. The Church-Turing thesis says so.
 5. **Brute force is impossible.** A lookup table would be bigger than the universe.
 
 What's needed are models that *compress*: capture the right pattern with far fewer parameters than a lookup table would need entries. And a way to find the right parameter values automatically rather than by hand.
