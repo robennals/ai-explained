@@ -852,7 +852,7 @@ export function BigramExplorer() {
       {mode === "explore" ? (
         <div className="space-y-4">
           <div className="text-xs text-muted">
-            Pick a starting word, then click predictions to build a sentence one word at a time. Watch how the model only ever looks at the last word you picked.
+            Pick a starting word, then tap predictions to build a sentence one word at a time. Watch how the model only ever looks at the last word you picked.
           </div>
 
           {/* Starting word selector */}
@@ -864,7 +864,7 @@ export function BigramExplorer() {
                   setSelectedWord(w);
                   setExploreSentence([w]);
                 }}
-                className={`rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
+                className={`min-h-7 min-w-7 rounded-full px-2.5 py-1 text-xs font-medium transition-colors sm:min-h-0 sm:min-w-0 ${
                   selectedWord === w
                     ? "bg-accent text-white"
                     : "bg-surface text-muted hover:text-foreground"
@@ -958,7 +958,7 @@ export function BigramExplorer() {
             onChange={setTemperature}
             formatValue={(v) => v.toFixed(1)}
           />
-          <div className="flex justify-between px-24 text-[10px] text-muted -mt-1">
+          <div className="-mt-1 flex justify-between text-[11px] text-muted sm:px-24 sm:text-[10px]">
             <span>Always pick top word</span>
             <span>Pick more randomly</span>
           </div>
