@@ -306,7 +306,7 @@ Run this and you'll see the loss drop over time, and the final outputs will be c
 A few things about this code:
 
 - **`nn.Sigmoid()`** squashes the output to the 0–1 range, which is what we want for a yes/no answer
-- **`nn.BCELoss()`** (binary cross-entropy) is the right loss function for binary classification
+- **`nn.BCELoss()`** (<nog>binary</nog> cross-entropy) is the right loss function for <nog>binary</nog> classification
 - **`torch.no_grad()`** tells PyTorch not to track gradients during testing, which saves memory and speeds things up
 - **`Adam`** instead of `SGD`. Adam is a smarter optimizer that adapts its learning rate per-parameter. It usually works better out of the box
 
