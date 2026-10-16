@@ -1,6 +1,6 @@
 # Mobile widget usability: audit and plan
 
-> **Status (2026-10-16):** phases 1–3 below are implemented. A follow-up readability pass also brought every widget to at least 10px text and 24px tap targets on a 390px phone. Still open: the ongoing mobile test and the analytics check.
+> **Status (2026-10-16):** phases 1–3 below are implemented. A follow-up readability pass also brought every widget to at least 10px text and 24px tap targets on a 390px phone. The ongoing mobile test is `tests/mobile-widgets.spec.ts`. Still open: the analytics check.
 
 **Summary.** Every widget in the 14 published chapters was checked at phone size (390×844, touch on) on 2026-10-15. **None is unusable on a phone, but about 20 are frustrating.** The problems cluster in a handful of shared components and recurring patterns, so roughly six shared fixes cover most of them. A Playwright test (with an allowlist of known problems) then stops new problems from being introduced.
 

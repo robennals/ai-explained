@@ -358,7 +358,9 @@ export function BuiltStepByStep() {
       </div>
 
       {/* The selected stage */}
-      <div className="min-h-[9.5rem] rounded-lg border border-border bg-surface/50 px-4 py-3 text-sm">
+      {/* Tall enough for the longest step, so the Back/Next buttons below stay
+          put as you step through (phone text wraps more, so it's taller). */}
+      <div className="min-h-[11.5rem] rounded-lg border border-border bg-surface/50 px-4 py-3 text-sm sm:min-h-[9.5rem]">
         <div className="mb-2 flex items-baseline justify-between gap-3">
           <span className="font-semibold text-foreground">
             {stageIndex + 1}. {stage.name}

@@ -105,4 +105,6 @@ If a script needs a large file, it should check if the file exists and download 
 - Import alias: `@/*` maps to `./src/*`
 - Widgets are always client components with local `useState` (no global state library)
 - Widgets are playgrounds, not demos — designed for experimentation and discovery (see `docs/plans/curriculum-outline.md` for editorial philosophy)
+- Widgets must work on phones. `tests/mobile-widgets.spec.ts` checks every widget at 390×844: no overflow, text ≥ 10px (including scaled SVG text), tap targets ≥ 24px, text boxes ≥ 16px. Accepted exceptions go in `tests/mobile-widgets.allowlist.ts` with a reason. Useful helpers in `src/components/widgets/shared/`: `useIsPhone`, `useSvgFontSize` (diagram text ≥ 10px on phones, unchanged on desktop), `keepInHorizontalView`, `useSliderDiagramLink`.
+- Instructions in widgets and chapter text say "Tap", not "Click" (it reads fine with a mouse too).
 - D3 for data visualizations, Framer Motion for animations, Radix UI for accessible controls
