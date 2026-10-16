@@ -5,13 +5,13 @@ const layers: ExampleData["layers"] = [
   {
     id: "L0",
     label: "Start",
-    description: "Each token shows just its dictionary meaning — what the model knows before any word has talked to any other. Click any word to see its raw embedding.",
+    description: "Each token shows just its dictionary meaning — what the model knows before any word has talked to any other. Tap any word to see its raw embedding.",
     heads: [],
   },
   {
     id: "L1",
     label: "Previous-token",
-    description: "Every word pulls a copy of the word immediately before it. Click 'Mars' to see how it picks up that 'On' came before — the seed for later realising it's a location.",
+    description: "Every word pulls a copy of the word immediately before it. Tap 'Mars' to see how it picks up that 'On' came before — the seed for later realising it's a location.",
     heads: [
       {
         id: "prev",
@@ -37,7 +37,7 @@ const layers: ExampleData["layers"] = [
   {
     id: "L3",
     label: "Resolve pronouns",
-    description: "Every pronoun in the sentence attends to its noun. Click 'her' to see it resolve to the astronaut — inheriting all the Mars context the astronaut accumulated at the previous layer.",
+    description: "Every pronoun in the sentence attends to its noun. Tap 'her' to see it resolve to the astronaut — inheriting all the Mars context the astronaut accumulated at the previous layer.",
     heads: [
       {
         id: "refers",
@@ -68,7 +68,7 @@ const layers: ExampleData["layers"] = [
       {
         id: "verb-of-object",
         label: "Find what verb acts on this",
-        description: "Rule: a word within a verb's object-phrase pulls in its verb context. When multiple nearby tokens carry the verb's context (the verb itself, or a noun that already absorbed it), attention pulls all of them, weighted. Click 'sky', 'her', or 'blue' to see each token's bindings.",
+        description: "Rule: a word within a verb's object-phrase pulls in its verb context. When multiple nearby tokens carry the verb's context (the verb itself, or a noun that already absorbed it), attention pulls all of them, weighted. Tap 'sky', 'her', or 'blue' to see each token's bindings.",
         kind: "content",
       },
     ],

@@ -25,7 +25,7 @@ The word "of" is most often followed by "the." The word "he" is often followed b
 This is called a **bigram model**. It predicts the next word based on just the *one* previous word. It's a giant lookup table: for each word, store a list of what typically follows it, ranked by frequency.
 
 <BigramExplorerWidget>
-**Explore mode**: Pick a starting word like "he" or "she," then click the predictions to build a sentence one word at a time. You're doing exactly what the bigram model does, picking the next word based only on the current one. "of" → "the" is a very strong prediction (33%!), while other words have more spread-out options. After a few clicks, read your sentence back. Each pair of words sounds fine, but the whole thing is nonsense!
+**Explore mode**: Pick a starting word like "he" or "she," then tap the predictions to build a sentence one word at a time. You're doing exactly what the bigram model does, picking the next word based only on the current one. "of" → "the" is a very strong prediction (33%!), while other words have more spread-out options. After a few clicks, read your sentence back. Each pair of words sounds fine, but the whole thing is nonsense!
 
 **Generate mode**: Pick a starting word and hit Generate to watch the model build sentences automatically. Try the temperature slider: low temperature always picks the top prediction (safe but repetitive), high temperature picks more randomly (wilder). Watch 30 words appear. Same result as doing it by hand, just faster.
 </BigramExplorerWidget>
@@ -59,7 +59,7 @@ Why would this work? Because embeddings capture *meaning*. "Cat" and "dog" have 
 The network doesn't need to have seen every possible word. It just needs to learn patterns over the *continuous space* of embeddings. Below is a real neural network we trained on 50,000 children's stories. It looks at the last 3 tokens and predicts what comes next.
 
 <SimpleNNPredictorWidget>
-**Explore tab**: Type text and see live predictions. Click any prediction to extend the sentence; try building a story! "once upon a" confidently predicts "time." Try different story beginnings like "the little" or "she was very." Compare similar words: type "the cat" vs "the dog" and they get similar predictions, because the model generalizes through embeddings.
+**Explore tab**: Type text and see live predictions. Tap any prediction to extend the sentence; try building a story! "once upon a" confidently predicts "time." Try different story beginnings like "the little" or "she was very." Compare similar words: type "the cat" vs "the dog" and they get similar predictions, because the model generalizes through embeddings.
 
 **Generate tab**: Enter a prompt and hit Generate to watch the model write word by word. Try the temperature slider: low temperature always picks the safest prediction (repetitive but grammatical), high temperature picks more randomly (creative but chaotic). Try generating from the same prompt twice at high temperature. You'll get different stories each time!
 </SimpleNNPredictorWidget>

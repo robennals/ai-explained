@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
+import { useSvgFontSize } from "../shared/useSvgScale";
 
 // --- Viewport: show the 0–1 range with a small margin ---
 const VIEW_MIN = -0.15;
@@ -142,10 +143,10 @@ function SigmoidCurve() {
   const yMid = SIG_PAD.left + (0.5) * SIG_PLOT_W; // x=0 line (center)
 
   return (
+    // Drawn a little wider on phones so its 9px labels come out at 11px.
     <svg
       viewBox={`0 0 ${SIG_W} ${SIG_H}`}
-      className="w-full"
-      style={{ maxWidth: SIG_W }}
+      className="w-full max-w-[220px] sm:max-w-[180px]"
     >
       {/* Axes */}
       <line
@@ -222,7 +223,7 @@ function SigmoidCurve() {
 
 // --- Unit box for the 0–1 panel ---
 
-function UnitBox() {
+function UnitBox({ fontSize }: { fontSize: (designPx: number) => number }) {
   const [x0, y0] = mathToSVG(0, 1);
   const [x1, y1] = mathToSVG(1, 0);
   return (
@@ -237,10 +238,10 @@ function UnitBox() {
         strokeWidth={1}
         opacity={0.5}
       />
-      <text x={mathToSVG(0, 0)[0]} y={mathToSVG(0, 0)[1] + 12} fontSize={10} fill="#9ca3af" textAnchor="middle">0</text>
-      <text x={mathToSVG(1, 0)[0]} y={mathToSVG(1, 0)[1] + 12} fontSize={10} fill="#9ca3af" textAnchor="middle">1</text>
-      <text x={mathToSVG(0, 0)[0] - 6} y={mathToSVG(0, 0)[1] + 4} fontSize={10} fill="#9ca3af" textAnchor="end">0</text>
-      <text x={mathToSVG(0, 1)[0] - 6} y={mathToSVG(0, 1)[1] + 4} fontSize={10} fill="#9ca3af" textAnchor="end">1</text>
+      <text x={mathToSVG(0, 0)[0]} y={mathToSVG(0, 0)[1] + 12} fontSize={fontSize(10)} fill="#9ca3af" textAnchor="middle">0</text>
+      <text x={mathToSVG(1, 0)[0]} y={mathToSVG(1, 0)[1] + 12} fontSize={fontSize(10)} fill="#9ca3af" textAnchor="middle">1</text>
+      <text x={mathToSVG(0, 0)[0] - 6} y={mathToSVG(0, 0)[1] + 4} fontSize={fontSize(10)} fill="#9ca3af" textAnchor="end">0</text>
+      <text x={mathToSVG(0, 1)[0] - 6} y={mathToSVG(0, 1)[1] + 4} fontSize={fontSize(10)} fill="#9ca3af" textAnchor="end">1</text>
     </g>
   );
 }
@@ -283,15 +284,19 @@ function ArrowPanel({
   }[];
   outlinePoints: { x: number; y: number }[];
 }) {
+  const svgRef = useRef<SVGSVGElement>(null);
+  const fontSize = useSvgFontSize(svgRef, SVG_SIZE);
+  // Lettered dots grow with their letters on phones.
+  const dotK = fontSize(9) / 9;
   return (
-    <svg viewBox={`0 0 ${SVG_SIZE} ${SVG_SIZE}`} className="w-full">
+    <svg ref={svgRef} viewBox={`0 0 ${SVG_SIZE} ${SVG_SIZE}`} className="w-full">
       <defs>
         <clipPath id="ae-clip">
           <rect x={0} y={0} width={SVG_SIZE} height={SVG_SIZE} />
         </clipPath>
       </defs>
 
-      <UnitBox />
+      <UnitBox fontSize={fontSize} />
 
       {/* Original arrow (faint) */}
       <polygon
@@ -336,13 +341,13 @@ function ArrowPanel({
         const [sx, sy] = mathToSVG(p.tx, p.ty);
         return (
           <g key={`trans-${p.label}`}>
-            <circle cx={sx} cy={sy} r={6} fill={p.color} />
+            <circle cx={sx} cy={sy} r={6 * dotK} fill={p.color} />
             <text
               x={sx}
               y={sy + 1}
               textAnchor="middle"
               dominantBaseline="middle"
-              fontSize={9}
+              fontSize={fontSize(9)}
               fontWeight="bold"
               fill="white"
             >

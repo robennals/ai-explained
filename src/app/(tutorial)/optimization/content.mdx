@@ -72,7 +72,7 @@ Explore the examples in each row. Smooth problems let you improve step by step. 
 Both shapes below have the same overall valley, but the smooth one lets a ball roll downhill to the bottom, while the stepped one is flat within each step. A small change in position tells you nothing.
 
 <SmoothVsRuggedWidget>
-Click anywhere to drop a ball. On the smooth curve, it rolls to the bottom. On the stepped version, it just sits wherever it lands, with no slope to follow.
+Tap anywhere to drop a ball. On the smooth curve, it rolls to the bottom. On the stepped version, it just sits wherever it lands, with no slope to follow.
 </SmoothVsRuggedWidget>
 
 <KeyInsight>
@@ -86,13 +86,13 @@ So far, our optimization strategy has been: try a small change, measure the erro
 Think about the difference between these two situations. A friend reads your story and says "I'd give it 3 out of 5." That tells you the error, but not what to fix. Now imagine they say "I'd give it 3 out of 5, the middle section was confusing." That's much more useful, because it tells you *which direction to change*.
 
 <GradientRealWorldWidget>
-Click through the examples. "Error only" tells you how far off you are. "Error + gradient" also tells you which way to adjust. That directional information is what makes improvement fast instead of slow.
+Tap through the examples. "Error only" tells you how far off you are. "Error + gradient" also tells you which way to adjust. That directional information is what makes improvement fast instead of slow.
 </GradientRealWorldWidget>
 
 This is the key idea behind the **gradient**. At any point on a smooth curve, you can look at the **slope**: the steepness right where you're standing. The slope tells you *exactly which direction is downhill*. Following it is called **gradient descent**, and it's dramatically faster than random guessing.
 
 <Gradient2DCurveWidget>
-Click on the curve to place a ball. The red arrow is the gradient. It points downhill from wherever you are. Hit "Run gradient descent" to watch the ball follow the gradient arrow step by step to the bottom.
+Tap on the curve to place a ball. The red arrow is the gradient. It points downhill from wherever you are. Hit "Run gradient descent" to watch the ball follow the gradient arrow step by step to the bottom.
 </Gradient2DCurveWidget>
 
 Real models don't have just one knob; they have millions. But the same idea works: the gradient is an arrow pointing in the steepest downhill direction across *all* dimensions at once. You can't visualize a million-dimensional landscape, but the math is the same. Calculate the slope, step downhill, repeat.

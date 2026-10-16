@@ -2,6 +2,8 @@
 
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
+import { useIsPhone } from "../shared/useMediaQuery";
+import { keepInHorizontalView } from "../shared/keepInHorizontalView";
 import { SliderControl } from "../shared/SliderControl";
 import { VectorCard } from "../vectors/VectorCard";
 
@@ -242,6 +244,8 @@ export function RotationToyTokens() {
 
   const rowRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<Map<number, HTMLElement>>(new Map());
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const compact = useIsPhone();
 
   const tokens = TOKENS;
   const itIdx = tokens.length - 1;
@@ -316,6 +320,17 @@ export function RotationToyTokens() {
     return () => cancelAnimationFrame(raf);
   }, [itIdx, weights, tokens]);
 
+  // When the sentence doesn't fit (phones), keep "it" and the token it attends
+  // to most on screen.
+  const topTarget = weights.reduce((best, w, i) => (i !== itIdx && w > weights[best] ? i : best), 0);
+  useEffect(() => {
+    const scroller = scrollRef.current;
+    if (!scroller) return;
+    keepInHorizontalView(scroller, [cardRefs.current.get(itIdx), cardRefs.current.get(topTarget)], {
+      behavior: "auto",
+    });
+  }, [compact, itIdx, topTarget]);
+
   const arcPad = 50;
 
   // Colors for the detail view
@@ -331,7 +346,7 @@ export function RotationToyTokens() {
   return (
     <WidgetContainer
       title="Rotation Applied to a Dimension"
-      description="One dimension gets split into x/y and rotated by position. Click a noun to inspect its rotated vector."
+      description="One dimension gets split into x/y and rotated by position. Tap a noun to inspect its rotated vector."
       onReset={handleReset}
     >
       <div className="flex flex-col gap-5">
@@ -357,7 +372,7 @@ export function RotationToyTokens() {
         </div>
 
         {/* Token row with arrow overlay */}
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto" ref={scrollRef}>
           <div className="relative inline-flex min-w-full justify-center" ref={rowRef}>
             {/* SVG overlay for curved arrows */}
             {arrows.length > 0 && (
@@ -412,7 +427,7 @@ export function RotationToyTokens() {
               const clickable = isClickable(tok);
 
               return (
-                <div key={`${i}`} className="flex flex-col items-center" style={{ width: 56 }}>
+                <div key={`${i}`} className="flex flex-col items-center" style={{ width: compact ? 46 : 56 }}>
                   {/* Token label */}
                   <div
                     ref={(el) => {
@@ -428,7 +443,7 @@ export function RotationToyTokens() {
                         setSelectedToken(i);
                       }
                     } : undefined}
-                    className={`rounded-md border px-2 py-1 ${
+                    className={`rounded-md border px-1 py-1 sm:px-2 ${
                       isIt
                         ? "ring-2 ring-accent ring-offset-1 border-border bg-surface"
                         : isActive
@@ -438,20 +453,20 @@ export function RotationToyTokens() {
                         : "border-border bg-surface"
                     }`}
                   >
-                    <span className={`text-sm font-bold ${tok.color}`}>{tok.label}</span>
+                    <span className={`text-xs font-bold sm:text-sm ${tok.color}`}>{tok.label}</span>
                   </div>
 
                   {/* Compact info below the token */}
                   <div className="mt-1 flex flex-col items-center gap-0.5">
                     {isIt ? (
-                      <span className="text-[9px] font-bold text-accent uppercase">query</span>
+                      <span className="text-[10px] font-bold text-accent uppercase sm:text-[9px]">query</span>
                     ) : (
                       <>
-                        <span className="text-[9px] text-muted">
+                        <span className="text-[10px] text-muted sm:text-[9px]">
                           rot {(i * degPerPos)}°
                         </span>
                         {degPerPos > 0 && isNoun(tok) && (
-                          <span className="text-[9px] text-amber-600 dark:text-amber-400">
+                          <span className="text-[10px] text-amber-600 sm:text-[9px] dark:text-amber-400">
                             Δ{angleDiff}°
                           </span>
                         )}
@@ -460,13 +475,13 @@ export function RotationToyTokens() {
                     {/* Attention weight pill */}
                     {isTarget ? (
                       <span
-                        className="rounded-full px-1.5 py-0.5 font-mono text-[9px] font-bold text-white"
+                        className="rounded-full px-1.5 py-0.5 font-mono text-[10px] font-bold text-white sm:text-[9px]"
                         style={{ backgroundColor: weightToPill(weight) }}
                       >
                         {pct(weight)}
                       </span>
                     ) : (
-                      <span className={`font-mono text-[9px] font-bold ${isIt ? "text-accent" : "text-muted"}`}>
+                      <span className={`font-mono text-[10px] font-bold sm:text-[9px] ${isIt ? "text-accent" : "text-muted"}`}>
                         {pct(weight)}
                       </span>
                     )}

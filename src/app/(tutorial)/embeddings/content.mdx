@@ -43,7 +43,7 @@ The dimensions don't need labels. What matters is that similar things are nearby
 A real embedding: GloVe, created by Stanford. Each word is a point in 300-dimensional space. The full embedding contains 400,000 words, which is too many to fit in the browser, so we're showing a subset of common nouns. We can't visualize 300 dimensions, but we *can* use cosine similarity (from <Ch slug="vectors" />) to ask: what's nearby?
 
 <EmbeddingPlaygroundWidget>
-Start with "dog". Its neighbors are other animals and pets. Click on a neighbor to jump to it and browse around the space. Try "guitar" and you get other instruments. Try "queen" and it sits near royalty words. Type your own words and see what clusters together.
+Start with "dog". Its neighbors are other animals and pets. Tap a neighbor to jump to it and browse around the space. Try "guitar" and you get other instruments. Try "queen" and it sits near royalty words. Type your own words and see what clusters together.
 </EmbeddingPlaygroundWidget>
 
 The embedding groups words by meaning without being told what any word means. "Dog" is near "cat" and "puppy". "Guitar" is near "piano" and "bass". Similar words end up nearby, exactly the idea we described earlier.
@@ -101,7 +101,7 @@ Take for example the word `treeishness`. You've probably never seen that word be
 Modern language models solve the problem the same way. The most common words get their own token, but others get assembled out of smaller parts. Try it out below.
 
 <TokenizationPlaygroundWidget>
-Click "superman, superb, superlative" and look for repeated chunks.
+Tap "superman, superb, superlative" and look for repeated chunks.
 Then try a made-up word like "qwertyflorp" and see how it still gets broken into smaller known parts.
 Try punctuation too (`!`, `,`, `?`); those are tokens as well.
 </TokenizationPlaygroundWidget>

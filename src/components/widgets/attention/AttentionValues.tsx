@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
 import { WidgetTabs } from "../shared/WidgetTabs";
+import { keepInHorizontalView } from "../shared/keepInHorizontalView";
 import { softmax } from "./toyMath";
 
 /* ------------------------------------------------------------------ */
@@ -155,6 +156,24 @@ export function AttentionValues({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [exampleIdx]);
 
+  // Keep the asking token and its top contributor on screen when the sentence
+  // doesn't fit (phones).
+  const labelColRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => {
+      const scroller = scrollRef.current;
+      if (!scroller) return;
+      keepInHorizontalView(
+        scroller,
+        [colRefs.current.get(example.asker), colRefs.current.get(contributors[0])],
+        { leftInset: labelColRef.current?.offsetWidth ?? 0 },
+      );
+    });
+    return () => cancelAnimationFrame(raf);
+    // Re-run when the example changes; asker/contributors derive from it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [exampleIdx]);
+
   return (
     <WidgetContainer title={title} description={description} onReset={handleReset}>
       <div className="flex flex-col gap-5">
@@ -199,14 +218,16 @@ export function AttentionValues({
             </svg>
             <div className="border-b border-border" style={{ height: ARC_H }} aria-hidden />
             <div className="flex w-max items-stretch">
-            <div className="flex shrink-0 flex-col bg-foreground/[0.02]">
-              <div className="flex h-9 items-center justify-end border-b border-border px-3 text-[10px] font-semibold uppercase tracking-wide text-muted">
+            {/* Row labels stay put while the tokens scroll under them. */}
+            <div ref={labelColRef} className="sticky left-0 z-[2] flex shrink-0 flex-col border-r border-border bg-surface">
+              <div className="flex h-9 items-center justify-end border-b border-border px-2 text-[10px] font-semibold uppercase tracking-normal text-muted sm:px-3 sm:tracking-wide">
                 token
               </div>
-              <div className="flex h-10 items-center justify-end border-b border-border px-3 text-[10px] font-semibold uppercase tracking-wide text-muted">
-                match&nbsp;score
+              <div className="flex h-10 items-center justify-end border-b border-border px-2 text-[10px] font-semibold uppercase tracking-normal text-muted sm:px-3 sm:tracking-wide">
+                <span className="sm:hidden">score</span>
+                <span className="hidden sm:inline">match&nbsp;score</span>
               </div>
-              <div className="flex h-10 items-center justify-end px-3 text-[10px] font-semibold uppercase tracking-wide text-accent">
+              <div className="flex h-10 items-center justify-end px-2 text-[10px] font-semibold uppercase tracking-normal text-accent sm:px-3 sm:tracking-wide">
                 softmax
               </div>
             </div>
@@ -222,22 +243,22 @@ export function AttentionValues({
                     if (el) colRefs.current.set(i, el);
                     else colRefs.current.delete(i);
                   }}
-                  className={`flex flex-col items-stretch border-l border-border ${
+                  className={`flex flex-col items-stretch border-l border-border first-of-type:border-l-0 ${
                     hasValue ? "bg-indigo-50/60 dark:bg-indigo-950/30" : ""
                   }`}
                 >
                   <div
-                    className={`flex h-9 items-center justify-center whitespace-nowrap border-b border-border px-3 text-lg ${
+                    className={`flex h-9 items-center justify-center whitespace-nowrap border-b border-border px-2 text-base sm:px-3 sm:text-lg ${
                       isAsker ? "font-bold text-accent" : hasValue ? "font-semibold text-indigo-600 dark:text-indigo-400" : "text-foreground"
                     }`}
                   >
                     {word}
                   </div>
-                  <div className="flex h-10 items-center justify-center border-b border-border px-3 font-mono text-lg font-bold text-muted/70">
+                  <div className="flex h-10 items-center justify-center border-b border-border px-2 font-mono text-base font-bold text-muted/70 sm:px-3 sm:text-lg">
                     {isAsker ? "–" : example.scores[i]}
                   </div>
                   <div
-                    className={`flex h-10 items-center justify-center px-3 font-mono text-lg font-bold ${
+                    className={`flex h-10 items-center justify-center px-2 font-mono text-base font-bold sm:px-3 sm:text-lg ${
                       isAsker ? "text-muted/40" : strong ? "text-accent" : "text-muted/50"
                     }`}
                   >

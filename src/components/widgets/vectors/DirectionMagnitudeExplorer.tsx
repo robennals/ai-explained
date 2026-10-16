@@ -5,6 +5,7 @@ import { WidgetContainer } from "../shared/WidgetContainer";
 import { WidgetTabs } from "../shared/WidgetTabs";
 import { SliderControl } from "../shared/SliderControl";
 import { VectorCard } from "./VectorCard";
+import { useIsPhone } from "../shared/useMediaQuery";
 
 const SVG_SIZE = 300;
 const CX = SVG_SIZE / 2;
@@ -42,6 +43,9 @@ function Arrow({
 }
 
 function SvgGrid() {
+  // The plot is drawn at its full 300px on phones too, so its 9px tick labels
+  // need a bigger phone size to stay readable.
+  const tickFontSize = useIsPhone() ? 11 : 9;
   return (
     <>
       {[-1, 0, 1].map((t) => (
@@ -52,9 +56,9 @@ function SvgGrid() {
       ))}
       {[-1, 0, 1].map((t) => (
         <g key={`tick-${t}`}>
-          <text x={CX + t * SCALE} y={CY + 14} textAnchor="middle" fontSize={9} fill="currentColor" opacity={0.3}>{t}</text>
+          <text x={CX + t * SCALE} y={CY + 14} textAnchor="middle" fontSize={tickFontSize} fill="currentColor" opacity={0.3}>{t}</text>
           {t !== 0 && (
-            <text x={CX - 10} y={CY - t * SCALE + 3} textAnchor="end" fontSize={9} fill="currentColor" opacity={0.3}>{t}</text>
+            <text x={CX - 10} y={CY - t * SCALE + 3} textAnchor="end" fontSize={tickFontSize} fill="currentColor" opacity={0.3}>{t}</text>
           )}
         </g>
       ))}

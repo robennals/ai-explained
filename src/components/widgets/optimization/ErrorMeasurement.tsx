@@ -4,6 +4,7 @@ import { useState, useCallback, useRef } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
 import { WidgetTabs } from "../shared/WidgetTabs";
 import { useSvgScale } from "../shared/useSvgScale";
+import { useIsPhone } from "../shared/useMediaQuery";
 
 interface Example {
   id: string;
@@ -116,6 +117,9 @@ export function ErrorMeasurement() {
   const svgRef = useRef<SVGSVGElement>(null);
   // Inverse-scale fontSize so text stays at ~11 CSS px on mobile.
   const scale = useSvgScale(svgRef, SVG_WIDTH);
+  const isPhone = useIsPhone();
+  // Marker labels: 10px on desktop, a touch bigger on phones so they clear 10px.
+  const markerFontSize = (isPhone ? 11 : 10) * scale;
 
   const ex = EXAMPLES.find((e) => e.id === selectedId)!;
   const value = values[ex.id];
@@ -283,7 +287,7 @@ export function ErrorMeasurement() {
           x={Math.max(40, Math.min(SVG_WIDTH - 40, perfectBarX))}
           y={BAR_Y - 8}
           textAnchor={perfectBarX < 80 ? "start" : perfectBarX > SVG_WIDTH - 80 ? "end" : "middle"}
-          fontSize={10 * scale} fontWeight="600" fill={MUTED_COLOR}
+          fontSize={markerFontSize} fontWeight="600" fill={MUTED_COLOR}
         >
           perfect ({ex.format(ex.perfect)})
         </text>
@@ -298,7 +302,7 @@ export function ErrorMeasurement() {
           x={Math.max(40, Math.min(SVG_WIDTH - 40, valueBarX))}
           y={BAR_Y + BAR_HEIGHT + 16}
           textAnchor={valueBarX < 80 ? "start" : valueBarX > SVG_WIDTH - 80 ? "end" : "middle"}
-          fontSize={10 * scale} fontWeight="600" fill={MUTED_COLOR}
+          fontSize={markerFontSize} fontWeight="600" fill={MUTED_COLOR}
         >
           {ex.thing}: {ex.format(value)}
         </text>

@@ -125,13 +125,15 @@ function ShapeChart({
       >
         distance from word →
       </text>
+      {/* Rotated, so the glyphs extend left of x: keep x far enough in that
+          the label isn't clipped by the SVG's left edge. */}
       <text
-        x={4}
+        x={11}
         y={pad.top + plotH / 2}
         fontSize={9}
         opacity={0.5}
         fill="currentColor"
-        transform={`rotate(-90, 4, ${pad.top + plotH / 2})`}
+        transform={`rotate(-90, 11, ${pad.top + plotH / 2})`}
         textAnchor="middle"
       >
         attention

@@ -3,6 +3,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
 import { WidgetTabs } from "../shared/WidgetTabs";
+import { keepInHorizontalView } from "../shared/keepInHorizontalView";
 
 /* ------------------------------------------------------------------ */
 /*  Modes                                                              */
@@ -323,6 +324,23 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
     return () => cancelAnimationFrame(raf);
   }, [effectiveAnswerer, selectedWord, sentenceIdx, mode]);
 
+  // Keep the asking token and the token it's compared with on screen when the
+  // sentence doesn't fit (phones). Runs on sentence or selection change.
+  const labelColRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (mode === "basic") return;
+    const raf = requestAnimationFrame(() => {
+      const scroller = gridScrollRef.current;
+      if (!scroller) return;
+      keepInHorizontalView(
+        scroller,
+        [colRefs.current.get(selectedWord), colRefs.current.get(effectiveAnswerer)],
+        { leftInset: labelColRef.current?.offsetWidth ?? 0 },
+      );
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [effectiveAnswerer, selectedWord, sentenceIdx, mode]);
+
   // Measure the dotted connectors from the query/key token columns down to
   // their detail cards, relative to the exploded-view wrapper.
   const measureConnectors = useCallback(() => {
@@ -397,9 +415,9 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
 
   const description =
     mode === "qkv"
-      ? "Each token's key gets a dot-product score against the query. Click any token to compare it; the matched token's value gets pulled in."
+      ? "Each token's key gets a dot-product score against the query. Tap any token to compare it; the matched token's value gets pulled in."
       : mode === "answering"
-        ? "The highlighted token's query lines up with one token's key, strongly or loosely. Click other tokens to compare their keys."
+        ? "The highlighted token's query lines up with one token's key, strongly or loosely. Tap other tokens to compare their keys."
         : "The highlighted token needs help from specific other tokens. Follow the arrow.";
 
   // The interactive token row, shared by the answering and dot-product modes.
@@ -433,17 +451,22 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
         </svg>
         <div className="border-b border-border" style={{ height: QKV_ARC_H }} aria-hidden />
         <div className="flex items-stretch">
-          <div className="flex shrink-0 flex-col bg-foreground/[0.02]">
+          {/* Row labels stay put while the tokens scroll under them. */}
+          <div
+            ref={labelColRef}
+            className="sticky left-0 z-[2] flex shrink-0 flex-col border-r border-border bg-surface"
+          >
             <div
-              className={`flex h-9 items-center justify-end px-3 text-[10px] font-semibold uppercase tracking-wide text-muted ${
+              className={`flex h-9 items-center justify-end px-2 text-[10px] font-semibold uppercase tracking-normal text-muted sm:px-3 sm:tracking-wide ${
                 showScores ? "border-b border-border" : ""
               }`}
             >
               token
             </div>
             {showScores && (
-              <div className="flex h-11 items-center justify-end px-3 text-[10px] font-semibold uppercase tracking-wide text-muted">
-                match&nbsp;score
+              <div className="flex h-11 items-center justify-end px-2 text-[10px] font-semibold uppercase tracking-normal text-muted sm:px-3 sm:tracking-wide">
+                <span className="sm:hidden">score</span>
+                <span className="hidden sm:inline">match&nbsp;score</span>
               </div>
             )}
           </div>
@@ -462,7 +485,7 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
                 }}
                 onClick={canClick ? () => setClickedAnswerer(i) : undefined}
                 aria-pressed={isSel}
-                className={`flex flex-col items-stretch border-l border-border transition-colors ${
+                className={`flex min-w-7 flex-col items-stretch border-l border-border transition-colors first-of-type:border-l-0 sm:min-w-0 ${
                   canClick ? "cursor-pointer hover:bg-accent/10" : "cursor-default"
                 } ${
                   isAsker
@@ -475,7 +498,7 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
                 }`}
               >
                 <div
-                  className={`flex h-9 items-center justify-center whitespace-nowrap px-3 text-lg ${
+                  className={`flex h-9 items-center justify-center whitespace-nowrap px-2 text-base sm:px-3 sm:text-lg ${
                     showScores ? "border-b border-border" : ""
                   } ${
                     isAsker
@@ -493,10 +516,10 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
                 </div>
                 {showScores && (
                   <div
-                    className={`flex h-11 items-center justify-center px-3 ${
+                    className={`flex h-11 items-center justify-center px-2 sm:px-3 ${
                       isAsker
                         ? "text-[10px] font-semibold uppercase tracking-wide text-accent"
-                        : `font-mono text-2xl font-bold ${isTgt ? "text-accent" : "text-muted/60"}`
+                        : `font-mono text-lg font-bold sm:text-2xl ${isTgt ? "text-accent" : "text-muted/60"}`
                     }`}
                   >
                     {isAsker ? "query" : sc.toFixed(1)}
@@ -615,8 +638,8 @@ export function WhyAttentionMatters({ mode = "basic" }: { mode?: Mode } = {}) {
           <div className="flex flex-col gap-4">
             <div className="text-center text-sm font-medium text-accent">
               {mode === "qkv"
-                ? `Click any token to score its key against “${selectedWordText}”’s query.`
-                : `Click any underlined token to compare its key against “${selectedWordText}”’s query.`}
+                ? `Tap any token to score its key against “${selectedWordText}”’s query.`
+                : `Tap any underlined token to compare its key against “${selectedWordText}”’s query.`}
             </div>
 
             <div ref={explodeRef} className="relative">

@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
+import { useSvgTextScale } from "../shared/useSvgScale";
 
 const PANEL_WIDTH = 260;
 const PANEL_HEIGHT = 200;
@@ -126,6 +127,7 @@ function LandscapePanel({
   onClickAt: (x: number, startSvgY: number) => void;
 }) {
   const svgRef = useRef<SVGSVGElement>(null);
+  const ts = useSvgTextScale(svgRef, PANEL_WIDTH);
   const landscapePath = generateLandscapePath(fn, maxY);
   const fillPath = generateFillPath(fn, maxY);
   const { ballX, ballSvgY, dropping, trail, steps, loss, settled } = panelData;
@@ -152,8 +154,8 @@ function LandscapePanel({
       : 0;
 
   return (
-    <div className="flex flex-col items-center gap-2">
-      <span className="text-xs font-semibold text-foreground">{title}</span>
+    <div className="flex min-w-0 flex-col items-center gap-2">
+      <span className="text-center text-xs font-semibold text-foreground">{title}</span>
       <svg
         ref={svgRef}
         viewBox={`0 0 ${PANEL_WIDTH} ${PANEL_HEIGHT}`}
@@ -229,16 +231,16 @@ function LandscapePanel({
             y={PANEL_HEIGHT / 2}
             textAnchor="middle"
             fill="currentColor"
-            fontSize="11"
-            opacity={0.3}
+            fontSize={11 * ts}
+            opacity={0.45}
           >
-            Click to drop a ball
+            Tap to drop a ball
           </text>
         )}
       </svg>
 
       {/* Stats — fixed height to prevent layout jump */}
-      <div className="flex h-5 items-center gap-3 text-xs text-muted">
+      <div className="flex min-h-10 flex-wrap items-start justify-center gap-x-3 text-xs text-muted sm:h-5 sm:min-h-0 sm:items-center">
         {steps > 0 && (
           <span>
             Steps: <span className="font-mono font-bold text-foreground">{steps}</span>
@@ -380,10 +382,11 @@ export function SmoothVsRugged() {
   return (
     <WidgetContainer
       title="Smooth vs. Non-Smooth"
-      description="Click anywhere to drop a ball — can gradient descent find the bottom?"
+      description="Tap anywhere to drop a ball — can gradient descent find the bottom?"
       onReset={reset}
     >
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      {/* Side by side even on phones, so both landscapes are on screen together. */}
+      <div className="grid grid-cols-2 gap-3 sm:gap-4">
         <LandscapePanel
           title="Smooth"
           fn={smoothFn}

@@ -1,12 +1,17 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useRef } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
+import { useIsPhone } from "../shared/useMediaQuery";
+import { useSvgFontSize } from "../shared/useSvgScale";
 import { useEmbeddingData } from "./useEmbeddingData";
 
 /* ── Layout constants (matching NetworkOverview style) ── */
 const W = 620;
 const H = 396;
+/* Phones crop the viewBox to the input → embedding part (x 24…360) */
+const COMPACT_X = 24;
+const COMPACT_W = 336;
 const NODE_R = 14;
 
 /* Column x-positions */
@@ -51,6 +56,12 @@ function valFill(v: number, maxAbs = 2.5): string {
 }
 
 export function EmbeddingLayerDiagram() {
+  // Phones: show only the input → weights → embedding part, at close to its
+  // designed size, so the weight values (the point of the diagram) are
+  // readable. The next layer is cropped off; its connections run off the edge.
+  const compact = useIsPhone();
+  const svgRef = useRef<SVGSVGElement>(null);
+  const fontSize = useSvgFontSize(svgRef, compact ? COMPACT_W : W);
   const { data, loading, error } = useEmbeddingData();
   const [selectedIdx, setSelectedIdx] = useState(1); // "dog"
 
@@ -136,9 +147,10 @@ export function EmbeddingLayerDiagram() {
 
       {/* SVG Diagram */}
       <svg
-        viewBox={`0 0 ${W} ${H}`}
+        ref={svgRef}
+        viewBox={compact ? `${COMPACT_X} 0 ${COMPACT_W} ${H}` : `0 0 ${W} ${H}`}
         className="w-full max-w-[680px]"
-        style={{ overflow: "visible" }}
+        style={{ overflow: compact ? "hidden" : "visible" }}
         aria-label="Embedding layer shown as the first layer of a neural network"
       >
         {/* ── Connection lines: input → embedding ── */}
@@ -168,7 +180,8 @@ export function EmbeddingLayerDiagram() {
                     x={(x1 + x2) / 2}
                     y={(y1 + y2) / 2 - 4}
                     textAnchor="middle"
-                    className="fill-accent text-[8px] font-mono select-none"
+                    fontSize={fontSize(8)}
+                    className="fill-accent font-mono select-none"
                     style={{ pointerEvents: "none" }}
                   >
                     {selVec[dimIdx].toFixed(2)}
@@ -218,7 +231,8 @@ export function EmbeddingLayerDiagram() {
         <text
           x={NEXT_X + NODE_R + 44}
           y={centerY + 4}
-          className="fill-muted text-[9px] italic"
+          fontSize={fontSize(9)}
+          className="fill-muted italic"
         >
           more layers...
         </text>
@@ -271,7 +285,8 @@ export function EmbeddingLayerDiagram() {
                 y={inp.y + 4}
                 textAnchor="end"
                 fill={isActive ? INPUT_COLOR : "#64748b"}
-                className={`text-[10px] select-none ${isActive ? "font-bold" : "font-medium"}`}
+                fontSize={fontSize(10)}
+                className={`select-none ${isActive ? "font-bold" : "font-medium"}`}
                 style={{ pointerEvents: "none" }}
               >
                 {wordData[idx].word}
@@ -312,7 +327,8 @@ export function EmbeddingLayerDiagram() {
                 x={EMBED_X + NODE_R + 5}
                 y={emb.y + 4}
                 textAnchor="start"
-                className="fill-muted text-[9px] font-mono select-none"
+                fontSize={fontSize(9)}
+                className="fill-muted font-mono select-none"
               >
                 {val.toFixed(2)}
               </text>
@@ -358,7 +374,8 @@ export function EmbeddingLayerDiagram() {
                 x={weightMidX}
                 y={embedMinY - 6}
                 textAnchor="middle"
-                className="text-[8px] font-medium select-none"
+                fontSize={fontSize(8)}
+                className="font-medium select-none"
                 fill={ACTIVE_COLOR}
                 opacity={0.7}
               >
@@ -381,7 +398,8 @@ export function EmbeddingLayerDiagram() {
                 x={EMBED_X + 17}
                 y={embedMinY - 6}
                 textAnchor="middle"
-                className="text-[8px] font-medium select-none"
+                fontSize={fontSize(8)}
+                className="font-medium select-none"
                 fill={EMBED_COLOR}
                 opacity={0.8}
               >
@@ -392,15 +410,15 @@ export function EmbeddingLayerDiagram() {
         })()}
 
         {/* ── Column labels ── */}
-        <text x={INPUT_X} y={H - 6} textAnchor="middle" className="fill-muted text-[10px]">
+        <text x={INPUT_X} y={H - 6} textAnchor="middle" fontSize={fontSize(10)} className="fill-muted">
           Input word
         </text>
 
-        <text x={EMBED_X} y={H - 6} textAnchor="middle" className="fill-muted text-[10px]">
+        <text x={EMBED_X} y={H - 6} textAnchor="middle" fontSize={fontSize(10)} className="fill-muted">
           Embedding layer
         </text>
 
-        <text x={NEXT_X} y={H - 6} textAnchor="middle" className="fill-muted text-[10px]">
+        <text x={NEXT_X} y={H - 6} textAnchor="middle" fontSize={fontSize(10)} className="fill-muted">
           Next layer
         </text>
       </svg>

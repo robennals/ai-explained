@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useRef } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
 import { SliderControl } from "../shared/SliderControl";
+import { useSvgTextScale } from "../shared/useSvgScale";
 
 // Target function: a cubic the kid CAN match exactly
 function targetFn(x: number): number {
@@ -56,6 +57,8 @@ export function ParameterPlayground() {
   const [b, setB] = useState(0);
   const [c, setC] = useState(0);
   const [d, setD] = useState(0);
+  const svgRef = useRef<SVGSVGElement>(null);
+  const ts = useSvgTextScale(svgRef, SVG_WIDTH);
 
   const resetParams = useCallback(() => {
     setA(0);
@@ -114,6 +117,7 @@ export function ParameterPlayground() {
       </div>
 
       <svg
+        ref={svgRef}
         viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}
         className="mb-4 w-full rounded-lg border border-border bg-surface"
         preserveAspectRatio="xMidYMid meet"
@@ -178,36 +182,36 @@ export function ParameterPlayground() {
         />
         {/* Legend */}
         <line
-          x1={SVG_WIDTH - 140}
-          y1={20}
-          x2={SVG_WIDTH - 120}
-          y2={20}
+          x1={SVG_WIDTH - 140 * ts}
+          y1={20 * ts}
+          x2={SVG_WIDTH - 120 * ts}
+          y2={20 * ts}
           stroke="var(--color-accent)"
           strokeWidth="2.5"
           opacity={0.5}
         />
         <text
-          x={SVG_WIDTH - 115}
-          y={24}
+          x={SVG_WIDTH - 115 * ts}
+          y={24 * ts}
           fill="currentColor"
-          fontSize="11"
+          fontSize={11 * ts}
           opacity={0.6}
         >
           Target
         </text>
         <line
-          x1={SVG_WIDTH - 140}
-          y1={36}
-          x2={SVG_WIDTH - 120}
-          y2={36}
+          x1={SVG_WIDTH - 140 * ts}
+          y1={36 * ts}
+          x2={SVG_WIDTH - 120 * ts}
+          y2={36 * ts}
           stroke="var(--color-error)"
           strokeWidth="2"
         />
         <text
-          x={SVG_WIDTH - 115}
-          y={40}
+          x={SVG_WIDTH - 115 * ts}
+          y={40 * ts}
           fill="currentColor"
-          fontSize="11"
+          fontSize={11 * ts}
           opacity={0.6}
         >
           Your model

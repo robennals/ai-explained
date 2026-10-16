@@ -3,6 +3,7 @@
 import { useState, useCallback, useRef } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
 import { WidgetTabs } from "../shared/WidgetTabs";
+import { useSvgTextScale } from "../shared/useSvgScale";
 
 const SVG_WIDTH = 500;
 const SVG_HEIGHT = 280;
@@ -66,6 +67,7 @@ export function OptimizationGame() {
   const [mode, setMode] = useState<"blind" | "signal">("blind");
   const [revealed, setRevealed] = useState(false);
   const svgRef = useRef<SVGSVGElement>(null);
+  const ts = useSvgTextScale(svgRef, SVG_WIDTH);
 
   const reset = useCallback(() => {
     setTarget(randomTarget());
@@ -210,7 +212,7 @@ export function OptimizationGame() {
                     }}
                   />
                   <span
-                    className="mt-0.5 text-[9px] font-bold"
+                    className="mt-0.5 text-[11px] font-bold"
                     style={{ color: signalColor(t) }}
                   >
                     you
@@ -404,10 +406,10 @@ export function OptimizationGame() {
             y={SVG_HEIGHT / 2}
             textAnchor="middle"
             fill="currentColor"
-            fontSize="13"
-            opacity={0.3}
+            fontSize={13 * ts}
+            opacity={0.45}
           >
-            Click anywhere to start guessing
+            Tap anywhere to start guessing
           </text>
         )}
       </svg>

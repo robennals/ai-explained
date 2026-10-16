@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
+import { useSvgFontSize } from "../shared/useSvgScale";
 
 function sigmoid(x: number): number {
   return 1 / (1 + Math.exp(-x));
@@ -48,6 +49,10 @@ export function SigmoidExplorer() {
   const [input, setInput] = useState(0);
   const [dragging, setDragging] = useState(false);
   const svgRef = useRef<SVGSVGElement>(null);
+  const fontSize = useSvgFontSize(svgRef, W);
+  // When squeezed (phones) the text grows, so the label under the output value
+  // is right-aligned to the edge to keep "≈ output" inside the drawing.
+  const squeezed = fontSize(9) > 9;
   const output = sigmoid(input);
 
   const reset = useCallback(() => setInput(0), []);
@@ -95,7 +100,7 @@ export function SigmoidExplorer() {
         <svg
           ref={svgRef}
           viewBox={`0 0 ${W} ${H}`}
-          className="w-full max-w-[520px] touch-none"
+          className="w-full max-w-[520px]"
           style={{ cursor: dragging ? "grabbing" : undefined }}
         >
           {/* Reference lines */}
@@ -158,7 +163,8 @@ export function SigmoidExplorer() {
             x={PAD_L - 6}
             y={toSvgY(1) + 4}
             textAnchor="end"
-            className="fill-muted text-[10px]"
+            fontSize={fontSize(10)}
+            className="fill-muted"
           >
             1
           </text>
@@ -166,7 +172,8 @@ export function SigmoidExplorer() {
             x={PAD_L - 6}
             y={toSvgY(0.5) + 3}
             textAnchor="end"
-            className="fill-muted text-[10px]"
+            fontSize={fontSize(10)}
+            className="fill-muted"
           >
             0.5
           </text>
@@ -174,7 +181,8 @@ export function SigmoidExplorer() {
             x={PAD_L - 6}
             y={toSvgY(0) + 3}
             textAnchor="end"
-            className="fill-muted text-[10px]"
+            fontSize={fontSize(10)}
+            className="fill-muted"
           >
             0
           </text>
@@ -183,7 +191,8 @@ export function SigmoidExplorer() {
             x={toSvgX(-6)}
             y={PAD_T + PLOT_H + 16}
             textAnchor="middle"
-            className="fill-muted text-[10px]"
+            fontSize={fontSize(10)}
+            className="fill-muted"
           >
             −6
           </text>
@@ -191,7 +200,8 @@ export function SigmoidExplorer() {
             x={toSvgX(-3)}
             y={PAD_T + PLOT_H + 16}
             textAnchor="middle"
-            className="fill-muted text-[10px]"
+            fontSize={fontSize(10)}
+            className="fill-muted"
           >
             −3
           </text>
@@ -199,7 +209,8 @@ export function SigmoidExplorer() {
             x={toSvgX(0)}
             y={PAD_T + PLOT_H + 16}
             textAnchor="middle"
-            className="fill-muted text-[10px]"
+            fontSize={fontSize(10)}
+            className="fill-muted"
           >
             0
           </text>
@@ -207,7 +218,8 @@ export function SigmoidExplorer() {
             x={toSvgX(3)}
             y={PAD_T + PLOT_H + 16}
             textAnchor="middle"
-            className="fill-muted text-[10px]"
+            fontSize={fontSize(10)}
+            className="fill-muted"
           >
             3
           </text>
@@ -215,7 +227,8 @@ export function SigmoidExplorer() {
             x={toSvgX(6)}
             y={PAD_T + PLOT_H + 16}
             textAnchor="middle"
-            className="fill-muted text-[10px]"
+            fontSize={fontSize(10)}
+            className="fill-muted"
           >
             6
           </text>
@@ -224,7 +237,8 @@ export function SigmoidExplorer() {
             x={12}
             y={PAD_T + PLOT_H / 2}
             textAnchor="middle"
-            className="fill-muted text-[10px]"
+            fontSize={fontSize(10)}
+            className="fill-muted"
             transform={`rotate(-90, 12, ${PAD_T + PLOT_H / 2})`}
           >
             output
@@ -275,9 +289,11 @@ export function SigmoidExplorer() {
             {output.toFixed(2)}
           </text>
           <text
-            x={PAD_L + PLOT_W + 10}
+            x={squeezed ? W - 2 : PAD_L + PLOT_W + 10}
             y={dotY + 19}
-            className="fill-muted text-[9px]"
+            textAnchor={squeezed ? "end" : "start"}
+            fontSize={fontSize(9)}
+            className="fill-muted"
           >
             {isApproxSigmoid(output) ? "≈ output" : "output"}
           </text>
@@ -328,14 +344,16 @@ export function SigmoidExplorer() {
           <text
             x={PAD_L + PLOT_W + 10}
             y={SLIDER_Y + 4}
-            className="fill-foreground text-[12px] font-bold font-mono"
+            fontSize={fontSize(12)}
+            className="fill-foreground font-bold font-mono"
           >
             {input.toFixed(1)}
           </text>
           <text
             x={PAD_L + PLOT_W + 10}
             y={SLIDER_Y + 16}
-            className="fill-muted text-[9px]"
+            fontSize={fontSize(9)}
+            className="fill-muted"
           >
             input
           </text>
@@ -347,7 +365,9 @@ export function SigmoidExplorer() {
             width={PLOT_W + 20}
             height={SLIDER_Y - (PAD_T + PLOT_H) + 14}
             fill="transparent"
-            style={{ cursor: dragging ? "grabbing" : "grab" }}
+            // Only the slider strip blocks page scrolling, so a swipe on the
+            // chart itself still scrolls the page on a phone.
+            style={{ cursor: dragging ? "grabbing" : "grab", touchAction: "none" }}
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}
             onPointerUp={onPointerUp}

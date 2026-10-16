@@ -509,13 +509,13 @@ function ExploreTab({
       {predictions.length > 0 ? (
         <div className="space-y-1">
           <div className="text-xs font-medium text-muted mb-2">
-            Top predictions (click to extend):
+            Top predictions (tap to extend):
           </div>
           {predictions.map((pred) => (
             <button
               key={pred.tokenId}
               onClick={() => onPredictionClick(pred)}
-              className="group flex w-full items-center gap-2 rounded-md px-1 py-0.5 text-left transition-colors hover:bg-surface"
+              className="group flex min-h-9 w-full items-center gap-2 rounded-md px-1 py-1 text-left transition-colors hover:bg-surface sm:min-h-0 sm:py-0.5"
             >
               <span className="w-20 text-right font-mono text-xs text-foreground group-hover:text-accent transition-colors truncate">
                 {displayToken(pred.token)}

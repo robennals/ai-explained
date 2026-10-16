@@ -52,6 +52,8 @@ export function TransformerOverview() {
     setSelectedCell(null);
   }, []);
 
+  const closeLayerPopup = useCallback(() => setSelectedLayer(null), []);
+
   const handleReset = useCallback(() => {
     setSelectedCell(INITIAL_SELECTION);
     setSelectedLayer(null);
@@ -90,7 +92,7 @@ export function TransformerOverview() {
 
   const repBox = useMemo(() => {
     if (!selectedCell) {
-      return { label: null as string | null, body: "Click any word-cell to see what it means at that layer." };
+      return { label: null as string | null, body: "Tap any word-cell to see what it means at that layer." };
     }
     const tokIndex = selectedCell.tokenIndex;
     const tok = simpleOverviewExample.tokens[tokIndex];
@@ -159,7 +161,9 @@ export function TransformerOverview() {
   return (
     <WidgetContainer title="A Transformer At a Glance" onReset={handleReset}>
       <div
-        className="relative overflow-x-auto mx-auto max-w-[960px]"
+        // Phones draw a compact grid that fits the width, so don't scroll it:
+        // a scroll container would also clip the popup vertically.
+        className={`relative mx-auto max-w-[960px] ${compact ? "" : "overflow-x-auto"}`}
         onClick={(e) => { if (e.target === e.currentTarget) closeAll(); }}
       >
         <Grid
@@ -179,7 +183,7 @@ export function TransformerOverview() {
             viewHeight={VIEW_HEIGHT}
             title={layerPopup.title}
             body={layerPopup.body}
-            onClose={() => setSelectedLayer(null)}
+            onClose={closeLayerPopup}
           />
         )}
       </div>
