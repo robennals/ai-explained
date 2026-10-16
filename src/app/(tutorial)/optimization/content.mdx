@@ -1,30 +1,22 @@
-The big idea behind AI is that a sufficiently large model can compute pretty much anything, provided it has been configured with the right parameters. But how do you find the right parameters? The answer is to use the same method that drives evolution: make a tiny change, check whether it made the model work better, keep it if it did, and repeat this process very very fast, many many times.
+The big idea behind AI is that a sufficiently large model can compute pretty much anything, provided it has been configured with the right parameters. 
 
-## How Do You Build Something You Don't Understand?
+A model is a machine with adjustable knobs, and different knob settings compute different functions. But how do you find the kno settings that compute the function you want? 
 
-A model is a machine with adjustable knobs. Different knob settings compute different functions. We need to find the settings that make the model compute the *right* function, but we can't try every combination, because the number of possibilities is astronomically large.
-
-So what do we do?
-
-Your first instinct might be: *think really hard*. Analyze the problem. Design the answer from first principles. Be brilliant.
-
-But that's almost never how complex things actually get built. And understanding *why* is the key to understanding how AI works.
+The answer is to use the same method that drives evolution: make a tiny change, check whether it made the model work better, keep it if it did, and repeat this process very very fast, many many times.
 
 ## Nothing Complex Was Ever Designed From Scratch
 
-The human eye is one of the most sophisticated optical instruments in existence. It automatically adjusts focus, adapts to light levels from pitch darkness to blinding sunshine, and processes information in real time. No engineer designed it. It evolved over 3.5 billion years of tiny changes, each one barely noticeable, accumulating into something extraordinary.
+When we see something complex and impressive, it's tempting to assume someone brilliant sat down and designed it. But that's almost never how complex things actually come to exist. Instead, pretty much everything complex in the world was created through a long sequence of incremental optimization steps.
 
-The Wright brothers didn't sit down and calculate the perfect wing shape. They built a wind tunnel and tested *hundreds* of wing designs, measuring which ones generated more lift. Each test informed the next. The airplane was iterated into existence.
-
-The iPhone didn't spring fully formed from Steve Jobs's mind. It evolved through generations (flip phones, then Blackberries, then the iPhone), each one building on what came before, each one a little closer to what people actually wanted.
-
-This pattern is universal. The steam engine, the internet, language itself, all were built incrementally. Even things we think of as "inventions" are really evolutionary processes. Nobody sat down and *designed* English. These things emerged through countless small improvements, tested against reality, kept or discarded.
+<BuiltStepByStepWidget>
+Pick a tab and click "Next small change" to step through it, or click any circle to jump straight to that step. Notice that no single step is a big leap, and that each one only had to work a little better than the one before. The eye took hundreds of millions of years and the phone took a century, but the pattern is the same. Even ideas evolve this way: our understanding of disease built up one discovery at a time. And nobody designed English: it drifted into shape one speaker at a time.
+</BuiltStepByStepWidget>
 
 <KeyInsight>
 **Every complex system was built the same way:** make a small change, test whether it helped, keep or undo it, repeat. By relentless, incremental improvement.
 </KeyInsight>
 
-This is how AI learns too. But to make this work, you need two things: a way to **measure how far off you are**, and a way to **make small changes**.
+AI is no exception. But to make this work, you need two things: a way to **measure how far off you are**, and a way to **make small changes**.
 
 ## You Need a Way to Measure the Error
 

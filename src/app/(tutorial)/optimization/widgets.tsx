@@ -12,6 +12,14 @@ const OptimizationGame = dynamic(
   { ssr: false }
 );
 
+const BuiltStepByStep = dynamic(
+  () =>
+    import("@/components/widgets/optimization/BuiltStepByStep").then(
+      (m) => m.BuiltStepByStep
+    ),
+  { ssr: false }
+);
+
 const ErrorMeasurement = dynamic(
   () =>
     import("@/components/widgets/optimization/ErrorMeasurement").then(
@@ -72,6 +80,14 @@ export function OptimizationGameWidget({ children }: { children?: React.ReactNod
   return (
     <WidgetSlot tryIt={children}>
       <OptimizationGame />
+    </WidgetSlot>
+  );
+}
+
+export function BuiltStepByStepWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <BuiltStepByStep />
     </WidgetSlot>
   );
 }
