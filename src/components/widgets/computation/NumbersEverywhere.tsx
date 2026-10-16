@@ -4,6 +4,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
 import { WidgetTabs } from "../shared/WidgetTabs";
 import { SliderControl } from "../shared/SliderControl";
+import { useIsPhone } from "../shared/useMediaQuery";
 
 type Tab = "text" | "image" | "color" | "sound";
 
@@ -91,10 +92,28 @@ function TextTab() {
 export function ImageTab() {
   const [grid, setGrid] = useState<string[][]>(createInitialGrid);
   const [selectedColor, setSelectedColor] = useState("#000000");
-  const [hoveredCell, setHoveredCell] = useState<[number, number] | null>(null);
-  const [isDrawing, setIsDrawing] = useState(false);
+  // The pixel whose values are shown: the one under the mouse, or the one
+  // most recently painted (touch screens have no hover).
+  const [focusCell, setFocusCell] = useState<[number, number] | null>(null);
   const [flashCell, setFlashCell] = useState<string | null>(null);
   const [highlightedCell, setHighlightedCell] = useState<string | null>(null);
+  const drawingRef = useRef(false);
+  const lastPaintedRef = useRef<string | null>(null);
+  const numbersListRef = useRef<HTMLDivElement>(null);
+  const compact = useIsPhone();
+
+  // Keep the just-painted row visible in the (scrolling) list of numbers.
+  // Adjust scrollTop directly so the page itself never scrolls.
+  useEffect(() => {
+    const list = numbersListRef.current;
+    if (!flashCell || !list) return;
+    const row = list.querySelector<HTMLElement>(`[data-row-index="${flashCell.split("-")[0]}"]`);
+    if (!row) return;
+    const top = row.offsetTop; // list is position:relative, so this is list-relative
+    if (top < list.scrollTop || top + row.offsetHeight > list.scrollTop + list.clientHeight) {
+      list.scrollTo({ top: top - 4, behavior: "smooth" });
+    }
+  }, [flashCell]);
 
   const paint = useCallback(
     (row: number, col: number) => {
@@ -110,6 +129,36 @@ export function ImageTab() {
     [selectedColor]
   );
 
+  // Pointer events cover mouse, pen and touch. With touch the pointer stays
+  // captured by the cell where the finger landed, so look up the cell under
+  // the finger instead of relying on per-cell enter events.
+  const cellAt = (x: number, y: number): [number, number] | null => {
+    const el = document.elementFromPoint(x, y)?.closest<HTMLElement>("[data-cell]");
+    if (!el) return null;
+    return [Number(el.dataset.row), Number(el.dataset.col)];
+  };
+
+  const handlePointer = (e: React.PointerEvent, starting: boolean) => {
+    const cell = cellAt(e.clientX, e.clientY);
+    if (starting) {
+      drawingRef.current = true;
+      lastPaintedRef.current = null;
+    }
+    if (!cell) return;
+    setFocusCell(cell);
+    if (!drawingRef.current) return;
+    const key = `${cell[0]}-${cell[1]}`;
+    if (key === lastPaintedRef.current) return;
+    lastPaintedRef.current = key;
+    paint(cell[0], cell[1]);
+  };
+
+  const stopDrawing = () => {
+    drawingRef.current = false;
+  };
+
+  const focusRgb = focusCell ? hexToRgb(grid[focusCell[0]][focusCell[1]]) : null;
+
   return (
     <div>
       <div className="mb-3 flex items-center gap-2">
@@ -118,7 +167,7 @@ export function ImageTab() {
           <button
             key={c}
             onClick={() => setSelectedColor(c)}
-            className={`h-6 w-6 rounded border-2 transition-transform ${
+            className={`h-8 w-8 rounded border-2 transition-transform sm:h-6 sm:w-6 ${
               selectedColor === c
                 ? "scale-110 border-accent"
                 : "border-border hover:scale-105"
@@ -131,77 +180,99 @@ export function ImageTab() {
       <div className="flex flex-col gap-4 sm:flex-row">
         <div>
           <div
-            className="inline-grid gap-0.5 rounded-lg border border-border bg-border p-0.5"
+            className="inline-grid touch-none select-none gap-0.5 rounded-lg border border-border bg-border p-0.5"
             style={{
               gridTemplateColumns: `repeat(${GRID_SIZE}, 1fr)`,
             }}
-            onMouseLeave={() => {
-              setHoveredCell(null);
-              setIsDrawing(false);
+            onPointerDown={(e) => {
+              e.preventDefault();
+              handlePointer(e, true);
             }}
-            onMouseUp={() => setIsDrawing(false)}
+            onPointerMove={(e) => handlePointer(e, false)}
+            onPointerUp={stopDrawing}
+            onPointerCancel={stopDrawing}
+            onPointerLeave={(e) => {
+              stopDrawing();
+              if (e.pointerType === "mouse") setFocusCell(null);
+            }}
           >
             {grid.flatMap((row, r) =>
               row.map((color, c) => (
                 <button
                   key={`${r}-${c}`}
-                  className={`h-7 w-7 transition-all hover:opacity-80 sm:h-8 sm:w-8 ${
+                  data-cell
+                  data-row={r}
+                  data-col={c}
+                  className={`h-9 w-9 transition-all hover:opacity-80 sm:h-8 sm:w-8 ${
                     highlightedCell === `${r}-${c}` ? "ring-2 ring-accent ring-offset-1" : ""
                   }`}
                   style={{ backgroundColor: color }}
-                  onMouseDown={() => {
-                    setIsDrawing(true);
-                    paint(r, c);
-                  }}
-                  onMouseEnter={() => {
-                    setHoveredCell([r, c]);
-                    if (isDrawing) paint(r, c);
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setFocusCell([r, c]);
+                      paint(r, c);
+                    }
                   }}
                   aria-label={`Pixel ${r},${c}`}
                 />
               ))
             )}
           </div>
+          {/* Phones: the selected pixel's values sit right under the grid, so
+              painting and the numbers it produces are on screen together. */}
+          {compact && (
+          <p className="mt-2 h-5 font-mono text-sm">
+            {focusCell && focusRgb ? (
+              <>
+                <span className="text-xs font-sans font-medium text-muted">
+                  Pixel [{focusCell[0]}, {focusCell[1]}] ={" "}
+                </span>
+                [<span className="text-red-500">{focusRgb[0]}</span>,{" "}
+                <span className="text-green-600">{focusRgb[1]}</span>,{" "}
+                <span className="text-blue-500">{focusRgb[2]}</span>]
+              </>
+            ) : (
+              <span className="font-sans text-xs text-muted">
+                Tap or drag to paint. Each pixel is three numbers.
+              </span>
+            )}
+          </p>
+          )}
         </div>
-        <div className="flex-1 overflow-auto">
-          {hoveredCell ? (
-            <div className="rounded-lg border border-border bg-surface p-3">
-              <p className="mb-1 text-xs font-medium text-muted">
-                Pixel [{hoveredCell[0]}, {hoveredCell[1]}]
-              </p>
-              <div className="flex items-center gap-2">
-                <div
-                  className="h-8 w-8 rounded border border-border"
-                  style={{
-                    backgroundColor:
-                      grid[hoveredCell[0]][hoveredCell[1]],
-                  }}
-                />
-                <div className="font-mono text-sm">
-                  {(() => {
-                    const [r, g, b] = hexToRgb(
-                      grid[hoveredCell[0]][hoveredCell[1]]
-                    );
-                    return (
-                      <span>
-                        [<span className="text-red-500">{r}</span>,{" "}
-                        <span className="text-green-600">{g}</span>,{" "}
-                        <span className="text-blue-500">{b}</span>]
-                      </span>
-                    );
-                  })()}
+        <div className="min-w-0 flex-1 overflow-auto">
+          {!compact && (
+          <div>
+            {focusCell && focusRgb ? (
+              <div className="rounded-lg border border-border bg-surface p-3">
+                <p className="mb-1 text-xs font-medium text-muted">
+                  Pixel [{focusCell[0]}, {focusCell[1]}]
+                </p>
+                <div className="flex items-center gap-2">
+                  <div
+                    className="h-8 w-8 rounded border border-border"
+                    style={{
+                      backgroundColor: grid[focusCell[0]][focusCell[1]],
+                    }}
+                  />
+                  <div className="font-mono text-sm">
+                    [<span className="text-red-500">{focusRgb[0]}</span>,{" "}
+                    <span className="text-green-600">{focusRgb[1]}</span>,{" "}
+                    <span className="text-blue-500">{focusRgb[2]}</span>]
+                  </div>
                 </div>
               </div>
-            </div>
-          ) : (
-            <p className="text-sm text-muted">
-              Hover over a pixel to see its RGB values. Click or drag to paint.
-            </p>
+            ) : (
+              <p className="text-sm text-muted">
+                Hover over a pixel to see its RGB values. Tap or drag to paint.
+              </p>
+            )}
+          </div>
           )}
-          <div className="mt-2 max-h-48 overflow-auto rounded border border-border bg-surface p-2">
+          <div ref={numbersListRef} className={`relative max-h-48 overflow-auto rounded border border-border bg-surface p-2 ${compact ? "" : "mt-2"}`}>
             {grid.map((row, r) => (
-              <div key={r} className={`${r > 0 ? "mt-1 border-t border-border/50 pt-1" : ""}`}>
-                <span className="mr-1.5 text-[9px] font-medium text-muted/50">Row {r}</span>
+              <div key={r} data-row-index={r} className={`${r > 0 ? "mt-1 border-t border-border/50 pt-1" : ""}`}>
+                <span className="mr-1.5 text-[10px] font-medium text-muted/60">Row {r}</span>
                 <div className="flex flex-wrap gap-1">
                   {row.map((color, c) => {
                     const [rv, gv, bv] = hexToRgb(color);
@@ -212,8 +283,15 @@ export function ImageTab() {
                         className={`inline-flex w-[5.5rem] cursor-default items-center gap-1 rounded-full border px-1.5 py-0.5 font-mono text-[10px] leading-tight text-muted transition-colors duration-300 ${
                           isFlashing ? "border-accent/30 bg-accent/20" : "border-border bg-white hover:border-accent/40 hover:bg-accent/5"
                         }`}
-                        onMouseEnter={() => setHighlightedCell(`${r}-${c}`)}
-                        onMouseLeave={() => setHighlightedCell(null)}
+                        onPointerEnter={(e) => {
+                          if (e.pointerType === "mouse") setHighlightedCell(`${r}-${c}`);
+                        }}
+                        onPointerLeave={(e) => {
+                          if (e.pointerType === "mouse") setHighlightedCell(null);
+                        }}
+                        onClick={() =>
+                          setHighlightedCell((prev) => (prev === `${r}-${c}` ? null : `${r}-${c}`))
+                        }
                       >
                         <span
                           className="inline-block h-2.5 w-2.5 rounded-sm border border-border/50"
@@ -764,8 +842,8 @@ function SoundTab() {
               , ...]
             </p>
             {selectedIdx === null && (
-              <p className="mt-1 text-[10px] text-muted/60">
-                Click the waveform to inspect a sample
+              <p className="mt-1 text-[11px] text-muted/70">
+                Tap the waveform to inspect a sample
               </p>
             )}
           </div>
