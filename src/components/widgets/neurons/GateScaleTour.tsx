@@ -16,124 +16,210 @@ const NODE_R = 13;
 
 type FontSize = (designPx: number) => number;
 
+// How much bigger than designed things are drawn: 1 on desktop, more on phones,
+// where text grows to stay readable. Boxes and circles grow by the same amount
+// so the text still fits inside them.
+function scaleOf(fontSize: FontSize): number {
+  return fontSize(12) / 12;
+}
+
 interface Point {
   x: number;
   y: number;
 }
 
 function Gate({ x, y, label, fontSize }: { x: number; y: number; label: string; fontSize: FontSize }) {
+  const k = scaleOf(fontSize);
   return (
     <g>
-      <rect x={x - GATE_W / 2} y={y - GATE_H / 2} width={GATE_W} height={GATE_H} rx={6} fill="#fef9ee" stroke="#f59e0b" strokeWidth={2} />
-      <text x={x} y={y + 4} textAnchor="middle" fontSize={fontSize(12)} className="fill-warning font-bold select-none">
+      <rect x={x - (GATE_W * k) / 2} y={y - (GATE_H * k) / 2} width={GATE_W * k} height={GATE_H * k} rx={6} fill="#fef9ee" stroke="#f59e0b" strokeWidth={2} />
+      <text x={x} y={y + fontSize(12) * 0.35} textAnchor="middle" fontSize={fontSize(12)} className="fill-warning font-bold select-none">
         {label}
       </text>
     </g>
   );
 }
 
-function Node({ x, y, label, fontSize, output }: { x: number; y: number; label: string; fontSize: FontSize; output?: boolean }) {
+// An input or output bit. Inputs can be tapped to flip between 0 and 1.
+function Node({
+  x,
+  y,
+  label,
+  value,
+  fontSize,
+  output,
+  onToggle,
+}: {
+  x: number;
+  y: number;
+  label: string;
+  value: number;
+  fontSize: FontSize;
+  output?: boolean;
+  onToggle?: () => void;
+}) {
+  const color = output ? "#10b981" : "#3b82f6";
+  const r = NODE_R * scaleOf(fontSize);
   return (
-    <g>
-      <circle cx={x} cy={y} r={NODE_R} fill={output ? "#f0fdf4" : "#f0f4ff"} stroke={output ? "#10b981" : "#3b82f6"} strokeWidth={2} />
-      <text x={x} y={y - NODE_R - 6} textAnchor="middle" fontSize={fontSize(11)} className="fill-foreground font-semibold select-none">
+    <g
+      className={onToggle ? "cursor-pointer" : undefined}
+      onClick={onToggle}
+      role={onToggle ? "button" : undefined}
+      aria-label={onToggle ? `${label}: ${value}. Tap to flip.` : undefined}
+    >
+      {/* Invisible, larger tap area, so the target is big enough on a phone */}
+      {onToggle && <circle cx={x} cy={y} r={r + 9} fill="transparent" />}
+      <circle
+        cx={x}
+        cy={y}
+        r={r}
+        fill={value ? (output ? "#dcfce7" : "#dbeafe") : "white"}
+        stroke={value ? color : "#d1d5db"}
+        strokeWidth={2}
+      />
+      <text x={x} y={y + fontSize(12) * 0.37} textAnchor="middle" fontSize={fontSize(12)} className="fill-foreground font-bold font-mono select-none pointer-events-none">
+        {value}
+      </text>
+      <text x={x} y={y - r - 6} textAnchor="middle" fontSize={fontSize(11)} className="fill-foreground font-semibold select-none pointer-events-none">
         {label}
       </text>
     </g>
   );
 }
 
-function Wire({ from, to }: { from: Point; to: Point }) {
-  return <line x1={from.x} y1={from.y} x2={to.x} y2={to.y} stroke="#9ca3af" strokeWidth={1.5} />;
+// A wire, lit blue when it carries a 1
+function Wire({ from, to, on }: { from: Point; to: Point; on: number }) {
+  return <line x1={from.x} y1={from.y} x2={to.x} y2={to.y} stroke={on ? "#3b82f6" : "#d1d5db"} strokeWidth={on ? 2.5 : 1.5} />;
 }
 
 // Wire from a node or gate's right side into the top (port 0) or bottom (port 1) of a gate's left side
-function into(gate: Point, port: 0 | 1): Point {
-  return { x: gate.x - GATE_W / 2, y: gate.y + (port === 0 ? -8 : 8) };
+// Phones: the 2-digit adder's rows are spread apart by the same scale, so the
+// bigger boxes, circles and labels don't run into each other.
+const ADDER_TOP = 30;
+function spreadY(y: number, k: number): number {
+  return ADDER_TOP + (y - ADDER_TOP) * k;
 }
-function outOfGate(gate: Point): Point {
-  return { x: gate.x + GATE_W / 2, y: gate.y };
+
+// k is the drawing scale from scaleOf.
+function into(gate: Point, port: 0 | 1, k: number): Point {
+  return { x: gate.x - (GATE_W * k) / 2, y: gate.y + (port === 0 ? -8 : 8) * k };
 }
-function outOfNode(node: Point): Point {
-  return { x: node.x + NODE_R, y: node.y };
+function outOfGate(gate: Point, k: number): Point {
+  return { x: gate.x + (GATE_W * k) / 2, y: gate.y };
+}
+function outOfNode(node: Point, k: number): Point {
+  return { x: node.x + NODE_R * k, y: node.y };
+}
+function intoNode(node: Point, k: number): Point {
+  return { x: node.x - NODE_R * k, y: node.y };
+}
+
+// Input bits the reader can flip by tapping. flip(key) returns a click handler for that bit.
+function useBits<K extends string>(initial: Record<K, number>) {
+  const [bits, setBits] = useState(initial);
+  const flip = (key: K) => () => setBits((prev) => ({ ...prev, [key]: prev[key] ? 0 : 1 }));
+  return { bits, flip };
 }
 
 function OneGate({ fontSize }: { fontSize: FontSize }) {
-  const a = { x: 130, y: 85 };
-  const b = { x: 130, y: 175 };
+  const k = scaleOf(fontSize);
+  const {
+    bits: { a, b },
+    flip,
+  } = useBits({ a: 1, b: 0 });
+  const result = a & b;
+  const pa = { x: 130, y: 85 };
+  const pb = { x: 130, y: 175 };
   const g = { x: 300, y: 130 };
   const out = { x: 470, y: 130 };
   return (
     <>
-      <Wire from={outOfNode(a)} to={into(g, 0)} />
-      <Wire from={outOfNode(b)} to={into(g, 1)} />
-      <Wire from={outOfGate(g)} to={{ x: out.x - NODE_R, y: out.y }} />
+      <Wire from={outOfNode(pa, k)} to={into(g, 0, k)} on={a} />
+      <Wire from={outOfNode(pb, k)} to={into(g, 1, k)} on={b} />
+      <Wire from={outOfGate(g, k)} to={intoNode(out, k)} on={result} />
       <Gate {...g} label="AND" fontSize={fontSize} />
-      <Node {...a} label="raining?" fontSize={fontSize} />
-      <Node {...b} label="going out?" fontSize={fontSize} />
-      <Node {...out} label="need umbrella?" fontSize={fontSize} output />
+      <Node {...pa} label="raining?" value={a} fontSize={fontSize} onToggle={flip("a")} />
+      <Node {...pb} label="going out?" value={b} fontSize={fontSize} onToggle={flip("b")} />
+      <Node {...out} label="need umbrella?" value={result} fontSize={fontSize} output />
     </>
   );
 }
 
 function HalfAdder({ fontSize }: { fontSize: FontSize }) {
-  const a = { x: 130, y: 85 };
-  const b = { x: 130, y: 175 };
+  const k = scaleOf(fontSize);
+  const {
+    bits: { a, b },
+    flip,
+  } = useBits({ a: 1, b: 0 });
+  const sum = a ^ b;
+  const carry = a & b;
+  const pa = { x: 130, y: 85 };
+  const pb = { x: 130, y: 175 };
   const xor = { x: 300, y: 85 };
   const and = { x: 300, y: 175 };
-  const sum = { x: 470, y: 85 };
-  const carry = { x: 470, y: 175 };
+  const pSum = { x: 470, y: 85 };
+  const pCarry = { x: 470, y: 175 };
   return (
     <>
       {[xor, and].flatMap((g) => [
-        <Wire key={`a${g.y}`} from={outOfNode(a)} to={into(g, 0)} />,
-        <Wire key={`b${g.y}`} from={outOfNode(b)} to={into(g, 1)} />,
+        <Wire key={`a${g.y}`} from={outOfNode(pa, k)} to={into(g, 0, k)} on={a} />,
+        <Wire key={`b${g.y}`} from={outOfNode(pb, k)} to={into(g, 1, k)} on={b} />,
       ])}
-      <Wire from={outOfGate(xor)} to={{ x: sum.x - NODE_R, y: sum.y }} />
-      <Wire from={outOfGate(and)} to={{ x: carry.x - NODE_R, y: carry.y }} />
+      <Wire from={outOfGate(xor, k)} to={intoNode(pSum, k)} on={sum} />
+      <Wire from={outOfGate(and, k)} to={intoNode(pCarry, k)} on={carry} />
       <Gate {...xor} label="XOR" fontSize={fontSize} />
       <Gate {...and} label="AND" fontSize={fontSize} />
-      <Node {...a} label="digit A" fontSize={fontSize} />
-      <Node {...b} label="digit B" fontSize={fontSize} />
-      <Node {...sum} label="sum digit" fontSize={fontSize} output />
-      <Node {...carry} label="carry digit" fontSize={fontSize} output />
+      <Node {...pa} label="digit A" value={a} fontSize={fontSize} onToggle={flip("a")} />
+      <Node {...pb} label="digit B" value={b} fontSize={fontSize} onToggle={flip("b")} />
+      <Node {...pSum} label="sum digit" value={sum} fontSize={fontSize} output />
+      <Node {...pCarry} label="carry digit" value={carry} fontSize={fontSize} output />
     </>
   );
 }
 
 function TwoDigitAdder({ fontSize }: { fontSize: FontSize }) {
-  const a2 = { x: 70, y: 45 };
-  const b2 = { x: 70, y: 105 };
-  const a1 = { x: 70, y: 165 };
-  const b1 = { x: 70, y: 225 };
-  const and2 = { x: 210, y: 45 };
-  const xor2 = { x: 210, y: 110 };
-  const carry1 = { x: 210, y: 170 };
-  const sum1 = { x: 210, y: 228 };
-  const carryIn2 = { x: 340, y: 110 };
-  const sum2 = { x: 340, y: 170 };
-  const carry4 = { x: 440, y: 70 };
-  const four = { x: 540, y: 70 };
-  const two = { x: 540, y: 160 };
-  const one = { x: 540, y: 228 };
-  const wires: [Point, Point][] = [
-    [outOfNode(a2), into(and2, 0)],
-    [outOfNode(b2), into(and2, 1)],
-    [outOfNode(a2), into(xor2, 0)],
-    [outOfNode(b2), into(xor2, 1)],
-    [outOfNode(a1), into(carry1, 0)],
-    [outOfNode(b1), into(carry1, 1)],
-    [outOfNode(a1), into(sum1, 0)],
-    [outOfNode(b1), into(sum1, 1)],
-    [outOfGate(xor2), into(carryIn2, 0)],
-    [outOfGate(carry1), into(carryIn2, 1)],
-    [outOfGate(xor2), into(sum2, 0)],
-    [outOfGate(carry1), into(sum2, 1)],
-    [outOfGate(and2), into(carry4, 0)],
-    [outOfGate(carryIn2), into(carry4, 1)],
-    [outOfGate(carry4), { x: four.x - NODE_R, y: four.y }],
-    [outOfGate(sum2), { x: two.x - NODE_R, y: two.y }],
-    [outOfGate(sum1), { x: one.x - NODE_R, y: one.y }],
+  const k = scaleOf(fontSize);
+  const { bits, flip } = useBits({ a2: 1, b2: 0, a1: 1, b1: 1 });
+  const and2v = bits.a2 & bits.b2;
+  const xor2v = bits.a2 ^ bits.b2;
+  const carry1v = bits.a1 & bits.b1;
+  const sum1v = bits.a1 ^ bits.b1;
+  const carryIn2v = xor2v & carry1v;
+  const sum2v = xor2v ^ carry1v;
+  const carry4v = and2v | carryIn2v;
+
+  const a2 = { x: 70, y: spreadY(45, k) };
+  const b2 = { x: 70, y: spreadY(105, k) };
+  const a1 = { x: 70, y: spreadY(165, k) };
+  const b1 = { x: 70, y: spreadY(225, k) };
+  const and2 = { x: 210, y: spreadY(45, k) };
+  const xor2 = { x: 210, y: spreadY(110, k) };
+  const carry1 = { x: 210, y: spreadY(170, k) };
+  const sum1 = { x: 210, y: spreadY(228, k) };
+  const carryIn2 = { x: 340, y: spreadY(110, k) };
+  const sum2 = { x: 340, y: spreadY(170, k) };
+  const carry4 = { x: 440, y: spreadY(70, k) };
+  const four = { x: 540, y: spreadY(70, k) };
+  const two = { x: 540, y: spreadY(160, k) };
+  const one = { x: 540, y: spreadY(228, k) };
+  const wires: [Point, Point, number][] = [
+    [outOfNode(a2, k), into(and2, 0, k), bits.a2],
+    [outOfNode(b2, k), into(and2, 1, k), bits.b2],
+    [outOfNode(a2, k), into(xor2, 0, k), bits.a2],
+    [outOfNode(b2, k), into(xor2, 1, k), bits.b2],
+    [outOfNode(a1, k), into(carry1, 0, k), bits.a1],
+    [outOfNode(b1, k), into(carry1, 1, k), bits.b1],
+    [outOfNode(a1, k), into(sum1, 0, k), bits.a1],
+    [outOfNode(b1, k), into(sum1, 1, k), bits.b1],
+    [outOfGate(xor2, k), into(carryIn2, 0, k), xor2v],
+    [outOfGate(carry1, k), into(carryIn2, 1, k), carry1v],
+    [outOfGate(xor2, k), into(sum2, 0, k), xor2v],
+    [outOfGate(carry1, k), into(sum2, 1, k), carry1v],
+    [outOfGate(and2, k), into(carry4, 0, k), and2v],
+    [outOfGate(carryIn2, k), into(carry4, 1, k), carryIn2v],
+    [outOfGate(carry4, k), intoNode(four, k), carry4v],
+    [outOfGate(sum2, k), intoNode(two, k), sum2v],
+    [outOfGate(sum1, k), intoNode(one, k), sum1v],
   ];
   const gates: [Point, string][] = [
     [and2, "AND"],
@@ -144,26 +230,21 @@ function TwoDigitAdder({ fontSize }: { fontSize: FontSize }) {
     [sum2, "XOR"],
     [carry4, "OR"],
   ];
-  const nodes: [Point, string, boolean][] = [
-    [a2, "A 2s", false],
-    [b2, "B 2s", false],
-    [a1, "A 1s", false],
-    [b1, "B 1s", false],
-    [four, "sum 4s", true],
-    [two, "sum 2s", true],
-    [one, "sum 1s", true],
-  ];
   return (
     <>
-      {wires.map(([from, to], i) => (
-        <Wire key={i} from={from} to={to} />
+      {wires.map(([from, to, on], i) => (
+        <Wire key={i} from={from} to={to} on={on} />
       ))}
       {gates.map(([p, label], i) => (
         <Gate key={i} {...p} label={label} fontSize={fontSize} />
       ))}
-      {nodes.map(([p, label, output]) => (
-        <Node key={label} {...p} label={label} fontSize={fontSize} output={output} />
-      ))}
+      <Node {...a2} label="A 2s" value={bits.a2} fontSize={fontSize} onToggle={flip("a2")} />
+      <Node {...b2} label="B 2s" value={bits.b2} fontSize={fontSize} onToggle={flip("b2")} />
+      <Node {...a1} label="A 1s" value={bits.a1} fontSize={fontSize} onToggle={flip("a1")} />
+      <Node {...b1} label="B 1s" value={bits.b1} fontSize={fontSize} onToggle={flip("b1")} />
+      <Node {...four} label="sum 4s" value={carry4v} fontSize={fontSize} output />
+      <Node {...two} label="sum 2s" value={sum2v} fontSize={fontSize} output />
+      <Node {...one} label="sum 1s" value={sum1v} fontSize={fontSize} output />
     </>
   );
 }
@@ -299,6 +380,8 @@ interface Stage {
   title: string;
   text: ReactNode;
   draw: (fontSize: FontSize) => ReactNode;
+  // Drawing height for a given scale (see scaleOf), when it isn't always H
+  height?: (k: number) => number;
 }
 
 const STAGES: Stage[] = [
@@ -307,7 +390,7 @@ const STAGES: Stage[] = [
     tab: "1 gate",
     gates: 1,
     title: "One gate answers one yes-or-no question",
-    text: "An AND gate on its own: you need an umbrella if it's raining AND you're going outside.",
+    text: "An AND gate on its own: you need an umbrella if it's raining AND you're going outside. Tap an input to flip it between 0 and 1.",
     draw: (fontSize) => <OneGate fontSize={fontSize} />,
   },
   {
@@ -315,7 +398,7 @@ const STAGES: Stage[] = [
     tab: "2 gates",
     gates: 2,
     title: "Two gates add two 1-digit numbers",
-    text: "Computers write numbers in binary, using only the digits 0 and 1. Adding two such digits takes just an XOR (the sum digit) and an AND (whether to carry a 1).",
+    text: "Computers write numbers in binary, using only the digits 0 and 1. Adding two such digits takes just an XOR (the sum digit) and an AND (whether to carry a 1). Tap the inputs to try 0 + 0, 0 + 1, and 1 + 1.",
     draw: (fontSize) => <HalfAdder fontSize={fontSize} />,
   },
   {
@@ -323,8 +406,9 @@ const STAGES: Stage[] = [
     tab: "7 gates",
     gates: 7,
     title: "Seven gates add two 2-digit numbers",
-    text: "Two-digit binary numbers go up to 3, so this circuit can work out anything from 0 + 0 up to 3 + 3.",
+    text: "Two-digit binary numbers go up to 3, so this circuit can work out anything from 0 + 0 up to 3 + 3. Tap the inputs to change the numbers.",
     draw: (fontSize) => <TwoDigitAdder fontSize={fontSize} />,
+    height: (k) => spreadY(H, k),
   },
   {
     id: "forty",
@@ -399,7 +483,12 @@ function GateScale({ gates, fontSize, svgRef }: { gates: number; fontSize: FontS
 
 export function GateScaleTour() {
   const [stageId, setStageId] = useState(STAGES[0].id);
-  const reset = useCallback(() => setStageId(STAGES[0].id), []);
+  // Bumped by Reset, so the drawing is rebuilt and its input bits go back to their starting values
+  const [resetCount, setResetCount] = useState(0);
+  const reset = useCallback(() => {
+    setStageId(STAGES[0].id);
+    setResetCount((n) => n + 1);
+  }, []);
   const stage = STAGES.find((s) => s.id === stageId) ?? STAGES[0];
   const svgRef = useRef<SVGSVGElement>(null);
   const fontSize = useSvgFontSize(svgRef, W);
@@ -415,8 +504,13 @@ export function GateScaleTour() {
       <WidgetTabs tabs={STAGES.map((s) => ({ id: s.id, label: s.tab }))} activeTab={stageId} onTabChange={setStageId} />
       <div className="mb-1 text-center text-sm font-semibold text-foreground">{stage.title}</div>
       <div className="mx-auto mb-2 max-w-xl text-center text-sm text-muted">{stage.text}</div>
-      <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} className="w-full" aria-label={stage.title}>
-        {stage.draw(fontSize)}
+      <svg
+        ref={svgRef}
+        viewBox={`0 0 ${W} ${stage.height ? stage.height(scaleOf(fontSize)) : H}`}
+        className="w-full"
+        aria-label={stage.title}
+      >
+        <g key={`${stage.id}-${resetCount}`}>{stage.draw(fontSize)}</g>
       </svg>
       <GateScale gates={stage.gates} fontSize={scaleFontSize} svgRef={scaleRef} />
     </WidgetContainer>
