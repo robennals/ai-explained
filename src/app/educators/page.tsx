@@ -49,9 +49,6 @@ export default function EducatorsPage() {
             Learn AI Layer by Layer explains how modern AI works, built up from
             first principles. It&apos;s written for curious learners from about
             age 12 to adults, and the only background it assumes is arithmetic.
-            It fits AI-literacy units in middle and high school, introductory
-            college courses such as AI for everyone or AI and society, and
-            adult education.
           </p>
           <p>
             It&apos;s free, with no ads and no accounts. Students never need to

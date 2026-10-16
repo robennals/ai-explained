@@ -2,7 +2,7 @@
 
 import { HoneypotField, useMessageForm } from "./useMessageForm";
 
-const INPUT = "rounded-md border border-foreground/20 bg-background px-3 py-2";
+const INPUT_CLASS = "rounded-md border border-foreground/20 bg-background px-3 py-2";
 
 /** The "tell me you're using it" form on /educators. */
 export function EducatorSignup() {
@@ -30,27 +30,27 @@ export function EducatorSignup() {
       <HoneypotField />
       <label className="grid gap-1 text-sm">
         <span>Your name (optional)</span>
-        <input type="text" name="name" maxLength={100} className={INPUT} />
+        <input type="text" name="name" maxLength={100} className={INPUT_CLASS} />
       </label>
       <label className="grid gap-1 text-sm">
         <span>Your email</span>
-        <input type="email" name="email" required maxLength={200} className={INPUT} />
+        <input type="email" name="email" required maxLength={200} className={INPUT_CLASS} />
       </label>
       <label className="grid gap-1 text-sm">
         <span>School or organization</span>
-        <input type="text" name="organization" required maxLength={200} className={INPUT} />
+        <input type="text" name="organization" required maxLength={200} className={INPUT_CLASS} />
       </label>
       <label className="grid gap-1 text-sm">
         <span>Course</span>
-        <input type="text" name="course" required maxLength={200} className={INPUT} />
+        <input type="text" name="course" required maxLength={200} className={INPUT_CLASS} />
       </label>
       <label className="grid gap-1 text-sm sm:col-span-2">
         <span>Roughly how many students? (optional)</span>
-        <input type="text" name="students" maxLength={50} className={`${INPUT} sm:max-w-48`} />
+        <input type="text" name="students" maxLength={50} className={`${INPUT_CLASS} sm:max-w-48`} />
       </label>
       <label className="grid gap-1 text-sm sm:col-span-2">
         <span>Anything else? (optional)</span>
-        <textarea name="message" maxLength={5000} rows={3} className={INPUT} />
+        <textarea name="message" maxLength={5000} rows={3} className={INPUT_CLASS} />
       </label>
       {status === "error" && error && (
         <p className="text-sm text-warning sm:col-span-2" role="alert">
