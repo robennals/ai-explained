@@ -2,9 +2,9 @@ An AI has to represent the meaning of each word as a list of numbers, a vector. 
 
 ## The Problem with Hand-Picked Dimensions
 
-When we represented animals as vectors, we chose dimensions that made sense for animals: size, speed, danger. But what dimensions would you use for *all words*? "How big is the color blue?" doesn't make sense. "How fast is democracy?" There's no universal set of labeled dimensions that works for everything.
+When we represented animals as vectors, we chose dimensions that made sense for animals: size, speed, danger. But what dimensions would you use for *all words*? "How big is the color blue?" doesn't make sense. "How fast is democracy?" There's no <nog>universal</nog> set of labeled dimensions that works for everything.
 
-AI solves this by giving up on universal dimensions entirely. Instead of asking "what properties describe everything?", it places words with similar meanings close together, and lets the dimensions mean different things in different parts of the space. Near "dog," the dimensions might capture size and domestication; near "cake," the same dimensions might capture sweetness and saltiness.
+AI solves this by giving up on <nog>universal</nog> dimensions entirely. Instead of asking "what properties describe everything?", it places words with similar meanings close together, and lets the dimensions mean different things in different parts of the space. Near "dog," the dimensions might capture size and domestication; near "cake," the same dimensions might capture sweetness and saltiness.
 
 This is a somewhat tricky idea, so we'll build up to it starting with just a single dimension. What if we use different *regions* of the number line for different categories, and order items *within* each region by a different property?
 
