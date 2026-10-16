@@ -91,7 +91,7 @@ The name comes from brain cells, which (very roughly) do something similar: they
 Tap **AND**, **OR**, and **NOT A** and watch the weights glide to each gate. Unlike the cutoff machine, the output now slides smoothly as the weights move, instead of jumping. Then slide the inputs to in-between values and see how the output responds. Finally, try to set the knobs so the neuron computes XOR.
 </NeuronFreePlayWidget>
 
-This neuron has two inputs, so that it can work like a logic gate. Real neurons can have many more. Neurons in modern AI systems often have thousands of inputs, each with its own weight. The recipe stays the same: multiply each input by its weight, add them all up along with the bias, and pass the total through the activation function.
+This neuron has two inputs, so that it can work like a logic gate. In practice, neurons can have many more. Neurons in modern AI systems often have thousands of inputs, each with its own weight. The recipe stays the same: multiply each input by its weight, add them all up along with the bias, and pass the total through the activation function.
 
 <KeyInsight>
 **A neuron is a smooth, trainable logic gate.** With the right weights it can compute AND, OR, NOT, and more. Because small changes to the weights produce small changes in the output, we can find those weights using optimization. And neurons handle in-between values naturally, which suits messy, uncertain real-world data.
@@ -131,7 +131,7 @@ Now we can see why a neural network has both properties from the start of this c
 
 ## How Do Networks Compare to Brains?
 
-Artificial neurons were inspired by real ones. A neuron in your brain receives signals from thousands of other neurons, through connections called **synapses**. Some connections are stronger than others, and the neuron fires when the combined signal is strong enough. Learning changes how strong those connections are. That's a lot like a weighted sum followed by an activation function, with each synapse playing the role of a weight. Real neurons are far more complicated than artificial ones, and we don't know whether brains learn the way neural networks do. But the resemblance is close enough that it's natural to compare their sizes, counting synapses for brains and weights for AI systems:
+Artificial neurons were inspired by the neurons in our brains. A neuron in your brain receives signals from thousands of other neurons, through connections called **synapses**. Some connections are stronger than others, and the neuron fires when the combined signal is strong enough. Learning changes how strong those connections are. That's a lot like a weighted sum followed by an activation function, with each synapse playing the role of a weight. The neurons in our brains are far more complicated than artificial ones, and we don't know whether brains learn the way neural networks do. But the resemblance is close enough that it's natural to compare their sizes, counting synapses for brains and weights for AI systems:
 
 <NeuronScaleComparisonWidget />
 
