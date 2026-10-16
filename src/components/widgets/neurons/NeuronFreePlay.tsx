@@ -335,6 +335,7 @@ export function NeuronFreePlay({ variant = "neuron" }: { variant?: NeuronFreePla
 
   const reset = useCallback(() => {
     cancelAnimationFrame(animationFrame.current);
+    setAnimatingTo(null);
     setInputA(settings.initial.a);
     setInputB(settings.initial.b);
     setW1(settings.initial.w1);
@@ -343,9 +344,13 @@ export function NeuronFreePlay({ variant = "neuron" }: { variant?: NeuronFreePla
     setActive(null);
   }, [settings, setActive]);
 
+  // The gate being glided to, so its button lights up straight away
+  const [animatingTo, setAnimatingTo] = useState<string | null>(null);
+
   const applyPreset = useCallback(
     (preset: GatePreset) => {
       cancelAnimationFrame(animationFrame.current);
+      setAnimatingTo(preset.name);
       const start = { w1, w2, bias };
       const startTime = performance.now();
       const tick = (now: number) => {
@@ -355,6 +360,7 @@ export function NeuronFreePlay({ variant = "neuron" }: { variant?: NeuronFreePla
         setW2(start.w2 + (preset.w2 - start.w2) * ease);
         setBias(start.bias + (preset.bias - start.bias) * ease);
         if (t < 1) animationFrame.current = requestAnimationFrame(tick);
+        else setAnimatingTo(null);
       };
       animationFrame.current = requestAnimationFrame(tick);
     },
@@ -379,6 +385,9 @@ export function NeuronFreePlay({ variant = "neuron" }: { variant?: NeuronFreePla
       ([a, b], i) => asBit(activate(preset.w1 * a + preset.w2 * b + preset.bias)) === asBit(truthOutputs[i])
     )
   );
+  const activeGateName = animatingTo ?? matchingPreset?.name ?? null;
+  const activeGateIndex = settings.presets.findIndex((p) => p.name === activeGateName);
+  const nextPreset = settings.presets[(activeGateIndex + 1) % Math.max(1, settings.presets.length)];
   const prodA = w1 * inputA;
   const prodB = w2 * inputB;
 
@@ -436,12 +445,16 @@ export function NeuronFreePlay({ variant = "neuron" }: { variant?: NeuronFreePla
   return (
     <WidgetContainer title={settings.title} description={settings.description} onReset={reset}>
       {settings.presets.length > 0 && (
-        <div className="mb-3 flex flex-wrap items-center justify-center gap-2">
+        <div className="mb-5 flex flex-wrap items-center justify-center gap-2">
           {settings.presets.map((preset) => (
             <button
               key={preset.name}
               onClick={() => applyPreset(preset)}
-              className="rounded-md border border-border px-3 py-1 text-xs font-semibold text-foreground hover:bg-foreground/5"
+              className={`cursor-pointer rounded-lg border-2 px-5 py-2.5 text-sm font-bold transition-colors ${
+                preset.name === activeGateName
+                  ? "border-accent bg-accent text-white shadow-md"
+                  : "border-border bg-white text-foreground hover:border-accent hover:text-accent"
+              }`}
             >
               {preset.name}
             </button>
@@ -1012,6 +1025,16 @@ export function NeuronFreePlay({ variant = "neuron" }: { variant?: NeuronFreePla
           {settings.footnote && (
             <div className="mt-1 max-w-md text-center text-xs text-muted">{settings.footnote}</div>
           )}
+        </div>
+      )}
+      {nextPreset && (
+        <div className="mt-6 flex justify-center">
+          <button
+            onClick={() => applyPreset(nextPreset)}
+            className="rounded-lg bg-accent px-6 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-accent-dark"
+          >
+            Try the Next Logic Gate →
+          </button>
         </div>
       )}
     </WidgetContainer>
