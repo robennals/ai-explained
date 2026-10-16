@@ -1,6 +1,8 @@
 "use client";
 
+import { useRef } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
+import { useSvgFontSize } from "../shared/useSvgScale";
 
 // Abstract gate network — gives the visual impression of many gates wired
 // together without implying the reader should understand the circuit.
@@ -148,12 +150,20 @@ const outputDots = Array.from({ length: NUM_OUTPUTS }, (_, i) => ({
 }));
 
 export function GateCircuitDiagram() {
+  const svgRef = useRef<SVGSVGElement>(null);
+  const fontSize = useSvgFontSize(svgRef, W);
+  const labelSize = fontSize(7);
+  // When squeezed (phones) the labels grow, so the boxes grow with them. Wires
+  // still end at the original box edge, hidden under the bigger box.
+  const squeezed = labelSize > 7;
+  const boxW = squeezed ? Math.max(GW, labelSize * 3) : GW;
+  const boxH = squeezed ? Math.max(GH, labelSize * 1.6) : GH;
   return (
     <WidgetContainer
       title="Gates Wired Together"
       description="Wire enough gates together and you can compute anything."
     >
-      <svg viewBox={`0 0 ${W} ${H}`} className="w-full">
+      <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} className="w-full">
         {/* Wires */}
         {wires.map((w, i) => {
           const midX = (w.x1 + w.x2) / 2;
@@ -182,10 +192,10 @@ export function GateCircuitDiagram() {
         {gates.map((g, i) => (
           <g key={i}>
             <rect
-              x={g.x - GW / 2}
-              y={g.y - GH / 2}
-              width={GW}
-              height={GH}
+              x={g.x - boxW / 2}
+              y={g.y - boxH / 2}
+              width={boxW}
+              height={boxH}
               rx={4}
               fill={FILL[g.type]}
               stroke={STROKE[g.type]}
@@ -193,9 +203,10 @@ export function GateCircuitDiagram() {
             />
             <text
               x={g.x}
-              y={g.y + 3.5}
+              y={g.y + (squeezed ? labelSize * 0.36 : 3.5)}
               textAnchor="middle"
-              className={`${TEXT_CLS[g.type]} text-[7px] font-bold pointer-events-none select-none`}
+              fontSize={labelSize}
+              className={`${TEXT_CLS[g.type]} font-bold pointer-events-none select-none`}
             >
               {g.type}
             </text>

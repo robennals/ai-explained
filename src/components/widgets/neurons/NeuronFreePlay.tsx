@@ -1,7 +1,12 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useRef } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
+import { SliderControl } from "../shared/SliderControl";
+import { useSliderDiagramLink } from "../shared/useSliderDiagramLink";
+import { ValueChip, type NeuronParam } from "./NeuronDiagramParts";
+import { useIsPhone } from "../shared/useMediaQuery";
+import { useSvgFontSize } from "../shared/useSvgScale";
 
 function sigmoid(x: number): number {
   return 1 / (1 + Math.exp(-x));
@@ -87,27 +92,34 @@ function MiniSlider({
   );
 }
 
-// Layout constants
-const W = 680;
-const H = 370;
-const IN_X = 55;
-const IN_A_Y = 65;
-const IN_B_Y = 270;
-const SUM_X = 290;
-const SUM_Y = 160;
-const ACT_X = 450;
-const ACT_Y = 160;
-const ACT_W = 110;
-const ACT_H = 75;
-const OUT_X = 610;
-const OUT_Y = 160;
+// Layout constants. WIDE has room for sliders inside the diagram. COMPACT
+// (phones) drops them in favour of normal sliders below, so the diagram can be
+// narrower and its text drawn at a readable size.
+const WIDE = {
+  W: 680, H: 370, IN_X: 55, IN_A_Y: 65, IN_B_Y: 270, SUM_X: 290, SUM_Y: 160,
+  ACT_X: 450, ACT_Y: 160, ACT_W: 110, ACT_H: 75, OUT_X: 610, OUT_Y: 160, W_X: 155,
+};
+const COMPACT = {
+  W: 420, H: 240, IN_X: 34, IN_A_Y: 44, IN_B_Y: 196, SUM_X: 180, SUM_Y: 120,
+  ACT_X: 290, ACT_Y: 120, ACT_W: 90, ACT_H: 64, OUT_X: 384, OUT_Y: 120, W_X: 105,
+};
 
 export function NeuronFreePlay() {
+  const compact = useIsPhone();
+  const {
+    W, H, IN_X, IN_A_Y, IN_B_Y, SUM_X, SUM_Y, ACT_X, ACT_Y, ACT_W, ACT_H, OUT_X, OUT_Y, W_X,
+  } = compact ? COMPACT : WIDE;
+  const svgRef = useRef<SVGSVGElement>(null);
+  const fontSize = useSvgFontSize(svgRef, W);
   const [inputA, setInputA] = useState(0.5);
   const [inputB, setInputB] = useState(0.5);
   const [w1, setW1] = useState(5.0);
   const [w2, setW2] = useState(-3.0);
   const [bias, setBias] = useState(0);
+
+  // Phones: the selected parameter's slider row and its part of the diagram
+  // are highlighted together (see useSliderDiagramLink).
+  const { active, setActive, selectFromDiagram, rowProps } = useSliderDiagramLink<NeuronParam>();
 
   const reset = useCallback(() => {
     setInputA(0.5);
@@ -115,7 +127,8 @@ export function NeuronFreePlay() {
     setW1(5.0);
     setW2(-3.0);
     setBias(0);
-  }, []);
+    setActive(null);
+  }, [setActive]);
 
   const weightedSum = w1 * inputA + w2 * inputB + bias;
   const output = sigmoid(weightedSum);
@@ -128,11 +141,11 @@ export function NeuronFreePlay() {
   const bStart = { x: IN_X + 22, y: IN_B_Y };
   const bEnd = { x: SUM_X - 28, y: SUM_Y };
 
-  const waX = 155;
+  const waX = W_X;
   const waT = (waX - aStart.x) / (aEnd.x - aStart.x);
   const waY = aStart.y + waT * (aEnd.y - aStart.y);
 
-  const wbX = 155;
+  const wbX = W_X;
   const wbT = (wbX - bStart.x) / (bEnd.x - bStart.x);
   const wbY = bStart.y + wbT * (bEnd.y - bStart.y);
 
@@ -151,7 +164,7 @@ export function NeuronFreePlay() {
       );
     }
     return pts.join(" ");
-  }, []);
+  }, [ACT_X, ACT_Y, ACT_W, ACT_H]);
 
   // Operating point on sigmoid
   const opFrac = Math.max(0, Math.min(1, (weightedSum + 10) / 20));
@@ -172,6 +185,7 @@ export function NeuronFreePlay() {
         output = sigmoid(weight<sub>A</sub> &times; input<sub>A</sub> + weight<sub>B</sub> &times; input<sub>B</sub> + bias)
       </div>
       <svg
+        ref={svgRef}
         viewBox={`0 0 ${W} ${H}`}
         className="w-full"
         aria-label="Interactive neuron diagram"
@@ -199,13 +213,16 @@ export function NeuronFreePlay() {
         >
           Input A
         </text>
+        {compact && active === "inputA" && (
+          <circle cx={IN_X} cy={IN_A_Y} r={27} fill="#3b82f6" opacity={0.18} />
+        )}
         <circle
           cx={IN_X}
           cy={IN_A_Y}
           r={20}
           fill="#f0f4ff"
           stroke="#3b82f6"
-          strokeWidth="2"
+          strokeWidth={compact && active === "inputA" ? 3.5 : 2}
         />
         <text
           x={IN_X}
@@ -215,17 +232,31 @@ export function NeuronFreePlay() {
         >
           {inputA.toFixed(1)}
         </text>
-        <MiniSlider
-          x={IN_X}
-          y={IN_A_Y + 16}
-          value={inputA}
-          min={0}
-          max={1}
-          step={0.1}
-          onChange={setInputA}
-          label=""
-          showValue={false}
-        />
+        {compact && (
+          <circle
+            cx={IN_X}
+            cy={IN_A_Y}
+            r={28}
+            fill="transparent"
+            className="cursor-pointer"
+            role="button"
+            aria-label="Adjust Input A"
+            onClick={() => selectFromDiagram("inputA")}
+          />
+        )}
+        {!compact && (
+          <MiniSlider
+            x={IN_X}
+            y={IN_A_Y + 16}
+            value={inputA}
+            min={0}
+            max={1}
+            step={0.1}
+            onChange={setInputA}
+            label=""
+            showValue={false}
+          />
+        )}
 
         {/* === INPUT B === */}
         <text
@@ -236,13 +267,16 @@ export function NeuronFreePlay() {
         >
           Input B
         </text>
+        {compact && active === "inputB" && (
+          <circle cx={IN_X} cy={IN_B_Y} r={27} fill="#3b82f6" opacity={0.18} />
+        )}
         <circle
           cx={IN_X}
           cy={IN_B_Y}
           r={20}
           fill="#f0f4ff"
           stroke="#3b82f6"
-          strokeWidth="2"
+          strokeWidth={compact && active === "inputB" ? 3.5 : 2}
         />
         <text
           x={IN_X}
@@ -252,17 +286,31 @@ export function NeuronFreePlay() {
         >
           {inputB.toFixed(1)}
         </text>
-        <MiniSlider
-          x={IN_X}
-          y={IN_B_Y + 16}
-          value={inputB}
-          min={0}
-          max={1}
-          step={0.1}
-          onChange={setInputB}
-          label=""
-          showValue={false}
-        />
+        {compact && (
+          <circle
+            cx={IN_X}
+            cy={IN_B_Y}
+            r={28}
+            fill="transparent"
+            className="cursor-pointer"
+            role="button"
+            aria-label="Adjust Input B"
+            onClick={() => selectFromDiagram("inputB")}
+          />
+        )}
+        {!compact && (
+          <MiniSlider
+            x={IN_X}
+            y={IN_B_Y + 16}
+            value={inputB}
+            min={0}
+            max={1}
+            step={0.1}
+            onChange={setInputB}
+            label=""
+            showValue={false}
+          />
+        )}
 
         {/* === ARROW A → SUM === */}
         <line
@@ -270,8 +318,8 @@ export function NeuronFreePlay() {
           y1={aStart.y}
           x2={aEnd.x}
           y2={aEnd.y}
-          stroke="#9ca3af"
-          strokeWidth="1.5"
+          stroke={compact && active === "w1" ? "#3b82f6" : "#9ca3af"}
+          strokeWidth={compact && active === "w1" ? 2.5 : 1.5}
           markerEnd="url(#nfp-arrow)"
         />
         <line
@@ -283,25 +331,39 @@ export function NeuronFreePlay() {
           strokeWidth="0.8"
           strokeDasharray="2,2"
         />
-        <MiniSlider
-          x={waX}
-          y={waY + 4}
-          value={w1}
-          min={-15}
-          max={15}
-          step={0.1}
-          onChange={setW1}
-          label="Weight A"
-          width={90}
-        />
-        <text
-          x={230}
-          y={aStart.y + 0.82 * (aEnd.y - aStart.y) - 8}
-          textAnchor="middle"
-          className="fill-muted text-[9px] font-mono pointer-events-none select-none"
-        >
-          = {prodA.toFixed(1)}
-        </text>
+        {!compact && (
+          <MiniSlider
+            x={waX}
+            y={waY + 4}
+            value={w1}
+            min={-15}
+            max={15}
+            step={0.1}
+            onChange={setW1}
+            label="Weight A"
+            width={90}
+          />
+        )}
+        {compact && (
+          <ValueChip
+            x={waX}
+            y={waY}
+            text={`×${w1.toFixed(1)}`}
+            label="Weight A"
+            active={active === "w1"}
+            onSelect={() => selectFromDiagram("w1")}
+          />
+        )}
+        {!compact && (
+          <text
+            x={230}
+            y={aStart.y + 0.82 * (aEnd.y - aStart.y) - 8}
+            textAnchor="middle"
+            className="fill-muted text-[9px] font-mono pointer-events-none select-none"
+          >
+            = {prodA.toFixed(1)}
+          </text>
+        )}
 
         {/* === ARROW B → SUM === */}
         <line
@@ -309,8 +371,8 @@ export function NeuronFreePlay() {
           y1={bStart.y}
           x2={bEnd.x}
           y2={bEnd.y}
-          stroke="#9ca3af"
-          strokeWidth="1.5"
+          stroke={compact && active === "w2" ? "#3b82f6" : "#9ca3af"}
+          strokeWidth={compact && active === "w2" ? 2.5 : 1.5}
           markerEnd="url(#nfp-arrow)"
         />
         <line
@@ -322,25 +384,39 @@ export function NeuronFreePlay() {
           strokeWidth="0.8"
           strokeDasharray="2,2"
         />
-        <MiniSlider
-          x={wbX}
-          y={wbY + 4}
-          value={w2}
-          min={-15}
-          max={15}
-          step={0.1}
-          onChange={setW2}
-          label="Weight B"
-          width={90}
-        />
-        <text
-          x={230}
-          y={bStart.y + 0.82 * (bEnd.y - bStart.y) + 14}
-          textAnchor="middle"
-          className="fill-muted text-[9px] font-mono pointer-events-none select-none"
-        >
-          = {prodB.toFixed(1)}
-        </text>
+        {!compact && (
+          <MiniSlider
+            x={wbX}
+            y={wbY + 4}
+            value={w2}
+            min={-15}
+            max={15}
+            step={0.1}
+            onChange={setW2}
+            label="Weight B"
+            width={90}
+          />
+        )}
+        {compact && (
+          <ValueChip
+            x={wbX}
+            y={wbY}
+            text={`×${w2.toFixed(1)}`}
+            label="Weight B"
+            active={active === "w2"}
+            onSelect={() => selectFromDiagram("w2")}
+          />
+        )}
+        {!compact && (
+          <text
+            x={230}
+            y={bStart.y + 0.82 * (bEnd.y - bStart.y) + 14}
+            textAnchor="middle"
+            className="fill-muted text-[9px] font-mono pointer-events-none select-none"
+          >
+            = {prodB.toFixed(1)}
+          </text>
+        )}
 
         {/* === SUM NODE === */}
         <text
@@ -379,17 +455,39 @@ export function NeuronFreePlay() {
           strokeDasharray="3,2"
           markerEnd="url(#nfp-arrow)"
         />
-        <MiniSlider
-          x={SUM_X}
-          y={SUM_Y + 40}
-          value={bias}
-          min={-20}
-          max={20}
-          step={0.1}
-          onChange={setBias}
-          label="Bias"
-          width={90}
-        />
+        {!compact && (
+          <MiniSlider
+            x={SUM_X}
+            y={SUM_Y + 40}
+            value={bias}
+            min={-20}
+            max={20}
+            step={0.1}
+            onChange={setBias}
+            label="Bias"
+            width={90}
+          />
+        )}
+        {compact && (
+          <>
+            <ValueChip
+              x={SUM_X}
+              y={SUM_Y + 52}
+              text={`${bias >= 0 ? "+" : ""}${bias.toFixed(1)}`}
+              label="Bias"
+              active={active === "bias"}
+              onSelect={() => selectFromDiagram("bias")}
+            />
+            <text
+              x={SUM_X}
+              y={SUM_Y + 80}
+              textAnchor="middle"
+              className="fill-muted text-[12px] font-semibold pointer-events-none select-none"
+            >
+              bias
+            </text>
+          </>
+        )}
 
         {/* === SUM → ACTIVATION === */}
         <line
@@ -417,7 +515,8 @@ export function NeuronFreePlay() {
           x={ACT_X}
           y={ACT_Y - ACT_H / 2 - 6}
           textAnchor="middle"
-          className="fill-success text-[9px] font-semibold uppercase tracking-wider pointer-events-none select-none"
+          fontSize={fontSize(9)}
+          className="fill-success font-semibold uppercase tracking-wider pointer-events-none select-none"
         >
           Activation
         </text>
@@ -488,16 +587,44 @@ export function NeuronFreePlay() {
           {output.toFixed(2)}
         </text>
         {isApproxSigmoid(output) && (
+          // Phones: readable-size text no longer fits inside the circle, so it
+          // goes underneath.
           <text
             x={OUT_X}
-            y={OUT_Y + 18}
+            y={compact ? OUT_Y + 38 : OUT_Y + 18}
             textAnchor="middle"
-            className="fill-white/70 text-[8px] pointer-events-none select-none"
+            fontSize={fontSize(8)}
+            className={`${compact ? "fill-muted" : "fill-white/70"} pointer-events-none select-none`}
           >
             approx
           </text>
         )}
       </svg>
+      {compact && (
+        <div className="mt-3 space-y-2 rounded-lg bg-surface p-3">
+          {(
+            [
+              { param: "inputA", label: "Input A", value: inputA, min: 0, max: 1, set: setInputA },
+              { param: "inputB", label: "Input B", value: inputB, min: 0, max: 1, set: setInputB },
+              { param: "w1", label: "Weight A", value: w1, min: -15, max: 15, set: setW1 },
+              { param: "w2", label: "Weight B", value: w2, min: -15, max: 15, set: setW2 },
+              { param: "bias", label: "Bias", value: bias, min: -20, max: 20, set: setBias },
+            ] as const
+          ).map((slider) => (
+            <div key={slider.param} {...rowProps(slider.param)}>
+              <SliderControl
+                label={slider.label}
+                value={slider.value}
+                min={slider.min}
+                max={slider.max}
+                step={0.1}
+                onChange={slider.set}
+                formatValue={(v) => v.toFixed(1)}
+              />
+            </div>
+          ))}
+        </div>
+      )}
     </WidgetContainer>
   );
 }
