@@ -3,7 +3,8 @@ import { test, expect, type Page } from "@playwright/test";
 async function fillRequired(page: Page) {
   await page.getByLabel("Your email").fill("teacher@example.com");
   await page.getByLabel("School or organization").fill("Playwright High");
-  await page.getByLabel("Course").fill("AI and Society");
+  // Not getByLabel: the "Fitting it into a course" section also matches "Course".
+  await page.getByRole("textbox", { name: "Course" }).fill("AI and Society");
 }
 
 test.describe("Educators page", () => {
