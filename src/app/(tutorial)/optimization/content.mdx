@@ -1,4 +1,4 @@
-The big idea behind AI is that a big enough *universal approximator* (see <Ch slug="computation" />), with the right parameters, can compute almost anything.
+The big idea behind AI is that a big enough *universal approximator* (see <Ch slug="computation" />), with the right parameters, can compute any function we want.
 
 A model is a machine with adjustable knobs, and different knob settings compute different functions. But how do you find the knob settings that compute the function you want? 
 
@@ -126,7 +126,7 @@ We now understand the game:
 4. **Take a tiny step** (adjust all parameters)
 5. **Repeat billions of times**
 
-But what should this model actually *look like*? It has to be smooth, so the gradient always points the way. And it has to be able to compute almost anything, or no amount of training will find the function we want. The cubic from <Ch slug="computation" /> is smooth but can't do much. In <Ch slug="neurons" />, we'll start from the logic gates inside every computer, which can compute anything but aren't smooth, and turn them into something that is both: the **neural network**.
+But what should this model actually *look like*? It has to be smooth, so the gradient always points the way. And it has to be able to compute any function we might want, or no amount of training will find it. The cubic from <Ch slug="computation" /> is smooth but can't do much. In <Ch slug="neurons" />, we'll start from the logic gates inside every computer, which can compute anything but aren't smooth, and turn them into something that is both: the **neural network**.
 
 <TryItInPyTorch notebook="optimization">
 Implement random search, use PyTorch's autograd to compute gradients automatically, run gradient descent from scratch, and compare both approaches side by side.

@@ -64,9 +64,9 @@ Try to match the target curve by adjusting the sliders. Pay attention to how eac
 
 Before going further, a question worth asking: is it possible to create a model that can build any function we might possibly want?
 
-In 1936, two mathematicians, Alan Turing and Alonzo Church, independently came up with two models, the *Turing machine* and the *lambda calculus*, that they claimed could compute any function that can be computed at all. Not just math. Anything. This claim is called the *Church-Turing thesis*. It can't be formally proven, but no one has ever found anything computable that these models cannot. We call a system like this *Turing complete*: given enough time and memory, it can compute anything that can be computed.
+In 1936, two mathematicians, Alan Turing and Alonzo Church, independently came up with two models, the *Turing machine* and the *lambda calculus*, that they claimed could compute any function that can be computed at all. Not just math. Anything. This claim is called the *Church-Turing thesis*. It can't be formally proven, but no one has ever found anything computable that these models cannot.
 
-The simple cubic model we gave above is nowhere close, and is very limited in what it can compute. But the models used in AI are *universal approximators*: make one big enough and find the right parameters, and it can match almost any function you want. Let it feed its own output back in, step after step, and it becomes Turing complete too.
+The simple cubic model we gave above is nowhere close, and is very limited in what it can compute. But the models used in AI are *universal approximators*: make one big enough and find the right parameters, and it can match any function whose inputs and outputs are of finite size, such as one that turns a photo into a description. Let it feed its own output back in, step after step, and it can keep working for as many steps as a problem needs, just like Turing's machine.
 
 So if "thinking" is computation (turning numbers into numbers), then a computer can in principle do anything a human mind can do. The question isn't whether the right function exists. The question is whether we can find the right parameters.
 
@@ -95,7 +95,7 @@ So here's where this leaves us:
 1. **Everything is numbers.** Text, images, sound, all of it.
 2. **Thinking is a function.** Every intelligent task is numbers in, numbers out.
 3. **Models are functions with knobs.** Different settings compute different functions.
-4. **Some models can compute almost anything.** A universal approximator, made big enough and given the right parameters, can match almost any function.
+4. **Some models can compute anything.** A universal approximator, made big enough and given the right parameters, can match any function whose inputs and outputs are of finite size.
 5. **Brute force is impossible.** A lookup table would be bigger than the universe.
 
 What's needed are models that *compress*: capture the right pattern with far fewer parameters than a lookup table would need entries. And a way to find the right parameter values automatically rather than by hand.

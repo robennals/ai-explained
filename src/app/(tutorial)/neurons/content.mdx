@@ -1,4 +1,4 @@
-<Ch slug="computation" /> introduced the idea of a *universal approximator*: a model that, if it's big enough and has the right parameters, can match almost any function, from translating text to creating images to writing code.
+<Ch slug="computation" /> introduced the idea of a *universal approximator*: a model that, if it's big enough and has the right parameters, can match any function whose inputs and outputs are of finite size, from translating text to creating images to writing code.
 
 <Ch slug="optimization" /> showed that we can use optimization to find the right values for a model's parameters, provided the model is *smooth*.
 
@@ -134,12 +134,12 @@ No human decides what each layer computes. The network learns that as part of it
 
 ## A Smooth Universal Approximator
 
-Now we can see why the neural network meets both goals from the start of this chapter. Any neuron can act as a logic gate, and logic gates wired together can build any function of 0s and 1s, so a big enough network with the right weights can compute any such function exactly. Neurons also handle in-between values, so a network can match functions of in-between values too, as closely as you like. That makes a neural network a **universal approximator**. And every weight is a smooth knob, so tiny improvements can find the right settings.
+Now we can see why the neural network meets both goals from the start of this chapter. Any neuron can act as a logic gate, and logic gates wired together can build any function whose inputs and outputs are a fixed number of 0s and 1s. Every number a computer handles is written that way, so a big enough network with the right weights can match any function whose inputs and outputs are of finite size. That makes a neural network a **universal approximator**. And every weight is a smooth knob, so tiny improvements can find the right settings.
 
 That said, "smooth logic gates" is only one way to think about neural networks, and trained networks rarely look like tidy circuits. They can do a lot more than generalize boolean logic, and as you go through this tutorial you'll meet better ways to think about them: in <Ch slug="vectors" />, a neuron becomes a detector that asks "is this input the kind of thing I'm looking for?", and in <Ch slug="embeddings" />, a network's numbers turn out to describe meanings. The link to logic gates is useful here because it explains why neural networks give us what this chapter needed: a smooth universal approximator.
 
 <Callout type="info" title="One limit">
-A network, like a circuit, gives its answer in a single pass: the input flows through a fixed number of layers and out the other side. Some problems need more steps of work than that, however large the network is, so a fixed network on its own isn't Turing complete. A computer handles those problems by looping, running the same circuit again and again. In <Ch slug="reasoning" /> we'll see how language models get the same power: they *think* by writing out their working, then reading it back in, as many times as the problem needs. A network that can do that is Turing complete, in principle.
+A network, like a circuit, gives its answer in a single pass: the input flows through a fixed number of layers and out the other side. Some problems, like multiplying very long numbers or solving a puzzle by trial and error, need far more steps of work than a network of sensible size can fit into one pass. A computer handles those problems by looping, running the same circuit again and again. In <Ch slug="reasoning" /> we'll see how language models get the same power: they *think* by writing out their working, then reading it back in, as many times as the problem needs.
 </Callout>
 
 <KeyInsight>
