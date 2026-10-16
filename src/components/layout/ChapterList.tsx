@@ -20,24 +20,6 @@ interface ChapterItemProps {
 function ChapterItem({ ch, isActive, label, onNavigate }: ChapterItemProps) {
   const href = `/${ch.slug}`;
 
-  if (!ch.ready) {
-    return (
-      <li>
-        <div className="flex items-start gap-3 rounded-lg px-3 py-2 text-sm text-muted/50 cursor-default">
-          <span className="mt-0.5 shrink-0 w-5 text-right font-mono text-xs">
-            {label}
-          </span>
-          <div className="leading-snug">
-            <span>{ch.title}</span>
-            <span className="block text-[10px] uppercase tracking-wide mt-0.5">
-              Coming soon
-            </span>
-          </div>
-        </div>
-      </li>
-    );
-  }
-
   return (
     <li>
       <Link
@@ -75,9 +57,10 @@ interface ChapterListProps {
 
 export function ChapterList({ onNavigate }: ChapterListProps) {
   const pathname = usePathname();
+  // Chapters that aren't written yet are left out of the nav entirely.
   const introChapter = getIntroChapter();
-  const mainChapters = getMainChapters();
-  const appendixChapters = getAppendixChapters();
+  const mainChapters = getMainChapters().filter((ch) => ch.ready);
+  const appendixChapters = getAppendixChapters().filter((ch) => ch.ready);
 
   return (
     <>
@@ -85,7 +68,7 @@ export function ChapterList({ onNavigate }: ChapterListProps) {
         Chapters
       </h2>
       <ul className="space-y-0.5">
-        {introChapter && (
+        {introChapter?.ready && (
           <ChapterItem
             key={introChapter.id}
             ch={introChapter}
