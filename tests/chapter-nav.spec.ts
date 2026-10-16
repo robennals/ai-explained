@@ -33,6 +33,19 @@ test.describe("chapter ending", () => {
   });
 });
 
+test.describe("chapter menu", () => {
+  test("lists only chapters that are ready, with no coming-soon entries", async ({ page }) => {
+    await page.goto("/computation");
+    await page.getByRole("button", { name: "Switch chapter" }).click();
+    const menu = page.getByRole("dialog");
+    await expect(menu.getByRole("link", { name: /Agents/ })).toHaveAttribute("href", "/agents");
+    await expect(menu.getByRole("link", { name: /PyTorch from Scratch/ })).toBeVisible();
+    // Matrix Math (chapter 14) isn't written yet.
+    await expect(menu.getByText("Matrix Math")).toHaveCount(0);
+    await expect(menu.getByText(/coming soon/i)).toHaveCount(0);
+  });
+});
+
 test.describe("on mobile", () => {
   test.use({ viewport: { width: 375, height: 812 } });
 
