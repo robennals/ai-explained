@@ -23,14 +23,14 @@ export function PropBar({
         : color;
   const pct = Math.max(0, Math.min(1, value / max)) * 100;
   return (
-    <div className="flex items-center gap-1.5">
-      <div className={`h-2.5 ${barWidth ?? "w-16"} rounded-full bg-foreground/5`}>
+    <div className="flex min-w-0 items-center gap-1.5">
+      <div className={`h-2.5 min-w-4 ${barWidth ?? "w-16"} rounded-full bg-foreground/5`}>
         <div
           className={`h-2.5 rounded-full ${animate ? "transition-all duration-200" : ""}`}
           style={{ width: `${pct}%`, backgroundColor: bg }}
         />
       </div>
-      <span className="w-7 text-right font-mono text-[10px] text-muted">
+      <span className="w-7 shrink-0 text-right font-mono text-[10px] text-muted">
         {value.toFixed(2)}
       </span>
     </div>
@@ -45,8 +45,8 @@ function SignedPropBar({ value, animate = true, max = 1 }: { value: number; anim
   const barColor = isNeg ? "#f87171" : "#4ade80";
 
   return (
-    <div className="flex items-center gap-1.5">
-      <div className="relative h-2.5 w-16 rounded-full bg-foreground/5">
+    <div className="flex min-w-0 items-center gap-1.5">
+      <div className="relative h-2.5 w-16 min-w-4 rounded-full bg-foreground/5">
         {/* Center dotted line */}
         <div
           className="absolute top-0 bottom-0 w-px border-l border-dashed border-foreground/25"
@@ -64,7 +64,7 @@ function SignedPropBar({ value, animate = true, max = 1 }: { value: number; anim
           }}
         />
       </div>
-      <span className="w-11 text-right font-mono text-[10px] text-muted">
+      <span className="w-11 shrink-0 text-right font-mono text-[10px] text-muted">
         {value >= 0 ? "\u00A0" : ""}{value.toFixed(2)}
       </span>
     </div>
@@ -109,8 +109,12 @@ export function VectorCard({
   mobileHideBar?: boolean;
 }) {
   return (
-    <div className={`rounded-lg border border-foreground/10 bg-foreground/[0.02] overflow-hidden shrink-0 ${className ?? ""}`}>
-      <div className="py-2 px-3 text-sm font-medium text-foreground border-b border-foreground/10 bg-foreground/[0.02]">
+    // min-w-0 lets the card shrink to its grid/flex column on phones; the
+    // bars shrink first, so labels and numbers stay visible.
+    <div className={`min-w-0 rounded-lg border border-foreground/10 bg-foreground/[0.02] overflow-hidden ${className ?? ""}`}>
+      {/* In compact (phone) mode cards sit three abreast and a long header can
+          wrap, so give headers a common height to keep the rows aligned. */}
+      <div className={`py-2 px-3 text-sm font-medium text-foreground border-b border-foreground/10 bg-foreground/[0.02] ${mobileHideBar ? "min-h-14 sm:min-h-0" : ""}`}>
         {label && (
           <span
             className="text-[10px] font-bold uppercase tracking-widest mr-2"

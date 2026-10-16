@@ -65,7 +65,7 @@ export function ChatMessage({
                 mono ? "font-mono text-sm" : "text-base"
               }`}
             >
-              {text}
+              {mono ? <MonoLines text={text} /> : text}
             </div>
           </details>
         ) : (
@@ -74,10 +74,28 @@ export function ChatMessage({
               mono ? "font-mono text-sm" : "text-base"
             }`}
           >
-            {text}
+            {mono ? <MonoLines text={text} /> : text}
           </div>
         )}
       </div>
     </div>
+  );
+}
+
+/**
+ * Monospace text, one block per line with a hanging indent, so that when a
+ * long line wraps on a narrow screen (e.g. "get_weather(location, hours)  the
+ * forecast for a place") the continuation is indented under its line instead
+ * of reading like a new line.
+ */
+function MonoLines({ text }: { text: string }) {
+  return (
+    <>
+      {text.split("\n").map((line, i) => (
+        <div key={i} className="pl-[4ch] -indent-[4ch]">
+          {line || "\u00a0"}
+        </div>
+      ))}
+    </>
   );
 }

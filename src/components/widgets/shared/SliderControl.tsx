@@ -27,13 +27,18 @@ export function SliderControl({
   ticks,
 }: SliderControlProps) {
   const displayValue = formatValue ? formatValue(value) : value.toFixed(2);
+  // Phones: label and value on one line above a full-width track, with a
+  // larger thumb and touch area. Wider screens: everything on one row.
   return (
-    <div className="flex items-center gap-2">
-      <label className="mr-2 w-24 shrink-0 overflow-visible whitespace-nowrap text-xs font-medium text-muted">
-        {label}
-      </label>
+    <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
+      <div className="flex items-baseline justify-between gap-2 sm:contents">
+        <label className="overflow-visible whitespace-nowrap text-xs font-medium text-muted sm:mr-2 sm:w-24 sm:shrink-0">
+          {label}
+        </label>
+        <span className="font-mono text-xs text-muted sm:hidden">{displayValue}</span>
+      </div>
       <Slider.Root
-        className="relative flex h-5 flex-1 touch-none select-none items-center"
+        className="relative flex h-8 w-full touch-none select-none items-center sm:h-5 sm:w-auto sm:flex-1"
         value={[value]}
         min={min}
         max={max}
@@ -41,7 +46,7 @@ export function SliderControl({
         onValueChange={([v]) => onChange(v)}
         onValueCommit={onCommit ? ([v]) => onCommit(v) : undefined}
       >
-        <Slider.Track className="relative h-1 flex-1 rounded-full bg-foreground/10">
+        <Slider.Track className="relative h-1.5 flex-1 rounded-full bg-foreground/10 sm:h-1">
           <Slider.Range className="absolute h-full rounded-full bg-accent" />
           {ticks?.map((t) => {
             const pct = ((t - min) / (max - min)) * 100;
@@ -54,9 +59,9 @@ export function SliderControl({
             );
           })}
         </Slider.Track>
-        <Slider.Thumb className="block h-4 w-4 rounded-full border-2 border-accent bg-white shadow-sm transition-shadow focus:outline-none focus:ring-2 focus:ring-accent/30" />
+        <Slider.Thumb className="block h-6 w-6 rounded-full border-2 border-accent bg-white shadow-sm transition-shadow focus:outline-none focus:ring-2 focus:ring-accent/30 sm:h-4 sm:w-4" />
       </Slider.Root>
-      <span className="w-12 shrink-0 text-left font-mono text-[10px] text-muted">
+      <span className="hidden w-12 shrink-0 text-left font-mono text-[10px] text-muted sm:block">
         {displayValue}
       </span>
     </div>
