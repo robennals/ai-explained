@@ -1,8 +1,11 @@
-<Ch slug="computation" /> introduced the idea of a *universal approximator*: a model that, if it's big enough and has the right parameters, can match any function whose inputs and outputs are of finite size, from translating text to creating images to writing code.
+The core idea behind AI is that we can create any function we want by choosing a suitable model, and then using optimization to find the right parameters for that model.
 
-<Ch slug="optimization" /> showed that we can use optimization to find the right values for a model's parameters, provided the model is *smooth*.
+For this to work, the model needs two properties:
 
-So to build AI, we need a universal approximator that is also smooth. A **neural network** is exactly that, which is why pretty much every modern AI system is built from one. This chapter builds one from scratch, starting with logic gates, which can build any function but aren't smooth.
+- **It must be a universal approximator.** Big enough, and with the right parameters, it can compute any function whose inputs and outputs are of finite size (see <Ch slug="computation" />).
+- **It must be smooth.** A tiny change to its parameters makes only a tiny change to its output (see <Ch slug="optimization" />).
+
+The most widely used model that is both is the **neural network**. This chapter builds one from scratch, starting with logic gates, which can build any function but aren't smooth.
 
 ## Logic Gates Can Build Any Function, but Aren't Smooth
 
@@ -134,7 +137,7 @@ No human decides what each layer computes. The network learns that as part of it
 
 ## A Smooth Universal Approximator
 
-Now we can see why the neural network meets both goals from the start of this chapter. Any neuron can act as a logic gate, and logic gates wired together can build any function whose inputs and outputs are a fixed number of 0s and 1s. Every number a computer handles is written that way, so a big enough network with the right weights can match any function whose inputs and outputs are of finite size. That makes a neural network a **universal approximator**. And every weight is a smooth knob, so tiny improvements can find the right settings.
+Now we can see why the neural network has both properties from the start of this chapter. Any neuron can act as a logic gate, and logic gates wired together can build any function whose inputs and outputs are a fixed number of 0s and 1s. Every number a computer handles is written that way, so a big enough network with the right weights can match any function whose inputs and outputs are of finite size. That makes a neural network a **universal approximator**. And every weight is a smooth knob, so tiny improvements can find the right settings.
 
 That said, "smooth logic gates" is only one way to think about neural networks, and trained networks rarely look like tidy circuits. They can do a lot more than generalize boolean logic, and as you go through this tutorial you'll meet better ways to think about them: in <Ch slug="vectors" />, a neuron becomes a detector that asks "is this input the kind of thing I'm looking for?", and in <Ch slug="embeddings" />, a network's numbers turn out to describe meanings. The link to logic gates is useful here because it explains why neural networks give us what this chapter needed: a smooth universal approximator.
 
