@@ -1,6 +1,6 @@
-<Ch slug="computation" /> introduced the *model*: a function with adjustable knobs, called parameters. A big enough model can compute almost any function you want, provided you can find the right parameters. <Ch slug="optimization" /> showed how to find them: make a tiny change that reduces the error, and repeat. That only works if the model is *smooth*, meaning a small change to a parameter makes a small, predictable change to the error.
+<Ch slug="computation" /> introduced the idea of a *universal model*: a function that can do almost anything (translate text, create images, write code), provided you find the right values for its parameters. <Ch slug="optimization" /> showed that we can find the right values for a model's parameters, provided the model is *smooth*: a small change to a parameter makes a small, predictable change to the error.
 
-So we want a model that does two things at once: it can compute almost anything, and it's smooth. A **neural network** is exactly that, which is why pretty much every modern AI system is built from one. This chapter builds one from scratch, starting with logic gates, which manage the first but not the second.
+So to build AI, we need a model that is both universal and smooth. A **neural network** is exactly that, which is why pretty much every modern AI system is built from one. This chapter builds one from scratch, starting with logic gates, which are universal but not smooth.
 
 ## Logic Gates Can Compute Anything, but Aren't Smooth
 
@@ -130,18 +130,18 @@ XOR needed a single hidden layer computing intermediate facts. Harder problems n
 
 No human decides what each layer computes. The network learns that as part of its training, using the same recipe as always: make a tiny change to the knobs that reduces the error. Every weight affects the final output, so for every weight we can work out which way to nudge it to reduce the error (its **gradient**, from <Ch slug="optimization" />). An algorithm called **backpropagation** works this out for every weight at once, by flowing the error signal backward through the layers.
 
-## Smooth, and Able to Compute Anything
+## Universal and Smooth
 
 Now we can see why the neural network meets both goals from the start of this chapter. Any neuron can act as a logic gate, and logic gates wired together can compute anything, so a big enough network with the right weights can do whatever a circuit can (and, because neurons handle in-between values, it isn't limited to 0s and 1s). And every weight is a smooth knob, so tiny improvements can find the right settings.
 
-That said, "smooth logic gates" is only one way to think about neural networks, and trained networks rarely look like tidy circuits. They can do a lot more than generalize boolean logic, and as you go through this tutorial you'll meet better ways to think about them: in <Ch slug="vectors" />, a neuron becomes a detector that asks "is this input the kind of thing I'm looking for?", and in <Ch slug="embeddings" />, a network's numbers turn out to describe meanings. The link to logic gates is useful here because it explains why neural networks give us what this chapter needed: a model that can compute almost anything, and is smooth enough to train.
+That said, "smooth logic gates" is only one way to think about neural networks, and trained networks rarely look like tidy circuits. They can do a lot more than generalize boolean logic, and as you go through this tutorial you'll meet better ways to think about them: in <Ch slug="vectors" />, a neuron becomes a detector that asks "is this input the kind of thing I'm looking for?", and in <Ch slug="embeddings" />, a network's numbers turn out to describe meanings. The link to logic gates is useful here because it explains why neural networks give us what this chapter needed: a model that is universal and smooth.
 
 <Callout type="info" title="One limit">
-A network, like a circuit, gives its answer in a single pass: the input flows through a fixed number of layers and out the other side. Some problems need more steps of work than that, however large the network is. A computer handles those by looping, running the same circuit again and again. In <Ch slug="reasoning" /> we'll see how language models get the same power: they *think* by writing out their working, then reading it back in, as many times as the problem needs.
+A network, like a circuit, gives its answer in a single pass: the input flows through a fixed number of layers and out the other side. Some problems need more steps of work than that, however large the network is. That's why <Ch slug="computation" /> said a universal model must be allowed to run long enough, not just be big enough. A computer handles those by looping, running the same circuit again and again. In <Ch slug="reasoning" /> we'll see how language models get the same power: they *think* by writing out their working, then reading it back in, as many times as the problem needs.
 </Callout>
 
 <KeyInsight>
-**A neural network is a model that is both smooth and able to compute almost anything.** It can do what a circuit of logic gates can do, but because it's smooth, optimization can find the right weights. That combination is why neural networks power pretty much all of modern AI.
+**A neural network is a model that is both universal and smooth.** It can do what a circuit of logic gates can do, but because it's smooth, optimization can find the right weights. That combination is why neural networks power pretty much all of modern AI.
 </KeyInsight>
 
 ## How Big Are Real Networks?

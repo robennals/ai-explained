@@ -1,0 +1,17 @@
+---
+term: universal model
+aliases: [universal models]
+firstAppearance: computation
+---
+
+A **universal model** is a model that can compute anything that can be computed at all, provided it is big enough, is allowed to run long enough, and has the right values for its parameters.
+
+Most models aren't universal. A cubic formula with four knobs can only ever draw a gentle curve, however you set them. A universal model has no such ceiling: with the right parameters it could translate text, recognize faces, or write code.
+
+Some examples:
+
+- **A computer running a program** — the program is the "parameters", and the right program can compute anything computable.
+- **A circuit of logic gates** — big enough circuits, run repeatedly, can compute anything a computer can.
+- **A neural network** — with enough neurons and the right weights it can compute almost any function in a single pass, and language models get the rest by writing out their working and reading it back in.
+
+This tutorial uses "universal model" as a plain-English umbrella. Computer scientists use two more precise terms: a model is **Turing complete** if it can compute anything computable given unlimited time and memory, and a neural network is a **universal function approximator** because a big enough network can match any smooth function as closely as you like.
