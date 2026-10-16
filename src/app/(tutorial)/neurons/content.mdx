@@ -99,7 +99,7 @@ This neuron has two inputs, so that it can work like a logic gate. Real neurons 
 
 ## Three Neurons Solve XOR
 
-Logic gates become powerful when you wire them together, and the same is true of neurons. The simplest example is **XOR**, the "one or the other, but not both" gate from earlier in this chapter. As you saw above, a single neuron can't compute it: no matter what weights you try, you can't get all four input combinations right at once. But two neurons feeding into a third can. The two middle neurons are called **hidden neurons**, because they don't produce the final answer. They compute intermediate results that the output neuron needs:
+Logic gates become powerful when you wire them together, and the same is true of neurons. The simplest example is **XOR**, which means "one or the other, but not both." A single neuron can't compute XOR: whatever weights you give it, it can't get all four input combinations right at once. (<Ch slug="vectors" /> shows why.) But two neurons feeding into a third can. The two middle neurons are called **hidden neurons**, because they don't produce the final answer. They compute intermediate results that the output neuron needs:
 
 - **Hidden Neuron 1** computes OR: "is *at least one* input on?"
 - **Hidden Neuron 2** computes NAND (not-and): "are they *not both* on?"
