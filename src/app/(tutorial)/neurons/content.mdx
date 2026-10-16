@@ -1,13 +1,6 @@
-The last two chapters gave us a recipe for building an AI. <Ch slug="computation" /> showed that anything you might want an AI system to do is a function, and that a *model* is a function with adjustable knobs. <Ch slug="optimization" /> showed how to set those knobs automatically: make a tiny change that reduces the error, and repeat, many many times. But the recipe left one big question open. Which model should we use?
+<Ch slug="computation" /> introduced the *model*: a function with adjustable knobs, called parameters. A big enough model can compute almost any function you want, provided you can find the right parameters. <Ch slug="optimization" /> showed how to find them: make a tiny change that reduces the error, and repeat. That only works if the model is *smooth*, meaning a small change to a parameter makes a small, predictable change to the error.
 
-## What We Need From a Model
-
-The recipe makes two demands of the model, and they pull in opposite directions.
-
-- **It must be able to compute almost anything.** If the model can't express the function we want, no amount of training will find it.
-- **It must be smooth.** Tiny improvements only work if a small change to a knob makes a small, predictable change to the error. Otherwise, as with the stepped curve in <Ch slug="optimization" />, there's no way to tell which direction is better.
-
-The cubic formula from <Ch slug="computation" /> is smooth, but however you set its four knobs it can't do much. A circuit of logic gates, the stuff every computer is made of, can compute anything, but it isn't smooth. The **neural network** gets both right, which is why pretty much every modern AI system is built from one. This chapter builds one from scratch, starting from logic gates.
+So we want a model that does two things at once: it can compute almost anything, and it's smooth. A **neural network** is exactly that, which is why pretty much every modern AI system is built from one. This chapter builds one from scratch, starting with logic gates, which manage the first but not the second.
 
 ## Logic Gates Can Compute Anything, but Aren't Smooth
 
@@ -139,7 +132,7 @@ No human decides what each layer computes. The network learns that as part of it
 
 ## Smooth, and Able to Compute Anything
 
-Now we can see why the neural network meets both of the demands from the start of this chapter. Any neuron can act as a logic gate, and logic gates wired together can compute anything, so a big enough network with the right weights can do whatever a circuit can (and, because neurons handle in-between values, it isn't limited to 0s and 1s). And every weight is a smooth knob, so tiny improvements can find the right settings.
+Now we can see why the neural network meets both goals from the start of this chapter. Any neuron can act as a logic gate, and logic gates wired together can compute anything, so a big enough network with the right weights can do whatever a circuit can (and, because neurons handle in-between values, it isn't limited to 0s and 1s). And every weight is a smooth knob, so tiny improvements can find the right settings.
 
 That said, "smooth logic gates" is only one way to think about neural networks, and trained networks rarely look like tidy circuits. They can do a lot more than generalize boolean logic, and as you go through this tutorial you'll meet better ways to think about them: in <Ch slug="vectors" />, a neuron becomes a detector that asks "is this input the kind of thing I'm looking for?", and in <Ch slug="embeddings" />, a network's numbers turn out to describe meanings. The link to logic gates is useful here because it explains why neural networks give us what this chapter needed: a model that can compute almost anything, and is smooth enough to train.
 
