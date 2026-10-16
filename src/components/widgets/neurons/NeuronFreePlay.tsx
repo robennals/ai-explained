@@ -150,7 +150,6 @@ const NEURON_PRESETS: GatePreset[] = [
   { name: "AND", w1: 10, w2: 10, bias: -15 },
   { name: "OR", w1: 10, w2: 10, bias: -5 },
   { name: "NOT A", w1: -10, w2: 0, bias: 5 },
-  { name: "NAND", w1: -10, w2: -10, bias: 15 },
 ];
 
 interface VariantSettings {
