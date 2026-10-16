@@ -92,11 +92,13 @@ export function AttentionSink() {
 
         {/* Sliders + bars */}
         <div className="grid gap-4">
+          {/* Phones: label, slider and weight on one line with the bar
+              underneath, so the slider gets real width. */}
           {scores.map((score, i) => {
             const w = weights[i];
             const barPct = Math.max((w / maxWeight) * 100, 2);
             return (
-              <div key={i} className="grid grid-cols-[3.5rem_1fr_4rem_1fr] items-center gap-3">
+              <div key={i} className="grid grid-cols-[3rem_1fr_3.5rem] items-center gap-x-3 gap-y-1 sm:grid-cols-[3.5rem_1fr_4rem_1fr] sm:gap-3">
                 <span className="text-center font-mono text-sm font-bold text-foreground">{LABELS[i]}</span>
                 <div className="flex items-center gap-2">
                   <input
@@ -111,7 +113,7 @@ export function AttentionSink() {
                   <span className="w-8 text-right font-mono text-xs text-muted">{score.toFixed(1)}</span>
                 </div>
                 <span className="text-right font-mono text-sm font-bold">{(w * 100).toFixed(1)}%</span>
-                <div className={`h-6 rounded ${COLORS_LIGHT[i]}`}>
+                <div className={`col-span-2 col-start-2 h-3 rounded sm:col-span-1 sm:col-start-auto sm:h-6 ${COLORS_LIGHT[i]}`}>
                   <div
                     className={`h-full rounded ${COLORS[i]} transition-all duration-150`}
                     style={{ width: `${barPct}%` }}
@@ -122,13 +124,13 @@ export function AttentionSink() {
           })}
 
           {/* Fixed sink row */}
-          <div className="grid grid-cols-[3.5rem_1fr_4rem_1fr] items-center gap-3 border-t border-border pt-4">
+          <div className="grid grid-cols-[3rem_1fr_3.5rem] items-center gap-x-3 gap-y-1 sm:grid-cols-[3.5rem_1fr_4rem_1fr] sm:gap-3 border-t border-border pt-4">
             <span className="text-center text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
               Sink
             </span>
             <div className="flex items-center gap-2 text-xs italic text-muted">fixed at {SINK_SCORE}</div>
             <span className="text-right font-mono text-sm font-bold">{(sinkWeight * 100).toFixed(1)}%</span>
-            <div className={`h-6 rounded ${SINK_COLOR_LIGHT}`}>
+            <div className={`col-span-2 col-start-2 h-3 rounded sm:col-span-1 sm:col-start-auto sm:h-6 ${SINK_COLOR_LIGHT}`}>
               <div
                 className={`h-full rounded ${SINK_COLOR} transition-all duration-150`}
                 style={{ width: `${Math.max((sinkWeight / maxWeight) * 100, 2)}%` }}
