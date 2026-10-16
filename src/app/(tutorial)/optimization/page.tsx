@@ -5,6 +5,7 @@ import Content from "./content.mdx";
 import { QuizContent } from "./QuizContent";
 import {
   OptimizationGameWidget,
+  BuiltStepByStepWidget,
   ErrorMeasurementWidget,
   SmoothRealWorldWidget,
   SmoothVsRuggedWidget,
@@ -22,6 +23,7 @@ export default function Chapter02() {
         <Content
           components={{
             OptimizationGameWidget,
+            BuiltStepByStepWidget,
             ErrorMeasurementWidget,
             SmoothRealWorldWidget,
             SmoothVsRuggedWidget,
