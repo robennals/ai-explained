@@ -333,6 +333,9 @@ export function NeuronFreePlay({ variant = "neuron" }: { variant?: NeuronFreePla
   const animationFrame = useRef(0);
   useEffect(() => () => cancelAnimationFrame(animationFrame.current), []);
 
+  // The gate being glided to, so its button lights up straight away
+  const [animatingTo, setAnimatingTo] = useState<string | null>(null);
+
   const reset = useCallback(() => {
     cancelAnimationFrame(animationFrame.current);
     setAnimatingTo(null);
@@ -343,9 +346,6 @@ export function NeuronFreePlay({ variant = "neuron" }: { variant?: NeuronFreePla
     setBias(settings.initial.bias);
     setActive(null);
   }, [settings, setActive]);
-
-  // The gate being glided to, so its button lights up straight away
-  const [animatingTo, setAnimatingTo] = useState<string | null>(null);
 
   const applyPreset = useCallback(
     (preset: GatePreset) => {
