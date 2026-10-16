@@ -1,0 +1,18 @@
+---
+term: universal approximator
+aliases: [universal approximators]
+firstAppearance: computation
+---
+
+A **universal approximator** is a kind of model that, made big enough and given the right parameters, can match almost any function you want.
+
+More precisely: for any continuous function, and any accuracy you choose, some big enough model of that kind matches the function to within that accuracy over a bounded range of inputs. The *universal approximation theorem* proves that neural networks with a hidden layer and an activation function such as the sigmoid are universal approximators. Most models aren't: the cubic formula in the Computation chapter can only ever draw a gentle curve, however you set its four knobs.
+
+The word "approximator" matters less than it sounds:
+
+- **For yes-or-no answers, it's exact.** A big enough network can compute any function of a fixed number of yes-or-no inputs exactly, as long as you read an output above 0.5 as "yes". That's because a neuron can act as a logic gate, and logic gates wired together can build any such function.
+- **For smooth, continuous outputs, it's "as close as you like".** The match is never perfect, but you can make the error as small as you want by making the network bigger.
+
+What a universal approximator can't do on its own is take more steps. A single pass through a network does a fixed amount of work, so problems that need an unknown amount of work are out of reach, however big the network. Let it feed its own output back in, and that changes: it can then work through any [Turing complete](/glossary#turing-complete) computation one step at a time. Two conditions make this work. The network has to be able to read back everything it has written so far, which acts as its memory, and each step's output has to be rounded to a definite answer, such as a single word, so small errors don't build up. A language model writing out its working meets both, in principle.
+
+The theorem only says a good network *exists*. It doesn't say how many neurons it needs, or whether training will find the right weights.

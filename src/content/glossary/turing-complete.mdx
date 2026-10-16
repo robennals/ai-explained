@@ -1,0 +1,17 @@
+---
+term: Turing complete
+aliases: [Turing completeness]
+firstAppearance: computation
+---
+
+A system is **Turing complete** if, given enough time and memory, it can compute anything that can be computed.
+
+The name comes from the *Turing machine*, Alan Turing's 1936 mathematical model of a computer: a simple machine that reads and writes symbols on an unlimited strip of memory, one step at a time. Anything that can do whatever a Turing machine can is Turing complete. By the *Church–Turing thesis*, that means it can compute anything computable at all.
+
+Some examples:
+
+- **A computer running a program** — real computers count as Turing complete, apart from having a finite amount of memory.
+- **Most programming languages**, such as Python.
+- **A neural network that feeds its output back in** — in principle, given enough steps (see [universal approximator](/glossary#universal-approximator)).
+
+A single pass through a fixed-size neural network is *not* Turing complete, however big the network is, because it can only do a fixed amount of work. Turing completeness is also only about what can be computed in principle. It says nothing about how fast, or how to find the right program.

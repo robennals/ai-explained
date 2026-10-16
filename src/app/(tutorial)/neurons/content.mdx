@@ -1,10 +1,10 @@
-<Ch slug="computation" /> introduced the idea of a *universal model*: a model that, with the right parameters, and given enough size and enough time, can compute anything that can be computed, from translating text to creating images to writing code.
+<Ch slug="computation" /> introduced the idea of a *universal approximator*: a model that, if it's big enough and has the right parameters, can match almost any function, from translating text to creating images to writing code.
 
 <Ch slug="optimization" /> showed that we can use optimization to find the right values for a model's parameters, provided the model is *smooth*.
 
-So to build AI, we need a model that is both universal and smooth. A **neural network** is exactly that, which is why pretty much every modern AI system is built from one. This chapter builds one from scratch, starting with logic gates, which are universal but not smooth.
+So to build AI, we need a universal approximator that is also smooth. A **neural network** is exactly that, which is why pretty much every modern AI system is built from one. This chapter builds one from scratch, starting with logic gates, which can build any function but aren't smooth.
 
-## Logic Gates Are Universal but Not Smooth
+## Logic Gates Can Build Any Function, but Aren't Smooth
 
 Every computer is built from **logic gates**: tiny components that combine true-or-false values, written as 1 and 0.
 
@@ -26,7 +26,7 @@ Step through the tabs, from one gate to billions. You don't need to follow how a
 But you can't train a circuit of gates. Its knobs are choices like "is this gate an AND or an OR?", and you can't make a gate 1% more like an OR. Its outputs snap between 0 and 1, so a small change either does nothing or flips the answer completely. There's no slope to follow.
 
 <KeyInsight>
-**Logic gates are universal, but they aren't smooth.** What we want is something that acts like a logic gate, but whose behavior slides smoothly as you turn its knobs. We'll build it in two steps.
+**Logic gates can build any function, but they aren't smooth.** What we want is something that acts like a logic gate, but whose behavior slides smoothly as you turn its knobs. We'll build it in two steps.
 </KeyInsight>
 
 ## Step 1: Gates Controlled by Numbers
@@ -132,18 +132,18 @@ XOR needed a single hidden layer computing intermediate facts. Harder problems n
 
 No human decides what each layer computes. The network learns that as part of its training, using the same recipe as always: make a tiny change to the knobs that reduces the error. Every weight affects the final output, so for every weight we can work out which way to nudge it to reduce the error (its **gradient**, from <Ch slug="optimization" />). An algorithm called **backpropagation** works this out for every weight at once, by flowing the error signal backward through the layers.
 
-## Universal and Smooth
+## A Smooth Universal Approximator
 
-Now we can see why the neural network meets both goals from the start of this chapter. Any neuron can act as a logic gate, and logic gates wired together can compute anything, so a big enough network with the right weights can do whatever a circuit can (and, because neurons handle in-between values, it isn't limited to 0s and 1s). And every weight is a smooth knob, so tiny improvements can find the right settings.
+Now we can see why the neural network meets both goals from the start of this chapter. Any neuron can act as a logic gate, and logic gates wired together can build any function of 0s and 1s, so a big enough network with the right weights can compute any such function exactly. Neurons also handle in-between values, so a network can match functions of in-between values too, as closely as you like. That makes a neural network a **universal approximator**. And every weight is a smooth knob, so tiny improvements can find the right settings.
 
-That said, "smooth logic gates" is only one way to think about neural networks, and trained networks rarely look like tidy circuits. They can do a lot more than generalize boolean logic, and as you go through this tutorial you'll meet better ways to think about them: in <Ch slug="vectors" />, a neuron becomes a detector that asks "is this input the kind of thing I'm looking for?", and in <Ch slug="embeddings" />, a network's numbers turn out to describe meanings. The link to logic gates is useful here because it explains why neural networks give us what this chapter needed: a model that is universal and smooth.
+That said, "smooth logic gates" is only one way to think about neural networks, and trained networks rarely look like tidy circuits. They can do a lot more than generalize boolean logic, and as you go through this tutorial you'll meet better ways to think about them: in <Ch slug="vectors" />, a neuron becomes a detector that asks "is this input the kind of thing I'm looking for?", and in <Ch slug="embeddings" />, a network's numbers turn out to describe meanings. The link to logic gates is useful here because it explains why neural networks give us what this chapter needed: a smooth universal approximator.
 
 <Callout type="info" title="One limit">
-A network, like a circuit, gives its answer in a single pass: the input flows through a fixed number of layers and out the other side. Some problems need more steps of work than that, however large the network is. That's why <Ch slug="computation" /> said a universal model needs enough time, not just enough size. A computer handles those by looping, running the same circuit again and again. In <Ch slug="reasoning" /> we'll see how language models get the same power: they *think* by writing out their working, then reading it back in, as many times as the problem needs.
+A network, like a circuit, gives its answer in a single pass: the input flows through a fixed number of layers and out the other side. Some problems need more steps of work than that, however large the network is, so a fixed network on its own isn't Turing complete. A computer handles those problems by looping, running the same circuit again and again. In <Ch slug="reasoning" /> we'll see how language models get the same power: they *think* by writing out their working, then reading it back in, as many times as the problem needs. A network that can do that is Turing complete, in principle.
 </Callout>
 
 <KeyInsight>
-**A neural network is a model that is both universal and smooth.** It can do what a circuit of logic gates can do, but because it's smooth, optimization can find the right weights. That combination is why neural networks power pretty much all of modern AI.
+**A neural network is a smooth universal approximator.** It can do what a circuit of logic gates can do, but because it's smooth, optimization can find the right weights. That combination is why neural networks power pretty much all of modern AI.
 </KeyInsight>
 
 ## How Big Are Real Networks?
