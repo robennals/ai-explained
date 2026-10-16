@@ -93,8 +93,6 @@ Tap **AND**, **OR**, and **NOT A** and watch the weights glide to each gate. Unl
 
 This neuron has two inputs, so that it can work like a logic gate. Real neurons can have many more. Neurons in modern AI systems often have thousands of inputs, each with its own weight. The recipe stays the same: multiply each input by its weight, add them all up along with the bias, and pass the total through the activation function.
 
-With the right weights, a single neuron computes AND, OR, NOT, and more, and you can slide smoothly from one gate to another. One gate is missing, though: no settings of a single neuron compute XOR. We'll see why, and how to fix it, in a moment. A neuron also keeps the nuance of in-between inputs. The cutoff in Step 1 squashed them into a hard yes or no, so 0.8 AND 0.8 ("probably" and "probably") came out as a flat 1 ("definitely"). A neuron's output can be 0.73 ("probably") or 0.4 ("maybe not"). That matters because real-world data is rarely cleanly true or false. Is this email spam? Probably. Is that shadow in the photo a cat? Maybe.
-
 <KeyInsight>
 **A neuron is a smooth, trainable logic gate.** With the right weights it can compute AND, OR, NOT, and more. Because small changes to the weights produce small changes in the output, we can find those weights using optimization. And neurons handle in-between values naturally, which suits messy, uncertain real-world data.
 </KeyInsight>
