@@ -99,7 +99,7 @@ This neuron has two inputs, so that it can work like a logic gate. Real neurons 
 
 ## Three Neurons Solve XOR
 
-Logic gates become powerful when you wire them together, and the same is true of neurons. The simplest example is **XOR**, which means "one or the other, but not both." A single neuron can't compute XOR: whatever weights you give it, it can't get all four input combinations right at once. (<Ch slug="vectors" /> shows why.) But two neurons feeding into a third can. The two middle neurons are called **hidden neurons**, because they don't produce the final answer. They compute intermediate results that the output neuron needs:
+Logic gates become powerful when you wire them together, and the same is true of neurons. The simplest example is **XOR**, which means "one or the other, but not both." A single neuron can't compute XOR: whatever weights you give it, it can't get all four input combinations right at once. But two neurons feeding into a third can. The two middle neurons are called **hidden neurons**, because they don't produce the final answer. They compute intermediate results that the output neuron needs:
 
 - **Hidden Neuron 1** computes OR: "is *at least one* input on?"
 - **Hidden Neuron 2** computes NAND (not-and): "are they *not both* on?"
@@ -149,7 +149,7 @@ There's something strange in this chart. Today's largest language models have ro
 
 ## What's Next
 
-A neuron is just a weighted sum and an activation function. But what *is* that weighted sum, really? In <Ch slug="vectors" />, we'll meet **vectors**, lists of numbers that describe things, and discover that a neuron's weighted sum is actually a geometric operation called a dot product. This connection reveals *why* a single neuron can only draw a straight line through input space, *why* XOR is impossible for one neuron, and *why* activation functions are the key to making depth work.
+A neuron is just a weighted sum and an activation function. But what *is* that weighted sum, really? In <Ch slug="vectors" />, we'll meet **vectors**, lists of numbers that describe things, and discover that a neuron's weighted sum is actually a geometric operation called a dot product. It measures how closely the input matches what the neuron is looking for, which turns out to be a powerful way to think about what each neuron does.
 
 <TryItInPyTorch notebook="neurons">
 Build a neuron from scratch, implement AND/OR gates, watch a single neuron fail on XOR, then train a two-layer network that succeeds, and visualize its decision boundary.
