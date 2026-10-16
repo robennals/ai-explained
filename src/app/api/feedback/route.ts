@@ -1,25 +1,10 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
+import { composeEmail, type Email, type FeedbackPayload } from "@/lib/feedback-email";
 
 const POSTMARK_ENDPOINT = "https://api.postmarkapp.com/email";
 const RESEND_ENDPOINT = "https://api.resend.com/emails";
 const RECIPIENT = "rob.ennals@gmail.com";
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-type Payload = {
-  name?: string;
-  email?: string;
-  message?: string;
-  // Honeypot — kept in sync with the hidden field in Feedback.tsx. Not named
-  // after a browser autofill token, or password managers trip it for real users.
-  hp_referrer?: string;
-};
-
-type Email = {
-  replyTo: string;
-  subject: string;
-  text: string;
-};
 
 // EMAIL_PROVIDER chooses "resend" (default) or "postmark".
 // Each sender returns null when its env vars aren't configured.
@@ -73,9 +58,9 @@ export async function POST(request: Request) {
   const provider =
     process.env.EMAIL_PROVIDER === "postmark" ? "postmark" : "resend";
 
-  let body: Payload;
+  let body: FeedbackPayload;
   try {
-    body = (await request.json()) as Payload;
+    body = (await request.json()) as FeedbackPayload;
   } catch {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
@@ -84,37 +69,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true });
   }
 
-  const email = (body.email ?? "").trim();
-  const message = (body.message ?? "").trim();
-  const name = (body.name ?? "").trim().slice(0, 100);
-
-  if (!email || email.length > 200 || !EMAIL_RE.test(email)) {
-    return NextResponse.json(
-      { error: "Valid email required." },
-      { status: 400 },
-    );
-  }
-  if (!message || message.length > 5000) {
-    return NextResponse.json(
-      { error: "Message required (max 5000 chars)." },
-      { status: 400 },
-    );
-  }
-
   const referer = (await headers()).get("referer") ?? "(unknown page)";
-  const oneLine = message.replace(/\s+/g, " ").trim();
-  const subject =
-    `Feedback on ${referer}: ` +
-    oneLine.slice(0, 60) +
-    (oneLine.length > 60 ? "…" : "");
+  const composed = composeEmail(body, referer);
+  if ("error" in composed) {
+    return NextResponse.json({ error: composed.error }, { status: 400 });
+  }
 
-  const text =
-    `${message}\n\n` +
-    `---\n` +
-    `From: ${name || "(no name given)"} <${email}>\n` +
-    `Page: ${referer}\n`;
-
-  const outgoing: Email = { replyTo: email, subject, text };
+  const outgoing = composed.email;
   const sendRes =
     provider === "postmark"
       ? await sendWithPostmark(outgoing)
