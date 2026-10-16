@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
+import { useSvgFontSize, useSvgTextScale } from "../shared/useSvgScale";
 import { SliderControl } from "../shared/SliderControl";
 import { ANIMAL_DOMAIN, vecDot } from "./vectorData";
 
@@ -48,23 +49,28 @@ const PRESETS: { label: string; mag: number; bias: number }[] = [
 // SVG geometry
 const W = 560;
 const H = 300;
-const PAD_L = 44;
 const PAD_R = 16;
 const PAD_T = 16;
 const PAD_B = 40;
-const PLOT_L = PAD_L;
 const PLOT_R = W - PAD_R;
 const PLOT_T = PAD_T;
 const PLOT_B = H - PAD_B;
 
-function xPix(v: number): number {
-  return PLOT_L + ((v - X_MIN) / (X_MAX - X_MIN)) * (PLOT_R - PLOT_L);
-}
 function yPix(o: number): number {
   return PLOT_B - o * (PLOT_B - PLOT_T);
 }
 
 export function NeuronResponseCurve() {
+  const svgRef = useRef<SVGSVGElement>(null);
+  const ts = useSvgTextScale(svgRef, W);
+  const fontSize = useSvgFontSize(svgRef, W);
+  // The y tick labels and rotated y label sit in the left pad, which widens
+  // with them on phones.
+  const PLOT_L = 44 * ts;
+  const yLabelX = 14 * ts;
+  // ...and the x tick labels and x label below the plot need more height.
+  const svgH = H + 16 * (ts - 1);
+  const xPix = (v: number) => PLOT_L + ((v - X_MIN) / (X_MAX - X_MIN)) * (PLOT_R - PLOT_L);
   const [magnitude, setMagnitude] = useState(DEFAULT_MAG);
   const [bias, setBias] = useState(DEFAULT_BIAS);
 
@@ -104,7 +110,8 @@ export function NeuronResponseCurve() {
     >
 
       <svg
-        viewBox={`0 0 ${W} ${H}`}
+        ref={svgRef}
+        viewBox={`0 0 ${W} ${svgH}`}
         className="mb-3 w-full select-none"
         aria-label="Neuron output plotted against how bear-like the input is"
       >
@@ -124,17 +131,18 @@ export function NeuronResponseCurve() {
               strokeWidth="1"
               strokeDasharray={o === 0.5 ? "3,3" : undefined}
             />
-            <text x={PLOT_L - 8} y={yPix(o) + 4} textAnchor="end" className="fill-muted text-[10px] font-mono">
+            <text x={PLOT_L - 8} y={yPix(o) + 4} textAnchor="end" className="fill-muted font-mono" style={{ fontSize: fontSize(10) }}>
               {o}
             </text>
           </g>
         ))}
         <text
-          x={14}
+          x={yLabelX}
           y={(PLOT_T + PLOT_B) / 2}
           textAnchor="middle"
-          className="fill-muted text-[10px] font-semibold"
-          transform={`rotate(-90 14 ${(PLOT_T + PLOT_B) / 2})`}
+          className="fill-muted font-semibold"
+          style={{ fontSize: fontSize(10) }}
+          transform={`rotate(-90 ${yLabelX} ${(PLOT_T + PLOT_B) / 2})`}
         >
           neuron output
         </text>
@@ -143,12 +151,12 @@ export function NeuronResponseCurve() {
         {xTicks.map((v) => (
           <g key={v}>
             <line x1={xPix(v)} y1={PLOT_B} x2={xPix(v)} y2={PLOT_B + 4} stroke="#9ca3af" strokeWidth="1" />
-            <text x={xPix(v)} y={PLOT_B + 16} textAnchor="middle" className="fill-muted text-[10px] font-mono">
+            <text x={xPix(v)} y={PLOT_B + 6 + 10 * ts} textAnchor="middle" className="fill-muted font-mono" style={{ fontSize: fontSize(10) }}>
               {v.toFixed(1)}
             </text>
           </g>
         ))}
-        <text x={(PLOT_L + PLOT_R) / 2} y={H - 4} textAnchor="middle" className="fill-muted text-[10px] font-semibold">
+        <text x={(PLOT_L + PLOT_R) / 2} y={svgH - 4} textAnchor="middle" className="fill-muted font-semibold" style={{ fontSize: fontSize(10) }}>
           how bear-like the input is →
         </text>
 
@@ -165,7 +173,7 @@ export function NeuronResponseCurve() {
               strokeDasharray="4,3"
               opacity={0.8}
             />
-            <text x={xPix(threshold)} y={PLOT_T + 10} textAnchor="middle" className="fill-warning text-[9px] font-semibold">
+            <text x={xPix(threshold)} y={PLOT_T + 10} textAnchor="middle" className="fill-warning font-semibold" style={{ fontSize: fontSize(9) }}>
               decision boundary ({threshold.toFixed(2)})
             </text>
           </g>
@@ -176,7 +184,8 @@ export function NeuronResponseCurve() {
             x={threshold < X_MIN ? PLOT_L + 6 : PLOT_R - 6}
             y={PLOT_T + 10}
             textAnchor={threshold < X_MIN ? "start" : "end"}
-            className="fill-warning text-[9px] font-semibold"
+            className="fill-warning font-semibold"
+            style={{ fontSize: fontSize(9) }}
           >
             {threshold < X_MIN
               ? `← boundary ${threshold.toFixed(2)} (all fire)`
@@ -195,7 +204,7 @@ export function NeuronResponseCurve() {
           return (
             <g key={a.name}>
               <circle cx={cx} cy={cy} r={isWeight ? 5 : 4} fill={outputColor(a.output)} stroke="white" strokeWidth="1.5" />
-              <text x={cx} y={cy - 8} textAnchor="middle" className="text-[13px]">
+              <text x={cx} y={cy - 8} textAnchor="middle" style={{ fontSize: fontSize(13) }}>
                 {a.emoji}
               </text>
             </g>

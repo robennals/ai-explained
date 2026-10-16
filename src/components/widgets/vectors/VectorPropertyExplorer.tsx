@@ -106,22 +106,25 @@ function DomainTab({ domain }: { domain: VectorDomain }) {
       <p className="mb-4 text-xs text-muted">
         {itemB
           ? "Comparing two items. Green bars are similar, red bars are different."
-          : "Click a second item to compare their vectors."}
+          : "Tap a second item to compare their vectors."}
       </p>
 
       {/* Cards */}
       <div className="overflow-hidden">
         <div ref={stripRef} className="flex gap-3">
+          {/* On phones each card takes half the width so two fit side by side. */}
           {transition && (
-            <VectorCard
-              name={transition.exitingItem.name}
-              emoji={transition.exitingItem.emoji}
-              properties={domain.properties}
-              values={transition.exitingItem.values}
-            />
+            <div className="w-[calc(50%-6px)] shrink-0 sm:w-auto">
+              <VectorCard
+                name={transition.exitingItem.name}
+                emoji={transition.exitingItem.emoji}
+                properties={domain.properties}
+                values={transition.exitingItem.values}
+              />
+            </div>
           )}
 
-          <div ref={cardRef}>
+          <div ref={cardRef} className="w-[calc(50%-6px)] shrink-0 sm:w-auto">
             <VectorCard
               name={itemA.name}
               emoji={itemA.emoji}
@@ -132,13 +135,15 @@ function DomainTab({ domain }: { domain: VectorDomain }) {
           </div>
 
           {itemB && (
-            <VectorCard
-              name={itemB.name}
-              emoji={itemB.emoji}
-              properties={domain.properties}
-              values={itemB.values}
-              highlight={getHighlight}
-            />
+            <div className="w-[calc(50%-6px)] shrink-0 sm:w-auto">
+              <VectorCard
+                name={itemB.name}
+                emoji={itemB.emoji}
+                properties={domain.properties}
+                values={itemB.values}
+                highlight={getHighlight}
+              />
+            </div>
           )}
         </div>
       </div>
