@@ -9,7 +9,7 @@ The original paper that introduced transformers was called *"Attention Is All Yo
 The picture below shows a very simple transformer doing its work on a tiny sentence. The final layer's embedding of the last token tells us enough to predict the next word.
 
 <TransformerOverviewWidget>
-Click any word-cell to see which earlier words fed into it. Click a layer's name on the left to see what that layer is doing.
+Tap any word-cell to see which earlier words fed into it. Tap a layer's name on the left to see what that layer is doing.
 </TransformerOverviewWidget>
 
 The representation of each token gets more sophisticated at each layer, by bringing in information from the tokens it paid attention to.
@@ -21,7 +21,7 @@ This looks a lot like a regular neural network: boxes in layers, connected by li
 The playground below shows a more detailed example with a longer sentence and more layers. Go through the layers one at a time and see how the representation of each token becomes more sophisticated as we bring in information from other tokens.
 
 <TransformerInActionWidget>
-Click **Next layer** to step through, or jump to any layer in the strip above the passage. **Previous-token** gives every word a copy of its predecessor. **Place in the scene** ties words to scene-locations. **Resolve pronouns** wires *her* to the astronaut. **Previous-token** (again) lets *blue* re-pull *her* with all the new context. **Find what verb acts on this** binds objects to their verbs. Click **Predict** to see the top guesses for the next word.
+Tap **Next layer** to step through, or jump to any layer in the strip above the passage. **Previous-token** gives every word a copy of its predecessor. **Place in the scene** ties words to scene-locations. **Resolve pronouns** wires *her* to the astronaut. **Previous-token** (again) lets *blue* re-pull *her* with all the new context. **Find what verb acts on this** binds objects to their verbs. Tap **Predict** to see the top guesses for the next word.
 </TransformerInActionWidget>
 
 The model never sees *Earth* spelled out. But by the last layer, *blue*'s representation says *a blue thing belonging to the astronaut on Mars, seen in the Martian sky*, and the embedding for *Earth* (a blue planet, home to humans, visible from other planets in our solar system) lines up almost exactly. That's where the prediction comes from.
@@ -42,12 +42,12 @@ Trying to understand the inner thought processes of transformers is an area of a
 
 We said at the beginning that each layer of a transformer creates a new representation for each token by using attention to find relevant tokens, and combining information from those tokens with what we already know about that token.
 
-The playground below gives more detail on how exactly a single layer of a transformer does that. Click on each box to see a description of what it does and how it does it.
+The playground below gives more detail on how exactly a single layer of a transformer does that. Tap each box to see a description of what it does and how it does it.
 
 (One transformer layer is sometimes also called a *transformer block*. The two names mean the same thing. We'll stick with "layer" because that's how people describe model size: "GPT-3 has 96 layers".)
 
 <TransformerBlockDiagramWidget>
-Click any box, or hit Next Block to step through. The grey box is one transformer layer. A real model stacks many of these (GPT-3 stacks 96).
+Tap any box, or hit Next Block to step through. The grey box is one transformer layer. A real model stacks many of these (GPT-3 stacks 96).
 </TransformerBlockDiagramWidget>
 
 

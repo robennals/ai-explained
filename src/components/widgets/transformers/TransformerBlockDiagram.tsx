@@ -366,7 +366,7 @@ function MobilePopup({
             <button
               onClick={onClose}
               aria-label="Close"
-              className="-mr-1 -mt-1 rounded-md p-1 text-muted transition-colors hover:bg-foreground/5 hover:text-foreground"
+              className="-mr-2 -mt-2 rounded-md p-2 text-muted transition-colors hover:bg-foreground/5 hover:text-foreground sm:-mr-1 sm:-mt-1 sm:p-1"
             >
               <svg
                 width="14"
@@ -397,7 +397,7 @@ function MobilePopup({
               <a
                 key={link.href}
                 href={link.href}
-                className="font-medium text-accent underline decoration-accent/30 hover:decoration-accent"
+                className="inline-block py-1 font-medium text-accent underline decoration-accent/30 hover:decoration-accent sm:py-0"
               >
                 {link.label}
               </a>
@@ -467,7 +467,7 @@ export function TransformerBlockDiagram() {
   return (
     <WidgetContainer
       title="The Transformer — Component by Component"
-      description="Click any box to learn about it, then hit Next Block to continue."
+      description="Tap any box to learn about it, then hit Next Block to continue."
       onReset={handleReset}
     >
       <div className="flex flex-col gap-6 lg:flex-row lg:gap-8">
@@ -617,7 +617,7 @@ export function TransformerBlockDiagram() {
                   <a
                     key={link.href}
                     href={link.href}
-                    className="font-medium text-accent underline decoration-accent/30 hover:decoration-accent"
+                    className="inline-block py-1 font-medium text-accent underline decoration-accent/30 hover:decoration-accent sm:py-0"
                   >
                     {link.label}
                   </a>
