@@ -4,7 +4,7 @@
 
 So to build AI, we need a model that is both universal and smooth. A **neural network** is exactly that, which is why pretty much every modern AI system is built from one. This chapter builds one from scratch, starting with logic gates, which are universal but not smooth.
 
-## Logic Gates Can Compute Anything, but Aren't Smooth
+## Logic Gates Are Universal but Not Smooth
 
 Every computer is built from **logic gates**: tiny components that combine true-or-false values, written as 1 and 0.
 
@@ -26,7 +26,7 @@ Step through the tabs, from one gate to billions. You don't need to follow how a
 But you can't train a circuit of gates. Its knobs are choices like "is this gate an AND or an OR?", and you can't make a gate 1% more like an OR. Its outputs snap between 0 and 1, so a small change either does nothing or flips the answer completely. There's no slope to follow.
 
 <KeyInsight>
-**Logic gates can compute anything, but they aren't smooth.** What we want is something that acts like a logic gate, but whose behavior slides smoothly as you turn its knobs. We'll build it in two steps.
+**Logic gates are universal, but they aren't smooth.** What we want is something that acts like a logic gate, but whose behavior slides smoothly as you turn its knobs. We'll build it in two steps.
 </KeyInsight>
 
 ## Step 1: Gates Controlled by Numbers
