@@ -3,12 +3,11 @@ import {
   controlCases,
   fictionCases,
   responseCases,
-  scenarioCases,
   whyBadCases,
 } from "./riskCases";
 import { estimates } from "./estimates";
 
-const caseSets = [fictionCases, scenarioCases, whyBadCases, controlCases, responseCases];
+const caseSets = [fictionCases, whyBadCases, controlCases, responseCases];
 
 describe("risk case sets", () => {
   it("gives every set a distinct title, since it names the widget in analytics", () => {

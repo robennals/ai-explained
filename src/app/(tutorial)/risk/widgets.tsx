@@ -9,7 +9,6 @@ import {
   fictionCases,
   responseCases,
   whyBadCases,
-  scenarioCases,
 } from "@/components/widgets/risk/riskCases";
 
 const CaseTabs = dynamic(
@@ -64,7 +63,6 @@ function caseWidget(set: CaseSet) {
 }
 
 export const FictionWidget = caseWidget(fictionCases);
-export const ScenarioWidget = caseWidget(scenarioCases);
 export const WhyBadWidget = caseWidget(whyBadCases);
 export const ControlWidget = caseWidget(controlCases);
 export const ResponseWidget = caseWidget(responseCases);

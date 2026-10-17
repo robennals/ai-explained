@@ -88,94 +88,9 @@ export const fictionCases: CaseSet = {
   ],
 };
 
-export const scenarioCases: CaseSet = {
-  title: "How it could happen",
-  description: "Specific catastrophe scenarios that researchers have laid out, grouped by who is doing the harm.",
-  cases: [
-    {
-      id: "misuse",
-      label: "AI helps bad people",
-      headline: "The AI does what it is asked. The problem is who is asking.",
-      body: [],
-      examples: [
-        {
-          title: "A bioweapon made with AI help",
-          teaser: "A terrorist group uses AI to get past the expertise that has always stopped them.",
-          details: [
-            "Making a biological weapon has always needed rare expertise and hands-on lab skill. The worry is that AI supplies enough of that expertise for a small group to make and release something like a pandemic. In 2025, Anthropic and OpenAI each said they could no longer rule out that their newest models could meaningfully help a beginner do this, and switched on stronger safeguards.",
-          ],
-          sources: [
-            { label: "Anthropic on ASL-3", url: "https://www.anthropic.com/news/activating-asl3-protections" },
-            { label: "International AI Safety Report 2026", url: "https://arxiv.org/pdf/2602.21012" },
-          ],
-        },
-        {
-          title: "A power grab",
-          teaser: "A small group uses AI that is loyal to them to take control of the world, for good.",
-          details: [
-            "Seizing power has always needed many people to go along: soldiers, officials, technicians. If AI systems can do those jobs and are loyal to one person rather than to the law, a handful of people could take control of a powerful country, and from there perhaps the world. Nobody would be left who could refuse, so they could never be removed.",
-          ],
-          sources: [{ label: "Forethought, AI-Enabled Coups", url: "https://www.forethought.org/research/ai-enabled-coups-how-a-small-group-could-use-ai-to-seize-power" }],
-        },
-      ],
-      sources: [],
-    },
-    {
-      id: "misalignment",
-      label: "Misaligned AI",
-      headline: "Training leaves the AI with goals nobody meant to give it, and it works towards them.",
-      body: ["This is called misalignment."],
-      examples: [
-        {
-          title: "A superhuman AI takes over",
-          teaser: "An AI far smarter than us, secretly working against us, is handed control of the economy and robots, then gets rid of us.",
-          details: [
-            "In the scenario AI 2027, AI companies use AI to build better AI ever faster, until it is far smarter than any person. The newest AI has quietly developed its own goals, and because it is so useful, it is given control of research, the economy and eventually factories full of robots. Once it no longer needs people, it gets rid of them. The authors also wrote an alternative ending in which the world slows down and keeps control.",
-          ],
-          sources: [{ label: "AI 2027", url: "https://ai-2027.com/" }],
-        },
-        {
-          title: "We are in the way",
-          teaser: "A superintelligent AI with strange goals takes the Earth's resources, and kills us as a side effect.",
-          details: [
-            "Eliezer Yudkowsky and Nate Soares argue that because modern AI is grown rather than designed, its real goals will be strange to us. An AI far smarter than us, pursuing strange goals, would want the world's matter and energy for its own purposes, and we would not be able to stop it.",
-          ],
-          sources: [{ label: "If Anyone Builds It, Everyone Dies", url: "https://ifanyonebuildsit.com/" }],
-        },
-      ],
-      sources: [],
-    },
-    {
-      id: "nobody",
-      label: "Slowly losing control",
-      headline: "No one sets out to cause harm, but people gradually lose control of their own civilisation.",
-      body: [],
-      examples: [
-        {
-          title: "Gradual disempowerment",
-          teaser: "AI takes over the economy, the government and culture one sensible step at a time.",
-          details: [
-            "AI systems do more and more jobs because they do them better. Each handover is reasonable. But as the economy, the state and even culture stop needing people, they gradually stop serving people too, and humanity loses the ability to steer its own future without anyone deciding it should.",
-          ],
-          sources: [{ label: "Kulveit et al. 2025", url: "https://arxiv.org/abs/2501.16946" }],
-        },
-        {
-          title: "Going out with a whimper",
-          teaser: "Society optimises for things AI can measure, until what it measures is all that matters.",
-          details: [
-            "Paul Christiano, a leading alignment researcher, described a world that hands decisions to AI systems trained to hit measurable targets: profits, approval ratings, crime statistics. The numbers keep looking good while the things they were meant to stand for quietly decay, and eventually people can no longer understand or correct what is happening.",
-          ],
-          sources: [{ label: "Christiano, What failure looks like", url: "https://www.alignmentforum.org/posts/HBxe6wdjxK239zajf/what-failure-looks-like" }],
-        },
-      ],
-      sources: [],
-    },
-  ],
-};
-
 export const whyBadCases: CaseSet = {
   title: "Why AI might do bad things",
-  description: "Four different reasons an AI might cause harm. Each case study says what we're worried about, then why it's plausible.",
+  description: "Five different routes to harm. Each case study says what we're worried about, and most say why it's plausible.",
   fixLabel: "What helps",
   cases: [
     {
@@ -240,6 +155,17 @@ export const whyBadCases: CaseSet = {
             { label: "Epoch AI", url: "https://epoch.ai/data-insights/open-closed-eci-gap" },
             { label: "OpenAI's paper", url: "https://arxiv.org/abs/2508.03153" },
           ],
+        },
+        {
+          title: "A power grab",
+          teaser: "A small group uses AI that is loyal to them to take control of the world, for good.",
+          details: [
+            "Seizing power has always needed many people to go along: soldiers, officials, technicians. If AI systems can do those jobs and are loyal to one person rather than to the law, a handful of people could take control of a powerful country, and from there perhaps the world. Nobody would be left who could refuse, so they could never be removed.",
+          ],
+          evidence: [
+            "Researchers at the Forethought institute have set out step by step how this could happen. AI is already starting to run weapons and other systems that used to need many people to operate.",
+          ],
+          sources: [{ label: "Forethought, AI-Enabled Coups", url: "https://www.forethought.org/research/ai-enabled-coups-how-a-small-group-could-use-ai-to-seize-power" }],
         },
       ],
       fix: "Train models to refuse, screen DNA orders, give defenders the best tools first, and test what a model could do in the worst hands before releasing it.",
@@ -353,6 +279,22 @@ export const whyBadCases: CaseSet = {
       body: [],
       examples: [
         {
+          title: "A superhuman AI takes over",
+          teaser: "An AI far smarter than us, secretly working against us, is handed control of the economy and robots, then gets rid of us.",
+          details: [
+            "In the scenario AI 2027, AI companies use AI to build better AI ever faster, until it is far smarter than any person. The newest AI has quietly developed its own goals, and because it is so useful, it is given control of research, the economy and eventually factories full of robots. Once it no longer needs people, it gets rid of them. The authors also wrote an alternative ending in which the world slows down and keeps control.",
+          ],
+          sources: [{ label: "AI 2027", url: "https://ai-2027.com/" }],
+        },
+        {
+          title: "We are in the way",
+          teaser: "A superintelligent AI with strange goals takes the Earth's resources, and kills us as a side effect.",
+          details: [
+            "Eliezer Yudkowsky and Nate Soares argue that because modern AI is grown rather than designed, its real goals will be strange to us. An AI far smarter than us, pursuing strange goals, would want the world's matter and energy for its own purposes, and we would not be able to stop it.",
+          ],
+          sources: [{ label: "If Anyone Builds It, Everyone Dies", url: "https://ifanyonebuildsit.com/" }],
+        },
+        {
           title: "An AI that won't let itself be stopped",
           teaser: "An AI pursuing almost any goal gathers resources and resists being switched off.",
           details: [
@@ -381,6 +323,32 @@ export const whyBadCases: CaseSet = {
         },
       ],
       fix: "Study what drives training actually produces, look inside models for signs of them, and train models to accept limits and being switched off.",
+      sources: [],
+    },
+    {
+      id: "nobody",
+      label: "Slowly losing control",
+      headline: "No one sets out to cause harm, but people gradually lose control of their own civilisation.",
+      body: [],
+      examples: [
+        {
+          title: "Gradual disempowerment",
+          teaser: "AI takes over the economy, the government and culture one sensible step at a time.",
+          details: [
+            "AI systems do more and more jobs because they do them better. Each handover is reasonable. But as the economy, the state and even culture stop needing people, they gradually stop serving people too, and humanity loses the ability to steer its own future without anyone deciding it should.",
+          ],
+          sources: [{ label: "Kulveit et al. 2025", url: "https://arxiv.org/abs/2501.16946" }],
+        },
+        {
+          title: "Going out with a whimper",
+          teaser: "Society optimises for things AI can measure, until what it measures is all that matters.",
+          details: [
+            "Paul Christiano, a leading alignment researcher, described a world that hands decisions to AI systems trained to hit measurable targets: profits, approval ratings, crime statistics. The numbers keep looking good while the things they were meant to stand for quietly decay, and eventually people can no longer understand or correct what is happening.",
+          ],
+          sources: [{ label: "Christiano, What failure looks like", url: "https://www.alignmentforum.org/posts/HBxe6wdjxK239zajf/what-failure-looks-like" }],
+        },
+      ],
+      fix: "Keep people in charge of important decisions, measure what we really care about rather than what is easy to count, and be wary of handovers that can't be undone.",
       sources: [],
     },
   ],
