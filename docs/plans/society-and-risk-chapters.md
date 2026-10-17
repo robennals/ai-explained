@@ -42,7 +42,7 @@ The chart figures are in `src/components/widgets/society/resourceData.ts`, each 
 | Why AI Might Do Bad Things | `WhyBadWidget`: told to by a person (biology, cyberattacks, open models), mistakes at scale (Replit database, 2010 flash crash), doing what it was told (boat race, o3, the Hugging Face incident), learning to want power (instrumental convergence, Scott Alexander's routes, Anthropic's spreading-bad-habits finding). Then `WriteTheRewardWidget`: the reader picks a cleaning robot's reward and an exact planner (`rewardPlanner.ts`) finds the loopholes |
 | The Hugging Face Incident | `HuggingFaceWidget`: a high-level, step-by-step walkthrough (isolated, finding each other, breaking out, organising, attacking, caught), each with a diagram |
 | Could We Stop It? | `ControlWidget`: deceiving us, avoiding shutdown, copying itself, defending itself |
-| What We Can Do | none: rules, company safety policies, international agreements, technology; points to the alignment chapter |
+| What We Can Do | `ResponseWidget`: built on Amodei's three-step pacing plan and the Pacing the Frontier statement, with AI 2040's Plan A for the international step. Tabs: outside checks (embedded evaluators, FRONTIER Act, AI Incident Reporting Act, California/New York/EU laws), companies agreeing (CATS Act, company safety policies), countries agreeing (AI 2040, chip tracking bills, agreements so far), keeping control (AI Kill Switch Act, Stop Rogue AI Act) |
 
 ## Decisions made in this draft (for review)
 
@@ -173,6 +173,17 @@ Confidence: unmarked = checked against a primary or reliable source during resea
 - Alignment faking: https://arxiv.org/abs/2412.14093
 - Agentic Misalignment: https://www.anthropic.com/research/agentic-misalignment
 - Claude Sonnet 4.5 noticing tests (Transformer): https://transformernews.ai/p/claude-sonnet-4-5-evaluation-situational-awareness
+- Pacing the Frontier statement (July 2026): https://www.pacingthefrontier.com/
+- AI 2040 (AI Futures Project): https://ai-2040.com/
+- We Must Pace the Frontier (Amodei, Sept 2026): https://darioamodei.com/post/we-must-pace-the-frontier
+- FRONTIER Act, H.R. 9925 (Obernolte, July 2026): https://www.govinfo.gov/content/pkg/BILLS-119hr9925ih/html/BILLS-119hr9925ih.htm
+- AI Incident Reporting Act, H.R. 9477 (Moran, June 2026): https://www.govinfo.gov/content/pkg/BILLS-119hr9477ih/html/BILLS-119hr9477ih.htm
+- AI Kill Switch Act, H.R. 9917 (Lieu and Moran, July 2026): https://www.govinfo.gov/content/pkg/BILLS-119hr9917ih/html/BILLS-119hr9917ih.htm
+- Stop Rogue AI Act, H.R. 10362 (Lawler and Gottheimer, Sept 2026): https://lawler.house.gov/news/documentsingle.aspx?DocumentID=6477
+- CATS Act, H.R. 9914 (Latta, July 2026) and Senate version (Banks and Schiff): https://www.govinfo.gov/content/pkg/BILLS-119hr9914ih/html/BILLS-119hr9914ih.htm
+- Chip Security Act, H.R. 3447 (passed House Foreign Affairs 42–0, March 2026): https://huizenga.house.gov/news/documentsingle.aspx?DocumentID=404259
+- Stop Stealing Our Chips Act, S. 1473 (passed Senate May 2026): https://www.govinfo.gov/content/pkg/BILLS-119s1473es/html/BILLS-119s1473es.htm
+- List of current AI safety bills: https://callcongress.ai/legislation
 - Palisade shutdown resistance: https://palisaderesearch.org/research/shutdown-resistance
 - Anti-scheming training: https://arxiv.org/abs/2509.15541
 - Carlsmith: https://arxiv.org/abs/2206.13353

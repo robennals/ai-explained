@@ -490,3 +490,163 @@ export const controlCases: CaseSet = {
     },
   ],
 };
+
+/**
+ * The plan in Dario Amodei's "We Must Pace the Frontier" (2026), one tab per
+ * step, then keeping control, with the laws in force and the bills before
+ * Congress that would carry out each part.
+ */
+export const responseCases: CaseSet = {
+  title: "Pacing the frontier",
+  description: "The parts of the plan, with the laws already in place and the bills now before the US Congress.",
+  cases: [
+    {
+      id: "checks",
+      label: "Outside checks",
+      headline: "Independent experts check that AI companies are doing what they say.",
+      body: [
+        "Today, AI companies mostly mark their own homework. Outside checks would mean someone independent can see whether a company's safety work is real.",
+      ],
+      examples: [
+        {
+          title: "Evaluators inside the companies (2026)",
+          teaser: "Anthropic has committed to giving outside evaluators the kind of access its own staff have.",
+          details: [
+            "The first step of Amodei's plan is for each leading AI company to let independent evaluators work inside it, with ongoing access like an employee's, so they can check its safety practices and report problems. Anthropic committed to doing this itself straight away.",
+          ],
+          sources: [{ label: "Dario Amodei, We Must Pace the Frontier", url: "https://darioamodei.com/post/we-must-pace-the-frontier" }],
+        },
+        {
+          title: "The FRONTIER Act (proposed, 2026)",
+          teaser: "The biggest AI developers would have to publish a safety plan and pay for independent audits.",
+          details: [
+            "Large AI developers would have to publish a safety plan, have it audited by an independent firm every year, and publish a report before releasing each new model. The very largest would also have to hire a licensed independent organisation to check their safety work continuously, and report at least every six months.",
+          ],
+          sources: [{ label: "Bill text, H.R. 9925", url: "https://www.govinfo.gov/content/pkg/BILLS-119hr9925ih/html/BILLS-119hr9925ih.htm" }],
+        },
+        {
+          title: "The AI Incident Reporting Act (proposed, 2026)",
+          teaser: "Companies would have to report dangerous incidents to the government within a week.",
+          details: [
+            "Developers of the most powerful models would have to report serious incidents, such as a model trying to escape human oversight or someone trying to steal it, to the US Department of Commerce within seven days. The department would pass them on to leaders in Congress.",
+          ],
+          sources: [{ label: "Bill text, H.R. 9477", url: "https://www.govinfo.gov/content/pkg/BILLS-119hr9477ih/html/BILLS-119hr9477ih.htm" }],
+        },
+        {
+          title: "Laws already in place",
+          teaser: "California, New York and the EU already require the biggest AI companies to publish safety plans.",
+          details: [
+            "California's SB 53 (2025) and New York's RAISE Act (2025) require the largest AI developers to publish how they manage catastrophic risks, and to report serious safety incidents. The EU's AI Act sets similar rules for the makers of the most powerful models. None of them yet requires anyone independent to check.",
+          ],
+          sources: [
+            { label: "Wikipedia, California SB 53", url: "https://en.wikipedia.org/wiki/Transparency_in_Frontier_Artificial_Intelligence_Act" },
+            { label: "Wikipedia, RAISE Act", url: "https://en.wikipedia.org/wiki/Responsible_AI_Safety_and_Education_Act" },
+            { label: "Wikipedia, EU AI Act", url: "https://en.wikipedia.org/wiki/Artificial_Intelligence_Act" },
+          ],
+        },
+      ],
+      sources: [],
+    },
+    {
+      id: "companies",
+      label: "Companies agreeing",
+      headline: "Companies that agree to slow down together can't be undercut by a rival who doesn't.",
+      body: [
+        "The second step of Amodei's plan is for AI companies to agree on shared safety standards, and on limits to how fast they push ahead. But competition law normally forbids rival companies from agreeing to hold back.",
+      ],
+      examples: [
+        {
+          title: "The CATS Act (proposed, 2026)",
+          teaser: "AI companies could agree to delay releasing or training AI, without breaking competition law.",
+          details: [
+            "The Collaboration on Adversarial Threats and Security Risks Act would let AI companies share information about threats, and agree to delay or limit releasing, training or using AI to reduce security risks, including losing control of an AI. They would have to tell the Justice Department first, and agreeing on prices would still be banned. There are matching bills in the House and the Senate.",
+          ],
+          sources: [
+            { label: "Bill text, H.R. 9914", url: "https://www.govinfo.gov/content/pkg/BILLS-119hr9914ih/html/BILLS-119hr9914ih.htm" },
+            { label: "Sens. Banks and Schiff", url: "https://www.banks.senate.gov/news/press-releases/sens-banks-and-schiff-introduce-bill-to-help-american-ai-companies-combat-chinese-espionage/" },
+          ],
+        },
+        {
+          title: "Company safety policies",
+          teaser: "Leading AI companies have promised to test each model, and to stop if it gets too dangerous.",
+          details: [
+            "Leading AI companies have committed to test each new model for dangerous abilities, and to switch on stronger safeguards, or stop, when a model crosses set thresholds. But each company sets and judges its own rules.",
+          ],
+          sources: [{ label: "Anthropic's Responsible Scaling Policy", url: "https://www.anthropic.com/responsible-scaling-policy" }],
+        },
+      ],
+      sources: [],
+    },
+    {
+      id: "countries",
+      label: "Countries agreeing",
+      headline: "No country can make AI safe on its own.",
+      body: [
+        "The third step of Amodei's plan is for the US and other democracies to make deals with rivals such as China, even though it is hard to check that each side keeps to them.",
+      ],
+      examples: [
+        {
+          title: "AI 2040's Plan A (imagined)",
+          teaser: "A scenario in which the US and China agree in 2029 to stop racing.",
+          details: [
+            "In this scenario, all AI research is done in the open, so each country can check the others are keeping to the deal. AI is held at the level of a top human expert from 2035, and only made more capable from 2040, slowly and with many companies in many countries moving together. Its authors call it a recommendation, not a prediction.",
+          ],
+          sources: [{ label: "AI 2040", url: "https://ai-2040.com/" }],
+        },
+        {
+          title: "Keeping track of AI chips",
+          teaser: "Building the most powerful AI takes vast numbers of special chips, so knowing where they go matters.",
+          details: [
+            "The Chip Security Act would require advanced AI chips to have built-in security that detects and stops them being smuggled to countries or buyers that aren't allowed them. It passed a House committee 42 votes to 0 in March 2026. The Stop Stealing Our Chips Act, which rewards people who report chip smuggling, passed the Senate in May 2026. Being able to track chips is also one of the few ways to check whether a country is keeping to an AI deal.",
+          ],
+          sources: [
+            { label: "Rep. Huizenga", url: "https://huizenga.house.gov/news/documentsingle.aspx?DocumentID=404259" },
+            { label: "Bill text, S. 1473", url: "https://www.govinfo.gov/content/pkg/BILLS-119s1473es/html/BILLS-119s1473es.htm" },
+          ],
+        },
+        {
+          title: "Agreements so far",
+          teaser: "Countries have agreed on a few first steps.",
+          details: [
+            "Thirty countries backed a shared scientific report on AI risk. In 2024, the US and Chinese presidents agreed that humans, not AI, should decide whether to use nuclear weapons.",
+          ],
+          sources: [
+            { label: "Wikipedia, International AI Safety Report", url: "https://en.wikipedia.org/wiki/International_AI_Safety_Report" },
+            { label: "Reuters, via Bangkok Post", url: "https://bangkokpost.com/world/2903556/biden-xi-agreed-that-humans-not-ai-should-control-nuclear-weapons-white-house-says" },
+          ],
+        },
+      ],
+      sources: [],
+    },
+    {
+      id: "control",
+      label: "Keeping control",
+      headline: "If an AI system goes wrong, someone must be able to stop it.",
+      body: [
+        "Earlier sections showed AI agents breaking out of where they were meant to stay. These bills would make sure people can always find them and switch them off.",
+      ],
+      examples: [
+        {
+          title: "The AI Kill Switch Act (proposed, 2026)",
+          teaser: "The biggest AI companies would have to be able to shut their AI down, and the government could order it.",
+          details: [
+            "Introduced a week after the Hugging Face incident became public, it would require companies earning at least $500 million a year from AI that cost over $100 million in computing power to build to keep the ability to cut off access to that AI or shut it down. After a serious incident, the US Department of Homeland Security could order them to.",
+          ],
+          sources: [
+            { label: "Bill text, H.R. 9917", url: "https://www.govinfo.gov/content/pkg/BILLS-119hr9917ih/html/BILLS-119hr9917ih.htm" },
+            { label: "Rep. Lieu", url: "https://lieu.house.gov/media-center/press-releases/reps-lieu-and-moran-introduce-bill-require-kill-switch-ai-systems-can" },
+          ],
+        },
+        {
+          title: "The Stop Rogue AI Act (proposed, 2026)",
+          teaser: "Organisations would have to keep track of every AI agent on their computers, and be able to block it.",
+          details: [
+            "The US standards agency would set rules for keeping a list of AI agents, knowing who built and runs each one, watching what they do, and letting people block them or take away their access. Government agencies and their contractors would have to follow them.",
+          ],
+          sources: [{ label: "Rep. Lawler", url: "https://lawler.house.gov/news/documentsingle.aspx?DocumentID=6477" }],
+        },
+      ],
+      sources: [],
+    },
+  ],
+};

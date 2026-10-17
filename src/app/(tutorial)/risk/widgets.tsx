@@ -7,6 +7,7 @@ import type { CaseSet } from "@/components/widgets/shared/caseTypes";
 import {
   controlCases,
   fictionCases,
+  responseCases,
   whyBadCases,
   scenarioCases,
 } from "@/components/widgets/risk/riskCases";
@@ -66,6 +67,7 @@ export const FictionWidget = caseWidget(fictionCases);
 export const ScenarioWidget = caseWidget(scenarioCases);
 export const WhyBadWidget = caseWidget(whyBadCases);
 export const ControlWidget = caseWidget(controlCases);
+export const ResponseWidget = caseWidget(responseCases);
 
 export function EstimatesWidget({ children }: { children?: React.ReactNode }) {
   return (
