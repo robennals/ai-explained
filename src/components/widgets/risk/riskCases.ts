@@ -124,7 +124,7 @@ export const scenarioCases: CaseSet = {
       id: "misalignment",
       label: "AI acting on its own",
       headline: "The AI ends up wanting something other than what we intended, and pursues it.",
-      body: [],
+      body: ["This is called misalignment."],
       examples: [
         {
           title: "A superhuman AI takes over",
