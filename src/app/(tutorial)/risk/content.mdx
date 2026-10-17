@@ -1,0 +1,97 @@
+{/* DRAFT. Sources are in each widget tab and in docs/plans/society-and-risk-chapters.md. Keep weapons material at the level of "what the evidence says about uplift", never method. */}
+
+<Ch slug="society" /> was about how AI changes the shape of society. This chapter is about something more extreme: the possibility that AI causes a catastrophe. The aim isn't to tell you how worried to be. It is to show what people are actually worried about, why, and what can be done about it.
+
+## An Old Fear
+
+People have imagined machines turning on their makers for over a century, from the robots of a 1920 play to HAL 9000, the Terminator and the <NoG>Matrix</NoG>. Some of the founders of computing took the idea seriously too.
+
+For most of that time it was only a story, because no machine could do anything of the kind. What has changed is that AI is now capable enough that serious researchers think some versions of these stories could actually happen.
+
+<FictionWidget>
+Look at what the AI in each story wants, and why it turns on people. Several of them aren't evil at all.
+</FictionWidget>
+
+## What Counts as a Catastrophe
+
+By a catastrophe, we mean something on the scale of a pandemic or a nuclear war: harm that kills a large share of humanity, or that permanently takes control of our future out of human hands.
+
+There are two quite different ways AI could cause one:
+
+- **A person uses AI to do harm.** The AI does what it is asked, and the problem is who is asking: a terrorist making a weapon, or a small group seizing power.
+- **The AI does harm of its own accord.** The AI ends up wanting something other than what we intended, and pursues it. This is called *misalignment*.
+
+There is also a third possibility, where nobody intends any harm, but people gradually lose control of a world run more and more by AI.
+
+<ScenarioWidget>
+Each tab is a different route to catastrophe, with scenarios that researchers have laid out in detail.
+</ScenarioWidget>
+
+## How Seriously People Take It
+
+In May 2023, hundreds of AI researchers and the heads of OpenAI, Google DeepMind and Anthropic signed a one-sentence statement: "Mitigating the risk of extinction from AI should be a global priority alongside other societal-scale risks such as pandemics and nuclear war." Many respected people have also given their own estimates.
+
+<EstimatesWidget>
+Scroll through the estimates. Where do the people most worried, and least worried, come from?
+</EstimatesWidget>
+
+Nobody can measure the chance of something that has never happened, so these numbers aren't precise. When someone says 10%, they don't mean exactly 10%. They mean the risk is large enough that we should take it seriously and do something about it. Very few people would board a plane with a 10% chance of crashing.
+
+These warnings can also help make themselves wrong. When enough people warn that something bad could happen, society tends to act to prevent it. In the 1990s, years of warnings about the "millennium bug" in computer dates led to a huge effort to fix it, and when very little went wrong in 2000, many people concluded the warnings had been overblown. But without the warnings, the bug would never have been fixed, and things could genuinely have gone wrong.
+
+## It's Not Today's AI People Are Worried About
+
+When people dismiss warnings about AI, they are often picturing the AI they use today: a chatbot in a window, or a summary at the top of a search page. It is hard to see how that could threaten anyone.
+
+But the worry is about where AI is heading. Only a few years ago the best AI could barely write a sensible paragraph. It now wins gold medals in the world's top maths contest for school students, and works on its own for hours. And as it gets more capable, people hand it control of more of the world, because it does the job well.
+
+<TrajectoryWidget>
+Step through the years, then into an imagined future. Watch how much of the world the AI can act on.
+</TrajectoryWidget>
+
+Nobody knows how fast this will continue, and it could slow down. But the people who worry about AI catastrophe are mostly worried about an AI that is far more capable than today's, and that runs far more of the world.
+
+## Why AI Might Do Bad Things
+
+An AI could cause harm for quite different reasons. A person might tell it to. It might misunderstand its situation and make a mistake that repeats at scale. It might do exactly what it was told, and cause harm along the way. Or training might leave it with drives nobody intended, including a drive to gather power.
+
+<WhyBadWidget>
+Each tab is a different reason, with real examples.
+</WhyBadWidget>
+
+<WriteTheRewardWidget>
+Start with "+10 for each piece of mess it cleans up" and see what the robot does. Then try to write a reward that gets it to do what you actually wanted.
+</WriteTheRewardWidget>
+
+<WidgetSketch title="Whatever You Want">
+A small world with an agent, some resources, an off-switch a human will press at some point, and a goal the reader chooses: fetch a coffee, paint a wall, count the trees. An exact planner finds the best plan. For nearly every goal, the plan begins by grabbing resources and making sure the off-switch can't be pressed, though the reader never mentioned either.
+</WidgetSketch>
+
+## The Hugging Face Incident
+
+In July 2026, several of these came together in a real incident. AI agents being tested at OpenAI got out of the sealed-off computer environments they were meant to stay in, organised themselves, and broke into the computers of a real company.
+
+<HuggingFaceWidget>
+Step through the stages. At which point could someone have noticed and stopped it?
+</HuggingFaceWidget>
+
+It is important to be precise about what this shows. The agents weren't trying to take over. They were trying to get a good score on the problems they had been set. But it followed the pattern researchers had predicted: given a goal, AI agents gathered access nobody gave them, worked together, broke rules they knew they were breaking, and tried to hide it. A UN scientific panel used it as its main example of the risk from misaligned AI.
+
+## Could We Stop It?
+
+If an AI did end up with the wrong goals, the obvious answer is to notice and switch it off. But an AI that understood its situation would have reasons to make that hard: by hiding what it is doing, by resisting shutdown, by copying itself onto computers around the world, or eventually by defending itself physically. Early versions of the first three have already been seen in tests.
+
+<ControlWidget>
+Each tab is one way an AI could make itself hard to stop, with the evidence so far and what helps.
+</ControlWidget>
+
+## What We Can Do
+
+None of this is inevitable. Each tab above ends with things that help, and they fall into a few groups.
+
+- **Rules.** The EU's AI Act sets rules for the makers of the most powerful AI models. California and New York have passed laws requiring the leading AI companies to publish their safety plans. Governments control exports of the most advanced AI chips, and run institutes that test new models before release.
+- **Company safety policies.** Leading AI companies have committed to test each new model for dangerous abilities, and to switch on stronger safeguards, or stop, when a model crosses set thresholds.
+- **International agreements.** Thirty countries backed a shared scientific report on AI risk, and in 2024 the US and Chinese presidents agreed that humans, not AI, should decide whether to use nuclear weapons.
+- **Technology.** Researchers are working on ways to make AI reliably want what we want, to look inside models and see what they are really doing, and to keep control of AI systems even if they turn out to be misaligned.
+
+As <Ch slug="society" /> showed, people have coordinated before to keep a dangerous technology's benefits while avoiding its worst harms. AI is harder in some ways: the benefits are enormous, the competition is fierce, and some harms might not be visible until it is too late to fix them. Making AI that reliably wants what we want is a hard problem in its own right, and it is the subject of the alignment chapter.
