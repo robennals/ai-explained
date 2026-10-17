@@ -1,6 +1,6 @@
 # AI and Society / Catastrophic Risk chapters — plan and sources
 
-Status: first draft of the prose, marked `ready` so it can be read on the site. The playgrounds are sketched in `<WidgetSketch>` boxes and none are built yet.
+Status: first draft, with every widget built, marked `ready` so it can be read on the site.
 Date: 2026-10-15
 
 ## Summary
@@ -10,8 +10,7 @@ Date: 2026-10-15
   - `risk` (**Catastrophic Risk**) is about routes to catastrophe.
   - Everything after them shifts up by two ids, with `prerequisites` remapped to match.
 - **Both chapters are marked `ready`.** They are a fifth part of the home page's learning path, "AI in the world", each with its own looping card illustration (`SocietyArt`, `RiskArt`).
-  - The widget-count test skips a ready chapter whose playgrounds are still `<WidgetSketch>` placeholders. That exemption lapses by itself once the real widgets replace the sketches.
-- **No quiz and no notebook yet.** Both chapters are policy and society topics with no PyTorch content, so a notebook may never make sense.
+- **Each chapter ends with a quiz, and neither has a notebook.** Both are policy and society topics with no PyTorch content, so a notebook may never make sense. The quiz questions test understanding through new scenarios, not memory of the chapter's examples.
 - **Fact-check markers.** Facts that still need a primary-source check are marked with `{/* VERIFY: ... */}` comments in the MDX.
 
 ## Structure
@@ -20,13 +19,13 @@ Date: 2026-10-15
 
 **The text is a skimmable overview of about 1,500 words.** Real-world examples live in tabbed widgets, one tab per example, built with `CaseTabs` from data in `src/components/widgets/society/societyCases.ts`. The chapter has no separate playgrounds beyond these widgets.
 
-| Section | Built widget (tabs) | Playground sketch |
-|---|---|---|
-| Good Technologies Come With Harms | `HistoryWidget` (`TechnologyTabs`, data in `technologies.ts`): printing press, factories, cars, chemistry, nuclear, biotechnology. Each tab shows the good and the bad side by side, then how societies adapted, then a one-line verdict | none |
-| Mistakes and Bias | `BiasWidget`: three tabs (mistakes, biased mistakes, disallowed discrimination), each with collapsible case studies and a "how to correct it" box | none |
-| How Society Decides What's True | `TruthWidget`: flattery, persuasion, a better source?, who's in control, sameness, fakes | none |
-| The Value of Human Thinking | `ValueWidget`: learning, jobs, bargaining power, concentrated power, meaning | none |
-| The Cost in Electricity and Water | `EnergyAndWaterWidget` (Electricity and Water tabs: one use, world, over time) | none |
+| Section | Built widget (tabs) |
+|---|---|
+| Good Technologies Come With Harms | `HistoryWidget` (`TechnologyTabs`, data in `technologies.ts`): printing press, factories, cars, chemistry, nuclear, biotechnology. Each tab shows the good and the bad side by side, then how societies adapted, then a one-line verdict |
+| Mistakes and Bias | `BiasWidget`: three tabs (mistakes, biased mistakes, disallowed discrimination), each with collapsible case studies and a "how to correct it" box |
+| How Society Decides What's True | `TruthWidget`: flattery, persuasion, a better source?, who's in control, sameness, fakes |
+| The Value of Human Thinking | `ValueWidget`: learning, jobs, bargaining power, concentrated power, meaning |
+| The Cost in Electricity and Water | `EnergyAndWaterWidget` (Electricity and Water tabs: one use, world, over time) |
 
 The chart figures are in `src/components/widgets/society/resourceData.ts`, each with a note saying what it measures.
 
@@ -34,16 +33,16 @@ The chart figures are in `src/components/widgets/society/resourceData.ts`, each 
 
 **Structured as a short overview per section, with case studies in collapsible tabbed widgets** (shared `CaseTabs`, data in `src/components/widgets/risk/riskCases.ts`). Each tab ends with a "What helps" box, and the closing section groups those fixes.
 
-| Section | Built widget | Playground sketch |
-|---|---|---|
-| An Old Fear | `FictionWidget`: stories (R.U.R., 2001, Colossus, Terminator, Matrix) and early warnings (Turing 1951, I. J. Good 1965) | none |
-| What Counts as a Catastrophe | `ScenarioWidget`: a person using AI (bioweapon, power grab), AI acting on its own (AI 2027, If Anyone Builds It), nobody intends it (gradual disempowerment, Christiano's "whimper") | none |
-| How Seriously People Take It | `EstimatesWidget`: published estimates from 2023 on (earlier ones predate recent progress): Christiano, Amodei, Bengio, Hinton, Musk, the AI Impacts survey, Hassabis and LeCun, on one 0–50% scale. The text explains what "10%" means and that warnings can prevent what they warn about | none |
-| It's Not Today's AI People Are Worried About | `TrajectoryWidget`: steps year by year from 2022 to today, covering chatbots, agents, self-driving cars, robots, factories and weapons, then one clearly marked imagined future, with a diagram of how much of the world the AI can act on | none |
-| Why AI Might Do Bad Things | `WhyBadWidget`: told to by a person (biology, cyberattacks, open models), mistakes at scale (Replit database, 2010 flash crash), doing what it was told (boat race, o3, the Hugging Face incident), learning to want power (instrumental convergence, Scott Alexander's routes, Anthropic's spreading-bad-habits finding) | Write the Reward; Whatever You Want |
-| The Hugging Face Incident | `HuggingFaceWidget`: a high-level, step-by-step walkthrough (isolated, finding each other, breaking out, organising, attacking, caught), each with a diagram | none |
-| Could We Stop It? | `ControlWidget`: deceiving us, avoiding shutdown, copying itself, defending itself | none |
-| What We Can Do | none: rules, company safety policies, international agreements, technology; points to the alignment chapter | none |
+| Section | Built widget |
+|---|---|
+| An Old Fear | `FictionWidget`: stories (R.U.R., 2001, Colossus, Terminator, Matrix) and early warnings (Turing 1951, I. J. Good 1965) |
+| What Counts as a Catastrophe | `ScenarioWidget`: a person using AI (bioweapon, power grab), AI acting on its own (AI 2027, If Anyone Builds It), nobody intends it (gradual disempowerment, Christiano's "whimper") |
+| How Seriously People Take It | `EstimatesWidget`: published estimates from 2023 on (earlier ones predate recent progress): Christiano, Amodei, Bengio, Hinton, Musk, the AI Impacts survey, Hassabis and LeCun, on one 0–50% scale. The text explains what "10%" means and that warnings can prevent what they warn about |
+| It's Not Today's AI People Are Worried About | `TrajectoryWidget`: steps year by year from 2022 to today, covering chatbots, agents, self-driving cars, robots, factories and weapons, then one clearly marked imagined future, with a diagram of how much of the world the AI can act on |
+| Why AI Might Do Bad Things | `WhyBadWidget`: told to by a person (biology, cyberattacks, open models), mistakes at scale (Replit database, 2010 flash crash), doing what it was told (boat race, o3, the Hugging Face incident), learning to want power (instrumental convergence, Scott Alexander's routes, Anthropic's spreading-bad-habits finding). Then `WriteTheRewardWidget`: the reader picks a cleaning robot's reward and an exact planner (`rewardPlanner.ts`) finds the loopholes |
+| The Hugging Face Incident | `HuggingFaceWidget`: a high-level, step-by-step walkthrough (isolated, finding each other, breaking out, organising, attacking, caught), each with a diagram |
+| Could We Stop It? | `ControlWidget`: deceiving us, avoiding shutdown, copying itself, defending itself |
+| What We Can Do | none: rules, company safety policies, international agreements, technology; points to the alignment chapter |
 
 ## Decisions made in this draft (for review)
 
@@ -58,6 +57,7 @@ The chart figures are in `src/components/widgets/society/resourceData.ts`, each 
 6. **Bio and chem are kept at the level of "what the evidence says about uplift", never method.**
 7. **Ending.** Risk ends by pointing at Alignment rather than surveying fixes. The two exceptions are the Forethought coup safeguards and Glasswing, which are included because they explain the risk.
 8. **The risk chapter is titled "Catastrophic Risk"**, subtitled "Could AI go badly wrong?". The Society chapter also covers risks such as bias and fakes, so "AI Risk" blurred the line between the two. The URL stays `/risk`.
+9. **No "Whatever You Want" playground.** It was planned to show an agent with any goal grabbing resources and blocking its off switch. Write the Reward already shows the off switch being blocked, and the "learning to want power" tab covers the idea in words, so the second playground was dropped.
 
 ## Sources by section
 
