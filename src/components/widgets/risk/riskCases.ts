@@ -113,7 +113,7 @@ export const scenarioCases: CaseSet = {
           title: "A power grab",
           teaser: "A small group uses AI that is loyal to them to seize permanent control.",
           details: [
-            "Seizing power has always needed many people to go along: soldiers, officials, technicians. If AI systems can do those jobs and are loyal to one person rather than to the law, a handful of people could take control of a country, or more, and nobody would be left who could refuse. The researchers who laid this out think leaders of AI projects are among the most likely to try it.",
+            "Seizing power has always needed many people to go along: soldiers, officials, technicians. If AI systems can do those jobs and are loyal to one person rather than to the law, a handful of people could take control of a country, or more, and nobody would be left who could refuse.",
           ],
           sources: [{ label: "Forethought, AI-Enabled Coups", url: "https://www.forethought.org/research/ai-enabled-coups-how-a-small-group-could-use-ai-to-seize-power" }],
         },
