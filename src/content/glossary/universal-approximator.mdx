@@ -1,0 +1,16 @@
+---
+term: universal approximator
+aliases: [universal approximators]
+firstAppearance: computation
+---
+
+A **universal approximator** is a kind of model that, made big enough and given the right parameters, can match any function whose inputs and outputs are of finite size.
+
+"Of finite size" means the inputs and outputs are a fixed number of digits, like a photo of a given resolution, or a prompt of a given length. Every number a computer handles is like this. Neural networks are universal approximators. Most models aren't: the cubic formula in the Computation chapter can only ever draw a gentle curve, however you set its four knobs.
+
+Why "approximator"? The name comes from the mathematical version, the *universal approximation theorem*, which is about numbers with unlimited precision. For those, a network can match any smooth function only as closely as you like, never perfectly. With the finite numbers computers actually use, that gap disappears.
+
+Some things to keep in mind:
+
+- **Existing isn't the same as being small or findable.** A giant lookup table, with one row for every possible input, could also match any such function, but it would be impossibly big. The theorem only says a good network exists. It doesn't say how many neurons it needs, or whether training will find the right weights.
+- **One pass does a fixed amount of work.** Some problems need far more steps than any network of sensible size can fit into one pass. A model that feeds its own output back in, step after step, can keep working for as long as a problem needs. That's what a language model does when it writes out its working.

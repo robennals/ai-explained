@@ -108,10 +108,10 @@ const TwoNeuronXOR = dynamic(
   { ssr: false }
 );
 
-const GateCircuitDiagram = dynamic(
+const GateScaleTour = dynamic(
   () =>
-    import("@/components/widgets/neurons/GateCircuitDiagram").then(
-      (m) => m.GateCircuitDiagram
+    import("@/components/widgets/neurons/GateScaleTour").then(
+      (m) => m.GateScaleTour
     ),
   { ssr: false }
 );
@@ -168,6 +168,22 @@ export function NeuronFreePlayWidget({ children }: { children?: React.ReactNode 
   return (
     <WidgetSlot tryIt={children}>
       <NeuronFreePlay />
+    </WidgetSlot>
+  );
+}
+
+export function CutoffGateWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <NeuronFreePlay variant="cutoff" />
+    </WidgetSlot>
+  );
+}
+
+export function ThresholdGateWidget({ gate, children }: { gate: "AND" | "OR" | "NOT"; children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <NeuronFreePlay variant={gate} />
     </WidgetSlot>
   );
 }
@@ -244,10 +260,10 @@ export function TwoNeuronXORWidget({ children }: { children?: React.ReactNode })
   );
 }
 
-export function GateCircuitDiagramWidget({ children }: { children?: React.ReactNode }) {
+export function GateScaleWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children}>
-      <GateCircuitDiagram />
+      <GateScaleTour />
     </WidgetSlot>
   );
 }

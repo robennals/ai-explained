@@ -13,9 +13,11 @@ import {
   SigmoidExplorerWidget,
   SigmoidZoomWidget,
   LogicGatePlaygroundWidget,
-  GateCircuitDiagramWidget,
+  GateScaleWidget,
   TwoNeuronXORWidget,
   DeepNetworkPlaygroundWidget,
+  CutoffGateWidget,
+  ThresholdGateWidget,
 } from "./widgets";
 
 export const metadata = chapterMetadata("neurons");
@@ -36,9 +38,11 @@ export default function Chapter03() {
             SigmoidExplorerWidget,
             SigmoidZoomWidget,
             LogicGatePlaygroundWidget,
-            GateCircuitDiagramWidget,
+            GateScaleWidget,
             TwoNeuronXORWidget,
             DeepNetworkPlaygroundWidget,
+            CutoffGateWidget,
+            ThresholdGateWidget,
           }}
         />
       </div>

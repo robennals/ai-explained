@@ -5,7 +5,7 @@ import { WidgetContainer } from "../shared/WidgetContainer";
 import { WidgetTabs } from "../shared/WidgetTabs";
 import { useSvgFontSize } from "../shared/useSvgScale";
 
-type GateType = "AND" | "OR" | "NOT";
+type GateType = "AND" | "OR" | "XOR" | "NOT";
 
 function computeGate(gate: GateType, a: number, b: number): number {
   switch (gate) {
@@ -13,6 +13,8 @@ function computeGate(gate: GateType, a: number, b: number): number {
       return a & b;
     case "OR":
       return a | b;
+    case "XOR":
+      return a ^ b;
     case "NOT":
       return a === 0 ? 1 : 0;
   }
@@ -21,6 +23,7 @@ function computeGate(gate: GateType, a: number, b: number): number {
 const GATE_DESCRIPTIONS: Record<GateType, string> = {
   AND: "Both inputs must be 1",
   OR: "At least one input must be 1",
+  XOR: "Exactly one input must be 1: one or the other, but not both",
   NOT: "Flips Input A (Input B is ignored)",
 };
 
@@ -41,6 +44,7 @@ const NODE_R = 24;
 const GATE_TABS: { id: GateType; label: string }[] = [
   { id: "AND", label: "AND" },
   { id: "OR", label: "OR" },
+  { id: "XOR", label: "XOR" },
   { id: "NOT", label: "NOT" },
 ];
 
