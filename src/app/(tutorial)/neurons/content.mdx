@@ -1,11 +1,11 @@
-The core idea behind AI is that we can create any function we want by choosing a suitable model, and then using optimization to find the right parameters for that model.
+In <Ch slug='optimization' /> we saw that, if we have a suitable model, we can optimize its parameters to produce whatever function we want - whether that function translates text, writes code, generates images, or anything else.
 
-For this to work, the model needs two properties:
+For this to work, the model needs to have two properties:
 
-- **It must be a universal approximator** - It can compute any function of finite input, provided you make it big enough and find the right parameters (<Ch slug="computation" />).
-- **It must be smooth** - A tiny change to its parameters makes only a tiny change to its output (<Ch slug="optimization" />).
+- **It must be a universal approximator** - This means that the model can compute any function of finite input, provided you make it big enough and find the right parameters (<Ch slug="computation" />).
+- **It must be smooth** - This means that a tiny change to its parameters makes only a tiny change to its output (<Ch slug="optimization" />).
 
-The most widely used model that is both is the **neural network**. This chapter builds one from scratch, starting with logic gates, which can build any function but aren't smooth.
+The most widely used model that has both properties is the **neural network**. This chapter builds one from scratch, starting with logic gates, which can build any function but aren't smooth.
 
 ## Logic Gates Can Build Any Function, but Aren't Smooth
 
