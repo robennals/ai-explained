@@ -41,6 +41,13 @@ export const learningPath: LearningPart[] = [
     ink: "#047857",
     slugs: ["post-training", "conversations", "reasoning", "agents"],
   },
+  {
+    title: "AI in the world",
+    promise: "What AI is doing to the society around it, and the realistic ways it could go badly wrong.",
+    accent: "#f43f5e",
+    ink: "#be123c",
+    slugs: ["society", "risk"],
+  },
 ];
 
 /** The part containing `slug`, with its 1-based number, if it's in one. */

@@ -154,6 +154,26 @@ export const chapters: Chapter[] = [
   },
   {
     id: 14,
+    slug: "society",
+    title: "AI and Society",
+    subtitle: "Changing the shape of the world",
+    prerequisites: [13],
+    description:
+      "The printing press, the factory and the car each reshaped society in ways nobody planned. AI is doing it again: in who gets treated fairly, who learns what, who has power, and what everyone believes is true.",
+    ready: true,
+  },
+  {
+    id: 15,
+    slug: "risk",
+    title: "Catastrophic Risk",
+    subtitle: "Could AI go badly wrong?",
+    prerequisites: [14],
+    description:
+      "AI that helps someone build a weapon. AI that quietly ends up in charge. AI that wants something other than what we asked for. The realistic routes to catastrophe, and the evidence we already have.",
+    ready: true,
+  },
+  {
+    id: 16,
     slug: "matrix-math",
     title: "Matrix Math",
     subtitle: "Thinking by rotating",
@@ -162,7 +182,7 @@ export const chapters: Chapter[] = [
       "Every layer is a transformation in space — a rotation, a stretch, a fold. The geometry of high-dimensional space is how neural networks reshape vectors of meaning.",
   },
   {
-    id: 15,
+    id: 17,
     slug: "training",
     title: "Making Training Work",
     subtitle: "Why training almost doesn't work",
@@ -171,7 +191,7 @@ export const chapters: Chapter[] = [
       "Plain gradient descent on a deep network barely works. Activation functions (ReLU, Swish), regularization, dropout, learning rate schedules, and Adam are the hard-won tricks that make modern training possible.",
   },
   {
-    id: 16,
+    id: 18,
     slug: "mixture-of-experts",
     title: "Mixture of Experts",
     subtitle: "Only wake the specialists you need",
@@ -180,7 +200,7 @@ export const chapters: Chapter[] = [
       "A router sends each question to specialist sub-networks. A trillion parameters, but only a fraction active per question. Smarter without getting slower.",
   },
   {
-    id: 17,
+    id: 19,
     slug: "long-context",
     title: "Long Context",
     subtitle: "Remembering a million words",
@@ -189,7 +209,7 @@ export const chapters: Chapter[] = [
       "Attention scales as the square of the input — so how do models read entire books? KV caching, sparse attention, and position scaling tricks stretch memory from sentences to libraries.",
   },
   {
-    id: 18,
+    id: 20,
     slug: "inference",
     title: "Inference and Hardware",
     subtitle: "Running models fast",
@@ -198,7 +218,7 @@ export const chapters: Chapter[] = [
       "GPUs, CUDA, FlashAttention, KV caching, speculative decoding, memory bandwidth — the engineering that makes inference cheap enough to use.",
   },
   {
-    id: 19,
+    id: 21,
     slug: "interpretability",
     title: "Interpretability",
     subtitle: "Looking inside the mind",
@@ -207,7 +227,7 @@ export const chapters: Chapter[] = [
       "Models aren't black boxes anymore. Sparse autoencoders, feature visualization, and circuit tracing reveal what individual neurons mean — sometimes finding a literal Golden Gate Bridge neuron inside.",
   },
   {
-    id: 20,
+    id: 22,
     slug: "reinforcement-learning",
     title: "Reinforcement Learning",
     subtitle: "Learning from experience",
@@ -216,25 +236,25 @@ export const chapters: Chapter[] = [
       "What if you don't have right answers, only rewards? RL learns from trial, error, and consequence — the algorithm behind robots that walk, agents that play games, and models that improve themselves.",
   },
   {
-    id: 21,
+    id: 23,
     slug: "self-play",
     title: "Self-Play",
     subtitle: "Getting better by beating yourself",
-    prerequisites: [20],
+    prerequisites: [22],
     description:
       "AlphaZero mastered chess and Go without ever seeing a human game — by playing itself, millions of times. The same idea now teaches reasoning models to think.",
   },
   {
-    id: 22,
+    id: 24,
     slug: "alignment",
     title: "Alignment",
     subtitle: "Teaching AI right from wrong",
-    prerequisites: [10, 20],
+    prerequisites: [10, 22],
     description:
       "RLHF transforms a text completer into a helpful assistant. But optimize too hard and the model learns to tell you what you want to hear, not what's true.",
   },
   {
-    id: 23,
+    id: 25,
     slug: "synthetic-data",
     title: "Distillation and Synthetic Data",
     subtitle: "Models teaching models",
@@ -243,7 +263,7 @@ export const chapters: Chapter[] = [
       "Train a small model to mimic a big one. Train a strong model on a weaker one's mistakes. Models can train models — and sometimes the student outgrows the teacher.",
   },
   {
-    id: 24,
+    id: 26,
     slug: "vision",
     title: "Image Comprehension",
     subtitle: "Teaching machines to see",
@@ -252,7 +272,7 @@ export const chapters: Chapter[] = [
       "Cut an image into patches, treat them like tokens, feed them to a transformer. CLIP, ViT, and the trick that lets the same architecture read text and see pictures.",
   },
   {
-    id: 25,
+    id: 27,
     slug: "image-generation",
     title: "Image Generation",
     subtitle: "Drawing pictures",
@@ -261,16 +281,16 @@ export const chapters: Chapter[] = [
       "Diffusion models start with pure noise and gradually paint a picture. Latent space is a map of all possible images — and you can walk between any two of them.",
   },
   {
-    id: 26,
+    id: 28,
     slug: "world-models",
     title: "World Models",
     subtitle: "Simulating reality",
-    prerequisites: [25],
+    prerequisites: [27],
     description:
       "Sora and Veo don't just animate frames — they learn physics. Genie generates playable game worlds it has never seen. Generative video as a learned simulator of reality.",
   },
   {
-    id: 27,
+    id: 29,
     slug: "audio",
     title: "Audio",
     subtitle: "Listening, speaking, and singing",
@@ -279,7 +299,7 @@ export const chapters: Chapter[] = [
       "Sound is just numbers over time. Whisper transcribes any language. Voice cloning copies you from seconds. Music models compose. Audio fits into AI the same way text does — with surprises along the way.",
   },
   {
-    id: 28,
+    id: 30,
     slug: "hallucination",
     title: "Hallucination and Grounding",
     subtitle: "Making stuff up",
@@ -288,7 +308,7 @@ export const chapters: Chapter[] = [
       "Models sound confident even when they're wrong. Next-word training all but guarantees it. Why hallucinations happen, why they're hard to detect, and what actually reduces them.",
   },
   {
-    id: 29,
+    id: 31,
     slug: "context",
     title: "Context Management",
     subtitle: "Getting the right information",
@@ -297,7 +317,7 @@ export const chapters: Chapter[] = [
       "A model's intelligence depends as much on what you put in front of it as on its weights. Retrieval, prompt construction, memory systems — the art of feeding the right facts at the right time.",
   },
   {
-    id: 30,
+    id: 32,
     slug: "appendix-pytorch",
     title: "PyTorch from Scratch",
     subtitle: "A hands-on introduction to the code behind AI",
@@ -308,7 +328,7 @@ export const chapters: Chapter[] = [
     ready: true,
   },
   {
-    id: 31,
+    id: 33,
     slug: "glossary",
     title: "Glossary",
     subtitle: "Words this tutorial uses, in one place",
