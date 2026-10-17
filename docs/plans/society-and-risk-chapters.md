@@ -172,6 +172,7 @@ Confidence: unmarked = checked against a primary or reliable source during resea
 - Anthropic, "From shortcuts to sabotage": https://www.anthropic.com/research/emergent-misalignment-reward-hacking
 - Alignment faking: https://arxiv.org/abs/2412.14093
 - Agentic Misalignment: https://www.anthropic.com/research/agentic-misalignment
+- Claude Sonnet 4.5 noticing tests (Transformer): https://transformernews.ai/p/claude-sonnet-4-5-evaluation-situational-awareness
 - Palisade shutdown resistance: https://palisaderesearch.org/research/shutdown-resistance
 - Anti-scheming training: https://arxiv.org/abs/2509.15541
 - Carlsmith: https://arxiv.org/abs/2206.13353

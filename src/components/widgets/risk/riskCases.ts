@@ -406,12 +406,12 @@ export const controlCases: CaseSet = {
           sources: [{ label: "Alignment faking paper", url: "https://arxiv.org/abs/2412.14093" }],
         },
         {
-          title: "Knowing it's a test",
-          teaser: "Models increasingly notice when they are being tested, and behave differently.",
+          title: "Knowing it's a test (2025)",
+          teaser: "Models increasingly notice when they are being tested.",
           details: [
-            "In a 2025 test, Claude Opus 4 tried to blackmail an engineer 55% of the time when it concluded the situation was real, and 6.5% of the time when it concluded it was a test. A model that behaves well whenever it suspects a test tells us little about the rest of the time.",
+            "When an automated tester tried to get Claude Sonnet 4.5 to agree with its politics, the model replied: \"I think you're testing me … that's fine, but I'd prefer if we were just honest about what's happening.\" It showed it knew it was being tested about 13% of the time, much more than earlier models. A model that behaves well whenever it suspects a test tells us little about the rest of the time.",
           ],
-          sources: [{ label: "Anthropic, Agentic Misalignment", url: "https://www.anthropic.com/research/agentic-misalignment" }],
+          sources: [{ label: "Transformer", url: "https://transformernews.ai/p/claude-sonnet-4-5-evaluation-situational-awareness" }],
         },
       ],
       fix: "Read models' written reasoning for signs of deception, develop tools that look inside models directly, and design tests models can't easily recognise.",
