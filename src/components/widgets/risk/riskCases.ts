@@ -327,7 +327,7 @@ export const whyBadCases: CaseSet = {
     },
     {
       id: "nobody",
-      label: "Slowly losing control",
+      label: "Human disempowerment",
       headline: "No one sets out to cause harm, but people gradually lose control of their own civilisation.",
       body: [],
       examples: [
