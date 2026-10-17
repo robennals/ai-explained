@@ -36,7 +36,7 @@ The chart figures are in `src/components/widgets/society/resourceData.ts`, each 
 | Section | Built widget |
 |---|---|
 | An Old Fear | `FictionWidget`: stories (R.U.R., 2001, Colossus, Terminator, Matrix) and early warnings (Turing 1951, I. J. Good 1965) |
-| What Counts as a Catastrophe | `ScenarioWidget`: a person using AI (bioweapon, power grab), AI acting on its own (AI 2027, If Anyone Builds It), nobody intends it (gradual disempowerment, Christiano's "whimper") |
+| What Counts as a Catastrophe | `ScenarioWidget`: AI helps bad people (bioweapon, power grab), misaligned AI (AI 2027, If Anyone Builds It), slowly losing control (gradual disempowerment, Christiano's "whimper") |
 | How Seriously People Take It | `EstimatesWidget`: published estimates from 2023 on (earlier ones predate recent progress): Christiano, Amodei, Bengio, Hinton, Musk, the AI Impacts survey, Hassabis and LeCun, on one 0–50% scale. The text explains what "10%" means and that warnings can prevent what they warn about |
 | It's Not Today's AI People Are Worried About | `TrajectoryWidget`: steps year by year from 2022 to today, covering chatbots, agents, self-driving cars, robots, factories and weapons, then one clearly marked imagined future, with a diagram of how much of the world the AI can act on |
 | Why AI Might Do Bad Things | `WhyBadWidget`: told to by a person (biology, cyberattacks, open models), mistakes at scale (Replit database, 2010 flash crash), doing what it was told (boat race, o3, the Hugging Face incident), learning to want power (instrumental convergence, Scott Alexander's routes, Anthropic's spreading-bad-habits finding). Then `WriteTheRewardWidget`: the reader picks a cleaning robot's reward and an exact planner (`rewardPlanner.ts`) finds the loopholes |

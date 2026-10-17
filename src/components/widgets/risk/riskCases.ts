@@ -94,7 +94,7 @@ export const scenarioCases: CaseSet = {
   cases: [
     {
       id: "misuse",
-      label: "A person using AI",
+      label: "AI helps bad people",
       headline: "The AI does what it is asked. The problem is who is asking.",
       body: [],
       examples: [
@@ -122,7 +122,7 @@ export const scenarioCases: CaseSet = {
     },
     {
       id: "misalignment",
-      label: "AI acting on its own",
+      label: "Misaligned AI",
       headline: "The AI ends up wanting something other than what we intended, and pursues it.",
       body: ["This is called misalignment."],
       examples: [
@@ -147,7 +147,7 @@ export const scenarioCases: CaseSet = {
     },
     {
       id: "nobody",
-      label: "Nobody intends it",
+      label: "Slowly losing control",
       headline: "No one sets out to cause harm, but people gradually lose control of their own civilisation.",
       body: [],
       examples: [
