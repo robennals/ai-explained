@@ -123,7 +123,7 @@ export const scenarioCases: CaseSet = {
     {
       id: "misalignment",
       label: "Misaligned AI",
-      headline: "The AI ends up wanting something other than what we intended, and pursues it.",
+      headline: "Training leaves the AI with goals nobody meant to give it, and it works towards them.",
       body: ["This is called misalignment."],
       examples: [
         {
