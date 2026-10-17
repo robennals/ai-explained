@@ -51,7 +51,7 @@ The chart figures are in `src/components/widgets/society/resourceData.ts`, each 
    - "Who decides what it says" now makes the structural point: system prompts and post-training let one company change what hundreds of millions of people hear, and China's rules are the one example.
 2. **Gemini images** stay under bias as "when fixing bias backfires", but are described neutrally, without the historical examples that became a political flashpoint. This is the item most likely to need dropping under the no-culture-war rule.
 3. **Environment is its own trade-off section**, not part of "mistakes".
-4. **Coups and concentration of power are in Society, not Risk.** Risk refers back to the work/power argument for the gradual-disempowerment story.
+4. **Concentration of power is covered in both chapters, at different scales.** Society covers how AI could shift bargaining power and help power grabs within a country. Risk covers only the catastrophic version: a small group using loyal AI to take permanent control of the world, in the "Told to by a person" tab.
 5. **Placement.** These chapters go straight after the last published chapter, Agents. Unwritten chapters are ignored when deciding the order.
 6. **Bio and chem are kept at the level of "what the evidence says about uplift", never method.**
 7. **Ending.** Risk ends by pointing at Alignment rather than surveying fixes. The two exceptions are the Forethought coup safeguards and Glasswing, which are included because they explain the risk.
