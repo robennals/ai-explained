@@ -84,7 +84,7 @@ const STEPS: Step[] = [
     label: "2025",
     when: "2025",
     imagined: false,
-    could: "AI reached gold-medal standard at the International Mathematical Olympiad, the world's top maths contest for school students. Agents began doing tasks on their own on real computers, and the length of task they could complete was doubling about every seven months. Driverless taxis gave hundreds of thousands of rides a week, and humanoid robots began rolling off production lines.",
+    could: "AI reached gold-medal standard at the International Mathematical Olympiad. Agents began doing tasks on their own on real computers, and the length of task they could complete was doubling about every seven months. Driverless taxis gave hundreds of thousands of rides a week, and humanoid robots began rolling off production lines.",
     reach: { "Running code": 2, "Computer use": 1, "Weapons": 1 },
     sources: [
       { label: "Google DeepMind", url: "https://deepmind.google/discover/blog/advanced-version-of-gemini-with-deep-think-officially-achieves-gold-medal-standard-at-the-international-mathematical-olympiad/" },
