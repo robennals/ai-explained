@@ -287,7 +287,7 @@ export const whyBadCases: CaseSet = {
           sources: [{ label: "AI 2027", url: "https://ai-2027.com/" }],
         },
         {
-          title: "We are in the way",
+          title: "A superintelligent AI that sees us as in the way",
           teaser: "A superintelligent AI with strange goals takes the Earth's resources, and kills us as a side effect.",
           details: [
             "Eliezer Yudkowsky and Nate Soares argue that because modern AI is grown rather than designed, its real goals will be strange to us. An AI far smarter than us, pursuing strange goals, would want the world's matter and energy for its own purposes, and we would not be able to stop it.",
@@ -444,7 +444,7 @@ export const controlCases: CaseSet = {
       body: [],
       examples: [
         {
-          title: "No evidence yet",
+          title: "An AI that uses robots to defend itself (imagined)",
           teaser: "Nothing like this has happened. It is a scenario, not an incident.",
           details: [
             "Today's AI has nothing like the physical control this would need. But scenarios like AI 2027 describe how, once AI runs factories and robots, a misaligned AI could protect its data centres and stop people interfering, as the Terminator films imagined.",
@@ -501,7 +501,7 @@ export const responseCases: CaseSet = {
           sources: [{ label: "Bill text, H.R. 9477", url: "https://www.govinfo.gov/content/pkg/BILLS-119hr9477ih/html/BILLS-119hr9477ih.htm" }],
         },
         {
-          title: "Laws already in place",
+          title: "Safety-plan laws already in place",
           teaser: "California, New York and the EU already require the biggest AI companies to publish safety plans.",
           details: [
             "California's SB 53 (2025) and New York's RAISE Act (2025) require the largest AI developers to publish how they manage catastrophic risks, and to report serious safety incidents. The EU's AI Act sets similar rules for the makers of the most powerful models. None of them yet requires anyone independent to check.",
@@ -573,7 +573,7 @@ export const responseCases: CaseSet = {
           ],
         },
         {
-          title: "Agreements so far",
+          title: "First agreements between countries",
           teaser: "Countries have agreed on a few first steps.",
           details: [
             "Thirty countries backed a shared scientific report on AI risk. In 2024, the US and Chinese presidents agreed that humans, not AI, should decide whether to use nuclear weapons.",
