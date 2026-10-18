@@ -26,10 +26,6 @@ const Trajectory = dynamic(
   { ssr: false }
 );
 
-const WriteTheReward = dynamic(
-  () => import("@/components/widgets/risk/WriteTheReward").then((m) => m.WriteTheReward),
-  { ssr: false }
-);
 
 const EstimatesList = dynamic(
   () => import("@/components/widgets/risk/EstimatesList").then((m) => m.EstimatesList),
@@ -87,14 +83,6 @@ export function TrajectoryWidget({ children }: { children?: React.ReactNode }) {
   return (
     <WidgetSlot tryIt={children}>
       <Trajectory />
-    </WidgetSlot>
-  );
-}
-
-export function WriteTheRewardWidget({ children }: { children?: React.ReactNode }) {
-  return (
-    <WidgetSlot tryIt={children}>
-      <WriteTheReward />
     </WidgetSlot>
   );
 }

@@ -11,7 +11,6 @@ import {
   ResponseWidget,
   TrajectoryWidget,
   WhyBadWidget,
-  WriteTheRewardWidget,
 } from "./widgets";
 
 export const metadata = chapterMetadata("risk");
@@ -30,7 +29,6 @@ export default function AIRiskChapter() {
             ResponseWidget,
             TrajectoryWidget,
             WhyBadWidget,
-            WriteTheRewardWidget,
           }}
         />
       </div>
