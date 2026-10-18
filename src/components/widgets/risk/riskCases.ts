@@ -426,7 +426,7 @@ export const controlCases: CaseSet = {
           sources: [{ label: "LessWrong summary", url: "https://www.lesswrong.com/posts/n8vobiGGrryjtAJTx/have-frontier-ai-systems-surpassed-the-self-replicating-red" }],
         },
         {
-          title: "Not yet, but improving (2025)",
+          title: "Models getting closer to copying themselves (2025)",
           teaser: "Government testers found the most advanced models can do many of the steps, but not yet all of them.",
           details: [
             "The UK AI Security Institute tested whether models could get money and computers, copy their own weights (the numbers that make up the model), and keep themselves running. They could set up copies on cloud services and copy weights where security was basic, but struggled with identity checks and keeping copies running. The testers concluded they weren't yet a credible threat, but were improving fast.",
