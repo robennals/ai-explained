@@ -68,7 +68,7 @@ export default function HomePage() {
       </div>
 
       <nav aria-label="Parts of the course" className="mx-auto max-w-4xl">
-        <ol className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <ol className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {learningPath.map((part, i) => (
             <li key={part.title}>
               <a

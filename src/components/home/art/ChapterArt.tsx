@@ -9,6 +9,8 @@ import { OptimizationArt } from "./OptimizationArt";
 import { PositionsArt } from "./PositionsArt";
 import { PostTrainingArt } from "./PostTrainingArt";
 import { ReasoningArt } from "./ReasoningArt";
+import { RiskArt } from "./RiskArt";
+import { SocietyArt } from "./SocietyArt";
 import { TransformersArt } from "./TransformersArt";
 import { VectorsArt } from "./VectorsArt";
 
@@ -26,6 +28,8 @@ const ART_BY_SLUG: Record<string, React.ComponentType<{ accent: string }>> = {
   conversations: ConversationsArt,
   reasoning: ReasoningArt,
   agents: AgentsArt,
+  society: SocietyArt,
+  risk: RiskArt,
 };
 
 /**
