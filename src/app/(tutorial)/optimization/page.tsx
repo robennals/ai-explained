@@ -1,11 +1,11 @@
 import { ChapterHeader } from "@/components/layout/ChapterHeader";
 import { ChapterNav } from "@/components/layout/ChapterNav";
 import { chapterMetadata } from "@/lib/chapter-metadata";
-import { getAdjacentChapters } from "@/lib/curriculum";
 import Content from "./content.mdx";
 import { QuizContent } from "./QuizContent";
 import {
   OptimizationGameWidget,
+  BuiltStepByStepWidget,
   ErrorMeasurementWidget,
   SmoothRealWorldWidget,
   SmoothVsRuggedWidget,
@@ -16,8 +16,6 @@ import {
 export const metadata = chapterMetadata("optimization");
 
 export default function Chapter02() {
-  const { prev, next } = getAdjacentChapters("optimization");
-
   return (
     <article>
       <div className="prose prose-lg max-w-none">
@@ -25,6 +23,7 @@ export default function Chapter02() {
         <Content
           components={{
             OptimizationGameWidget,
+            BuiltStepByStepWidget,
             ErrorMeasurementWidget,
             SmoothRealWorldWidget,
             SmoothVsRuggedWidget,
@@ -34,7 +33,7 @@ export default function Chapter02() {
         />
       </div>
       <QuizContent />
-      <ChapterNav prev={prev} next={next} />
+      <ChapterNav slug="optimization" />
     </article>
   );
 }

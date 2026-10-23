@@ -1,47 +1,15 @@
 "use client";
 
-import { useState } from "react";
 import { Callout } from "@/components/mdx/Callout";
-
-type Status = "idle" | "submitting" | "success" | "error";
+import { HoneypotField, useMessageForm } from "./useMessageForm";
 
 export function Feedback() {
-  const [status, setStatus] = useState<Status>("idle");
-  const [error, setError] = useState<string | null>(null);
-
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setStatus("submitting");
-    setError(null);
-
-    const data = new FormData(event.currentTarget);
-    const payload = {
-      name: String(data.get("name") ?? ""),
-      email: String(data.get("email") ?? ""),
-      message: String(data.get("message") ?? ""),
-      // Honeypot — see the hidden field below for why it isn't named "website".
-      hp_referrer: String(data.get("hp_referrer") ?? ""),
-    };
-
-    try {
-      const res = await fetch("/api/feedback", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) {
-        const responseBody = await res.json().catch(() => ({}));
-        throw new Error(
-          (responseBody as { error?: string }).error ??
-            `Request failed (${res.status})`,
-        );
-      }
-      setStatus("success");
-    } catch (err) {
-      setStatus("error");
-      setError(err instanceof Error ? err.message : "Something went wrong.");
-    }
-  }
+  const { status, error, handleSubmit } = useMessageForm((field) => ({
+    type: "feedback",
+    name: field("name"),
+    email: field("email"),
+    message: field("message"),
+  }));
 
   return (
     <section className="mt-12 border-t border-foreground/10 pt-8">
@@ -58,21 +26,7 @@ export function Feedback() {
         </p>
       ) : (
         <form onSubmit={handleSubmit} className="mt-4 grid gap-4">
-          {/*
-            Spam honeypot: hidden from humans, but bots fill every field.
-            The name must NOT match a browser autofill token (website, url,
-            email, name, tel, …) or password managers fill it and silently
-            flag real users as bots. "hp_referrer" matches no autofill
-            heuristic.
-          */}
-          <input
-            type="text"
-            name="hp_referrer"
-            tabIndex={-1}
-            autoComplete="off"
-            aria-hidden="true"
-            className="absolute left-[-9999px] h-0 w-0 opacity-0"
-          />
+          <HoneypotField />
           <label className="grid gap-1 text-sm">
             <span>Your name (optional)</span>
             <input

@@ -2,6 +2,8 @@
 
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
+import { useSvgFontSize } from "../shared/useSvgScale";
+import { useIsPhone } from "../shared/useMediaQuery";
 
 function sigmoid(x: number): number {
   return 1 / (1 + Math.exp(-x));
@@ -64,7 +66,37 @@ const OUT_X = 400;
 const OUT_Y = 140;
 const NODE_R = 22;
 
+/**
+ * "approx" note under a neuron's value. Inside the circle on desktop; below it
+ * on phones, where readable-size text no longer fits inside.
+ */
+function ApproxLabel({
+  x, y, below, nodeR, fontSize,
+}: { x: number; y: number; below: boolean; nodeR: number; fontSize: number }) {
+  return (
+    <text
+      x={x}
+      y={below ? y + nodeR + 14 : y + 17}
+      textAnchor="middle"
+      fontSize={fontSize}
+      className={`${below ? "fill-muted" : "fill-white/70"} pointer-events-none select-none`}
+    >
+      approx
+    </text>
+  );
+}
+
 export function TwoNeuronXOR() {
+  const svgRef = useRef<SVGSVGElement>(null);
+  const fontSize = useSvgFontSize(svgRef, SVG_W);
+  // Phones: bigger nodes so the text inside can be drawn at a readable size.
+  // Gated on phone width (not just squeezing) because the diagram is also a
+  // little under its viewBox width beside the truth table on desktop.
+  const compact = useIsPhone();
+  const nodeTextSize = (designPx: number) => (compact ? fontSize(designPx) : designPx);
+  const nodeR = compact ? 30 : NODE_R;
+  const labelDy = compact ? -11 : -8;
+  const valueDy = compact ? 10 : 7;
   const [inputA, setInputA] = useState(0);
   const [inputB, setInputB] = useState(0);
   const [selected, setSelected] = useState<NeuronId>("h1");
@@ -195,13 +227,13 @@ export function TwoNeuronXOR() {
   return (
     <WidgetContainer
       title="Two Neurons Solve XOR"
-      description="Click a neuron to select it and adjust its weights. Click an input to toggle it."
+      description="Tap a neuron to select it and adjust its weights. Tap an input to toggle it."
       onReset={reset}
     >
       <div className="flex flex-col lg:flex-row gap-4">
         {/* Network diagram */}
         <div className="flex-1">
-          <svg viewBox={`0 0 ${SVG_W} ${SVG_H}`} className="w-full">
+          <svg ref={svgRef} viewBox={`0 0 ${SVG_W} ${SVG_H}`} className="w-full">
             <defs>
               <marker
                 id="xor-arrow"
@@ -225,9 +257,9 @@ export function TwoNeuronXOR() {
             ].map((c, i) => (
               <line
                 key={`ih-${i}`}
-                x1={c.from.x + NODE_R}
+                x1={c.from.x + nodeR}
                 y1={c.from.y}
-                x2={c.to.x - NODE_R}
+                x2={c.to.x - nodeR}
                 y2={c.to.y}
                 stroke={c.bold ? "#3b82f6" : "#d1d5db"}
                 strokeWidth={c.bold ? 2.5 : 1}
@@ -242,9 +274,9 @@ export function TwoNeuronXOR() {
             ].map((c, i) => (
               <line
                 key={`ho-${i}`}
-                x1={c.from.x + NODE_R}
+                x1={c.from.x + nodeR}
                 y1={c.from.y}
-                x2={c.to.x - NODE_R}
+                x2={c.to.x - nodeR}
                 y2={c.to.y}
                 stroke={c.bold ? "#3b82f6" : "#d1d5db"}
                 strokeWidth={c.bold ? 2.5 : 1}
@@ -265,24 +297,26 @@ export function TwoNeuronXOR() {
                 <circle
                   cx={IN_X}
                   cy={inp.y}
-                  r={NODE_R}
+                  r={nodeR}
                   fill={inp.val === 1 ? "#dbeafe" : "#f9fafb"}
                   stroke={inp.val === 1 ? "#3b82f6" : "#d1d5db"}
                   strokeWidth="2"
                 />
                 <text
                   x={IN_X}
-                  y={inp.y - 8}
+                  y={inp.y + labelDy}
                   textAnchor="middle"
-                  className="fill-muted text-[9px] font-semibold pointer-events-none select-none"
+                  fontSize={nodeTextSize(9)}
+                  className="fill-muted font-semibold pointer-events-none select-none"
                 >
                   {inp.label}
                 </text>
                 <text
                   x={IN_X}
-                  y={inp.y + 7}
+                  y={inp.y + valueDy}
                   textAnchor="middle"
-                  className="fill-foreground text-[14px] font-bold font-mono pointer-events-none select-none"
+                  fontSize={nodeTextSize(14)}
+                  className="fill-foreground font-bold font-mono pointer-events-none select-none"
                 >
                   {inp.val}
                 </text>
@@ -302,36 +336,31 @@ export function TwoNeuronXOR() {
                 <circle
                   cx={HID_X}
                   cy={n.y}
-                  r={NODE_R}
+                  r={nodeR}
                   fill={outputColor(n.val)}
                   stroke={selected === n.id ? "#3b82f6" : outputColor(n.val)}
                   strokeWidth={selected === n.id ? 3 : 2}
                 />
                 <text
                   x={HID_X}
-                  y={n.y - 8}
+                  y={n.y + labelDy}
                   textAnchor="middle"
-                  className="fill-white text-[9px] font-semibold pointer-events-none select-none"
+                  fontSize={nodeTextSize(9)}
+                  className="fill-white font-semibold pointer-events-none select-none"
                 >
                   {n.label}
                 </text>
                 <text
                   x={HID_X}
-                  y={n.y + 7}
+                  y={n.y + valueDy}
                   textAnchor="middle"
-                  className="fill-white text-[12px] font-bold font-mono pointer-events-none select-none"
+                  fontSize={nodeTextSize(12)}
+                  className="fill-white font-bold font-mono pointer-events-none select-none"
                 >
                   {n.val.toFixed(2)}
                 </text>
                 {isApproxSigmoid(n.val) && (
-                  <text
-                    x={HID_X}
-                    y={n.y + 17}
-                    textAnchor="middle"
-                    className="fill-white/70 text-[7px] pointer-events-none select-none"
-                  >
-                    approx
-                  </text>
+                  <ApproxLabel x={HID_X} y={n.y} below={compact} nodeR={nodeR} fontSize={nodeTextSize(7)} />
                 )}
               </g>
             ))}
@@ -344,47 +373,42 @@ export function TwoNeuronXOR() {
               <circle
                 cx={OUT_X}
                 cy={OUT_Y}
-                r={NODE_R}
+                r={nodeR}
                 fill={outputColor(finalOut)}
                 stroke={selected === "out" ? "#3b82f6" : outputColor(finalOut)}
                 strokeWidth={selected === "out" ? 3 : 2}
               />
               <text
                 x={OUT_X}
-                y={OUT_Y - 8}
+                y={OUT_Y + labelDy}
                 textAnchor="middle"
-                className="fill-white text-[9px] font-semibold pointer-events-none select-none"
+                fontSize={nodeTextSize(9)}
+                className="fill-white font-semibold pointer-events-none select-none"
               >
                 Out
               </text>
               <text
                 x={OUT_X}
-                y={OUT_Y + 7}
+                y={OUT_Y + valueDy}
                 textAnchor="middle"
-                className="fill-white text-[12px] font-bold font-mono pointer-events-none select-none"
+                fontSize={nodeTextSize(12)}
+                className="fill-white font-bold font-mono pointer-events-none select-none"
               >
                 {finalOut.toFixed(2)}
               </text>
               {isApproxSigmoid(finalOut) && (
-                <text
-                  x={OUT_X}
-                  y={OUT_Y + 17}
-                  textAnchor="middle"
-                  className="fill-white/70 text-[7px] pointer-events-none select-none"
-                >
-                  approx
-                </text>
+                <ApproxLabel x={OUT_X} y={OUT_Y} below={compact} nodeR={nodeR} fontSize={nodeTextSize(7)} />
               )}
             </g>
 
             {/* Layer labels */}
-            <text x={IN_X} y={30} textAnchor="middle" className="fill-muted text-[10px] font-medium pointer-events-none select-none">
+            <text x={IN_X} y={30} textAnchor="middle" className="fill-muted font-medium pointer-events-none select-none" fontSize={fontSize(10)}>
               Inputs
             </text>
-            <text x={HID_X} y={30} textAnchor="middle" className="fill-muted text-[10px] font-medium pointer-events-none select-none">
+            <text x={HID_X} y={30} textAnchor="middle" className="fill-muted font-medium pointer-events-none select-none" fontSize={fontSize(10)}>
               Hidden
             </text>
-            <text x={OUT_X} y={30} textAnchor="middle" className="fill-muted text-[10px] font-medium pointer-events-none select-none">
+            <text x={OUT_X} y={30} textAnchor="middle" className="fill-muted font-medium pointer-events-none select-none" fontSize={fontSize(10)}>
               Output
             </text>
           </svg>
@@ -467,7 +491,7 @@ export function TwoNeuronXOR() {
                           >
                             {row.h1.toFixed(2)}
                           </span>
-                          <span className="text-[8px] text-muted h-3 leading-3">
+                          <span className="text-[10px] sm:text-[8px] text-muted h-3 leading-3">
                             {isApproxSigmoid(row.h1) ? "approx" : ""}
                           </span>
                         </div>
@@ -480,7 +504,7 @@ export function TwoNeuronXOR() {
                           >
                             {row.h2.toFixed(2)}
                           </span>
-                          <span className="text-[8px] text-muted h-3 leading-3">
+                          <span className="text-[10px] sm:text-[8px] text-muted h-3 leading-3">
                             {isApproxSigmoid(row.h2) ? "approx" : ""}
                           </span>
                         </div>
@@ -493,7 +517,7 @@ export function TwoNeuronXOR() {
                           >
                             {row.out.toFixed(2)}
                           </span>
-                          <span className="text-[8px] text-muted h-3 leading-3">
+                          <span className="text-[10px] sm:text-[8px] text-muted h-3 leading-3">
                             {isApproxSigmoid(row.out) ? "approx" : ""}
                           </span>
                         </div>

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useRef } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
+import { useSvgFontSize } from "../shared/useSvgScale";
 
 const SVG_SIZE = 400;
 const CX = SVG_SIZE / 2;
@@ -45,6 +46,10 @@ const SHAPES: Record<ShapeType, LabeledPoint[]> = {
 };
 
 export function DimensionProjection() {
+  const svgRef = useRef<SVGSVGElement>(null);
+  const fontSize = useSvgFontSize(svgRef, SVG_SIZE);
+  // Lettered dots grow with their letters on phones.
+  const dotK = fontSize(9) / 9;
   const [angle, setAngle] = useState(0);
   const [shapeType, setShapeType] = useState<ShapeType>("arrow");
 
@@ -85,7 +90,7 @@ export function DimensionProjection() {
   return (
     <WidgetContainer
       title="Changing Dimensions"
-      description="A 1\u00d72 matrix projects 2D points onto a 1D line \u2014 reducing a dimension"
+      description="A 1×2 matrix projects 2D points onto a 1D line — reducing a dimension"
       onReset={handleReset}
     >
       {/* Shape selector */}
@@ -112,6 +117,7 @@ export function DimensionProjection() {
       </div>
 
       <svg
+        ref={svgRef}
         viewBox={`0 0 ${SVG_SIZE} ${SVG_SIZE}`}
         className="w-full"
         style={{ maxHeight: 420 }}
@@ -216,13 +222,13 @@ export function DimensionProjection() {
               {/* Projected point on line */}
               <circle cx={px} cy={py} r={5} fill={p.color} opacity={0.6} />
               {/* Original point */}
-              <circle cx={sx} cy={sy} r={7} fill={p.color} />
+              <circle cx={sx} cy={sy} r={7 * dotK} fill={p.color} />
               <text
                 x={sx}
                 y={sy + 1}
                 textAnchor="middle"
                 dominantBaseline="middle"
-                fontSize={9}
+                fontSize={fontSize(9)}
                 fontWeight="bold"
                 fill="white"
               >
@@ -268,7 +274,7 @@ export function DimensionProjection() {
                 x={tx}
                 y={NL_Y + 14}
                 textAnchor="middle"
-                fontSize={9}
+                fontSize={fontSize(9)}
                 fill="#6b7280"
               >
                 {v}
@@ -285,13 +291,13 @@ export function DimensionProjection() {
           );
           return (
             <g key={`nl-${p.label}`}>
-              <circle cx={nlX} cy={NL_Y} r={6} fill={p.color} />
+              <circle cx={nlX} cy={NL_Y} r={6 * dotK} fill={p.color} />
               <text
                 x={nlX}
                 y={NL_Y + 1}
                 textAnchor="middle"
                 dominantBaseline="middle"
-                fontSize={8}
+                fontSize={fontSize(8)}
                 fontWeight="bold"
                 fill="white"
               >
@@ -306,7 +312,7 @@ export function DimensionProjection() {
           x={NL_CX}
           y={NL_Y + 26}
           textAnchor="middle"
-          fontSize={10}
+          fontSize={fontSize(10)}
           fill="#9ca3af"
         >
           1D output

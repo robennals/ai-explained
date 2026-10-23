@@ -168,7 +168,7 @@ export function EmbeddingPlayground() {
                   <button
                     key={data.words[r.index]}
                     onClick={() => setMainWord(data.words[r.index])}
-                    className="flex w-full items-center gap-2 rounded-md px-1 py-0.5 cursor-pointer transition-colors hover:bg-accent/10 group"
+                    className="flex min-h-7 w-full items-center gap-2 rounded-md px-1 py-0.5 cursor-pointer transition-colors hover:bg-accent/10 group sm:min-h-0"
                   >
                     <span className="w-4 text-right text-[10px] text-muted">{i + 1}</span>
                     <span className="w-20 text-left text-xs font-medium text-accent group-hover:underline truncate">

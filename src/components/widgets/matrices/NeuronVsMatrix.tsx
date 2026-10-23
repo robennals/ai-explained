@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useRef } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
+import { useSvgFontSize } from "../shared/useSvgScale";
+import { useIsPhone } from "../shared/useMediaQuery";
 
 const GRID_SIZE = 280;
 const GRID_CX = GRID_SIZE / 2;
@@ -47,6 +49,17 @@ const NEURON_W = 340;
 const NEURON_H = 150;
 
 export function NeuronVsMatrix() {
+  // The neuron diagram is drawn narrower than its viewBox on desktop too, so
+  // only apply the phone text floor on phones.
+  const isPhone = useIsPhone();
+  const neuronSvgRef = useRef<SVGSVGElement>(null);
+  const flooredNeuronFontSize = useSvgFontSize(neuronSvgRef, NEURON_W);
+  const neuronFontSize = (designPx: number) =>
+    isPhone ? flooredNeuronFontSize(designPx) : designPx;
+  const gridSvgRef = useRef<SVGSVGElement>(null);
+  const gridFontSize = useSvgFontSize(gridSvgRef, GRID_SIZE);
+  // Lettered dots grow with their letters on phones.
+  const dotK = gridFontSize(8) / 8;
   const [a, setA] = useState(1);
   const [b, setB] = useState(0);
   const [c, setC] = useState(0);
@@ -125,6 +138,7 @@ export function NeuronVsMatrix() {
             Neuron View
           </div>
           <svg
+            ref={neuronSvgRef}
             viewBox={`0 0 ${NEURON_W} ${NEURON_H}`}
             className="w-full"
             style={{ maxWidth: 340 }}
@@ -142,7 +156,7 @@ export function NeuronVsMatrix() {
               x={60}
               y={41}
               textAnchor="middle"
-              fontSize={10}
+              fontSize={neuronFontSize(10)}
               fill="#1a1a2e"
             >
               input
@@ -151,7 +165,7 @@ export function NeuronVsMatrix() {
               x={60}
               y={53}
               textAnchor="middle"
-              fontSize={10}
+              fontSize={neuronFontSize(10)}
               fill="#1a1a2e"
             >
               1
@@ -169,7 +183,7 @@ export function NeuronVsMatrix() {
               x={60}
               y={106}
               textAnchor="middle"
-              fontSize={10}
+              fontSize={neuronFontSize(10)}
               fill="#1a1a2e"
             >
               input
@@ -178,7 +192,7 @@ export function NeuronVsMatrix() {
               x={60}
               y={118}
               textAnchor="middle"
-              fontSize={10}
+              fontSize={neuronFontSize(10)}
               fill="#1a1a2e"
             >
               2
@@ -197,7 +211,7 @@ export function NeuronVsMatrix() {
               x={280}
               y={41}
               textAnchor="middle"
-              fontSize={10}
+              fontSize={neuronFontSize(10)}
               fill="#1a1a2e"
             >
               output
@@ -206,7 +220,7 @@ export function NeuronVsMatrix() {
               x={280}
               y={53}
               textAnchor="middle"
-              fontSize={10}
+              fontSize={neuronFontSize(10)}
               fill="#1a1a2e"
             >
               1
@@ -224,7 +238,7 @@ export function NeuronVsMatrix() {
               x={280}
               y={106}
               textAnchor="middle"
-              fontSize={10}
+              fontSize={neuronFontSize(10)}
               fill="#1a1a2e"
             >
               output
@@ -233,7 +247,7 @@ export function NeuronVsMatrix() {
               x={280}
               y={118}
               textAnchor="middle"
-              fontSize={10}
+              fontSize={neuronFontSize(10)}
               fill="#1a1a2e"
             >
               2
@@ -251,7 +265,7 @@ export function NeuronVsMatrix() {
               x={170}
               y={33}
               textAnchor="middle"
-              fontSize={13}
+              fontSize={neuronFontSize(13)}
               fill={W_COLORS.a}
               fontWeight="bold"
             >
@@ -270,7 +284,7 @@ export function NeuronVsMatrix() {
               x={138}
               y={73}
               textAnchor="middle"
-              fontSize={13}
+              fontSize={neuronFontSize(13)}
               fill={W_COLORS.b}
               fontWeight="bold"
             >
@@ -289,7 +303,7 @@ export function NeuronVsMatrix() {
               x={202}
               y={87}
               textAnchor="middle"
-              fontSize={13}
+              fontSize={neuronFontSize(13)}
               fill={W_COLORS.c}
               fontWeight="bold"
             >
@@ -308,7 +322,7 @@ export function NeuronVsMatrix() {
               x={170}
               y={137}
               textAnchor="middle"
-              fontSize={13}
+              fontSize={neuronFontSize(13)}
               fill={W_COLORS.d}
               fontWeight="bold"
             >
@@ -397,6 +411,7 @@ export function NeuronVsMatrix() {
         {/* Geometric view with arrow */}
         <div className="flex-1">
           <svg
+            ref={gridSvgRef}
             viewBox={`0 0 ${GRID_SIZE} ${GRID_SIZE}`}
             className="w-full"
           >
@@ -496,13 +511,13 @@ export function NeuronVsMatrix() {
               const [sx, sy] = gridToSVG(p.tx, p.ty);
               return (
                 <g key={`trans-${p.label}`}>
-                  <circle cx={sx} cy={sy} r={6} fill={p.color} />
+                  <circle cx={sx} cy={sy} r={6 * dotK} fill={p.color} />
                   <text
                     x={sx}
                     y={sy + 1}
                     textAnchor="middle"
                     dominantBaseline="middle"
-                    fontSize={8}
+                    fontSize={gridFontSize(8)}
                     fontWeight="bold"
                     fill="white"
                   >

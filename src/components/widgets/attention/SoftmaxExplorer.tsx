@@ -126,13 +126,14 @@ export function SoftmaxExplorer() {
           ))}
         </div>
 
-        {/* Sliders + bars */}
+        {/* Sliders + bars. Phones: label, slider and weight on one line with the
+            bar underneath, so the slider gets real width. */}
         <div className="grid gap-4">
           {scores.map((score, i) => {
             const w = weights[i];
             const barPct = Math.max(w / maxWeight * 100, 2);
             return (
-              <div key={i} className="grid grid-cols-[2rem_1fr_4rem_1fr] items-center gap-3">
+              <div key={i} className="grid grid-cols-[1.5rem_1fr_3.5rem] items-center gap-x-3 gap-y-1 sm:grid-cols-[2rem_1fr_4rem_1fr] sm:gap-3">
                 {/* Label */}
                 <span className="text-center font-mono text-sm font-bold text-foreground">
                   {LABELS[i]}
@@ -160,7 +161,7 @@ export function SoftmaxExplorer() {
                 </span>
 
                 {/* Bar */}
-                <div className={`h-6 rounded ${COLORS_LIGHT[i]}`}>
+                <div className={`col-span-2 col-start-2 h-3 rounded sm:col-span-1 sm:col-start-auto sm:h-6 ${COLORS_LIGHT[i]}`}>
                   <div
                     className={`h-full rounded ${COLORS[i]} transition-all duration-150`}
                     style={{ width: `${barPct}%` }}
@@ -175,7 +176,7 @@ export function SoftmaxExplorer() {
         <div className="rounded border border-border bg-foreground/[0.02] px-4 py-2.5 text-center">
           <span className="text-xs text-muted">The formula, if you&apos;re curious: </span>
           <span className="font-mono text-xs text-foreground/70">
-            weight(i) = e<sup>score(i)</sup> / Σ e<sup>score(j)</sup>
+            weight(i) = e<sup className="text-[10px] sm:text-[9px]">score(i)</sup> / Σ e<sup className="text-[10px] sm:text-[9px]">score(j)</sup>
           </span>
         </div>
 

@@ -1,7 +1,6 @@
 import { ChapterHeader } from "@/components/layout/ChapterHeader";
 import { ChapterNav } from "@/components/layout/ChapterNav";
 import { chapterMetadata } from "@/lib/chapter-metadata";
-import { getAdjacentChapters } from "@/lib/curriculum";
 import Content from "./content.mdx";
 import { QuizContent } from "./QuizContent";
 import {
@@ -14,16 +13,16 @@ import {
   SigmoidExplorerWidget,
   SigmoidZoomWidget,
   LogicGatePlaygroundWidget,
-  GateCircuitDiagramWidget,
+  GateScaleWidget,
   TwoNeuronXORWidget,
   DeepNetworkPlaygroundWidget,
+  CutoffGateWidget,
+  ThresholdGateWidget,
 } from "./widgets";
 
 export const metadata = chapterMetadata("neurons");
 
 export default function Chapter03() {
-  const { prev, next } = getAdjacentChapters("neurons");
-
   return (
     <article>
       <div className="prose prose-lg max-w-none">
@@ -39,14 +38,16 @@ export default function Chapter03() {
             SigmoidExplorerWidget,
             SigmoidZoomWidget,
             LogicGatePlaygroundWidget,
-            GateCircuitDiagramWidget,
+            GateScaleWidget,
             TwoNeuronXORWidget,
             DeepNetworkPlaygroundWidget,
+            CutoffGateWidget,
+            ThresholdGateWidget,
           }}
         />
       </div>
       <QuizContent />
-      <ChapterNav prev={prev} next={next} />
+      <ChapterNav slug="neurons" />
     </article>
   );
 }

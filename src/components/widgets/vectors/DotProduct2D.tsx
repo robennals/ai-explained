@@ -3,6 +3,7 @@
 import { useState, useCallback, useRef } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
 import { VectorCard } from "./VectorCard";
+import { useIsPhone } from "../shared/useMediaQuery";
 
 const SVG_SIZE = 300;
 const CX = SVG_SIZE / 2;
@@ -74,6 +75,9 @@ function magnitudeWord(mag: number): string {
 }
 
 export function DotProduct2D() {
+  // The plot is drawn at its full 300px on phones too, so its 9px tick labels
+  // need a bigger phone size to stay readable.
+  const tickFontSize = useIsPhone() ? 11 : 9;
   const [a, setA] = useState<[number, number]>([1.2, 0.5]);
   const [b, setB] = useState<[number, number]>([0.4, 1.1]);
   const svgRef = useRef<SVGSVGElement>(null);
@@ -166,10 +170,10 @@ export function DotProduct2D() {
             <g key={t}>
               {/* X axis ticks */}
               <line x1={CX + t * SCALE} y1={CY - 3} x2={CX + t * SCALE} y2={CY + 3} stroke="currentColor" strokeOpacity={0.2} />
-              <text x={CX + t * SCALE} y={CY + 14} textAnchor="middle" fontSize={9} fill="currentColor" opacity={0.3}>{t}</text>
+              <text x={CX + t * SCALE} y={CY + 14} textAnchor="middle" fontSize={tickFontSize} fill="currentColor" opacity={0.3}>{t}</text>
               {/* Y axis ticks */}
               <line x1={CX - 3} y1={CY - t * SCALE} x2={CX + 3} y2={CY - t * SCALE} stroke="currentColor" strokeOpacity={0.2} />
-              <text x={CX - 8} y={CY - t * SCALE + 3} textAnchor="end" fontSize={9} fill="currentColor" opacity={0.3}>{t}</text>
+              <text x={CX - 8} y={CY - t * SCALE + 3} textAnchor="end" fontSize={tickFontSize} fill="currentColor" opacity={0.3}>{t}</text>
             </g>
           ))}
 

@@ -16,11 +16,14 @@ export function SiteHeader() {
           <span className="text-lg">Learn AI Layer by Layer</span>
         </Link>
         <nav className="ml-auto flex items-center gap-6 text-sm text-muted">
+          <Link href="/educators" className="whitespace-nowrap transition-colors hover:text-foreground">
+            For educators
+          </Link>
           <a
             href="https://github.com/robennals/ai-explained"
             target="_blank"
             rel="noopener noreferrer"
-            className="transition-colors hover:text-foreground"
+            className="hidden transition-colors hover:text-foreground sm:inline"
           >
             GitHub
           </a>

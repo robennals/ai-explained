@@ -3,6 +3,8 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
 import { SliderControl } from "../shared/SliderControl";
+import { useIsPhone } from "../shared/useMediaQuery";
+import { keepInHorizontalView } from "../shared/keepInHorizontalView";
 
 /* ------------------------------------------------------------------ */
 /*  Data — one real sentence: "The dog chased the cat and bit it"      */
@@ -101,6 +103,9 @@ export function ALiBiToyTokens() {
 
   const rowRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<Map<number, HTMLElement>>(new Map());
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const labelRef = useRef<HTMLDivElement>(null);
+  const compact = useIsPhone();
 
   const tokens = TOKENS;
   const itIdx = tokens.length - 1; // "it" is always last
@@ -177,6 +182,18 @@ export function ALiBiToyTokens() {
     return () => cancelAnimationFrame(raf);
   }, [selected, weights, tokens]);
 
+  // When the sentence doesn't fit (phones), keep "it" and the closer noun on
+  // screen: they're what the widget is about.
+  const closerIdx = closer?.idx;
+  useEffect(() => {
+    const scroller = scrollRef.current;
+    if (!scroller || closerIdx === undefined) return;
+    keepInHorizontalView(scroller, [cardRefs.current.get(itIdx), cardRefs.current.get(closerIdx)], {
+      leftInset: labelRef.current?.offsetWidth ?? 0,
+      behavior: "auto",
+    });
+  }, [compact, itIdx, closerIdx]);
+
   const arcPad = 50;
 
   return (
@@ -208,7 +225,7 @@ export function ALiBiToyTokens() {
         </div>
 
         {/* Token row with arrow overlay */}
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto" ref={scrollRef}>
           <div className="relative inline-flex min-w-full justify-center" ref={rowRef}>
             {/* SVG overlay for curved arrows */}
             {arrows.length > 0 && (
@@ -257,11 +274,14 @@ export function ALiBiToyTokens() {
               className="grid items-center gap-x-1 gap-y-1.5"
               style={{
                 paddingTop: `${arcPad + 8}px`,
-                gridTemplateColumns: `minmax(110px, max-content) repeat(${tokens.length}, 72px)`,
+                gridTemplateColumns: compact
+                  ? `minmax(76px, max-content) repeat(${tokens.length}, 48px)`
+                  : `minmax(110px, max-content) repeat(${tokens.length}, 72px)`,
               }}
             >
-              {/* Row 0: token labels */}
-              <div />
+              {/* Row 0: token labels. The first column (row labels) stays put
+                  while the tokens scroll under it. */}
+              <div ref={labelRef} className="sticky left-0 z-[11] bg-[var(--color-widget-bg)] self-stretch" />
               {tokens.map((tok, i) => {
                 const isSelected = i === selected;
                 return (
@@ -271,13 +291,13 @@ export function ALiBiToyTokens() {
                         if (el) cardRefs.current.set(i, el);
                         else cardRefs.current.delete(i);
                       }}
-                      className={`rounded-md border px-2 py-1.5 ${
+                      className={`rounded-md border px-1.5 py-1 sm:px-2 sm:py-1.5 ${
                         isSelected
                           ? "ring-2 ring-accent ring-offset-1 border-border bg-surface"
                           : "border-border bg-surface"
                       }`}
                     >
-                      <span className={`text-base font-bold ${tok.color}`}>
+                      <span className={`text-sm font-bold sm:text-base ${tok.color}`}>
                         {tok.label}
                       </span>
                     </div>
@@ -286,41 +306,41 @@ export function ALiBiToyTokens() {
               })}
 
               {/* Row label: Dot product */}
-              <div className="text-right text-sm font-semibold text-foreground/80 pr-2">
+              <div className="sticky left-0 z-[11] bg-[var(--color-widget-bg)] pr-2 text-right text-xs font-semibold sm:text-sm text-foreground/80">
                 Dot product
-                <div className="text-[10px] font-normal text-muted leading-tight">
+                <div className="text-[10px] font-normal leading-tight text-muted">
                   query · key
                 </div>
               </div>
               {tokens.map((_, i) => (
                 <div
                   key={`dot-${i}`}
-                  className="text-center font-mono text-base font-semibold text-foreground"
+                  className="text-center font-mono text-sm sm:text-base font-semibold text-foreground"
                 >
                   {dots[i]}
                 </div>
               ))}
 
               {/* Row label: Distance */}
-              <div className="text-right text-sm font-semibold text-foreground/80 pr-2">
+              <div className="sticky left-0 z-[11] bg-[var(--color-widget-bg)] pr-2 text-right text-xs font-semibold sm:text-sm text-foreground/80">
                 Distance
-                <div className="text-[10px] font-normal text-muted leading-tight">
+                <div className="text-[10px] font-normal leading-tight text-muted">
                   positions from &ldquo;it&rdquo;
                 </div>
               </div>
               {tokens.map((_, i) => (
                 <div
                   key={`dist-${i}`}
-                  className="text-center font-mono text-base font-semibold text-foreground"
+                  className="text-center font-mono text-sm sm:text-base font-semibold text-foreground"
                 >
                   {distances[i]}
                 </div>
               ))}
 
               {/* Row label: Distance penalty */}
-              <div className="text-right text-sm font-semibold text-red-600 dark:text-red-400 pr-2">
+              <div className="sticky left-0 z-[11] bg-[var(--color-widget-bg)] pr-2 text-right text-xs font-semibold sm:text-sm text-red-600 dark:text-red-400">
                 Distance penalty
-                <div className="text-[10px] font-normal text-muted leading-tight">
+                <div className="text-[10px] font-normal leading-tight text-muted">
                   − slope × distance
                 </div>
               </div>
@@ -330,7 +350,7 @@ export function ALiBiToyTokens() {
                   return (
                     <div
                       key={`pen-${i}`}
-                      className="text-center font-mono text-base text-muted"
+                      className="text-center font-mono text-sm sm:text-base text-muted"
                     >
                       0
                     </div>
@@ -339,7 +359,7 @@ export function ALiBiToyTokens() {
                 return (
                   <div
                     key={`pen-${i}`}
-                    className="text-center font-mono text-base font-semibold text-red-500"
+                    className="text-center font-mono text-sm sm:text-base font-semibold text-red-500"
                   >
                     −{p.toFixed(1)}
                   </div>
@@ -347,25 +367,25 @@ export function ALiBiToyTokens() {
               })}
 
               {/* Row label: Score */}
-              <div className="text-right text-sm font-semibold text-foreground/80 pr-2">
+              <div className="sticky left-0 z-[11] bg-[var(--color-widget-bg)] pr-2 text-right text-xs font-semibold sm:text-sm text-foreground/80">
                 Score
-                <div className="text-[10px] font-normal text-muted leading-tight">
+                <div className="text-[10px] font-normal leading-tight text-muted">
                   dot − penalty
                 </div>
               </div>
               {tokens.map((_, i) => (
                 <div
                   key={`score-${i}`}
-                  className="text-center font-mono text-base font-bold text-foreground"
+                  className="text-center font-mono text-sm sm:text-base font-bold text-foreground"
                 >
                   {penalizedScores[i].toFixed(1)}
                 </div>
               ))}
 
               {/* Row label: Attention */}
-              <div className="text-right text-sm font-semibold text-accent pr-2">
+              <div className="sticky left-0 z-[11] bg-[var(--color-widget-bg)] pr-2 text-right text-xs font-semibold sm:text-sm text-accent">
                 Attention
-                <div className="text-[10px] font-normal text-muted leading-tight">
+                <div className="text-[10px] font-normal leading-tight text-muted">
                   after softmax
                 </div>
               </div>

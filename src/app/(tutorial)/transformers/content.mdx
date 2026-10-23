@@ -9,7 +9,7 @@ The original paper that introduced transformers was called *"Attention Is All Yo
 The picture below shows a very simple transformer doing its work on a tiny sentence. The final layer's embedding of the last token tells us enough to predict the next word.
 
 <TransformerOverviewWidget>
-Click any word-cell to see which earlier words fed into it. Click a layer's name on the left to see what that layer is doing.
+Tap any word-cell to see which earlier words fed into it. Tap a layer's name on the left to see what that layer is doing.
 </TransformerOverviewWidget>
 
 The representation of each token gets more sophisticated at each layer, by bringing in information from the tokens it paid attention to.
@@ -21,7 +21,7 @@ This looks a lot like a regular neural network: boxes in layers, connected by li
 The playground below shows a more detailed example with a longer sentence and more layers. Go through the layers one at a time and see how the representation of each token becomes more sophisticated as we bring in information from other tokens.
 
 <TransformerInActionWidget>
-Click **Next layer** to step through, or jump to any layer in the strip above the passage. **Previous-token** gives every word a copy of its predecessor. **Place in the scene** ties words to scene-locations. **Resolve pronouns** wires *her* to the astronaut. **Previous-token** (again) lets *blue* re-pull *her* with all the new context. **Find what verb acts on this** binds objects to their verbs. Click **Predict** to see the top guesses for the next word.
+Tap **Next layer** to step through, or jump to any layer in the strip above the passage. **Previous-token** gives every word a copy of its predecessor. **Place in the scene** ties words to scene-locations. **Resolve pronouns** wires *her* to the astronaut. **Previous-token** (again) lets *blue* re-pull *her* with all the new context. **Find what verb acts on this** binds objects to their verbs. Tap **Predict** to see the top guesses for the next word.
 </TransformerInActionWidget>
 
 The model never sees *Earth* spelled out. But by the last layer, *blue*'s representation says *a blue thing belonging to the astronaut on Mars, seen in the Martian sky*, and the embedding for *Earth* (a blue planet, home to humans, visible from other planets in our solar system) lines up almost exactly. That's where the prediction comes from.
@@ -42,12 +42,12 @@ Trying to understand the inner thought processes of transformers is an area of a
 
 We said at the beginning that each layer of a transformer creates a new representation for each token by using attention to find relevant tokens, and combining information from those tokens with what we already know about that token.
 
-The playground below gives more detail on how exactly a single layer of a transformer does that. Click on each box to see a description of what it does and how it does it.
+The playground below gives more detail on how exactly a single layer of a transformer does that. Tap each box to see a description of what it does and how it does it.
 
 (One transformer layer is sometimes also called a *transformer block*. The two names mean the same thing. We'll stick with "layer" because that's how people describe model size: "GPT-3 has 96 layers".)
 
 <TransformerBlockDiagramWidget>
-Click any box, or hit Next Block to step through. The grey box is one transformer layer. A real model stacks many of these (GPT-3 stacks 96).
+Tap any box, or hit Next Block to step through. The grey box is one transformer layer. A real model stacks many of these (GPT-3 stacks 96).
 </TransformerBlockDiagramWidget>
 
 
@@ -65,7 +65,20 @@ We've come a long way:
 8. **Position encoding adds order** (<Ch slug="positions" />): so "dog bit man" isn't the same as "man bit dog".
 9. **The transformer wires it all together** (this chapter): and meaning emerges from prediction.
 
-Same architecture, scaled up trillions of times, is what powers ChatGPT, Claude, and Gemini.
+This same architecture, scaled up enormously, is the engine inside ChatGPT, Claude, and Gemini.
+
+## But It Isn't a Chatbot Yet
+
+Train a transformer on the whole internet, type in a question, and you might not get an answer. You might get a list of other people's questions, as if yours were one line in a forum's index page. A transformer has only ever learned to continue text. Nobody has told it that it's supposed to be helping you.
+
+Getting from here to the assistant you actually talk to is the next part of this tutorial:
+
+1. **Post-training** (<Ch slug="post-training" />): a second, much smaller round of training that makes the helpful completion the likely one.
+2. **Conversations** (<Ch slug="conversations" />): how a back-and-forth chat becomes one long document the model can continue.
+3. **Reasoning** (<Ch slug="reasoning" />): why a model that writes out its working before it answers gets dramatically better.
+4. **Agents** (<Ch slug="agents" />): how a model wrapped in a program can run tools and get things done.
+
+All four are built on the transformer you now understand.
 
 <TryItInPyTorch notebook="transformers">
 Build a complete transformer from scratch in PyTorch. Train one on simple patterns, visualize what the attention heads learn, then train a bigger one on real stories and experiment with temperature and generation.

@@ -162,6 +162,7 @@ function BlendTab() {
       />
       <div className="grid gap-2 mt-3" style={{ gridTemplateColumns: "1fr 1fr 1fr" }}>
         <VectorCard
+          mobileHideBar
           name={animalA.name}
           emoji={animalA.emoji}
           properties={PROPS}
@@ -171,6 +172,7 @@ function BlendTab() {
           labelColor="#3b82f6"
         />
         <VectorCard
+          mobileHideBar
           name={animalB.name}
           emoji={animalB.emoji}
           properties={PROPS}
@@ -180,6 +182,7 @@ function BlendTab() {
           labelColor="#f59e0b"
         />
         <VectorCard
+          mobileHideBar
           name="Blend"
           emoji="?"
           properties={PROPS}
@@ -277,6 +280,7 @@ function RecipeTab() {
       </div>
       <div className="grid gap-2 mt-3" style={{ gridTemplateColumns: "1fr 1fr 1fr" }}>
         <VectorCard
+          mobileHideBar
           name={base.name}
           emoji={base.emoji}
           properties={PROPS}
@@ -286,6 +290,7 @@ function RecipeTab() {
           labelColor="#3b82f6"
         />
         <VectorCard
+          mobileHideBar
           name="Modifier"
           emoji="+"
           properties={PROPS}
@@ -296,6 +301,7 @@ function RecipeTab() {
           labelColor="#f59e0b"
         />
         <VectorCard
+          mobileHideBar
           name={recipeName || "Result"}
           emoji="?"
           properties={PROPS}

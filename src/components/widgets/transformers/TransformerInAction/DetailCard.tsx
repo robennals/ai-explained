@@ -1,6 +1,7 @@
 "use client";
 
 import type { HeadCard, HeadDef, TokenState } from "./types";
+import { useIsPhone } from "../../shared/useMediaQuery";
 
 interface DetailCardProps {
   focalToken: TokenState;
@@ -25,6 +26,7 @@ export function DetailCard({
   layerLabel,
   previousRep,
 }: DetailCardProps) {
+  const compact = useIsPhone();
   // L0 — no head, just show the embedding rep.
   if (!headDef) {
     return (
@@ -135,6 +137,30 @@ export function DetailCard({
           <div className="mb-1 text-xs font-medium uppercase tracking-wider text-muted">
             Paying attention to
           </div>
+          {/* Phones: one small card per token. The four-column table squeezes
+              the Value column to a word per line at phone width. */}
+          {compact ? (
+          <div className="flex flex-col gap-2">
+            {card.pulls.map((pull) => (
+              <div key={pull.fromTokenIndex} className="rounded border border-border bg-surface px-3 py-2">
+                <div className="flex items-baseline justify-between gap-2">
+                  <span className="font-semibold">{tokens[pull.fromTokenIndex].token}</span>
+                  <span className="font-medium text-accent">{Math.round(pull.weight * 100)}%</span>
+                </div>
+                {card.kind === "content" && (
+                  <div className="mt-1 rounded bg-green-50 px-2 py-0.5 dark:bg-green-900/30">
+                    <span className="text-[11px] font-medium uppercase tracking-wider text-muted">Key </span>
+                    {pull.key}
+                  </div>
+                )}
+                <div className="mt-1 rounded bg-yellow-50 px-2 py-0.5 dark:bg-yellow-900/30">
+                  <span className="text-[11px] font-medium uppercase tracking-wider text-muted">Value </span>
+                  {pull.value}
+                </div>
+              </div>
+            ))}
+          </div>
+          ) : (
           <table className="w-full border-separate border-spacing-y-1 text-sm">
             <thead>
               <tr className="text-left text-xs font-medium uppercase tracking-wider text-muted">
@@ -172,6 +198,7 @@ export function DetailCard({
               })}
             </tbody>
           </table>
+          )}
         </div>
       )}
 

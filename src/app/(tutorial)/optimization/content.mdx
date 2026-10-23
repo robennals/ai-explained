@@ -1,30 +1,22 @@
-The big idea behind AI is that a sufficiently large model can compute pretty much anything, provided it has been configured with the right parameters. But how do you find the right parameters? The answer is to use the same method that drives evolution: make a tiny change, check whether it made the model work better, keep it if it did, and repeat this process very very fast, many many times.
+In <Ch slug='computation'/> we saw that a well-chosen model can compute whatever we want, provided we set it up with the right parameters.
 
-## How Do You Build Something You Don't Understand?
+But how do you find the right parameters?
 
-A model is a machine with adjustable knobs. Different knob settings compute different functions. We need to find the settings that make the model compute the *right* function, but we can't try every combination, because the number of possibilities is astronomically large.
-
-So what do we do?
-
-Your first instinct might be: *think really hard*. Analyze the problem. Design the answer from first principles. Be brilliant.
-
-But that's almost never how complex things actually get built. And understanding *why* is the key to understanding how AI works.
+The answer is to use the same method that drives evolution: make a tiny change, check whether it made the model work better, keep it if it did, and repeat this process very very fast, many many times.
 
 ## Nothing Complex Was Ever Designed From Scratch
 
-The human eye is one of the most sophisticated optical instruments in existence. It automatically adjusts focus, adapts to light levels from pitch darkness to blinding sunshine, and processes information in real time. No engineer designed it. It evolved over 3.5 billion years of tiny changes, each one barely noticeable, accumulating into something extraordinary.
+When we see something complex and impressive, it's tempting to assume someone brilliant sat down and designed it. But that's almost never how complex things actually come to exist. Instead, pretty much everything complex in the world was created through a long sequence of incremental optimization steps.
 
-The Wright brothers didn't sit down and calculate the perfect wing shape. They built a wind tunnel and tested *hundreds* of wing designs, measuring which ones generated more lift. Each test informed the next. The airplane was iterated into existence.
-
-The iPhone didn't spring fully formed from Steve Jobs's mind. It evolved through generations (flip phones, then Blackberries, then the iPhone), each one building on what came before, each one a little closer to what people actually wanted.
-
-This pattern is universal. The steam engine, the internet, language itself, all were built incrementally. Even things we think of as "inventions" are really evolutionary processes. Nobody sat down and *designed* English. These things emerged through countless small improvements, tested against reality, kept or discarded.
+<BuiltStepByStepWidget>
+Pick a tab and tap "Next small change" to step through it, or tap any circle to jump straight to that step. Notice that no single step is a big leap, and that each one only had to work a little better than the one before. The eye took hundreds of millions of years and the phone took a century, but the pattern is the same. Even ideas evolve this way: our understanding of disease built up one discovery at a time. And nobody designed English: it drifted into shape one speaker at a time.
+</BuiltStepByStepWidget>
 
 <KeyInsight>
 **Every complex system was built the same way:** make a small change, test whether it helped, keep or undo it, repeat. By relentless, incremental improvement.
 </KeyInsight>
 
-This is how AI learns too. But to make this work, you need two things: a way to **measure how far off you are**, and a way to **make small changes**.
+AI is no exception. But to make this work, you need two things: a way to **measure how far off you are**, and a way to **make small changes**.
 
 ## You Need a Way to Measure the Error
 
@@ -80,7 +72,7 @@ Explore the examples in each row. Smooth problems let you improve step by step. 
 Both shapes below have the same overall valley, but the smooth one lets a ball roll downhill to the bottom, while the stepped one is flat within each step. A small change in position tells you nothing.
 
 <SmoothVsRuggedWidget>
-Click anywhere to drop a ball. On the smooth curve, it rolls to the bottom. On the stepped version, it just sits wherever it lands, with no slope to follow.
+Tap anywhere to drop a ball. On the smooth curve, it rolls to the bottom. On the stepped version, it just sits wherever it lands, with no slope to follow.
 </SmoothVsRuggedWidget>
 
 <KeyInsight>
@@ -94,13 +86,13 @@ So far, our optimization strategy has been: try a small change, measure the erro
 Think about the difference between these two situations. A friend reads your story and says "I'd give it 3 out of 5." That tells you the error, but not what to fix. Now imagine they say "I'd give it 3 out of 5, the middle section was confusing." That's much more useful, because it tells you *which direction to change*.
 
 <GradientRealWorldWidget>
-Click through the examples. "Error only" tells you how far off you are. "Error + gradient" also tells you which way to adjust. That directional information is what makes improvement fast instead of slow.
+Tap through the examples. "Error only" tells you how far off you are. "Error + gradient" also tells you which way to adjust. That directional information is what makes improvement fast instead of slow.
 </GradientRealWorldWidget>
 
 This is the key idea behind the **gradient**. At any point on a smooth curve, you can look at the **slope**: the steepness right where you're standing. The slope tells you *exactly which direction is downhill*. Following it is called **gradient descent**, and it's dramatically faster than random guessing.
 
 <Gradient2DCurveWidget>
-Click on the curve to place a ball. The red arrow is the gradient. It points downhill from wherever you are. Hit "Run gradient descent" to watch the ball follow the gradient arrow step by step to the bottom.
+Tap on the curve to place a ball. The red arrow is the gradient. It points downhill from wherever you are. Hit "Run gradient descent" to watch the ball follow the gradient arrow step by step to the bottom.
 </Gradient2DCurveWidget>
 
 Real models don't have just one knob; they have millions. But the same idea works: the gradient is an arrow pointing in the steepest downhill direction across *all* dimensions at once. You can't visualize a million-dimensional landscape, but the math is the same. Calculate the slope, step downhill, repeat.
@@ -134,7 +126,7 @@ We now understand the game:
 4. **Take a tiny step** (adjust all parameters)
 5. **Repeat billions of times**
 
-But what should this model actually *look like*? What's inside a neural network? In <Ch slug="neurons" />, we'll meet the building block: the **artificial neuron**, a simple unit that takes a weighted sum of its inputs, adds a bias, and passes the result through a nonlinear function. It's almost embarrassingly simple. But stack enough of them together, and they can compute anything.
+But what should this model actually *look like*? It has to be smooth, so the gradient always points the way. And it has to be able to compute any function we might want, or no amount of training will find it. The cubic from <Ch slug="computation" /> is smooth but can't do much. In <Ch slug="neurons" />, we'll start from the logic gates inside every computer, which can compute anything but aren't smooth, and turn them into something that is both: the **neural network**.
 
 <TryItInPyTorch notebook="optimization">
 Implement random search, use PyTorch's autograd to compute gradients automatically, run gradient descent from scratch, and compare both approaches side by side.

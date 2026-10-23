@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
+import { useSvgFontSize } from "../shared/useSvgScale";
 
 /**
  * Interactive diagram of a multi-layer neural network.
@@ -53,6 +54,8 @@ export function NetworkOverview() {
   });
 
   const selectedLabel = selected ? LAYERS[selected.layer].label : null;
+  const svgRef = useRef<SVGSVGElement>(null);
+  const fontSize = useSvgFontSize(svgRef, W);
 
   return (
     <WidgetContainer
@@ -61,6 +64,7 @@ export function NetworkOverview() {
       onReset={() => setSelected(null)}
     >
       <svg
+        ref={svgRef}
         viewBox={`0 0 ${W} ${H}`}
         className="w-full max-w-[560px]"
         aria-label="Diagram of a neural network with input, hidden, and output layers"
@@ -106,6 +110,8 @@ export function NetworkOverview() {
                 className="cursor-pointer"
                 onClick={() => setSelected({ layer: li, index: ni })}
               >
+                {/* Invisible, larger tap target: neurons are small on a phone. */}
+                <circle cx={pos.x} cy={pos.y} r={20} fill="transparent" />
                 <circle
                   cx={pos.x}
                   cy={pos.y}
@@ -138,7 +144,8 @@ export function NetworkOverview() {
             x={LAYER_XS[li]}
             y={LABEL_Y}
             textAnchor="middle"
-            className="fill-muted text-[10px]"
+            className="fill-muted"
+            fontSize={fontSize(10)}
           >
             {layer.label}
           </text>
@@ -157,7 +164,7 @@ export function NetworkOverview() {
         </p>
       ) : (
         <div className="mt-3 max-w-[560px] rounded-lg border-2 border-dashed border-accent/40 bg-accent/5 px-4 py-3 text-center text-sm font-medium text-accent">
-          👆 Click any neuron to learn what it does.
+          👆 Tap any neuron to learn what it does.
         </div>
       )}
     </WidgetContainer>

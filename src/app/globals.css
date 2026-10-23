@@ -103,6 +103,23 @@ body {
   }
 }
 
+/* Phones: iOS Safari zooms the whole page when a text field under 16px gets
+   focus. Unlayered, so it wins over Tailwind's text-xs/text-sm utilities. */
+@media (max-width: 639.98px) {
+  .widget-container input:not([type="range"]):not([type="checkbox"]):not([type="radio"]),
+  .widget-container textarea,
+  .widget-container select {
+    font-size: 16px;
+  }
+
+  /* Native sliders: a finger-sized touch strip (many are styled h-1/h-1.5),
+     and allowed to shrink inside flex rows instead of pushing off-screen. */
+  .widget-container input[type="range"] {
+    height: 28px;
+    min-width: 0;
+  }
+}
+
 /* Scrollbars use the browser default everywhere except .scrollbar-autohide,
    so the page scrollbar looks and behaves like any other site's. */
 

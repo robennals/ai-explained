@@ -17,3 +17,8 @@ export function useMediaQuery(query: string): boolean {
   }, [query]);
   return matches;
 }
+
+/** True below Tailwind's `sm` breakpoint (640px): phones in portrait. */
+export function useIsPhone(): boolean {
+  return useMediaQuery("(max-width: 639.98px)");
+}

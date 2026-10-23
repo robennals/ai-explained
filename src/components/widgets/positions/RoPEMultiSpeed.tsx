@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useRef } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
 import { WidgetTabs } from "../shared/WidgetTabs";
 import { SliderControl } from "../shared/SliderControl";
+import { useSvgTextScale } from "../shared/useSvgScale";
+import { useIsPhone } from "../shared/useMediaQuery";
 
 /* ------------------------------------------------------------------ */
 /*  Constants                                                          */
@@ -168,8 +170,18 @@ export function RoPEMultiSpeed() {
 
   // Chart dimensions
   const chartWidth = 600;
+  const chartRef = useRef<SVGSVGElement>(null);
+  const ts = useSvgTextScale(chartRef, chartWidth);
+  // Axis text: as designed on desktop; on phones a touch over 10px, so
+  // rounding never leaves it under 10.
+  const isPhone = useIsPhone();
+  const tickSize = (isPhone ? 10.5 : 9) * ts;
+  const axisTitleSize = (isPhone ? 10.5 : 10) * ts;
   const chartHeight = 260;
-  const pad = { top: 20, right: 20, bottom: 36, left: 44 };
+  // Phones: leave room for the (scaled-up) tick labels and the axis title
+  // stacked beneath them.
+  const padBottom = isPhone ? 5 + tickSize + axisTitleSize + 8 : 36;
+  const pad = { top: 20, right: 20, bottom: padBottom, left: 44 };
   const plotW = chartWidth - pad.left - pad.right;
   const plotH = chartHeight - pad.top - pad.bottom;
 
@@ -238,8 +250,9 @@ export function RoPEMultiSpeed() {
 
       <div className="flex flex-col gap-5">
         {/* Pair weight sliders. Hovering or focusing a row highlights that
-            frequency's curve in the chart below. */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1">
+            frequency's curve in the chart below. Phones: two columns, placed
+            after the charts so the result is on screen first. */}
+        <div className="order-2 grid grid-cols-2 gap-x-3 sm:order-none sm:gap-x-6 sm:gap-y-1">
           {SPEEDS.map((spd, i) => (
             <div
               key={i}
@@ -279,13 +292,14 @@ export function RoPEMultiSpeed() {
 
         {/* Two charts side by side on desktop (lg+), stacked on smaller screens
             so both the raw scores and the softmax weights are visible without scrolling. */}
-        <div className="flex flex-col lg:flex-row gap-5 lg:gap-4 lg:items-start">
+        <div className="order-1 flex flex-col gap-5 sm:order-none lg:flex-row lg:items-start lg:gap-4">
         <div className="flex-1 min-w-0">
           <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-muted">
             Raw dot-product score vs distance
           </div>
           <div className="flex justify-center">
             <svg
+              ref={chartRef}
               viewBox={`0 0 ${chartWidth} ${chartHeight}`}
               className="w-full"
               preserveAspectRatio="xMidYMid meet"
@@ -344,14 +358,14 @@ export function RoPEMultiSpeed() {
 
               {/* X-axis */}
               <line x1={pad.left} y1={pad.top + plotH} x2={pad.left + plotW} y2={pad.top + plotH} stroke="currentColor" strokeWidth={1} opacity={0.15} />
-              <text x={pad.left + plotW / 2} y={chartHeight - 4} textAnchor="middle" fontSize={10} fill="currentColor" opacity={0.4}>
+              <text x={pad.left + plotW / 2} y={chartHeight - 4} textAnchor="middle" fontSize={axisTitleSize} fill="currentColor" opacity={0.4}>
                 Distance (positions apart)
               </text>
               {Array.from({ length: 6 }, (_, i) => {
                 const d = Math.round((WINDOW_SIZE / 5) * i);
                 const x = pad.left + (d / WINDOW_SIZE) * plotW;
                 return (
-                  <text key={d} x={x} y={pad.top + plotH + 14} textAnchor="middle" fontSize={9} fill="currentColor" opacity={0.4}>{d}</text>
+                  <text key={d} x={x} y={pad.top + plotH + 5 + tickSize} textAnchor="middle" fontSize={tickSize} fill="currentColor" opacity={0.4}>{d}</text>
                 );
               })}
             </svg>
@@ -383,7 +397,7 @@ export function RoPEMultiSpeed() {
                 const d = Math.round((WINDOW_SIZE / 5) * i);
                 const x = pad.left + (d / WINDOW_SIZE) * plotW;
                 return (
-                  <text key={d} x={x} y={barChartH + 14} textAnchor="middle" fontSize={9} fill="currentColor" opacity={0.4}>{d}</text>
+                  <text key={d} x={x} y={barChartH + 5 + tickSize} textAnchor="middle" fontSize={tickSize} fill="currentColor" opacity={0.4}>{d}</text>
                 );
               })}
             </svg>
@@ -392,7 +406,7 @@ export function RoPEMultiSpeed() {
         </div>
 
         {/* Description */}
-        <div className="rounded-lg border border-border bg-surface px-4 py-3 text-sm text-foreground">
+        <div className="order-3 rounded-lg border border-border bg-surface px-4 py-3 text-sm text-foreground sm:order-none">
           {description}
         </div>
       </div>

@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useRef } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
 import { WidgetTabs } from "../shared/WidgetTabs";
+import { useSvgFontSize } from "../shared/useSvgScale";
 
-type GateType = "AND" | "OR" | "NOT";
+type GateType = "AND" | "OR" | "XOR" | "NOT";
 
 function computeGate(gate: GateType, a: number, b: number): number {
   switch (gate) {
@@ -12,6 +13,8 @@ function computeGate(gate: GateType, a: number, b: number): number {
       return a & b;
     case "OR":
       return a | b;
+    case "XOR":
+      return a ^ b;
     case "NOT":
       return a === 0 ? 1 : 0;
   }
@@ -20,6 +23,7 @@ function computeGate(gate: GateType, a: number, b: number): number {
 const GATE_DESCRIPTIONS: Record<GateType, string> = {
   AND: "Both inputs must be 1",
   OR: "At least one input must be 1",
+  XOR: "Exactly one input must be 1: one or the other, but not both",
   NOT: "Flips Input A (Input B is ignored)",
 };
 
@@ -40,6 +44,7 @@ const NODE_R = 24;
 const GATE_TABS: { id: GateType; label: string }[] = [
   { id: "AND", label: "AND" },
   { id: "OR", label: "OR" },
+  { id: "XOR", label: "XOR" },
   { id: "NOT", label: "NOT" },
 ];
 
@@ -47,6 +52,8 @@ export function LogicGatePlayground() {
   const [gate, setGate] = useState<GateType>("AND");
   const [inputA, setInputA] = useState(0);
   const [inputB, setInputB] = useState(0);
+  const svgRef = useRef<SVGSVGElement>(null);
+  const fontSize = useSvgFontSize(svgRef, W);
 
   const output = computeGate(gate, inputA, inputB);
 
@@ -75,7 +82,7 @@ export function LogicGatePlayground() {
   return (
     <WidgetContainer
       title="Logic Gates"
-      description="Click the inputs to toggle them. Switch between gates with the tabs."
+      description="Tap the inputs to toggle them. Switch between gates with the tabs."
       onReset={reset}
     >
       <WidgetTabs tabs={GATE_TABS} activeTab={gate} onTabChange={setGate} />
@@ -86,6 +93,7 @@ export function LogicGatePlayground() {
 
       {/* SVG diagram — same layout as neuron diagrams */}
       <svg
+        ref={svgRef}
         viewBox={`0 0 ${W} ${H}`}
         className="w-full max-w-lg mx-auto"
         aria-label="Logic gate diagram"
@@ -109,7 +117,8 @@ export function LogicGatePlayground() {
           x={IN_X}
           y={(showB ? IN_A_Y : GATE_Y) - NODE_R - 8}
           textAnchor="middle"
-          className="fill-foreground text-[12px] font-bold pointer-events-none select-none"
+          fontSize={fontSize(12)}
+          className="fill-foreground font-bold pointer-events-none select-none"
         >
           Input A
         </text>
@@ -142,7 +151,8 @@ export function LogicGatePlayground() {
               x={IN_X}
               y={IN_B_Y - NODE_R - 8}
               textAnchor="middle"
-              className="fill-foreground text-[12px] font-bold pointer-events-none select-none"
+              fontSize={fontSize(12)}
+          className="fill-foreground font-bold pointer-events-none select-none"
             >
               Input B
             </text>
@@ -228,7 +238,8 @@ export function LogicGatePlayground() {
           x={OUT_X}
           y={OUT_Y - NODE_R - 8}
           textAnchor="middle"
-          className="fill-foreground text-[12px] font-bold pointer-events-none select-none"
+          fontSize={fontSize(12)}
+          className="fill-foreground font-bold pointer-events-none select-none"
         >
           Output
         </text>

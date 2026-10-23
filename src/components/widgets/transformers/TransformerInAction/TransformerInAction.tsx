@@ -134,10 +134,10 @@ export function TransformerInAction() {
   return (
     <WidgetContainer
       title="A Transformer In Action"
-      description="Watch this sentence flow through five transformer layers. Click a layer to see each token's representation there; click a word to see what the layer's head did to it."
+      description="Watch this sentence flow through five transformer layers. Tap a layer to see each token's representation there; tap a word to see what the layer's head did to it."
       onReset={handleReset}
     >
-      <div className="flex flex-col gap-4 p-4">
+      <div className="flex flex-col gap-4 sm:p-4">
         <StackStrip
           layers={data.layers}
           selectedId={selectedLayerId}
@@ -181,7 +181,7 @@ export function TransformerInAction() {
           />
         ) : (
           <div className="rounded-lg border border-dashed border-border bg-foreground/[0.03] p-6 text-center text-sm italic text-muted">
-            Click a word in the passage above to inspect it.
+            Tap a word in the passage above to inspect it.
           </div>
         )}
 

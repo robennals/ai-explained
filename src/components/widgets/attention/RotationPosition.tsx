@@ -451,7 +451,7 @@ export function RotationPosition() {
                 <circle
                   cx={aEndX}
                   cy={aEndY}
-                  r={14}
+                  r={22}
                   fill="transparent"
                   cursor="grab"
                   onPointerDown={handlePointerDown("A")}
@@ -472,7 +472,7 @@ export function RotationPosition() {
                 <circle
                   cx={bEndX}
                   cy={bEndY}
-                  r={14}
+                  r={22}
                   fill="transparent"
                   cursor="grab"
                   onPointerDown={handlePointerDown("B")}

@@ -1,32 +1,21 @@
-Modern AI does things that would have seemed impossible for a computer a few years ago. Underneath all of it is math, and less math than you would expect. This chapter is about what kind of math, and why a foundation this simple can do so much.
-
-## What Can AI Do?
-
-A few years ago, the things AI does routinely now would have read as science fiction. It can translate between hundreds of languages, generate a photorealistic image from a description, write complex computer programs from scratch, or perform expert tasks better than most experts. The goal of this tutorial is to give you a deep intuitive sense of how AI does these things. 
-
-The whole tutorial rests on four ideas that the rest of this chapter introduces:
-
-- **Everything inside an AI is numbers.** Words, images, sound.
-- **An AI is a function**: numbers go in, different numbers come out.
-- **The function is itself made of numbers.** Billions of them, called *parameters*.
-- **Training an AI means finding the right values for those numbers.**
-
-Most of the tutorial is spent on the fourth point, because that's where the interesting complications live.
+Modern AI does things that would have seemed impossible for a computer a few years ago. It can translate between hundreds of languages, generate a photorealistic image from a description, write complex computer programs from scratch, or perform expert tasks better than most experts. Underneath all of it is math, and less math than you would expect. This chapter is about what kind of math, and why a foundation this simple can do so much.
 
 ## Everything Is Numbers
 
 You probably think of a text message as letters, a photo as colors, a song as sound. Inside a computer, all of them are lists of numbers.
 
+Throughout this tutorial, the boxes that look like the one below are interactive *playgrounds*. Tap the tabs, type things in, drag the sliders. The point is to mess around with them.
+
+<NumbersEverywhereWidget>
+Type your name in the Text tab and watch each letter become a number. Mix a color using three sliders in the Color tab. Paint something in the Image tab. The computer only ever sees the numbers. In the Sound tab, tap a preset like "aaah" or "eeee" and press Play. You'll hear a synthesized vowel, and see the raw numbers that produce it.
+</NumbersEverywhereWidget>
+
+Here's what's going on in each tab:
+
 - **Text** is numbers. Every character has a number assigned to it. The letter "H" is one number, "e" is another, the space between words is yet another. Your text message is a sequence of numbers.
 - **Colors** are numbers. Every color you've ever seen can be described by three numbers: how much red, green, and blue light to mix. (Or how much cyan, magenta, and yellow ink, if you're painting.) Change those three numbers and you get a different color.
 - **Images** are numbers. Every pixel is a color, and every color is three numbers. A photo is a giant grid of number-triplets.
 - **Sound** is numbers. A microphone samples the air pressure thousands of times per second. Each sample is one number. A three-minute song is about 8 million numbers.
-
-Throughout this tutorial, the boxes that look like the one below are interactive *playgrounds*. Click the tabs, type things in, drag the sliders. The point is to mess around with them.
-
-<NumbersEverywhereWidget>
-Type your name in the Text tab and watch each letter become a number. Mix a color using three sliders in the Color tab. Paint something in the Image tab. The computer only ever sees the numbers. In the Sound tab, click a preset like "aaah" or "eeee" and press Play. You'll hear a synthesized vowel, and see the raw numbers that produce it.
-</NumbersEverywhereWidget>
 
 <KeyInsight>
 **Every input a computer ever sees is a list of numbers. Every output it produces is also a list of numbers.** So every kind of computer thinking is the act of turning one list of numbers into another.
@@ -44,7 +33,7 @@ Once you accept that everything is numbers, something useful follows. Every kind
 The shape is the same in every case: numbers in, numbers out.
 
 <FunctionMachineWidget>
-Click through the different tasks. Despite doing wildly different things (recognizing images, translating text, generating art), they all have the same shape. A list of numbers goes in, a list of numbers comes out. The only thing that changes is what the function does in the middle.
+Tap through the different tasks. Despite doing wildly different things (recognizing images, translating text, generating art), they all have the same shape. A list of numbers goes in, a list of numbers comes out. The only thing that changes is what the function does in the middle.
 </FunctionMachineWidget>
 
 So all of AI reduces to one problem: build the right function.
@@ -75,9 +64,9 @@ Try to match the target curve by adjusting the sliders. Pay attention to how eac
 
 Before going further, a question worth asking: is it possible to create a model that can build any function we might possibly want?
 
-In 1936, two mathematicians, Alan Turing and Alonzo Church, independently came up with two models, the *Turing machine* and the *lambda calculus*, that they claimed could compute any function that can be computed at all. Not just math. Anything. This claim is called the *Church-Turing thesis*. It can't be formally proven, but no one has ever found anything computable that these models cannot. We call a model that can compute any computable function a *universal model*.
+In 1936, two mathematicians, Alan Turing and Alonzo Church, independently came up with two models, the *Turing machine* and the *lambda calculus*, that they claimed could compute any function that can be computed at all. Not just math. Anything. This claim is called the *Church-Turing thesis*. It can't be formally proven, but no one has ever found anything computable that these models cannot.
 
-The simple cubic model we gave above is not a universal model, and is very limited in what it can compute. But some of the models we use in AI are universal models. If you allow them to become big enough, and run long enough, and find the right parameters, they really can compute anything that can be computed.
+The simple cubic model we gave above is very limited in what it can compute. But the models used in AI are *universal approximators*: make one big enough and find the right parameters, and it can match any function whose inputs and outputs are of finite size.
 
 So if "thinking" is computation (turning numbers into numbers), then a computer can in principle do anything a human mind can do. The question isn't whether the right function exists. The question is whether we can find the right parameters.
 
@@ -106,7 +95,7 @@ So here's where this leaves us:
 1. **Everything is numbers.** Text, images, sound, all of it.
 2. **Thinking is a function.** Every intelligent task is numbers in, numbers out.
 3. **Models are functions with knobs.** Different settings compute different functions.
-4. **The right function exists.** The Church-Turing thesis says so.
+4. **Some models can compute anything.** We call such models "universal approximators".
 5. **Brute force is impossible.** A lookup table would be bigger than the universe.
 
 What's needed are models that *compress*: capture the right pattern with far fewer parameters than a lookup table would need entries. And a way to find the right parameter values automatically rather than by hand.

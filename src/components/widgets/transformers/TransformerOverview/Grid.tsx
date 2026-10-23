@@ -57,6 +57,13 @@ export function Grid({ compact, selectedCell, selectedLayer, sourceCells, onCell
   const labelGutterX = compact ? COMPACT_LABEL_GUTTER_RIGHT_X : LABEL_GUTTER_RIGHT_X;
   const firstColX = compact ? COMPACT_FIRST_COL_X : FIRST_COL_X;
   const viewWidth = compact ? COMPACT_VIEW_WIDTH : VIEW_WIDTH;
+  // The compact (phone) grid is drawn at about 0.65x, so its text is set
+  // larger to stay at least 10px, and each cell and label gets an invisible
+  // tap area taller than its drawn box (at least ~30px on a phone).
+  const labelFontSize = compact ? 16 : 14;
+  const layerIdFontSize = compact ? 16 : 11;
+  const cellFontSize = compact ? 16 : 15;
+  const hitPad = compact ? 6 : 0;
 
   function activateOnKey<T>(handler: (arg: T) => void, arg: T) {
     return (e: React.KeyboardEvent) => {
@@ -85,26 +92,34 @@ export function Grid({ compact, selectedCell, selectedLayer, sourceCells, onCell
         const layerDef = simpleOverviewExample.layers.find((l) => l.id === layer);
         const label = layerDef ? layerDef.label : "Tokens";
         const lines = compact ? splitLabel(label) : [label];
-        const labelLineH = 14;
+        const labelLineH = compact ? 16 : 14;
         // Center the label block (lines + layer-id row) vertically against the cell row.
-        const totalH = lines.length * labelLineH + 14;
+        const totalH = lines.length * labelLineH + layerIdFontSize;
         const yTop = layerRowY(layer) + (CELL_HEIGHT - totalH) / 2 + labelLineH;
         const isSelected = selectedLayer === layer;
         return (
           <g key={`label-${layer}`}>
-            <text
-              x={labelGutterX}
-              y={yTop}
-              textAnchor="end"
-              fontSize={14}
-              fontWeight={layer === "L0" ? 600 : 400}
-              fill={isSelected ? "#92400e" : "#374151"}
+            <rect
+              x={0}
+              y={layerRowY(layer) - hitPad}
+              width={labelGutterX + 4}
+              height={CELL_HEIGHT + 2 * hitPad}
+              fill="transparent"
               style={{ cursor: "pointer" }}
               onClick={() => onLayerLabelClick(layer)}
               onKeyDown={activateOnKey(onLayerLabelClick, layer)}
               role="button"
               tabIndex={0}
               aria-label={`${label} — click to see what this layer does`}
+            />
+            <text
+              x={labelGutterX}
+              y={yTop}
+              textAnchor="end"
+              fontSize={labelFontSize}
+              fontWeight={layer === "L0" ? 600 : 400}
+              fill={isSelected ? "#92400e" : "#374151"}
+              pointerEvents="none"
             >
               {lines.map((line, idx) => (
                 <tspan key={idx} x={labelGutterX} dy={idx === 0 ? 0 : labelLineH}>
@@ -112,7 +127,7 @@ export function Grid({ compact, selectedCell, selectedLayer, sourceCells, onCell
                 </tspan>
               ))}
             </text>
-            <text x={labelGutterX} y={yTop + lines.length * labelLineH} textAnchor="end" fontSize={11} fill="#9ca3af">
+            <text x={labelGutterX} y={yTop + lines.length * labelLineH} textAnchor="end" fontSize={layerIdFontSize} fill="#9ca3af" pointerEvents="none">
               {layer}
             </text>
           </g>
@@ -196,13 +211,21 @@ export function Grid({ compact, selectedCell, selectedLayer, sourceCells, onCell
                 x={columnX(i, firstColX)}
                 y={layerRowY(layer) + 23}
                 textAnchor="middle"
-                fontSize={15}
+                fontSize={cellFontSize}
                 fontWeight={isInputRow || isSelected ? 600 : 400}
                 fill={isSelected ? "#92400e" : isInputRow ? "#1e3a8a" : "#374151"}
                 pointerEvents="none"
               >
                 {tok.token}
               </text>
+              {hitPad > 0 && (
+                <HitPad
+                  x={columnLeft(i, firstColX)}
+                  y={layerRowY(layer)}
+                  pad={hitPad}
+                  onClick={() => onCellClick(i, layer)}
+                />
+              )}
             </g>
           );
         })
@@ -234,13 +257,41 @@ export function Grid({ compact, selectedCell, selectedLayer, sourceCells, onCell
         x={columnX(lastIdx, firstColX)}
         y={layerRowY("Predict") + 23}
         textAnchor="middle"
-        fontSize={15}
+        fontSize={cellFontSize}
         fontWeight={700}
         fill="#1e3a8a"
         pointerEvents="none"
       >
         {simpleOverviewExample.predictions[0]?.token ?? "?"}
       </text>
+      {hitPad > 0 && (
+        <HitPad
+          x={columnLeft(lastIdx, firstColX)}
+          y={layerRowY("Predict")}
+          pad={hitPad}
+          onClick={() => onCellClick(lastIdx, "Predict")}
+        />
+      )}
     </svg>
+  );
+}
+
+/**
+ * Invisible extra tap area around a cell, for the compact (phone) grid where
+ * the drawn cells are under 24px tall. The cell itself stays the labelled,
+ * focusable button; this only widens where a finger can land.
+ */
+function HitPad({ x, y, pad, onClick }: { x: number; y: number; pad: number; onClick: () => void }) {
+  return (
+    <rect
+      x={x}
+      y={y - pad}
+      width={CELL_WIDTH}
+      height={CELL_HEIGHT + 2 * pad}
+      fill="transparent"
+      style={{ cursor: "pointer" }}
+      onClick={onClick}
+      aria-hidden="true"
+    />
   );
 }
