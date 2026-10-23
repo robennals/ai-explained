@@ -7,7 +7,7 @@ An interactive, visual tutorial site for understanding AI from first principles.
 
 ## What's here
 
-The site walks through the big ideas behind modern AI — neural networks, embeddings, attention, transformers, and on to post-training, reasoning, and agents — using interactive widgets you can play with. Each chapter is a standalone article with playgrounds inline. A companion Jupyter notebook for each chapter lets you run real PyTorch code in Google Colab.
+The site walks through the big ideas behind modern AI — neural networks, embeddings, attention, transformers, and on to post-training, reasoning, agents, and what AI means for society and its risks — using interactive widgets you can play with. Each chapter is a standalone article with playgrounds inline. A companion Jupyter notebook for each chapter lets you run real PyTorch code in Google Colab.
 
 See `src/lib/curriculum.ts` for the full chapter list.
 

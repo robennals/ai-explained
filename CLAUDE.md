@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Interactive visual tutorial website for understanding AI from first principles. Built with Next.js 16 (App Router), MDX, and interactive React widgets. Chapters 0–13 (Introduction through Agents) plus the PyTorch and Glossary appendices are published; more chapters are planned. `src/lib/curriculum.ts` is the source of truth — a chapter is published when its entry has `ready: true`. The longer-term plan is in `docs/plans/curriculum-outline.md`.
+Interactive visual tutorial website for understanding AI from first principles. Built with Next.js 16 (App Router), MDX, and interactive React widgets. Chapters 0–15 (Introduction through Catastrophic Risk) plus the PyTorch and Glossary appendices are published; more chapters are planned. `src/lib/curriculum.ts` is the source of truth — a chapter is published when its entry has `ready: true`. The longer-term plan is in `docs/plans/curriculum-outline.md`.
 
 ## Commands
 
