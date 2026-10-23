@@ -1,21 +1,30 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { sendGAEvent } from "@next/third-parties/google";
+import type { CaptureResult } from "posthog-js";
 import { chapterFromPathname, createOnceGuard } from "./analytics";
 
 vi.mock("@next/third-parties/google", () => ({ sendGAEvent: vi.fn() }));
+vi.mock("posthog-js", () => ({ default: { init: vi.fn(), capture: vi.fn() } }));
 
 // A fresh copy of the module per test, so events queued by one test can't
 // leak into the next.
 let track: typeof import("./analytics").track;
+let initPostHog: typeof import("./posthog").initPostHog;
+let addVercelEnv: typeof import("./posthog").addVercelEnv;
+let posthog: typeof import("posthog-js").default;
 
 beforeEach(async () => {
   vi.useFakeTimers();
   vi.resetModules();
   ({ track } = await import("./analytics"));
+  ({ initPostHog, addVercelEnv } = await import("./posthog"));
+  ({ default: posthog } = await import("posthog-js"));
 });
 
 afterEach(() => {
   vi.mocked(sendGAEvent).mockClear();
+  vi.mocked(posthog.init).mockClear();
+  vi.mocked(posthog.capture).mockClear();
   vi.unstubAllEnvs();
   vi.unstubAllGlobals();
   vi.useRealTimers();
@@ -74,6 +83,91 @@ describe("track", () => {
     fakeWindow.dataLayer = [];
     vi.advanceTimersByTime(60_000);
     expect(sendGAEvent).not.toHaveBeenCalled();
+  });
+});
+
+describe("track, with PostHog", () => {
+  it("sends the same event and parameters to PostHog as to GA", () => {
+    vi.stubEnv("NEXT_PUBLIC_VERCEL_ENV", "production");
+    vi.stubEnv("NEXT_PUBLIC_POSTHOG_KEY", "phc_test");
+    vi.stubGlobal("window", { dataLayer: [] });
+    initPostHog();
+    const params = { chapter: "vectors", question: 2, correct: true };
+    track("quiz_answer", params);
+    expect(posthog.capture).toHaveBeenCalledTimes(1);
+    expect(posthog.capture).toHaveBeenCalledWith("quiz_answer", params);
+    expect(sendGAEvent).toHaveBeenCalledWith("event", "quiz_answer", params);
+  });
+
+  it("doesn't wait for GA, which loads later", () => {
+    vi.stubEnv("NEXT_PUBLIC_VERCEL_ENV", "preview");
+    vi.stubEnv("NEXT_PUBLIC_POSTHOG_KEY", "phc_test");
+    vi.stubGlobal("window", {});
+    initPostHog();
+    track("chapter_start", { chapter: "vectors" });
+    expect(posthog.capture).toHaveBeenCalledWith("chapter_start", { chapter: "vectors" });
+    expect(sendGAEvent).not.toHaveBeenCalled();
+  });
+
+  it("does nothing without a project key", () => {
+    vi.stubEnv("NEXT_PUBLIC_VERCEL_ENV", "production");
+    vi.stubEnv("NEXT_PUBLIC_POSTHOG_KEY", "");
+    vi.stubGlobal("window", { dataLayer: [] });
+    initPostHog();
+    track("chapter_start", { chapter: "vectors" });
+    expect(posthog.init).not.toHaveBeenCalled();
+    expect(posthog.capture).not.toHaveBeenCalled();
+  });
+
+  it("does nothing outside production and previews", () => {
+    vi.stubEnv("NEXT_PUBLIC_VERCEL_ENV", "");
+    vi.stubEnv("NEXT_PUBLIC_POSTHOG_KEY", "phc_test");
+    vi.stubGlobal("window", { dataLayer: [] });
+    initPostHog();
+    track("chapter_start", { chapter: "vectors" });
+    expect(posthog.capture).not.toHaveBeenCalled();
+  });
+
+  it("does nothing on the server", () => {
+    vi.stubEnv("NEXT_PUBLIC_VERCEL_ENV", "production");
+    vi.stubEnv("NEXT_PUBLIC_POSTHOG_KEY", "phc_test");
+    initPostHog();
+    track("chapter_start", { chapter: "vectors" });
+    expect(posthog.capture).not.toHaveBeenCalled();
+    expect(sendGAEvent).not.toHaveBeenCalled();
+  });
+});
+
+describe("initPostHog", () => {
+  it("starts PostHog cookieless, through the site's proxy, tagging every event", () => {
+    vi.stubEnv("NEXT_PUBLIC_POSTHOG_KEY", "phc_test");
+    initPostHog();
+    expect(posthog.init).toHaveBeenCalledWith(
+      "phc_test",
+      expect.objectContaining({
+        api_host: "/ingest",
+        cookieless_mode: "always",
+        person_profiles: "never",
+        before_send: addVercelEnv,
+      }),
+    );
+  });
+});
+
+describe("addVercelEnv", () => {
+  it("adds vercel_env and changes nothing else", () => {
+    vi.stubEnv("NEXT_PUBLIC_VERCEL_ENV", "preview");
+    const event: CaptureResult = {
+      uuid: "1",
+      event: "chapter_start",
+      properties: { chapter: "vectors" },
+    };
+    expect(addVercelEnv(event)).toEqual({
+      uuid: "1",
+      event: "chapter_start",
+      properties: { chapter: "vectors", vercel_env: "preview" },
+    });
+    expect(event.properties).toEqual({ chapter: "vectors" });
   });
 });
 

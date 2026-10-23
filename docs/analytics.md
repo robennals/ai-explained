@@ -1,21 +1,27 @@
 # Analytics
 
-The site sends a small set of typed events to Google Analytics 4 (GA4) so we
-can tell whether readers learn, and which sources bring readers who stay.
-Vercel Analytics still records pageviews alongside it.
+The site sends a small set of typed events to Google Analytics 4 (GA4) and to
+PostHog, so we can tell whether readers learn, and which sources bring readers
+who stay. Vercel Analytics still records pageviews alongside them.
 
+- **Moving to PostHog.** GA sets cookies, which in the UK and EU need a consent
+  banner, and children use this site. PostHog runs in cookieless mode: it
+  stores nothing on the reader's device. Both run side by side until PostHog's
+  numbers check out, then GA goes. See [PostHog](#posthog).
 - **One helper.** Every event goes through `track(event, params)` in
-  [`src/lib/analytics.ts`](../src/lib/analytics.ts). Event names and their
-  parameters are a TypeScript type, so a typo fails to compile.
+  [`src/lib/analytics.ts`](../src/lib/analytics.ts), which sends it to both
+  tools with the same name and parameters. Event names and their parameters
+  are a TypeScript type, so a typo fails to compile.
 - **No personal data.** Children use this site. Parameters are chapter slugs,
   widget names, question numbers, booleans and scores — never names, emails,
   free text or user ids.
-- **Where it runs.** GA loads on production, and on Vercel preview
-  deployments in debug mode so new events can be checked before they ship.
-  Local dev and tests send nothing.
+- **Where it runs.** GA and PostHog load on production, and on Vercel preview
+  deployments so new events can be checked before they ship (GA in debug
+  mode; PostHog tags each event with `vercel_env`). Local dev and tests send
+  nothing.
 - **Reading the data.** The `analytics-review` skill
   ([`.claude/skills/analytics-review/`](../.claude/skills/analytics-review/SKILL.md))
-  has Claude pull the numbers and say where readers get stuck. See
+  has Claude pull the numbers from GA4 and say where readers get stuck. See
   [Querying from Claude](#querying-from-claude) for its one-time setup.
 
 ## Events
@@ -45,9 +51,82 @@ Details worth knowing when reading the numbers:
 - **Educator events are not wired yet.** The `/educators` and `/teach` pages
   don't exist yet; when they land they call
   `track("educator_page_view", { page })` and `track("educator_signup", {})`.
-- **Source tracking.** GA4 reads `utm_source` / `utm_campaign` from the
-  landing URL itself. Nothing in the app redirects or rewrites the URL on
+- **Source tracking.** GA4 and PostHog read `utm_source` / `utm_campaign`
+  from the landing URL itself. Nothing in the app redirects or rewrites the URL on
   first load, so links like `?utm_source=educator` arrive intact.
+
+## PostHog
+
+PostHog is set up in [`src/lib/posthog.ts`](../src/lib/posthog.ts) and started
+from [`src/instrumentation-client.ts`](../src/instrumentation-client.ts), which
+runs before React hydrates the page, so the first render's `chapter_start`
+isn't lost.
+
+- **Cookieless.** With `cookieless_mode: "always"` PostHog uses no cookies,
+  local storage or session storage. Its servers recognise a reader for one day
+  with a hash of the IP address, browser and a salt that changes daily, then
+  throw the IP address away.
+- **What it records.** Page views (including moves between pages with the
+  site's own links) and the events above. Click autocapture, page-leave
+  events, session recordings, surveys, heatmaps and error capture are all off
+  in code, to stay inside the free plan's 1 million events a month.
+- **Previews share the project.** The free plan has one project, so every
+  event carries `vercel_env` (`"production"` or `"preview"`). Filter reports
+  to `vercel_env = production`.
+- **Proxied.** Requests go to `/ingest` on the site's own domain, which
+  `next.config.ts` forwards to PostHog's EU servers, so ad blockers block it
+  less often.
+- **Off without a key.** It loads only where GA does, and only when
+  `NEXT_PUBLIC_POSTHOG_KEY` is set.
+- **Known gaps.** No country or city data, and returning readers look new
+  each day. Known bots (Googlebot and the like) are dropped in the browser by
+  their user agent, but PostHog's server-side bot detection doesn't run. Readers sharing an IP address and browser — a
+  class on school Chromebooks — count as one "user".
+
+### One-time PostHog setup (manual)
+
+1. **Create a PostHog project** on EU cloud (the region is fixed at signup).
+2. **Turn on "Cookieless server hash mode"** under Project settings → Web
+   analytics. Without it, PostHog silently drops every event.
+3. **Check "Discard client IP data" is off**, if the project has that setting.
+   The daily hash needs the IP address, and cookieless mode already removes it.
+4. **Add `NEXT_PUBLIC_POSTHOG_KEY`** (the project key, which is public by
+   design) in Vercel for Production and Preview, then redeploy.
+5. **Optional: add a card and set a billing limit.** That keeps 7 years of
+   history instead of the free plan's 1.
+
+### Checking PostHog works
+
+On a preview deployment with the key set:
+
+1. **Nothing stored.** After reading a chapter, `document.cookie` and
+   `localStorage` have no keys starting `ph_` or containing `posthog`. GA's
+   `_ga` cookies are still there while GA runs.
+2. **Events arrive.** PostHog's **Activity** view shows a page view,
+   `chapter_start`, `section_reached`, `widget_interact` and `quiz_answer`,
+   with their parameters and `vercel_env: "preview"`.
+3. **Readers stay distinct.** Open the preview from two networks (Wi-Fi and a
+   phone on mobile data): they should get different `distinct_id`s. One shared
+   id means the proxy is hiding the reader's IP address.
+4. **One page view per move.** Following next/previous chapter links adds
+   exactly one page view each time.
+5. **Same-site requests.** The Network tab shows PostHog requests going to
+   `/ingest` on the site's domain.
+
+### Reading drop-off in PostHog
+
+Make a **Trends** insight counting `section_reached` events, broken down by
+`section`, filtered to one `chapter` and to `vercel_env = production`. Plain
+event counts are unaffected when a classroom merges into one "user"; funnel
+insights are, so treat funnels as a secondary view. To compare phones with
+desktops, add a breakdown by **Device type**, which PostHog records on every
+event without any code of ours.
+
+### Comparing with GA
+
+To decide whether PostHog can be trusted, compare daily `chapter_start` counts
+per chapter in both tools over the same dates. They should roughly match.
+PostHog may run a little higher, since its proxy dodges some ad blockers.
 
 ## One-time GA4 setup (manual)
 

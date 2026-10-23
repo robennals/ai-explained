@@ -1,12 +1,13 @@
 import { sendGAEvent } from "@next/third-parties/google";
 import { getChapter } from "@/lib/curriculum";
+import { sendPostHogEvent } from "@/lib/posthog";
 
 /**
- * Typed Google Analytics events. Children use this site, so parameters are
+ * Typed analytics events, sent to Google Analytics and PostHog. Children use this site, so parameters are
  * limited to chapter slugs, widget names, question numbers, booleans and
  * scores — never names, emails, free text or user ids.
  *
- * docs/analytics.md lists when each event fires and how to read them in GA4.
+ * docs/analytics.md lists when each event fires and how to read them.
  */
 
 export const GA_ID = "G-4BJPJ1RZR6";
@@ -61,6 +62,8 @@ export function track<E extends AnalyticsEvent>(
   params: AnalyticsEvents[E],
 ): void {
   if (typeof window === "undefined" || !isAnalyticsEnabled()) return;
+  // PostHog starts before hydration, so unlike GA it needs no queue.
+  sendPostHogEvent(event, params);
   pending.push([event, params]);
   if (!retryTimer) flush();
 }

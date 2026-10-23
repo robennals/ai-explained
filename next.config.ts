@@ -17,8 +17,26 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_GIT_BRANCH: getGitBranch(),
     // Exposes VERCEL_ENV to client code, which uses it to decide whether
-    // Google Analytics is loaded (see src/lib/analytics.ts).
+    // analytics is loaded (see src/lib/analytics.ts).
     NEXT_PUBLIC_VERCEL_ENV: process.env.VERCEL_ENV ?? "",
+  },
+  // PostHog's traffic goes through the site's own domain, so ad blockers
+  // block it less often (see src/lib/posthog.ts).
+  async rewrites() {
+    return [
+      { source: "/ingest/static/:path*", destination: "https://eu-assets.i.posthog.com/static/:path*" },
+      { source: "/ingest/array/:path*", destination: "https://eu-assets.i.posthog.com/array/:path*" },
+      { source: "/ingest/:path*", destination: "https://eu.i.posthog.com/:path*" },
+    ];
+  },
+  // PostHog's API paths end in a slash (`/e/`), and Next.js would answer each
+  // one with a redirect. So Next's own trailing-slash redirect is off, and the
+  // redirect below does the same job for every path outside /ingest.
+  skipTrailingSlashRedirect: true,
+  async redirects() {
+    return [
+      { source: "/:path((?!ingest/).+)/", destination: "/:path", permanent: true },
+    ];
   },
 };
 
