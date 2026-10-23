@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Interactive visual tutorial website for understanding AI from first principles. Built with Next.js 16 (App Router), MDX, and interactive React widgets. Currently Chapter 1 is implemented; 17 chapters are planned (see `docs/plans/curriculum-outline.md`).
+Interactive visual tutorial website for understanding AI from first principles. Built with Next.js 16 (App Router), MDX, and interactive React widgets. Chapters 0–15 (Introduction through Catastrophic Risk) plus the PyTorch and Glossary appendices are published; more chapters are planned. `src/lib/curriculum.ts` is the source of truth — a chapter is published when its entry has `ready: true`. The longer-term plan is in `docs/plans/curriculum-outline.md`.
 
 ## Commands
 
@@ -52,7 +52,8 @@ Widgets are client-side interactive components (`"use client"`) organized by cha
 ```
 src/components/widgets/
   shared/             — WidgetContainer, SliderControl, SelectControl, ToggleControl
-  computation/        — Chapter 1 widgets
+  {topic}/            — one folder per chapter with widgets, named after its slug (e.g. computation/,
+                        neurons/, attention/, agents/); matrix-math widgets live in matrices/
 ```
 
 **Pattern for widgets**: Each widget wraps in `<WidgetContainer>` for consistent chrome (title, description, reset button). Widgets are dynamically imported with `next/dynamic` + `{ ssr: false }` and wrapped in `<Suspense>`.
@@ -73,7 +74,7 @@ src/components/widgets/
 1. Add chapter metadata to `src/lib/curriculum.ts`
 2. Create `src/app/(tutorial)/{slug}/` with `page.tsx`, `content.mdx`, `widgets.tsx`
 3. Create widgets in `src/components/widgets/{topic}/`
-4. Follow the `01-computation` chapter as a template
+4. Follow the `computation` chapter as a template
 
 The chapter title and subtitle are rendered by `<ChapterHeader slug="..." />` in `page.tsx`, reading from `curriculum.ts`. `content.mdx` therefore starts with the opening paragraph and contains no `#` heading of its own.
 
@@ -96,7 +97,7 @@ Test notebooks: `pnpm test:notebooks`. This runs `scripts/test-notebooks.sh`, wh
 **Never commit large data files** (model weights, embeddings, datasets, zip archives) to git. These bloat the repo permanently — even removing them later leaves them in history.
 
 - `data/` — local directory for large downloaded files, fully gitignored. Scripts and notebooks should download what they need here on demand.
-- `notebooks/` — gitignore covers `glove.*` and other large artifacts. Notebooks should download data at runtime (see `04-embeddings.ipynb` for the pattern).
+- `notebooks/` — gitignore covers `glove.*` and other large artifacts. Notebooks should download data at runtime (see `embeddings.ipynb` for the pattern).
 
 If a script needs a large file, it should check if the file exists and download it if not, rather than expecting it to be in the repo.
 

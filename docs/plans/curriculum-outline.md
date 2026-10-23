@@ -4,7 +4,7 @@
 
 Every chapter should have at least one "wait, what?" moment — something counterintuitive, a surprising connection to an unrelated domain, or an approach that *seems* like it should work but spectacularly doesn't. The goal is not to march through concepts linearly, but to make readers feel the *shape* of the problem space.
 
-The target audience is smart middle schoolers. Every chapter must connect to their lived experience — their phone, their games, ChatGPT, DALL-E, YouTube recommendations. Technical concepts (activation functions, loss functions, regularization, matrix math) are covered *within* exciting narrative chapters, not as standalone topics. No chapter should feel like a textbook section they have to get through before the fun stuff.
+The target audience is curious learners from about age 12 to adults. Every chapter must connect to their lived experience — their phone, their games, ChatGPT, DALL-E, YouTube recommendations. Technical concepts (activation functions, loss functions, regularization, matrix math) are covered *within* exciting narrative chapters, not as standalone topics. No chapter should feel like a textbook section they have to get through before the fun stuff.
 
 ## Widget Philosophy
 
