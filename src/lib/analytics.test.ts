@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { sendGAEvent } from "@next/third-parties/google";
 import type { CaptureResult } from "posthog-js";
-import { chapterFromPathname, createOnceGuard } from "./analytics";
+import { chapterFromPathname, createOnceGuard, onFirstSeen } from "./analytics";
 
 vi.mock("@next/third-parties/google", () => ({ sendGAEvent: vi.fn() }));
 vi.mock("posthog-js", () => ({ default: { init: vi.fn(), capture: vi.fn() } }));
@@ -48,10 +48,11 @@ describe("track", () => {
   it("sends the event once GA is loaded", () => {
     vi.stubEnv("NEXT_PUBLIC_VERCEL_ENV", "preview");
     vi.stubGlobal("window", { dataLayer: [] });
-    track("quiz_answer", { chapter: "vectors", question: 2, correct: true });
+    track("quiz_answer", { chapter: "vectors", question: 2, choice: "A", correct: true });
     expect(sendGAEvent).toHaveBeenCalledWith("event", "quiz_answer", {
       chapter: "vectors",
       question: 2,
+      choice: "A",
       correct: true,
     });
   });
@@ -92,7 +93,7 @@ describe("track, with PostHog", () => {
     vi.stubEnv("NEXT_PUBLIC_POSTHOG_KEY", "phc_test");
     vi.stubGlobal("window", { dataLayer: [] });
     initPostHog();
-    const params = { chapter: "vectors", question: 2, correct: true };
+    const params = { chapter: "vectors", question: 2, choice: "A", correct: true };
     track("quiz_answer", params);
     expect(posthog.capture).toHaveBeenCalledTimes(1);
     expect(posthog.capture).toHaveBeenCalledWith("quiz_answer", params);
@@ -182,6 +183,56 @@ describe("createOnceGuard", () => {
   it("starts fresh for each guard, so a new page visit fires again", () => {
     createOnceGuard()("complete");
     expect(createOnceGuard()("complete")).toBe(true);
+  });
+});
+
+describe("onFirstSeen", () => {
+  // A stand-in for the browser's IntersectionObserver that tests drive by
+  // hand: `show(visible)` reports the watched element entering or leaving.
+  function fakeObserver() {
+    let callback: (entries: { isIntersecting: boolean }[]) => void = () => {};
+    let watching = false;
+    vi.stubGlobal(
+      "IntersectionObserver",
+      class {
+        constructor(cb: typeof callback) {
+          callback = cb;
+        }
+        observe() {
+          watching = true;
+        }
+        disconnect() {
+          watching = false;
+        }
+      },
+    );
+    return {
+      // Tests have no DOM, and the fake never reads the element it watches.
+      el: {} as Element,
+      show: (visible: boolean) => {
+        if (watching) callback([{ isIntersecting: visible }]);
+      },
+    };
+  }
+
+  it("fires once, the first time the element comes into view", () => {
+    const observer = fakeObserver();
+    const onSeen = vi.fn();
+    onFirstSeen(observer.el, onSeen);
+    observer.show(false);
+    expect(onSeen).not.toHaveBeenCalled();
+    observer.show(true);
+    observer.show(false);
+    observer.show(true);
+    expect(onSeen).toHaveBeenCalledTimes(1);
+  });
+
+  it("stops watching when cleaned up", () => {
+    const observer = fakeObserver();
+    const onSeen = vi.fn();
+    onFirstSeen(observer.el, onSeen)();
+    observer.show(true);
+    expect(onSeen).not.toHaveBeenCalled();
   });
 });
 

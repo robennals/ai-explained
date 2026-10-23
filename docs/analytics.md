@@ -31,8 +31,9 @@ who stay. Vercel Analytics still records pageviews alongside them.
 | `chapter_start` | chapter page loads | `chapter` |
 | `section_reached` | a `##` heading scrolls into view, once per section per page load | `chapter`, `section` (heading id) |
 | `chapter_complete` | the quiz scrolls into view, or the end of the chapter for chapters without one | `chapter` |
+| `widget_view` | a widget scrolls into view (its top past the bottom quarter of the screen), once per widget per page load | `chapter`, `widget` (the widget's title) |
 | `widget_interact` | first pointer/keyboard interaction inside each widget, once per page load | `chapter`, `widget` (the widget's title) |
-| `quiz_answer` | a quiz question is answered (first attempt only) | `chapter`, `question` (1-based), `correct` |
+| `quiz_answer` | a quiz question is answered (first attempt only) | `chapter`, `question` (1-based), `choice` (the option's letter, `"A"`, `"B"`…), `correct` |
 | `quiz_complete` | all questions answered (first attempt only) | `chapter`, `score`, `total` |
 | `colab_open` | a `<TryItInPyTorch>` link is clicked | `chapter` |
 | `educator_page_view` | `/educators` or any `/{slug}/teach` loads | `page` |
@@ -46,6 +47,14 @@ Details worth knowing when reading the numbers:
 - **"First attempt" survives reloads.** Answers restored from the browser's
   saved quiz state are not re-sent. After the reader presses "Retake quiz",
   that quiz sends no more `quiz_*` events from that browser.
+- **Widget use is a ratio.** `widget_interact` ÷ `widget_view` for a widget
+  is the share of readers who reached it and tried it. Dividing by
+  `chapter_start` instead would blame a late widget for readers who quit
+  before it.
+- **Wrong answers point at misunderstandings.** Count `quiz_answer` by
+  `question` and `choice`: a wrong letter many readers pick marks a
+  misconception the chapter should address. Letters match the order of
+  options in the chapter's `quiz.mdx`.
 - **Widget names are widget titles.** Every widget passes a distinct `title`
   to `WidgetContainer`, so renaming a widget starts a new row in reports.
 - **Educator events are not wired yet.** The `/educators` and `/teach` pages
@@ -67,9 +76,14 @@ isn't lost.
   with a hash of the IP address, browser and a salt that changes daily, then
   throw the IP address away.
 - **What it records.** Page views (including moves between pages with the
-  site's own links) and the events above. Click autocapture, page-leave
-  events, session recordings, surveys, heatmaps and error capture are all off
-  in code, to stay inside the free plan's 1 million events a month.
+  site's own links), page leaves, and the events above. Click autocapture,
+  session recordings, surveys, heatmaps and error capture are all off in
+  code, to stay inside the free plan's 1 million events a month.
+- **Time and scroll depth.** Each page view carries
+  `$prev_pageview_duration` (seconds) and
+  `$prev_pageview_max_scroll_percentage` for the page before it, and a
+  `$pageleave` event carries the same for the last page of a visit. The time
+  includes any spell in a background tab, so read medians, not averages.
 - **Previews share the project.** The free plan has one project, so every
   event carries `vercel_env` (`"production"` or `"preview"`). Filter reports
   to `vercel_env = production`.
@@ -143,6 +157,7 @@ In GA4 → **Admin → Data display → Custom definitions**:
 | Custom dimension | Section | `section` | Event |
 | Custom dimension | Widget | `widget` | Event |
 | Custom dimension | Quiz question | `question` | Event |
+| Custom dimension | Quiz choice | `choice` | Event |
 | Custom dimension | Quiz correct | `correct` | Event |
 | Custom dimension | Educator page | `page` | Event |
 | Custom metric | Quiz score | `score` | Standard |
