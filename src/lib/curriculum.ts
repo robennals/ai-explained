@@ -2,6 +2,9 @@ export interface Chapter {
   id: number;
   slug: string;
   title: string;
+  /** Title shown in search results and link previews, phrased the way people
+   * search for the topic. Falls back to `title`. */
+  searchTitle?: string;
   subtitle: string;
   prerequisites: number[];
   description: string;
@@ -26,6 +29,7 @@ export const chapters: Chapter[] = [
     id: 1,
     slug: "computation",
     title: "Computation",
+    searchTitle: "Computation: What Is an AI Model?",
     subtitle: "Everything is numbers",
     prerequisites: [],
     description:
@@ -36,6 +40,7 @@ export const chapters: Chapter[] = [
     id: 2,
     slug: "optimization",
     title: "Optimization",
+    searchTitle: "Optimization: How AI Learns by Gradient Descent",
     subtitle: "The power of incremental improvement",
     prerequisites: [1],
     description:
@@ -46,6 +51,7 @@ export const chapters: Chapter[] = [
     id: 3,
     slug: "neurons",
     title: "Neural Networks",
+    searchTitle: "Neural Networks, Explained Interactively",
     subtitle: "Building a brain",
     prerequisites: [2],
     description:
@@ -56,6 +62,7 @@ export const chapters: Chapter[] = [
     id: 4,
     slug: "vectors",
     title: "Vectors",
+    searchTitle: "Vectors and Dot Products for AI",
     subtitle: "Describing the world with numbers",
     prerequisites: [3],
     description:
@@ -66,6 +73,7 @@ export const chapters: Chapter[] = [
     id: 5,
     slug: "embeddings",
     title: "Embeddings",
+    searchTitle: "Word Embeddings, Interactive",
     subtitle: "From words to meanings",
     prerequisites: [4],
     description:
@@ -76,6 +84,7 @@ export const chapters: Chapter[] = [
     id: 6,
     slug: "next-word-prediction",
     title: "Next-Word Prediction",
+    searchTitle: "Next-Word Prediction: How LLMs Generate Text",
     subtitle: "Understanding by predicting",
     prerequisites: [5],
     description:
@@ -86,6 +95,7 @@ export const chapters: Chapter[] = [
     id: 7,
     slug: "attention",
     title: "Attention",
+    searchTitle: "Attention in Transformers, Explained Interactively",
     subtitle: "Letting words look at each other",
     prerequisites: [6],
     description:
@@ -96,6 +106,7 @@ export const chapters: Chapter[] = [
     id: 8,
     slug: "positions",
     title: "Positional Encoding",
+    searchTitle: "Positional Encoding in Transformers",
     subtitle: "Where am I?",
     prerequisites: [7],
     description:
@@ -106,6 +117,7 @@ export const chapters: Chapter[] = [
     id: 9,
     slug: "transformers",
     title: "Transformers",
+    searchTitle: "Transformers: How LLMs Work Inside",
     subtitle: "One architecture to rule them all",
     prerequisites: [8],
     description:
@@ -116,6 +128,7 @@ export const chapters: Chapter[] = [
     id: 10,
     slug: "post-training",
     title: "Post-Training",
+    searchTitle: "Post-Training: From Base Model to Assistant",
     subtitle: "Teaching a model to be useful",
     prerequisites: [9],
     description:
@@ -126,6 +139,7 @@ export const chapters: Chapter[] = [
     id: 11,
     slug: "conversations",
     title: "Conversations",
+    searchTitle: "Conversations: How AI Chatbots Work",
     subtitle: "One long document, pretending to be a chat",
     prerequisites: [10],
     description:
@@ -136,6 +150,7 @@ export const chapters: Chapter[] = [
     id: 12,
     slug: "reasoning",
     title: "Reasoning",
+    searchTitle: "Reasoning: How AI Reasoning Models Work",
     subtitle: "Thinking by talking to yourself",
     prerequisites: [11],
     description:
@@ -146,6 +161,7 @@ export const chapters: Chapter[] = [
     id: 13,
     slug: "agents",
     title: "Agents",
+    searchTitle: "Agents: How AI Agents Work",
     subtitle: "Getting things done",
     prerequisites: [11],
     description:
@@ -156,6 +172,7 @@ export const chapters: Chapter[] = [
     id: 14,
     slug: "society",
     title: "AI and Society",
+    searchTitle: "AI and Society: Bias, Truth, and Energy Use",
     subtitle: "Changing the shape of the world",
     prerequisites: [13],
     description:
@@ -166,6 +183,7 @@ export const chapters: Chapter[] = [
     id: 15,
     slug: "risk",
     title: "Catastrophic Risk",
+    searchTitle: "Catastrophic Risk: Could AI Go Badly Wrong?",
     subtitle: "Could AI go badly wrong?",
     prerequisites: [14],
     description:
@@ -320,6 +338,7 @@ export const chapters: Chapter[] = [
     id: 32,
     slug: "appendix-pytorch",
     title: "PyTorch from Scratch",
+    searchTitle: "PyTorch from Scratch, for Beginners",
     subtitle: "A hands-on introduction to the code behind AI",
     prerequisites: [],
     description:
@@ -331,6 +350,7 @@ export const chapters: Chapter[] = [
     id: 33,
     slug: "glossary",
     title: "Glossary",
+    searchTitle: "AI Glossary",
     subtitle: "Words this tutorial uses, in one place",
     prerequisites: [],
     description:

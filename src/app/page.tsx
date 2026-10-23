@@ -13,6 +13,9 @@ import { NewChaptersSignup } from "@/components/home/NewChaptersSignup";
 import { PyTorchPromo } from "@/components/home/PyTorchPromo";
 
 export const metadata: Metadata = {
+  title: {
+    absolute: "Learn AI Layer by Layer: An Interactive, Visual Guide to How AI Works",
+  },
   alternates: {
     canonical: "/",
   },
