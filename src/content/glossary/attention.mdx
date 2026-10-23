@@ -1,0 +1,24 @@
+---
+term: attention
+aliases: [attentions]
+firstAppearance: attention
+---
+
+**Attention** is the mechanism that lets a token in one layer of a transformer know which tokens in the previous layer to get information from.
+
+For each token, attention answers a single question: out of all the tokens in the previous layer, which ones have the information I need? It does this by giving every token three vectors:
+
+- A **query** — what kind of information this token is looking for (e.g. "a noun").
+- A **key** — a label describing the kind of information this token offers to others (e.g. "a noun"). The key is a *tag*, not the actual content.
+- A **value** — the actual content this token shares when others attend to it (e.g. the specific identity "cat").
+
+Each token's query is matched against every other token's key via dot product; the highest-scoring matches contribute their values most strongly, and the token's new representation is the softmax-weighted blend of those values. In short: *query asks, key advertises, value delivers*.
+
+Some examples:
+
+- **A pronoun resolving itself** — "she" has a query for "female noun"; "the woman" has a key advertising female-noun info and a value carrying who that woman is. The query matches the key, and "she" pulls in the value.
+- **Disambiguating "bank"** — in "she made a deposit at the bank", "bank" asks "is there a money-context word nearby?"; "deposit"'s key advertises that, so "bank" gathers in its value — the financial context — rather than river information.
+- **A pronoun resolved across paragraphs** — a novel introduces "John" once at the start; thousands of words later, "John picked up the scalpel" — attention can gather information from the original introduction. No fixed-window model can do this.
+- **Inside ChatGPT** — every token in your prompt and the model's response uses attention to gather information from every previous token, in parallel, at every layer.
+
+Attention is the single biggest reason modern AI works as well as it does — it's the *A* in *Attention Is All You Need*, the paper that introduced the transformer.

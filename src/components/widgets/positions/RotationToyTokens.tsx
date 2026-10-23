@@ -2,11 +2,13 @@
 
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
+import { useIsPhone } from "../shared/useMediaQuery";
+import { keepInHorizontalView } from "../shared/keepInHorizontalView";
 import { SliderControl } from "../shared/SliderControl";
 import { VectorCard } from "../vectors/VectorCard";
 
 /* ------------------------------------------------------------------ */
-/*  Data — same toy tokens as ALiBiToyTokens                          */
+/*  Data — one real sentence: "The dog chased the cat and bit it"      */
 /* ------------------------------------------------------------------ */
 
 interface Token {
@@ -16,36 +18,30 @@ interface Token {
   color: string;
 }
 
-interface Sentence {
-  label: string;
-  tokens: Token[];
-}
-
 const S = 3;
 
-const CAT: Token = {
-  label: "cat", key: [S], query: [0],
-  color: "text-amber-600 dark:text-amber-400",
-};
 const DOG: Token = {
   label: "dog", key: [S], query: [0],
   color: "text-blue-600 dark:text-blue-400",
 };
-const BLA: Token = {
-  label: "blah", key: [0], query: [0],
-  color: "text-foreground/40",
+const CAT: Token = {
+  label: "cat", key: [S], query: [0],
+  color: "text-amber-600 dark:text-amber-400",
 };
 const IT: Token = {
   label: "it", key: [0], query: [S],
   color: "text-purple-600 dark:text-purple-400",
 };
 
-const SENTENCES: Sentence[] = [
-  { label: "dog blah blah blah cat blah it", tokens: [DOG, BLA, BLA, BLA, CAT, BLA, IT] },
-  { label: "cat blah blah blah dog blah it", tokens: [CAT, BLA, BLA, BLA, DOG, BLA, IT] },
-  { label: "dog blah cat blah it", tokens: [DOG, BLA, CAT, BLA, IT] },
-  { label: "cat blah blah blah blah dog blah blah it", tokens: [CAT, BLA, BLA, BLA, BLA, DOG, BLA, BLA, IT] },
-];
+// Filler words carry no noun signal (key 0), so "it" never attends to them.
+const filler = (label: string): Token => ({
+  label, key: [0], query: [0],
+  color: "text-foreground/40",
+});
+
+// "it" refers to the cat (the one that got bitten). The cat sits 3 positions
+// back and the dog 6, so faster rotation tips attention toward the cat.
+const TOKENS: Token[] = [filler("The"), DOG, filler("chased"), filler("the"), CAT, filler("and"), filler("bit"), IT];
 
 /* ------------------------------------------------------------------ */
 /*  Math                                                              */
@@ -242,16 +238,16 @@ function RotationCircle({
 /* ------------------------------------------------------------------ */
 
 export function RotationToyTokens() {
-  const [sentIdx, setSentIdx] = useState(0);
   const [degPerPos, setDegPerPos] = useState(15);
   const [selectedToken, setSelectedToken] = useState<number | null>(null);
   const [arrows, setArrows] = useState<Arrow[]>([]);
 
   const rowRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<Map<number, HTMLElement>>(new Map());
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const compact = useIsPhone();
 
-  const sentence = SENTENCES[sentIdx];
-  const tokens = sentence.tokens;
+  const tokens = TOKENS;
   const itIdx = tokens.length - 1;
 
   // Find the default selected token (first noun) when sentence changes
@@ -268,15 +264,9 @@ export function RotationToyTokens() {
   const isClickable = (t: Token) => t.label !== "it";
 
   const handleReset = useCallback(() => {
-    setSentIdx(0);
     setDegPerPos(15);
     setSelectedToken(null);
   }, []);
-
-  const handleSentenceChange = (idx: number) => {
-    setSentIdx(idx);
-    setSelectedToken(null); // reset to default for new sentence
-  };
 
   // Compute rotated dot products and attention weights
   const itQuery = rotateScalar(tokens[itIdx].query[0], itIdx * degPerPos);
@@ -328,7 +318,18 @@ export function RotationToyTokens() {
     });
 
     return () => cancelAnimationFrame(raf);
-  }, [itIdx, weights, sentIdx, tokens]);
+  }, [itIdx, weights, tokens]);
+
+  // When the sentence doesn't fit (phones), keep "it" and the token it attends
+  // to most on screen.
+  const topTarget = weights.reduce((best, w, i) => (i !== itIdx && w > weights[best] ? i : best), 0);
+  useEffect(() => {
+    const scroller = scrollRef.current;
+    if (!scroller) return;
+    keepInHorizontalView(scroller, [cardRefs.current.get(itIdx), cardRefs.current.get(topTarget)], {
+      behavior: "auto",
+    });
+  }, [compact, itIdx, topTarget]);
 
   const arcPad = 50;
 
@@ -345,27 +346,10 @@ export function RotationToyTokens() {
   return (
     <WidgetContainer
       title="Rotation Applied to a Dimension"
-      description="One dimension gets split into x/y and rotated by position. Click a noun to inspect its rotated vector."
+      description="One dimension gets split into x/y and rotated by position. Tap a noun to inspect its rotated vector."
       onReset={handleReset}
     >
       <div className="flex flex-col gap-5">
-        {/* Sentence selector */}
-        <div className="flex flex-wrap gap-1.5">
-          {SENTENCES.map((s, i) => (
-            <button
-              key={i}
-              onClick={() => handleSentenceChange(i)}
-              className={`rounded-full px-3 py-1 font-mono text-xs font-medium transition-colors ${
-                i === sentIdx
-                  ? "bg-accent text-white"
-                  : "bg-foreground/5 text-muted hover:bg-foreground/10 hover:text-foreground"
-              }`}
-            >
-              {s.label}
-            </button>
-          ))}
-        </div>
-
         {/* Rotation speed slider */}
         <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 dark:border-amber-900 dark:bg-amber-950/30">
           <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
@@ -388,7 +372,7 @@ export function RotationToyTokens() {
         </div>
 
         {/* Token row with arrow overlay */}
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto" ref={scrollRef}>
           <div className="relative inline-flex min-w-full justify-center" ref={rowRef}>
             {/* SVG overlay for curved arrows */}
             {arrows.length > 0 && (
@@ -443,7 +427,7 @@ export function RotationToyTokens() {
               const clickable = isClickable(tok);
 
               return (
-                <div key={`${sentIdx}-${i}`} className="flex flex-col items-center" style={{ width: 56 }}>
+                <div key={`${i}`} className="flex flex-col items-center" style={{ width: compact ? 46 : 56 }}>
                   {/* Token label */}
                   <div
                     ref={(el) => {
@@ -459,7 +443,7 @@ export function RotationToyTokens() {
                         setSelectedToken(i);
                       }
                     } : undefined}
-                    className={`rounded-md border px-2 py-1 ${
+                    className={`rounded-md border px-1 py-1 sm:px-2 ${
                       isIt
                         ? "ring-2 ring-accent ring-offset-1 border-border bg-surface"
                         : isActive
@@ -469,20 +453,20 @@ export function RotationToyTokens() {
                         : "border-border bg-surface"
                     }`}
                   >
-                    <span className={`text-sm font-bold ${tok.color}`}>{tok.label}</span>
+                    <span className={`text-xs font-bold sm:text-sm ${tok.color}`}>{tok.label}</span>
                   </div>
 
                   {/* Compact info below the token */}
                   <div className="mt-1 flex flex-col items-center gap-0.5">
                     {isIt ? (
-                      <span className="text-[9px] font-bold text-accent uppercase">query</span>
+                      <span className="text-[10px] font-bold text-accent uppercase sm:text-[9px]">query</span>
                     ) : (
                       <>
-                        <span className="text-[9px] text-muted">
+                        <span className="text-[10px] text-muted sm:text-[9px]">
                           rot {(i * degPerPos)}°
                         </span>
                         {degPerPos > 0 && isNoun(tok) && (
-                          <span className="text-[9px] text-amber-600 dark:text-amber-400">
+                          <span className="text-[10px] text-amber-600 sm:text-[9px] dark:text-amber-400">
                             Δ{angleDiff}°
                           </span>
                         )}
@@ -491,13 +475,13 @@ export function RotationToyTokens() {
                     {/* Attention weight pill */}
                     {isTarget ? (
                       <span
-                        className="rounded-full px-1.5 py-0.5 font-mono text-[9px] font-bold text-white"
+                        className="rounded-full px-1.5 py-0.5 font-mono text-[10px] font-bold text-white sm:text-[9px]"
                         style={{ backgroundColor: weightToPill(weight) }}
                       >
                         {pct(weight)}
                       </span>
                     ) : (
-                      <span className={`font-mono text-[9px] font-bold ${isIt ? "text-accent" : "text-muted"}`}>
+                      <span className={`font-mono text-[10px] font-bold sm:text-[9px] ${isIt ? "text-accent" : "text-muted"}`}>
                         {pct(weight)}
                       </span>
                     )}

@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useRef } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
+import { useIsPhone } from "../shared/useMediaQuery";
+import { useSvgFontSize } from "../shared/useSvgScale";
 import { WidgetTabs } from "../shared/WidgetTabs";
 import { SliderControl } from "../shared/SliderControl";
 import { VectorCard } from "./VectorCard";
@@ -33,18 +35,23 @@ function NeuronDiagram({ dot, bias, output, outColor }: {
   dot: number; bias: number; output: number; outColor: string;
 }) {
   const preActivation = dot + bias;
+  // Phones: pull the stages closer together so the drawing scales down less
+  // and the small labels can be drawn larger.
+  const compact = useIsPhone();
 
-  const ND_W = 580;
+  const ND_W = compact ? 420 : 580;
   const ND_H = 215;
   const ND_IN_X = 45;
-  const ND_SUM_X = 200;
+  const ND_SUM_X = compact ? 160 : 200;
   const ND_SUM_Y = 110;
-  const ND_ACT_X = 360;
+  const ND_ACT_X = compact ? 270 : 360;
   const ND_ACT_Y = 110;
-  const ND_ACT_W = 100;
+  const ND_ACT_W = compact ? 90 : 100;
   const ND_ACT_H = 70;
-  const ND_OUT_X = 520;
+  const ND_OUT_X = compact ? 375 : 520;
   const ND_OUT_Y = 110;
+  const svgRef = useRef<SVGSVGElement>(null);
+  const fontSize = useSvgFontSize(svgRef, ND_W);
 
   const sigmoidPath = useMemo(() => {
     const pts: string[] = [];
@@ -60,7 +67,7 @@ function NeuronDiagram({ dot, bias, output, outColor }: {
       );
     }
     return pts.join(" ");
-  }, []);
+  }, [ND_ACT_X, ND_ACT_Y, ND_ACT_W, ND_ACT_H]);
 
   const opFrac = Math.max(0, Math.min(1, (preActivation + 10) / 20));
   const ndPL = ND_ACT_X - ND_ACT_W / 2 + 8;
@@ -78,19 +85,19 @@ function NeuronDiagram({ dot, bias, output, outColor }: {
   ];
 
   return (
-    <svg viewBox={`0 0 ${ND_W} ${ND_H}`} className="w-full mb-4 select-none" aria-label="Neuron as dot product diagram">
+    <svg ref={svgRef} viewBox={`0 0 ${ND_W} ${ND_H}`} className="w-full mb-4 select-none" aria-label="Neuron as dot product diagram">
       <defs>
         <marker id="ndp-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
           <path d="M 0 0 L 10 5 L 0 10 z" fill="#9ca3af" />
         </marker>
       </defs>
 
-      <text x={ND_IN_X} y={12} textAnchor="middle" className="fill-foreground text-[11px] font-bold">Input x</text>
+      <text x={ND_IN_X} y={12} textAnchor="middle" className="fill-foreground font-bold" style={{ fontSize: fontSize(11) }}>Input x</text>
 
       {inputNodes.map((node, i) => {
         if (!node.label) {
           return (
-            <text key={i} x={ND_IN_X} y={node.y + 5} textAnchor="middle" className="fill-muted text-[16px]">⋮</text>
+            <text key={i} x={ND_IN_X} y={node.y + 5} textAnchor="middle" className="fill-muted" style={{ fontSize: fontSize(16) }}>⋮</text>
           );
         }
         const wLabel = i === 0 ? "w₁" : i === 1 ? "w₂" : "wₙ";
@@ -99,28 +106,29 @@ function NeuronDiagram({ dot, bias, output, outColor }: {
         return (
           <g key={i}>
             <circle cx={ND_IN_X} cy={node.y} r={16} fill="#f0f4ff" stroke="#3b82f6" strokeWidth="1.5" />
-            <text x={ND_IN_X} y={node.y + 4} textAnchor="middle" className="fill-accent text-[11px] font-medium">{node.label}</text>
+            <text x={ND_IN_X} y={node.y + 4} textAnchor="middle" className="fill-accent font-medium" style={{ fontSize: fontSize(11) }}>{node.label}</text>
             <line x1={ND_IN_X + 16} y1={node.y} x2={ND_SUM_X - 26} y2={ND_SUM_Y} stroke="#9ca3af" strokeWidth="1.2" markerEnd="url(#ndp-arrow)" />
-            <text x={midX} y={midY - 5} textAnchor="middle" className="fill-muted text-[8px] font-mono">{wLabel}</text>
+            <text x={midX} y={midY - 5} textAnchor="middle" className="fill-muted font-mono" style={{ fontSize: fontSize(8) }}>{wLabel}</text>
           </g>
         );
       })}
 
-      <text x={(ND_IN_X + 16 + ND_SUM_X - 26) / 2} y={12} textAnchor="middle" className="fill-foreground text-[11px] font-bold">Weight w</text>
+      {/* On phones the header shifts right so it clears "Input x". */}
+      <text x={compact ? 118 : (ND_IN_X + 16 + ND_SUM_X - 26) / 2} y={12} textAnchor="middle" className="fill-foreground font-bold" style={{ fontSize: fontSize(11) }}>Weight w</text>
 
       <circle cx={ND_SUM_X} cy={ND_SUM_Y} r={24} fill="#fef9ee" stroke="#f59e0b" strokeWidth="1.5" />
-      <text x={ND_SUM_X} y={ND_SUM_Y - 3} textAnchor="middle" className="fill-foreground text-[10px] font-semibold">w · x</text>
-      <text x={ND_SUM_X} y={ND_SUM_Y + 10} textAnchor="middle" className="fill-foreground text-[10px] font-semibold">+ bias</text>
+      <text x={ND_SUM_X} y={ND_SUM_Y - 3} textAnchor="middle" className="fill-foreground font-semibold" style={{ fontSize: fontSize(10) }}>w · x</text>
+      <text x={ND_SUM_X} y={ND_SUM_Y + 10} textAnchor="middle" className="fill-foreground font-semibold" style={{ fontSize: fontSize(10) }}>+ bias</text>
 
       <line x1={ND_SUM_X} y1={ND_SUM_Y + 38} x2={ND_SUM_X} y2={ND_SUM_Y + 26} stroke="#9ca3af" strokeWidth="1" strokeDasharray="3,2" markerEnd="url(#ndp-arrow)" />
-      <text x={ND_SUM_X} y={ND_SUM_Y + 50} textAnchor="middle" className="fill-muted text-[9px]">bias = {bias.toFixed(1)}</text>
+      <text x={ND_SUM_X} y={ND_SUM_Y + 50} textAnchor="middle" className="fill-muted" style={{ fontSize: fontSize(9) }}>bias = {bias.toFixed(1)}</text>
 
-      <text x={ND_SUM_X} y={ND_SUM_Y - 30} textAnchor="middle" className="fill-warning text-[11px] font-bold font-mono">{preActivation.toFixed(2)}</text>
+      <text x={ND_SUM_X} y={ND_SUM_Y - 30} textAnchor="middle" className="fill-warning font-bold font-mono" style={{ fontSize: fontSize(11) }}>{preActivation.toFixed(2)}</text>
 
       <line x1={ND_SUM_X + 26} y1={ND_SUM_Y} x2={ND_ACT_X - ND_ACT_W / 2 - 4} y2={ND_ACT_Y} stroke="#9ca3af" strokeWidth="1.5" markerEnd="url(#ndp-arrow)" />
 
       <rect x={ND_ACT_X - ND_ACT_W / 2} y={ND_ACT_Y - ND_ACT_H / 2} width={ND_ACT_W} height={ND_ACT_H} rx={8} fill="#f0fdf4" stroke="#10b981" strokeWidth="1.5" />
-      <text x={ND_ACT_X} y={ND_ACT_Y - ND_ACT_H / 2 - 6} textAnchor="middle" className="fill-success text-[8px] font-semibold uppercase tracking-wider">Activation</text>
+      <text x={ND_ACT_X} y={ND_ACT_Y - ND_ACT_H / 2 - 6} textAnchor="middle" className="fill-success font-semibold uppercase tracking-wider" style={{ fontSize: fontSize(8) }}>Activation</text>
       <path d={sigmoidPath} fill="none" stroke="#10b981" strokeWidth="2" />
       <line x1={opSx} y1={ndPB} x2={opSx} y2={opSy} stroke="#f59e0b" strokeWidth="1" strokeDasharray="2,2" opacity={0.6} />
       <line x1={ndPL} y1={opSy} x2={opSx} y2={opSy} stroke="#f59e0b" strokeWidth="1" strokeDasharray="2,2" opacity={0.6} />
@@ -128,9 +136,9 @@ function NeuronDiagram({ dot, bias, output, outColor }: {
 
       <line x1={ND_ACT_X + ND_ACT_W / 2 + 2} y1={ND_ACT_Y} x2={ND_OUT_X - 22} y2={ND_OUT_Y} stroke="#9ca3af" strokeWidth="1.5" markerEnd="url(#ndp-arrow)" />
 
-      <text x={ND_OUT_X} y={ND_OUT_Y - 26} textAnchor="middle" className="fill-foreground text-[11px] font-bold">Output</text>
+      <text x={ND_OUT_X} y={ND_OUT_Y - 26} textAnchor="middle" className="fill-foreground font-bold" style={{ fontSize: fontSize(11) }}>Output</text>
       <circle cx={ND_OUT_X} cy={ND_OUT_Y} r={20} fill={outColor} stroke={outColor} strokeWidth="2" />
-      <text x={ND_OUT_X} y={ND_OUT_Y + 5} textAnchor="middle" className="fill-white text-[13px] font-bold font-mono">{output.toFixed(2)}</text>
+      <text x={ND_OUT_X} y={ND_OUT_Y + 5} textAnchor="middle" className="fill-white font-bold font-mono" style={{ fontSize: fontSize(13) }}>{output.toFixed(2)}</text>
     </svg>
   );
 }
@@ -202,7 +210,7 @@ function DomainNeuronTab({ domain, bias, onBiasChange, weightMag, onWeightMagCha
         <SliderControl label="weight magnitude" value={weightMag} min={0} max={Math.round(defaultMag * 2)} step={0.1} onChange={onWeightMagChange} />
       </div>
 
-      <div className="grid grid-cols-[1fr_1fr_auto] gap-2 items-start overflow-x-auto">
+      <div className="grid grid-cols-2 gap-2 items-start md:grid-cols-[1fr_1fr_auto]">
         {/* Row 1: selectors */}
         <div>
           <div className="mb-1 text-[10px] font-bold uppercase tracking-widest text-amber-500">Weight (Detects)</div>
@@ -240,7 +248,8 @@ function DomainNeuronTab({ domain, bias, onBiasChange, weightMag, onWeightMagCha
             ))}
           </div>
         </div>
-        <div>{/* empty cell above multiply column */}</div>
+        {/* empty cell above multiply column — desktop only */}
+        <div className="hidden md:block" />
 
         {/* Row 2: cards + product column */}
         <VectorCard
@@ -254,7 +263,10 @@ function DomainNeuronTab({ domain, bias, onBiasChange, weightMag, onWeightMagCha
           properties={domain.properties} values={inputItem.values}
           barColor="#3b82f6" label="input" labelColor="#3b82f6"
         />
-        <ProductColumn vecW={scaledWeightValues} vecX={inputItem.values} properties={domain.properties} dot={dot} />
+        {/* Multiply column: own row spanning weight+input on mobile */}
+        <div className="col-span-2 mt-2 flex justify-center md:col-span-1 md:mt-0 md:justify-start">
+          <ProductColumn vecW={scaledWeightValues} vecX={inputItem.values} properties={domain.properties} dot={dot} />
+        </div>
       </div>
     </>
   );

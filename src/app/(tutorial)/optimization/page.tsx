@@ -1,8 +1,11 @@
+import { ChapterHeader } from "@/components/layout/ChapterHeader";
 import { ChapterNav } from "@/components/layout/ChapterNav";
-import { getAdjacentChapters } from "@/lib/curriculum";
+import { chapterMetadata } from "@/lib/chapter-metadata";
 import Content from "./content.mdx";
+import { QuizContent } from "./QuizContent";
 import {
   OptimizationGameWidget,
+  BuiltStepByStepWidget,
   ErrorMeasurementWidget,
   SmoothRealWorldWidget,
   SmoothVsRuggedWidget,
@@ -10,21 +13,17 @@ import {
   Gradient2DCurveWidget,
 } from "./widgets";
 
-export const metadata = {
-  title: "The Power of Incremental Improvement — Learn AI Layer by Layer",
-  description:
-    "Evolution, the scientific method, and gradient descent are all the same algorithm. Reliable tiny improvements, repeated billions of times.",
-};
+export const metadata = chapterMetadata("optimization");
 
 export default function Chapter02() {
-  const { prev, next } = getAdjacentChapters("optimization");
-
   return (
     <article>
       <div className="prose prose-lg max-w-none">
+        <ChapterHeader slug="optimization" />
         <Content
           components={{
             OptimizationGameWidget,
+            BuiltStepByStepWidget,
             ErrorMeasurementWidget,
             SmoothRealWorldWidget,
             SmoothVsRuggedWidget,
@@ -33,7 +32,8 @@ export default function Chapter02() {
           }}
         />
       </div>
-      <ChapterNav prev={prev} next={next} />
+      <QuizContent />
+      <ChapterNav slug="optimization" />
     </article>
   );
 }

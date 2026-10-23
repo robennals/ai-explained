@@ -1,0 +1,18 @@
+---
+term: transformer
+aliases: [transformers]
+firstAppearance: transformers
+---
+
+A **transformer** is the neural-network architecture behind every major modern AI — ChatGPT, Claude, Gemini, Llama — built by stacking many layers, each of which uses attention to let every token gather information from every other token.
+
+A passage of text enters as token embeddings. Each layer creates a richer representation of every token by combining what's already known about that token with information attention pulls in from other tokens. After many layers, the final representation of the last token has enough context to predict what should come next. The architecture's defining trick is attention: instead of fixed wiring between neurons, attention decides at runtime which token's information should flow where.
+
+Some examples:
+
+- **A toy 5-layer transformer** — one attention head per layer, a few hundred parameters. Enough to demonstrate the wiring; not enough to do anything useful.
+- **GPT-2** — 12 layers, 12 heads per layer, 768-dimensional embeddings, ~117 million parameters. Generates short stories.
+- **GPT-3** — 96 layers, 96 heads per layer, 12 288-dimensional embeddings, 175 billion parameters. Surprised everyone with its emergent abilities.
+- **Frontier models like Claude or GPT-4** — exact dimensions undisclosed but believed to be substantially larger.
+
+The original paper introducing the architecture was called *"Attention Is All You Need"* — and the title turned out to be right. The same architecture, scaled up, is what powers nearly every conversation, translation, and code-completion tool you've used in the last few years.

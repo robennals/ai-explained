@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
 import { SliderControl } from "../shared/SliderControl";
+import { useSvgFontSize, useSvgTextScale } from "../shared/useSvgScale";
 
 const POINTS = [-2, -1, -0.5, 0.5, 1, 2];
 const COLORS = [
@@ -20,14 +21,23 @@ const LINE_X_END = 540;
 const Y_IN = 50;
 const Y_OUT = 140;
 
-function toX(value: number): number {
-  return (
-    LINE_X_START +
-    ((value + RANGE) / (2 * RANGE)) * (LINE_X_END - LINE_X_START)
-  );
-}
+// Phones: start the number lines further right so the enlarged
+// "input"/"output" labels fit in the left margin.
+const PHONE_LINE_X_START = 110;
+const PHONE_LINE_X_END = 570;
 
 export function Transform1D() {
+  const svgRef = useRef<SVGSVGElement>(null);
+  const ts = useSvgTextScale(svgRef, 600);
+  const fontSize = useSvgFontSize(svgRef, 600);
+  const squeezed = ts > 1;
+  const lineStart = squeezed ? PHONE_LINE_X_START : LINE_X_START;
+  const lineEnd = squeezed ? PHONE_LINE_X_END : LINE_X_END;
+  const toX = (value: number) =>
+    lineStart + ((value + RANGE) / (2 * RANGE)) * (lineEnd - lineStart);
+  // Leave room below the output line for its (scaled) numbers and the equation.
+  const eqY = Y_OUT + 14 + 24 * ts;
+  const svgH = eqY + 12;
   const [scalar, setScalar] = useState(2);
 
   const handleReset = useCallback(() => setScalar(2), []);
@@ -38,17 +48,24 @@ export function Transform1D() {
       description="A &lsquo;matrix&rsquo; in one dimension is just a single number"
       onReset={handleReset}
     >
-      <svg viewBox="0 0 600 190" className="w-full">
+      <svg ref={svgRef} viewBox={`0 0 600 ${svgH}`} className="w-full">
         {/* Input number line */}
         <line
-          x1={LINE_X_START}
+          x1={lineStart}
           y1={Y_IN}
-          x2={LINE_X_END}
+          x2={lineEnd}
           y2={Y_IN}
           stroke="#d1d5db"
           strokeWidth={1.5}
         />
-        <text x={25} y={Y_IN + 4} fontSize={11} fill="#6b7280" fontWeight="600">
+        <text
+          x={squeezed ? lineStart - 16 : 25}
+          y={Y_IN + 4}
+          textAnchor={squeezed ? "end" : "start"}
+          fontSize={fontSize(11)}
+          fill="#6b7280"
+          fontWeight="600"
+        >
           input
         </text>
 
@@ -68,7 +85,7 @@ export function Transform1D() {
                 x={toX(v)}
                 y={Y_IN - 10}
                 textAnchor="middle"
-                fontSize={10}
+                fontSize={fontSize(10)}
                 fill="#9ca3af"
               >
                 {v}
@@ -79,17 +96,18 @@ export function Transform1D() {
 
         {/* Output number line */}
         <line
-          x1={LINE_X_START}
+          x1={lineStart}
           y1={Y_OUT}
-          x2={LINE_X_END}
+          x2={lineEnd}
           y2={Y_OUT}
           stroke="#d1d5db"
           strokeWidth={1.5}
         />
         <text
-          x={18}
+          x={squeezed ? lineStart - 16 : 18}
           y={Y_OUT + 4}
-          fontSize={11}
+          textAnchor={squeezed ? "end" : "start"}
+          fontSize={fontSize(11)}
           fill="#6b7280"
           fontWeight="600"
         >
@@ -110,9 +128,9 @@ export function Transform1D() {
               />
               <text
                 x={toX(v)}
-                y={Y_OUT + 16}
+                y={Y_OUT + 6 + 10 * ts}
                 textAnchor="middle"
-                fontSize={10}
+                fontSize={fontSize(10)}
                 fill="#9ca3af"
               >
                 {v}
@@ -174,9 +192,9 @@ export function Transform1D() {
         {/* Equation display */}
         <text
           x={300}
-          y={178}
+          y={eqY}
           textAnchor="middle"
-          fontSize={13}
+          fontSize={fontSize(13)}
           fill="#6b7280"
           fontFamily="var(--font-mono)"
         >

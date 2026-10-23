@@ -1,0 +1,18 @@
+---
+term: ReLU
+aliases: [ReLUs, rectified linear unit, rectified linear units]
+firstAppearance: matrix-math
+---
+
+**ReLU** is a popular activation function: it outputs zero for negative inputs and passes positive inputs through unchanged.
+
+"ReLU" stands for *Rectified Linear Unit*. As math, `relu(x) = max(0, x)`. Despite being almost laughably simple, it works extremely well in practice and was the default activation in deep networks for years before being supplanted by smoother variants like Swish and SwiGLU in most modern frontier models.
+
+Some examples:
+
+- **`relu(3) = 3`** — positive input, passes through unchanged.
+- **`relu(-7) = 0`** — negative input, clipped to zero.
+- **`relu(0) = 0`** — boundary case; the function has a kink right at zero.
+- **Inside a deep image classifier** — every neuron in every hidden layer uses ReLU. For any given input, about half the neurons output zero (they're "off") and the rest pass their values through.
+
+ReLU's main virtues are that it's fast to compute and easy to train.

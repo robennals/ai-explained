@@ -1,29 +1,27 @@
+import { ChapterHeader } from "@/components/layout/ChapterHeader";
 import { ChapterNav } from "@/components/layout/ChapterNav";
-import { getAdjacentChapters } from "@/lib/curriculum";
+import { chapterMetadata } from "@/lib/chapter-metadata";
 import Content from "./content.mdx";
+import { QuizContent } from "./QuizContent";
 import {
   CombinedNumberLineWidget,
   Simple2DScatterWidget,
   EmbeddingPlaygroundWidget,
   WordPairSpectrumWidget,
   EmbeddingLayerDiagramWidget,
+  EmbeddingTrainerWidget,
   EmbeddingClassifierWidget,
   EmbeddingArithmeticWidget,
   TokenizationPlaygroundWidget,
 } from "./widgets";
 
-export const metadata = {
-  title: "From Words to Meanings — Learn AI Layer by Layer",
-  description:
-    "From one-hot to learned representations. Word analogies, semantic structure, and exploring the geometry of meaning.",
-};
+export const metadata = chapterMetadata("embeddings");
 
 export default function Chapter04() {
-  const { prev, next } = getAdjacentChapters("embeddings");
-
   return (
     <article>
       <div className="prose prose-lg max-w-none">
+        <ChapterHeader slug="embeddings" />
         <Content
           components={{
             CombinedNumberLineWidget,
@@ -31,13 +29,15 @@ export default function Chapter04() {
             EmbeddingPlaygroundWidget,
             WordPairSpectrumWidget,
             EmbeddingLayerDiagramWidget,
+            EmbeddingTrainerWidget,
             EmbeddingClassifierWidget,
             EmbeddingArithmeticWidget,
             TokenizationPlaygroundWidget,
           }}
         />
       </div>
-      <ChapterNav prev={prev} next={next} />
+      <QuizContent />
+      <ChapterNav slug="embeddings" />
     </article>
   );
 }

@@ -44,6 +44,14 @@ const EmbeddingLayerDiagram = dynamic(
   { ssr: false }
 );
 
+const EmbeddingTrainer = dynamic(
+  () =>
+    import("@/components/widgets/embeddings/EmbeddingTrainer").then(
+      (m) => m.EmbeddingTrainer
+    ),
+  { ssr: false }
+);
+
 const EmbeddingClassifier = dynamic(
   () =>
     import("@/components/widgets/embeddings/EmbeddingClassifier").then(
@@ -120,6 +128,14 @@ export function EmbeddingLayerDiagramWidget({ children }: { children?: React.Rea
   return (
     <WidgetSlot tryIt={children} label="Explore it">
       <EmbeddingLayerDiagram />
+    </WidgetSlot>
+  );
+}
+
+export function EmbeddingTrainerWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children} label="Explore it">
+      <EmbeddingTrainer />
     </WidgetSlot>
   );
 }

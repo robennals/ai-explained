@@ -1,0 +1,18 @@
+---
+term: neural network
+aliases: [neural networks, neural net, neural nets]
+firstAppearance: neurons
+---
+
+A **neural network** is a model built by connecting lots of neurons together into layers.
+
+Each neuron takes a weighted sum of its inputs, runs the result through an activation function, and passes its output along. Layers are stacked so each layer's outputs become the next layer's inputs. Training adjusts all the weights so the whole stack ends up producing useful outputs.
+
+Some examples:
+
+- **A single neuron** — technically a one-neuron neural network. The smallest possible case.
+- **A small image classifier** — three or four layers of neurons that take pixel values in and output a probability that the image is a cat.
+- **A neural-network language model** — many layers, each containing thousands of neurons; takes a sequence of tokens in and predicts the next one.
+- **ChatGPT (GPT-4)** — hundreds of layers, hundreds of billions of parameters; still just neurons wired together into a giant network.
+
+Pretty much all modern AI is built on neural networks. The differences between models are mostly in how the neurons are wired (feed-forward layers, attention, and so on) and how big the network is.

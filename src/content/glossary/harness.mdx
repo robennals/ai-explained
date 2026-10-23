@@ -1,0 +1,18 @@
+---
+term: harness
+aliases: [harnesses, agent harness]
+firstAppearance: conversations
+---
+
+A **harness** is the ordinary program that runs a model: it builds the prompt, reads what the model writes, runs any tools, and decides when to stop.
+
+The model only turns text into more text. Everything around that is the harness. When an agent searches the web, the harness is what actually made the request, because the model can only write down that it would like one made.
+
+What a harness does:
+
+- **Builds the prompt** — glues the system prompt, the conversation so far, and anything else needed into the one stream of text the model completes.
+- **Runs the tools** — sees a tool call, stops generation, does the search, and pastes the result back in as a new message.
+- **Loops** — lets the model write again, and keeps going until it produces an ordinary reply instead of another tool call.
+- **Hides the plumbing** — shows the human the messages meant for them, and not the traffic between the model and the tools.
+
+Two products built on the same model can behave very differently because their harnesses differ.

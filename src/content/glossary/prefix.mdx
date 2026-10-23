@@ -1,0 +1,18 @@
+---
+term: prefix
+aliases: [prefixes, sentence prefix, sentence prefixes]
+firstAppearance: embeddings
+---
+
+A **prefix** is the start of a piece of text, up to the point where the next word is missing.
+
+A language model is given a prefix and has to predict the word that comes next. The blank at the end marks the missing word.
+
+Some examples:
+
+- **"I like to pet my ___"** — a prefix that is usually followed by "dog" or "cat".
+- **"I was bitten by a ___"** — followed by "dog" far more often than "wolf", because people meet far more dogs than wolves.
+- **"The capital of France is ___"** — a prefix where predicting the next word means knowing a fact.
+- **A whole conversation so far** — when a chatbot writes a reply, everything said up to that point is the prefix, and it adds one word at a time.
+
+The prefix a model is working from is also called its context.

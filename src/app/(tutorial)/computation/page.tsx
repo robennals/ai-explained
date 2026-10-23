@@ -1,6 +1,8 @@
+import { ChapterHeader } from "@/components/layout/ChapterHeader";
 import { ChapterNav } from "@/components/layout/ChapterNav";
-import { getAdjacentChapters } from "@/lib/curriculum";
+import { chapterMetadata } from "@/lib/chapter-metadata";
 import Content from "./content.mdx";
+import { QuizContent } from "./QuizContent";
 import {
   NumbersEverywhereWidget,
   FunctionMachineWidget,
@@ -8,18 +10,13 @@ import {
   LookupTableExplosionWidget,
 } from "./widgets";
 
-export const metadata = {
-  title: "Everything Is Numbers — Learn AI Layer by Layer",
-  description:
-    "Text, images, and sound are all numbers. Thinking is a function. The challenge: find the right one.",
-};
+export const metadata = chapterMetadata("computation");
 
 export default function Chapter01() {
-  const { prev, next } = getAdjacentChapters("computation");
-
   return (
     <article>
       <div className="prose prose-lg max-w-none">
+        <ChapterHeader slug="computation" />
         <Content
           components={{
             NumbersEverywhereWidget,
@@ -29,7 +26,8 @@ export default function Chapter01() {
           }}
         />
       </div>
-      <ChapterNav prev={prev} next={next} />
+      <QuizContent />
+      <ChapterNav slug="computation" />
     </article>
   );
 }

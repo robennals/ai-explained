@@ -1,0 +1,17 @@
+---
+term: multi-head attention
+aliases: [multi-headed attention, multihead attention]
+firstAppearance: attention
+---
+
+**Multi-head attention** is running the attention computation several times in parallel at the same layer, each copy with its own query, key, and value weights, so the model can learn many different relationships between tokens at once.
+
+Understanding a sentence requires asking several kinds of question at the same time: what does this pronoun refer to? What's the subject of this verb? Which clause does this word belong to? A single attention computation can only learn one of these patterns, so transformers run several side-by-side at each layer and combine the results. Each one of these parallel runs is called an **attention head**.
+
+Some examples:
+
+- **Two heads** — one head specialises in pronoun resolution, the other in subject–verb linking. Both run on the same tokens at the same time, and their outputs are combined into the next layer's input.
+- **GPT-3** — 96 heads per layer; every token gets 96 simultaneous "questions" asked about it at every layer.
+- **Frontier models** — even more heads, learning a wider variety of patterns.
+
+Multi-head attention is what gives transformers their remarkable ability to handle complex grammar and reasoning — the model isn't picking one kind of attention, it's getting them all in parallel.

@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useCallback, useRef } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
+import { useIsPhone } from "../shared/useMediaQuery";
 import { useEmbeddingData } from "./useEmbeddingData";
 import { vecAdd, vecSub, findNearest } from "./embeddingUtils";
 
@@ -138,6 +139,7 @@ function Autocomplete({
 }
 
 export function EmbeddingArithmetic() {
+  const compact = useIsPhone();
   const { data, loading, error } = useEmbeddingData();
   const [wordA, setWordA] = useState("elephant");
   const [wordB, setWordB] = useState("mouse");
@@ -195,11 +197,46 @@ export function EmbeddingArithmetic() {
       description="Subtract one word's embedding from another, add a third, and see what word lands nearest the result."
       onReset={resetState}
     >
-      {/* Preset buttons grouped by category */}
+      {/* Phones: presets in one grouped dropdown (the native picker), so the
+          equation and results aren't pushed a screen and a half down. */}
+      {compact ? (
+      <label className="mb-4 flex items-center gap-2">
+        <span className="shrink-0 text-xs font-medium text-muted">Try:</span>
+        <select
+          value={
+            PRESET_GROUPS.flatMap((g) => g.presets).find(
+              (p) => p.a === wordA && p.b === wordB && p.c === wordC,
+            )?.label ?? ""
+          }
+          onChange={(e) => {
+            const p = PRESET_GROUPS.flatMap((g) => g.presets).find((x) => x.label === e.target.value);
+            if (!p) return;
+            setWordA(p.a);
+            setWordB(p.b);
+            setWordC(p.c);
+          }}
+          className="min-w-0 flex-1 rounded-lg border border-border bg-white px-2 py-2"
+        >
+          <option value="" disabled>
+            Pick an example…
+          </option>
+          {PRESET_GROUPS.map((group) => (
+            <optgroup key={group.name} label={group.name}>
+              {group.presets.map((p) => (
+                <option key={p.label} value={p.label}>
+                  {p.label}
+                </option>
+              ))}
+            </optgroup>
+          ))}
+        </select>
+      </label>
+      ) : (
+      /* Preset buttons grouped by category */
       <div className="mb-4 space-y-2">
         {PRESET_GROUPS.map((group) => (
           <div key={group.name} className="flex flex-wrap items-center gap-2">
-            <span className="w-16 shrink-0 text-[10px] font-medium uppercase tracking-wider text-muted">
+            <span className="w-24 shrink-0 text-[10px] font-medium uppercase tracking-wider text-muted">
               {group.name}
             </span>
             {group.presets.map((p) => {
@@ -225,6 +262,7 @@ export function EmbeddingArithmetic() {
           </div>
         ))}
       </div>
+      )}
 
       {/* Equation inputs */}
       <div className="mb-4 flex flex-wrap items-start gap-2">

@@ -1,6 +1,8 @@
+import { ChapterHeader } from "@/components/layout/ChapterHeader";
 import { ChapterNav } from "@/components/layout/ChapterNav";
-import { getAdjacentChapters } from "@/lib/curriculum";
+import { chapterMetadata } from "@/lib/chapter-metadata";
 import Content from "./content.mdx";
+import { QuizContent } from "./QuizContent";
 import {
   NetworkOverviewWidget,
   NeuronDiagramWidget,
@@ -11,23 +13,20 @@ import {
   SigmoidExplorerWidget,
   SigmoidZoomWidget,
   LogicGatePlaygroundWidget,
-  GateCircuitDiagramWidget,
+  GateScaleWidget,
   TwoNeuronXORWidget,
   DeepNetworkPlaygroundWidget,
+  CutoffGateWidget,
+  ThresholdGateWidget,
 } from "./widgets";
 
-export const metadata = {
-  title: "Building a Brain — Learn AI Layer by Layer",
-  description:
-    "A neuron is a smooth logic gate. Stack them in layers and they can compute anything — and backpropagation lets you train all the weights at once.",
-};
+export const metadata = chapterMetadata("neurons");
 
 export default function Chapter03() {
-  const { prev, next } = getAdjacentChapters("neurons");
-
   return (
     <article>
       <div className="prose prose-lg max-w-none">
+        <ChapterHeader slug="neurons" />
         <Content
           components={{
             NetworkOverviewWidget,
@@ -39,13 +38,16 @@ export default function Chapter03() {
             SigmoidExplorerWidget,
             SigmoidZoomWidget,
             LogicGatePlaygroundWidget,
-            GateCircuitDiagramWidget,
+            GateScaleWidget,
             TwoNeuronXORWidget,
             DeepNetworkPlaygroundWidget,
+            CutoffGateWidget,
+            ThresholdGateWidget,
           }}
         />
       </div>
-      <ChapterNav prev={prev} next={next} />
+      <QuizContent />
+      <ChapterNav slug="neurons" />
     </article>
   );
 }

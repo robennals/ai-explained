@@ -66,7 +66,7 @@ export function NgramExplosion() {
         <div className="text-center">
           <div className="mb-1 text-xs text-muted">
             <span className="font-mono">{vocabSize.toLocaleString()}</span>
-            <sup className="font-mono">{contextSize}</sup>
+            <sup className="font-mono text-[10px] sm:text-[9px]">{contextSize}</sup>
             {" "}= possible contexts
           </div>
           <div
@@ -101,7 +101,7 @@ export function NgramExplosion() {
               >
                 <span>{comp.label}</span>
                 <span className="font-mono">
-                  ~10<sup>{comp.exponent}</sup>
+                  ~10<sup className="text-[10px] sm:text-[9px]">{comp.exponent}</sup>
                   {exceeded && " \u2713"}
                 </span>
               </div>

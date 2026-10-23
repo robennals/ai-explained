@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Interactive visual tutorial website for understanding AI from first principles. Built with Next.js 16 (App Router), MDX, and interactive React widgets. Currently Chapter 1 is implemented; 17 chapters are planned (see `docs/plans/curriculum-outline.md`).
+Interactive visual tutorial website for understanding AI from first principles. Built with Next.js 16 (App Router), MDX, and interactive React widgets. Chapters 0–15 (Introduction through Catastrophic Risk) plus the PyTorch and Glossary appendices are published; more chapters are planned. `src/lib/curriculum.ts` is the source of truth — a chapter is published when its entry has `ready: true`. The longer-term plan is in `docs/plans/curriculum-outline.md`.
 
 ## Commands
 
@@ -12,9 +12,17 @@ Interactive visual tutorial website for understanding AI from first principles. 
 pnpm dev              # Start dev server at localhost:3000
 pnpm build            # Production build
 pnpm lint             # ESLint + MDX validation
-pnpm test:notebooks   # Execute all Jupyter notebooks (requires Python + torch)
+pnpm test:notebooks   # Execute all Jupyter notebooks (see scripts/test-notebooks.sh for setup)
 npx playwright test   # E2E tests (expects dev server running)
 ```
+
+## Dev Server
+
+**Do not kill any running dev server, and do not start your own without asking first.** The user typically has their own `pnpm dev` running.
+
+- **Never** kill a running dev server — no `kill`, `pkill`, `kill-port`, killing the process on port 3000, or similar. The user's server may be running and killing it disrupts their work.
+- **Never** start your own dev server (`pnpm dev`, `next dev`, etc.) without first asking the user for permission. A second server fails to bind to port 3000 (or silently takes a different port), which prevents the user's server from starting or causes confusion.
+- If you need a running app — for Playwright tests, screenshots, or to verify a change — assume the user already has one on `localhost:3000`. If it doesn't appear to be running, **ask the user to start it** (or ask permission before starting one yourself) rather than launching one on your own.
 
 ## Architecture
 
@@ -34,7 +42,7 @@ Chapter metadata (title, slug, prerequisites, descriptions) lives in `src/lib/cu
 ### MDX Pipeline
 
 - `@next/mdx` with `remark-math` + `rehype-katex` (LaTeX) + `rehype-pretty-code` (Shiki syntax highlighting)
-- Custom MDX components registered in `mdx-components.tsx`: `<Callout>`, `<KeyInsight>`, `<Lead>`, `<TryIt>`, `<TryItInPyTorch>`
+- Custom MDX components registered in `mdx-components.tsx`: `<Callout>`, `<KeyInsight>`, `<TryIt>`, `<TryItInPyTorch>`
 - MDX component source in `src/components/mdx/`
 
 ### Widget System
@@ -44,7 +52,8 @@ Widgets are client-side interactive components (`"use client"`) organized by cha
 ```
 src/components/widgets/
   shared/             — WidgetContainer, SliderControl, SelectControl, ToggleControl
-  computation/        — Chapter 1 widgets
+  {topic}/            — one folder per chapter with widgets, named after its slug (e.g. computation/,
+                        neurons/, attention/, agents/); matrix-math widgets live in matrices/
 ```
 
 **Pattern for widgets**: Each widget wraps in `<WidgetContainer>` for consistent chrome (title, description, reset button). Widgets are dynamically imported with `next/dynamic` + `{ ssr: false }` and wrapped in `<Suspense>`.
@@ -65,7 +74,9 @@ src/components/widgets/
 1. Add chapter metadata to `src/lib/curriculum.ts`
 2. Create `src/app/(tutorial)/{slug}/` with `page.tsx`, `content.mdx`, `widgets.tsx`
 3. Create widgets in `src/components/widgets/{topic}/`
-4. Follow the `01-computation` chapter as a template
+4. Follow the `computation` chapter as a template
+
+The chapter title and subtitle are rendered by `<ChapterHeader slug="..." />` in `page.tsx`, reading from `curriculum.ts`. `content.mdx` therefore starts with the opening paragraph and contains no `#` heading of its own.
 
 ## PyTorch Notebooks
 
@@ -75,18 +86,18 @@ When modifying a chapter, check if the companion notebook needs updating. When a
 
 Every term must be defined before it's used in the notebook — either with a brief inline explanation, or a reference to the chapter where it's covered (e.g. "nn.Linear uses matrix multiplication — see Chapter 5"). See `docs/plans/pytorch-prerequisites.md` for the full forward-reference tracking.
 
-Test notebooks: `pnpm test:notebooks` (requires `pip install torch matplotlib jupyter tiktoken`). Note: notebook 04 downloads ~66MB of GloVe embeddings on first run.
+Test notebooks: `pnpm test:notebooks`. This runs `scripts/test-notebooks.sh`, which executes every notebook and prints `PASS`/`FAIL` per file. It uses `.venv/bin/jupyter` if a virtualenv exists and falls back to the system `jupyter` otherwise — the script's header has the full, current install command for setting up that venv (a system Python generally has none of the packages the notebooks need). Note that the suite is slow: `embeddings.ipynb` downloads the ~862MB GloVe zip plus text8 and trains word2vec, and `next-word-prediction.ipynb` streams TinyStories and trains. Those downloads land in `notebooks/` and are gitignored.
 
 ## MDX Gotchas
 
-- **Never use raw `<p>` tags in MDX files.** MDX wraps paragraph text in its own `<p>`, so a raw `<p>text</p>` becomes `<p><p>text</p></p>` — invalid HTML that causes React hydration errors. Use `<Lead>` for intro paragraphs or `<div>` if you need a block wrapper. The `pnpm lint` command includes a check for this (`scripts/lint-mdx-no-raw-p.sh`).
+- **Never use raw `<p>` tags in MDX files.** MDX wraps paragraph text in its own `<p>`, so a raw `<p>text</p>` becomes `<p><p>text</p></p>` — invalid HTML that causes React hydration errors. Use a `<div>` if you need a block wrapper. The `pnpm lint` command includes a check for this (`scripts/lint-mdx-no-raw-p.sh`).
 
 ## Large Files
 
 **Never commit large data files** (model weights, embeddings, datasets, zip archives) to git. These bloat the repo permanently — even removing them later leaves them in history.
 
 - `data/` — local directory for large downloaded files, fully gitignored. Scripts and notebooks should download what they need here on demand.
-- `notebooks/` — gitignore covers `glove.*` and other large artifacts. Notebooks should download data at runtime (see `04-embeddings.ipynb` for the pattern).
+- `notebooks/` — gitignore covers `glove.*` and other large artifacts. Notebooks should download data at runtime (see `embeddings.ipynb` for the pattern).
 
 If a script needs a large file, it should check if the file exists and download it if not, rather than expecting it to be in the repo.
 
@@ -95,4 +106,6 @@ If a script needs a large file, it should check if the file exists and download 
 - Import alias: `@/*` maps to `./src/*`
 - Widgets are always client components with local `useState` (no global state library)
 - Widgets are playgrounds, not demos — designed for experimentation and discovery (see `docs/plans/curriculum-outline.md` for editorial philosophy)
+- Widgets must work on phones. `tests/mobile-widgets.spec.ts` checks every widget at 390×844: no overflow, text ≥ 10px (including scaled SVG text), tap targets ≥ 24px, text boxes ≥ 16px. Accepted exceptions go in `tests/mobile-widgets.allowlist.ts` with a reason. Useful helpers in `src/components/widgets/shared/`: `useIsPhone`, `useSvgFontSize` (diagram text ≥ 10px on phones, unchanged on desktop), `keepInHorizontalView`, `useSliderDiagramLink`.
+- Instructions in widgets and chapter text say "Tap", not "Click" (it reads fine with a mouse too).
 - D3 for data visualizations, Framer Motion for animations, Radix UI for accessible controls

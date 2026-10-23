@@ -1,0 +1,18 @@
+---
+term: agent
+aliases: [agents, agentic]
+firstAppearance: agents
+---
+
+An **agent** is a model wrapped in a program that reads what the model writes, acts on it, and writes back.
+
+The model itself only turns text into more text. On its own it can tell you how to book a table; it cannot book one. Put a program around it that spots when the model asks for something and goes and does it, and the pair together can get things done. The program is called the harness, and the model inside is exactly the same model as before.
+
+What that lets the pair do:
+
+- **Look something up** — the model writes a search, the harness runs it, and the results come back as another message for the model to read.
+- **Work in steps** — the model reads what came back, decides what to do next, and writes again, round and round until it has an answer for you.
+- **Fetch instructions** — the model asks for a skill, and a page of instructions arrives, which it then follows.
+- **Remember** — the model saves a note in one conversation and searches for it in another, weeks later.
+
+Two products built on the same model can feel very different, because most of what an agent can do is decided by the harness around it.

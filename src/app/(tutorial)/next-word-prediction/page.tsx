@@ -1,6 +1,8 @@
+import { ChapterHeader } from "@/components/layout/ChapterHeader";
 import { ChapterNav } from "@/components/layout/ChapterNav";
-import { getAdjacentChapters } from "@/lib/curriculum";
+import { chapterMetadata } from "@/lib/chapter-metadata";
 import Content from "./content.mdx";
+import { QuizContent } from "./QuizContent";
 import {
   NextWordGameWidget,
   BigramExplorerWidget,
@@ -8,18 +10,13 @@ import {
   SimpleNNPredictorWidget,
 } from "./widgets";
 
-export const metadata = {
-  title: "Understanding by Predicting — Learn AI Layer by Layer",
-  description:
-    "If you can predict the next word accurately, you must understand grammar, facts, and common sense. Prediction REQUIRES understanding.",
-};
+export const metadata = chapterMetadata("next-word-prediction");
 
 export default function Chapter06() {
-  const { prev, next } = getAdjacentChapters("next-word-prediction");
-
   return (
     <article>
       <div className="prose prose-lg max-w-none">
+        <ChapterHeader slug="next-word-prediction" />
         <Content
           components={{
             NextWordGameWidget,
@@ -29,7 +26,8 @@ export default function Chapter06() {
           }}
         />
       </div>
-      <ChapterNav prev={prev} next={next} />
+      <QuizContent />
+      <ChapterNav slug="next-word-prediction" />
     </article>
   );
 }

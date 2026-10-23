@@ -1,29 +1,27 @@
+import { ChapterHeader } from "@/components/layout/ChapterHeader";
 import { ChapterNav } from "@/components/layout/ChapterNav";
-import { getAdjacentChapters } from "@/lib/curriculum";
+import { chapterMetadata } from "@/lib/chapter-metadata";
 import Content from "./content.mdx";
+import { QuizContent } from "./QuizContent";
 import {
   VectorPropertyExplorerWidget,
   UnitVectorExplorerWidget,
   DotProduct2DWidget,
   DotProductComparisonWidget,
   NeuronDotProductWidget,
+  NeuronResponseCurveWidget,
   AmplifiedAnimalExplorerWidget,
   VectorMixerWidget,
   DirectionMagnitudeExplorerWidget,
 } from "./widgets";
 
-export const metadata = {
-  title: "Describing the World with Numbers — Learn AI Layer by Layer",
-  description:
-    "A vector is just a list of numbers — but lists of numbers can describe animals, characters, food, and anything else. See how the dot product measures similarity and how neurons use it to detect patterns.",
-};
+export const metadata = chapterMetadata("vectors");
 
 export default function ChapterVectors() {
-  const { prev, next } = getAdjacentChapters("vectors");
-
   return (
     <article>
       <div className="prose prose-lg max-w-none">
+        <ChapterHeader slug="vectors" />
         <Content
           components={{
             VectorPropertyExplorerWidget,
@@ -31,13 +29,15 @@ export default function ChapterVectors() {
             DotProduct2DWidget,
             DotProductComparisonWidget,
             NeuronDotProductWidget,
+            NeuronResponseCurveWidget,
             AmplifiedAnimalExplorerWidget,
             VectorMixerWidget,
             DirectionMagnitudeExplorerWidget,
           }}
         />
       </div>
-      <ChapterNav prev={prev} next={next} />
+      <QuizContent />
+      <ChapterNav slug="vectors" />
     </article>
   );
 }

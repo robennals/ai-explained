@@ -1,0 +1,18 @@
+---
+term: matrix
+aliases: [matrices]
+firstAppearance: matrix-math
+---
+
+A **matrix** is a 2-dimensional grid of numbers — rows and columns of values.
+
+A vector is a list of numbers; a matrix is a rectangle. Matrices are how neural networks store the weights connecting one layer to another: each row holds the weights for one output neuron, each column corresponds to one input.
+
+Some examples:
+
+- **A 2×2 grid** — `[[1, 2], [3, 4]]`. Two rows, two columns. The smallest interesting matrix.
+- **A black-and-white photo** — a matrix where each cell is the brightness of one pixel; a 1024×1024 photo is a 1024×1024 matrix.
+- **A layer's weights** — connecting 100 inputs to 50 outputs uses a 50×100 matrix. Multiplying the input vector by this matrix produces the layer's output.
+- **A transformer's query/key/value weights** — three matrices per attention head, each transforming a token's embedding into its query, key, or value vector.
+
+Pretty much every weight in a neural network lives in some matrix.

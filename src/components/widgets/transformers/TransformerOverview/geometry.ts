@@ -27,12 +27,12 @@ export function layerRowY(layer: LayerId): number {
   return L0_Y - idx * ROW_GAP;
 }
 
-export function columnX(tokenIndex: number): number {
-  return FIRST_COL_X + tokenIndex * COL_STRIDE + CELL_WIDTH / 2; // cell center
+export function columnX(tokenIndex: number, firstColX = FIRST_COL_X): number {
+  return firstColX + tokenIndex * COL_STRIDE + CELL_WIDTH / 2; // cell center
 }
 
-export function columnLeft(tokenIndex: number): number {
-  return FIRST_COL_X + tokenIndex * COL_STRIDE;
+export function columnLeft(tokenIndex: number, firstColX = FIRST_COL_X): number {
+  return firstColX + tokenIndex * COL_STRIDE;
 }
 
 /** Returns the layer immediately below `layer` in LAYER_ORDER, or null for L0. */
@@ -51,3 +51,11 @@ export const CELL_ROW_LAYERS: LayerId[] = LAYER_ORDER.filter((l) => l !== "Predi
 // View box. Includes margin around the grid.
 export const VIEW_WIDTH = 810;
 export const VIEW_HEIGHT = 400;
+
+// Compact (mobile) geometry: narrower label gutter so cells are larger relative
+// to the SVG. Labels are allowed to wrap to two lines.
+export const COMPACT_LABEL_GUTTER_RIGHT_X = 95;
+export const COMPACT_FIRST_COL_X = 110;
+// Last cell right edge under compact layout, plus a small right margin.
+export const COMPACT_VIEW_WIDTH =
+  COMPACT_FIRST_COL_X + 4 * COL_STRIDE - COL_GAP + 12;

@@ -1,3 +1,10 @@
+import Link from "next/link";
+import { ColabLink } from "./ColabLink";
+
+// The appendix's own notebook shares its slug, so its box skips the link
+// back to itself.
+const PYTORCH_APPENDIX_SLUG = "appendix-pytorch";
+
 interface TryItInPyTorchProps {
   notebook: string;
   children: React.ReactNode;
@@ -8,21 +15,30 @@ export function TryItInPyTorch({ notebook, children }: TryItInPyTorchProps) {
   const colabUrl = `https://colab.research.google.com/github/robennals/ai-explained/blob/${branch}/notebooks/${notebook}.ipynb`;
 
   return (
-    <div className="my-8 rounded-xl border border-orange-500/20 bg-gradient-to-r from-orange-500/5 to-transparent p-6">
+    <div
+      id="try-it-in-pytorch"
+      data-nav-title="Try it in PyTorch"
+      className="my-8 scroll-mt-20 rounded-xl border border-orange-500/20 bg-gradient-to-r from-orange-500/5 to-transparent p-6"
+    >
       <p className="mb-2 text-xs font-bold uppercase tracking-widest text-orange-600 dark:text-orange-400">
         Try it in PyTorch — Optional
       </p>
       <div className="mb-4 text-sm leading-relaxed text-foreground/80 [&>p]:my-1">
         {children}
       </div>
-      <a
-        href={colabUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="inline-flex items-center gap-2 rounded-lg bg-orange-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-orange-600"
-      >
-        Open in Google Colab →
-      </a>
+      <ColabLink href={colabUrl} />
+      {notebook !== PYTORCH_APPENDIX_SLUG && (
+        <div className="mt-3 text-xs text-muted">
+          New to PyTorch?{" "}
+          <Link
+            href={`/${PYTORCH_APPENDIX_SLUG}`}
+            className="font-medium text-orange-700 underline underline-offset-2 hover:text-orange-800"
+          >
+            Start with PyTorch from Scratch
+          </Link>
+          , a beginner-friendly introduction.
+        </div>
+      )}
     </div>
   );
 }

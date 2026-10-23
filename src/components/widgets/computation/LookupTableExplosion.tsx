@@ -166,7 +166,7 @@ export function LookupTableExplosion() {
             <button
               key={i}
               onClick={() => setSizeIdx(i)}
-              className={`rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
+              className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors sm:px-2.5 sm:py-1 ${
                 sizeIdx === i
                   ? "bg-accent text-white"
                   : "bg-surface text-muted hover:text-foreground"
@@ -186,7 +186,7 @@ export function LookupTableExplosion() {
             <button
               key={i}
               onClick={() => setDepthIdx(i)}
-              className={`rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
+              className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors sm:px-2.5 sm:py-1 ${
                 depthIdx === i
                   ? "bg-accent text-white"
                   : "bg-surface text-muted hover:text-foreground"
@@ -206,7 +206,7 @@ export function LookupTableExplosion() {
       {/* Big number */}
       <div className="text-center">
         <p className="mb-1 text-xs text-muted">
-          {depth.values.toLocaleString()}<sup>{size.count.toLocaleString()}</sup> possible inputs =
+          {depth.values.toLocaleString()}<sup className="max-sm:text-[10px]">{size.count.toLocaleString()}</sup> possible inputs =
         </p>
         <p
           className="font-mono text-3xl font-bold transition-colors duration-300"
@@ -240,7 +240,7 @@ export function LookupTableExplosion() {
             >
               <span>{comp.label}</span>
               <span className="font-mono">
-                ~10<sup>{comp.exponent}</sup>
+                ~10<sup className="max-sm:text-[10px]">{comp.exponent}</sup>
                 {exceeded && " \u2713"}
               </span>
             </div>

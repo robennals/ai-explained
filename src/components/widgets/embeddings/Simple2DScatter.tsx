@@ -243,6 +243,53 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 const MARGIN = { top: 20, right: 20, bottom: 40, left: 50 };
 
+/**
+ * Places each point's label next to it: above if that spot is clear, else
+ * below, beside, or diagonally — whichever overlaps the fewest dots and
+ * earlier labels. Matters on narrow screens, where clusters of points
+ * otherwise have their labels drawn over each other and over the dots.
+ */
+function placeLabels(points: { word: string; cx: number; cy: number }[]) {
+  const CHAR_W = 6.2; // approx width of an 11px character
+  const H = 12;
+  type Box = { l: number; r: number; t: number; b: number };
+  const obstacles: Box[] = points.map((p) => ({ l: p.cx - 6, r: p.cx + 6, t: p.cy - 6, b: p.cy + 6 }));
+  const overlap = (a: Box, b: Box) =>
+    Math.max(0, Math.min(a.r, b.r) - Math.max(a.l, b.l)) * Math.max(0, Math.min(a.b, b.b) - Math.max(a.t, b.t));
+  const result = new Map<string, { x: number; y: number; anchor: "middle" | "start" | "end" }>();
+  const sorted = [...points].sort((a, b) => a.cy - b.cy || a.cx - b.cx);
+  for (const p of sorted) {
+    const w = p.word.length * CHAR_W;
+    const candidates = [
+      { x: p.cx, y: p.cy - 10, anchor: "middle" as const, l: p.cx - w / 2 },
+      { x: p.cx, y: p.cy + 19, anchor: "middle" as const, l: p.cx - w / 2 },
+      { x: p.cx + 9, y: p.cy + 4, anchor: "start" as const, l: p.cx + 9 },
+      { x: p.cx - 9, y: p.cy + 4, anchor: "end" as const, l: p.cx - 9 - w },
+      { x: p.cx + 5, y: p.cy - 8, anchor: "start" as const, l: p.cx + 5 },
+      { x: p.cx - 5, y: p.cy - 8, anchor: "end" as const, l: p.cx - 5 - w },
+      { x: p.cx + 5, y: p.cy + 17, anchor: "start" as const, l: p.cx + 5 },
+      { x: p.cx - 5, y: p.cy + 17, anchor: "end" as const, l: p.cx - 5 - w },
+    ];
+    const box = (c: (typeof candidates)[number]): Box => ({ l: c.l, r: c.l + w, t: c.y - H + 2, b: c.y + 2 });
+    // The point's own dot never blocks its own label.
+    const others = obstacles.filter((o) => !(o.l === p.cx - 6 && o.t === p.cy - 6));
+    let best = candidates[0];
+    let bestCost = Infinity;
+    for (const c of candidates) {
+      const bb = box(c);
+      const cost = others.reduce((sum, o) => sum + overlap(bb, o), 0);
+      if (cost < bestCost) {
+        best = c;
+        bestCost = cost;
+        if (cost === 0) break;
+      }
+    }
+    obstacles.push(box(best));
+    result.set(p.word, { x: best.x, y: best.y, anchor: best.anchor });
+  }
+  return result;
+}
+
 export function Simple2DScatter() {
   const [activePreset, setActivePreset] = useState<PresetId>("animal-food");
   const [hoveredWord, setHoveredWord] = useState<string | null>(null);
@@ -254,7 +301,9 @@ export function Simple2DScatter() {
     const obs = new ResizeObserver((entries) => {
       for (const entry of entries) {
         const w = entry.contentRect.width;
-        setDims({ width: w, height: Math.min(w * 0.75, 450) });
+        // Narrow (phone) plots get a squarer shape so points spread out
+        // vertically and their labels collide less.
+        setDims({ width: w, height: w < 500 ? w : Math.min(w * 0.75, 450) });
       }
     });
     obs.observe(containerRef.current);
@@ -334,6 +383,8 @@ export function Simple2DScatter() {
       });
     }
   }
+
+  const labelPositions = placeLabels(points);
 
   return (
     <WidgetContainer
@@ -599,6 +650,7 @@ export function Simple2DScatter() {
 
           {/* Data points */}
           {points.map((pt) => {
+            const label = labelPositions.get(pt.word) ?? { x: pt.cx, y: pt.cy - 10, anchor: "middle" };
             const isHovered = hoveredWord === pt.word;
             const dimmed = hoveredWord !== null && !isHovered;
             return (
@@ -618,8 +670,8 @@ export function Simple2DScatter() {
                   opacity={dimmed ? 0.25 : 1}
                 />
                 <text
-                  x={pt.cx} y={pt.cy - 10}
-                  textAnchor="middle"
+                  x={label.x} y={label.y}
+                  textAnchor={label.anchor}
                   className={`text-[11px] pointer-events-none select-none ${isHovered ? "font-bold" : "font-medium"}`}
                   fill={isHovered ? "var(--color-foreground)" : pt.color}
                   opacity={dimmed ? 0.25 : 1}

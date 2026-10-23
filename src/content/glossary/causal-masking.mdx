@@ -1,0 +1,17 @@
+---
+term: causal masking
+aliases: [causal mask, causal masks, causal-mask]
+firstAppearance: positions
+---
+
+**Causal masking** is the rule that each token in a language model is only allowed to attend to tokens *before* it in the sequence — never to future tokens.
+
+This serves two purposes. First, it matches the training task: a next-word predictor is supposed to predict the next word without seeing it, so it can't be allowed to peek ahead. Second, it removes any ambiguity about direction — positional encoding tells the model about distance, and causal masking handles the question of which side.
+
+Some examples:
+
+- **The first token** — has nothing to attend to except itself; its representation can only be based on what it inherently is.
+- **The fifth token** — can attend to tokens 1 through 4, plus itself. Cannot see tokens 6 onward.
+- **Generating text** — when the model predicts the next word, causal masking guarantees the prediction depends only on what came before, not on what's about to come.
+
+Causal masking is what makes a transformer a *causal* (left-to-right) language model. Other transformer variants — used for translation, classification, or filling in masked words — don't apply causal masking because they're allowed to see the whole input at once.

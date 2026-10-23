@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
+import { useSvgTextScale } from "../shared/useSvgScale";
 
 const SVG_WIDTH = 500;
 const SVG_HEIGHT = 340;
@@ -74,6 +75,7 @@ export function Gradient2DCurve() {
   const [mode, setMode] = useState<"idle" | "gradient">("idle");
 
   const svgRef = useRef<SVGSVGElement>(null);
+  const ts = useSvgTextScale(svgRef, SVG_WIDTH);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const clearTimer = useCallback(() => {
@@ -152,7 +154,7 @@ export function Gradient2DCurve() {
   return (
     <WidgetContainer
       title="Gradient: The Slope Points Downhill"
-      description="Click on the curve to place a ball — the red arrow is the gradient, pointing downhill"
+      description="Tap on the curve to place a ball — the red arrow is the gradient, pointing downhill"
       onReset={reset}
     >
       {/* Button */}
@@ -160,7 +162,7 @@ export function Gradient2DCurve() {
         <button
           onClick={runGradientDescent}
           disabled={startX === null || running}
-          className="rounded-md bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-600 transition-colors hover:bg-emerald-500/20 disabled:opacity-40"
+          className="rounded-md bg-emerald-500/10 px-4 py-2.5 text-sm font-medium text-emerald-600 sm:px-3 sm:py-1.5 sm:text-xs transition-colors hover:bg-emerald-500/20 disabled:opacity-40"
         >
           {running ? "Running..." : "Run gradient descent"}
         </button>
@@ -197,10 +199,10 @@ export function Gradient2DCurve() {
           x2={PLOT_LEFT} y2={PLOT_BOTTOM}
           stroke="currentColor" strokeWidth="1" opacity={0.2}
         />
-        <text x={SVG_WIDTH / 2} y={SVG_HEIGHT - 6} textAnchor="middle" fontSize="11" fill="currentColor" opacity={0.4}>
+        <text x={SVG_WIDTH / 2} y={SVG_HEIGHT - 6} textAnchor="middle" fontSize={11 * ts} fill="currentColor" opacity={0.4}>
           parameter value
         </text>
-        <text x={12} y={SVG_HEIGHT / 2} textAnchor="middle" fontSize="11" fill="currentColor" opacity={0.4} transform={`rotate(-90, 12, ${SVG_HEIGHT / 2})`}>
+        <text x={12} y={SVG_HEIGHT / 2} textAnchor="middle" fontSize={11 * ts} fill="currentColor" opacity={0.4} transform={`rotate(-90, 12, ${SVG_HEIGHT / 2})`}>
           error
         </text>
 
@@ -270,7 +272,7 @@ export function Gradient2DCurve() {
                   x={ex + dir * 6}
                   y={ey - 8}
                   textAnchor={dir > 0 ? "start" : "end"}
-                  fontSize="11"
+                  fontSize={11 * ts}
                   fontWeight="600"
                   fill="#e11d48"
                 >
@@ -288,10 +290,10 @@ export function Gradient2DCurve() {
             y={SVG_HEIGHT / 2}
             textAnchor="middle"
             fill="currentColor"
-            fontSize="13"
-            opacity={0.3}
+            fontSize={13 * ts}
+            opacity={0.45}
           >
-            Click anywhere on the curve to place a ball
+            Tap anywhere on the curve to place a ball
           </text>
         )}
       </svg>

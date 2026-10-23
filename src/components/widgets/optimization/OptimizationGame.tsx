@@ -3,6 +3,7 @@
 import { useState, useCallback, useRef } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
 import { WidgetTabs } from "../shared/WidgetTabs";
+import { useSvgTextScale } from "../shared/useSvgScale";
 
 const SVG_WIDTH = 500;
 const SVG_HEIGHT = 280;
@@ -56,8 +57,8 @@ function signalRadius(t: number, isLatest: boolean): number {
 }
 
 const GAME_TABS: { id: "blind" | "signal"; label: string }[] = [
-  { id: "blind", label: "Blind (no signal)" },
-  { id: "signal", label: "With signal" },
+  { id: "blind", label: "Blind (no error signal)" },
+  { id: "signal", label: "With error signal" },
 ];
 
 export function OptimizationGame() {
@@ -66,6 +67,7 @@ export function OptimizationGame() {
   const [mode, setMode] = useState<"blind" | "signal">("blind");
   const [revealed, setRevealed] = useState(false);
   const svgRef = useRef<SVGSVGElement>(null);
+  const ts = useSvgTextScale(svgRef, SVG_WIDTH);
 
   const reset = useCallback(() => {
     setTarget(randomTarget());
@@ -123,7 +125,7 @@ export function OptimizationGame() {
   return (
     <WidgetContainer
       title="Search: Blind vs. Guided"
-      description="Find a hidden target — compare searching with no signal vs. an incremental signal"
+      description="Search for a hidden target, with and without an error signal."
       onReset={reset}
     >
       {/* Mode tabs */}
@@ -210,7 +212,7 @@ export function OptimizationGame() {
                     }}
                   />
                   <span
-                    className="mt-0.5 text-[9px] font-bold"
+                    className="mt-0.5 text-[11px] font-bold"
                     style={{ color: signalColor(t) }}
                   >
                     you
@@ -404,10 +406,10 @@ export function OptimizationGame() {
             y={SVG_HEIGHT / 2}
             textAnchor="middle"
             fill="currentColor"
-            fontSize="13"
-            opacity={0.3}
+            fontSize={13 * ts}
+            opacity={0.45}
           >
-            Click anywhere to start guessing
+            Tap anywhere to start guessing
           </text>
         )}
       </svg>

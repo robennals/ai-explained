@@ -1,5 +1,6 @@
+import { ChapterHeader } from "@/components/layout/ChapterHeader";
 import { ChapterNav } from "@/components/layout/ChapterNav";
-import { getAdjacentChapters } from "@/lib/curriculum";
+import { chapterMetadata } from "@/lib/chapter-metadata";
 import Content from "./content.mdx";
 import {
   Transform1DWidget,
@@ -10,18 +11,13 @@ import {
   ActivationEffectWidget,
 } from "./widgets";
 
-export const metadata = {
-  title: "Neural Networks as Geometry — Learn AI Layer by Layer",
-  description:
-    "Every neural network layer is a geometric transformation. See how matrices rotate, scale, and shear space — and why that's the same thing as a layer of neurons.",
-};
+export const metadata = chapterMetadata("matrix-math");
 
 export default function Chapter05() {
-  const { prev, next } = getAdjacentChapters("matrix-math");
-
   return (
     <article>
       <div className="prose prose-lg max-w-none">
+        <ChapterHeader slug="matrix-math" />
         <Content
           components={{
             Transform1DWidget,
@@ -33,7 +29,7 @@ export default function Chapter05() {
           }}
         />
       </div>
-      <ChapterNav prev={prev} next={next} />
+      <ChapterNav slug="matrix-math" />
     </article>
   );
 }

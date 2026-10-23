@@ -1,24 +1,21 @@
+import { ChapterHeader } from "@/components/layout/ChapterHeader";
 import { ChapterNav } from "@/components/layout/ChapterNav";
-import { getAdjacentChapters } from "@/lib/curriculum";
+import { chapterMetadata } from "@/lib/chapter-metadata";
 import Content from "./content.mdx";
+import { QuizContent } from "./QuizContent";
 import {
   TransformerBlockDiagramWidget,
   TransformerInActionWidget,
   TransformerOverviewWidget,
 } from "./widgets";
 
-export const metadata = {
-  title: "One Architecture to Rule Them All — Learn AI Layer by Layer",
-  description:
-    "The transformer wires attention and neural networks together. Trained to predict the next word, it learns grammar and common sense from nothing but prediction.",
-};
+export const metadata = chapterMetadata("transformers");
 
 export default function Chapter09() {
-  const { prev, next } = getAdjacentChapters("transformers");
-
   return (
     <article>
       <div className="prose prose-lg max-w-none">
+        <ChapterHeader slug="transformers" />
         <Content
           components={{
             TransformerBlockDiagramWidget,
@@ -27,7 +24,8 @@ export default function Chapter09() {
           }}
         />
       </div>
-      <ChapterNav prev={prev} next={next} />
+      <QuizContent />
+      <ChapterNav slug="transformers" />
     </article>
   );
 }

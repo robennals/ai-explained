@@ -1,0 +1,18 @@
+---
+term: gradient descent
+aliases: []
+firstAppearance: optimization
+---
+
+**Gradient descent** is a more efficient way of optimizing the parameters of a model during training: nudge each parameter in the direction of its gradient, then repeat.
+
+Random search (try a tiny change, keep it if it helped, repeat) works but is hopelessly slow when there are millions of parameters — you have no idea which of the millions to change first or in what direction. Gradient descent solves this by computing, for every parameter at once, the direction that shrinks the loss fastest. That direction is the gradient; you take a small step that way, recompute, and repeat. This only works because real models are built to be **smooth** — small parameter changes give small, predictable changes in the loss, so the gradient really does point the way.
+
+Some examples:
+
+- **A ball rolling down a hill** — gravity pulls it in the steepest direction; it stops at the bottom of the valley. The mechanical analogue, and the picture used in the optimization chapter's widget.
+- **Tuning a one-knob model** — try a setting, see the loss; the slope tells you whether to nudge the knob up or down. Step that way, repeat.
+- **Training a small neural network** — use [backpropagation](/glossary#backpropagation) to compute the gradient for every weight, then update each by a small fraction of its gradient. Repeat for millions of steps.
+- **Training ChatGPT** — the same algorithm, applied to about a trillion parameters, for months on tens of thousands of GPUs.
+
+Without gradient descent, you'd be guessing the direction of every parameter change — hopeless when there are millions of them. Gradient descent is what makes large-model training work at all.

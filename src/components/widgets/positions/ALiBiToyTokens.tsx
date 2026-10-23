@@ -3,9 +3,11 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
 import { SliderControl } from "../shared/SliderControl";
+import { useIsPhone } from "../shared/useMediaQuery";
+import { keepInHorizontalView } from "../shared/keepInHorizontalView";
 
 /* ------------------------------------------------------------------ */
-/*  Data — same toy tokens as ToyAttention                            */
+/*  Data — one real sentence: "The dog chased the cat and bit it"      */
 /* ------------------------------------------------------------------ */
 
 interface Token {
@@ -15,36 +17,30 @@ interface Token {
   color: string;
 }
 
-interface Sentence {
-  label: string;
-  tokens: Token[];
-}
-
-const S = 3;
-
-const CAT: Token = {
-  label: "cat", key: [S], query: [0],
-  color: "text-amber-600 dark:text-amber-400",
-};
+// "it" sends a query of 10 in the noun dimension; nouns answer with key = 1,
+// so the dot product is 10 for a noun and 0 for everything else.
 const DOG: Token = {
-  label: "dog", key: [S], query: [0],
+  label: "dog", key: [1], query: [0],
   color: "text-blue-600 dark:text-blue-400",
 };
-const BLA: Token = {
-  label: "blah", key: [0], query: [0],
-  color: "text-foreground/40",
+const CAT: Token = {
+  label: "cat", key: [1], query: [0],
+  color: "text-amber-600 dark:text-amber-400",
 };
 const IT: Token = {
-  label: "it", key: [0], query: [S],
+  label: "it", key: [0], query: [10],
   color: "text-purple-600 dark:text-purple-400",
 };
 
-const SENTENCES: Sentence[] = [
-  { label: "dog blah blah blah cat blah it", tokens: [DOG, BLA, BLA, BLA, CAT, BLA, IT] },
-  { label: "cat blah blah blah dog blah it", tokens: [CAT, BLA, BLA, BLA, DOG, BLA, IT] },
-  { label: "dog blah cat blah it", tokens: [DOG, BLA, CAT, BLA, IT] },
-  { label: "cat blah blah blah blah dog blah blah it", tokens: [CAT, BLA, BLA, BLA, BLA, DOG, BLA, BLA, IT] },
-];
+// Filler words carry no noun signal (key 0), so "it" never attends to them.
+const filler = (label: string): Token => ({
+  label, key: [0], query: [0],
+  color: "text-foreground/40",
+});
+
+// "it" refers to the cat (the one that got bitten). The cat sits 3 positions
+// back and the dog 6, so a distance penalty tips attention toward the cat.
+const TOKENS: Token[] = [filler("The"), DOG, filler("chased"), filler("the"), CAT, filler("and"), filler("bit"), IT];
 
 /* ------------------------------------------------------------------ */
 /*  Math                                                              */
@@ -102,29 +98,55 @@ interface Arrow {
 /* ------------------------------------------------------------------ */
 
 export function ALiBiToyTokens() {
-  const [sentIdx, setSentIdx] = useState(0);
   const [slope, setSlope] = useState(1);
   const [arrows, setArrows] = useState<Arrow[]>([]);
 
   const rowRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<Map<number, HTMLElement>>(new Map());
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const labelRef = useRef<HTMLDivElement>(null);
+  const compact = useIsPhone();
 
-  const sentence = SENTENCES[sentIdx];
-  const tokens = sentence.tokens;
+  const tokens = TOKENS;
   const itIdx = tokens.length - 1; // "it" is always last
   const selected = itIdx; // always show attention from "it"
 
   const handleReset = useCallback(() => {
-    setSentIdx(0);
     setSlope(1);
   }, []);
 
-  // Compute attention scores for "it"
-  const penalizedScores = tokens.map((t, i) => {
-    const distance = itIdx - i;
-    return dot(tokens[selected].query, t.key) - slope * distance;
-  });
+  // Per-token math, broken out so we can render each row separately
+  const dots = tokens.map((t) => dot(tokens[selected].query, t.key));
+  const distances = tokens.map((_, i) => itIdx - i);
+  const penalties = distances.map((d) => slope * d);
+  const penalizedScores = tokens.map((_, i) => dots[i] - penalties[i]);
   const weights = softmax(penalizedScores);
+
+  // Find the two nouns for the description card
+  const nounInfo = tokens
+    .map((t, i) => ({ label: t.label, distance: itIdx - i, idx: i }))
+    .filter((t) => t.label === "cat" || t.label === "dog")
+    .sort((a, b) => a.distance - b.distance);
+  const closer = nounInfo[0];
+  const farther = nounInfo[1];
+
+  let description = "";
+  let descriptionTone: "neutral" | "low" | "medium" | "high" = "neutral";
+  if (closer && farther) {
+    if (slope < 0.05) {
+      description = `No distance penalty, so "it" pays equal attention to "${closer.label}" and "${farther.label}" even though "${closer.label}" is closer to "it".`;
+      descriptionTone = "low";
+    } else if (slope < 0.25) {
+      description = `Distance penalty is low, so "it" pays similar attention to "${closer.label}" and "${farther.label}".`;
+      descriptionTone = "low";
+    } else if (slope < 0.7) {
+      description = `Distance penalty is medium, so "it" pays a bit more attention to "${closer.label}" because "${closer.label}" is closer to "it" than "${farther.label}".`;
+      descriptionTone = "medium";
+    } else {
+      description = `Distance penalty is high, so "it" mostly pays attention to "${closer.label}" and ignores "${farther.label}".`;
+      descriptionTone = "high";
+    }
+  }
 
   // Measure card positions and compute arrows
   useEffect(() => {
@@ -158,7 +180,19 @@ export function ALiBiToyTokens() {
     });
 
     return () => cancelAnimationFrame(raf);
-  }, [selected, weights, sentIdx, tokens]);
+  }, [selected, weights, tokens]);
+
+  // When the sentence doesn't fit (phones), keep "it" and the closer noun on
+  // screen: they're what the widget is about.
+  const closerIdx = closer?.idx;
+  useEffect(() => {
+    const scroller = scrollRef.current;
+    if (!scroller || closerIdx === undefined) return;
+    keepInHorizontalView(scroller, [cardRefs.current.get(itIdx), cardRefs.current.get(closerIdx)], {
+      leftInset: labelRef.current?.offsetWidth ?? 0,
+      behavior: "auto",
+    });
+  }, [compact, itIdx, closerIdx]);
 
   const arcPad = 50;
 
@@ -169,23 +203,6 @@ export function ALiBiToyTokens() {
       onReset={handleReset}
     >
       <div className="flex flex-col gap-5">
-        {/* Sentence selector */}
-        <div className="flex flex-wrap gap-1.5">
-          {SENTENCES.map((s, i) => (
-            <button
-              key={i}
-              onClick={() => setSentIdx(i)}
-              className={`rounded-full px-3 py-1 font-mono text-xs font-medium transition-colors ${
-                i === sentIdx
-                  ? "bg-accent text-white"
-                  : "bg-foreground/5 text-muted hover:bg-foreground/10 hover:text-foreground"
-              }`}
-            >
-              {s.label}
-            </button>
-          ))}
-        </div>
-
         {/* Slope slider */}
         <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 dark:border-blue-900 dark:bg-blue-950/30">
           <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400">
@@ -195,7 +212,7 @@ export function ALiBiToyTokens() {
             label=""
             value={slope}
             min={0}
-            max={3}
+            max={1.5}
             step={0.1}
             onChange={setSlope}
             formatValue={(v) => v.toFixed(1)}
@@ -208,7 +225,7 @@ export function ALiBiToyTokens() {
         </div>
 
         {/* Token row with arrow overlay */}
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto" ref={scrollRef}>
           <div className="relative inline-flex min-w-full justify-center" ref={rowRef}>
             {/* SVG overlay for curved arrows */}
             {arrows.length > 0 && (
@@ -252,68 +269,172 @@ export function ALiBiToyTokens() {
               </svg>
             )}
 
-            {/* Token cards */}
-            <div className="flex justify-center gap-1.5" style={{ paddingTop: `${arcPad + 8}px` }}>
-            {tokens.map((tok, i) => {
-              const isSelected = i === selected;
-              const weight = weights[i];
-              const isTarget = weight > 0.01 && !isSelected;
-              const distance = itIdx - i;
-              const isNoun = tok.label === "cat" || tok.label === "dog";
-
-              return (
-                <div key={`${sentIdx}-${i}`} className="flex flex-col items-center" style={{ width: 56 }}>
-                  {/* Token label */}
-                  <div
-                    ref={(el) => {
-                      if (el) cardRefs.current.set(i, el);
-                      else cardRefs.current.delete(i);
-                    }}
-                    className={`rounded-md border px-2 py-1 ${
-                      isSelected
-                        ? "ring-2 ring-accent ring-offset-1 border-border bg-surface"
-                        : "border-border bg-surface"
-                    }`}
-                  >
-                    <span className={`text-sm font-bold ${tok.color}`}>{tok.label}</span>
+            {/* Grid: row labels on left, one column per token */}
+            <div
+              className="grid items-center gap-x-1 gap-y-1.5"
+              style={{
+                paddingTop: `${arcPad + 8}px`,
+                gridTemplateColumns: compact
+                  ? `minmax(76px, max-content) repeat(${tokens.length}, 48px)`
+                  : `minmax(110px, max-content) repeat(${tokens.length}, 72px)`,
+              }}
+            >
+              {/* Row 0: token labels. The first column (row labels) stays put
+                  while the tokens scroll under it. */}
+              <div ref={labelRef} className="sticky left-0 z-[11] bg-[var(--color-widget-bg)] self-stretch" />
+              {tokens.map((tok, i) => {
+                const isSelected = i === selected;
+                return (
+                  <div key={`tok-${i}`} className="flex justify-center">
+                    <div
+                      ref={(el) => {
+                        if (el) cardRefs.current.set(i, el);
+                        else cardRefs.current.delete(i);
+                      }}
+                      className={`rounded-md border px-1.5 py-1 sm:px-2 sm:py-1.5 ${
+                        isSelected
+                          ? "ring-2 ring-accent ring-offset-1 border-border bg-surface"
+                          : "border-border bg-surface"
+                      }`}
+                    >
+                      <span className={`text-sm font-bold sm:text-base ${tok.color}`}>
+                        {tok.label}
+                      </span>
+                    </div>
                   </div>
+                );
+              })}
 
-                  {/* Compact info below the token */}
-                  <div className="mt-1 flex flex-col items-center gap-0.5">
-                    {isSelected ? (
-                      <span className="text-[9px] font-bold text-accent uppercase">query</span>
-                    ) : (
-                      <>
-                        <span className="text-[9px] text-muted">
-                          {isNoun ? `key=${tok.key[0]}` : `key=${tok.key[0]}`}
-                        </span>
-                        {slope > 0 && distance > 0 && (
-                          <span className="text-[9px] text-red-500">
-                            −{(slope * distance).toFixed(1)}
-                          </span>
-                        )}
-                      </>
-                    )}
-                    {/* Attention weight pill */}
+              {/* Row label: Dot product */}
+              <div className="sticky left-0 z-[11] bg-[var(--color-widget-bg)] pr-2 text-right text-xs font-semibold sm:text-sm text-foreground/80">
+                Dot product
+                <div className="text-[10px] font-normal leading-tight text-muted">
+                  query · key
+                </div>
+              </div>
+              {tokens.map((_, i) => (
+                <div
+                  key={`dot-${i}`}
+                  className="text-center font-mono text-sm sm:text-base font-semibold text-foreground"
+                >
+                  {dots[i]}
+                </div>
+              ))}
+
+              {/* Row label: Distance */}
+              <div className="sticky left-0 z-[11] bg-[var(--color-widget-bg)] pr-2 text-right text-xs font-semibold sm:text-sm text-foreground/80">
+                Distance
+                <div className="text-[10px] font-normal leading-tight text-muted">
+                  positions from &ldquo;it&rdquo;
+                </div>
+              </div>
+              {tokens.map((_, i) => (
+                <div
+                  key={`dist-${i}`}
+                  className="text-center font-mono text-sm sm:text-base font-semibold text-foreground"
+                >
+                  {distances[i]}
+                </div>
+              ))}
+
+              {/* Row label: Distance penalty */}
+              <div className="sticky left-0 z-[11] bg-[var(--color-widget-bg)] pr-2 text-right text-xs font-semibold sm:text-sm text-red-600 dark:text-red-400">
+                Distance penalty
+                <div className="text-[10px] font-normal leading-tight text-muted">
+                  − slope × distance
+                </div>
+              </div>
+              {tokens.map((_, i) => {
+                const p = penalties[i];
+                if (p < 0.05) {
+                  return (
+                    <div
+                      key={`pen-${i}`}
+                      className="text-center font-mono text-sm sm:text-base text-muted"
+                    >
+                      0
+                    </div>
+                  );
+                }
+                return (
+                  <div
+                    key={`pen-${i}`}
+                    className="text-center font-mono text-sm sm:text-base font-semibold text-red-500"
+                  >
+                    −{p.toFixed(1)}
+                  </div>
+                );
+              })}
+
+              {/* Row label: Score */}
+              <div className="sticky left-0 z-[11] bg-[var(--color-widget-bg)] pr-2 text-right text-xs font-semibold sm:text-sm text-foreground/80">
+                Score
+                <div className="text-[10px] font-normal leading-tight text-muted">
+                  dot − penalty
+                </div>
+              </div>
+              {tokens.map((_, i) => (
+                <div
+                  key={`score-${i}`}
+                  className="text-center font-mono text-sm sm:text-base font-bold text-foreground"
+                >
+                  {penalizedScores[i].toFixed(1)}
+                </div>
+              ))}
+
+              {/* Row label: Attention */}
+              <div className="sticky left-0 z-[11] bg-[var(--color-widget-bg)] pr-2 text-right text-xs font-semibold sm:text-sm text-accent">
+                Attention
+                <div className="text-[10px] font-normal leading-tight text-muted">
+                  after softmax
+                </div>
+              </div>
+              {tokens.map((_, i) => {
+                const isSelected = i === selected;
+                const weight = weights[i];
+                const isTarget = weight > 0.01 && !isSelected;
+                return (
+                  <div
+                    key={`att-${i}`}
+                    className="flex justify-center"
+                  >
                     {isTarget ? (
                       <span
-                        className="rounded-full px-1.5 py-0.5 font-mono text-[9px] font-bold text-white"
+                        className="rounded-full px-2 py-0.5 font-mono text-xs font-bold text-white"
                         style={{ backgroundColor: weightToPill(weight) }}
                       >
                         {pct(weight)}
                       </span>
                     ) : (
-                      <span className={`font-mono text-[9px] font-bold ${isSelected ? "text-accent" : "text-muted"}`}>
-                        {pct(weight)}
+                      <span
+                        className={`font-mono text-xs font-bold ${
+                          isSelected ? "text-accent" : "text-muted"
+                        }`}
+                      >
+                        {isSelected ? "query" : pct(weight)}
                       </span>
                     )}
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
           </div>
         </div>
+
+        {/* Plain-language description that adapts to slope */}
+        {description && (
+          <div
+            className={`rounded-lg border px-4 py-3 text-sm leading-relaxed ${
+              descriptionTone === "low"
+                ? "border-border bg-surface text-foreground"
+                : descriptionTone === "medium"
+                ? "border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100"
+                : "border-blue-300 bg-blue-50 text-blue-900 dark:border-blue-800 dark:bg-blue-950/30 dark:text-blue-100"
+            }`}
+          >
+            {description}
+          </div>
+        )}
       </div>
     </WidgetContainer>
   );

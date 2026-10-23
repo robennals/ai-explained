@@ -1,0 +1,16 @@
+---
+term: error
+aliases: [errors]
+firstAppearance: optimization
+---
+
+An **error** is a number that says how far off something is from perfect.
+
+Some examples:
+
+- **A student's test score** — got 72 out of 100, target is 100. Error = 100 − 72 = 28 points.
+- **A runner's time** — finished a race in 14.2 seconds, target is 0 (impossible, but smaller is always better). Error = 14.2 − 0 = 14.2.
+- **A photo classifier** — the answer is "cat", but the model only gave "cat" 30% probability. Error = 100% − 30% = 70%.
+- **A next-word predictor** — the next word in "The cat sat on the ___" is "mat", but the model gave "mat" only 1% probability. The error formula `−log(probability of the right word)` turns this into ≈ 4.6 (very bad); a 99% guess would have given ≈ 0.01 (very good).
+
+Averaged across many examples, the error becomes the loss — the number training tries to make small.

@@ -1,0 +1,18 @@
+---
+term: unit vector
+aliases: [unit vectors]
+firstAppearance: vectors
+---
+
+A **unit vector** is a vector whose magnitude is exactly 1.
+
+You make a unit vector by dividing every number in the vector by its magnitude — the proportions between the dimensions stay the same, but the overall size is now 1. Two unit vectors can be compared fairly: their dot product depends only on the direction they point, not on how large either one is.
+
+Some examples:
+
+- **`(1, 0)`** — already a unit vector; points along the x-axis.
+- **`(3, 4)` → `(0.6, 0.8)`** — divide each number by the magnitude (5). Same direction, size 1.
+- **An animal vector scaled to size 1** — all the chapter's animal vectors are unit vectors, which is why their dot products land cleanly between −1 and 1 (cosine similarity).
+- **A weight vector inside a neuron** — its unit vector tells you what the neuron is looking for; its magnitude tells you how sensitive it is.
+
+Unit vectors are the standard form for fair similarity comparisons — without them, a vector that's "big in everything" would falsely look similar to anything, because its sheer size inflates the dot product.

@@ -1,6 +1,8 @@
 "use client";
 
+import { useRef } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
+import { useSvgFontSize } from "../shared/useSvgScale";
 
 function sigmoid(x: number): number {
   return 1 / (1 + Math.exp(-x));
@@ -96,6 +98,8 @@ const ZOOM_CURVES = REGIONS.map((r) => {
 });
 
 export function SigmoidZoom() {
+  const svgRef = useRef<SVGSVGElement>(null);
+  const fontSize = useSvgFontSize(svgRef, MW);
   return (
     <WidgetContainer
       title="S-Curves Are Everywhere"
@@ -103,7 +107,7 @@ export function SigmoidZoom() {
     >
       <div className="flex flex-col items-center gap-4">
         {/* Main sigmoid with highlighted regions */}
-        <svg viewBox={`0 0 ${MW} ${MH}`} className="w-full max-w-[520px]">
+        <svg ref={svgRef} viewBox={`0 0 ${MW} ${MH}`} className="w-full max-w-[520px]">
           {/* Axes */}
           <line
             x1={ML}
@@ -136,7 +140,8 @@ export function SigmoidZoom() {
             x={ML - 4}
             y={my(1) + 4}
             textAnchor="end"
-            className="fill-muted text-[9px]"
+            fontSize={fontSize(9)}
+            className="fill-muted"
           >
             1
           </text>
@@ -144,7 +149,8 @@ export function SigmoidZoom() {
             x={ML - 4}
             y={my(0.5) + 3}
             textAnchor="end"
-            className="fill-muted text-[9px]"
+            fontSize={fontSize(9)}
+            className="fill-muted"
           >
             .5
           </text>
@@ -152,7 +158,8 @@ export function SigmoidZoom() {
             x={ML - 4}
             y={my(0) + 3}
             textAnchor="end"
-            className="fill-muted text-[9px]"
+            fontSize={fontSize(9)}
+            className="fill-muted"
           >
             0
           </text>

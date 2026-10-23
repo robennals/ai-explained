@@ -40,6 +40,18 @@ const COLORS_LIGHT = [
 
 const PRESETS: Preset[] = [
   {
+    label: "Score of 1",
+    scores: [1, 0, 0, 0],
+    description:
+      "A scores 1 and the rest score 0. Even so, A only gets about 47% — and each zero still keeps around 18%. When the scores are small, softmax stays flat, so even a token that scored nothing keeps a slice.",
+  },
+  {
+    label: "Score of 9",
+    scores: [9, 0, 0, 0],
+    description:
+      "Same shape, but now A scores 9. This time A takes almost all the weight and the zeros vanish. Bigger scores make the winner dominate — which is why models scale their scores up before softmax.",
+  },
+  {
     label: "All equal",
     scores: [2, 2, 2, 2],
     description:
@@ -114,13 +126,14 @@ export function SoftmaxExplorer() {
           ))}
         </div>
 
-        {/* Sliders + bars */}
+        {/* Sliders + bars. Phones: label, slider and weight on one line with the
+            bar underneath, so the slider gets real width. */}
         <div className="grid gap-4">
           {scores.map((score, i) => {
             const w = weights[i];
             const barPct = Math.max(w / maxWeight * 100, 2);
             return (
-              <div key={i} className="grid grid-cols-[2rem_1fr_4rem_1fr] items-center gap-3">
+              <div key={i} className="grid grid-cols-[1.5rem_1fr_3.5rem] items-center gap-x-3 gap-y-1 sm:grid-cols-[2rem_1fr_4rem_1fr] sm:gap-3">
                 {/* Label */}
                 <span className="text-center font-mono text-sm font-bold text-foreground">
                   {LABELS[i]}
@@ -148,7 +161,7 @@ export function SoftmaxExplorer() {
                 </span>
 
                 {/* Bar */}
-                <div className={`h-6 rounded ${COLORS_LIGHT[i]}`}>
+                <div className={`col-span-2 col-start-2 h-3 rounded sm:col-span-1 sm:col-start-auto sm:h-6 ${COLORS_LIGHT[i]}`}>
                   <div
                     className={`h-full rounded ${COLORS[i]} transition-all duration-150`}
                     style={{ width: `${barPct}%` }}
@@ -163,7 +176,7 @@ export function SoftmaxExplorer() {
         <div className="rounded border border-border bg-foreground/[0.02] px-4 py-2.5 text-center">
           <span className="text-xs text-muted">The formula, if you&apos;re curious: </span>
           <span className="font-mono text-xs text-foreground/70">
-            weight(i) = e<sup>score(i)</sup> / Σ e<sup>score(j)</sup>
+            weight(i) = e<sup className="text-[10px] sm:text-[9px]">score(i)</sup> / Σ e<sup className="text-[10px] sm:text-[9px]">score(j)</sup>
           </span>
         </div>
 

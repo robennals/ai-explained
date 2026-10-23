@@ -1,0 +1,18 @@
+---
+term: XOR
+aliases: [exclusive or]
+firstAppearance: neurons
+---
+
+**XOR** (short for "exclusive or") is a logic operation that is true when exactly one of its two inputs is true, but not both.
+
+It means "one or the other, but not both." XOR is famous in the history of AI because a single [neuron](/glossary#neuron) *can't* compute it. You need at least two [layers](/glossary#layer) — hidden neurons that compute intermediate facts (like OR and NAND), and an output neuron that combines them.
+
+Here's the full truth table:
+
+- **0 XOR 0 = 0** — neither input on.
+- **0 XOR 1 = 1** — exactly one on.
+- **1 XOR 0 = 1** — exactly one on.
+- **1 XOR 1 = 0** — both on, so *not* exclusive.
+
+XOR's unsolvability by a single layer was the heart of the 1969 *Perceptrons* critique that helped trigger the first "AI winter." The fix, stacking layers, is the same idea that powers every deep network today.

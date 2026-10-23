@@ -52,6 +52,14 @@ const AmplifiedAnimalExplorer = dynamic(
   { ssr: false }
 );
 
+const NeuronResponseCurve = dynamic(
+  () =>
+    import("@/components/widgets/vectors/NeuronResponseCurve").then(
+      (m) => m.NeuronResponseCurve
+    ),
+  { ssr: false }
+);
+
 const VectorMixer = dynamic(
   () =>
     import("@/components/widgets/vectors/VectorMixer").then(
@@ -128,6 +136,14 @@ export function AmplifiedAnimalExplorerWidget({ children }: { children?: React.R
   return (
     <WidgetSlot tryIt={children}>
       <AmplifiedAnimalExplorer />
+    </WidgetSlot>
+  );
+}
+
+export function NeuronResponseCurveWidget({ children }: { children?: React.ReactNode }) {
+  return (
+    <WidgetSlot tryIt={children}>
+      <NeuronResponseCurve />
     </WidgetSlot>
   );
 }

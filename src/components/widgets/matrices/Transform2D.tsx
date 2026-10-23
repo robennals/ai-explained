@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useRef } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
+import { useSvgFontSize } from "../shared/useSvgScale";
 
 const SVG_SIZE = 500;
 const CX = SVG_SIZE / 2;
@@ -86,6 +87,11 @@ const PRESETS: Preset[] = [
 ];
 
 export function Transform2D() {
+  const svgRef = useRef<SVGSVGElement>(null);
+  const fontSize = useSvgFontSize(svgRef, SVG_SIZE);
+  const labelSize = fontSize(13);
+  // Offsets of the ê labels from their arrow tips grow with the label.
+  const k = labelSize / 13;
   // Basis vector components: ê₁ = (e1x, e1y), ê₂ = (e2x, e2y)
   // Matrix columns: col1 = ê₁ = where x-axis goes, col2 = ê₂ = where y-axis goes
   const [e1x, setE1x] = useState(1);
@@ -200,6 +206,7 @@ export function Transform2D() {
       </div>
 
       <svg
+        ref={svgRef}
         viewBox={`0 0 ${SVG_SIZE} ${SVG_SIZE}`}
         className="w-full"
         style={{ maxHeight: 440 }}
@@ -363,10 +370,10 @@ export function Transform2D() {
           markerEnd="url(#arrow-red)"
         />
         <text
-          x={se1x + (se1x > ox ? 10 : -18)}
-          y={se1y + (se1y < oy ? -8 : 14)}
+          x={se1x + (se1x > ox ? 10 : -18) * k}
+          y={se1y + (se1y < oy ? -8 : 14) * k}
           fill="#ef4444"
-          fontSize={13}
+          fontSize={labelSize}
           fontWeight="bold"
           style={{ fontFamily: "serif" }}
         >
@@ -384,10 +391,10 @@ export function Transform2D() {
           markerEnd="url(#arrow-green)"
         />
         <text
-          x={se2x + (se2x > ox ? 10 : -18)}
-          y={se2y + (se2y < oy ? -8 : 14)}
+          x={se2x + (se2x > ox ? 10 : -18) * k}
+          y={se2y + (se2y < oy ? -8 : 14) * k}
           fill="#22c55e"
-          fontSize={13}
+          fontSize={labelSize}
           fontWeight="bold"
           style={{ fontFamily: "serif" }}
         >

@@ -1,4 +1,7 @@
 import { SideNav } from "@/components/layout/SideNav";
+import { MobileChapterNav } from "@/components/layout/MobileChapterNav";
+import { Feedback } from "@/components/feedback/Feedback";
+import { ChapterAnalytics } from "@/components/layout/ChapterAnalytics";
 
 export default function TutorialLayout({
   children,
@@ -8,7 +11,12 @@ export default function TutorialLayout({
   return (
     <div className="mx-auto flex max-w-7xl">
       <SideNav />
-      <main className="min-w-0 flex-1 px-6 py-10 lg:px-12">{children}</main>
+      <MobileChapterNav />
+      <main className="min-w-0 flex-1 px-6 py-10 lg:px-12">
+        {children}
+        <Feedback />
+        <ChapterAnalytics />
+      </main>
     </div>
   );
 }

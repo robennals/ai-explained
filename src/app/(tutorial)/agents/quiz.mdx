@@ -1,0 +1,68 @@
+<Quiz slug="agents">
+
+<Question>
+What is an *agent*, as distinct from a model?
+
+<Choice>A model that can run programs and open web pages all by itself</Choice>
+<Choice>A larger model with a lot more parameters</Choice>
+<Choice>A model that keeps running between conversations</Choice>
+<Choice correct>A model wrapped in a program that does what the model asks</Choice>
+
+<Feedback>
+The model in an agent is the same model, unchanged, and it still only writes text. What is added is the program around it, the harness, and the loop between them: the model writes a message that is not addressed to the user, the harness acts on it, and the reply lands back in the conversation. Post-training does teach a model to write good tool calls, but on its own that just leaves it writing requests nothing acts on. The model has not gained an ability to act. It has gained a correspondent.
+</Feedback>
+</Question>
+
+<Question>
+When a model "searches the web", what does the model itself do?
+
+<Choice correct>Writes a tool call, then reads the result it gets</Choice>
+<Choice>Opens a network connection and fetches the page itself</Choice>
+<Choice>Looks the answer up in weights from training</Choice>
+<Choice>Hands the conversation to a search model</Choice>
+
+<Feedback>
+The model can only write text. It writes a structured tool call, the program running it (the harness) stops generation, performs the search, and pastes the result into the transcript as a new turn. The model then carries on predicting from there. The loop repeats until the model writes an ordinary reply instead of another tool call.
+</Feedback>
+</Question>
+
+<Question>
+How do a skill's instructions reach the model?
+
+<Choice>They are trained into the weights beforehand</Choice>
+<Choice>A separate model runs the skill and reports back</Choice>
+<Choice correct>They arrive as a hidden message when the model asks</Choice>
+<Choice>They are always in the context, along with every other skill</Choice>
+
+<Feedback>
+The model cannot fetch anything itself, any more than it can run a tool itself. It writes a request for the skill, and the harness answers with a hidden message containing the instructions, exactly as it does with the result of a tool. What makes a skill a skill is only what comes back: a page of instructions rather than a search result or a number.
+</Feedback>
+</Question>
+
+<Question>
+What does a conversation change about the model itself?
+
+<Choice correct>Nothing. Only the text in its context changes</Choice>
+<Choice>Its weights shift a little as the conversation goes on</Choice>
+<Choice>It permanently learns any fact you tell it</Choice>
+<Choice>It rewrites its own system prompt as it goes</Choice>
+
+<Feedback>
+Training changes weights. Talking does not. Everything the model knows about what is going on is text sitting in its context, which is why a skill has to arrive as a fetched document, and why carrying something from one conversation to the next means writing a note down and fetching it back later. Take that machinery away and the next conversation starts blank, not because anything was discarded, but because nothing was ever kept.
+</Feedback>
+</Question>
+
+<Question>
+When a chat product "remembers" something about you between conversations, what has happened?
+
+<Choice>The model was retrained on your conversation</Choice>
+<Choice correct>A note was saved, and fetched back in again later</Choice>
+<Choice>The earlier conversation is still open somewhere</Choice>
+<Choice>The model recognises you and recalls it</Choice>
+
+<Feedback>
+The weights do not change while you talk, so nothing can be learned in the ordinary sense. A memory is text: the model (or the harness) writes a short note through a tool, and a later conversation searches for it and pastes what it finds into the context. That means a memory can be wrong or out of date, and stays that way until someone edits or deletes it.
+</Feedback>
+</Question>
+
+</Quiz>

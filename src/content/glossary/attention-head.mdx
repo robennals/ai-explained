@@ -1,0 +1,18 @@
+---
+term: attention head
+aliases: [attention heads]
+firstAppearance: attention
+---
+
+An **attention head** is one full attention computation — its own set of query, key, and value weights, learning one specific pattern of which tokens attend to which.
+
+A single attention head can only learn one kind of relationship — pronoun resolution, say, or subject–verb linking, or grouping related ideas. To handle the many different relationships in a sentence at once, transformers run many heads in parallel, each free to learn a different pattern. This is called multi-head attention.
+
+Some examples:
+
+- **A pronoun-resolution head** — query, key, and value weights tuned to spot pronouns and connect them to the nouns they refer to.
+- **A subject–verb linking head** — different weights, tuned to bind verbs to their subjects.
+- **A long-range head** — weights and (with positional encoding) distance falloff tuned to pull in context from many sentences back.
+- **GPT-3** — 96 heads per layer over 96 layers, so nearly 10 000 attention heads in the whole model, each specialising in a different pattern.
+
+The model doesn't need to choose one kind of attention; with many heads it gets all of them at once.

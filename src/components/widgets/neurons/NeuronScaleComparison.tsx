@@ -1,6 +1,8 @@
 "use client";
 
+import { useRef } from "react";
 import { WidgetContainer } from "../shared/WidgetContainer";
+import { MIN_SVG_TEXT_PX, useSvgScale } from "../shared/useSvgScale";
 
 /**
  * Log-scale bar chart comparing connection counts:
@@ -39,22 +41,32 @@ function formatCount(n: number): string {
 
 const BAR_H = 26;
 const GAP = 6;
-const LABEL_W = 160;
+const LABEL_W = 200;
 const COUNT_W = 60;
 const BAR_MAX_W = 280;
 
 export function NeuronScaleComparison() {
+  const svgRef = useRef<SVGSVGElement>(null);
   const maxLog = Math.log10(Math.max(...DATA.map((d) => d.count)));
   const minLog = Math.log10(Math.min(...DATA.map((d) => d.count)));
-  const totalH = DATA.length * (BAR_H + GAP) - GAP + 24;
   const svgW = LABEL_W + BAR_MAX_W + COUNT_W + 10;
+  // Inverse-scale fontSize so labels stay readable when the SVG is squeezed
+  // on mobile (constant CSS pixel size regardless of viewport).
+  const scale = useSvgScale(svgRef, svgW);
+  // The legend is designed smaller than the rest; on a squeezed (phone) SVG
+  // bring it up to the readable minimum, and stack its two entries since they
+  // no longer fit side by side.
+  const squeezed = scale > 1;
+  const legendPx = squeezed ? MIN_SVG_TEXT_PX : 9;
+  const legendRowH = legendPx * scale + 6;
+  const totalH = DATA.length * (BAR_H + GAP) - GAP + 24 + (squeezed ? legendRowH : 0);
 
   return (
     <WidgetContainer
       title="How Big Are Neural Networks?"
       description="Comparing brains and AI models by number of connections"
     >
-      <svg viewBox={`0 0 ${svgW} ${totalH}`} className="w-full max-w-[600px]">
+      <svg ref={svgRef} viewBox={`0 0 ${svgW} ${totalH}`} className="w-full max-w-[600px]">
         {DATA.map((entry, i) => {
           const y = i * (BAR_H + GAP);
           const logVal = Math.log10(entry.count);
@@ -70,7 +82,8 @@ export function NeuronScaleComparison() {
                 y={y + BAR_H / 2 + 1}
                 textAnchor="end"
                 dominantBaseline="middle"
-                className="fill-foreground text-[10px]"
+                fontSize={11 * scale}
+                className="fill-foreground"
               >
                 {entry.label}
               </text>
@@ -98,7 +111,8 @@ export function NeuronScaleComparison() {
                 x={LABEL_W + BAR_MAX_W + 6}
                 y={y + BAR_H / 2 + 1}
                 dominantBaseline="middle"
-                className="fill-muted text-[9px] font-mono"
+                fontSize={10 * scale}
+                className="fill-muted font-mono"
               >
                 {formatCount(entry.count)}
               </text>
@@ -106,11 +120,11 @@ export function NeuronScaleComparison() {
           );
         })}
         {/* Legend */}
-        <g transform={`translate(${LABEL_W}, ${totalH - 16})`}>
+        <g transform={`translate(${LABEL_W}, ${totalH - 16 - (squeezed ? legendRowH : 0)})`}>
           <rect x={0} y={0} width={10} height={10} rx={2} fill="#3b82f6" opacity={0.8} />
-          <text x={14} y={8} className="fill-muted text-[8px]">Biological synapses</text>
-          <rect x={120} y={0} width={10} height={10} rx={2} fill="#f59e0b" opacity={0.8} />
-          <text x={134} y={8} className="fill-muted text-[8px]">AI parameters (weights)</text>
+          <text x={14} y={9} fontSize={legendPx * scale} className="fill-muted">Biological synapses</text>
+          <rect x={squeezed ? 0 : 140} y={squeezed ? legendRowH : 0} width={10} height={10} rx={2} fill="#f59e0b" opacity={0.8} />
+          <text x={squeezed ? 14 : 154} y={squeezed ? legendRowH + 9 : 9} fontSize={legendPx * scale} className="fill-muted">AI parameters (weights)</text>
         </g>
       </svg>
       <div className="mt-2 text-[10px] text-muted leading-relaxed">

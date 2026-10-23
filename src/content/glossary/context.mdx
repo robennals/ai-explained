@@ -1,0 +1,18 @@
+---
+term: context
+aliases: [contexts, context window, context windows]
+firstAppearance: next-word-prediction
+---
+
+A **context** is the surrounding tokens a language model uses when making a prediction.
+
+When a language model predicts the next word, it doesn't just look at the previous word — it looks at all the tokens leading up to that point. Those tokens are its context. The maximum number of tokens it can use at once is called the *context window*; bigger windows let the model use longer-range information.
+
+Some examples:
+
+- **A bigram model** — context is one token: just the previous word.
+- **An n-gram model** — context is the previous n−1 tokens. A few words at most.
+- **GPT-2** — context window of 1024 tokens. Enough for a few paragraphs.
+- **GPT-4** — context window of 128 000 tokens in the largest variant. Long enough to hold a small book.
+
+Bigger context windows are expensive: vanilla attention's cost grows with the square of sequence length, so doubling the context roughly quadruples the compute (unless you use clever tricks — modern long-context models use techniques like sliding-window attention or linear-attention variants to avoid the full quadratic cost).

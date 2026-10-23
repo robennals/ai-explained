@@ -12,6 +12,8 @@
 
 # testing
 /coverage
+/test-results/
+/playwright-report/
 
 # next.js
 /.next/
@@ -23,6 +25,7 @@
 # misc
 .DS_Store
 *.pem
+client_secret*.json
 
 # debug
 npm-debug.log*
@@ -46,12 +49,27 @@ next-env.d.ts
 # model files (served from R2, not git)
 public/data/next-word-model/
 public/data/embeddings/
+public/data/attention-model/
 
 # large data files (downloaded on demand by notebooks/scripts)
 notebooks/glove.*
+notebooks/text8
+notebooks/text8.zip
+notebooks/ts-tokenizer-4096.json
 
 # broomy
 .broomy/output/
 
 # superpowers brainstorm scratch
 .superpowers/
+.env*.local
+
+# Python
+__pycache__/
+*.pyc
+
+# glossary build artifact
+src/lib/glossary/index.generated.ts
+
+# python venv for notebook testing
+.venv/

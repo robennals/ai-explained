@@ -1,0 +1,94 @@
+<Quiz slug="attention">
+
+<Question>
+What does *attention* let a model do?
+
+<Choice>Translate any sentence into another language</Choice>
+<Choice>Predict the next word using a fixed window</Choice>
+<Choice correct>Pick out which earlier words matter</Choice>
+<Choice>Count how many times each word appears</Choice>
+
+<Feedback>
+Attention lets a model look at every word that came before and *choose* which ones are relevant to the word it's currently processing. The pronoun "it" can reach back to find the noun it refers to, however far away that noun is. No fixed window — the model dynamically picks what matters.
+</Feedback>
+</Question>
+
+<Question>
+In attention, what does a token's *query* vector represent?
+
+<Choice>The token's position in the sentence</Choice>
+<Choice>The token's output value</Choice>
+<Choice>The token's softmax probability</Choice>
+<Choice correct>What the token is looking for</Choice>
+
+<Feedback>
+Each token has three vectors. The *query* says what the token is looking for (e.g., a pronoun asking "where's the noun I refer to?"). The *key* says what each token has to offer ("I'm a noun"). The *value* says what gets shared when there's a match. A dot product of a query with each key gives the match scores.
+</Feedback>
+</Question>
+
+<Question>
+Why does each token have a *separate* query and key, rather than just one vector?
+
+<Choice correct>What you offer differs from what you seek</Choice>
+<Choice>To make the math run faster</Choice>
+<Choice>Each vector encodes a different word</Choice>
+<Choice>Queries are used for math; keys for display</Choice>
+
+<Feedback>
+A pronoun like "it" is looking for a noun, but isn't itself a noun. If query and key were the same vector, "it" would advertise itself as a noun while also seeking one. Separating *query* (what you're looking for) from *key* (what you're offering) lets each token honestly describe both ends of the match.
+</Feedback>
+</Question>
+
+<Question>
+"bank" is looking for "a river or money", but the closest key it finds is just "a river". How does attention handle this partial match?
+
+<Choice>It ignores "river" because the match isn't exact</Choice>
+<Choice correct>"river" still scores well enough to win, so its value gets pulled in</Choice>
+<Choice>It waits for an exact match later in the sentence</Choice>
+<Choice>It splits attention equally across every token</Choice>
+
+<Feedback>
+Matches don't have to be exact. The dot product measures how *similar* a query and key are, so "a river" overlaps enough with "a river or money" to score highly — not as high as a perfect match, but higher than everything else. "river" wins the attention and hands over its value, which is how "bank" learns it means the riverbank.
+</Feedback>
+</Question>
+
+<Question>
+Why does the chapter introduce a *sink* token?
+
+<Choice>To make attention scores larger overall</Choice>
+<Choice>To save memory when storing keys</Choice>
+<Choice>To replace tokens that aren't useful</Choice>
+<Choice correct>To absorb attention when nothing matches</Choice>
+
+<Feedback>
+Softmax always allocates 100% of attention to *something*, even when no real match exists. Without a sink, a pronoun in a sentence with no nouns would still spread attention everywhere, with full confidence. The sink gives leftover attention a harmless place to land — when nothing real matches, the sink wins by default.
+</Feedback>
+</Question>
+
+<Question>
+In the chapter we wrote each query and key as a short phrase like "a thing" or "a person". Do real attention heads work with tidy phrases like that?
+
+<Choice>Yes — they store the phrases as text</Choice>
+<Choice correct>No — they're learned vectors with no fixed meanings</Choice>
+<Choice>Yes, each vector stands for a concept like noun or verb</Choice>
+<Choice>No — they're just longer lists of words</Choice>
+
+<Feedback>
+The plain-English phrases are a simplification to show the mechanics. Underneath, each query, key, and value is a vector, a list of numbers the model learns through gradient descent. The vectors the model learns will typically not encode simple concepts that make sense to humans.
+</Feedback>
+</Question>
+
+<Question>
+With attention as described in the chapter, "The dog chased the cat" and "The cat chased the dog" would produce *identical* attention scores. Why?
+
+<Choice>The model has memorized these specific sentences</Choice>
+<Choice>The dot product treats every word equally</Choice>
+<Choice correct>Attention scores ignore the order of words</Choice>
+<Choice>Softmax always gives the same percentages</Choice>
+
+<Feedback>
+The attention mechanism matches tokens by *what they are*, not *where they sit*. Rearrange the words and each token's query, key, and value stay the same — so the attention scores between them stay the same too. "The dog chased the cat" and "the cat chased the dog" look identical to attention as built so far. The next chapter fixes this with a trick that rotates each token's vector by an amount based on its position.
+</Feedback>
+</Question>
+
+</Quiz>

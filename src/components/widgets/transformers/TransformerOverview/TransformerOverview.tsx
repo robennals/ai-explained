@@ -2,11 +2,20 @@
 
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { WidgetContainer } from "@/components/widgets/shared/WidgetContainer";
+import { useMediaQuery } from "@/components/widgets/shared/useMediaQuery";
 import { simpleOverviewExample } from "./simple-example";
 import type { LayerId } from "@/components/widgets/transformers/TransformerInAction/types";
 import { Grid } from "./Grid";
 import { Popup } from "./Popup";
-import { layerRowY, LABEL_GUTTER_RIGHT_X, VIEW_WIDTH, VIEW_HEIGHT, previousLayer } from "./geometry";
+import {
+  layerRowY,
+  LABEL_GUTTER_RIGHT_X,
+  COMPACT_LABEL_GUTTER_RIGHT_X,
+  VIEW_WIDTH,
+  COMPACT_VIEW_WIDTH,
+  VIEW_HEIGHT,
+  previousLayer,
+} from "./geometry";
 import { LAYER_SUMMARIES } from "./layer-summaries";
 import { overviewEdges } from "./edges";
 
@@ -15,9 +24,23 @@ interface CellSelection {
   layer: LayerId;
 }
 
+// Guided tour through the most interesting cells, starting at "dog" on the
+// Previous-token row (the first cell where attention actually pulls something).
+const TOUR: CellSelection[] = [
+  { tokenIndex: 1, layer: "L1" },
+  { tokenIndex: 2, layer: "L1" },
+  { tokenIndex: 3, layer: "L1" },
+  { tokenIndex: 3, layer: "L2" },
+  { tokenIndex: 3, layer: "Predict" },
+];
+const INITIAL_SELECTION: CellSelection = TOUR[0];
+
 export function TransformerOverview() {
-  const [selectedCell, setSelectedCell] = useState<CellSelection | null>(null);
+  const [selectedCell, setSelectedCell] = useState<CellSelection | null>(INITIAL_SELECTION);
   const [selectedLayer, setSelectedLayer] = useState<LayerId | null>(null);
+  const compact = useMediaQuery("(max-width: 767.98px)");
+  const labelGutterX = compact ? COMPACT_LABEL_GUTTER_RIGHT_X : LABEL_GUTTER_RIGHT_X;
+  const viewWidth = compact ? COMPACT_VIEW_WIDTH : VIEW_WIDTH;
 
   const handleCellClick = useCallback((tokenIndex: number, layer: LayerId) => {
     setSelectedCell({ tokenIndex, layer });
@@ -29,8 +52,10 @@ export function TransformerOverview() {
     setSelectedCell(null);
   }, []);
 
+  const closeLayerPopup = useCallback(() => setSelectedLayer(null), []);
+
   const handleReset = useCallback(() => {
-    setSelectedCell(null);
+    setSelectedCell(INITIAL_SELECTION);
     setSelectedLayer(null);
   }, []);
 
@@ -38,6 +63,23 @@ export function TransformerOverview() {
     setSelectedCell(null);
     setSelectedLayer(null);
   }, []);
+
+  const tourIndex = useMemo(() => {
+    if (!selectedCell) return -1;
+    return TOUR.findIndex(
+      (t) => t.tokenIndex === selectedCell.tokenIndex && t.layer === selectedCell.layer
+    );
+  }, [selectedCell]);
+
+  const nextTourCell: CellSelection | null =
+    tourIndex >= 0 && tourIndex < TOUR.length - 1 ? TOUR[tourIndex + 1] : null;
+
+  const handleNextToken = useCallback(() => {
+    if (nextTourCell) {
+      setSelectedCell(nextTourCell);
+      setSelectedLayer(null);
+    }
+  }, [nextTourCell]);
 
   useEffect(() => {
     if (!selectedCell && !selectedLayer) return;
@@ -50,7 +92,7 @@ export function TransformerOverview() {
 
   const repBox = useMemo(() => {
     if (!selectedCell) {
-      return { label: null as string | null, body: "Click any word-cell to see what it means at that layer." };
+      return { label: null as string | null, body: "Tap any word-cell to see what it means at that layer." };
     }
     const tokIndex = selectedCell.tokenIndex;
     const tok = simpleOverviewExample.tokens[tokIndex];
@@ -84,7 +126,7 @@ export function TransformerOverview() {
     const layerDef = simpleOverviewExample.layers.find((l) => l.id === selectedLayer);
     const layerLabel = layerDef ? layerDef.label : selectedLayer;
     return {
-      anchorX: LABEL_GUTTER_RIGHT_X,
+      anchorX: labelGutterX,
       anchorY: layerRowY(selectedLayer) + 11,
       title: (
         <span>
@@ -93,7 +135,7 @@ export function TransformerOverview() {
       ),
       body: LAYER_SUMMARIES[selectedLayer],
     };
-  }, [selectedLayer]);
+  }, [selectedLayer, labelGutterX]);
 
   const sourceCells = useMemo(() => {
     if (!selectedCell) return new Set<string>();
@@ -119,10 +161,13 @@ export function TransformerOverview() {
   return (
     <WidgetContainer title="A Transformer At a Glance" onReset={handleReset}>
       <div
-        className="relative overflow-x-auto mx-auto max-w-[960px]"
+        // Phones draw a compact grid that fits the width, so don't scroll it:
+        // a scroll container would also clip the popup vertically.
+        className={`relative mx-auto max-w-[960px] ${compact ? "" : "overflow-x-auto"}`}
         onClick={(e) => { if (e.target === e.currentTarget) closeAll(); }}
       >
         <Grid
+          compact={compact}
           selectedCell={selectedCell}
           selectedLayer={selectedLayer}
           sourceCells={sourceCells}
@@ -134,25 +179,40 @@ export function TransformerOverview() {
             anchorX={layerPopup.anchorX}
             anchorY={layerPopup.anchorY}
             pointerDirection="above"
-            viewWidth={VIEW_WIDTH}
+            viewWidth={viewWidth}
             viewHeight={VIEW_HEIGHT}
             title={layerPopup.title}
             body={layerPopup.body}
-            onClose={() => setSelectedLayer(null)}
+            onClose={closeLayerPopup}
           />
         )}
       </div>
       <div
-        className="mt-4 rounded-md border border-foreground/10 bg-foreground/[0.03] px-4 py-3 text-sm"
+        className="mt-4 rounded-lg border-l-4 border-amber-500 bg-amber-50 px-4 py-4 shadow-sm dark:bg-amber-900/20"
         aria-live="polite"
       >
         {repBox.label ? (
-          <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted">
+          <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-amber-900 dark:text-amber-300">
             {repBox.label}
           </div>
-        ) : null}
-        <div className="text-foreground">{repBox.body}</div>
+        ) : (
+          <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-amber-900 dark:text-amber-300">
+            What this token means
+          </div>
+        )}
+        <div className="text-base text-foreground">{repBox.body}</div>
       </div>
+      {nextTourCell && (
+        <div className="mt-4 flex justify-end">
+          <button
+            type="button"
+            onClick={handleNextToken}
+            className="rounded-lg bg-accent px-6 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-accent-dark"
+          >
+            Next token →
+          </button>
+        </div>
+      )}
     </WidgetContainer>
   );
 }

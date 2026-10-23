@@ -1,22 +1,18 @@
+import { ChapterHeader } from "@/components/layout/ChapterHeader";
 import { ChapterNav } from "@/components/layout/ChapterNav";
-import { getAdjacentChapters } from "@/lib/curriculum";
+import { chapterMetadata } from "@/lib/chapter-metadata";
 import Content from "./content.mdx";
 
-export const metadata = {
-  title: "PyTorch from Scratch — Learn AI Layer by Layer",
-  description:
-    "Install PyTorch, write your first tensor operations, and train a simple neural network.",
-};
+export const metadata = chapterMetadata("appendix-pytorch");
 
 export default function AppendixPyTorch() {
-  const { prev, next } = getAdjacentChapters("appendix-pytorch");
-
   return (
     <article>
       <div className="prose prose-lg max-w-none">
+        <ChapterHeader slug="appendix-pytorch" />
         <Content />
       </div>
-      <ChapterNav prev={prev} next={next} />
+      <ChapterNav slug="appendix-pytorch" />
     </article>
   );
 }
