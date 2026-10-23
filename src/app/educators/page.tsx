@@ -53,8 +53,8 @@ export default function EducatorsPage() {
           <p>
             It&apos;s free, with no ads and no accounts. Students never need to
             sign up or give any personal information. The site uses standard
-            analytics (Google Analytics) to count visits and see which chapters
-            work.
+            analytics (Google Analytics and PostHog) to count visits and see
+            which chapters work.
           </p>
         </div>
         <a
