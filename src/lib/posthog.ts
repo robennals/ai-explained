@@ -28,11 +28,14 @@ export function initPostHog(): void {
     cookieless_mode: "always",
     // Makes identify() a no-op, so nothing can attach an id to a reader.
     person_profiles: "never",
-    // Only page views and our own track() events. Everything else is off here
+    // A page view carries the time spent on, and scroll depth of, the page
+    // before it. Page-leave events record the same for the last page of a
+    // visit, which is where readers give up.
+    capture_pageleave: true,
+    // Otherwise only our own track() events. Everything else is off here
     // rather than left to the project settings, which could switch it on.
     autocapture: false,
     rageclick: false,
-    capture_pageleave: false,
     capture_dead_clicks: false,
     capture_heatmaps: false,
     capture_exceptions: false,

@@ -16,8 +16,9 @@ export interface AnalyticsEvents {
   chapter_start: { chapter: string };
   section_reached: { chapter: string; section: string };
   chapter_complete: { chapter: string };
+  widget_view: { chapter: string; widget: string };
   widget_interact: { chapter: string; widget: string };
-  quiz_answer: { chapter: string; question: number; correct: boolean };
+  quiz_answer: { chapter: string; question: number; choice: string; correct: boolean };
   quiz_complete: { chapter: string; score: number; total: number };
   colab_open: { chapter: string };
   educator_page_view: { page: string };
@@ -79,6 +80,24 @@ export function createOnceGuard(): (key: string) => boolean {
     seen.add(key);
     return true;
   };
+}
+
+/**
+ * Calls `onSeen` once, when `el` first scrolls into view — its top edge past
+ * the bottom quarter of the screen, so a sliver peeking in doesn't count.
+ * Returns a function that stops watching.
+ */
+export function onFirstSeen(el: Element, onSeen: () => void): () => void {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      if (!entries.some((entry) => entry.isIntersecting)) return;
+      observer.disconnect();
+      onSeen();
+    },
+    { rootMargin: "0px 0px -25% 0px" },
+  );
+  observer.observe(el);
+  return () => observer.disconnect();
 }
 
 /**

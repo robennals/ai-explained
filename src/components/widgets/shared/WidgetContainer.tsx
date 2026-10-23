@@ -1,8 +1,8 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback, useRef, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, useCallback, useRef, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
-import { chapterFromPathname, track } from "@/lib/analytics";
+import { chapterFromPathname, onFirstSeen, track } from "@/lib/analytics";
 
 interface TryItValue {
   content: ReactNode;
@@ -46,6 +46,15 @@ export function WidgetContainer({
   const tryIt = useContext(TryItContext);
   const chapter = chapterFromPathname(usePathname());
   const interactedRef = useRef(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Report the widget scrolling into view, so reports can tell a widget
+  // readers skip from one they never reached.
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el || !chapter) return;
+    return onFirstSeen(el, () => track("widget_view", { chapter, widget: title }));
+  }, [chapter, title]);
 
   // Report the reader's first poke at this widget. Capture phase, so a
   // control that stops propagation still counts.
@@ -82,6 +91,7 @@ export function WidgetContainer({
 
   return (
     <div
+      ref={containerRef}
       className="widget-container my-8"
       onPointerDownCapture={handleFirstInteraction}
       onKeyDownCapture={handleFirstInteraction}

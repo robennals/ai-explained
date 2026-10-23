@@ -11,7 +11,7 @@ beforeEach(() => vi.mocked(track).mockClear());
 afterEach(() => vi.mocked(track).mockClear());
 
 describe("trackQuizAnswer", () => {
-  it("reports the answer with a 1-based question number", () => {
+  it("reports the answer with a 1-based question number and the choice's letter", () => {
     trackQuizAnswer({
       chapter: "vectors",
       selectionsBefore: {},
@@ -20,7 +20,7 @@ describe("trackQuizAnswer", () => {
       correctIndices,
     });
     expect(vi.mocked(track).mock.calls).toEqual([
-      ["quiz_answer", { chapter: "vectors", question: 2, correct: true }],
+      ["quiz_answer", { chapter: "vectors", question: 2, choice: "C", correct: true }],
     ]);
   });
 
@@ -34,7 +34,7 @@ describe("trackQuizAnswer", () => {
       correctIndices,
     });
     expect(vi.mocked(track).mock.calls).toEqual([
-      ["quiz_answer", { chapter: "vectors", question: 3, correct: true }],
+      ["quiz_answer", { chapter: "vectors", question: 3, choice: "B", correct: true }],
       ["quiz_complete", { chapter: "vectors", score: 2, total: 3 }],
     ]);
   });

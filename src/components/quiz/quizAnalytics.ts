@@ -1,4 +1,5 @@
 import { track } from "@/lib/analytics";
+import { choiceLetter } from "./choiceLetter";
 
 /**
  * Reports a freshly chosen quiz answer, plus `quiz_complete` if it was the
@@ -21,6 +22,7 @@ export function trackQuizAnswer({
   track("quiz_answer", {
     chapter,
     question: questionIdx + 1,
+    choice: choiceLetter(optionIdx),
     correct: optionIdx === correctIndices[questionIdx],
   });
 

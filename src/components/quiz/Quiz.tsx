@@ -16,6 +16,7 @@ import {
 } from "react";
 import { GlossaryPlainProvider } from "@/components/mdx/G";
 import { trackQuizAnswer } from "./quizAnalytics";
+import { choiceLetter } from "./choiceLetter";
 
 // ───────────────────────────────────────────────────────────────────────────
 // localStorage-backed persistence (via useSyncExternalStore so it survives the
@@ -440,7 +441,7 @@ export function Question({ children }: QuestionProps) {
       <ul className="mt-5 list-none space-y-2 p-0">
         {choices.map((choice, i) => {
           const cp = choice.props as ChoiceProps;
-          const label = String.fromCharCode(65 + i);
+          const label = choiceLetter(i);
           const isThisCorrect = i === correctIndex;
           const isThisPicked = i === selectedIndex;
 
