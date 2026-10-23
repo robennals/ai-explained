@@ -78,6 +78,18 @@ src/components/widgets/
 
 The chapter title and subtitle are rendered by `<ChapterHeader slug="..." />` in `page.tsx`, reading from `curriculum.ts`. `content.mdx` therefore starts with the opening paragraph and contains no `#` heading of its own.
 
+### Page titles for search
+
+Each published chapter also has a `searchTitle` in `curriculum.ts`. It's used for the browser tab, search results and link previews; the on-page heading keeps the short `title`. A test fails if a published chapter is missing one. Give a new chapter one, and revisit it when a chapter's title or focus changes.
+
+- **Start with the chapter's own title**, then add what people would search for: "Agents: How AI Agents Work", "Neural Networks, Explained Interactively". Google may replace a page title with the on-page heading when the two disagree.
+- **Keep it short and plain.** One idea, no stacked keyword lists like "X Explained Visually: A, B, and C" — they look spammy in search results, tabs and shared links.
+- **Vary the wording across chapters.** Don't put the same phrase on every chapter (e.g. "How X works — explained visually"); Google treats near-identical titles as boilerplate.
+- **Only promise what the chapter covers.** Don't add a search term the text never mentions.
+- **Prefer "Interactive" to "Visually"** when an angle word helps: hands-on widgets are what set the site apart.
+
+The introduction deliberately has no `searchTitle` and is left out of the sitemap, because it's too thin to be a good landing page from search.
+
 ## PyTorch Notebooks
 
 The `notebooks/` directory contains Jupyter notebooks — one per chapter — that let readers run real PyTorch code in Google Colab. Each chapter's `content.mdx` links to its notebook via the `<TryItInPyTorch notebook="...">` component, which builds a Colab URL: `https://colab.research.google.com/github/robennals/ai-explained/blob/main/notebooks/{name}.ipynb`

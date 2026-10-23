@@ -10,20 +10,21 @@ export function chapterMetadata(slug: string): Metadata {
   // Chapters with a curated diagram get their own OG image; others fall back
   // to the site-wide branded card.
   const ogImage = getOgDiagram(slug) ? `/og/${slug}.png` : `/og/site.png`;
+  const title = ch.searchTitle ?? ch.title;
   return {
-    title: ch.title,
+    title,
     description: ch.description,
     alternates: {
       canonical: `/${slug}`,
     },
     openGraph: {
-      title: ch.title,
+      title,
       description: ch.description,
       images: [ogImage],
     },
     twitter: {
       card: "summary_large_image",
-      title: ch.title,
+      title,
       description: ch.description,
       images: [ogImage],
     },

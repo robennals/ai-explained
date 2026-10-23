@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "node scripts/build-glossary-index.mjs && next dev",
-    "build": "node scripts/build-glossary-index.mjs && next build",
+    "dev": "node scripts/build-glossary-index.mjs && node scripts/build-page-dates.mjs && next dev",
+    "build": "node scripts/build-glossary-index.mjs && node scripts/build-page-dates.mjs && next build",
     "start": "next start",
     "glossary:build": "node scripts/build-glossary-index.mjs",
     "glossary:audit": "node scripts/audit-glossary.mjs",

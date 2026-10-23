@@ -1,5 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { chapters } from "@/lib/curriculum";
+
+// A developer page listing unfinished chapters too; keep it out of search.
+export const metadata: Metadata = {
+  robots: { index: false },
+};
 
 export default function DebugAllPage() {
   return (
